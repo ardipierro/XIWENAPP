@@ -79,19 +79,29 @@ function StudentDashboard({ student, onLogout, onChangeAvatar, onStartGame }) {
   };
 
   if (!student || !student.id) {
-    return <div>Error: Perfil no encontrado. Por favor, loguea de nuevo.</div>;
+    return (
+      <div className="dashboard-container">
+        <div className="error-state">
+          <span className="text-4xl mb-4">⚠️</span>
+          <h3>Error: Perfil no encontrado</h3>
+          <p>Por favor, vuelve a iniciar sesión</p>
+        </div>
+      </div>
+    );
   }
 
   const currentAvatar = AVATARS[student.profile?.avatar || 'default'];
   const points = student.profile?.totalPoints || 0;
   const level = student.profile?.level || 1;
-  const pointsToNextLevel = (level * 100) - points;
+  const pointsInLevel = points % 100;
+  const pointsToNextLevel = 100 - pointsInLevel;
+  const progressPercentage = pointsInLevel;
 
   if (loading) {
     return (
-      <div className="student-dashboard-container">
-        <div className="loading-screen">
-          <div className="loading-spinner">🎮</div>
+      <div className="dashboard-container">
+        <div className="loading-state">
+          <div className="spinner"></div>
           <p>Cargando tu perfil...</p>
         </div>
       </div>
@@ -100,100 +110,144 @@ function StudentDashboard({ student, onLogout, onChangeAvatar, onStartGame }) {
 
   return (
     <>
-      <div className="student-dashboard-container">
-        <div className="dashboard-header">
-          <div className="header-left">
-            <div className="avatar-container" onClick={() => setShowAvatarSelector(true)}>
-              <div className="avatar-emoji">{currentAvatar}</div>
-              <div className="avatar-change">✏️</div>
+      <div className="dashboard-container student-theme">
+        {/* Header */}
+        <header className="dashboard-header">
+          <div className="header-content">
+            <div className="header-left">
+              <div 
+                className="avatar-container clickable"
+                onClick={() => setShowAvatarSelector(true)}
+              >
+                <div className="avatar-display student-avatar">
+                  <span className="avatar-emoji">{currentAvatar}</span>
+                </div>
+                <div className="avatar-edit-badge">
+                  <span>✏️</span>
+                </div>
+              </div>
+              <div className="user-info">
+                <h1 className="user-name">{student.name}</h1>
+                <div className="user-meta">
+                  <span className="badge badge-student">Estudiante</span>
+                  <span className="user-level">Nivel {level}</span>
+                </div>
+                {student.studentCode && (
+                  <p className="student-code">Código: {student.studentCode}</p>
+                )}
+              </div>
             </div>
-            <div className="user-info">
-              <h2>{student.name}</h2>
-              <p className="user-level">Nivel {level}</p>
+            <button className="btn btn-danger" onClick={onLogout}>
+              🚪 Salir
+            </button>
+          </div>
+        </header>
+
+        <div className="dashboard-content">
+          {/* Progress Section */}
+          <div className="progress-section card">
+            <div className="progress-header">
+              <div className="progress-info">
+                <span className="progress-label">Puntos totales</span>
+                <span className="progress-value">{points} pts</span>
+              </div>
+              <div className="progress-next">
+                <span className="text-sm text-gray-600">
+                  {pointsToNextLevel} pts para nivel {level + 1}
+                </span>
+              </div>
+            </div>
+            <div className="level-progress">
+              <div 
+                className="level-progress-fill student-progress"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
             </div>
           </div>
-          <button className="logout-btn" onClick={onLogout}>
-            🚪 Salir
+
+          {/* Stats Grid */}
+          <div className="stats-grid">
+            <div className="stat-card card">
+              <div className="stat-icon">🎮</div>
+              <div className="stat-info">
+                <div className="stat-value">{stats.totalGames}</div>
+                <div className="stat-label">Juegos jugados</div>
+              </div>
+            </div>
+
+            <div className="stat-card card">
+              <div className="stat-icon">🎯</div>
+              <div className="stat-info">
+                <div className="stat-value">{stats.averageScore}%</div>
+                <div className="stat-label">Promedio</div>
+              </div>
+            </div>
+
+            <div className="stat-card card">
+              <div className="stat-icon">⭐</div>
+              <div className="stat-info">
+                <div className="stat-value">{stats.bestScore}%</div>
+                <div className="stat-label">Mejor puntaje</div>
+              </div>
+            </div>
+
+            <div className="stat-card card">
+              <div className="stat-icon">✅</div>
+              <div className="stat-info">
+                <div className="stat-value">{stats.totalCorrect}</div>
+                <div className="stat-label">Respuestas correctas</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <button className="btn-play student-cta" onClick={onStartGame}>
+            <span className="cta-icon">🎮</span>
+            <span className="cta-text">¡Jugar Ahora!</span>
           </button>
-        </div>
 
-        {/* Progress Bar */}
-        <div className="progress-section">
-          <div className="progress-header">
-            <span>Puntos: {points}</span>
-            <span>{pointsToNextLevel} para siguiente nivel</span>
-          </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${(points % 100)}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="stats-section">
-          <div className="stat-card">
-            <div className="stat-icon">🎮</div>
-            <div className="stat-value">{stats.totalGames}</div>
-            <div className="stat-label">Juegos</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">🏆</div>
-            <div className="stat-value">{stats.averageScore}%</div>
-            <div className="stat-label">Promedio</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">⭐</div>
-            <div className="stat-value">{stats.bestScore}%</div>
-            <div className="stat-label">Mejor</div>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <button className="play-button" onClick={onStartGame}>
-          ¡Jugar ahora!
-        </button>
-
-        {/* Historial Reciente */}
-        {gameHistory.length > 0 && (
-          <div className="history-section">
-            <h3>📜 Historial Reciente</h3>
-            <div className="history-list">
-              {gameHistory.slice(0, 5).map((game, index) => (
-                <div key={index} className="history-item">
-                  <div className="history-date">
-                    {new Date(game.date).toLocaleDateString('es-AR')}
-                  </div>
-                  <div className="history-details">
-                    <div className="history-category">{game.category}</div>
+          {/* Game History */}
+          {gameHistory.length > 0 ? (
+            <div className="history-section card">
+              <h3 className="section-title">📜 Historial Reciente</h3>
+              <div className="history-list">
+                {gameHistory.slice(0, 5).map((game, index) => (
+                  <div key={index} className="history-item">
+                    <div className="history-main">
+                      <div className="history-category">{game.category}</div>
+                      <div className="history-date">
+                        {new Date(game.date).toLocaleDateString('es-AR')}
+                      </div>
+                    </div>
                     <div className="history-score">
                       <span className="score-value">{game.score} pts</span>
                       <span className="score-percentage">({game.percentage}%)</span>
                     </div>
+                    <div className={`history-position position-${game.position}`}>
+                      #{game.position}
+                    </div>
                   </div>
-                  <div className={`history-position position-${game.position}`}>
-                    #{game.position}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-
-        {gameHistory.length === 0 && (
-          <div className="no-games-message">
-            <div className="no-games-icon">🎯</div>
-            <h3>¡Aún no has jugado!</h3>
-            <p>Comienza tu primera partida y empieza a ganar puntos</p>
-          </div>
-        )}
+          ) : (
+            <div className="empty-state card">
+              <div className="empty-icon">🎯</div>
+              <h3>¡Aún no has jugado!</h3>
+              <p>Comienza tu primera partida y empieza a ganar puntos</p>
+              <button className="btn btn-primary" onClick={onStartGame}>
+                Jugar primer juego
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Avatar Selector Modal */}
       {showAvatarSelector && (
-        <div className="avatar-selector-overlay" onClick={() => setShowAvatarSelector(false)}>
-          <div className="avatar-selector-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Selecciona tu Avatar</h3>
+        <div className="modal-overlay" onClick={() => setShowAvatarSelector(false)}>
+          <div className="modal-content avatar-selector" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-title">Selecciona tu Avatar</h3>
             <div className="avatars-grid">
               {Object.entries(AVATARS).map(([id, emoji]) => (
                 <button
@@ -205,7 +259,10 @@ function StudentDashboard({ student, onLogout, onChangeAvatar, onStartGame }) {
                 </button>
               ))}
             </div>
-            <button className="close-avatar-selector" onClick={() => setShowAvatarSelector(false)}>
+            <button 
+              className="btn btn-ghost w-full" 
+              onClick={() => setShowAvatarSelector(false)}
+            >
               Cerrar
             </button>
           </div>

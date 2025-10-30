@@ -450,31 +450,3 @@ export const migrateFromLocalStorage = async () => {
     return false;
   }
 };
-
-import { db } from './config';
-import { doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, arrayUnion } from 'firebase/firestore';
-
-export const setUserRole = async (uid, role) => {
-  try {
-    await setDoc(doc(db, 'users', uid), { role }, { merge: true });
-    console.log('Rol setado:', role);
-  } catch (error) {
-    console.error('Error setting role:', error);
-  }
-};
-
-export const getStudentProfile = async (uid) => {
-  try {
-    const docRef = doc(db, 'students', uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
-    } else {
-      console.log('No profile found for uid:', uid);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error fetching profile:', error);
-    return null;
-  }
-};

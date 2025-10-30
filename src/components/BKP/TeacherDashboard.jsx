@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { loadStudents, loadGameHistory, loadCategories } from '../firebase/firestore';
-import StudentManager from './StudentManager';
+import StudentManager from './StudentManager';  // ⭐ IMPORTAR StudentManager
 import './TeacherDashboard.css';
 
-function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory, onLogout, setTeacherScreen }) {
+function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory, onLogout, setTeacherScreen }) { // ⭐ NUEVO: Agregar setTeacherScreen como prop para navegación
   const [stats, setStats] = useState({
     totalStudents: 0,
     studentsWithCode: 0,
@@ -14,6 +14,8 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
   const [recentGames, setRecentGames] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // ⭐ NUEVO: Estado para mostrar modal de estudiantes
   const [showStudentManager, setShowStudentManager] = useState(false);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
       // Cargar categorías
       const categories = await loadCategories();
 
-      // Calcular top students
+      // Calcular top students (más activos)
       const studentGameCounts = {};
       games.forEach(game => {
         game.players?.forEach(player => {
@@ -51,6 +53,7 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
         });
       });
 
+      // Calcular promedios y ordenar
       const topStudentsArray = Object.values(studentGameCounts)
         .map(student => ({
           ...student,
@@ -75,84 +78,64 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
     setLoading(false);
   };
 
+  // ⭐ NUEVO: Función para manejar cierre del modal
   const handleCloseStudentManager = () => {
     setShowStudentManager(false);
-    loadDashboardData();
-  };
-
-  // Obtener iniciales para el avatar
-  const getUserInitials = () => {
-    if (!user.email) return '?';
-    return user.email.charAt(0).toUpperCase();
+    loadDashboardData(); // Recargar estadísticas después de cambios
   };
 
   if (loading) {
     return (
-      <div className="dashboard-container">
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Cargando panel del profesor...</p>
-        </div>
+      <div className="teacher-dashboard-loading">
+        <div className="loading-spinner">📊</div>
+        <p>Cargando panel del profesor...</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="dashboard-container teacher-theme">
+      <div className="teacher-dashboard-container">
         {/* Header */}
-        <header className="dashboard-header">
+        <div className="teacher-dashboard-header">
           <div className="header-content">
             <div className="header-left">
-              <div className="avatar-container">
-                <div className="avatar-display teacher-avatar">
-                  <span className="avatar-initial">{getUserInitials()}</span>
-                </div>
-              </div>
-              <div className="user-info">
-                <h1 className="user-name">Panel del Profesor</h1>
-                <div className="user-meta">
-                  <span className="badge badge-teacher">Profesor</span>
-                  <span className="user-email">{user.email}</span>
-                </div>
-              </div>
+              <h1>👨‍🏫 Panel del Profesor</h1>
+              <p className="user-email">{user.email}</p>
             </div>
-            <button className="btn btn-danger" onClick={onLogout}>
+            <button className="logout-btn" onClick={onLogout}>
               🚪 Salir
             </button>
           </div>
-        </header>
+        </div>
 
-        <div className="dashboard-content">
-          {/* Stats Section */}
-          <section className="stats-section">
+        <div className="teacher-dashboard-content">
+          {/* Stats Cards */}
+          <div className="stats-section">
             <h2 className="section-title">📊 Resumen General</h2>
             <div className="stats-grid">
-              <div className="stat-card card border-left-blue">
+              <div className="stat-card card-blue">
                 <div className="stat-icon">👥</div>
                 <div className="stat-info">
                   <div className="stat-value">{stats.totalStudents}</div>
                   <div className="stat-label">Alumnos totales</div>
                 </div>
               </div>
-
-              <div className="stat-card card border-left-green">
+              <div className="stat-card card-green">
                 <div className="stat-icon">🔑</div>
                 <div className="stat-info">
                   <div className="stat-value">{stats.studentsWithCode}</div>
-                  <div className="stat-label">Con código activo</div>
+                  <div className="stat-label">Con código</div>
                 </div>
               </div>
-
-              <div className="stat-card card border-left-purple">
+              <div className="stat-card card-purple">
                 <div className="stat-icon">🎮</div>
                 <div className="stat-info">
                   <div className="stat-value">{stats.totalGames}</div>
                   <div className="stat-label">Juegos totales</div>
                 </div>
               </div>
-
-              <div className="stat-card card border-left-orange">
+              <div className="stat-card card-orange">
                 <div className="stat-icon">📚</div>
                 <div className="stat-info">
                   <div className="stat-value">{stats.totalCategories}</div>
@@ -160,10 +143,10 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Quick Actions */}
-          <section className="actions-section">
+          <div className="actions-section">
             <h2 className="section-title">⚡ Acciones Rápidas</h2>
             <div className="actions-grid">
               <button className="action-card action-primary" onClick={onStartGame}>
@@ -197,29 +180,28 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
                 <div className="action-icon">📊</div>
                 <div className="action-content">
                   <h3>Ver Historial</h3>
-                  <p>Resultados anteriores</p>
+                  <p>Resultados de juegos anteriores</p>
                 </div>
                 <div className="action-arrow">→</div>
               </button>
 
-              {setTeacherScreen && (
-                <button className="action-card action-secondary" onClick={() => setTeacherScreen('courses')}>
-                  <div className="action-icon">📚</div>
-                  <div className="action-content">
-                    <h3>Gestionar Cursos</h3>
-                    <p>Crear y editar lecciones</p>
-                  </div>
-                  <div className="action-arrow">→</div>
-                </button>
-              )}
+              {/* ⭐ NUEVO: Botón para Cursos */}
+              <button className="action-card action-primary" onClick={() => setTeacherScreen('courses')}>
+                <div className="action-icon">📚</div>
+                <div className="action-content">
+                  <h3>Gestionar Cursos</h3>
+                  <p>Crear y editar cursos y lecciones</p>
+                </div>
+                <div className="action-arrow">→</div>
+              </button>
             </div>
-          </section>
+          </div>
 
-          {/* Dashboard Grid */}
+          {/* Two Column Layout */}
           <div className="dashboard-grid">
             {/* Recent Activity */}
-            <section className="dashboard-section card">
-              <h3 className="section-title">📈 Actividad Reciente</h3>
+            <div className="dashboard-section">
+              <h2 className="section-title">📈 Actividad Reciente</h2>
               <div className="recent-games-list">
                 {recentGames.length > 0 ? (
                   recentGames.map((game, index) => (
@@ -240,20 +222,20 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
                     </div>
                   ))
                 ) : (
-                  <div className="empty-state-small">
+                  <div className="empty-state">
                     <div className="empty-icon">🎯</div>
                     <p>Aún no hay juegos creados</p>
-                    <button className="btn btn-primary btn-sm" onClick={onStartGame}>
+                    <button className="empty-action" onClick={onStartGame}>
                       Crear primer juego
                     </button>
                   </div>
                 )}
               </div>
-            </section>
+            </div>
 
             {/* Top Students */}
-            <section className="dashboard-section card">
-              <h3 className="section-title">🏆 Alumnos Destacados</h3>
+            <div className="dashboard-section">
+              <h2 className="section-title">🏆 Alumnos Destacados</h2>
               <div className="top-students-list">
                 {topStudents.length > 0 ? (
                   topStudents.map((student, index) => (
@@ -273,22 +255,22 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
                     </div>
                   ))
                 ) : (
-                  <div className="empty-state-small">
+                  <div className="empty-state">
                     <div className="empty-icon">👥</div>
                     <p>Los alumnos aparecerán aquí cuando jueguen</p>
                   </div>
                 )}
               </div>
-            </section>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Student Manager Modal */}
+      {/* ⭐ NUEVO: Modal de gestión de alumnos */}
       {showStudentManager && (
         <StudentManager
           onClose={handleCloseStudentManager}
-          onStudentSelect={null}
+          onStudentSelect={null}  // No necesario desde el dashboard
         />
       )}
     </>
