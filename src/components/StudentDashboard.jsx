@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import { getStudentGameHistory } from '../firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase/config';
+import { getStudentGameHistory, getStudentProfile, ensureStudentProfile } from '../firebase/firestore';
+import Navigation from './Navigation';
 import './StudentDashboard.css';
 
 // Avatares disponibles
@@ -18,7 +22,9 @@ const AVATARS = {
   medal: '🥇'
 };
 
-function StudentDashboard({ student, onLogout, onChangeAvatar, onStartGame }) {
+function StudentDashboard({ user, userRole, student: studentProp, onLogout, onChangeAvatar, onStartGame }) {
+  const navigate = useNavigate();
+  const [student, setStudent] = useState(studentProp);
   const [gameHistory, setGameHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
@@ -30,24 +36,44 @@ function StudentDashboard({ student, onLogout, onChangeAvatar, onStartGame }) {
     totalQuestions: 0
   });
 
+  // Cargar perfil del estudiante al montar el componente
   useEffect(() => {
-    if (student && student.id) {
-      loadStudentData();
-    } else {
-      setLoading(false);
-    }
-  }, [student]);
+    const loadProfile = async () => {
+      setLoading(true); // Asegurar que loading está en true
 
-  const loadStudentData = async () => {
-    setLoading(true);
-    const history = await getStudentGameHistory(student.id);
-    setGameHistory(history);
-    calculateStats(history);
-    setLoading(false);
-  };
+      if (!studentProp && user) {
+        // Intentar cargar o crear el perfil del estudiante desde Firestore
+        console.log('🔍 Cargando perfil de estudiante para:', user.uid);
+        const profile = await ensureStudentProfile(user.uid);
+
+        if (profile) {
+          console.log('✅ Perfil de estudiante cargado/creado:', profile);
+          setStudent(profile);
+
+          // Cargar historial de juegos
+          const history = await getStudentGameHistory(profile.id);
+          setGameHistory(history);
+          calculateStats(history);
+        } else {
+          console.warn('⚠️ No se pudo cargar ni crear perfil de estudiante para:', user.uid);
+        }
+      } else if (studentProp) {
+        setStudent(studentProp);
+
+        // Cargar historial de juegos
+        const history = await getStudentGameHistory(studentProp.id);
+        setGameHistory(history);
+        calculateStats(history);
+      }
+
+      setLoading(false); // Siempre terminar con loading en false
+    };
+
+    loadProfile();
+  }, [user?.uid, studentProp]); // Ejecutar solo cuando cambie el uid o el prop inicial
 
   const calculateStats = (history) => {
-    if (history.length === 0) {
+    if (!history || history.length === 0) {
       setStats({
         totalGames: 0,
         averageScore: 0,
@@ -59,15 +85,15 @@ function StudentDashboard({ student, onLogout, onChangeAvatar, onStartGame }) {
     }
 
     const totalGames = history.length;
-    const totalCorrect = history.reduce((sum, game) => sum + game.correctAnswers, 0);
-    const totalQuestions = history.reduce((sum, game) => sum + game.totalQuestions, 0);
-    const averageScore = Math.round(history.reduce((sum, game) => sum + game.percentage, 0) / totalGames);
-    const bestScore = Math.max(...history.map(game => game.percentage));
+    const totalCorrect = history.reduce((sum, game) => sum + (game.correctAnswers || 0), 0);
+    const totalQuestions = history.reduce((sum, game) => sum + (game.totalQuestions || 0), 0);
+    const averageScore = Math.round(history.reduce((sum, game) => sum + (game.percentage || 0), 0) / totalGames) || 0;
+    const bestScore = Math.max(...history.map(game => game.percentage || 0)) || 0;
 
     setStats({
       totalGames,
-      averageScore,
-      bestScore,
+      averageScore: isNaN(averageScore) ? 0 : averageScore,
+      bestScore: isNaN(bestScore) ? 0 : bestScore,
       totalCorrect,
       totalQuestions
     });
@@ -78,25 +104,17 @@ function StudentDashboard({ student, onLogout, onChangeAvatar, onStartGame }) {
     setShowAvatarSelector(false);
   };
 
-  if (!student || !student.id) {
-    return (
-      <div className="dashboard-container">
-        <div className="error-state">
-          <span className="text-4xl mb-4">⚠️</span>
-          <h3>Error: Perfil no encontrado</h3>
-          <p>Por favor, vuelve a iniciar sesión</p>
-        </div>
-      </div>
-    );
-  }
+  const handleBackToLogin = async () => {
+    try {
+      await signOut(auth);
+      console.log('✅ Sesión cerrada');
+      navigate('/login');
+    } catch (error) {
+      console.error('❌ Error al cerrar sesión:', error);
+    }
+  };
 
-  const currentAvatar = AVATARS[student.profile?.avatar || 'default'];
-  const points = student.profile?.totalPoints || 0;
-  const level = student.profile?.level || 1;
-  const pointsInLevel = points % 100;
-  const pointsToNextLevel = 100 - pointsInLevel;
-  const progressPercentage = pointsInLevel;
-
+  // Mostrar loading mientras se carga el perfil
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -108,8 +126,52 @@ function StudentDashboard({ student, onLogout, onChangeAvatar, onStartGame }) {
     );
   }
 
+  // Solo mostrar error si terminó de cargar Y no hay perfil
+  if (!student || !student.id) {
+    return (
+      <div className="dashboard-container">
+        <div className="error-state">
+          <span className="text-4xl mb-4">⚠️</span>
+          <h3>Error de Configuración</h3>
+          <p>No se pudo cargar tu perfil de estudiante.</p>
+          <p style={{ marginTop: '12px', fontSize: '14px', opacity: 0.8 }}>
+            Contacta al administrador si el problema persiste.
+          </p>
+          <button
+            onClick={handleBackToLogin}
+            className="btn-primary"
+            style={{ marginTop: '24px', padding: '12px 24px', fontSize: '16px' }}
+          >
+            ← Volver al Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar loading mientras se carga
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Cargando tu perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calcular valores después de verificar loading y error
+  const currentAvatar = AVATARS[student.profile?.avatar || 'default'];
+  const points = student.profile?.totalPoints || 0;
+  const level = student.profile?.level || 1;
+  const pointsInLevel = points % 100;
+  const pointsToNextLevel = 100 - pointsInLevel;
+  const progressPercentage = pointsInLevel;
+
   return (
     <>
+      <Navigation user={user} userRole={userRole} />
       <div className="dashboard-container student-theme">
         {/* Header */}
         <header className="dashboard-header">

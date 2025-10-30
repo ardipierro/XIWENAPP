@@ -311,3 +311,21 @@
     gap: var(--spacing-md);
   }
 }
+
+.admin-card {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%) !important;
+  border-color: #991B1B !important;
+}
+
+.admin-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.4) !important;
+}
+
+.admin-card .card-icon {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+
+
+

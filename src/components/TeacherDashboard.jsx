@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { loadStudents, loadGameHistory, loadCategories } from '../firebase/firestore';
 import StudentManager from './StudentManager';
+import Navigation from './Navigation';
 import './TeacherDashboard.css';
+import { isAdminEmail } from '../firebase/roleConfig';
 
-function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory, onLogout, setTeacherScreen }) {
+function TeacherDashboard({ user, userRole, onStartGame, onManageCategories, onViewHistory, onLogout, setTeacherScreen }) {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalStudents: 0,
     studentsWithCode: 0,
@@ -19,6 +23,39 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  // Handlers por defecto para funcionalidades no implementadas
+  const handleStartGame = () => {
+    if (onStartGame) {
+      onStartGame();
+    } else {
+      alert('⚠️ Funcionalidad "Crear Juego" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
+    }
+  };
+
+  const handleManageCategories = () => {
+    if (onManageCategories) {
+      onManageCategories();
+    } else {
+      alert('⚠️ Funcionalidad "Gestionar Categorías" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
+    }
+  };
+
+  const handleViewHistory = () => {
+    if (onViewHistory) {
+      onViewHistory();
+    } else {
+      alert('⚠️ Funcionalidad "Ver Historial" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
+    }
+  };
+
+  const handleManageCourses = () => {
+    if (setTeacherScreen) {
+      setTeacherScreen('courses');
+    } else {
+      alert('⚠️ Funcionalidad "Gestionar Cursos" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
+    }
+  };
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -99,6 +136,7 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
 
   return (
     <>
+      <Navigation user={user} userRole={userRole} />
       <div className="dashboard-container teacher-theme">
         {/* Header */}
         <header className="dashboard-header">
@@ -166,7 +204,7 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
           <section className="actions-section">
             <h2 className="section-title">⚡ Acciones Rápidas</h2>
             <div className="actions-grid">
-              <button className="action-card action-primary" onClick={onStartGame}>
+              <button className="action-card action-primary" onClick={handleStartGame}>
                 <div className="action-icon">🎮</div>
                 <div className="action-content">
                   <h3>Crear Juego</h3>
@@ -184,7 +222,7 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
                 <div className="action-arrow">→</div>
               </button>
 
-              <button className="action-card action-secondary" onClick={onManageCategories}>
+              <button className="action-card action-secondary" onClick={handleManageCategories}>
                 <div className="action-icon">📂</div>
                 <div className="action-content">
                   <h3>Gestionar Categorías</h3>
@@ -193,7 +231,7 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
                 <div className="action-arrow">→</div>
               </button>
 
-              <button className="action-card action-secondary" onClick={onViewHistory}>
+              <button className="action-card action-secondary" onClick={handleViewHistory}>
                 <div className="action-icon">📊</div>
                 <div className="action-content">
                   <h3>Ver Historial</h3>
@@ -202,12 +240,23 @@ function TeacherDashboard({ user, onStartGame, onManageCategories, onViewHistory
                 <div className="action-arrow">→</div>
               </button>
 
-              {setTeacherScreen && (
-                <button className="action-card action-secondary" onClick={() => setTeacherScreen('courses')}>
-                  <div className="action-icon">📚</div>
+              <button className="action-card action-secondary" onClick={handleManageCourses}>
+                <div className="action-icon">📚</div>
+                <div className="action-content">
+                  <h3>Gestionar Cursos</h3>
+                  <p>Crear y editar lecciones</p>
+                </div>
+                <div className="action-arrow">→</div>
+              </button>
+
+              {isAdminEmail(user?.email) && (
+                <button
+                  onClick={() => setTeacherScreen ? setTeacherScreen('admin') : navigate('/admin')}
+                  className="action-card action-secondary admin-card">
+                  <div className="action-icon">👑</div>
                   <div className="action-content">
-                    <h3>Gestionar Cursos</h3>
-                    <p>Crear y editar lecciones</p>
+                    <h3>Panel de Administración</h3>
+                    <p>Gestionar usuarios y roles del sistema</p>
                   </div>
                   <div className="action-arrow">→</div>
                 </button>

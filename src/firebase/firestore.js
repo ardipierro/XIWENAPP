@@ -23,14 +23,22 @@ import { db } from './config';
  */
 export const getUserRole = async (userId) => {
   try {
+    console.log('📝 getUserRole - consultando userId:', userId);
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
+
     if (userSnap.exists()) {
-      return userSnap.data().role;
+      const role = userSnap.data().role;
+      console.log('✅ getUserRole - documento existe, rol:', role);
+      return role;
     }
-    return null; // No existe, se asignará default en App
+
+    console.log('⚠️ getUserRole - documento NO existe para userId:', userId);
+    return null;
   } catch (error) {
     console.error('❌ Error obteniendo rol:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     return null;
   }
 };
@@ -40,16 +48,162 @@ export const getUserRole = async (userId) => {
  */
 export const setUserRole = async (userId, role) => {
   try {
+    console.log('📝 Intentando setear rol:', { userId, role });
     const userRef = doc(db, 'users', userId);
-    await setDoc(userRef, {
+
+    const result = await setDoc(userRef, {
       role,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     }, { merge: true });
-    console.log(`✅ Rol seteado: ${role}`);
+
+    console.log('📝 Resultado de setDoc:', result);
+    console.log(`✅ Rol seteado: ${role} para usuario ${userId}`);
     return true;
   } catch (error) {
     console.error('❌ Error seteando rol:', error);
+    console.error('userId:', userId, 'role:', role);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    console.error('Error name:', error.name);
+    console.error('Full error:', JSON.stringify(error, null, 2));
+
+    // Mensaje específico para errores comunes
+    if (error.code === 'permission-denied') {
+      console.error('🔒 PERMISO DENEGADO: Debes actualizar las Firestore Security Rules');
+      console.error('Ve a Firebase Console → Firestore Database → Rules');
+    }
+
+    throw error; // Lanzar el error para capturarlo arriba
+  }
+};
+
+
+/**
+ * FASE 1: Crear perfil completo de usuario (unificado)
+ * Usado en registro para crear tanto el documento de auth como el perfil
+ */
+export const createUserProfile = async (userId, userData) => {
+  try {
+    const { email, name, role } = userData;
+    
+    // Crear documento en colección 'users'
+    const userRef = doc(db, 'users', userId);
+    await setDoc(userRef, {
+      email,
+      name,
+      role,
+      status: 'active',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    // Si es estudiante, crear también documento en 'students'
+    if (role === 'student' || role === 'listener' || role === 'trial') {
+      const studentRef = doc(db, 'students', userId);
+      await setDoc(studentRef, {
+        name,
+        email,
+        profile: {
+          avatar: 'default',
+          totalPoints: 0,
+          level: 1,
+          gamesPlayed: 0,
+          achievements: [],
+          registeredAt: serverTimestamp()
+        },
+        active: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    console.log('Usuario creado con rol:', role);
+    return true;
+  } catch (error) {
+    console.error('Error creando perfil:', error);
+    return false;
+  }
+};
+
+/**
+ * FASE 1: Obtener perfil completo de usuario
+ */
+export const getUserProfile = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      return {
+        id: userId,
+        ...userSnap.data()
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error obteniendo perfil:', error);
+    return null;
+  }
+};
+
+/**
+ * FASE 1: Obtener todos los usuarios (para panel admin)
+ */
+export const getAllUsers = async () => {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    const users = [];
+    querySnapshot.forEach((doc) => {
+      users.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    console.log(users.length + ' usuarios cargados');
+    return users;
+  } catch (error) {
+    console.error('Error cargando usuarios:', error);
+    return [];
+  }
+};
+
+/**
+ * FASE 1: Actualizar rol de un usuario (para panel admin)
+ */
+export const updateUserRole = async (userId, newRole) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      role: newRole,
+      updatedAt: serverTimestamp()
+    });
+    console.log('Rol actualizado a:', newRole);
+    return true;
+  } catch (error) {
+    console.error('Error actualizando rol:', error);
+    return false;
+  }
+};
+
+/**
+ * FASE 1: Actualizar estado de un usuario (para panel admin)
+ */
+export const updateUserStatus = async (userId, newStatus) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      status: newStatus,
+      updatedAt: serverTimestamp()
+    });
+    console.log('Estado actualizado a:', newStatus);
+    return true;
+  } catch (error) {
+    console.error('Error actualizando estado:', error);
     return false;
   }
 };
@@ -328,6 +482,71 @@ export const getStudentProfile = async (studentId) => {
 };
 
 /**
+ * Crear perfil de estudiante automáticamente si no existe
+ * Útil para usuarios que tienen rol "student" pero no tienen perfil en la colección "students"
+ */
+export const ensureStudentProfile = async (userId) => {
+  try {
+    console.log('🔍 ensureStudentProfile - Verificando perfil para:', userId);
+
+    // Verificar si ya existe
+    const existingProfile = await getStudentProfile(userId);
+    if (existingProfile) {
+      console.log('✅ Perfil ya existe:', existingProfile);
+      return existingProfile;
+    }
+
+    console.log('⚙️ Perfil no existe, intentando crear...');
+
+    // Obtener datos del usuario desde la colección "users"
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      console.error('❌ Usuario no encontrado en la colección users, userId:', userId);
+      console.error('El usuario debe tener un documento en la colección "users" primero');
+      return null;
+    }
+
+    const userData = userSnap.data();
+    console.log('👤 Datos del usuario:', userData);
+
+    // Crear perfil de estudiante
+    const studentRef = doc(db, 'students', userId);
+    const studentData = {
+      name: userData.name || userData.email?.split('@')[0] || 'Estudiante',
+      email: userData.email,
+      profile: {
+        avatar: 'default',
+        totalPoints: 0,
+        level: 1,
+        gamesPlayed: 0,
+        achievements: [],
+        registeredAt: serverTimestamp()
+      },
+      active: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+
+    console.log('📝 Creando perfil de estudiante:', studentData);
+    await setDoc(studentRef, studentData);
+
+    console.log('✅ Perfil de estudiante creado automáticamente');
+
+    // Retornar el perfil recién creado
+    const newProfile = await getStudentProfile(userId);
+    console.log('✅ Perfil retornado:', newProfile);
+    return newProfile;
+  } catch (error) {
+    console.error('❌ Error creando perfil de estudiante:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    return null;
+  }
+};
+
+/**
  * Actualizar avatar del alumno
  */
 export const updateStudentAvatar = async (studentId, avatarId) => {
@@ -415,6 +634,192 @@ export const getStudentGameHistory = async (studentId) => {
     return studentGames;
   } catch (error) {
     console.error('❌ Error cargando historial:', error);
+    return [];
+  }
+};
+
+
+// ============================================
+// CURSOS
+// ============================================
+
+/**
+ * Crear nuevo curso
+ */
+export const createCourse = async (courseData) => {
+  try {
+    const coursesRef = collection(db, 'courses');
+    const docRef = await addDoc(coursesRef, {
+      ...courseData,
+      students: courseData.students || [],
+      active: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    console.log('✅ Curso creado con ID:', docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error('❌ Error creando curso:', error);
+    return null;
+  }
+};
+
+/**
+ * Cargar todos los cursos
+ */
+export const loadCourses = async () => {
+  try {
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef, orderBy('name', 'asc'));
+    const querySnapshot = await getDocs(q);
+    
+    const courses = [];
+    querySnapshot.forEach((doc) => {
+      courses.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    console.log(`✅ ${courses.length} cursos cargados desde Firestore`);
+    return courses;
+  } catch (error) {
+    console.error('❌ Error cargando cursos:', error);
+    return [];
+  }
+};
+
+/**
+ * Actualizar datos de un curso
+ */
+export const updateCourse = async (courseId, courseData) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    await updateDoc(courseRef, {
+      ...courseData,
+      updatedAt: serverTimestamp()
+    });
+    console.log('✅ Curso actualizado');
+    return true;
+  } catch (error) {
+    console.error('❌ Error actualizando curso:', error);
+    return false;
+  }
+};
+
+/**
+ * Eliminar un curso (soft delete - lo marca como inactivo)
+ */
+export const deleteCourse = async (courseId) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    await updateDoc(courseRef, {
+      active: false,
+      updatedAt: serverTimestamp()
+    });
+    console.log('✅ Curso marcado como inactivo');
+    return true;
+  } catch (error) {
+    console.error('❌ Error eliminando curso:', error);
+    return false;
+  }
+};
+
+/**
+ * Inscribir alumno a un curso
+ */
+export const enrollStudent = async (courseId, studentId) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    const courseSnap = await getDoc(courseRef);
+    
+    if (courseSnap.exists()) {
+      const currentStudents = courseSnap.data().students || [];
+      
+      // Verificar si ya está inscrito
+      if (currentStudents.includes(studentId)) {
+        console.log('ℹ️ El alumno ya está inscrito en este curso');
+        return true;
+      }
+      
+      await updateDoc(courseRef, {
+        students: [...currentStudents, studentId],
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log('✅ Alumno inscrito al curso');
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('❌ Error inscribiendo alumno:', error);
+    return false;
+  }
+};
+
+/**
+ * Desinscribir alumno de un curso
+ */
+export const unenrollStudent = async (courseId, studentId) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    const courseSnap = await getDoc(courseRef);
+    
+    if (courseSnap.exists()) {
+      const currentStudents = courseSnap.data().students || [];
+      const updatedStudents = currentStudents.filter(id => id !== studentId);
+      
+      await updateDoc(courseRef, {
+        students: updatedStudents,
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log('✅ Alumno desinscrito del curso');
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('❌ Error desinscribiendo alumno:', error);
+    return false;
+  }
+};
+
+/**
+ * Obtener alumnos de un curso específico
+ */
+export const getCourseStudents = async (courseId) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    const courseSnap = await getDoc(courseRef);
+    
+    if (!courseSnap.exists()) {
+      return [];
+    }
+    
+    const studentIds = courseSnap.data().students || [];
+    
+    if (studentIds.length === 0) {
+      return [];
+    }
+    
+    // Cargar datos completos de cada alumno
+    const studentsPromises = studentIds.map(id => 
+      getDoc(doc(db, 'students', id))
+    );
+    
+    const studentsSnaps = await Promise.all(studentsPromises);
+    
+    const students = studentsSnaps
+      .filter(snap => snap.exists())
+      .map(snap => ({
+        id: snap.id,
+        ...snap.data()
+      }));
+    
+    console.log(`✅ ${students.length} alumnos cargados del curso`);
+    return students;
+  } catch (error) {
+    console.error('❌ Error cargando alumnos del curso:', error);
     return [];
   }
 };
