@@ -5,12 +5,12 @@ import { getFunctions } from "firebase/functions"; // ⭐ NUEVO: Para Cloud Func
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAFYL-booTK8odJ2eOPOx6rCOaRb4xTTks",
-  authDomain: "xiwen-app-2026.firebaseapp.com",
-  projectId: "xiwen-app-2026",
-  storageBucket: "xiwen-app-2026.firebasestorage.app",
-  messagingSenderId: "755222942641",
-  appId: "1:755222942641:web:f7ff3b2caf5ad677906390"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase

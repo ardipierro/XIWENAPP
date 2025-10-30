@@ -3,17 +3,15 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'fire
 import { auth, db } from '../firebase/config';
 import { setUserRole, getStudentProfile } from '../firebase/firestore';
 import { doc, setDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom'; // Assuming react-router-dom is used for navigation
 import './StudentLogin.css';
 
 function StudentLogin({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState(''); // Added for registration
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-  const navigate = useNavigate(); // For back button
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,6 +22,7 @@ function StudentLogin({ onLoginSuccess }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const profile = await getStudentProfile(userCredential.user.uid);
       if (profile) {
+        console.log('Profile found:', profile);
         onLoginSuccess(profile);
       } else {
         setError('Perfil no encontrado. Contacta al administrador.');
@@ -61,6 +60,10 @@ function StudentLogin({ onLoginSuccess }) {
           level: 1
         }
       });
+      console.log('Profile created for uid:', userCredential.user.uid);
+
+      // Small delay for Firestore sync if needed (test)
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const profile = await getStudentProfile(userCredential.user.uid);
       if (profile) {
@@ -79,7 +82,7 @@ function StudentLogin({ onLoginSuccess }) {
   return (
     <div className="student-login-container">
       <div className="student-login-content">
-        <button className="back-button" onClick={() => navigate(-1)}>Volver</button> {/* Added back button */}
+        <button className="back-button" onClick={() => window.history.back()}>Volver</button>
         <div className="student-login-header">
           <div className="student-icon">👨‍🎓</div>
           <h1>{isRegistering ? 'Registro Alumno' : 'Login Alumno'}</h1>
@@ -94,7 +97,7 @@ function StudentLogin({ onLoginSuccess }) {
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder="Nombre" 
-                className="code-input" // Reusing style, but can adjust CSS if needed
+                className="code-input"
               />
             </div>
           )}
