@@ -242,6 +242,51 @@ body {
   color: var(--color-text-secondary);
 }
 
+/* Stats Cards (genérico para todos los dashboards excepto Admin que tiene estilos propios) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 40px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.stat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-value {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  line-height: 1.3;
+}
+
 /* Inputs */
 .input {
   width: 100%;
@@ -477,17 +522,48 @@ body {
 }
 
 /* ============================================
-   MODO OSCURO (FUTURO)
+   MODO OSCURO
    ============================================ */
 
-/* Descomenta cuando implementes modo oscuro
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #111827;
-    --color-surface: #1f2937;
-    --color-text-primary: #f9fafb;
-    --color-text-secondary: #d1d5db;
-    --color-border: #374151;
-  }
+.dark {
+  /* Colores de Fondo */
+  --color-background: #0f172a;     /* Slate 900 */
+  --color-surface: #1e293b;        /* Slate 800 */
+
+  /* Colores de Texto */
+  --color-text-primary: #f1f5f9;   /* Slate 100 */
+  --color-text-secondary: #cbd5e1; /* Slate 300 */
+
+  /* Bordes y División */
+  --color-border: #334155;         /* Slate 700 */
+  --color-disabled: #475569;       /* Slate 600 */
+
+  /* Ajustar sombras para modo oscuro */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 8px 10px -6px rgb(0 0 0 / 0.5);
 }
-*/
+
+/* Ajustes específicos para componentes en modo oscuro */
+.dark .backdrop-blur {
+  background-color: rgba(15, 23, 42, 0.8);
+}
+
+.dark .btn-ghost {
+  color: var(--color-text-primary);
+}
+
+.dark .btn-ghost:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .btn-outline {
+  border-color: var(--color-primary-light);
+  color: var(--color-primary-light);
+}
+
+.dark .btn-outline:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  color: white;
+}

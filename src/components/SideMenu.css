@@ -1,0 +1,242 @@
+.sidemenu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sidemenu {
+  position: fixed;
+  top: 64px; /* Altura del TopBar */
+  left: 0;
+  bottom: 0;
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-out;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidemenu.open {
+  transform: translateX(0);
+}
+
+/* SideMenu con tema Admin */
+.admin-theme .sidemenu {
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.admin-theme .sidemenu-title {
+  color: white;
+}
+
+.admin-theme .sidemenu-item {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.admin-theme .sidemenu-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.admin-theme .sidemenu-item.active {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.admin-theme .sidemenu-item.active::before {
+  background: white;
+}
+
+.admin-theme .sidemenu-divider {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-theme .version-label {
+  color: white;
+}
+
+.admin-theme .version-number {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.admin-theme .sidemenu-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.admin-theme .sidemenu-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sidemenu-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidemenu-header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sidemenu-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.sidemenu-nav {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.sidemenu-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  color: #374151;
+}
+
+.sidemenu-item:hover {
+  background: #f3f4f6;
+  color: #667eea;
+}
+
+.sidemenu-item.active {
+  background: #eef2ff;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.sidemenu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #667eea;
+  border-radius: 0 4px 4px 0;
+}
+
+.sidemenu-item-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidemenu-item-label {
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.active-indicator {
+  width: 6px;
+  height: 6px;
+  background: #667eea;
+  border-radius: 50%;
+  margin-left: auto;
+}
+
+.sidemenu-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 8px 20px;
+}
+
+.sidemenu-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: auto;
+}
+
+.sidemenu-version {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.version-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #667eea;
+  letter-spacing: 0.5px;
+}
+
+.version-number {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Scrollbar personalizado */
+.sidemenu-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidemenu-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidemenu-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.sidemenu-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Responsive */
+@media (min-width: 769px) {
+  /* En desktop, el overlay solo aparece cuando el menú está cerrado (no lo necesitamos) */
+  .sidemenu-overlay {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidemenu {
+    width: 280px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 480px) {
+  .sidemenu {
+    width: 240px;
+  }
+}

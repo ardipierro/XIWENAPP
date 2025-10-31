@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { getStudentGameHistory, getStudentProfile, ensureStudentProfile } from '../firebase/firestore';
-import Navigation from './Navigation';
+import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStudentEnrollments } from '../firebase/firestore';
+import DashboardLayout from './DashboardLayout';
 import './StudentDashboard.css';
 
 // Avatares disponibles
@@ -26,6 +26,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
   const navigate = useNavigate();
   const [student, setStudent] = useState(studentProp);
   const [gameHistory, setGameHistory] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [stats, setStats] = useState({
@@ -54,6 +55,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
           const history = await getStudentGameHistory(profile.id);
           setGameHistory(history);
           calculateStats(history);
+
+          // Cargar cursos asignados
+          const enrollments = await getStudentEnrollments(profile.id);
+          setEnrolledCourses(enrollments);
+          console.log('📚 Cursos asignados:', enrollments);
         } else {
           console.warn('⚠️ No se pudo cargar ni crear perfil de estudiante para:', user.uid);
         }
@@ -64,6 +70,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
         const history = await getStudentGameHistory(studentProp.id);
         setGameHistory(history);
         calculateStats(history);
+
+        // Cargar cursos asignados
+        const enrollments = await getStudentEnrollments(studentProp.id);
+        setEnrolledCourses(enrollments);
+        console.log('📚 Cursos asignados:', enrollments);
       }
 
       setLoading(false); // Siempre terminar con loading en false
@@ -170,41 +181,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
   const progressPercentage = pointsInLevel;
 
   return (
-    <>
-      <Navigation user={user} userRole={userRole} />
-      <div className="dashboard-container student-theme">
-        {/* Header */}
-        <header className="dashboard-header">
-          <div className="header-content">
-            <div className="header-left">
-              <div 
-                className="avatar-container clickable"
-                onClick={() => setShowAvatarSelector(true)}
-              >
-                <div className="avatar-display student-avatar">
-                  <span className="avatar-emoji">{currentAvatar}</span>
-                </div>
-                <div className="avatar-edit-badge">
-                  <span>✏️</span>
-                </div>
-              </div>
-              <div className="user-info">
-                <h1 className="user-name">{student.name}</h1>
-                <div className="user-meta">
-                  <span className="badge badge-student">Estudiante</span>
-                  <span className="user-level">Nivel {level}</span>
-                </div>
-                {student.studentCode && (
-                  <p className="student-code">Código: {student.studentCode}</p>
-                )}
-              </div>
-            </div>
-            <button className="btn btn-danger" onClick={onLogout}>
-              🚪 Salir
-            </button>
-          </div>
-        </header>
-
+    <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+      <div className="student-dashboard">
         <div className="dashboard-content">
           {/* Progress Section */}
           <div className="progress-section card">
@@ -268,6 +246,46 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
             <span className="cta-text">¡Jugar Ahora!</span>
           </button>
 
+          {/* Cursos Asignados */}
+          {enrolledCourses.length > 0 && (
+            <div className="courses-section card">
+              <h3 className="section-title">📚 Mis Cursos</h3>
+              <div className="courses-list">
+                {enrolledCourses.map((enrollment) => (
+                  <div key={enrollment.enrollmentId} className="course-item">
+                    <div className="course-header">
+                      <div className="course-name">{enrollment.course.name}</div>
+                      {enrollment.course.level && (
+                        <span className="course-level">Nivel {enrollment.course.level}</span>
+                      )}
+                    </div>
+                    {enrollment.course.description && (
+                      <div className="course-description">{enrollment.course.description}</div>
+                    )}
+                    <div className="course-progress-bar">
+                      <div className="progress-label">
+                        <span>Progreso</span>
+                        <span className="progress-percent">{enrollment.progress?.percentComplete || 0}%</span>
+                      </div>
+                      <div className="progress-track">
+                        <div
+                          className="progress-fill"
+                          style={{ width: `${enrollment.progress?.percentComplete || 0}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-outline course-btn"
+                      onClick={() => alert('Funcionalidad de curso en desarrollo')}
+                    >
+                      📖 Continuar Curso
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Game History */}
           {gameHistory.length > 0 ? (
             <div className="history-section card">
@@ -321,8 +339,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
                 </button>
               ))}
             </div>
-            <button 
-              className="btn btn-ghost w-full" 
+            <button
+              className="btn btn-ghost w-full"
               onClick={() => setShowAvatarSelector(false)}
             >
               Cerrar
@@ -330,7 +348,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
           </div>
         </div>
       )}
-    </>
+    </DashboardLayout>
   );
 }
 

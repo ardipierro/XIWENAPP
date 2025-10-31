@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getFunctions } from "firebase/functions"; // ⭐ NUEVO: Para Cloud Functions si se usa para custom claims
+import { getStorage } from "firebase/storage"; // ⭐ NUEVO: Para almacenamiento de archivos
 
 // Your web app's Firebase configuration
 export const firebaseConfig = {
@@ -24,5 +25,8 @@ export const auth = getAuth(app);
 
 // ⭐ NUEVO: Initialize Functions (para custom claims en futuro, opcional por ahora)
 export const functions = getFunctions(app);
+
+// ⭐ NUEVO: Initialize Storage (para subir imágenes y archivos)
+export const storage = getStorage(app);
 
 export default app;

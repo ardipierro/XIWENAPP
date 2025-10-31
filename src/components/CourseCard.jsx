@@ -1,0 +1,75 @@
+function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
+  return (
+    <div
+      className="card overflow-hidden"
+      style={{ borderLeft: `4px solid ${course.color || '#667eea'}` }}
+    >
+      {/* Imagen del curso */}
+      {course.imageUrl && (
+        <div className="w-full h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
+          <img
+            src={course.imageUrl}
+            alt={course.name}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+      )}
+
+      {/* Contenido de la tarjeta */}
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex-1">
+            {course.name}
+          </h3>
+          {course.level && (
+            <span className="badge badge-info ml-2">
+              {course.level}
+            </span>
+          )}
+        </div>
+
+        {/* Descripción */}
+        {course.description && (
+          <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+            {course.description}
+          </p>
+        )}
+
+        {/* Estadísticas */}
+        <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
+          <span className="flex items-center gap-1">
+            👥 {course.students?.length || 0} alumnos
+          </span>
+          <span className="flex items-center gap-1">
+            📖 {course.lessonsCount || 0} lecciones
+          </span>
+        </div>
+
+        {/* Acciones */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => onViewLessons?.(course)}
+            className="btn btn-sm btn-primary flex-1"
+          >
+            📖 Ver Lecciones
+          </button>
+          <button
+            onClick={() => onEdit?.(course)}
+            className="btn btn-sm btn-outline"
+          >
+            ✏️
+          </button>
+          <button
+            onClick={() => onDelete?.(course.id, course.name)}
+            className="btn btn-sm btn-danger"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default CourseCard;

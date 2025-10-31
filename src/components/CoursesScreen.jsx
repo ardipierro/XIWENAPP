@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
-import { 
-  loadCourses, 
-  createCourse, 
-  updateCourse, 
+import {
+  loadCourses,
+  createCourse,
+  updateCourse,
   deleteCourse,
   loadStudents,
   enrollStudent,
-  unenrollStudent 
+  unenrollStudent,
+  getCourseLessons,
+  createLesson,
+  deleteLesson
 } from '../firebase/firestore';
+import LessonScreen from './LessonScreen';
 
 function CoursesScreen({ onBack }) {
   const [courses, setCourses] = useState([]);
@@ -21,6 +25,11 @@ function CoursesScreen({ onBack }) {
     color: '#667eea'
   });
 
+  // Estado para gestión de lecciones
+  const [viewingLessons, setViewingLessons] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [lessons, setLessons] = useState([]);
+
   useEffect(() => {
     loadAllCourses();
   }, []);
@@ -28,7 +37,20 @@ function CoursesScreen({ onBack }) {
   const loadAllCourses = async () => {
     setLoading(true);
     const loadedCourses = await loadCourses();
-    setCourses(loadedCourses.filter(c => c.active !== false));
+    const activeCourses = loadedCourses.filter(c => c.active !== false);
+
+    // Cargar cantidad de lecciones para cada curso
+    const coursesWithLessons = await Promise.all(
+      activeCourses.map(async (course) => {
+        const courseLessons = await getCourseLessons(course.id);
+        return {
+          ...course,
+          lessonsCount: courseLessons.length
+        };
+      })
+    );
+
+    setCourses(coursesWithLessons);
     setLoading(false);
   };
 
@@ -119,12 +141,37 @@ function CoursesScreen({ onBack }) {
     resetForm();
   };
 
+  // Funciones para gestión de lecciones
+  const handleViewLessons = async (course) => {
+    setSelectedCourse(course);
+    setViewingLessons(true);
+    const courseLessons = await getCourseLessons(course.id);
+    setLessons(courseLessons);
+  };
+
+  const handleBackToList = () => {
+    setViewingLessons(false);
+    setSelectedCourse(null);
+    setLessons([]);
+  };
+
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.spinner}>🔄</div>
         <p style={styles.loadingText}>Cargando cursos...</p>
       </div>
+    );
+  }
+
+  // Renderizar vista de lecciones si un curso está seleccionado
+  if (viewingLessons && selectedCourse) {
+    return (
+      <LessonScreen
+        course={selectedCourse}
+        lessons={lessons}
+        onBack={handleBackToList}
+      />
     );
   }
 
@@ -173,16 +220,25 @@ function CoursesScreen({ onBack }) {
                 <span style={styles.statItem}>
                   👥 {course.students?.length || 0} alumnos
                 </span>
+                <span style={styles.statItem}>
+                  📖 {course.lessonsCount || 0} lecciones
+                </span>
               </div>
 
               <div style={styles.courseActions}>
-                <button 
+                <button
+                  onClick={() => handleViewLessons(course)}
+                  style={styles.lessonsButton}
+                >
+                  📖 Ver Lecciones
+                </button>
+                <button
                   onClick={() => openEditModal(course)}
                   style={styles.editButton}
                 >
                   ✏️ Editar
                 </button>
-                <button 
+                <button
                   onClick={() => handleDeleteCourse(course.id, course.name)}
                   style={styles.deleteButton}
                 >
@@ -423,6 +479,18 @@ const styles = {
   courseActions: {
     display: 'flex',
     gap: '8px',
+  },
+  lessonsButton: {
+    flex: 1,
+    padding: '10px',
+    background: '#10b981',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'white',
+    transition: 'all 0.3s',
   },
   editButton: {
     flex: 1,

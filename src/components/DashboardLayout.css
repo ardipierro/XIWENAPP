@@ -1,0 +1,43 @@
+.dashboard-layout {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+/* Tema Admin - Fondo degradado */
+.dashboard-layout.admin-theme {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.dashboard-main {
+  margin-top: 64px; /* Altura del TopBar */
+  margin-left: 260px; /* Ancho del SideMenu */
+  min-height: calc(100vh - 64px);
+  transition: margin-left 0.3s ease-out;
+}
+
+.dashboard-main.sidebar-closed {
+  margin-left: 0;
+}
+
+.dashboard-main-content {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-main {
+    margin-left: 0;
+  }
+
+  .dashboard-main-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-main-content {
+    padding: 12px;
+  }
+}

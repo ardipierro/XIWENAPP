@@ -18,8 +18,6 @@ function QuestionScreen({
   unlimitedTime,
   gameMode,
   repeatMode,
-  schoolLogo,
-  logoSize,
   setScreen,
   saveGameToHistory
 }) {
@@ -206,7 +204,7 @@ function QuestionScreen({
   const moveToNext = (wasCorrect) => {
     let newQuestions = [...parsedQuestions]
     let nextQuestionIndex = currentQuestionIndex
-    
+
     if (!wasCorrect) {
       if (repeatMode === 'shuffle') {
         const incorrectQuestion = newQuestions[currentQuestionIndex]
@@ -225,15 +223,15 @@ function QuestionScreen({
     } else {
       nextQuestionIndex = currentQuestionIndex + 1
     }
-    
+
     const nextStudentIndex = (currentStudentIndex + 1) % validStudents.length
-    
+
     if (nextQuestionIndex >= newQuestions.length) {
       saveGameToHistory(scores, questionsAnswered, responseTimes)
       setScreen('results')
       return
     }
-    
+
     setParsedQuestions(newQuestions)
     setCurrentStudentIndex(nextStudentIndex)
     setCurrentQuestionIndex(nextQuestionIndex)
@@ -314,9 +312,9 @@ function QuestionScreen({
               </button>
             </div>
           </div>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: `repeat(${validStudents.length + (schoolLogo ? 1 : 0)}, 1fr)`,
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${validStudents.length}, 1fr)`,
             gap: '12px'
           }}>
             {validStudents.map(student => (
@@ -341,19 +339,6 @@ function QuestionScreen({
                 </div>
               </div>
             ))}
-            {schoolLogo && (
-              <div className="p-3 rounded-lg bg-white flex items-center justify-center" style={{ marginLeft: '48px' }}>
-                <img 
-                  src={schoolLogo} 
-                  alt="Logo" 
-                  className={`w-auto object-contain ${
-                    logoSize === 'small' ? 'h-12' :
-                    logoSize === 'medium' ? 'h-16' :
-                    logoSize === 'large' ? 'h-20' : 'h-24'
-                  }`}
-                />
-              </div>
-            )}
           </div>
         </div>
 

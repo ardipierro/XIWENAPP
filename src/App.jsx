@@ -90,7 +90,7 @@ function App() {
           path="/admin/*"
           element={
             <ProtectedRoute user={user} userRole={userRole} allowedRoles={['admin']}>
-              <AdminPanel user={user} userRole={userRole} />
+              <Navigate to="/teacher" replace />
             </ProtectedRoute>
           }
         />
@@ -220,9 +220,8 @@ function DashboardRedirect({ user, userRole }) {
       return <Navigate to="/student" replace />;
     case 'teacher':
     case 'trial_teacher':
-      return <Navigate to="/teacher" replace />;
     case 'admin':
-      return <Navigate to="/admin" replace />;
+      return <Navigate to="/teacher" replace />;
     default:
       console.warn('⚠️ Rol desconocido:', userRole);
       return <Navigate to="/login" replace />;

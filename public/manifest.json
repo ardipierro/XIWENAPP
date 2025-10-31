@@ -1,0 +1,36 @@
+{
+  "name": "XIWEN - Plataforma Educativa",
+  "short_name": "XIWEN",
+  "description": "Plataforma educativa con juegos, ejercicios y cursos interactivos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Iniciar Juego",
+      "short_name": "Jugar",
+      "description": "Iniciar un nuevo juego",
+      "url": "/game",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mis Cursos",
+      "short_name": "Cursos",
+      "description": "Ver mis cursos",
+      "url": "/courses",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "192x192" }]
+    }
+  ]
+}

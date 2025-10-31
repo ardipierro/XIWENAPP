@@ -208,6 +208,42 @@ export const updateUserStatus = async (userId, newStatus) => {
   }
 };
 
+/**
+ * Actualizar avatar del usuario
+ */
+export const updateUserAvatar = async (userId, avatarId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      avatar: avatarId,
+      updatedAt: serverTimestamp()
+    });
+    console.log('✅ Avatar actualizado a:', avatarId);
+    return true;
+  } catch (error) {
+    console.error('❌ Error actualizando avatar:', error);
+    return false;
+  }
+};
+
+/**
+ * Obtener avatar del usuario
+ */
+export const getUserAvatar = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      return userSnap.data().avatar || 'default';
+    }
+    return 'default';
+  } catch (error) {
+    console.error('❌ Error obteniendo avatar:', error);
+    return 'default';
+  }
+};
+
 // ============================================
 // CATEGORÍAS DE PREGUNTAS
 // ============================================
@@ -825,20 +861,398 @@ export const getCourseStudents = async (courseId) => {
 };
 
 // ============================================
+// LECCIONES (LESSONS)
+// ============================================
+
+/**
+ * Crear una nueva lección para un curso
+ */
+export const createLesson = async (courseId, lessonData) => {
+  try {
+    const { title, type, content, order } = lessonData;
+
+    const lessonRef = await addDoc(collection(db, 'lessons'), {
+      courseId,
+      title,
+      type, // 'text', 'video', 'audio', 'interactive'
+      content,
+      order: order || 0,
+      active: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('✅ Lección creada:', lessonRef.id);
+    return lessonRef.id;
+  } catch (error) {
+    console.error('❌ Error creando lección:', error);
+    return null;
+  }
+};
+
+/**
+ * Obtener todas las lecciones de un curso
+ */
+export const getCourseLessons = async (courseId) => {
+  try {
+    // Query simple sin orderBy para evitar índice compuesto
+    const lessonsQuery = query(
+      collection(db, 'lessons'),
+      where('courseId', '==', courseId)
+    );
+
+    const snapshot = await getDocs(lessonsQuery);
+    // Filtrar activas y ordenar en el cliente
+    const lessons = snapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      .filter(lesson => lesson.active !== false)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    console.log(`✅ ${lessons.length} lecciones cargadas para curso ${courseId}`);
+    return lessons;
+  } catch (error) {
+    console.error('❌ Error cargando lecciones:', error);
+    return [];
+  }
+};
+
+/**
+ * Obtener una lección específica por ID
+ */
+export const getLesson = async (lessonId) => {
+  try {
+    const lessonRef = doc(db, 'lessons', lessonId);
+    const lessonSnap = await getDoc(lessonRef);
+
+    if (lessonSnap.exists()) {
+      return {
+        id: lessonSnap.id,
+        ...lessonSnap.data()
+      };
+    }
+
+    console.warn('⚠️ Lección no encontrada:', lessonId);
+    return null;
+  } catch (error) {
+    console.error('❌ Error obteniendo lección:', error);
+    return null;
+  }
+};
+
+/**
+ * Actualizar una lección existente
+ */
+export const updateLesson = async (lessonId, lessonData) => {
+  try {
+    const lessonRef = doc(db, 'lessons', lessonId);
+
+    await updateDoc(lessonRef, {
+      ...lessonData,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('✅ Lección actualizada:', lessonId);
+    return true;
+  } catch (error) {
+    console.error('❌ Error actualizando lección:', error);
+    return false;
+  }
+};
+
+/**
+ * Eliminar una lección (soft delete)
+ */
+export const deleteLesson = async (lessonId) => {
+  try {
+    const lessonRef = doc(db, 'lessons', lessonId);
+
+    await updateDoc(lessonRef, {
+      active: false,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('✅ Lección eliminada (soft delete):', lessonId);
+    return true;
+  } catch (error) {
+    console.error('❌ Error eliminando lección:', error);
+    return false;
+  }
+};
+
+/**
+ * Reordenar lecciones de un curso
+ */
+export const reorderLessons = async (lessonUpdates) => {
+  try {
+    const updates = lessonUpdates.map(({ id, order }) => {
+      const lessonRef = doc(db, 'lessons', id);
+      return updateDoc(lessonRef, {
+        order,
+        updatedAt: serverTimestamp()
+      });
+    });
+
+    await Promise.all(updates);
+    console.log('✅ Lecciones reordenadas');
+    return true;
+  } catch (error) {
+    console.error('❌ Error reordenando lecciones:', error);
+    return false;
+  }
+};
+
+// ============================================
+// INSCRIPCIONES (ENROLLMENTS)
+// ============================================
+
+/**
+ * Inscribir alumno en un curso (crear registro de inscripción)
+ */
+export const enrollStudentInCourse = async (studentId, courseId) => {
+  try {
+    // Verificar si ya está inscrito
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(
+      enrollmentsRef,
+      where('studentId', '==', studentId),
+      where('courseId', '==', courseId)
+    );
+    const existingEnrollment = await getDocs(q);
+
+    if (!existingEnrollment.empty) {
+      console.log('ℹ️ El alumno ya está inscrito en este curso');
+      return existingEnrollment.docs[0].id;
+    }
+
+    // Crear nueva inscripción
+    const enrollmentRef = await addDoc(enrollmentsRef, {
+      studentId,
+      courseId,
+      enrolledAt: serverTimestamp(),
+      progress: {
+        completedLessons: [],
+        lastAccessedLesson: null,
+        percentComplete: 0
+      },
+      status: 'active', // active, completed, paused
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('✅ Alumno inscrito en curso:', enrollmentRef.id);
+    return enrollmentRef.id;
+  } catch (error) {
+    console.error('❌ Error inscribiendo alumno:', error);
+    return null;
+  }
+};
+
+/**
+ * Desinscribir alumno de un curso
+ */
+export const unenrollStudentFromCourse = async (studentId, courseId) => {
+  try {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(
+      enrollmentsRef,
+      where('studentId', '==', studentId),
+      where('courseId', '==', courseId)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      console.log('ℹ️ No se encontró inscripción para desinscribir');
+      return false;
+    }
+
+    // Eliminar registro de inscripción
+    const enrollmentId = querySnapshot.docs[0].id;
+    await deleteDoc(doc(db, 'enrollments', enrollmentId));
+
+    console.log('✅ Alumno desinscrito del curso');
+    return true;
+  } catch (error) {
+    console.error('❌ Error desinscribiendo alumno:', error);
+    return false;
+  }
+};
+
+/**
+ * Obtener todos los cursos en los que está inscrito un alumno
+ */
+export const getStudentEnrollments = async (studentId) => {
+  try {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(enrollmentsRef, where('studentId', '==', studentId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    // Obtener datos completos de cada curso
+    const enrollments = [];
+    for (const enrollDoc of querySnapshot.docs) {
+      const enrollmentData = enrollDoc.data();
+      const courseRef = doc(db, 'courses', enrollmentData.courseId);
+      const courseSnap = await getDoc(courseRef);
+
+      if (courseSnap.exists()) {
+        enrollments.push({
+          enrollmentId: enrollDoc.id,
+          course: {
+            id: courseSnap.id,
+            ...courseSnap.data()
+          },
+          progress: enrollmentData.progress,
+          status: enrollmentData.status,
+          enrolledAt: enrollmentData.enrolledAt
+        });
+      }
+    }
+
+    console.log(`✅ ${enrollments.length} inscripciones cargadas para el alumno`);
+    return enrollments;
+  } catch (error) {
+    console.error('❌ Error cargando inscripciones del alumno:', error);
+    return [];
+  }
+};
+
+/**
+ * Obtener todos los alumnos inscritos en un curso
+ */
+export const getCourseEnrollments = async (courseId) => {
+  try {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(enrollmentsRef, where('courseId', '==', courseId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    // Obtener datos completos de cada alumno
+    const enrollments = [];
+    for (const enrollDoc of querySnapshot.docs) {
+      const enrollmentData = enrollDoc.data();
+      const studentRef = doc(db, 'students', enrollmentData.studentId);
+      const studentSnap = await getDoc(studentRef);
+
+      if (studentSnap.exists()) {
+        enrollments.push({
+          enrollmentId: enrollDoc.id,
+          student: {
+            id: studentSnap.id,
+            ...studentSnap.data()
+          },
+          progress: enrollmentData.progress,
+          status: enrollmentData.status,
+          enrolledAt: enrollmentData.enrolledAt
+        });
+      }
+    }
+
+    console.log(`✅ ${enrollments.length} alumnos inscritos en el curso`);
+    return enrollments;
+  } catch (error) {
+    console.error('❌ Error cargando inscripciones del curso:', error);
+    return [];
+  }
+};
+
+/**
+ * Obtener progreso de un alumno en un curso específico
+ */
+export const getEnrollmentProgress = async (studentId, courseId) => {
+  try {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(
+      enrollmentsRef,
+      where('studentId', '==', studentId),
+      where('courseId', '==', courseId)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const enrollmentData = querySnapshot.docs[0].data();
+    return enrollmentData.progress;
+  } catch (error) {
+    console.error('❌ Error obteniendo progreso:', error);
+    return null;
+  }
+};
+
+/**
+ * Actualizar progreso de un alumno en un curso
+ */
+export const updateEnrollmentProgress = async (studentId, courseId, progressData) => {
+  try {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(
+      enrollmentsRef,
+      where('studentId', '==', studentId),
+      where('courseId', '==', courseId)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      console.log('⚠️ No se encontró inscripción para actualizar');
+      return false;
+    }
+
+    const enrollmentId = querySnapshot.docs[0].id;
+    const enrollmentRef = doc(db, 'enrollments', enrollmentId);
+
+    await updateDoc(enrollmentRef, {
+      progress: progressData,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log('✅ Progreso actualizado');
+    return true;
+  } catch (error) {
+    console.error('❌ Error actualizando progreso:', error);
+    return false;
+  }
+};
+
+/**
+ * Obtener número de cursos asignados a un alumno
+ */
+export const getStudentEnrolledCoursesCount = async (studentId) => {
+  try {
+    const enrollmentsRef = collection(db, 'enrollments');
+    const q = query(enrollmentsRef, where('studentId', '==', studentId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.size;
+  } catch (error) {
+    console.error('❌ Error contando cursos:', error);
+    return 0;
+  }
+};
+
+// ============================================
 // MIGRACIÓN DESDE LOCALSTORAGE
 // ============================================
 
 export const migrateFromLocalStorage = async () => {
   try {
     console.log('🔄 Iniciando migración desde localStorage...');
-    
+
     const savedCategories = localStorage.getItem('quizGameCategories');
     if (savedCategories) {
       const categories = JSON.parse(savedCategories);
       await saveCategories(categories);
       console.log('✅ Categorías migradas');
     }
-    
+
     const savedHistory = localStorage.getItem('quizGameHistory');
     if (savedHistory) {
       const history = JSON.parse(savedHistory);
@@ -847,7 +1261,7 @@ export const migrateFromLocalStorage = async () => {
       }
       console.log(`✅ ${history.length} juegos migrados`);
     }
-    
+
     console.log('🎉 Migración completada');
     return true;
   } catch (error) {
