@@ -19,6 +19,8 @@ import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
 import ExerciseManager from './ExerciseManager';
 import ContentManager from './ContentManager';
+import GroupManager from './GroupManager';
+import AnalyticsDashboard from './AnalyticsDashboard';
 import './TeacherDashboard.css';
 
 function TeacherDashboard({ user, userRole, onLogout }) {
@@ -68,6 +70,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
   const handleManageContent = () => {
     setCurrentScreen('content');
+  };
+
+  const handleManageGroups = () => {
+    setCurrentScreen('groups');
+  };
+
+  const handleViewAnalytics = () => {
+    setCurrentScreen('analytics');
   };
 
   const handleManageCategories = () => {
@@ -396,6 +406,34 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             ← Volver al Dashboard
           </button>
           <ContentManager user={user} />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Renderizar Gestión de Grupos - CON Layout
+  if (currentScreen === 'groups') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+        <div className="groups-management">
+          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver al Dashboard
+          </button>
+          <GroupManager user={user} courses={courses} />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Renderizar Analytics Dashboard - CON Layout
+  if (currentScreen === 'analytics') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+        <div className="analytics-section">
+          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver al Dashboard
+          </button>
+          <AnalyticsDashboard user={user} />
         </div>
       </DashboardLayout>
     );
@@ -847,6 +885,32 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                     <span className={`stat-badge ${isAdmin ? 'admin-badge-special' : ''}`}>
                       {stats.totalStudents} alumnos
                     </span>
+                  </div>
+                </div>
+                <div className="card-arrow">→</div>
+              </button>
+
+              {/* Tarjeta 5: Gestionar Grupos */}
+              <button className="main-action-card groups-card" onClick={handleManageGroups}>
+                <div className="card-icon">👥</div>
+                <div className="card-content">
+                  <h3 className="card-title">Gestionar Grupos</h3>
+                  <p className="card-description">Organiza estudiantes en grupos y asigna cursos</p>
+                  <div className="card-stats">
+                    <span className="stat-badge">Nuevo</span>
+                  </div>
+                </div>
+                <div className="card-arrow">→</div>
+              </button>
+
+              {/* Tarjeta 6: Ver Analytics */}
+              <button className="main-action-card analytics-card" onClick={handleViewAnalytics}>
+                <div className="card-icon">📊</div>
+                <div className="card-content">
+                  <h3 className="card-title">Análisis y Estadísticas</h3>
+                  <p className="card-description">Visualiza métricas y rendimiento de estudiantes</p>
+                  <div className="card-stats">
+                    <span className="stat-badge">Nuevo</span>
                   </div>
                 </div>
                 <div className="card-arrow">→</div>
