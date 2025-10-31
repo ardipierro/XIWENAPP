@@ -17,6 +17,8 @@ import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
+import ExerciseManager from './ExerciseManager';
+import ContentManager from './ContentManager';
 import './TeacherDashboard.css';
 
 function TeacherDashboard({ user, userRole, onLogout }) {
@@ -58,6 +60,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Handlers de navegación
   const handleStartGame = () => {
     setCurrentScreen('setup');
+  };
+
+  const handleManageExercises = () => {
+    setCurrentScreen('exercises');
+  };
+
+  const handleManageContent = () => {
+    setCurrentScreen('content');
   };
 
   const handleManageCategories = () => {
@@ -361,6 +371,34 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar CoursesScreen (Gestionar Cursos) - SIN Layout porque tiene su propia navegación
   if (currentScreen === 'courses') {
     return <CoursesScreen onBack={handleBackToDashboard} />;
+  }
+
+  // Renderizar Gestión de Ejercicios - CON Layout
+  if (currentScreen === 'exercises') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+        <div className="exercises-management">
+          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver al Dashboard
+          </button>
+          <ExerciseManager user={user} />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Renderizar Gestión de Contenido - CON Layout
+  if (currentScreen === 'content') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+        <div className="content-management">
+          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver al Dashboard
+          </button>
+          <ContentManager user={user} />
+        </div>
+      </DashboardLayout>
+    );
   }
 
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
@@ -752,27 +790,27 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           <section className="main-actions">
             <h2 className="section-title">🚀 Acciones Principales</h2>
             <div className="main-actions-grid">
-              {/* Tarjeta 1: Crear Ejercicio/Juego */}
-              <button className="main-action-card game-card" onClick={handleStartGame}>
+              {/* Tarjeta 1: Gestionar Ejercicios */}
+              <button className="main-action-card game-card" onClick={handleManageExercises}>
                 <div className="card-icon">🎮</div>
                 <div className="card-content">
-                  <h3 className="card-title">Crear Ejercicio</h3>
-                  <p className="card-description">Configura un nuevo juego o quiz para tus alumnos</p>
+                  <h3 className="card-title">Gestionar Ejercicios</h3>
+                  <p className="card-description">Ver, crear y editar ejercicios y quizzes</p>
                   <div className="card-stats">
-                    <span className="stat-badge">{stats.totalGames} juegos creados</span>
+                    <span className="stat-badge">{stats.totalGames} ejercicios creados</span>
                   </div>
                 </div>
                 <div className="card-arrow">→</div>
               </button>
 
-              {/* Tarjeta 2: Crear Contenido */}
-              <button className="main-action-card content-card" onClick={() => alert('Funcionalidad en desarrollo')}>
+              {/* Tarjeta 2: Gestionar Contenido */}
+              <button className="main-action-card content-card" onClick={handleManageContent}>
                 <div className="card-icon">📄</div>
                 <div className="card-content">
-                  <h3 className="card-title">Crear Contenido</h3>
-                  <p className="card-description">Crea lecciones individuales o importa desde archivo</p>
+                  <h3 className="card-title">Gestionar Contenido</h3>
+                  <p className="card-description">Ver, crear y editar lecciones y materiales</p>
                   <div className="card-stats">
-                    <span className="stat-badge coming-soon">Próximamente</span>
+                    <span className="stat-badge">Nuevo</span>
                   </div>
                 </div>
                 <div className="card-arrow">→</div>

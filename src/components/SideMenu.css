@@ -220,6 +220,75 @@
   background: #9ca3af;
 }
 
+/* ============================================
+   DARK MODE
+   ============================================ */
+
+.dark .sidemenu {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+}
+
+.dark .sidemenu-header {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dark .sidemenu-title {
+  color: var(--color-text-secondary);
+}
+
+.dark .sidemenu-item {
+  color: var(--color-text-primary);
+}
+
+.dark .sidemenu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #818cf8;
+}
+
+.dark .sidemenu-item.active {
+  background: rgba(129, 140, 248, 0.15);
+  color: #818cf8;
+}
+
+.dark .sidemenu-item.active::before {
+  background: #818cf8;
+}
+
+.dark .active-indicator {
+  background: #818cf8;
+}
+
+.dark .sidemenu-divider {
+  background: var(--color-border);
+}
+
+.dark .sidemenu-footer {
+  border-top: 1px solid var(--color-border);
+}
+
+.dark .version-label {
+  color: #818cf8;
+}
+
+.dark .version-number {
+  color: var(--color-text-secondary);
+}
+
+.dark .sidemenu-content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+.dark .sidemenu-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* Dark mode - Admin theme overrides */
+.dark.admin-theme .sidemenu {
+  background: linear-gradient(180deg, #4338ca 0%, #581c87 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Responsive */
 @media (min-width: 769px) {
   /* En desktop, el overlay solo aparece cuando el menú está cerrado (no lo necesitamos) */

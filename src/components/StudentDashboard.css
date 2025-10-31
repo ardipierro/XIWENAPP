@@ -808,3 +808,126 @@
     gap: 8px;
   }
 }
+
+/* ============================================
+   DARK MODE - StudentDashboard
+   ============================================ */
+
+/* Container */
+.dark .dashboard-container {
+  background: var(--color-background);
+}
+
+.dark .student-dashboard {
+  background: transparent;
+}
+
+/* Cards */
+.dark .card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .progress-section {
+  background: var(--color-surface);
+}
+
+.dark .stat-card {
+  background: var(--color-surface);
+}
+
+.dark .course-item {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .history-item {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+/* Text */
+.dark .progress-label,
+.dark .section-title,
+.dark .course-name,
+.dark .history-category {
+  color: var(--color-text-primary);
+}
+
+.dark .progress-value,
+.dark .stat-value {
+  color: var(--color-text-primary);
+}
+
+.dark .stat-label,
+.dark .course-description,
+.dark .history-date {
+  color: var(--color-text-secondary);
+}
+
+/* Progress Bar */
+.dark .level-progress {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .level-progress-fill {
+  background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+}
+
+.dark .progress-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .progress-fill {
+  background: #818cf8;
+}
+
+/* CTA Button */
+.dark .student-cta {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: white;
+}
+
+.dark .student-cta:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+}
+
+/* Empty State */
+.dark .empty-state {
+  background: var(--color-surface);
+}
+
+.dark .empty-state h3 {
+  color: var(--color-text-primary);
+}
+
+.dark .empty-state p {
+  color: var(--color-text-secondary);
+}
+
+/* Loading */
+.dark .loading-state p {
+  color: var(--color-text-secondary);
+}
+
+.dark .error-state h3,
+.dark .error-state p {
+  color: var(--color-text-primary);
+}
+
+/* Course Level Badge */
+.dark .course-level {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+/* History Position */
+.dark .history-position {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+.dark .position-1 {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}

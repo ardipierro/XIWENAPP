@@ -1,11 +1,21 @@
 .dashboard-layout {
   min-height: 100vh;
-  background: #f9fafb;
+  background: var(--color-background);
+  transition: background-color 0.3s ease;
 }
 
 /* Tema Admin - Fondo degradado */
 .dashboard-layout.admin-theme {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Dark mode - dashboard background */
+.dark .dashboard-layout {
+  background: var(--color-background);
+}
+
+.dark .dashboard-layout.admin-theme {
+  background: linear-gradient(135deg, #4338ca 0%, #581c87 100%);
 }
 
 .dashboard-main {

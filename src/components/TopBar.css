@@ -285,6 +285,66 @@
   color: #374151;
 }
 
+/* ============================================
+   DARK MODE
+   ============================================ */
+
+.dark .topbar {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .hamburger span {
+  background: var(--color-text-primary);
+}
+
+.dark .brand-title {
+  color: var(--color-text-primary);
+}
+
+.dark .icon-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .topbar-divider {
+  background: var(--color-border);
+}
+
+.dark .user-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .user-avatar {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+.dark .avatar-edit-hint {
+  background: var(--color-surface);
+}
+
+.dark .user-name {
+  color: var(--color-text-primary);
+}
+
+.dark .dropdown-arrow {
+  color: var(--color-text-secondary);
+}
+
+.dark .user-button:hover .dropdown-arrow {
+  color: var(--color-text-primary);
+}
+
+/* Dark mode - Admin theme overrides */
+.dark.admin-theme .topbar {
+  background: linear-gradient(135deg, #4338ca 0%, #581c87 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .topbar-content {

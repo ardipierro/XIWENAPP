@@ -1412,3 +1412,177 @@
   border-color: #d1d5db;
 }
 
+/* ============================================
+   DARK MODE - TeacherDashboard
+   ============================================ */
+
+/* Container & Background */
+.dark .dashboard-container {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+/* Cards */
+.dark .card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .stat-card {
+  background: var(--color-surface);
+}
+
+.dark .main-action-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .main-action-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Text */
+.dark .dashboard-title,
+.dark .section-title,
+.dark .card-title {
+  color: var(--color-text-primary);
+}
+
+.dark .dashboard-subtitle,
+.dark .card-description,
+.dark .stat-label {
+  color: var(--color-text-secondary);
+}
+
+/* Stat Values */
+.dark .stat-value {
+  color: var(--color-text-primary);
+}
+
+/* Borders */
+.dark .border-left-blue {
+  border-left-color: #3b82f6;
+}
+
+.dark .border-left-green {
+  border-left-color: #10b981;
+}
+
+.dark .border-left-purple {
+  border-left-color: #8b5cf6;
+}
+
+.dark .border-left-orange {
+  border-left-color: #f59e0b;
+}
+
+/* Tables */
+.dark .user-table {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .user-table th {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-border);
+}
+
+.dark .user-table td {
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-border);
+}
+
+.dark .user-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Inputs */
+.dark input,
+.dark select,
+.dark textarea {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #818cf8;
+  background: var(--color-surface);
+}
+
+.dark input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* Badges */
+.dark .stat-badge {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+.dark .badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.dark .badge-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.dark .badge-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* Buttons */
+.dark .btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.dark .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+}
+
+/* Modals */
+.dark .modal-content {
+  background: var(--color-surface);
+}
+
+.dark .modal-title {
+  color: var(--color-text-primary);
+}
+
+/* Loading & Empty States */
+.dark .loading-state p,
+.dark .empty-state p {
+  color: var(--color-text-secondary);
+}
+
+/* Analytics */
+.dark .analytics-title {
+  color: var(--color-text-primary);
+}
+
+.dark .analytics-grid > div {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+/* Recent Games */
+.dark .game-item {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dark .game-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
