@@ -12,13 +12,12 @@ import ContentPlayer from './student/ContentPlayer';
 import StudentClassView from './StudentClassView';
 import './StudentDashboard.css';
 
-function StudentDashboard({ user, userRole, student: studentProp, onLogout, onChangeAvatar, onStartGame }) {
+function StudentDashboard({ user, userRole, student: studentProp, onLogout, onStartGame }) {
   const navigate = useNavigate();
   const [student, setStudent] = useState(studentProp);
   const [gameHistory, setGameHistory] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'classes', 'courseView', 'contentPlayer'
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [selectedCourseData, setSelectedCourseData] = useState(null);
@@ -103,11 +102,6 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
       totalCorrect,
       totalQuestions
     });
-  };
-
-  const handleAvatarChange = (avatarId) => {
-    onChangeAvatar(avatarId);
-    setShowAvatarSelector(false);
   };
 
   const handleBackToLogin = async () => {
@@ -240,20 +234,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
     );
   }
 
-  // Mostrar loading mientras se carga
-  if (loading) {
-    return (
-      <div className="dashboard-container">
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Cargando tu perfil...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Calcular valores después de verificar loading y error
-  const currentAvatar = AVATARS[student.profile?.avatar || 'default'];
+  // Calcular valores de progreso
   const points = student.profile?.totalPoints || 0;
   const level = student.profile?.level || 1;
   const pointsInLevel = points % 100;

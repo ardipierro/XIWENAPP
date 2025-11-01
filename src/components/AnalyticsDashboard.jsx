@@ -80,20 +80,19 @@ function AnalyticsDashboard({ user }) {
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={activityData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-600" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
               <XAxis
                 dataKey="date"
-                stroke="#6b7280"
-                className="dark:stroke-gray-400"
+                stroke="#71717a"
               />
-              <YAxis stroke="#6b7280" className="dark:stroke-gray-400" />
+              <YAxis stroke="#71717a" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px'
+                  backgroundColor: '#18181b',
+                  border: '1px solid #3f3f46',
+                  borderRadius: '8px',
+                  color: '#f4f4f5'
                 }}
-                className="dark:bg-gray-800 dark:border-gray-600"
               />
               <Legend />
               <Line
@@ -124,24 +123,23 @@ function AnalyticsDashboard({ user }) {
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={topStudents} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-600" />
-                <XAxis type="number" stroke="#6b7280" className="dark:stroke-gray-400" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                <XAxis type="number" stroke="#71717a" />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={100}
-                  stroke="#6b7280"
-                  className="dark:stroke-gray-400"
+                  stroke="#71717a"
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px'
+                    backgroundColor: '#18181b',
+                    border: '1px solid #3f3f46',
+                    borderRadius: '8px',
+                    color: '#f4f4f5'
                   }}
-                  className="dark:bg-gray-800 dark:border-gray-600"
                 />
-                <Bar dataKey="points" fill="#8b5cf6" name="Puntos totales" />
+                <Bar dataKey="points" fill="#71717a" name="Puntos totales" />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -175,11 +173,11 @@ function AnalyticsDashboard({ user }) {
                 <Tooltip
                   formatter={(value) => `${value}% de aciertos`}
                   contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px'
+                    backgroundColor: '#18181b',
+                    border: '1px solid #3f3f46',
+                    borderRadius: '8px',
+                    color: '#f4f4f5'
                   }}
-                  className="dark:bg-gray-800 dark:border-gray-600"
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -199,23 +197,22 @@ function AnalyticsDashboard({ user }) {
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={popularExercises}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-600" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
               <XAxis
                 dataKey="name"
-                stroke="#6b7280"
-                className="dark:stroke-gray-400"
+                stroke="#71717a"
                 angle={-45}
                 textAnchor="end"
                 height={100}
               />
-              <YAxis stroke="#6b7280" className="dark:stroke-gray-400" />
+              <YAxis stroke="#71717a" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px'
+                  backgroundColor: '#18181b',
+                  border: '1px solid #3f3f46',
+                  borderRadius: '8px',
+                  color: '#f4f4f5'
                 }}
-                className="dark:bg-gray-800 dark:border-gray-600"
               />
               <Legend />
               <Bar dataKey="plays" fill="#10b981" name="Veces jugado" />
