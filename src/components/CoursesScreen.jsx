@@ -379,7 +379,13 @@ function CoursesScreen({ onBack, user }) {
         /* Grid View */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredCourses.map((course) => (
-            <div key={course.id} className="card" style={{ padding: '12px' }}>
+            <div
+              key={course.id}
+              className="card cursor-pointer hover:shadow-lg transition-all duration-300"
+              style={{ padding: '12px' }}
+              onClick={() => handleOpenCourseModal(course, 'content')}
+              title="Click para gestionar curso"
+            >
               {/* Course Image */}
               {course.imageUrl ? (
                 <div className="w-full h-32 mb-2 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -417,7 +423,7 @@ function CoursesScreen({ onBack, user }) {
               )}
 
               {/* Stats */}
-              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1">
                   <FileText size={16} strokeWidth={2} /> {course.contentCount || 0}
                 </span>
@@ -425,15 +431,6 @@ function CoursesScreen({ onBack, user }) {
                   <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0}
                 </span>
               </div>
-
-              {/* Actions */}
-              <button
-                className="btn btn-primary"
-                onClick={() => handleOpenCourseModal(course, 'content')}
-                title="Gestionar curso completo"
-              >
-                <Settings size={16} strokeWidth={2} className="inline-icon" /> Gestionar
-              </button>
             </div>
           ))}
         </div>
@@ -441,7 +438,12 @@ function CoursesScreen({ onBack, user }) {
         /* List View */
         <div className="flex flex-col gap-3">
           {filteredCourses.map((course) => (
-            <div key={course.id} className="card">
+            <div
+              key={course.id}
+              className="card cursor-pointer hover:shadow-lg transition-all duration-300"
+              onClick={() => handleOpenCourseModal(course, 'content')}
+              title="Click para gestionar curso"
+            >
               <div className="flex gap-4 items-start">
                 {/* Course Image - Smaller in list view */}
                 {course.imageUrl ? (
@@ -480,25 +482,14 @@ function CoursesScreen({ onBack, user }) {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-4">
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <FileText size={16} strokeWidth={2} /> {course.contentCount || 0} contenido{course.contentCount !== 1 ? 's' : ''}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0} ejercicio{course.exercisesCount !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-
-                    {/* Actions */}
-                    <button
-                      className="btn btn-primary flex-shrink-0"
-                      onClick={() => handleOpenCourseModal(course, 'content')}
-                      title="Gestionar curso completo"
-                    >
-                      <Settings size={16} strokeWidth={2} className="inline-icon" /> Gestionar
-                    </button>
+                  {/* Stats */}
+                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <FileText size={16} strokeWidth={2} /> {course.contentCount || 0} contenido{course.contentCount !== 1 ? 's' : ''}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0} ejercicio{course.exercisesCount !== 1 ? 's' : ''}
+                    </span>
                   </div>
                 </div>
               </div>

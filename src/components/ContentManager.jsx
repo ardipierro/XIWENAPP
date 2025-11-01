@@ -220,13 +220,6 @@ function ContentManager({ user, courses = [] }) {
         </div>
         <div className="flex items-center gap-3">
           <button
-            className="btn btn-outline"
-            onClick={handleAssignUnassignedContent}
-            title="Asignar contenidos sin curso a un curso específico"
-          >
-            <BookMarked size={16} strokeWidth={2} /> Asignar a Curso
-          </button>
-          <button
             className="btn btn-primary"
             onClick={() => setShowCreateModal(true)}
           >

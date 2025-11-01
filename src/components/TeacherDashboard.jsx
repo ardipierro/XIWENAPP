@@ -798,7 +798,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                       <th>Email</th>
                       {isAdmin && <th>Rol</th>}
                       <th>Estado</th>
-                      <th>Cursos Asignados</th>
                       {isAdmin && <th>Registro</th>}
                       <th>Acciones</th>
                     </tr>
@@ -859,23 +858,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             <option value="suspended">Suspendido</option>
                             <option value="pending">Pendiente</option>
                           </select>
-                        </td>
-
-                        <td className="courses-cell">
-                          <div className="courses-cell-content">
-                            <button
-                              className="btn btn-outline"
-                              onClick={() => handleOpenResourceModal(userItem)}
-                              title="Asignar cursos, contenido y ejercicios"
-                            >
-                              <ClipboardList size={16} strokeWidth={2} /> Asignar
-                            </button>
-                            {enrollmentCounts[userItem.id] > 0 && (
-                              <span className="enrolled-count">
-                                {enrollmentCounts[userItem.id]}
-                              </span>
-                            )}
-                          </div>
                         </td>
 
                         {isAdmin && (
