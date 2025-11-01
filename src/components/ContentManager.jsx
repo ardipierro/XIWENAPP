@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3 } from 'lucide-react';
 import { getContentByTeacher, createContent, updateContent, getContentById, deleteContent } from '../firebase/content';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse';
 import {
@@ -142,13 +142,14 @@ function ContentManager({ user, courses = [] }) {
   });
 
   const getTypeIcon = (type) => {
-    const icons = {
-      lesson: '📖',
-      reading: '📚',
-      video: '🎥',
-      link: '🔗'
-    };
-    return icons[type] || '📄';
+    const iconProps = { size: 32, strokeWidth: 2 };
+    switch (type) {
+      case 'lesson': return <BookOpen {...iconProps} />;
+      case 'reading': return <BookMarked {...iconProps} />;
+      case 'video': return <Video {...iconProps} />;
+      case 'link': return <Link {...iconProps} />;
+      default: return <FileText {...iconProps} />;
+    }
   };
 
   const getTypeLabel = (type) => {
@@ -213,7 +214,7 @@ function ContentManager({ user, courses = [] }) {
             onClick={handleAssignUnassignedContent}
             title="Asignar contenidos sin curso a un curso específico"
           >
-            📚 Asignar a Curso
+            <BookMarked size={18} strokeWidth={2} className="inline-icon" /> Asignar a Curso
           </button>
           <button
             className="btn btn-primary"
@@ -258,7 +259,9 @@ function ContentManager({ user, courses = [] }) {
       {/* Lista de Contenido */}
       {filteredContents.length === 0 ? (
         <div className="card text-center py-12">
-          <div className="text-6xl mb-4">📄</div>
+          <div className="empty-icon mb-4">
+            <FileText size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500 mx-auto" />
+          </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             {contents.length === 0 ? 'No hay contenido creado' : 'No se encontró contenido'}
           </h3>
@@ -301,7 +304,7 @@ function ContentManager({ user, courses = [] }) {
                       <div className="flex flex-wrap gap-1">
                         {contentCourses[content.id].map(course => (
                           <span key={course.id} className="badge badge-success">
-                            📚 {course.name}
+                            <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
                           </span>
                         ))}
                       </div>
@@ -313,7 +316,9 @@ function ContentManager({ user, courses = [] }) {
 
                   <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                     {content.order !== undefined && (
-                      <span>📊 Orden: {content.order}</span>
+                      <span className="flex items-center gap-1">
+                        <BarChart3 size={14} strokeWidth={2} className="inline-icon" /> Orden: {content.order}
+                      </span>
                     )}
                     {content.createdAt && (
                       <span className="flex items-center gap-1"><Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR')}</span>
@@ -602,7 +607,7 @@ function ContentManager({ user, courses = [] }) {
                 </span>
                 {contentCourses[selectedContent.id]?.map(course => (
                   <span key={course.id} className="badge badge-success">
-                    📚 {course.name}
+                    <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
                   </span>
                 ))}
                 {(!contentCourses[selectedContent.id] || contentCourses[selectedContent.id].length === 0) && (
