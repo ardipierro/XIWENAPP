@@ -245,62 +245,6 @@ function AdminPanel({ user, userRole, onBack }) {
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="card mb-6">
-        <div className="flex gap-3 mb-3">
-          <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-            className="input w-48"
-          >
-            <option value="all">Todos los roles</option>
-            {Object.values(ROLES).map(role => (
-              <option key={role} value={role}>
-                {ROLE_INFO[role].icon} {ROLE_INFO[role].name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="input w-48"
-          >
-            <option value="all">Todos los estados</option>
-            <option value="active">Activos</option>
-            <option value="suspended">Suspendidos</option>
-          </select>
-
-          {/* Toggle Vista */}
-          <div className="view-toggle">
-            <button
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Vista de grilla"
-            >
-              ⊞
-            </button>
-            <button
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-              title="Vista de lista"
-            >
-              ☰
-            </button>
-          </div>
-        </div>
-
-        <button
-          onClick={() => {
-            setSearchTerm('');
-            setFilterRole('all');
-            setFilterStatus('all');
-          }}
-          className="btn btn-outline btn-sm"
-        >
-          Limpiar filtros
-        </button>
-      </div>
 
       {/* Users Grid/List */}
       <div className="users-section">

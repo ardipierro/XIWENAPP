@@ -356,35 +356,6 @@ function CoursesScreen({ onBack, user }) {
         </button>
       </div>
 
-      {/* View Toggle */}
-      <div className="card mb-6">
-        <div className="flex gap-3">
-          <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-            <button
-              className={`px-4 py-2 rounded-md transition-all ${
-                viewMode === 'grid'
-                  ? 'bg-white dark:bg-gray-700 shadow-sm font-semibold text-gray-900 dark:text-gray-100'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-              onClick={() => setViewMode('grid')}
-              title="Vista de grilla"
-            >
-              ⊞
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md transition-all ${
-                viewMode === 'list'
-                  ? 'bg-white dark:bg-gray-700 shadow-sm font-semibold text-gray-900 dark:text-gray-100'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-              onClick={() => setViewMode('list')}
-              title="Vista de lista"
-            >
-              ☰
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Courses Display */}
       {filteredCourses.length === 0 ? (

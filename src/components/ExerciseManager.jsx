@@ -281,45 +281,6 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
         </button>
       </div>
 
-      {/* Filtros */}
-      <div className="card mb-6">
-        <div className="flex gap-3">
-          {/* Filtro por tipo */}
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="input w-48"
-          >
-            <option value="all">Todos los tipos</option>
-            <option value="multiple_choice">Opción Múltiple</option>
-            <option value="fill_blank">Completar Espacios</option>
-            <option value="drag_drop">Drag & Drop</option>
-            <option value="highlight">Resaltar Palabras</option>
-            <option value="order_sentence">Ordenar Oración</option>
-            <option value="true_false">Verdadero/Falso</option>
-            <option value="matching">Relacionar</option>
-            <option value="table">Tabla</option>
-          </select>
-
-          {/* Toggle Vista */}
-          <div className="view-toggle">
-            <button
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Vista de grilla"
-            >
-              ⊞
-            </button>
-            <button
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-              title="Vista de lista"
-            >
-              ☰
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Lista de Ejercicios */}
       {filteredExercises.length === 0 ? (

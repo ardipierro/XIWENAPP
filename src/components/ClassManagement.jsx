@@ -398,29 +398,6 @@ function ClassManagement({ user }) {
       {/* List View */}
       {view === 'list' && (
         <div className="cm-list">
-          {/* Filters */}
-          <div className="cm-filters">
-            <select
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">Todos los grupos</option>
-              {groups.map(group => (
-                <option key={group.id} value={group.id}>{group.name}</option>
-              ))}
-            </select>
-            <select
-              value={selectedDay}
-              onChange={(e) => setSelectedDay(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">Todos los días</option>
-              {daysOfWeek.map(day => (
-                <option key={day.value} value={day.value}>{day.label}</option>
-              ))}
-            </select>
-          </div>
 
           {/* Sessions List */}
           <div className="sessions-list">

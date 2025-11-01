@@ -557,16 +557,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return studentExercises.some(se => se.itemId === exerciseId);
   };
 
-  const filteredUsers = users.filter(userItem => {
-    const matchesSearch =
-      userItem.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      userItem.email?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesRole = filterRole === 'all' || userItem.role === filterRole;
-    const matchesStatus = filterStatus === 'all' || userItem.status === filterStatus;
-
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  const filteredUsers = users;
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
@@ -775,56 +766,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             </div>
           )}
 
-          {/* Filtros */}
-          <div className="filters-section card">
-            <div className="search-box">
-              <span className="search-icon">
-                <Search size={18} strokeWidth={2} />
-              </span>
-              <input
-                type="text"
-                placeholder="Buscar por nombre o email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <div className="filter-group">
-              <select
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">Todos los roles</option>
-                {Object.values(ROLES).map(role => (
-                  <option key={role} value={role}>
-                    {ROLE_INFO[role].name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">Todos los estados</option>
-                <option value="active">Activos</option>
-                <option value="suspended">Suspendidos</option>
-              </select>
-
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setFilterRole('all');
-                  setFilterStatus('all');
-                }}
-                className="clear-filters-btn"
-              >
-                Limpiar filtros
-              </button>
-            </div>
-          </div>
 
           {/* Tabla de usuarios */}
           <div className="users-section card">

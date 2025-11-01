@@ -224,41 +224,6 @@ function ContentManager({ user, courses = [] }) {
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="card mb-6">
-        <div className="flex gap-3">
-          {/* Filtro por tipo */}
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="input w-48"
-          >
-            <option value="all">Todos los tipos</option>
-            <option value="lesson">Lección</option>
-            <option value="reading">Lectura</option>
-            <option value="video">Video</option>
-            <option value="link">Enlace</option>
-          </select>
-
-          {/* Toggle Vista */}
-          <div className="view-toggle">
-            <button
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Vista de grilla"
-            >
-              ⊞
-            </button>
-            <button
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-              title="Vista de lista"
-            >
-              ☰
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Lista de Contenido */}
       {filteredContents.length === 0 ? (

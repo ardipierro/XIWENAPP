@@ -183,27 +183,6 @@ function GroupManager({ user, courses }) {
         </button>
       </div>
 
-      {/* Toggle Vista */}
-      <div className="card mb-6">
-        <div className="flex gap-3">
-          <div className="view-toggle">
-            <button
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Vista de grilla"
-            >
-              ⊞
-            </button>
-            <button
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-              title="Vista de lista"
-            >
-              ☰
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Groups Grid/List */}
       {filteredGroups.length === 0 ? (
