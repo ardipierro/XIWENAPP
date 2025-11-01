@@ -446,19 +446,19 @@ function ClassManager({ user, courses }) {
           <div className="header-actions" style={{ gap: '12px' }}>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
-                className={`btn btn-sm ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setActiveTab('list')}
               >
                 <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Mis Clases
               </button>
               <button
-                className={`btn btn-sm ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setActiveTab('calendar')}
               >
                 <Calendar size={18} strokeWidth={2} className="inline-icon" /> Calendario
               </button>
             </div>
-            <button onClick={handleCreateClass} className="btn btn-sm btn-primary">
+            <button onClick={handleCreateClass} className="btn btn-primary">
               + Nueva Clase
             </button>
           </div>
@@ -1170,19 +1170,19 @@ function ClassManager({ user, courses }) {
           <div className="header-actions" style={{ gap: '12px' }}>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
-                className={`btn btn-sm ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setActiveTab('list')}
               >
                 <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Mis Clases
               </button>
               <button
-                className={`btn btn-sm ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setActiveTab('calendar')}
               >
                 <Calendar size={18} strokeWidth={2} className="inline-icon" /> Calendario
               </button>
             </div>
-            <button onClick={handleCreateClass} className="btn btn-sm btn-primary">
+            <button onClick={handleCreateClass} className="btn btn-primary">
               + Nueva Clase
             </button>
           </div>

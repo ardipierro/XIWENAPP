@@ -922,7 +922,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                         <td className="courses-cell">
                           <div className="courses-cell-content">
                             <button
-                              className="btn btn-sm btn-outline"
+                              className="btn btn-outline"
                               onClick={() => handleOpenResourceModal(userItem)}
                               title="Asignar cursos, contenido y ejercicios"
                             >
