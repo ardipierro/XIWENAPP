@@ -67,7 +67,7 @@ function App() {
       };
       setEffectiveUser(syntheticUser);
       setEffectiveRole(viewAsUser.role);
-      console.log('👁️ Modo ViewAs activado:', viewAsUser.name, '| Rol:', viewAsUser.role);
+      console.log('Modo ViewAs activado:', viewAsUser.name, '| Rol:', viewAsUser.role);
     } else {
       // Usar el usuario real
       setEffectiveUser(user);
@@ -242,12 +242,12 @@ function DashboardRedirect({ user, userRole, viewAsActive }) {
     case 'student':
     case 'listener':
     case 'trial':
-      console.log(viewAsActive ? '👁️ Redirigiendo a /student (ViewAs)' : '➡️ Redirigiendo a /student');
+      console.log(viewAsActive ? 'Redirigiendo a /student (ViewAs)' : 'Redirigiendo a /student');
       return <Navigate to="/student" replace />;
     case 'teacher':
     case 'trial_teacher':
     case 'admin':
-      console.log(viewAsActive ? '👁️ Redirigiendo a /teacher (ViewAs)' : '➡️ Redirigiendo a /teacher');
+      console.log(viewAsActive ? 'Redirigiendo a /teacher (ViewAs)' : 'Redirigiendo a /teacher');
       return <Navigate to="/teacher" replace />;
     default:
       console.warn('⚠️ Rol desconocido:', userRole);

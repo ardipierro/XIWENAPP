@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Eye, Trash2, Edit, Plus, Calendar } from 'lucide-react';
 import { getContentByTeacher, createContent, updateContent, getContentById, deleteContent } from '../firebase/content';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse';
 import {
@@ -315,7 +316,7 @@ function ContentManager({ user, courses = [] }) {
                       <span>📊 Orden: {content.order}</span>
                     )}
                     {content.createdAt && (
-                      <span>📅 {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR')}</span>
+                      <span className="flex items-center gap-1"><Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR')}</span>
                     )}
                   </div>
                 </div>
@@ -325,19 +326,19 @@ function ContentManager({ user, courses = [] }) {
                     className="btn btn-sm btn-outline"
                     onClick={() => handleEdit(content.id)}
                   >
-                    ✏️ Editar
+<Edit size={16} strokeWidth={2} /> Editar
                   </button>
                   <button
                     className="btn btn-sm btn-ghost"
                     onClick={() => handleView(content.id)}
                   >
-                    👁️ Ver
+<Eye size={16} strokeWidth={2} /> Ver
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
                     onClick={() => handleDelete(content.id)}
                   >
-                    🗑️
+<Trash2 size={16} strokeWidth={2} />
                   </button>
                 </div>
               </div>
@@ -640,12 +641,12 @@ function ContentManager({ user, courses = [] }) {
               )}
 
               <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  📅 Creado: {selectedContent.createdAt && new Date(selectedContent.createdAt.seconds * 1000).toLocaleString('es-AR')}
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <Calendar size={14} strokeWidth={2} /> Creado: {selectedContent.createdAt && new Date(selectedContent.createdAt.seconds * 1000).toLocaleString('es-AR')}
                 </p>
                 {selectedContent.updatedAt && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    ✏️ Actualizado: {new Date(selectedContent.updatedAt.seconds * 1000).toLocaleString('es-AR')}
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                    <Edit size={14} strokeWidth={2} /> Actualizado: {new Date(selectedContent.updatedAt.seconds * 1000).toLocaleString('es-AR')}
                   </p>
                 )}
               </div>

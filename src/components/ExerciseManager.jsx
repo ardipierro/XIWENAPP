@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Eye, Trash2, Edit, Plus, CheckCircle, AlertTriangle, Calendar } from 'lucide-react';
 import { getExercisesByTeacher, createExercise, updateExercise, getExerciseById, deleteExercise } from '../firebase/exercises';
 import {
   updateExerciseCourses,
@@ -405,19 +406,19 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                     className="btn btn-sm btn-outline"
                     onClick={() => handleEdit(exercise.id)}
                   >
-                    ✏️ Editar
+                    <Edit size={16} strokeWidth={2} /> Editar
                   </button>
                   <button
                     className="btn btn-sm btn-ghost"
                     onClick={() => handleView(exercise.id)}
                   >
-                    👁️ Ver
+                    <Eye size={16} strokeWidth={2} /> Ver
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
                     onClick={() => handleDelete(exercise.id)}
                   >
-                    🗑️
+                    <Trash2 size={16} strokeWidth={2} />
                   </button>
                 </div>
               </div>
@@ -844,12 +845,12 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  📅 Creado: {selectedExercise.createdAt && new Date(selectedExercise.createdAt.seconds * 1000).toLocaleString('es-AR')}
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <Calendar size={14} strokeWidth={2} /> Creado: {selectedExercise.createdAt && new Date(selectedExercise.createdAt.seconds * 1000).toLocaleString('es-AR')}
                 </p>
                 {selectedExercise.updatedAt && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    ✏️ Actualizado: {new Date(selectedExercise.updatedAt.seconds * 1000).toLocaleString('es-AR')}
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                    <Edit size={14} strokeWidth={2} /> Actualizado: {new Date(selectedExercise.updatedAt.seconds * 1000).toLocaleString('es-AR')}
                   </p>
                 )}
               </div>

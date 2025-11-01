@@ -1,3 +1,4 @@
+import { Eye } from 'lucide-react';
 import { useViewAs } from '../contexts/ViewAsContext';
 import './ViewAsBanner.css';
 
@@ -21,7 +22,9 @@ function ViewAsBanner() {
   return (
     <div className="view-as-banner">
       <div className="banner-content">
-        <div className="banner-icon">👁️</div>
+        <div className="banner-icon">
+          <Eye size={20} strokeWidth={2} />
+        </div>
         <div className="banner-text">
           <strong>Modo Visualización:</strong> Viendo como {viewAsUser?.name || viewAsUser?.email}
         </div>
