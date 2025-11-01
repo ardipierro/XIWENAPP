@@ -15,6 +15,9 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import {
+  BarChart3, Trophy, BookOpen, Gamepad2, Target, Users
+} from 'lucide-react';
+import {
   getActivityByDay,
   getTopStudents,
   getCourseStats,
@@ -70,8 +73,8 @@ function AnalyticsDashboard({ user }) {
 
       {/* Activity by Day */}
       <div className="card mb-6">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          📊 Actividad de Juegos (Últimos 7 Días)
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+          <BarChart3 size={20} strokeWidth={2} /> Actividad de Juegos (Últimos 7 Días)
         </h3>
         {activityData.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400 text-center py-8">
@@ -113,8 +116,8 @@ function AnalyticsDashboard({ user }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Top Students */}
         <div className="card">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            🏆 Top 10 Estudiantes
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+            <Trophy size={20} strokeWidth={2} /> Top 10 Estudiantes
           </h3>
           {topStudents.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400 text-center py-8">
@@ -147,8 +150,8 @@ function AnalyticsDashboard({ user }) {
 
         {/* Course Stats */}
         <div className="card">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            📚 Rendimiento por Curso
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+            <BookOpen size={20} strokeWidth={2} /> Rendimiento por Curso
           </h3>
           {courseStats.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400 text-center py-8">
@@ -187,8 +190,8 @@ function AnalyticsDashboard({ user }) {
 
       {/* Popular Exercises */}
       <div className="card">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          🎮 Ejercicios Más Jugados
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+          <Gamepad2 size={20} strokeWidth={2} /> Ejercicios Más Jugados
         </h3>
         {popularExercises.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400 text-center py-8">
@@ -224,21 +227,27 @@ function AnalyticsDashboard({ user }) {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <div className="card text-center">
-          <div className="text-4xl mb-2">🎯</div>
+          <div className="text-4xl mb-2 flex justify-center">
+            <Target size={40} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+          </div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {activityData.reduce((sum, d) => sum + d.games, 0)}
           </div>
           <div className="text-gray-600 dark:text-gray-400">Juegos Totales (7 días)</div>
         </div>
         <div className="card text-center">
-          <div className="text-4xl mb-2">👥</div>
+          <div className="text-4xl mb-2 flex justify-center">
+            <Users size={40} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+          </div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {topStudents.length}
           </div>
           <div className="text-gray-600 dark:text-gray-400">Estudiantes Activos</div>
         </div>
         <div className="card text-center">
-          <div className="text-4xl mb-2">📖</div>
+          <div className="text-4xl mb-2 flex justify-center">
+            <BookOpen size={40} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+          </div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {courseStats.length}
           </div>
