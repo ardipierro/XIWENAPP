@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import './SideMenu.css';
 
-function SideMenu({ isOpen, userRole, onNavigate, onMenuAction }) {
+function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -78,12 +78,9 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction }) {
 
   const menuItems = getMenuItems();
 
-  const isActive = (path, section) => {
-    if (section) {
-      // Lógica para detectar sección activa (puedes mejorar esto)
-      return location.pathname === path && location.hash === `#${section}`;
-    }
-    return location.pathname === path;
+  const isActive = (action) => {
+    // Comparar con currentScreen pasado desde el dashboard
+    return currentScreen === action;
   };
 
   return (
@@ -106,7 +103,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction }) {
                 return <div key={`divider-${index}`} className="sidemenu-divider"></div>;
               }
 
-              const active = isActive(item.path, item.section);
+              const active = isActive(item.action);
 
               const IconComponent = item.icon;
 
@@ -120,7 +117,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction }) {
                     <IconComponent size={18} strokeWidth={2} />
                   </span>
                   <span className="sidemenu-item-label">{item.label}</span>
-                  {active && <span className="active-indicator"></span>}
                 </button>
               );
             })}

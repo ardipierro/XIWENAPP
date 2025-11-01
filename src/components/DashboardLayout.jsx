@@ -5,7 +5,7 @@ import ViewAsBanner from './ViewAsBanner';
 import { isAdminEmail } from '../firebase/roleConfig';
 import './DashboardLayout.css';
 
-function DashboardLayout({ user, userRole, children, onLogout, onMenuAction }) {
+function DashboardLayout({ user, userRole, children, onLogout, onMenuAction, currentScreen }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Determinar si el usuario es admin
@@ -40,6 +40,7 @@ function DashboardLayout({ user, userRole, children, onLogout, onMenuAction }) {
           }
         }}
         onMenuAction={onMenuAction}
+        currentScreen={currentScreen}
         isAdmin={isAdmin}
       />
 

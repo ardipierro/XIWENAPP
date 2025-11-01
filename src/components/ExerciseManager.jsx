@@ -268,7 +268,11 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
   return (
     <div className="exercise-manager">
       {/* Header */}
-      <div className="flex justify-end items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-3">
+          <Gamepad2 size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Ejercicios</h1>
+        </div>
         <button
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}

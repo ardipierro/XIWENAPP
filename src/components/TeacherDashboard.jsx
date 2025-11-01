@@ -618,7 +618,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar CoursesScreen (Gestionar Cursos) - CON Layout
   if (currentScreen === 'courses') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <CoursesScreen onBack={handleBackToDashboard} user={user} />
       </DashboardLayout>
     );
@@ -642,7 +642,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Gestión de Ejercicios - CON Layout
   if (currentScreen === 'exercises') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="exercises-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
@@ -656,7 +656,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Gestión de Contenido - CON Layout
   if (currentScreen === 'content') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="content-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
@@ -670,7 +670,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Gestión de Grupos - CON Layout
   if (currentScreen === 'groups') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="groups-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
@@ -684,7 +684,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Class Manager (Clases Recurrentes) - CON Layout
   if (currentScreen === 'classes') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="classes-management-section">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
@@ -698,7 +698,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Analytics Dashboard - CON Layout
   if (currentScreen === 'analytics') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="analytics-section">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
@@ -712,7 +712,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Vista de Asistencia - CON Layout
   if (currentScreen === 'attendance') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="attendance-section">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
@@ -726,7 +726,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Perfil de Usuario
   if (currentScreen === 'users' && showUserProfile && selectedUserProfile) {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <UserProfile
           selectedUser={selectedUserProfile}
           currentUser={user}
@@ -741,7 +741,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
   if (currentScreen === 'users') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="user-management">
           {/* Header */}
           <div className="section-header">
@@ -1344,7 +1344,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Dashboard Principal con el nuevo layout
   return (
     <>
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="teacher-dashboard">
           {/* Header del Dashboard */}
           <div className="dashboard-welcome">

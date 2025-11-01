@@ -170,7 +170,11 @@ function GroupManager({ user, courses }) {
   return (
     <div className="group-manager">
       {/* Header */}
-      <div className="flex justify-end items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-3">
+          <Users size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Grupos</h1>
+        </div>
         <button
           onClick={() => setShowCreateModal(true)}
           className="btn btn-primary"

@@ -202,7 +202,11 @@ function ContentManager({ user, courses = [] }) {
   return (
     <div className="content-manager">
       {/* Header */}
-      <div className="flex justify-end items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-3">
+          <FileText size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Contenido</h1>
+        </div>
         <div className="flex gap-3">
           <button
             className="btn btn-outline"
