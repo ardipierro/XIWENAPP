@@ -5,7 +5,7 @@ import { auth } from '../firebase/config';
 import { Home, BarChart3, Edit, User, Settings, LogOut } from 'lucide-react';
 import './UserMenu.css';
 
-function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
+function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
@@ -101,7 +101,7 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
 
         <button
           className="menu-item"
-          onClick={() => alert('Funcionalidad de perfil en desarrollo')}
+          onClick={onViewProfile}
         >
           <User size={18} strokeWidth={2} className="menu-item-icon" />
           <span className="menu-item-text">Ver Perfil</span>

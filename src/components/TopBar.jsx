@@ -156,6 +156,10 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
                   setShowUserMenu(false);
                   setShowAvatarSelector(true);
                 }}
+                onViewProfile={() => {
+                  setShowUserMenu(false);
+                  setShowProfilePanel(true);
+                }}
               />
             )}
           </div>
