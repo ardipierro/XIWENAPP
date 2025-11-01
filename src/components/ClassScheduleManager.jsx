@@ -440,7 +440,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
       {/* Create Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => !processing && setShowModal(false)}>
-          <div className="modal-content schedule-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box schedule-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title flex items-center gap-2">
                 <Calendar size={24} strokeWidth={2} /> Nuevo Horario de Clase

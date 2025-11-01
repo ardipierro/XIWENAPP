@@ -211,8 +211,8 @@ function ClassManagement({ user }) {
       {/* Header */}
       <div className="cm-header">
         <div>
-          <h1 className="cm-title flex items-center gap-3">
-            <Calendar size={32} strokeWidth={2} /> Clases
+          <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <Calendar size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" /> Clases
           </h1>
           <p className="cm-subtitle">
             Vista panorámica de todas tus clases programadas

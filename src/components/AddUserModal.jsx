@@ -109,7 +109,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-content add-user-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box add-user-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="modal-header">
           <h2 className="modal-title">

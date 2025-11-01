@@ -350,7 +350,7 @@ function CreditManager({ userId, currentUser, onUpdate }) {
       {/* Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content credit-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box credit-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="modal-title flex items-center gap-2">
                 {modalType === 'add' ? (

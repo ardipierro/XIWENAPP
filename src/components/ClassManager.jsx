@@ -528,7 +528,7 @@ function ClassManager({ user, courses }) {
         {/* Modal de Crear/Editar Clase */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-box large" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h3>{editingClass ? 'Editar Clase' : 'Nueva Clase'}</h3>
                 <button onClick={() => setShowModal(false)} className="btn-close">×</button>

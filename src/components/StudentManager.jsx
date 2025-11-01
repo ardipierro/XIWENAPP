@@ -178,7 +178,7 @@ function StudentManager({ onClose, onStudentSelect }) {
       <div className="student-manager bg-white dark:bg-gray-800" style={{borderRadius: '16px', maxWidth: '1400px'}}>
         <div className="manager-header">
           <h2 className="flex items-center gap-2">
-            <Users size={24} strokeWidth={2} /> Gestión de Alumnos
+            <Users size={24} strokeWidth={2} /> Alumnos
           </h2>
           <button className="close-btn" onClick={onClose}>
             <X size={24} strokeWidth={2} />

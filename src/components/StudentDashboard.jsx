@@ -224,7 +224,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           </p>
           <button
             onClick={handleBackToLogin}
-            className="btn-primary"
+            className="btn btn-primary"
             style={{ marginTop: '24px', padding: '12px 24px', fontSize: '16px' }}
           >
             ← Volver al Login

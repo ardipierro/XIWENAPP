@@ -176,9 +176,9 @@ function Login() {
             </div>
           )}
 
-          <button 
-            type="submit" 
-            className="btn-primary"
+          <button
+            type="submit"
+            className="btn btn-primary"
             disabled={loading}
           >
             {loading ? '⏳ Cargando...' : (isRegistering ? '✅ Crear cuenta' : '🔓 Ingresar')}

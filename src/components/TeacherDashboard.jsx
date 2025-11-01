@@ -974,7 +974,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           {/* Modal de Asignación de Recursos */}
           {showResourceModal && selectedStudent && (
             <div className="modal-overlay" onClick={handleCloseResourceModal}>
-              <div className="modal-content enrollment-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-box enrollment-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                   <h2 className="modal-title flex items-center gap-2">
                     <Folder size={22} strokeWidth={2} />
