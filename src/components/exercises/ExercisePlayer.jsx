@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AlertTriangle, PartyPopper, Smile, Zap, Check, X, RotateCcw } from 'lucide-react';
 import { getExerciseById } from '../../firebase/exercises';
 import MultipleChoiceExercise from './types/MultipleChoiceExercise';
 import './ExercisePlayer.css';
@@ -80,7 +81,9 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
     return (
       <div className="exercise-player">
         <div className="error-container">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon">
+            <AlertTriangle size={48} strokeWidth={2} className="text-red-500" />
+          </div>
           <h2 className="error-title">Error</h2>
           <p className="error-message">{error}</p>
           <button className="btn btn-primary" onClick={handleExit}>
@@ -98,7 +101,13 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
         <div className="results-container">
           <div className="results-header">
             <div className="results-icon">
-              {results.percentage >= 70 ? '🎉' : results.percentage >= 50 ? '😊' : '💪'}
+              {results.percentage >= 70 ? (
+                <PartyPopper size={48} strokeWidth={2} className="text-yellow-500" />
+              ) : results.percentage >= 50 ? (
+                <Smile size={48} strokeWidth={2} className="text-green-500" />
+              ) : (
+                <Zap size={48} strokeWidth={2} className="text-blue-500" />
+              )}
             </div>
             <h2 className="results-title">¡Ejercicio Completado!</h2>
             <p className="results-subtitle">{exercise.title}</p>
@@ -144,7 +153,11 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
                   <div className="answer-header">
                     <span className="answer-number">Pregunta {index + 1}</span>
                     <span className={`answer-badge ${answer.isCorrect ? 'badge-success' : 'badge-error'}`}>
-                      {answer.isCorrect ? '✓ Correcta' : '✗ Incorrecta'}
+                      {answer.isCorrect ? (
+                        <><Check size={16} strokeWidth={2} className="inline-icon" /> Correcta</>
+                      ) : (
+                        <><X size={16} strokeWidth={2} className="inline-icon" /> Incorrecta</>
+                      )}
                     </span>
                   </div>
                   <p className="answer-question">{answer.question}</p>
@@ -160,7 +173,7 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
 
           <div className="results-actions">
             <button className="btn btn-outline" onClick={handleRetry}>
-              🔄 Intentar de Nuevo
+              <RotateCcw size={18} strokeWidth={2} className="inline-icon" /> Intentar de Nuevo
             </button>
             <button className="btn btn-primary" onClick={handleExit}>
               ← Volver
