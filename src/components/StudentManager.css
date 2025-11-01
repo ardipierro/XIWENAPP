@@ -79,19 +79,18 @@
 
 .btn-add {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #10b981;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: none;
 }
 
 .btn-add:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  background: #059669;
 }
 
 .student-count {
@@ -143,8 +142,8 @@
 
 .form-field input:focus {
   outline: none;
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: #52525b;
+  box-shadow: 0 0 0 2px rgba(82, 82, 91, 0.1);
 }
 
 .form-actions {
@@ -156,19 +155,18 @@
 .btn-save {
   flex: 1;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #10b981;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: none;
 }
 
 .btn-save:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  background: #059669;
 }
 
 .btn-cancel {
@@ -260,13 +258,12 @@
 }
 
 .btn-select {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #e5e7eb;
+  color: #374151;
 }
 
 .btn-select:hover {
-  background: #bfdbfe;
-  transform: scale(1.1);
+  background: #d1d5db;
 }
 
 .btn-edit {

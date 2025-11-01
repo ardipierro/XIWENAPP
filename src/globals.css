@@ -294,6 +294,85 @@
   .inline-icon {
     @apply inline-block align-text-bottom;
   }
+
+  /* ============================================
+     SISTEMA UNIFICADO DE CARDS PARA MANAGERS
+     ============================================ */
+
+  /* Vista Grilla */
+  .card-image-placeholder {
+    @apply w-full h-32 rounded-lg mb-3;
+    @apply bg-gray-100 dark:bg-gray-800;
+    @apply flex items-center justify-center;
+  }
+
+  .card-image-placeholder svg {
+    @apply text-gray-400 dark:text-gray-500;
+  }
+
+  .card-title {
+    @apply text-lg font-bold text-gray-900 dark:text-gray-100 mb-1;
+    @apply line-clamp-1;
+  }
+
+  .card-description {
+    @apply text-sm text-gray-600 dark:text-gray-400 mb-2;
+    @apply line-clamp-2 min-h-[2.5rem];
+  }
+
+  .card-badges {
+    @apply flex flex-wrap gap-2 mb-3;
+  }
+
+  .card-stats {
+    @apply flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3;
+  }
+
+  .card-actions {
+    @apply flex gap-2 mt-auto;
+  }
+
+  /* Vista Lista */
+  .card-list {
+    @apply p-4;
+  }
+
+  .card-image-placeholder-sm {
+    @apply w-24 h-24 flex-shrink-0 rounded-lg;
+    @apply bg-gray-100 dark:bg-gray-800;
+    @apply flex items-center justify-center;
+  }
+
+  .card-image-placeholder-sm svg {
+    @apply text-gray-400 dark:text-gray-500;
+  }
+
+  .card-badges-list {
+    @apply flex flex-col gap-2;
+  }
+
+  .card-actions-list {
+    @apply flex gap-2 items-start;
+  }
+
+  /* Toggle de Vista */
+  .view-toggle {
+    @apply flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1;
+  }
+
+  .view-toggle-btn {
+    @apply px-4 py-2 rounded-md transition-colors;
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .view-toggle-btn.active {
+    @apply bg-white dark:bg-gray-700 shadow-sm;
+    @apply font-semibold text-gray-900 dark:text-gray-100;
+  }
+
+  .view-toggle-btn:hover:not(.active) {
+    @apply text-gray-900 dark:text-gray-200;
+  }
 }
 
 /* ============================================
