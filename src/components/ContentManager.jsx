@@ -207,17 +207,19 @@ function ContentManager({ user, courses = [] }) {
           <FileText size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Contenido</h1>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3" style={{ alignItems: 'center' }}>
           <button
             className="btn btn-outline"
             onClick={handleAssignUnassignedContent}
             title="Asignar contenidos sin curso a un curso específico"
+            style={{ height: '42px' }}
           >
             <BookMarked size={18} strokeWidth={2} className="inline-icon" /> Asignar a Curso
           </button>
           <button
             className="btn btn-primary"
             onClick={() => setShowCreateModal(true)}
+            style={{ height: '42px' }}
           >
             + Crear Nuevo Contenido
           </button>
