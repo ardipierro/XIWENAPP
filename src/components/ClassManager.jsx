@@ -439,10 +439,12 @@ function ClassManager({ user, courses }) {
   if (activeTab === 'list') {
     return (
       <div className="class-manager">
-        <div className="manager-header">
-          <h2 className="flex items-center gap-2">
-            <BookOpen size={28} strokeWidth={2} /> Clases
-          </h2>
+        {/* Header unificado */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <BookOpen size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Clases</h1>
+          </div>
           <div className="flex items-center gap-3">
             <button
               className={`btn ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
@@ -1161,10 +1163,12 @@ function ClassManager({ user, courses }) {
   if (activeTab === 'calendar') {
     return (
       <div className="class-manager">
-        <div className="manager-header">
-          <h2 className="flex items-center gap-2">
-            <BookOpen size={28} strokeWidth={2} /> Clases
-          </h2>
+        {/* Header unificado */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <BookOpen size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Clases</h1>
+          </div>
           <div className="flex items-center gap-3">
             <button
               className={`btn ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
