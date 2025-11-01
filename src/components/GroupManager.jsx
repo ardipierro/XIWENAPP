@@ -177,7 +177,7 @@ function GroupManager({ user, courses }) {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="btn btn-primary"
+          className="btn btn-sm btn-primary"
         >
           + Crear Nuevo Grupo
         </button>
@@ -521,7 +521,7 @@ function GroupManager({ user, courses }) {
                       setSelectedGroup(null);
                     }
                   }}
-                  className="btn btn-sm btn-danger"
+                  className="btn btn-danger"
                 >
                   <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
                 </button>
@@ -569,7 +569,7 @@ function GroupManager({ user, courses }) {
                         <span className="text-gray-900 dark:text-gray-100">{member.studentName}</span>
                         <button
                           onClick={() => handleRemoveStudent(member.studentId)}
-                          className="btn btn-sm btn-danger"
+                          className="btn btn-danger"
                         >
                           Remover
                         </button>
@@ -606,7 +606,7 @@ function GroupManager({ user, courses }) {
                         <span className="text-gray-900 dark:text-gray-100">{gc.courseName}</span>
                         <button
                           onClick={() => unassignCourseFromGroup(selectedGroup.id, gc.courseId).then(() => handleSelectGroup(selectedGroup))}
-                          className="btn btn-sm btn-danger"
+                          className="btn btn-danger"
                         >
                           Desasignar
                         </button>

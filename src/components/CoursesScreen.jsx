@@ -342,7 +342,7 @@ function CoursesScreen({ onBack, user }) {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Cursos</h1>
         </div>
         <button
-          className="btn btn-primary"
+          className="btn btn-sm btn-primary"
           onClick={() => setShowCreateModal(true)}
         >
           + Crear Nuevo Curso

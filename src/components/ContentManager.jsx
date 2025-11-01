@@ -216,7 +216,7 @@ function ContentManager({ user, courses = [] }) {
             <BookMarked size={18} strokeWidth={2} className="inline-icon" /> Asignar a Curso
           </button>
           <button
-            className="btn btn-primary"
+            className="btn btn-sm btn-primary"
             onClick={() => setShowCreateModal(true)}
           >
             + Crear Nuevo Contenido
