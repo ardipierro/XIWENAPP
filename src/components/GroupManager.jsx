@@ -170,7 +170,8 @@ function GroupManager({ user, courses }) {
   return (
     <div className="group-manager">
       {/* Header */}
-      <div className="flex justify-end items-center mb-6">
+      <div className="panel-header">
+        <h1 className="panel-title">Gestionar Grupos</h1>
         <button
           onClick={() => setShowCreateModal(true)}
           className="btn btn-primary"
@@ -305,11 +306,25 @@ function GroupManager({ user, courses }) {
 
       {/* Create Modal with Tabs */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 1000}}>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto" style={{position: 'relative', zIndex: 1001}}>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Crear Nuevo Grupo
-            </h3>
+        <div className="modal-overlay">
+          <div className="modal-box max-w-3xl" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                Crear Nuevo Grupo
+              </h3>
+              <button
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setFormData({ name: '', description: '', color: '#3f3f46' });
+                  setSelectedStudents([]);
+                  setSelectedCourses([]);
+                  setActiveCreateTab('info');
+                }}
+              >
+                ×
+              </button>
+            </div>
 
             {/* Tabs */}
             <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
@@ -482,15 +497,15 @@ function GroupManager({ user, courses }) {
 
       {/* Group Detail Modal with Tabs */}
       {selectedGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 1000}}>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto" style={{position: 'relative', zIndex: 1001}}>
+        <div className="modal-overlay">
+          <div className="modal-box max-w-5xl" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex justify-between items-start mb-6">
+            <div className="modal-header">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <h3 className="modal-title">
                   {selectedGroup.name}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
                   {selectedGroup.description}
                 </p>
               </div>
@@ -509,9 +524,9 @@ function GroupManager({ user, courses }) {
                 </button>
                 <button
                   onClick={() => setSelectedGroup(null)}
-                  className="btn btn-ghost"
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
                 >
-                  <X size={18} strokeWidth={2} />
+                  ×
                 </button>
               </div>
             </div>
@@ -541,7 +556,7 @@ function GroupManager({ user, courses }) {
             </div>
 
             {/* Tab Content */}
-            <div className="tab-content">
+            <div className="modal-content">
               {/* Students Tab */}
               {activeGroupTab === 'students' && (
                 <div>

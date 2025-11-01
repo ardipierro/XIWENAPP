@@ -68,9 +68,9 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 bg-white rounded-2xl shadow-xl p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Historial de Partidas</h2>
+    <div className="max-w-4xl mx-auto mt-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+      <div className="panel-header">
+        <h2 className="panel-title">Historial de Partidas</h2>
         <div className="flex gap-2">
           <button
             onClick={exportHistoryCSV}

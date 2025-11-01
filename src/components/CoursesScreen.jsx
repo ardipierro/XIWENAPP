@@ -336,7 +336,8 @@ function CoursesScreen({ onBack, user }) {
   return (
     <div className="courses-screen">
       {/* Header */}
-      <div className="flex justify-end items-center mb-6">
+      <div className="panel-header">
+        <h1 className="panel-title">Gestionar Cursos</h1>
         <button
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}
@@ -535,18 +536,21 @@ function CoursesScreen({ onBack, user }) {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <h3 className="modal-title">
                 Crear Nuevo Curso
               </h3>
-              <button className="modal-close" onClick={() => setShowCreateModal(false)}>
+              <button
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                onClick={() => setShowCreateModal(false)}
+              >
                 ×
               </button>
             </div>
 
             <form onSubmit={handleCreate}>
-              <div className="modal-body">
+              <div className="modal-content">
                 <div className="form-group">
                   <label className="form-label">Nombre del Curso *</label>
                   <input
@@ -620,12 +624,15 @@ function CoursesScreen({ onBack, user }) {
       {/* Unified Course Modal with Tabs */}
       {showCourseModal && selectedCourse && (
         <div className="modal-overlay" onClick={handleCloseCourseModal}>
-          <div className="modal-content max-w-5xl" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box max-w-5xl" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <h3 className="modal-title">
                 {selectedCourse.name}
               </h3>
-              <button className="modal-close" onClick={handleCloseCourseModal}>
+              <button
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                onClick={handleCloseCourseModal}
+              >
                 ×
               </button>
             </div>

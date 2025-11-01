@@ -268,7 +268,8 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
   return (
     <div className="exercise-manager">
       {/* Header */}
-      <div className="flex justify-end items-center mb-6">
+      <div className="panel-header">
+        <h1 className="panel-title">Gestionar Ejercicios</h1>
         <button
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}
@@ -482,20 +483,20 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       {/* Modal Crear Ejercicio */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <h3 className="modal-title">
                 Crear Nuevo Ejercicio
               </h3>
               <button
-                className="modal-close"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
                 onClick={() => setShowCreateModal(false)}
               >
                 ×
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="modal-body">
+            <form onSubmit={handleCreate} className="modal-content">
               <div className="form-group">
                 <label className="form-label">Título*</label>
                 <input
@@ -631,20 +632,20 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       {/* Modal Editar Ejercicio */}
       {showEditModal && selectedExercise && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <h3 className="modal-title">
                 Editar Ejercicio
               </h3>
               <button
-                className="modal-close"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
                 onClick={() => setShowEditModal(false)}
               >
                 ×
               </button>
             </div>
 
-            <form onSubmit={handleUpdate} className="modal-body">
+            <form onSubmit={handleUpdate} className="modal-content">
               <div className="form-group">
                 <label className="form-label">Título*</label>
                 <input
@@ -813,20 +814,20 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       {/* Modal Ver Ejercicio */}
       {showViewModal && selectedExercise && (
         <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal-content max-w-4xl" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box max-w-4xl" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <h3 className="modal-title">
                 {selectedExercise.title}
               </h3>
               <button
-                className="modal-close"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
                 onClick={() => setShowViewModal(false)}
               >
                 ×
               </button>
             </div>
 
-            <div className="modal-body">
+            <div className="modal-content">
               <div className="flex gap-2 mb-4">
                 <span className="badge badge-info">
                   {getTypeLabel(selectedExercise.type)}
