@@ -1,6 +1,7 @@
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
+import { Home, GraduationCap, Crown, LogOut } from 'lucide-react';
 import './Navigation.css';
 
 function Navigation({ user, userRole }) {
@@ -49,18 +50,18 @@ function Navigation({ user, userRole }) {
 
         <div className="nav-links">
           <button onClick={handleNavigateToDashboard} className="nav-btn">
-            🏠 Mi Dashboard
+            <Home size={18} strokeWidth={2} className="inline-icon" /> Mi Dashboard
           </button>
 
           {canAccessTeacher && (
             <button onClick={() => navigate('/teacher')} className="nav-btn">
-              👨‍🏫 Profesor
+              <GraduationCap size={18} strokeWidth={2} className="inline-icon" /> Profesor
             </button>
           )}
 
           {canAccessAdmin && (
             <button onClick={() => navigate('/admin')} className="nav-btn">
-              👑 Admin
+              <Crown size={18} strokeWidth={2} className="inline-icon" /> Admin
             </button>
           )}
 
@@ -70,7 +71,7 @@ function Navigation({ user, userRole }) {
           </div>
 
           <button onClick={handleLogout} className="nav-btn logout-btn">
-            🚪 Cerrar Sesión
+            <LogOut size={18} strokeWidth={2} className="inline-icon" /> Cerrar Sesión
           </button>
         </div>
       </div>
