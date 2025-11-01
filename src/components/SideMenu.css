@@ -134,6 +134,10 @@
   font-weight: 500;
 }
 
+.sidemenu-item.active .sidemenu-item-icon {
+  color: #f4f4f5;
+}
+
 .sidemenu-item-icon {
   color: #a1a1aa;
   width: 24px;
@@ -142,6 +146,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: color 0.15s ease;
 }
 
 .sidemenu-item:hover .sidemenu-item-icon {

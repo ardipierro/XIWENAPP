@@ -76,6 +76,7 @@
   width: 24px;
   text-align: center;
   flex-shrink: 0;
+  transition: color 0.15s ease;
 }
 
 .menu-item:hover .menu-item-icon {

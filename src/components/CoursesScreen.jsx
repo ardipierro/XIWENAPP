@@ -336,8 +336,7 @@ function CoursesScreen({ onBack, user }) {
   return (
     <div className="courses-screen">
       {/* Header */}
-      <div className="panel-header">
-        <h1 className="panel-title">Gestionar Cursos</h1>
+      <div className="flex justify-end items-center mb-6">
         <button
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}

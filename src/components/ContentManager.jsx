@@ -202,8 +202,7 @@ function ContentManager({ user, courses = [] }) {
   return (
     <div className="content-manager">
       {/* Header */}
-      <div className="panel-header">
-        <h1 className="panel-title">Gestionar Contenido</h1>
+      <div className="flex justify-end items-center mb-6">
         <div className="flex gap-3">
           <button
             className="btn btn-outline"

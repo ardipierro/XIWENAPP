@@ -268,8 +268,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
   return (
     <div className="exercise-manager">
       {/* Header */}
-      <div className="panel-header">
-        <h1 className="panel-title">Gestionar Ejercicios</h1>
+      <div className="flex justify-end items-center mb-6">
         <button
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}
