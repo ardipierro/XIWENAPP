@@ -922,11 +922,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                         <td className="courses-cell">
                           <div className="courses-cell-content">
                             <button
-                              className="btn btn-xs btn-outline"
+                              className="btn btn-sm btn-outline"
                               onClick={() => handleOpenResourceModal(userItem)}
                               title="Asignar cursos, contenido y ejercicios"
                             >
-                              <ClipboardList size={14} strokeWidth={2} /> Asignar
+                              <ClipboardList size={16} strokeWidth={2} /> Asignar
                             </button>
                             {enrollmentCounts[userItem.id] > 0 && (
                               <span className="enrolled-count">

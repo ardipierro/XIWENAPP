@@ -177,7 +177,7 @@ function GroupManager({ user, courses }) {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="btn btn-xs btn-primary"
+          className="btn btn-sm btn-primary"
         >
           + Crear Nuevo Grupo
         </button>
