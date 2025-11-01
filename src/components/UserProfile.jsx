@@ -17,7 +17,8 @@ import {
   GraduationCap,
   Ear,
   Target,
-  FlaskConical
+  FlaskConical,
+  Plus
 } from 'lucide-react';
 import { ROLES, ROLE_INFO } from '../firebase/roleConfig';
 import { updateUser } from '../firebase/users';
@@ -499,12 +500,14 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
                 {/* Cursos disponibles */}
                 <div className="courses-section">
-                  <h3 className="section-subtitle">
-                    ➕ Disponibles para asignar
+                  <h3 className="section-subtitle flex items-center gap-2">
+                    <Plus size={18} strokeWidth={2} className="inline-icon" /> Disponibles para asignar
                   </h3>
                   {availableCourses.filter(c => !isCourseEnrolled(c.id)).length === 0 ? (
                     <div className="empty-message">
-                      <p>✅ Todos los cursos ya han sido asignados</p>
+                      <p className="flex items-center gap-2 justify-center">
+                        <CheckCircle size={18} strokeWidth={2} className="inline-icon text-green-600" /> Todos los cursos ya han sido asignados
+                      </p>
                     </div>
                   ) : (
                     <div className="courses-list">
