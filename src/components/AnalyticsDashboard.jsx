@@ -21,7 +21,7 @@ import {
   getPopularExercises
 } from '../firebase/analytics';
 
-const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#14b8a6'];
+const COLORS = ['#52525b', '#71717a', '#a1a1aa', '#f59e0b', '#10b981', '#d4d4d8', '#ef4444', '#3f3f46'];
 
 function AnalyticsDashboard({ user }) {
   const [loading, setLoading] = useState(true);

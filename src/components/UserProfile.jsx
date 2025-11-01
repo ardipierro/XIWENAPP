@@ -1,5 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  User,
+  CheckCircle,
+  Ban,
+  Eye,
+  AlertTriangle,
+  BarChart3,
+  BookOpen,
+  CreditCard,
+  Calendar,
+  Edit,
+  Save,
+  Crown,
+  UserCog,
+  GraduationCap,
+  Ear,
+  Target,
+  FlaskConical
+} from 'lucide-react';
 import { ROLES, ROLE_INFO } from '../firebase/roleConfig';
 import { updateUser } from '../firebase/users';
 import {
@@ -12,6 +31,17 @@ import CreditManager from './CreditManager';
 import StudentClassView from './StudentClassView';
 import { useViewAs } from '../contexts/ViewAsContext';
 import './UserProfile.css';
+
+// Icon mapping for role icons from roleConfig
+const ICON_MAP = {
+  'Crown': Crown,
+  'UserCog': UserCog,
+  'GraduationCap': GraduationCap,
+  'Ear': Ear,
+  'Target': Target,
+  'FlaskConical': FlaskConical,
+  'User': User
+};
 
 function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   const { startViewingAs } = useViewAs();
@@ -190,20 +220,33 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         </div>
         <div className="profile-header-content">
           <div className="profile-avatar-large">
-            {selectedUser.avatar || '👤'}
+            {(() => {
+              const iconName = ROLE_INFO[selectedUser.role]?.icon || 'User';
+              const IconComponent = ICON_MAP[iconName] || User;
+              return <IconComponent size={48} strokeWidth={2} />;
+            })()}
           </div>
           <div className="profile-header-info">
             <h1 className="profile-name">{selectedUser.name || selectedUser.email}</h1>
             <div className="profile-meta">
               <span className="profile-role-badge">
-                {ROLE_INFO[selectedUser.role]?.icon} {ROLE_INFO[selectedUser.role]?.name}
+                {(() => {
+                  const iconName = ROLE_INFO[selectedUser.role]?.icon || 'User';
+                  const IconComponent = ICON_MAP[iconName] || User;
+                  return <IconComponent size={16} strokeWidth={2} style={{ display: 'inline', marginRight: '4px' }} />;
+                })()}
+                {ROLE_INFO[selectedUser.role]?.name}
               </span>
               <span className={`profile-status-badge status-${selectedUser.status}`}>
-                {selectedUser.status === 'active' ? '✅ Activo' : '🚫 Suspendido'}
+                {selectedUser.status === 'active' ? (
+                  <span className="flex items-center gap-1"><CheckCircle size={16} strokeWidth={2} /> Activo</span>
+                ) : (
+                  <span className="flex items-center gap-1"><Ban size={16} strokeWidth={2} /> Suspendido</span>
+                )}
               </span>
               {isAdmin && currentUser.uid !== selectedUser.id && (
                 <button onClick={handleViewAs} className="btn-view-as">
-                  👁️ Ver como
+                  <Eye size={16} strokeWidth={2} /> Ver como
                 </button>
               )}
             </div>
@@ -214,7 +257,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       {/* Message */}
       {message.text && (
         <div className={`profile-message ${message.type}`}>
-          {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+          {message.type === 'success' ? <CheckCircle size={18} strokeWidth={2} /> : <AlertTriangle size={18} strokeWidth={2} />} {message.text}
         </div>
       )}
 
@@ -224,25 +267,25 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
           className={`profile-tab ${activeTab === 'info' ? 'active' : ''}`}
           onClick={() => setActiveTab('info')}
         >
-          📊 Información
+          <BarChart3 size={18} strokeWidth={2} /> Información
         </button>
         <button
           className={`profile-tab ${activeTab === 'courses' ? 'active' : ''}`}
           onClick={() => setActiveTab('courses')}
         >
-          📚 Cursos
+          <BookOpen size={18} strokeWidth={2} /> Cursos
         </button>
         <button
           className={`profile-tab ${activeTab === 'credits' ? 'active' : ''}`}
           onClick={() => setActiveTab('credits')}
         >
-          💳 Créditos
+          <CreditCard size={18} strokeWidth={2} /> Créditos
         </button>
         <button
           className={`profile-tab ${activeTab === 'classes' ? 'active' : ''}`}
           onClick={() => setActiveTab('classes')}
         >
-          📅 Clases
+          <Calendar size={18} strokeWidth={2} /> Clases
         </button>
       </div>
 
@@ -255,7 +298,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               <h2 className="tab-title">Información Básica</h2>
               {!editing ? (
                 <button className="btn btn-secondary" onClick={() => setEditing(true)}>
-                  ✏️ Editar
+                  <Edit size={18} strokeWidth={2} /> Editar
                 </button>
               ) : (
                 <div className="btn-group">
@@ -281,7 +324,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                     onClick={handleSave}
                     disabled={saving}
                   >
-                    {saving ? '💾 Guardando...' : '💾 Guardar'}
+                    <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar'}
                   </button>
                 </div>
               )}
@@ -350,12 +393,12 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                     onChange={handleChange}
                     className="info-select"
                   >
-                    <option value="active">✅ Activo</option>
-                    <option value="suspended">🚫 Suspendido</option>
+                    <option value="active">Activo</option>
+                    <option value="suspended">Suspendido</option>
                   </select>
                 ) : (
-                  <div className="info-value">
-                    {selectedUser.status === 'active' ? '✅ Activo' : '🚫 Suspendido'}
+                  <div className="info-value" style={{ color: selectedUser.status === 'active' ? '#10b981' : '#ef4444' }}>
+                    {selectedUser.status === 'active' ? 'Activo' : 'Suspendido'}
                   </div>
                 )}
               </div>
@@ -427,8 +470,9 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 {/* Cursos matriculados */}
                 {enrolledCourses.length > 0 && (
                   <div className="courses-section">
-                    <h3 className="section-subtitle">
-                      📚 Matriculado ({enrolledCourses.length})
+                    <h3 className="section-subtitle flex items-center gap-2">
+                      <BookOpen size={18} strokeWidth={2} />
+                      Matriculado ({enrolledCourses.length})
                     </h3>
                     <div className="courses-list">
                       {enrolledCourses.map(enrollment => (

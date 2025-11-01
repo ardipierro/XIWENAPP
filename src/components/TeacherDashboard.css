@@ -988,31 +988,31 @@
 
 .status-select {
   padding: 8px 12px;
-  border: 1px solid #27272a;
+  border: 1px solid transparent;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: none;
-  background: #18181b;
+  background: transparent;
 }
 
 .status-select.active {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background: transparent;
+  border-color: transparent;
+  color: #10b981;
 }
 
 .status-select.suspended {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background: transparent;
+  border-color: transparent;
+  color: #ef4444;
 }
 
 .status-select.pending {
-  background: rgba(245, 158, 11, 0.15);
-  border-color: rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
+  background: transparent;
+  border-color: transparent;
+  color: #f59e0b;
 }
 
 .status-select:disabled {

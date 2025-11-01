@@ -12,7 +12,22 @@ import {
   Folder,
   Rocket,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  Search,
+  Plus,
+  RefreshCw,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  Ban,
+  Check,
+  ClipboardList,
+  Medal,
+  User,
+  GraduationCap,
+  UserCog,
+  Ear,
+  FlaskConical
 } from 'lucide-react';
 import {
   loadStudents,
@@ -50,6 +65,17 @@ import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
 import ExercisePlayer from './exercises/ExercisePlayer';
 import './TeacherDashboard.css';
+
+// Icon mapping for role icons from roleConfig
+const ICON_MAP = {
+  'Crown': Crown,
+  'UserCog': UserCog,
+  'GraduationCap': GraduationCap,
+  'Ear': Ear,
+  'Target': Target,
+  'FlaskConical': FlaskConical,
+  'User': User
+};
 
 function TeacherDashboard({ user, userRole, onLogout }) {
   const navigate = useNavigate();
@@ -118,11 +144,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   };
 
   const handleManageCategories = () => {
-    alert('⚠️ Funcionalidad "Gestionar Categorías" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
+    alert('Funcionalidad "Gestionar Categorías" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
   };
 
   const handleViewHistory = () => {
-    alert('⚠️ Funcionalidad "Ver Historial" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
+    alert('Funcionalidad "Ver Historial" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
   };
 
   const handleManageCourses = () => {
@@ -245,7 +271,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         // Admin ve todos los usuarios
         const allUsers = await getAllUsers();
         setUsers(allUsers);
-        console.log('✅ Usuarios cargados:', allUsers.length);
+        console.log('Usuarios cargados:', allUsers.length);
       } else {
         // Profesores solo ven alumnos
         const allUsers = await getAllUsers();
@@ -253,10 +279,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           ['student', 'listener', 'trial'].includes(u.role)
         );
         setUsers(students);
-        console.log('✅ Alumnos cargados:', students.length);
+        console.log('Alumnos cargados:', students.length);
       }
     } catch (error) {
-      console.error('❌ Error cargando usuarios:', error);
+      console.error('Error cargando usuarios:', error);
       showError('Error al cargar usuarios');
     }
   };
@@ -723,7 +749,17 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               ← Volver al Dashboard
             </button>
             <h1 className="section-title-main">
-              {isAdmin ? '👑 Gestión de Usuarios' : '👥 Gestión de Alumnos'}
+              {isAdmin ? (
+                <span className="flex items-center gap-2">
+                  <Crown size={28} strokeWidth={2} />
+                  Gestión de Usuarios
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Users size={28} strokeWidth={2} />
+                  Gestión de Alumnos
+                </span>
+              )}
             </h1>
             <p className="section-subtitle">
               {isAdmin
@@ -736,19 +772,21 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           {/* Mensajes */}
           {successMessage && (
             <div className="message success-msg">
-              ✅ {successMessage}
+              <CheckCircle size={18} strokeWidth={2} /> {successMessage}
             </div>
           )}
           {errorMessage && (
             <div className="message error-msg">
-              ⚠️ {errorMessage}
+              <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
             </div>
           )}
 
           {/* Filtros */}
           <div className="filters-section card">
             <div className="search-box">
-              <span className="search-icon">🔍</span>
+              <span className="search-icon">
+                <Search size={18} strokeWidth={2} />
+              </span>
               <input
                 type="text"
                 placeholder="Buscar por nombre o email..."
@@ -777,8 +815,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 className="filter-select"
               >
                 <option value="all">Todos los estados</option>
-                <option value="active">✅ Activos</option>
-                <option value="suspended">🚫 Suspendidos</option>
+                <option value="active">Activos</option>
+                <option value="suspended">Suspendidos</option>
               </select>
 
               <button
@@ -803,10 +841,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   onClick={() => setShowAddUserModal(true)}
                   className="add-user-btn"
                 >
-                  ➕ {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
+                  <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
                 </button>
                 <button onClick={loadUsers} className="refresh-btn">
-                  🔄 Actualizar
+                  <RefreshCw size={18} strokeWidth={2} /> Actualizar
                 </button>
               </div>
             </div>
@@ -839,7 +877,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             title="Ver perfil completo"
                           >
                             <div className="user-avatar-small">
-                              {ROLE_INFO[userItem.role]?.icon || '👤'}
+                              {(() => {
+                                const iconName = ROLE_INFO[userItem.role]?.icon || 'User';
+                                const IconComponent = ICON_MAP[iconName] || User;
+                                return <IconComponent size={20} strokeWidth={2} />;
+                              })()}
                             </div>
                             <div className="user-name">
                               {userItem.name}
@@ -877,9 +919,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             className={`status-select ${userItem.status}`}
                             disabled={isAdminEmail(userItem.email) && userItem.status === 'active'}
                           >
-                            <option value="active">✅ Activo</option>
-                            <option value="suspended">🚫 Suspendido</option>
-                            <option value="pending">⏳ Pendiente</option>
+                            <option value="active">Activo</option>
+                            <option value="suspended">Suspendido</option>
+                            <option value="pending">Pendiente</option>
                           </select>
                         </td>
 
@@ -889,7 +931,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                               className="assign-courses-btn"
                               onClick={() => handleOpenResourceModal(userItem)}
                             >
-                              📋 Asignar Recursos
+                              <ClipboardList size={16} strokeWidth={2} /> Asignar Recursos
                             </button>
                             {enrollmentCounts[userItem.id] > 0 && (
                               <span className="enrolled-count">
@@ -914,7 +956,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                 disabled={isAdminEmail(userItem.email)}
                                 title="Suspender usuario"
                               >
-                                🚫
+                                <Ban size={18} strokeWidth={2} />
                               </button>
                             ) : (
                               <button
@@ -922,7 +964,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                 className="action-btn activate-btn"
                                 title="Activar usuario"
                               >
-                                ✅
+                                <Check size={18} strokeWidth={2} />
                               </button>
                             )}
                           </div>
@@ -940,8 +982,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             <div className="modal-overlay" onClick={handleCloseResourceModal}>
               <div className="modal-content enrollment-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                  <h2 className="modal-title">
-                    📋 Asignar Recursos a {selectedStudent.name}
+                  <h2 className="modal-title flex items-center gap-2">
+                    <Folder size={22} strokeWidth={2} />
+                    Asignar Recursos a {selectedStudent.name}
                   </h2>
                   <button className="modal-close-btn" onClick={handleCloseResourceModal}>
                     ✕
@@ -953,33 +996,36 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   <div className="flex gap-4">
                     <button
                       onClick={() => setActiveResourceTab('courses')}
-                      className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                      className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
                         activeResourceTab === 'courses'
                           ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
-                      📚 Cursos ({studentEnrollments.length})
+                      <BookOpen size={18} strokeWidth={2} />
+                      Cursos ({studentEnrollments.length})
                     </button>
                     <button
                       onClick={() => setActiveResourceTab('content')}
-                      className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                      className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
                         activeResourceTab === 'content'
                           ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
-                      📄 Contenidos ({studentContent.length})
+                      <FileText size={18} strokeWidth={2} />
+                      Contenidos ({studentContent.length})
                     </button>
                     <button
                       onClick={() => setActiveResourceTab('exercises')}
-                      className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                      className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
                         activeResourceTab === 'exercises'
                           ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
-                      🎮 Ejercicios ({studentExercises.length})
+                      <Gamepad2 size={18} strokeWidth={2} />
+                      Ejercicios ({studentExercises.length})
                     </button>
                   </div>
                 </div>
@@ -998,8 +1044,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                           {/* Cursos Asignados */}
                           {studentEnrollments.length > 0 && (
                             <div className="enrolled-courses-section">
-                              <h3 className="section-subtitle">
-                                ✅ Cursos Asignados ({studentEnrollments.length})
+                              <h3 className="section-subtitle flex items-center gap-2">
+                                <CheckCircle size={18} strokeWidth={2} />
+                                Cursos Asignados ({studentEnrollments.length})
                               </h3>
                               <div className="courses-list">
                                 {studentEnrollments.map(enrollment => (
@@ -1030,8 +1077,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
                           {/* Cursos Disponibles */}
                           <div className="available-courses-section">
-                            <h3 className="section-subtitle">
-                              📖 Cursos Disponibles
+                            <h3 className="section-subtitle flex items-center gap-2">
+                              <BookOpen size={18} strokeWidth={2} />
+                              Cursos Disponibles
                             </h3>
                             {courses.length === 0 ? (
                               <div className="no-courses">
@@ -1068,7 +1116,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                   ))}
                                 {courses.filter(course => !isEnrolled(course.id)).length === 0 && (
                                   <div className="all-enrolled">
-                                    <p>✅ Todos los cursos ya han sido asignados</p>
+                                    <p className="flex items-center gap-2">
+                                      <CheckCircle size={16} strokeWidth={2} />
+                                      Todos los cursos ya han sido asignados
+                                    </p>
                                   </div>
                                 )}
                               </div>
@@ -1083,8 +1134,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                           {/* Contenidos Asignados */}
                           {studentContent.length > 0 && (
                             <div className="enrolled-courses-section">
-                              <h3 className="section-subtitle">
-                                ✅ Contenidos Asignados ({studentContent.length})
+                              <h3 className="section-subtitle flex items-center gap-2">
+                                <CheckCircle size={18} strokeWidth={2} />
+                                Contenidos Asignados ({studentContent.length})
                               </h3>
                               <div className="courses-list">
                                 {studentContent.map(assignment => {
@@ -1099,8 +1151,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                             {content.type}
                                           </span>
                                           {content.duration && (
-                                            <span className="course-description">
-                                              ⏱ {content.duration} min
+                                            <span className="course-description flex items-center gap-1">
+                                              <Clock size={14} strokeWidth={2} /> {content.duration} min
                                             </span>
                                           )}
                                         </div>
@@ -1121,8 +1173,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
                           {/* Contenidos Disponibles */}
                           <div className="available-courses-section">
-                            <h3 className="section-subtitle">
-                              📖 Contenidos Disponibles
+                            <h3 className="section-subtitle flex items-center gap-2">
+                              <FileText size={18} strokeWidth={2} />
+                              Contenidos Disponibles
                             </h3>
                             {allContent.length === 0 ? (
                               <div className="no-courses">
@@ -1142,8 +1195,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                             {content.type}
                                           </span>
                                           {content.duration && (
-                                            <span className="course-description">
-                                              ⏱ {content.duration} min
+                                            <span className="course-description flex items-center gap-1">
+                                              <Clock size={14} strokeWidth={2} /> {content.duration} min
                                             </span>
                                           )}
                                         </div>
@@ -1159,7 +1212,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                   ))}
                                 {allContent.filter(c => !isContentAssigned(c.id)).length === 0 && (
                                   <div className="all-enrolled">
-                                    <p>✅ Todos los contenidos ya han sido asignados</p>
+                                    <p className="flex items-center gap-2">
+                                      <CheckCircle size={16} strokeWidth={2} />
+                                      Todos los contenidos ya han sido asignados
+                                    </p>
                                   </div>
                                 )}
                               </div>
@@ -1174,8 +1230,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                           {/* Ejercicios Asignados */}
                           {studentExercises.length > 0 && (
                             <div className="enrolled-courses-section">
-                              <h3 className="section-subtitle">
-                                ✅ Ejercicios Asignados ({studentExercises.length})
+                              <h3 className="section-subtitle flex items-center gap-2">
+                                <CheckCircle size={18} strokeWidth={2} />
+                                Ejercicios Asignados ({studentExercises.length})
                               </h3>
                               <div className="courses-list">
                                 {studentExercises.map(assignment => {
@@ -1210,8 +1267,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
                           {/* Ejercicios Disponibles */}
                           <div className="available-courses-section">
-                            <h3 className="section-subtitle">
-                              📖 Ejercicios Disponibles
+                            <h3 className="section-subtitle flex items-center gap-2">
+                              <Gamepad2 size={18} strokeWidth={2} />
+                              Ejercicios Disponibles
                             </h3>
                             {allExercises.length === 0 ? (
                               <div className="no-courses">
@@ -1246,7 +1304,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                   ))}
                                 {allExercises.filter(e => !isExerciseAssigned(e.id)).length === 0 && (
                                   <div className="all-enrolled">
-                                    <p>✅ Todos los ejercicios ya han sido asignados</p>
+                                    <p className="flex items-center gap-2">
+                                      <CheckCircle size={16} strokeWidth={2} />
+                                      Todos los ejercicios ya han sido asignados
+                                    </p>
                                   </div>
                                 )}
                               </div>
@@ -1288,7 +1349,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           {/* Header del Dashboard */}
           <div className="dashboard-welcome">
             <h1 className="dashboard-title">
-              {isAdmin ? '👑 Panel de Administración' : 'Panel del Profesor'}
+              {isAdmin ? (
+                <span className="flex items-center gap-2">
+                  <Crown size={32} strokeWidth={2} />
+                  Panel de Administración
+                </span>
+              ) : (
+                'Panel del Profesor'
+              )}
             </h1>
             <p className="dashboard-subtitle">
               {isAdmin
@@ -1451,11 +1519,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               {/* Gráfico 1: Participación en Ejercicios */}
               <div className="analytics-card">
                 <div className="analytics-header">
-                  <h3 className="analytics-title">📈 Participación en Ejercicios</h3>
+                  <h3 className="analytics-title flex items-center gap-2">
+                    <TrendingUp size={20} strokeWidth={2} />
+                    Participación en Ejercicios
+                  </h3>
                   <span className="analytics-badge">Últimos 30 días</span>
                 </div>
                 <div className="analytics-placeholder">
-                  <div className="placeholder-icon">📊</div>
+                  <div className="placeholder-icon">
+                    <BarChart3 size={48} strokeWidth={2} />
+                  </div>
                   <p className="placeholder-text">Gráfico de participación</p>
                   <p className="placeholder-subtext">Próximamente</p>
                 </div>
@@ -1464,11 +1537,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               {/* Gráfico 2: Progreso en Lecciones */}
               <div className="analytics-card">
                 <div className="analytics-header">
-                  <h3 className="analytics-title">📚 Progreso en Lecciones</h3>
+                  <h3 className="analytics-title flex items-center gap-2">
+                    <BookOpen size={20} strokeWidth={2} />
+                    Progreso en Lecciones
+                  </h3>
                   <span className="analytics-badge">Por curso</span>
                 </div>
                 <div className="analytics-placeholder">
-                  <div className="placeholder-icon">📖</div>
+                  <div className="placeholder-icon">
+                    <BookOpen size={48} strokeWidth={2} />
+                  </div>
                   <p className="placeholder-text">Gráfico de progreso</p>
                   <p className="placeholder-subtext">Próximamente</p>
                 </div>
@@ -1477,11 +1555,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               {/* Gráfico 3: Rendimiento General */}
               <div className="analytics-card">
                 <div className="analytics-header">
-                  <h3 className="analytics-title">🎯 Rendimiento General</h3>
+                  <h3 className="analytics-title flex items-center gap-2">
+                    <Target size={20} strokeWidth={2} />
+                    Rendimiento General
+                  </h3>
                   <span className="analytics-badge">Promedio del grupo</span>
                 </div>
                 <div className="analytics-placeholder">
-                  <div className="placeholder-icon">📈</div>
+                  <div className="placeholder-icon">
+                    <TrendingUp size={48} strokeWidth={2} />
+                  </div>
                   <p className="placeholder-text">Gráfico de rendimiento</p>
                   <p className="placeholder-subtext">Próximamente</p>
                 </div>
@@ -1492,12 +1575,17 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           {/* Actividad Reciente y Top Students (más compactos) */}
           <div className="dashboard-grid">
             <section className="dashboard-section card">
-              <h3 className="section-title">📈 Actividad Reciente</h3>
+              <h3 className="section-title flex items-center gap-2">
+                <TrendingUp size={20} strokeWidth={2} />
+                Actividad Reciente
+              </h3>
               <div className="recent-games-list">
                 {recentGames.length > 0 ? (
                   recentGames.slice(0, 5).map((game, index) => (
                     <div key={index} className="recent-game-item">
-                      <div className="game-icon">🎮</div>
+                      <div className="game-icon">
+                        <Gamepad2 size={24} strokeWidth={2} />
+                      </div>
                       <div className="game-info">
                         <div className="game-category">{game.category}</div>
                         <div className="game-meta">
@@ -1514,7 +1602,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   ))
                 ) : (
                   <div className="empty-state-small">
-                    <div className="empty-icon">🎯</div>
+                    <div className="empty-icon">
+                      <Target size={32} strokeWidth={2} />
+                    </div>
                     <p>Aún no hay juegos creados</p>
                   </div>
                 )}
@@ -1522,7 +1612,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             </section>
 
             <section className="dashboard-section card">
-              <h3 className="section-title">🏆 Alumnos Destacados</h3>
+              <h3 className="section-title flex items-center gap-2">
+                <Medal size={20} strokeWidth={2} />
+                Alumnos Destacados
+              </h3>
               <div className="top-students-list">
                 {topStudents.length > 0 ? (
                   topStudents.map((student, index) => (
@@ -1537,13 +1630,23 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                         </div>
                       </div>
                       <div className="student-badge">
-                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '⭐'}
+                        {index === 0 ? (
+                          <Medal size={24} strokeWidth={2} style={{ color: '#fbbf24' }} />
+                        ) : index === 1 ? (
+                          <Medal size={24} strokeWidth={2} style={{ color: '#d1d5db' }} />
+                        ) : index === 2 ? (
+                          <Medal size={24} strokeWidth={2} style={{ color: '#f59e0b' }} />
+                        ) : (
+                          <Medal size={20} strokeWidth={2} />
+                        )}
                       </div>
                     </div>
                   ))
                 ) : (
                   <div className="empty-state-small">
-                    <div className="empty-icon">👥</div>
+                    <div className="empty-icon">
+                      <Users size={32} strokeWidth={2} />
+                    </div>
                     <p>Los alumnos aparecerán aquí cuando jueguen</p>
                   </div>
                 )}

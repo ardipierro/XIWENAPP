@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStudentEnrollments } from '../firebase/firestore';
+import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import MyCourses from './student/MyCourses';
 import MyAssignments from './student/MyAssignments';
@@ -10,22 +11,6 @@ import CourseViewer from './student/CourseViewer';
 import ContentPlayer from './student/ContentPlayer';
 import StudentClassView from './StudentClassView';
 import './StudentDashboard.css';
-
-// Avatares disponibles
-const AVATARS = {
-  default: '👤',
-  student1: '👨‍🎓',
-  student2: '👩‍🎓',
-  scientist: '🧑‍🔬',
-  artist: '🧑‍🎨',
-  athlete: '🏃',
-  reader: '📚',
-  star: '⭐',
-  rocket: '🚀',
-  trophy: '🏆',
-  brain: '🧠',
-  medal: '🥇'
-};
 
 function StudentDashboard({ user, userRole, student: studentProp, onLogout, onChangeAvatar, onStartGame }) {
   const navigate = useNavigate();
@@ -54,11 +39,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
 
       if (!studentProp && user) {
         // Intentar cargar o crear el perfil del estudiante desde Firestore
-        console.log('🔍 Cargando perfil de estudiante para:', user.uid);
+        console.log('Cargando perfil de estudiante para:', user.uid);
         const profile = await ensureStudentProfile(user.uid);
 
         if (profile) {
-          console.log('✅ Perfil de estudiante cargado/creado:', profile);
+          console.log('Perfil de estudiante cargado/creado:', profile);
           setStudent(profile);
 
           // Cargar historial de juegos
@@ -69,9 +54,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
           // Cargar cursos asignados
           const enrollments = await getStudentEnrollments(profile.id);
           setEnrolledCourses(enrollments);
-          console.log('📚 Cursos asignados:', enrollments);
+          console.log('Cursos asignados:', enrollments);
         } else {
-          console.warn('⚠️ No se pudo cargar ni crear perfil de estudiante para:', user.uid);
+          console.warn('No se pudo cargar ni crear perfil de estudiante para:', user.uid);
         }
       } else if (studentProp) {
         setStudent(studentProp);
@@ -84,7 +69,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
         // Cargar cursos asignados
         const enrollments = await getStudentEnrollments(studentProp.id);
         setEnrolledCourses(enrollments);
-        console.log('📚 Cursos asignados:', enrollments);
+        console.log('Cursos asignados:', enrollments);
       }
 
       setLoading(false); // Siempre terminar con loading en false
@@ -389,7 +374,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
           {/* Stats Grid */}
           <div className="stats-grid">
             <div className="stat-card card">
-              <div className="stat-icon">🎮</div>
+              <div className="stat-icon">
+                <Gamepad2 size={40} strokeWidth={2} />
+              </div>
               <div className="stat-info">
                 <div className="stat-value">{stats.totalGames}</div>
                 <div className="stat-label">Juegos jugados</div>
@@ -397,7 +384,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
             </div>
 
             <div className="stat-card card">
-              <div className="stat-icon">🎯</div>
+              <div className="stat-icon">
+                <Target size={40} strokeWidth={2} />
+              </div>
               <div className="stat-info">
                 <div className="stat-value">{stats.averageScore}%</div>
                 <div className="stat-label">Promedio</div>
@@ -405,7 +394,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
             </div>
 
             <div className="stat-card card">
-              <div className="stat-icon">⭐</div>
+              <div className="stat-icon">
+                <Target size={40} strokeWidth={2} />
+              </div>
               <div className="stat-info">
                 <div className="stat-value">{stats.bestScore}%</div>
                 <div className="stat-label">Mejor puntaje</div>
@@ -413,7 +404,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
             </div>
 
             <div className="stat-card card">
-              <div className="stat-icon">✅</div>
+              <div className="stat-icon">
+                <Target size={40} strokeWidth={2} />
+              </div>
               <div className="stat-info">
                 <div className="stat-value">{stats.totalCorrect}</div>
                 <div className="stat-label">Respuestas correctas</div>
@@ -423,14 +416,19 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
 
           {/* Call to Action */}
           <button className="btn-play student-cta" onClick={onStartGame}>
-            <span className="cta-icon">🎮</span>
+            <span className="cta-icon">
+              <Gamepad2 size={24} strokeWidth={2} />
+            </span>
             <span className="cta-text">¡Jugar Ahora!</span>
           </button>
 
           {/* Mis Cursos - Quick Access */}
           <div className="courses-quick-access card">
             <div className="section-header">
-              <h3 className="section-title">📚 Mis Cursos</h3>
+              <h3 className="section-title flex items-center gap-2">
+                <BookOpen size={20} strokeWidth={2} />
+                Mis Cursos
+              </h3>
               {enrolledCourses.length > 0 && (
                 <button className="btn btn-text" onClick={handleViewMyCourses}>
                   Ver todos →
@@ -477,7 +475,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
           {/* Asignado a Mí - Quick Access */}
           <div className="assignments-quick-access card">
             <div className="section-header">
-              <h3 className="section-title">📋 Asignado a Mí</h3>
+              <h3 className="section-title flex items-center gap-2">
+                <ClipboardList size={20} strokeWidth={2} />
+                Asignado a Mí
+              </h3>
               <button className="btn btn-text" onClick={handleViewMyAssignments}>
                 Ver todos →
               </button>
@@ -495,7 +496,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
           {/* Game History */}
           {gameHistory.length > 0 ? (
             <div className="history-section card">
-              <h3 className="section-title">📜 Historial Reciente</h3>
+              <h3 className="section-title flex items-center gap-2">
+                <ScrollText size={20} strokeWidth={2} />
+                Historial Reciente
+              </h3>
               <div className="history-list">
                 {gameHistory.slice(0, 5).map((game, index) => (
                   <div key={index} className="history-item">
@@ -518,7 +522,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
             </div>
           ) : (
             <div className="empty-state card">
-              <div className="empty-icon">🎯</div>
+              <div className="empty-icon">
+                <Target size={64} strokeWidth={2} />
+              </div>
               <h3>¡Aún no has jugado!</h3>
               <p>Comienza tu primera partida y empieza a ganar puntos</p>
               <button className="btn btn-primary" onClick={onStartGame}>
@@ -528,32 +534,6 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
           )}
         </div>
       </div>
-
-      {/* Avatar Selector Modal */}
-      {showAvatarSelector && (
-        <div className="modal-overlay" onClick={() => setShowAvatarSelector(false)}>
-          <div className="modal-content avatar-selector" onClick={(e) => e.stopPropagation()}>
-            <h3 className="modal-title">Selecciona tu Avatar</h3>
-            <div className="avatars-grid">
-              {Object.entries(AVATARS).map(([id, emoji]) => (
-                <button
-                  key={id}
-                  className={`avatar-option ${(student.profile?.avatar || 'default') === id ? 'selected' : ''}`}
-                  onClick={() => handleAvatarChange(id)}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-            <button
-              className="btn btn-ghost w-full"
-              onClick={() => setShowAvatarSelector(false)}
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
     </DashboardLayout>
   );
 }

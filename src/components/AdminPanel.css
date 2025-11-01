@@ -1,6 +1,6 @@
 .admin-panel-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #09090b;
   padding: 40px 20px;
 }
 
@@ -121,13 +121,13 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
 
-/* Colored backgrounds for each card type */
-.admin-panel-container .stat-card.total { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
-.admin-panel-container .stat-card.admins { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); }
-.admin-panel-container .stat-card.teachers { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); }
-.admin-panel-container .stat-card.students { background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%); }
-.admin-panel-container .stat-card.active { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
-.admin-panel-container .stat-card.suspended { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
+/* Gray backgrounds for stat cards with status colors where appropriate */
+.admin-panel-container .stat-card.total { background: #27272a; }
+.admin-panel-container .stat-card.admins { background: #ef4444; }
+.admin-panel-container .stat-card.teachers { background: #3f3f46; }
+.admin-panel-container .stat-card.students { background: #3f3f46; }
+.admin-panel-container .stat-card.active { background: #10B981; }
+.admin-panel-container .stat-card.suspended { background: #F59E0B; }
 
 .admin-panel-container .stat-icon {
   font-size: 36px;
@@ -199,8 +199,8 @@
 
 .search-box input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #52525b;
+  box-shadow: 0 0 0 3px rgba(82, 82, 91, 0.1);
 }
 
 .filter-group {
@@ -223,7 +223,7 @@
 
 .filter-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #52525b;
 }
 
 .clear-filters-btn {
@@ -270,7 +270,7 @@
 
 .refresh-btn {
   padding: 10px 20px;
-  background: #667eea;
+  background: #27272a;
   color: white;
   border: none;
   border-radius: 8px;
@@ -281,7 +281,7 @@
 }
 
 .refresh-btn:hover {
-  background: #5568d3;
+  background: #3f3f46;
   transform: translateY(-2px);
 }
 
@@ -332,7 +332,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3f3f46;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -348,7 +348,7 @@
   display: inline-block;
   margin-left: 8px;
   padding: 2px 8px;
-  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  background: #ef4444;
   color: white;
   font-size: 10px;
   font-weight: 700;
@@ -373,7 +373,7 @@
 }
 
 .role-select:hover:not(:disabled) {
-  border-color: #667eea;
+  border-color: #52525b;
 }
 
 .role-select:disabled {
