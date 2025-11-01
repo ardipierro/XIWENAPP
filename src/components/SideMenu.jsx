@@ -7,7 +7,6 @@ import {
   FileText,
   UsersRound,
   Calendar,
-  TrendingUp,
   Dice3,
   Home,
   ClipboardList
@@ -42,8 +41,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: UsersRound, label: 'Grupos', path: '/teacher', action: 'groups' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
-        { divider: true },
-        { icon: TrendingUp, label: 'Analytics', path: '/teacher', action: 'analytics' },
       ];
     }
 
@@ -58,7 +55,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
         { divider: true },
         { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
-        { icon: TrendingUp, label: 'Analytics', path: '/teacher', action: 'analytics' },
         { icon: Users, label: 'Alumnos', path: '/teacher', action: 'users' },
       ];
     }
