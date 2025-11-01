@@ -335,6 +335,13 @@ function CoursesScreen({ onBack, user }) {
 
   return (
     <div className="courses-screen">
+      {/* Back Button */}
+      {onBack && (
+        <button onClick={onBack} className="btn btn-ghost mb-4">
+          ← Volver a Inicio
+        </button>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">

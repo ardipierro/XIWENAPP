@@ -248,7 +248,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         <div className="student-dashboard">
           <div className="dashboard-content">
             <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
-              ← Volver al Dashboard
+              ← Volver a Inicio
             </button>
             <MyCourses user={user} onSelectCourse={handleSelectCourse} />
           </div>
@@ -264,7 +264,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         <div className="student-dashboard">
           <div className="dashboard-content">
             <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
-              ← Volver al Dashboard
+              ← Volver a Inicio
             </button>
             <MyAssignments
               user={user}
@@ -284,7 +284,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         <div className="student-dashboard">
           <div className="dashboard-content">
             <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
-              ← Volver al Dashboard
+              ← Volver a Inicio
             </button>
             <StudentClassView student={student} />
           </div>

@@ -34,7 +34,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
   const getMenuItems = () => {
     if (userRole === 'admin') {
       return [
-        { icon: BarChart3, label: 'Dashboard', path: '/teacher', action: 'dashboard' },
+        { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
         { icon: Users, label: 'Usuarios', path: '/teacher', action: 'users' },
         { divider: true },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
@@ -49,7 +49,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
 
     if (['teacher', 'trial_teacher'].includes(userRole)) {
       return [
-        { icon: BarChart3, label: 'Dashboard', path: '/teacher', action: 'dashboard' },
+        { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
         { divider: true },
         { icon: Gamepad2, label: 'Ejercicios', path: '/teacher', action: 'exercises' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },

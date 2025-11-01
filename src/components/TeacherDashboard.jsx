@@ -645,7 +645,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="exercises-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Dashboard
+            ← Volver a Inicio
           </button>
           <ExerciseManager user={user} courses={courses} onPlayExercise={handlePlayExercise} />
         </div>
@@ -659,7 +659,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="content-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Dashboard
+            ← Volver a Inicio
           </button>
           <ContentManager user={user} courses={courses} />
         </div>
@@ -673,7 +673,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="groups-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Dashboard
+            ← Volver a Inicio
           </button>
           <GroupManager user={user} courses={courses} />
         </div>
@@ -687,7 +687,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="classes-management-section">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Dashboard
+            ← Volver a Inicio
           </button>
           <ClassManager user={user} courses={courses} />
         </div>
@@ -701,7 +701,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="analytics-section">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Dashboard
+            ← Volver a Inicio
           </button>
           <AnalyticsDashboard user={user} />
         </div>
@@ -715,7 +715,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="attendance-section">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Dashboard
+            ← Volver a Inicio
           </button>
           <AttendanceView teacher={user} />
         </div>
@@ -746,7 +746,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           {/* Header */}
           <div className="mb-6">
             <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-              ← Volver al Dashboard
+              ← Volver a Inicio
             </button>
             <div className="flex items-center gap-3">
               {isAdmin ? (
@@ -798,7 +798,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 <option value="all">Todos los roles</option>
                 {Object.values(ROLES).map(role => (
                   <option key={role} value={role}>
-                    {ROLE_INFO[role].icon} {ROLE_INFO[role].name}
+                    {ROLE_INFO[role].name}
                   </option>
                 ))}
               </select>
@@ -899,7 +899,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             >
                               {Object.values(ROLES).map(role => (
                                 <option key={role} value={role}>
-                                  {ROLE_INFO[role].icon} {ROLE_INFO[role].name}
+                                  {ROLE_INFO[role].name}
                                 </option>
                               ))}
                             </select>
@@ -922,14 +922,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                         <td className="courses-cell">
                           <div className="courses-cell-content">
                             <button
-                              className="assign-courses-btn"
+                              className="btn btn-xs btn-outline"
                               onClick={() => handleOpenResourceModal(userItem)}
+                              title="Asignar cursos, contenido y ejercicios"
                             >
-                              <ClipboardList size={16} strokeWidth={2} /> Asignar Recursos
+                              <ClipboardList size={14} strokeWidth={2} /> Asignar
                             </button>
                             {enrollmentCounts[userItem.id] > 0 && (
                               <span className="enrolled-count">
-                                {enrollmentCounts[userItem.id]} recurso{enrollmentCounts[userItem.id] > 1 ? 's' : ''}
+                                {enrollmentCounts[userItem.id]}
                               </span>
                             )}
                           </div>
@@ -1340,28 +1341,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="teacher-dashboard">
-          {/* Header del Dashboard */}
-          <div className="dashboard-welcome">
-            <h1 className="dashboard-title">
-              {isAdmin ? (
-                <span className="flex items-center gap-2">
-                  <Crown size={32} strokeWidth={2} />
-                  Panel de Administración
-                </span>
-              ) : (
-                'Panel del Profesor'
-              )}
-            </h1>
-            <p className="dashboard-subtitle">
-              {isAdmin
-                ? 'Gestiona todo el sistema: usuarios, cursos, juegos y configuración'
-                : 'Bienvenido, gestiona tus cursos, juegos y alumnos'
-              }
-            </p>
-          </div>
-
           <div className="dashboard-content">
-            {/* Dashboard principal - Listo para nuevas tarjetas */}
+            {/* Inicio - Listo para nuevas tarjetas */}
           </div>
       </div>
       </DashboardLayout>
