@@ -16,11 +16,7 @@
   margin: 0 0 8px 0;
 }
 
-.assignments-subtitle {
-  font-size: 16px;
-  color: var(--color-text-secondary, #6B7280);
-  margin: 0;
-}
+/* assignments-subtitle ahora usa section-subtitle de globals.css */
 
 /* Tabs */
 .assignments-tabs {
