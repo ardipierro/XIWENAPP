@@ -1,4 +1,9 @@
 import { useState, useEffect } from 'react';
+import {
+  BookOpen, Video, BookMarked, Link, FileText, CheckCircle, ListChecks,
+  Edit3, RefreshCw, Hash, Sparkles, Table, Gamepad2, Clock, Play,
+  BarChart3, TrendingUp, PartyPopper, Check
+} from 'lucide-react';
 import { getCourseProgress, getNextContent } from '../../firebase/studentProgress';
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { getCourseContents, getCourseExercises } from '../../firebase/relationships';
@@ -66,26 +71,28 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
   };
 
   const getContentIcon = (type) => {
+    const iconProps = { size: 24, strokeWidth: 2 };
     switch (type) {
-      case 'lesson': return '📖';
-      case 'video': return '🎥';
-      case 'reading': return '📚';
-      case 'link': return '🔗';
-      default: return '📄';
+      case 'lesson': return <BookOpen {...iconProps} />;
+      case 'video': return <Video {...iconProps} />;
+      case 'reading': return <BookMarked {...iconProps} />;
+      case 'link': return <Link {...iconProps} />;
+      default: return <FileText {...iconProps} />;
     }
   };
 
   const getExerciseIcon = (type) => {
+    const iconProps = { size: 32, strokeWidth: 2 };
     switch (type) {
-      case 'multiple_choice': return '✅';
-      case 'true_false': return '✓✗';
-      case 'fill_blank': return '📝';
-      case 'drag_drop': return '🔄';
-      case 'order_sentence': return '🔢';
-      case 'matching': return '🔗';
-      case 'highlight': return '✨';
-      case 'table': return '📊';
-      default: return '🎮';
+      case 'multiple_choice': return <CheckCircle {...iconProps} />;
+      case 'true_false': return <ListChecks {...iconProps} />;
+      case 'fill_blank': return <Edit3 {...iconProps} />;
+      case 'drag_drop': return <RefreshCw {...iconProps} />;
+      case 'order_sentence': return <Hash {...iconProps} />;
+      case 'matching': return <Link {...iconProps} />;
+      case 'highlight': return <Sparkles {...iconProps} />;
+      case 'table': return <Table {...iconProps} />;
+      default: return <Gamepad2 {...iconProps} />;
     }
   };
 
@@ -147,7 +154,7 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
                 className="btn-continue-course"
                 onClick={() => onPlayContent(nextContent.id)}
               >
-                ▶ Continuar: {nextContent.title}
+                <Play size={18} strokeWidth={2} className="inline-icon" /> Continuar: {nextContent.title}
               </button>
             )}
           </div>
@@ -160,19 +167,19 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
           className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
           onClick={() => setActiveTab('content')}
         >
-          📚 Contenido ({courseContent.length})
+          <BookMarked size={18} strokeWidth={2} className="inline-icon" /> Contenido ({courseContent.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'exercises' ? 'active' : ''}`}
           onClick={() => setActiveTab('exercises')}
         >
-          🎮 Ejercicios ({courseExercises.length})
+          <Gamepad2 size={18} strokeWidth={2} className="inline-icon" /> Ejercicios ({courseExercises.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'progress' ? 'active' : ''}`}
           onClick={() => setActiveTab('progress')}
         >
-          📊 Mi Progreso
+          <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> Mi Progreso
         </button>
       </div>
 
@@ -183,7 +190,9 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
           <div className="content-list">
             {courseContent.length === 0 ? (
               <div className="empty-tab">
-                <div className="empty-icon">📚</div>
+                <div className="empty-icon">
+                  <BookMarked size={64} strokeWidth={2} className="text-gray-400" />
+                </div>
                 <h3>No hay contenido disponible</h3>
                 <p>El profesor aún no ha agregado lecciones a este curso.</p>
               </div>
@@ -204,13 +213,17 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
                         <div className="content-item-meta">
                           <span className="content-type">{content.type}</span>
                           {content.duration && (
-                            <span className="content-duration">⏱ {content.duration} min</span>
+                            <span className="content-duration">
+                              <Clock size={14} strokeWidth={2} className="inline-icon" /> {content.duration} min
+                            </span>
                           )}
                         </div>
                       </div>
                       <div className="content-item-status">
                         {isCompleted ? (
-                          <span className="status-completed">✓ Completado</span>
+                          <span className="status-completed">
+                            <Check size={16} strokeWidth={2} className="inline-icon" /> Completado
+                          </span>
                         ) : (
                           <span className="status-pending">○ Pendiente</span>
                         )}
@@ -228,7 +241,9 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
           <div className="exercises-list">
             {courseExercises.length === 0 ? (
               <div className="empty-tab">
-                <div className="empty-icon">🎮</div>
+                <div className="empty-icon">
+                  <Gamepad2 size={64} strokeWidth={2} className="text-gray-400" />
+                </div>
                 <h3>No hay ejercicios disponibles</h3>
                 <p>El profesor aún no ha agregado ejercicios a este curso.</p>
               </div>
@@ -248,7 +263,9 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
                           {getExerciseIcon(exercise.type)}
                         </div>
                         {isCompleted && (
-                          <span className="completed-badge">✓</span>
+                          <span className="completed-badge">
+                            <Check size={20} strokeWidth={2} />
+                          </span>
                         )}
                       </div>
                       <h4 className="exercise-card-title">{exercise.title}</h4>
@@ -278,7 +295,9 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
           <div className="progress-stats">
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon">📚</div>
+                <div className="stat-icon">
+                  <BookMarked size={32} strokeWidth={2} />
+                </div>
                 <div className="stat-info">
                   <div className="stat-value">
                     {progress?.completedContent?.length || 0}/{courseContent.length}
@@ -288,7 +307,9 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon">🎮</div>
+                <div className="stat-icon">
+                  <Gamepad2 size={32} strokeWidth={2} />
+                </div>
                 <div className="stat-info">
                   <div className="stat-value">
                     {progress?.completedExercises?.length || 0}/{courseExercises.length}
@@ -298,7 +319,9 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon">⏱</div>
+                <div className="stat-icon">
+                  <Clock size={32} strokeWidth={2} />
+                </div>
                 <div className="stat-info">
                   <div className="stat-value">
                     {Math.round((progress?.totalTimeSpent || 0) / 60)} min
@@ -308,7 +331,9 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon">📈</div>
+                <div className="stat-icon">
+                  <TrendingUp size={32} strokeWidth={2} />
+                </div>
                 <div className="stat-info">
                   <div className="stat-value">{progress?.progress || 0}%</div>
                   <div className="stat-label">Progreso General</div>
@@ -318,7 +343,9 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
 
             {progress?.status === 'completed' ? (
               <div className="completion-message">
-                <div className="completion-icon">🎉</div>
+                <div className="completion-icon">
+                  <PartyPopper size={48} strokeWidth={2} className="text-yellow-500" />
+                </div>
                 <h3>¡Felicitaciones!</h3>
                 <p>Has completado este curso exitosamente.</p>
               </div>
