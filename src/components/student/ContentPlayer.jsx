@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import {
+  PartyPopper, Link, AlertTriangle, BookOpen, Video, BookMarked, Clock, Check
+} from 'lucide-react';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { ensureStudentProfile } from '../../firebase/firestore';
@@ -87,7 +90,7 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
         onComplete();
       }
 
-      alert('¡Lección completada! 🎉');
+      alert('¡Lección completada!');
     } catch (error) {
       console.error('Error marcando como completado:', error);
       alert('Error al marcar como completado');
@@ -178,7 +181,9 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
             {content.url ? (
               <>
                 <div className="link-info">
-                  <div className="link-icon">🔗</div>
+                  <div className="link-icon">
+                    <Link size={40} strokeWidth={2} className="text-blue-500" />
+                  </div>
                   <div>
                     <h3>Recurso externo</h3>
                     <p>Este contenido te llevará a un sitio externo</p>
@@ -238,7 +243,9 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
     return (
       <div className="content-player">
         <div className="error-container">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon">
+            <AlertTriangle size={48} strokeWidth={2} className="text-red-500" />
+          </div>
           <h2>Error</h2>
           <p>{error}</p>
           <button className="btn btn-primary" onClick={onBack}>
@@ -272,10 +279,18 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
 
         <div className="content-header-info">
           <div className="content-type-badge">
-            {content.type === 'lesson' && '📖 Lección'}
-            {content.type === 'video' && '🎥 Video'}
-            {content.type === 'reading' && '📚 Lectura'}
-            {content.type === 'link' && '🔗 Enlace'}
+            {content.type === 'lesson' && (
+              <><BookOpen size={16} strokeWidth={2} className="inline-icon" /> Lección</>
+            )}
+            {content.type === 'video' && (
+              <><Video size={16} strokeWidth={2} className="inline-icon" /> Video</>
+            )}
+            {content.type === 'reading' && (
+              <><BookMarked size={16} strokeWidth={2} className="inline-icon" /> Lectura</>
+            )}
+            {content.type === 'link' && (
+              <><Link size={16} strokeWidth={2} className="inline-icon" /> Enlace</>
+            )}
           </div>
           <h1 className="content-title">{content.title}</h1>
           <div className="content-progress-info">
@@ -283,7 +298,9 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
               Lección {currentIndex + 1} de {allContent.length}
             </span>
             {content.duration && (
-              <span>⏱ {content.duration} min</span>
+              <span>
+                <Clock size={14} strokeWidth={2} className="inline-icon" /> {content.duration} min
+              </span>
             )}
           </div>
         </div>
@@ -304,12 +321,12 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
               className="btn-mark-complete"
               onClick={handleMarkAsCompleted}
             >
-              ✓ Marcar como completado
+              <Check size={18} strokeWidth={2} className="inline-icon" /> Marcar como completado
             </button>
           )}
           {isCompleted && (
             <div className="completed-indicator">
-              ✓ Completado
+              <Check size={18} strokeWidth={2} className="inline-icon" /> Completado
             </div>
           )}
         </div>
