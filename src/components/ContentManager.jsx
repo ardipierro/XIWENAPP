@@ -224,18 +224,9 @@ function ContentManager({ user, courses = [] }) {
         </div>
       </div>
 
-      {/* Filtros y Búsqueda */}
+      {/* Filtros */}
       <div className="card mb-6">
         <div className="flex gap-3">
-          {/* Búsqueda */}
-          <input
-            type="text"
-            placeholder="Buscar por título o contenido..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input flex-1"
-          />
-
           {/* Filtro por tipo */}
           <select
             value={filter}

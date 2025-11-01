@@ -356,16 +356,9 @@ function CoursesScreen({ onBack, user }) {
         </button>
       </div>
 
-      {/* Search and View Toggle */}
+      {/* View Toggle */}
       <div className="card mb-6">
         <div className="flex gap-3">
-          <input
-            type="text"
-            className="input flex-1"
-            placeholder="Buscar cursos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
           <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             <button
               className={`px-4 py-2 rounded-md transition-all ${

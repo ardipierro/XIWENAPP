@@ -183,18 +183,9 @@ function GroupManager({ user, courses }) {
         </button>
       </div>
 
-      {/* Search and Toggle */}
+      {/* Toggle Vista */}
       <div className="card mb-6">
         <div className="flex gap-3">
-          <input
-            type="text"
-            placeholder="Buscar grupos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input flex-1"
-          />
-
-          {/* Toggle Vista */}
           <div className="view-toggle">
             <button
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}

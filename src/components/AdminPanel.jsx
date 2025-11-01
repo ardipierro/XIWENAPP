@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Crown, Users, UserCog, GraduationCap, CheckCircle, Ban,
-  Search, RefreshCw, AlertTriangle, Clock, Settings, X
+  RefreshCw, AlertTriangle, Clock, Settings, X
 } from 'lucide-react';
 import { getAllUsers, updateUserRole, updateUserStatus } from '../firebase/firestore';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
@@ -248,19 +248,6 @@ function AdminPanel({ user, userRole, onBack }) {
       {/* Filtros */}
       <div className="card mb-6">
         <div className="flex gap-3 mb-3">
-          <div className="search-box flex-1">
-            <span className="search-icon">
-              <Search size={18} strokeWidth={2} />
-            </span>
-            <input
-              type="text"
-              placeholder="Buscar por nombre o email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-            />
-          </div>
-
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}

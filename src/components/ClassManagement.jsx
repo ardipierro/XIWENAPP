@@ -400,13 +400,6 @@ function ClassManagement({ user }) {
         <div className="cm-list">
           {/* Filters */}
           <div className="cm-filters">
-            <input
-              type="text"
-              placeholder="Buscar por tema o grupo..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="filter-input"
-            />
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
