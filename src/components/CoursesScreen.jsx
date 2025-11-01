@@ -336,13 +336,7 @@ function CoursesScreen({ onBack, user }) {
   return (
     <div className="courses-screen">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Gestión de Cursos</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {courses.length} curso{courses.length !== 1 ? 's' : ''} disponible{courses.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+      <div className="flex justify-end items-center mb-6">
         <button
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}

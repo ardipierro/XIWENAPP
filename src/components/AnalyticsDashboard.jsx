@@ -64,13 +64,6 @@ function AnalyticsDashboard({ user }) {
 
   return (
     <div className="analytics-dashboard">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Análisis y Estadísticas</h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Visualización de datos y métricas de rendimiento
-        </p>
-      </div>
-
       {/* Activity by Day */}
       <div className="card mb-6">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">

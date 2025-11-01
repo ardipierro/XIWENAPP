@@ -169,13 +169,7 @@ function GroupManager({ user, courses }) {
   return (
     <div className="group-manager">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Gestión de Grupos</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {groups.length} grupo{groups.length !== 1 ? 's' : ''} creado{groups.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+      <div className="flex justify-end items-center mb-6">
         <button
           onClick={() => setShowCreateModal(true)}
           className="btn btn-primary"
