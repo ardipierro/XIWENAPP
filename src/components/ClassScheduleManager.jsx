@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
+  Calendar, CalendarDays, CheckCircle, AlertTriangle, RefreshCw,
+  Repeat, Trash2, Clock, Video, CreditCard, BarChart3, AlarmClock,
+  MapPin, Loader, X, Info
+} from 'lucide-react';
+import {
   createScheduledClass,
   createScheduledClassMultipleDays,
   getGroupScheduledClasses,
@@ -59,8 +64,8 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
       // Verificar y auto-renovar sesiones si es necesario
       const autoRenewResult = await checkAndAutoRenewSessions(group.id);
       if (autoRenewResult.renewed > 0) {
-        console.log(`🔄 Auto-renovadas ${autoRenewResult.renewed} sesiones`);
-        showMessage('success', `🔄 ${autoRenewResult.renewed} sesiones auto-generadas`);
+        console.log(`Auto-renovadas ${autoRenewResult.renewed} sesiones`);
+        showMessage('success', `${autoRenewResult.renewed} sesiones auto-generadas`);
       }
 
       const schedulesData = await getGroupScheduledClasses(group.id);
@@ -122,7 +127,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
       });
 
       if (result.success) {
-        showMessage('success', `✅ ${result.count} horario(s) creado(s) exitosamente`);
+        showMessage('success', `${result.count} horario(s) creado(s) exitosamente`);
 
         // Generar sesiones para cada horario creado
         let totalSessions = 0;
@@ -145,7 +150,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
         }
 
         if (totalSessions > 0) {
-          showMessage('success', `✅ ${totalSessions} sesiones generadas en total`);
+          showMessage('success', `${totalSessions} sesiones generadas en total`);
         }
 
         setShowModal(false);
@@ -203,7 +208,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
       );
 
       if (result.success) {
-        showMessage('success', `✅ ${result.created} nuevas sesiones generadas`);
+        showMessage('success', `${result.created} nuevas sesiones generadas`);
       } else {
         showMessage('error', 'Error al generar sesiones');
       }
@@ -246,7 +251,9 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
       {/* Header */}
       <div className="schedule-header">
         <div>
-          <h3 className="schedule-title">📅 Horarios de Clases</h3>
+          <h3 className="schedule-title flex items-center gap-2">
+            <Calendar size={24} strokeWidth={2} /> Horarios de Clases
+          </h3>
           <p className="schedule-subtitle">
             Grupo: {group.name}
           </p>
@@ -262,14 +269,20 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
       {/* Message */}
       {message.text && (
         <div className={`schedule-message ${message.type}`}>
-          {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+          {message.type === 'success' ? (
+            <CheckCircle size={18} strokeWidth={2} className="inline-icon" />
+          ) : (
+            <AlertTriangle size={18} strokeWidth={2} className="inline-icon" />
+          )} {message.text}
         </div>
       )}
 
       {/* Schedules List */}
       {schedules.length === 0 ? (
         <div className="empty-schedules">
-          <div className="empty-icon">🗓️</div>
+          <div className="empty-icon">
+            <CalendarDays size={64} strokeWidth={2} />
+          </div>
           <h4 className="empty-title">No hay horarios configurados</h4>
           <p className="empty-text">
             Agrega un horario recurrente para que se generen las sesiones automáticamente
@@ -292,7 +305,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                     </div>
                     {schedule.autoRenew && (
                       <div className="auto-renew-badge" title="Auto-renovación activa">
-                        ♻️
+                        <Repeat size={14} strokeWidth={2} />
                       </div>
                     )}
                   </div>
@@ -303,7 +316,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                         className="btn-icon btn-primary-action"
                         title="¡Generar más sesiones!"
                       >
-                        🔄
+                        <RefreshCw size={16} strokeWidth={2} />
                       </button>
                     )}
                     {!isLowSessions && !hasNoSessions && (
@@ -312,7 +325,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                         className="btn-icon"
                         title="Generar más sesiones"
                       >
-                        🔄
+                        <RefreshCw size={16} strokeWidth={2} />
                       </button>
                     )}
                     <button
@@ -320,14 +333,16 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                       className="btn-icon btn-danger"
                       title="Eliminar horario"
                     >
-                      🗑️
+                      <Trash2 size={16} strokeWidth={2} />
                     </button>
                   </div>
                 </div>
 
                 <div className="schedule-card-body">
                   <div className="schedule-time">
-                    <span className="time-icon">🕒</span>
+                    <span className="time-icon">
+                      <Clock size={16} strokeWidth={2} />
+                    </span>
                     <span className="time-text">
                       {schedule.startTime} - {schedule.endTime}
                     </span>
@@ -335,7 +350,9 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
 
                   {schedule.meetingLink && (
                     <div className="schedule-link">
-                      <span className="link-icon">🎥</span>
+                      <span className="link-icon">
+                        <Video size={16} strokeWidth={2} />
+                      </span>
                       <a
                         href={schedule.meetingLink}
                         target="_blank"
@@ -348,7 +365,9 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                   )}
 
                   <div className="schedule-cost">
-                    <span className="cost-icon">💳</span>
+                    <span className="cost-icon">
+                      <CreditCard size={16} strokeWidth={2} />
+                    </span>
                     <span className="cost-text">
                       {schedule.creditCost} crédito{schedule.creditCost !== 1 ? 's' : ''} por clase
                     </span>
@@ -358,20 +377,26 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                   {stats.total > 0 && (
                     <div className="schedule-stats">
                       <div className="stats-row">
-                        <span className="stats-label">📊 Sesiones:</span>
+                        <span className="stats-label">
+                          <BarChart3 size={16} strokeWidth={2} className="inline-icon" /> Sesiones:
+                        </span>
                         <span className="stats-value">
                           {stats.completed || 0} realizadas | {stats.upcoming || 0} pendientes
                         </span>
                       </div>
                       {hasNoSessions && (
                         <div className="stats-warning critical">
-                          <span className="warning-icon">⚠️</span>
+                          <span className="warning-icon">
+                            <AlertTriangle size={16} strokeWidth={2} />
+                          </span>
                           <span className="warning-text">No hay sesiones programadas</span>
                         </div>
                       )}
                       {!hasNoSessions && isLowSessions && (
                         <div className="stats-warning">
-                          <span className="warning-icon">⏰</span>
+                          <span className="warning-icon">
+                            <AlarmClock size={16} strokeWidth={2} />
+                          </span>
                           <span className="warning-text">Quedan pocas sesiones</span>
                         </div>
                       )}
@@ -381,7 +406,9 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                   {/* Próxima sesión */}
                   {nextSession ? (
                     <div className="schedule-next">
-                      <span className="next-icon">📍</span>
+                      <span className="next-icon">
+                        <MapPin size={16} strokeWidth={2} />
+                      </span>
                       <span className="next-text">
                         Próxima: {nextSession.date?.toDate ?
                           nextSession.date.toDate().toLocaleDateString('es-ES', {
@@ -397,7 +424,9 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                     </div>
                   ) : (
                     <div className="schedule-next">
-                      <span className="next-icon">⚠️</span>
+                      <span className="next-icon">
+                        <AlertTriangle size={16} strokeWidth={2} />
+                      </span>
                       <span className="next-text">No hay sesiones programadas</span>
                     </div>
                   )}
@@ -413,13 +442,15 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
         <div className="modal-overlay" onClick={() => !processing && setShowModal(false)}>
           <div className="modal-content schedule-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="modal-title">📅 Nuevo Horario de Clase</h3>
+              <h3 className="modal-title flex items-center gap-2">
+                <Calendar size={24} strokeWidth={2} /> Nuevo Horario de Clase
+              </h3>
               <button
                 className="modal-close"
                 onClick={() => setShowModal(false)}
                 disabled={processing}
               >
-                ✕
+                <X size={18} strokeWidth={2} />
               </button>
             </div>
 
@@ -588,7 +619,9 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                       className="checkbox-input"
                     />
                     <div className="checkbox-content">
-                      <span className="checkbox-title">♻️ Auto-renovar sesiones</span>
+                      <span className="checkbox-title">
+                        <Repeat size={16} strokeWidth={2} className="inline-icon" /> Auto-renovar sesiones
+                      </span>
                       <span className="checkbox-description">
                         Genera automáticamente {formData.autoRenewWeeks} semanas más cuando queden menos de 3 sesiones
                       </span>
@@ -597,7 +630,9 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                 </div>
 
                 <div className="info-box-small">
-                  <strong>ℹ️ Auto-generación de sesiones:</strong>
+                  <strong>
+                    <Info size={16} strokeWidth={2} className="inline-icon" /> Auto-generación de sesiones:
+                  </strong>
                   <p>Al crear este horario, se generarán automáticamente las sesiones de las próximas {formData.weeksToGenerate} semanas.{formData.autoRenew ? ' La auto-renovación mantendrá las sesiones actualizadas automáticamente.' : ' Podrás generar más cuando lo necesites.'}</p>
                 </div>
               </div>
@@ -616,7 +651,11 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                   className="btn btn-primary"
                   disabled={processing}
                 >
-                  {processing ? '⏳ Creando...' : '✅ Crear Horario'}
+                  {processing ? (
+                    <><Loader size={16} strokeWidth={2} className="inline-icon" /> Creando...</>
+                  ) : (
+                    <><CheckCircle size={16} strokeWidth={2} className="inline-icon" /> Crear Horario</>
+                  )}
                 </button>
               </div>
             </form>
