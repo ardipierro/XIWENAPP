@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react';
+import {
+  Search, BookOpen, FileText, Gamepad2, List, Trash2, Clock,
+  Plus, Users, Image as ImageIcon
+} from 'lucide-react';
 import { loadCourses, createCourse, updateCourse, deleteCourse, loadStudents } from '../firebase/firestore';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
@@ -353,7 +357,7 @@ function CoursesScreen({ onBack, user }) {
           <input
             type="text"
             className="input flex-1"
-            placeholder="🔍 Buscar cursos..."
+            placeholder="Buscar cursos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -387,7 +391,9 @@ function CoursesScreen({ onBack, user }) {
       {/* Courses Display */}
       {filteredCourses.length === 0 ? (
         <div className="card text-center py-12">
-          <div className="text-6xl mb-4">📚</div>
+          <div className="text-6xl mb-4">
+            <BookOpen size={64} strokeWidth={2} />
+          </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {searchTerm ? 'No se encontraron cursos' : 'No hay cursos creados'}
           </h3>
@@ -420,7 +426,9 @@ function CoursesScreen({ onBack, user }) {
                 </div>
               ) : (
                 <div className="w-full h-32 mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                  <span className="text-4xl">📚</span>
+                  <span className="text-4xl">
+                    <BookOpen size={40} strokeWidth={2} />
+                  </span>
                 </div>
               )}
 
@@ -443,8 +451,12 @@ function CoursesScreen({ onBack, user }) {
 
               {/* Stats */}
               <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
-                <span>📄 {course.contentCount || 0}</span>
-                <span>🎮 {course.exercisesCount || 0}</span>
+                <span className="flex items-center gap-1">
+                  <FileText size={16} strokeWidth={2} /> {course.contentCount || 0}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0}
+                </span>
               </div>
 
               {/* Actions */}
@@ -461,7 +473,7 @@ function CoursesScreen({ onBack, user }) {
                   onClick={() => handleDelete(course.id)}
                   title="Eliminar curso"
                 >
-                  🗑️
+<Trash2 size={16} strokeWidth={2} />
                 </button>
               </div>
             </div>
@@ -488,7 +500,9 @@ function CoursesScreen({ onBack, user }) {
                   </div>
                 ) : (
                   <div className="w-24 h-24 flex-shrink-0 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                    <span className="text-3xl">📚</span>
+                    <span className="text-3xl">
+                      <BookOpen size={32} strokeWidth={2} />
+                    </span>
                   </div>
                 )}
 
@@ -513,8 +527,12 @@ function CoursesScreen({ onBack, user }) {
                   <div className="flex items-center justify-between gap-4">
                     {/* Stats */}
                     <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                      <span>📄 {course.contentCount || 0} contenido{course.contentCount !== 1 ? 's' : ''}</span>
-                      <span>🎮 {course.exercisesCount || 0} ejercicio{course.exercisesCount !== 1 ? 's' : ''}</span>
+                      <span className="flex items-center gap-1">
+                        <FileText size={16} strokeWidth={2} /> {course.contentCount || 0} contenido{course.contentCount !== 1 ? 's' : ''}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0} ejercicio{course.exercisesCount !== 1 ? 's' : ''}
+                      </span>
                     </div>
 
                     {/* Actions */}
@@ -531,7 +549,7 @@ function CoursesScreen({ onBack, user }) {
                         onClick={() => handleDelete(course.id)}
                         title="Eliminar curso"
                       >
-                        🗑️
+      <Trash2 size={16} strokeWidth={2} />
                       </button>
                     </div>
                   </div>
@@ -597,7 +615,7 @@ function CoursesScreen({ onBack, user }) {
                     <div className="mb-3">
                       <img src={formData.imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
                       <button type="button" className="btn btn-outline w-full" onClick={handleRemoveImage}>
-                        🗑️ Eliminar Imagen
+      <Trash2 size={16} strokeWidth={2} /> Eliminar Imagen
                       </button>
                     </div>
                   ) : (
@@ -661,7 +679,7 @@ function CoursesScreen({ onBack, user }) {
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
-                  📄 Contenidos ({courseContents.length})
+<FileText size={18} strokeWidth={2} /> Contenidos ({courseContents.length})
                 </button>
                 <button
                   onClick={() => setActiveModalTab('exercises')}
@@ -671,7 +689,7 @@ function CoursesScreen({ onBack, user }) {
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
-                  🎮 Ejercicios ({courseExercises.length})
+<Gamepad2 size={18} strokeWidth={2} /> Ejercicios ({courseExercises.length})
                 </button>
                 <button
                   onClick={() => setActiveModalTab('students')}
@@ -681,7 +699,7 @@ function CoursesScreen({ onBack, user }) {
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
-                  👥 Estudiantes ({courseStudents.length})
+<Users size={18} strokeWidth={2} /> Estudiantes ({courseStudents.length})
                 </button>
               </div>
             </div>
@@ -735,7 +753,7 @@ function CoursesScreen({ onBack, user }) {
                           <div className="mb-3">
                             <img src={formData.imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
                             <button type="button" className="btn btn-outline w-full" onClick={handleRemoveImage}>
-                              🗑️ Eliminar Imagen
+            <Trash2 size={16} strokeWidth={2} /> Eliminar Imagen
                             </button>
                           </div>
                         ) : (
@@ -747,7 +765,11 @@ function CoursesScreen({ onBack, user }) {
                             disabled={uploadingImage}
                           />
                         )}
-                        {uploadingImage && <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">⏳ Subiendo imagen...</p>}
+                        {uploadingImage && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
+                            <Clock size={14} strokeWidth={2} /> Subiendo imagen...
+                          </p>
+                        )}
                         <p className="text-sm text-gray-500 mt-1">Máximo 5MB (JPG, PNG, GIF, WEBP)</p>
                       </div>
 
@@ -788,7 +810,7 @@ function CoursesScreen({ onBack, user }) {
 
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                         <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                          ➕ Agregar Contenido
+<Plus size={16} strokeWidth={2} /> Agregar Contenido
                         </h4>
                         {availableContents.filter(c => !courseContents.some(cc => cc.id === c.id)).length === 0 ? (
                           <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los contenidos ya están asignados</p>
@@ -849,7 +871,7 @@ function CoursesScreen({ onBack, user }) {
 
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                         <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                          ➕ Agregar Ejercicio
+<Plus size={16} strokeWidth={2} /> Agregar Ejercicio
                         </h4>
                         {availableExercises.filter(e => !courseExercises.some(ce => ce.id === e.id)).length === 0 ? (
                           <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los ejercicios ya están asignados</p>
@@ -910,7 +932,7 @@ function CoursesScreen({ onBack, user }) {
 
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                         <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                          ➕ Asignar Estudiantes
+<Plus size={16} strokeWidth={2} /> Asignar Estudiantes
                         </h4>
                         {allStudents.filter(s => !courseStudents.some(cs => cs.id === s.id)).length === 0 ? (
                           <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los estudiantes ya están asignados</p>
