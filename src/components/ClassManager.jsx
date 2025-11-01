@@ -716,7 +716,7 @@ function ClassManager({ user, courses }) {
                           setShowDetailsModal(false);
                         }
                       }}
-                      className="btn btn-sm btn-danger"
+                      className="btn btn-danger"
                     >
                       <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
                     </button>
@@ -982,7 +982,7 @@ function ClassManager({ user, courses }) {
                       <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg mb-4">
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="font-semibold text-gray-900 dark:text-gray-100">Instancias Próximas</h4>
-                          <button onClick={() => handleGenerateInstances(selectedClass.id)} className="btn btn-sm btn-primary">
+                          <button onClick={() => handleGenerateInstances(selectedClass.id)} className="btn btn-primary">
                             + Generar Más
                           </button>
                         </div>
@@ -1073,7 +1073,7 @@ function ClassManager({ user, courses }) {
                                 </div>
                                 <button
                                   onClick={() => handleUnassignGroup(group.id)}
-                                  className="btn btn-sm btn-danger"
+                                  className="btn btn-danger"
                                 >
                                   Remover
                                 </button>
@@ -1119,7 +1119,7 @@ function ClassManager({ user, courses }) {
                                 </div>
                                 <button
                                   onClick={() => handleUnassignStudent(student.id)}
-                                  className="btn btn-sm btn-danger"
+                                  className="btn btn-danger"
                                 >
                                   Remover
                                 </button>
