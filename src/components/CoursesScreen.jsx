@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Search, BookOpen, FileText, Gamepad2, List, Trash2, Clock,
-  Plus, Users, Image as ImageIcon
+  Plus, Users, Image as ImageIcon, Settings, Info
 } from 'lucide-react';
 import { loadCourses, createCourse, updateCourse, deleteCourse, loadStudents } from '../firebase/firestore';
 import { getContentByTeacher } from '../firebase/content';
@@ -419,10 +419,8 @@ function CoursesScreen({ onBack, user }) {
                   />
                 </div>
               ) : (
-                <div className="w-full h-32 mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                  <span className="text-4xl">
-                    <BookOpen size={40} strokeWidth={2} />
-                  </span>
+                <div className="w-full h-32 mb-2 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <BookOpen size={40} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
                 </div>
               )}
 
@@ -454,22 +452,13 @@ function CoursesScreen({ onBack, user }) {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
-                <button
-                  className="btn btn-primary flex-1"
-                  onClick={() => handleOpenCourseModal(course, 'content')}
-                  title="Gestionar curso completo"
-                >
-                  📋 Gestionar
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleDelete(course.id)}
-                  title="Eliminar curso"
-                >
-<Trash2 size={16} strokeWidth={2} />
-                </button>
-              </div>
+              <button
+                className="btn btn-primary w-full"
+                onClick={() => handleOpenCourseModal(course, 'content')}
+                title="Gestionar curso completo"
+              >
+                <Settings size={16} strokeWidth={2} className="inline-icon" /> Gestionar
+              </button>
             </div>
           ))}
         </div>
@@ -493,10 +482,8 @@ function CoursesScreen({ onBack, user }) {
                     />
                   </div>
                 ) : (
-                  <div className="w-24 h-24 flex-shrink-0 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                    <span className="text-3xl">
-                      <BookOpen size={32} strokeWidth={2} />
-                    </span>
+                  <div className="w-24 h-24 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <BookOpen size={32} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
                   </div>
                 )}
 
@@ -530,22 +517,13 @@ function CoursesScreen({ onBack, user }) {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2 flex-shrink-0">
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handleOpenCourseModal(course, 'content')}
-                        title="Gestionar curso completo"
-                      >
-                        📋 Gestionar
-                      </button>
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => handleDelete(course.id)}
-                        title="Eliminar curso"
-                      >
-      <Trash2 size={16} strokeWidth={2} />
-                      </button>
-                    </div>
+                    <button
+                      className="btn btn-primary flex-shrink-0"
+                      onClick={() => handleOpenCourseModal(course, 'content')}
+                      title="Gestionar curso completo"
+                    >
+                      <Settings size={16} strokeWidth={2} className="inline-icon" /> Gestionar
+                    </button>
                   </div>
                 </div>
               </div>
@@ -663,7 +641,7 @@ function CoursesScreen({ onBack, user }) {
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
-                  📝 Información
+                  <Info size={18} strokeWidth={2} className="inline-icon" /> Información
                 </button>
                 <button
                   onClick={() => setActiveModalTab('content')}
@@ -767,9 +745,27 @@ function CoursesScreen({ onBack, user }) {
                         <p className="text-sm text-gray-500 mt-1">Máximo 5MB (JPG, PNG, GIF, WEBP)</p>
                       </div>
 
-                      <button type="submit" className="btn btn-primary w-full" disabled={uploadingImage}>
-                        {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
-                      </button>
+                      <div className="flex flex-col gap-3">
+                        <button type="submit" className="btn btn-primary w-full" disabled={uploadingImage}>
+                          {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
+                        </button>
+
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Zona de peligro</p>
+                          <button
+                            type="button"
+                            className="btn btn-danger w-full"
+                            onClick={() => {
+                              if (window.confirm('¿Estás seguro de eliminar este curso? Esta acción no se puede deshacer.')) {
+                                handleDelete(selectedCourse.id);
+                                handleCloseCourseModal();
+                              }
+                            }}
+                          >
+                            <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Curso
+                          </button>
+                        </div>
+                      </div>
                     </form>
                   )}
 
