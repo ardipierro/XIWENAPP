@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Check, X, PartyPopper, Frown } from 'lucide-react';
 import './MultipleChoiceExercise.css';
 
 function MultipleChoiceExercise({ questions, onComplete, studentName }) {
@@ -128,10 +129,14 @@ function MultipleChoiceExercise({ questions, onComplete, studentName }) {
               </span>
               <span className="option-text">{option}</span>
               {isAnswered && index === currentQuestion.correctAnswer && (
-                <span className="check-icon">✓</span>
+                <span className="check-icon">
+                  <Check size={20} strokeWidth={2} />
+                </span>
               )}
               {isAnswered && selectedAnswer === index && index !== currentQuestion.correctAnswer && (
-                <span className="cross-icon">✗</span>
+                <span className="cross-icon">
+                  <X size={20} strokeWidth={2} />
+                </span>
               )}
             </button>
           ))}
@@ -142,12 +147,16 @@ function MultipleChoiceExercise({ questions, onComplete, studentName }) {
           <div className={`feedback ${selectedAnswer === currentQuestion.correctAnswer ? 'correct' : 'incorrect'}`}>
             {selectedAnswer === currentQuestion.correctAnswer ? (
               <div className="feedback-content">
-                <span className="feedback-icon">🎉</span>
+                <span className="feedback-icon">
+                  <PartyPopper size={24} strokeWidth={2} />
+                </span>
                 <span className="feedback-text">¡Correcto! Bien hecho.</span>
               </div>
             ) : (
               <div className="feedback-content">
-                <span className="feedback-icon">😕</span>
+                <span className="feedback-icon">
+                  <Frown size={24} strokeWidth={2} />
+                </span>
                 <span className="feedback-text">
                   Incorrecto. La respuesta correcta era: {currentQuestion.options[currentQuestion.correctAnswer]}
                 </span>
