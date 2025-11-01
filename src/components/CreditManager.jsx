@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
+  CreditCard, ShoppingCart, Minus, Calendar, CheckCircle, AlertTriangle,
+  BarChart3, TrendingUp, Plus, FileText, Edit, Save, ClipboardList, X, Loader
+} from 'lucide-react';
+import {
   getUserCredits,
   addCredits,
   deductCredits,
@@ -144,15 +148,16 @@ function CreditManager({ userId, currentUser, onUpdate }) {
   };
 
   const getTransactionIcon = (type) => {
+    const iconProps = { size: 20, strokeWidth: 2 };
     switch (type) {
       case 'purchase':
-        return '💰';
+        return <ShoppingCart {...iconProps} />;
       case 'deduction':
-        return '➖';
+        return <Minus {...iconProps} />;
       case 'class':
-        return '📅';
+        return <Calendar {...iconProps} />;
       default:
-        return '💳';
+        return <CreditCard {...iconProps} />;
     }
   };
 
@@ -183,14 +188,20 @@ function CreditManager({ userId, currentUser, onUpdate }) {
       {/* Message */}
       {message.text && (
         <div className={`credit-message ${message.type}`}>
-          {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+          {message.type === 'success' ? (
+            <CheckCircle size={18} strokeWidth={2} className="inline-icon" />
+          ) : (
+            <AlertTriangle size={18} strokeWidth={2} className="inline-icon" />
+          )} {message.text}
         </div>
       )}
 
       {/* Stats Cards */}
       <div className="credit-stats-grid">
         <div className="credit-stat-card available">
-          <div className="stat-icon">💳</div>
+          <div className="stat-icon">
+            <CreditCard size={32} strokeWidth={2} />
+          </div>
           <div className="stat-content">
             <div className="stat-value">{stats.availableCredits}</div>
             <div className="stat-label">Créditos Disponibles</div>
@@ -198,7 +209,9 @@ function CreditManager({ userId, currentUser, onUpdate }) {
         </div>
 
         <div className="credit-stat-card purchased">
-          <div className="stat-icon">💰</div>
+          <div className="stat-icon">
+            <ShoppingCart size={32} strokeWidth={2} />
+          </div>
           <div className="stat-content">
             <div className="stat-value">{stats.totalPurchased}</div>
             <div className="stat-label">Total Comprados</div>
@@ -206,7 +219,9 @@ function CreditManager({ userId, currentUser, onUpdate }) {
         </div>
 
         <div className="credit-stat-card used">
-          <div className="stat-icon">📊</div>
+          <div className="stat-icon">
+            <BarChart3 size={32} strokeWidth={2} />
+          </div>
           <div className="stat-content">
             <div className="stat-value">{stats.totalUsed}</div>
             <div className="stat-label">Total Usados</div>
@@ -214,7 +229,9 @@ function CreditManager({ userId, currentUser, onUpdate }) {
         </div>
 
         <div className="credit-stat-card usage">
-          <div className="stat-icon">📈</div>
+          <div className="stat-icon">
+            <TrendingUp size={32} strokeWidth={2} />
+          </div>
           <div className="stat-content">
             <div className="stat-value">{stats.usagePercentage}%</div>
             <div className="stat-label">Uso</div>
@@ -228,26 +245,28 @@ function CreditManager({ userId, currentUser, onUpdate }) {
           className="btn btn-primary"
           onClick={() => handleOpenModal('add')}
         >
-          ➕ Agregar Créditos
+          <Plus size={18} strokeWidth={2} className="inline-icon" /> Agregar Créditos
         </button>
         <button
           className="btn btn-secondary"
           onClick={() => handleOpenModal('deduct')}
         >
-          ➖ Quitar Créditos
+          <Minus size={18} strokeWidth={2} className="inline-icon" /> Quitar Créditos
         </button>
       </div>
 
       {/* Notes */}
       <div className="credit-notes-section">
         <div className="notes-header">
-          <h3 className="notes-title">📝 Notas</h3>
+          <h3 className="notes-title flex items-center gap-2">
+            <FileText size={20} strokeWidth={2} /> Notas
+          </h3>
           {!editingNotes ? (
             <button
               className="btn btn-ghost btn-sm"
               onClick={() => setEditingNotes(true)}
             >
-              ✏️ Editar
+              <Edit size={16} strokeWidth={2} className="inline-icon" /> Editar
             </button>
           ) : (
             <div className="btn-group-sm">
@@ -264,7 +283,7 @@ function CreditManager({ userId, currentUser, onUpdate }) {
                 className="btn btn-primary btn-sm"
                 onClick={handleSaveNotes}
               >
-                💾 Guardar
+                <Save size={16} strokeWidth={2} className="inline-icon" /> Guardar
               </button>
             </div>
           )}
@@ -286,7 +305,9 @@ function CreditManager({ userId, currentUser, onUpdate }) {
 
       {/* Transaction History */}
       <div className="transactions-section">
-        <h3 className="section-title">📋 Historial de Transacciones</h3>
+        <h3 className="section-title flex items-center gap-2">
+          <ClipboardList size={20} strokeWidth={2} /> Historial de Transacciones
+        </h3>
 
         {transactions.length === 0 ? (
           <div className="empty-transactions">
@@ -331,15 +352,19 @@ function CreditManager({ userId, currentUser, onUpdate }) {
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content credit-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">
-                {modalType === 'add' ? '➕ Agregar Créditos' : '➖ Quitar Créditos'}
+              <h2 className="modal-title flex items-center gap-2">
+                {modalType === 'add' ? (
+                  <><Plus size={20} strokeWidth={2} /> Agregar Créditos</>
+                ) : (
+                  <><Minus size={20} strokeWidth={2} /> Quitar Créditos</>
+                )}
               </h2>
               <button
                 className="modal-close"
                 onClick={handleCloseModal}
                 disabled={processing}
               >
-                ✕
+                <X size={18} strokeWidth={2} />
               </button>
             </div>
 
@@ -373,8 +398,8 @@ function CreditManager({ userId, currentUser, onUpdate }) {
                 </div>
 
                 {modalType === 'deduct' && stats.availableCredits < parseInt(modalForm.amount || 0) && (
-                  <div className="warning-message">
-                    ⚠️ El usuario no tiene suficientes créditos disponibles
+                  <div className="warning-message flex items-center gap-2">
+                    <AlertTriangle size={18} strokeWidth={2} /> El usuario no tiene suficientes créditos disponibles
                   </div>
                 )}
               </div>
@@ -393,7 +418,15 @@ function CreditManager({ userId, currentUser, onUpdate }) {
                   className="btn btn-primary"
                   disabled={processing}
                 >
-                  {processing ? '⏳ Procesando...' : (modalType === 'add' ? '✅ Agregar' : '✅ Quitar')}
+                  {processing ? (
+                    <><Loader size={18} strokeWidth={2} className="inline-icon animate-spin" /> Procesando...</>
+                  ) : (
+                    modalType === 'add' ? (
+                      <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Agregar</>
+                    ) : (
+                      <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Quitar</>
+                    )
+                  )}
                 </button>
               </div>
             </form>
