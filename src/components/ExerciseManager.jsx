@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, CheckCircle, AlertTriangle, Calendar } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, CheckCircle, AlertTriangle, Calendar, FileText, BookMarked, BarChart3 } from 'lucide-react';
 import { getExercisesByTeacher, createExercise, updateExercise, getExerciseById, deleteExercise } from '../firebase/exercises';
 import {
   updateExerciseCourses,
@@ -321,7 +321,9 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       {/* Lista de Ejercicios */}
       {filteredExercises.length === 0 ? (
         <div className="card text-center py-12">
-          <div className="text-6xl mb-4">📝</div>
+          <div className="empty-icon mb-4">
+            <FileText size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500 mx-auto" />
+          </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             {exercises.length === 0 ? 'No hay ejercicios creados' : 'No se encontraron ejercicios'}
           </h3>
@@ -370,7 +372,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                       <div className="flex flex-wrap gap-1">
                         {exerciseCourses[exercise.id].map(course => (
                           <span key={course.id} className="badge badge-success">
-                            📚 {course.name}
+                            <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
                           </span>
                         ))}
                       </div>
@@ -709,8 +711,8 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                     Preguntas (Formato: 1 pregunta + 4 opciones por línea)
                   </label>
                   <div className="mb-2 p-3 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded">
-                    <p className="text-sm text-gray-800 dark:text-gray-200 mb-2">
-                      📝 <strong>Formato:</strong>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                      <FileText size={18} strokeWidth={2} className="inline-icon" /> <strong>Formato:</strong>
                     </p>
                     <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1 ml-4">
                       <li>• Línea 1: Pregunta</li>
@@ -734,8 +736,8 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                     placeholder="Ingresa las preguntas en el formato indicado..."
                   />
                   {questionsText.trim() && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      📊 {parseQuestions(questionsText).length} pregunta(s) detectada(s)
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
+                      <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> {parseQuestions(questionsText).length} pregunta(s) detectada(s)
                     </p>
                   )}
                 </div>
