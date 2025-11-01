@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react';
+import {
+  BookOpen, Video, BookMarked, Link, FileText, CheckCircle, ListChecks,
+  Edit3, RefreshCw, Hash, Sparkles, Table, Gamepad2, AlertTriangle, Clock, Play
+} from 'lucide-react';
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { getStudentAssignments } from '../../firebase/relationships';
 import './MyAssignments.css';
@@ -77,26 +81,28 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
   };
 
   const getContentIcon = (type) => {
+    const iconProps = { size: 32, strokeWidth: 2 };
     switch (type) {
-      case 'lesson': return '📖';
-      case 'video': return '🎥';
-      case 'reading': return '📚';
-      case 'link': return '🔗';
-      default: return '📄';
+      case 'lesson': return <BookOpen {...iconProps} />;
+      case 'video': return <Video {...iconProps} />;
+      case 'reading': return <BookMarked {...iconProps} />;
+      case 'link': return <Link {...iconProps} />;
+      default: return <FileText {...iconProps} />;
     }
   };
 
   const getExerciseIcon = (type) => {
+    const iconProps = { size: 32, strokeWidth: 2 };
     switch (type) {
-      case 'multiple_choice': return '✅';
-      case 'true_false': return '✓✗';
-      case 'fill_blank': return '📝';
-      case 'drag_drop': return '🔄';
-      case 'order_sentence': return '🔢';
-      case 'matching': return '🔗';
-      case 'highlight': return '✨';
-      case 'table': return '📊';
-      default: return '🎮';
+      case 'multiple_choice': return <CheckCircle {...iconProps} />;
+      case 'true_false': return <ListChecks {...iconProps} />;
+      case 'fill_blank': return <Edit3 {...iconProps} />;
+      case 'drag_drop': return <RefreshCw {...iconProps} />;
+      case 'order_sentence': return <Hash {...iconProps} />;
+      case 'matching': return <Link {...iconProps} />;
+      case 'highlight': return <Sparkles {...iconProps} />;
+      case 'table': return <Table {...iconProps} />;
+      default: return <Gamepad2 {...iconProps} />;
     }
   };
 
@@ -134,7 +140,9 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
           <h1 className="assignments-title">Asignado a Mí</h1>
         </div>
         <div className="error-state">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon">
+            <AlertTriangle size={48} strokeWidth={2} className="text-red-500" />
+          </div>
           <p>{error}</p>
           <button className="btn btn-primary" onClick={loadAssignments}>
             Reintentar
@@ -158,13 +166,13 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
           className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
           onClick={() => setActiveTab('content')}
         >
-          📄 Contenidos ({contentAssignments.length})
+          <FileText size={18} strokeWidth={2} className="inline-icon" /> Contenidos ({contentAssignments.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'exercises' ? 'active' : ''}`}
           onClick={() => setActiveTab('exercises')}
         >
-          🎮 Ejercicios ({exerciseAssignments.length})
+          <Gamepad2 size={18} strokeWidth={2} className="inline-icon" /> Ejercicios ({exerciseAssignments.length})
         </button>
       </div>
 
@@ -173,7 +181,9 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
         <div className="assignments-content">
           {contentAssignments.length === 0 ? (
             <div className="empty-state-large">
-              <div className="empty-icon">📄</div>
+              <div className="empty-icon">
+                <FileText size={64} strokeWidth={2} className="text-gray-400" />
+              </div>
               <h3>No hay contenidos asignados</h3>
               <p>Tu profesor aún no te ha asignado contenidos directamente.</p>
               <p style={{ marginTop: '8px', fontSize: '14px', opacity: 0.8 }}>
@@ -201,7 +211,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
                       </span>
                       {assignment.itemDetails?.duration && (
                         <span className="meta-badge duration-badge">
-                          ⏱ {assignment.itemDetails.duration} min
+                          <Clock size={14} strokeWidth={2} className="inline-icon" /> {assignment.itemDetails.duration} min
                         </span>
                       )}
                     </div>
@@ -212,7 +222,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
                     </div>
                   </div>
                   <button className="btn-play-assignment">
-                    ▶ Iniciar
+                    <Play size={16} strokeWidth={2} className="inline-icon" /> Iniciar
                   </button>
                 </div>
               ))}
@@ -225,7 +235,9 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
         <div className="assignments-content">
           {exerciseAssignments.length === 0 ? (
             <div className="empty-state-large">
-              <div className="empty-icon">🎮</div>
+              <div className="empty-icon">
+                <Gamepad2 size={64} strokeWidth={2} className="text-gray-400" />
+              </div>
               <h3>No hay ejercicios asignados</h3>
               <p>Tu profesor aún no te ha asignado ejercicios directamente.</p>
               <p style={{ marginTop: '8px', fontSize: '14px', opacity: 0.8 }}>
@@ -264,7 +276,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
                       </div>
                     </div>
                     <button className="btn-play-assignment">
-                      🎮 Jugar
+                      <Gamepad2 size={16} strokeWidth={2} className="inline-icon" /> Jugar
                     </button>
                   </div>
                 );
