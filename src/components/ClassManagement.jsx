@@ -1,4 +1,9 @@
 import { useState, useEffect } from 'react';
+import {
+  Calendar, ClipboardList, Bell, CheckCircle, AlertTriangle,
+  Users, RefreshCw, Clock, Circle, XCircle, Inbox, CreditCard,
+  Video, X
+} from 'lucide-react';
 import { getTeacherScheduledClasses, getDayName } from '../firebase/scheduledClasses';
 import {
   getTeacherSessions,
@@ -101,7 +106,7 @@ function ClassManagement({ user }) {
     const result = await cancelSession(sessionId, reason || 'Cancelada por el profesor');
 
     if (result.success) {
-      showMessage('success', '✅ Sesión cancelada');
+      showMessage('success', 'Sesión cancelada');
       loadData();
     } else {
       showMessage('error', 'Error al cancelar sesión');
@@ -206,7 +211,9 @@ function ClassManagement({ user }) {
       {/* Header */}
       <div className="cm-header">
         <div>
-          <h1 className="cm-title">📅 Gestión de Clases</h1>
+          <h1 className="cm-title flex items-center gap-3">
+            <Calendar size={32} strokeWidth={2} /> Gestión de Clases
+          </h1>
           <p className="cm-subtitle">
             Vista panorámica de todas tus clases programadas
           </p>
@@ -216,28 +223,36 @@ function ClassManagement({ user }) {
       {/* Stats Cards */}
       <div className="cm-stats">
         <div className="stat-card">
-          <div className="stat-icon">📋</div>
+          <div className="stat-icon">
+            <ClipboardList size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.totalSchedules}</div>
             <div className="stat-label">Horarios activos</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon">📆</div>
+          <div className="stat-icon">
+            <Calendar size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.totalSessions}</div>
             <div className="stat-label">Sesiones próximas</div>
           </div>
         </div>
         <div className="stat-card highlight">
-          <div className="stat-icon">🔔</div>
+          <div className="stat-icon">
+            <Bell size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.todaySessions}</div>
             <div className="stat-label">Hoy</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon">📅</div>
+          <div className="stat-icon">
+            <Calendar size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.thisWeekSessions}</div>
             <div className="stat-label">Esta semana</div>
@@ -248,7 +263,11 @@ function ClassManagement({ user }) {
       {/* Message */}
       {message.text && (
         <div className={`cm-message ${message.type}`}>
-          {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+          {message.type === 'success' ? (
+            <CheckCircle size={18} strokeWidth={2} className="inline-icon" />
+          ) : (
+            <AlertTriangle size={18} strokeWidth={2} className="inline-icon" />
+          )} {message.text}
         </div>
       )}
 
@@ -258,13 +277,13 @@ function ClassManagement({ user }) {
           className={`view-toggle-btn ${view === 'calendar' ? 'active' : ''}`}
           onClick={() => setView('calendar')}
         >
-          📅 Calendario Semanal
+          <Calendar size={18} strokeWidth={2} className="inline-icon" /> Calendario Semanal
         </button>
         <button
           className={`view-toggle-btn ${view === 'list' ? 'active' : ''}`}
           onClick={() => setView('list')}
         >
-          📋 Lista de Sesiones
+          <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Lista de Sesiones
         </button>
       </div>
 
@@ -299,7 +318,7 @@ function ClassManagement({ user }) {
                 onClick={() => setWeekOffset(0)}
                 title="Volver a esta semana"
               >
-                📅 Hoy
+                <Calendar size={18} strokeWidth={2} className="inline-icon" /> Hoy
               </button>
             )}
             <button
@@ -307,7 +326,7 @@ function ClassManagement({ user }) {
               onClick={() => setShowWeekends(!showWeekends)}
               title={showWeekends ? 'Ocultar fines de semana' : 'Mostrar fines de semana'}
             >
-              {showWeekends ? '📅 7 días' : '📅 5 días'}
+              <Calendar size={18} strokeWidth={2} className="inline-icon" /> {showWeekends ? '7 días' : '5 días'}
             </button>
           </div>
 
@@ -339,8 +358,12 @@ function ClassManagement({ user }) {
                               {schedule.startTime} - {schedule.endTime}
                             </div>
                             <div className="schedule-subject">{schedule.courseName}</div>
-                            <div className="schedule-group">👥 {schedule.groupName}</div>
-                            <div className="schedule-type-badge">🔄 Recurrente</div>
+                            <div className="schedule-group">
+                              <Users size={14} strokeWidth={2} className="inline-icon" /> {schedule.groupName}
+                            </div>
+                            <div className="schedule-type-badge">
+                              <RefreshCw size={14} strokeWidth={2} className="inline-icon" /> Recurrente
+                            </div>
                           </div>
                         ))}
 
@@ -351,12 +374,14 @@ function ClassManagement({ user }) {
                               {session.date.toDate().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
                             </div>
                             <div className="schedule-subject">{session.courseName}</div>
-                            <div className="schedule-group">👥 {session.groupName}</div>
+                            <div className="schedule-group">
+                              <Users size={14} strokeWidth={2} className="inline-icon" /> {session.groupName}
+                            </div>
                             <div className={`schedule-status-badge status-${session.status}`}>
-                              {session.status === 'scheduled' && '⏳'}
-                              {session.status === 'in_progress' && '🟢'}
-                              {session.status === 'completed' && '✅'}
-                              {session.status === 'cancelled' && '❌'}
+                              {session.status === 'scheduled' && <Clock size={14} strokeWidth={2} className="inline-icon" />}
+                              {session.status === 'in_progress' && <Circle size={14} strokeWidth={2} className="inline-icon" fill="currentColor" />}
+                              {session.status === 'completed' && <CheckCircle size={14} strokeWidth={2} className="inline-icon" />}
+                              {session.status === 'cancelled' && <XCircle size={14} strokeWidth={2} className="inline-icon" />}
                             </div>
                           </div>
                         ))}
@@ -408,7 +433,9 @@ function ClassManagement({ user }) {
           <div className="sessions-list">
             {filteredSessions.length === 0 ? (
               <div className="empty-sessions">
-                <div className="empty-icon">📭</div>
+                <div className="empty-icon">
+                  <Inbox size={64} strokeWidth={2} />
+                </div>
                 <p>No hay sesiones próximas con estos filtros</p>
               </div>
             ) : (
@@ -418,9 +445,15 @@ function ClassManagement({ user }) {
                     <div className="session-info">
                       <h3 className="session-subject">{session.courseName}</h3>
                       <div className="session-meta">
-                        <span className="session-group">👥 {session.groupName}</span>
-                        <span className="session-date">🕒 {formatSessionDate(session.date)}</span>
-                        <span className="session-cost">💳 {session.creditCost} crédito{session.creditCost !== 1 ? 's' : ''}</span>
+                        <span className="session-group">
+                          <Users size={16} strokeWidth={2} className="inline-icon" /> {session.groupName}
+                        </span>
+                        <span className="session-date">
+                          <Clock size={16} strokeWidth={2} className="inline-icon" /> {formatSessionDate(session.date)}
+                        </span>
+                        <span className="session-cost">
+                          <CreditCard size={16} strokeWidth={2} className="inline-icon" /> {session.creditCost} crédito{session.creditCost !== 1 ? 's' : ''}
+                        </span>
                       </div>
                     </div>
                     <div className="session-actions">
@@ -432,7 +465,7 @@ function ClassManagement({ user }) {
                           className="btn-session-action"
                           title="Abrir videollamada"
                         >
-                          🎥
+                          <Video size={16} strokeWidth={2} />
                         </a>
                       )}
                       {session.status === 'scheduled' && (
@@ -441,16 +474,24 @@ function ClassManagement({ user }) {
                           onClick={() => handleCancelSession(session.id)}
                           title="Cancelar sesión"
                         >
-                          ✕
+                          <X size={16} strokeWidth={2} />
                         </button>
                       )}
                     </div>
                   </div>
                   <div className="session-status-badge">
-                    {session.status === 'scheduled' && '⏳ Programada'}
-                    {session.status === 'in_progress' && '🟢 En curso'}
-                    {session.status === 'completed' && '✅ Completada'}
-                    {session.status === 'cancelled' && '❌ Cancelada'}
+                    {session.status === 'scheduled' && (
+                      <><Clock size={14} strokeWidth={2} className="inline-icon" /> Programada</>
+                    )}
+                    {session.status === 'in_progress' && (
+                      <><Circle size={14} strokeWidth={2} className="inline-icon" fill="currentColor" /> En curso</>
+                    )}
+                    {session.status === 'completed' && (
+                      <><CheckCircle size={14} strokeWidth={2} className="inline-icon" /> Completada</>
+                    )}
+                    {session.status === 'cancelled' && (
+                      <><XCircle size={14} strokeWidth={2} className="inline-icon" /> Cancelada</>
+                    )}
                   </div>
                 </div>
               ))
