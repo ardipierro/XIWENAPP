@@ -1,3 +1,8 @@
+/* ============================================
+   STUDENTMANAGER - Estilos específicos del modal
+   Cards y layout usan Tailwind desde globals.css
+   ============================================ */
+
 .student-manager-overlay {
   position: fixed;
   top: 0;
@@ -13,13 +18,9 @@
 }
 
 .student-manager {
-  background: white;
-  border-radius: 16px;
   width: 100%;
-  max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease-out;
 }
 
@@ -34,6 +35,7 @@
   }
 }
 
+/* Header específico */
 .manager-header {
   display: flex;
   justify-content: space-between;
@@ -47,10 +49,19 @@
   z-index: 10;
 }
 
+.dark .manager-header {
+  background: #27272a;
+  border-bottom-color: #3f3f46;
+}
+
 .manager-header h2 {
   margin: 0;
   font-size: 24px;
   color: #1f2937;
+}
+
+.dark .manager-header h2 {
+  color: #fafafa;
 }
 
 .close-btn {
@@ -69,6 +80,7 @@
   transform: scale(1.1);
 }
 
+/* Actions bar */
 .manager-actions {
   display: flex;
   justify-content: space-between;
@@ -77,20 +89,8 @@
   background: #f9fafb;
 }
 
-.btn-add {
-  padding: 12px 24px;
-  background: #10b981;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: none;
-}
-
-.btn-add:hover {
-  background: #059669;
+.dark .manager-actions {
+  background: #18181b;
 }
 
 .student-count {
@@ -99,6 +99,11 @@
   font-weight: 600;
 }
 
+.dark .student-count {
+  color: #a1a1aa;
+}
+
+/* Formulario específico */
 .student-form {
   padding: 24px;
   background: #f0fdf4;
@@ -107,10 +112,19 @@
   margin: 20px 24px;
 }
 
+.dark .student-form {
+  background: #14532d;
+  border-color: #166534;
+}
+
 .student-form h3 {
   margin: 0 0 20px 0;
   color: #065f46;
   font-size: 18px;
+}
+
+.dark .student-form h3 {
+  color: #86efac;
 }
 
 .form-row {
@@ -125,6 +139,10 @@
   flex-direction: column;
 }
 
+.form-field.full-width {
+  grid-column: 1 / -1;
+}
+
 .form-field label {
   font-size: 14px;
   font-weight: 600;
@@ -132,18 +150,72 @@
   margin-bottom: 6px;
 }
 
-.form-field input {
+.dark .form-field label {
+  color: #d4d4d8;
+}
+
+.form-field input,
+.form-field textarea {
   padding: 10px 14px;
   border: 2px solid #d1d5db;
   border-radius: 8px;
   font-size: 16px;
   transition: all 0.2s;
+  background: white;
+  color: #1f2937;
 }
 
-.form-field input:focus {
+.dark .form-field input,
+.dark .form-field textarea {
+  background: #27272a;
+  border-color: #52525b;
+  color: #fafafa;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
   outline: none;
   border-color: #52525b;
-  box-shadow: 0 0 0 2px rgba(82, 82, 91, 0.1);
+}
+
+.dark .form-field input:focus,
+.dark .form-field textarea:focus {
+  border-color: #a1a1aa;
+}
+
+.code-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.code-input-group input {
+  flex: 1;
+}
+
+.btn-generate {
+  padding: 10px 16px;
+  background: #3f3f46;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-generate:hover {
+  background: #52525b;
+}
+
+.form-field .error {
+  color: #dc2626;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.dark .form-field .error {
+  color: #fca5a5;
 }
 
 .form-actions {
@@ -152,145 +224,9 @@
   margin-top: 20px;
 }
 
-.btn-save {
-  flex: 1;
-  padding: 12px 24px;
-  background: #10b981;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: none;
-}
-
-.btn-save:hover {
-  background: #059669;
-}
-
-.btn-cancel {
-  padding: 12px 24px;
-  background: white;
-  color: #6b7280;
-  border: 2px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-cancel:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-}
-
+/* Lista de estudiantes */
 .students-list {
   padding: 24px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #6b7280;
-}
-
-.empty-state p:first-child {
-  font-size: 48px;
-  margin: 0 0 16px 0;
-}
-
-.empty-state p:last-child {
-  font-size: 16px;
-  margin: 0;
-}
-
-.students-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.students-table thead {
-  background: #f3f4f6;
-}
-
-.students-table th {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 14px;
-  font-weight: 700;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.students-table td {
-  padding: 16px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 15px;
-  color: #1f2937;
-}
-
-.student-name {
-  font-weight: 600;
-  color: #111827;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-select,
-.btn-edit,
-.btn-delete {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-select {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.btn-select:hover {
-  background: #d1d5db;
-}
-
-.btn-edit {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.btn-edit:hover {
-  background: #fde68a;
-  transform: scale(1.1);
-}
-
-.btn-delete {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.btn-delete:hover {
-  background: #fecaca;
-  transform: scale(1.1);
-}
-
-.loading {
-  text-align: center;
-  padding: 100px 20px;
-  font-size: 24px;
-  color: #6b7280;
 }
 
 /* Responsive */
@@ -314,32 +250,7 @@
     align-items: stretch;
   }
 
-  .btn-add {
-    width: 100%;
-  }
-
   .form-row {
     grid-template-columns: 1fr;
-  }
-
-  .students-table {
-    font-size: 14px;
-  }
-
-  .students-table th,
-  .students-table td {
-    padding: 10px 8px;
-  }
-
-  .actions {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .btn-select,
-  .btn-edit,
-  .btn-delete {
-    width: 100%;
-    padding: 8px;
   }
 }
