@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3 } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings } from 'lucide-react';
 import { getContentByTeacher, createContent, updateContent, getContentById, deleteContent } from '../firebase/content';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse';
 import {
@@ -13,6 +13,7 @@ function ContentManager({ user, courses = [] }) {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, lesson, reading, video, link
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -221,31 +222,45 @@ function ContentManager({ user, courses = [] }) {
 
       {/* Filtros y Búsqueda */}
       <div className="card mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex gap-3">
           {/* Búsqueda */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Buscar por título o contenido..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Buscar por título o contenido..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="input flex-1"
+          />
 
           {/* Filtro por tipo */}
-          <div className="w-full md:w-64">
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="input"
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="input w-48"
+          >
+            <option value="all">Todos los tipos</option>
+            <option value="lesson">Lección</option>
+            <option value="reading">Lectura</option>
+            <option value="video">Video</option>
+            <option value="link">Enlace</option>
+          </select>
+
+          {/* Toggle Vista */}
+          <div className="view-toggle">
+            <button
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Vista de grilla"
             >
-              <option value="all">Todos los tipos</option>
-              <option value="lesson">Lección</option>
-              <option value="reading">Lectura</option>
-              <option value="video">Video</option>
-              <option value="link">Enlace</option>
-            </select>
+              ⊞
+            </button>
+            <button
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="Vista de lista"
+            >
+              ☰
+            </button>
           </div>
         </div>
       </div>
@@ -273,71 +288,113 @@ function ContentManager({ user, courses = [] }) {
             </button>
           )}
         </div>
-      ) : (
-        <div className="grid gap-4">
+      ) : viewMode === 'grid' ? (
+        /* Vista Grilla */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredContents.map((content) => (
-            <div key={content.id} className="card">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">{getTypeIcon(content.type)}</span>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                      {content.title || 'Sin título'}
-                    </h3>
-                    <span className="badge badge-info">
-                      {getTypeLabel(content.type)}
+            <div key={content.id} className="card flex flex-col" style={{ padding: '12px' }}>
+              {/* Placeholder con icono de tipo */}
+              <div className="card-image-placeholder">
+                {getTypeIcon(content.type)}
+              </div>
+
+              {/* Título */}
+              <h3 className="card-title">{content.title || 'Sin título'}</h3>
+
+              {/* Descripción */}
+              <p className="card-description">{content.body || 'Sin contenido'}</p>
+
+              {/* Badges */}
+              <div className="card-badges">
+                <span className="badge badge-info">{getTypeLabel(content.type)}</span>
+                {contentCourses[content.id]?.length > 0 && (
+                  contentCourses[content.id].slice(0, 2).map(course => (
+                    <span key={course.id} className="badge badge-success">
+                      <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
                     </span>
-                  </div>
+                  ))
+                )}
+                {contentCourses[content.id]?.length > 2 && (
+                  <span className="badge badge-info">+{contentCourses[content.id].length - 2}</span>
+                )}
+              </div>
 
-                  <p className="text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                    {content.body || 'Sin contenido'}
-                  </p>
+              {/* Stats */}
+              <div className="card-stats">
+                {content.order !== undefined && (
+                  <span className="flex items-center gap-1">
+                    <BarChart3 size={14} strokeWidth={2} /> Orden: {content.order}
+                  </span>
+                )}
+                {content.createdAt && (
+                  <span className="flex items-center gap-1">
+                    <Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}
+                  </span>
+                )}
+              </div>
 
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    {contentCourses[content.id]?.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {contentCourses[content.id].map(course => (
-                          <span key={course.id} className="badge badge-success">
-                            <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {(!contentCourses[content.id] || contentCourses[content.id].length === 0) && (
-                      <span className="text-gray-400">Sin cursos asignados</span>
-                    )}
-                  </div>
+              {/* Botones */}
+              <div className="card-actions">
+                <button
+                  className="btn btn-primary flex-1"
+                  onClick={() => handleEdit(content.id)}
+                >
+                  <Settings size={16} strokeWidth={2} /> Gestionar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Vista Lista */
+        <div className="flex flex-col gap-3">
+          {filteredContents.map((content) => (
+            <div key={content.id} className="card card-list">
+              <div className="flex gap-4 items-start">
+                {/* Placeholder pequeño */}
+                <div className="card-image-placeholder-sm">
+                  {getTypeIcon(content.type)}
+                </div>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                {/* Contenido principal */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="card-title">{content.title || 'Sin título'}</h3>
+                  <p className="card-description">{content.body || 'Sin contenido'}</p>
+
+                  {/* Stats */}
+                  <div className="card-stats">
                     {content.order !== undefined && (
                       <span className="flex items-center gap-1">
-                        <BarChart3 size={14} strokeWidth={2} className="inline-icon" /> Orden: {content.order}
+                        <BarChart3 size={14} strokeWidth={2} /> Orden: {content.order}
                       </span>
                     )}
                     {content.createdAt && (
-                      <span className="flex items-center gap-1"><Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR')}</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR')}
+                      </span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex gap-2 ml-4">
+                {/* Badges */}
+                <div className="card-badges-list">
+                  <span className="badge badge-info">{getTypeLabel(content.type)}</span>
+                  {contentCourses[content.id]?.length > 0 && (
+                    contentCourses[content.id].slice(0, 2).map(course => (
+                      <span key={course.id} className="badge badge-success">
+                        <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                {/* Botones */}
+                <div className="card-actions-list">
                   <button
-                    className="btn btn-sm btn-outline"
+                    className="btn btn-primary"
                     onClick={() => handleEdit(content.id)}
                   >
-<Edit size={16} strokeWidth={2} /> Editar
-                  </button>
-                  <button
-                    className="btn btn-sm btn-ghost"
-                    onClick={() => handleView(content.id)}
-                  >
-<Eye size={16} strokeWidth={2} /> Ver
-                  </button>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDelete(content.id)}
-                  >
-<Trash2 size={16} strokeWidth={2} />
+                    <Settings size={16} strokeWidth={2} /> Gestionar
                   </button>
                 </div>
               </div>
