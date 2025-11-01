@@ -213,19 +213,22 @@ className="btn btn-sm btn-primary flex-1"  // Uso correcto de variante pequeña
 ### Usuario reportó:
 - "los botones 'agregar ....' quedaron demasiado grandes"
 - "Hay otros botones en las mismas screen que no son del mismo tamaño"
+- **Decisión final:** Botones "+ Crear Nuevo..." en headers deben ser `btn btn-sm` (más compactos)
 
 ### Archivos con botones "Agregar/Crear":
-1. ContentManager.jsx:222 - `+ Crear Nuevo Contenido`
-2. CoursesScreen.jsx:348 - `+ Crear Nuevo Curso`
-3. ExerciseManager.jsx:280 - `+ Crear Nuevo Ejercicio`
-4. GroupManager.jsx:182 - `+ Crear Nuevo Grupo`
-5. ClassManager.jsx:461, 476 - botones crear clase
-6. ClassScheduleManager.jsx:265 - `+ Agregar Horario`
-7. CreditManager.jsx:248 - `Agregar Créditos`
-8. StudentManager.jsx:196 - `Agregar Alumno`
-9. AddUserModal.jsx:116 - `Crear Nuevo Usuario / Agregar Alumno`
+1. ✅ ContentManager.jsx:219 - `+ Crear Nuevo Contenido` - ahora usa `btn btn-sm btn-primary`
+2. ✅ CoursesScreen.jsx:345 - `+ Crear Nuevo Curso` - ahora usa `btn btn-sm btn-primary`
+3. ✅ ExerciseManager.jsx:277 - `+ Crear Nuevo Ejercicio` - ahora usa `btn btn-sm btn-primary`
+4. ✅ GroupManager.jsx:180 - `+ Crear Nuevo Grupo` - ahora usa `btn btn-sm btn-primary`
+5. ✅ ClassManager.jsx - botones de acción estandarizados (commit cc4f83e)
+6. ❌ ClassScheduleManager.jsx:265 - `+ Agregar Horario` - PENDIENTE
+7. ❌ CreditManager.jsx:248 - `Agregar Créditos` - PENDIENTE
+8. ❌ StudentManager.jsx:196 - `Agregar Alumno` - PENDIENTE
+9. ❌ AddUserModal.jsx:116 - `Crear Nuevo Usuario / Agregar Alumno` - PENDIENTE
 
-**ACCIÓN PENDIENTE:** Revisar cada archivo para verificar tamaño consistente. Posiblemente todos deberían ser `btn btn-primary` sin modificadores de tamaño.
+**ESTANDARIZACIÓN DE BOTONES COMPLETADA:**
+- ClassManager.jsx:719, 985, 1076, 1122 - Botones de acción estandarizados a tamaño normal
+- GroupManager.jsx:524, 572, 609 - Botones destructivos estandarizados a tamaño normal
 
 ---
 
@@ -352,6 +355,59 @@ className="text-2xl font-bold text-gray-900 dark:text-gray-100"
 ```jsx
 <Icon size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
 ```
+
+---
+
+## 11. CAMBIOS COMPLETADOS EN SESIÓN 2025-11-01
+
+### ✅ COMMIT 4251f1d - Unificar clases de subtítulos
+**Archivos modificados: 4**
+- AdminPanel.jsx:170 - `admin-subtitle` → `section-subtitle`
+- ClassManagement.jsx:217 - `cm-subtitle` → `section-subtitle`
+- MyAssignments.jsx:126, 160 - `assignments-subtitle` → `section-subtitle`
+- MyCourses.jsx:140 - `courses-subtitle` → `section-subtitle`
+
+### ✅ COMMIT b923789 - Eliminar clases CSS duplicadas de subtítulos
+**Archivos modificados: 4**
+- AdminPanel.css - eliminada `.admin-subtitle` (-4 líneas)
+- ClassManagement.css - eliminadas `.cm-subtitle` y `.dark .cm-subtitle` (-8 líneas)
+- MyAssignments.css - eliminada `.assignments-subtitle` (-5 líneas)
+- MyCourses.css - eliminada `.courses-subtitle` (-5 líneas)
+**Total: -22 líneas de CSS eliminadas**
+
+### ✅ COMMIT cc4f83e - Estandarizar tamaños de botones en ClassManager
+**Archivos modificados: 1**
+- ClassManager.jsx:719 - Botón "Eliminar" (removido btn-sm)
+- ClassManager.jsx:985 - Botón "Generar Más Instancias" (removido btn-sm)
+- ClassManager.jsx:1076 - Botón "Remover grupo" (removido btn-sm)
+- ClassManager.jsx:1122 - Botón "Remover estudiante" (removido btn-sm)
+
+**Feedback del usuario:** "qué pasó con los botones en Clases que siguen de distinto tamaño?"
+
+### ✅ COMMIT fed59c0 - Reducir tamaño de botones Crear Nuevo y estandarizar GroupManager
+**Archivos modificados: 4**
+
+**Botones de creación reducidos (agregado btn-sm):**
+- ContentManager.jsx:219 - `btn btn-primary` → `btn btn-sm btn-primary`
+- ExerciseManager.jsx:277 - `btn btn-primary` → `btn btn-sm btn-primary`
+- CoursesScreen.jsx:345 - `btn btn-primary` → `btn btn-sm btn-primary`
+- GroupManager.jsx:180 - `btn btn-primary` → `btn btn-sm btn-primary`
+
+**Botones de acción en GroupManager estandarizados (removido btn-sm):**
+- GroupManager.jsx:524 - Botón "Eliminar grupo"
+- GroupManager.jsx:572 - Botón "Remover estudiante"
+- GroupManager.jsx:609 - Botón "Desasignar curso"
+
+**Feedback del usuario:** "tambien los botones '+crear nuevo curso/ejercicio…' que son demaisado grandes"
+
+### Resumen de la sesión:
+- **4 commits** realizados
+- **12 archivos** modificados (4 JSX + 4 CSS + 4 más JSX)
+- **-22 líneas CSS** eliminadas (eliminación de duplicados)
+- **Clases unificadas:** Todos los subtítulos ahora usan `section-subtitle`
+- **Botones estandarizados:**
+  - Botones de creación en headers → `btn btn-sm btn-primary`
+  - Botones de acción inline → `btn btn-[variant]` (sin sm)
 
 ---
 
