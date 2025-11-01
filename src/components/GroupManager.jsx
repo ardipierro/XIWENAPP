@@ -461,10 +461,10 @@ function GroupManager({ user, courses }) {
 
       {/* Group Detail Modal with Tabs */}
       {selectedGroup && (
-        <div className="modal-overlay">
-          <div className="modal-box max-w-5xl" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="modal-header">
+        <div className="modal-overlay" onClick={() => setSelectedGroup(null)}>
+          <div className="modal-box max-w-5xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            {/* Header - Fixed */}
+            <div className="modal-header flex-shrink-0">
               <div>
                 <h3 className="modal-title">
                   {selectedGroup.name}
@@ -482,7 +482,7 @@ function GroupManager({ user, courses }) {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
               <button
                 onClick={() => setActiveGroupTab('students')}
                 className={`px-4 py-2 font-semibold transition-colors ${
@@ -505,8 +505,8 @@ function GroupManager({ user, courses }) {
               </button>
             </div>
 
-            {/* Tab Content */}
-            <div className="modal-content">
+            {/* Tab Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
               {/* Students Tab */}
               {activeGroupTab === 'students' && (
                 <div>
@@ -583,7 +583,7 @@ function GroupManager({ user, courses }) {
             </div>
 
             {/* Botón Eliminar - Zona de peligro */}
-            <div className="mt-8 pt-6 border-t-2 border-red-200 dark:border-red-900">
+            <div className="px-6 pt-6 pb-6 border-t-2 border-red-200 dark:border-red-900 flex-shrink-0">
               <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
                 <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
                 <p className="text-xs text-red-700 dark:text-red-400 mb-3">

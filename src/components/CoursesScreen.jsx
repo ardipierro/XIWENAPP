@@ -589,8 +589,9 @@ function CoursesScreen({ onBack, user }) {
       {/* Unified Course Modal with Tabs */}
       {showCourseModal && selectedCourse && (
         <div className="modal-overlay" onClick={handleCloseCourseModal}>
-          <div className="modal-box max-w-5xl" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modal-box max-w-5xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            {/* Header - Fixed */}
+            <div className="modal-header flex-shrink-0">
               <h3 className="modal-title">
                 {selectedCourse.name}
               </h3>
@@ -602,8 +603,8 @@ function CoursesScreen({ onBack, user }) {
               </button>
             </div>
 
-            {/* Tabs */}
-            <div className="border-b border-gray-200 dark:border-gray-700 px-6">
+            {/* Tabs - Fixed */}
+            <div className="border-b border-gray-200 dark:border-gray-700 px-6 flex-shrink-0">
               <div className="flex gap-4">
                 <button
                   onClick={() => setActiveModalTab('info')}
@@ -648,7 +649,8 @@ function CoursesScreen({ onBack, user }) {
               </div>
             </div>
 
-            <div className="modal-body max-h-[60vh] overflow-y-auto">
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
               {loadingModalData ? (
                 <div className="flex justify-center items-center py-8">
                   <div className="spinner"></div>
@@ -910,7 +912,7 @@ function CoursesScreen({ onBack, user }) {
             </div>
 
             {/* Botón Eliminar - Zona de peligro */}
-            <div className="px-6 mt-8 pt-6 border-t-2 border-red-200 dark:border-red-900">
+            <div className="px-6 pt-6 pb-6 border-t-2 border-red-200 dark:border-red-900 flex-shrink-0">
               <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
                 <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
                 <p className="text-xs text-red-700 dark:text-red-400 mb-3">
@@ -931,7 +933,7 @@ function CoursesScreen({ onBack, user }) {
               </div>
             </div>
 
-            <div className="modal-footer">
+            <div className="modal-footer flex-shrink-0">
               <button className="btn btn-primary" onClick={handleCloseCourseModal}>
                 Cerrar
               </button>
