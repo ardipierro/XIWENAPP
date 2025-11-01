@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Check, Play, AlertTriangle, BookMarked, Calendar } from 'lucide-react';
 import { getStudentEnrollments, ensureStudentProfile } from '../../firebase/firestore';
 import './MyCourses.css';
 
@@ -81,9 +82,17 @@ function MyCourses({ user, onSelectCourse }) {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'completed':
-        return <span className="status-badge completed">✓ Completado</span>;
+        return (
+          <span className="status-badge completed">
+            <Check size={14} strokeWidth={2} className="inline-icon" /> Completado
+          </span>
+        );
       case 'in_progress':
-        return <span className="status-badge in-progress">▶ En Progreso</span>;
+        return (
+          <span className="status-badge in-progress">
+            <Play size={14} strokeWidth={2} className="inline-icon" /> En Progreso
+          </span>
+        );
       default:
         return <span className="status-badge not-started">○ No Iniciado</span>;
     }
@@ -112,7 +121,9 @@ function MyCourses({ user, onSelectCourse }) {
           <h1 className="courses-title">Mis Cursos</h1>
         </div>
         <div className="error-state">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon">
+            <AlertTriangle size={48} strokeWidth={2} className="text-red-500" />
+          </div>
           <p>{error}</p>
           <button className="btn btn-primary" onClick={loadCourses}>
             Reintentar
@@ -179,7 +190,7 @@ function MyCourses({ user, onSelectCourse }) {
                         <img src={enrollment.course.imageUrl} alt={enrollment.course?.name || 'Curso'} />
                       ) : (
                         <div className="course-image-placeholder">
-                          <span>📚</span>
+                          <BookMarked size={48} strokeWidth={2} />
                         </div>
                       )}
                       {getStatusBadge(enrollment.status)}
@@ -209,7 +220,7 @@ function MyCourses({ user, onSelectCourse }) {
                       {/* Enrolled Date */}
                       <div className="course-meta">
                         <span className="meta-item">
-                          📅 Inscrito: {formatDate(enrollment.enrolledAt)}
+                          <Calendar size={14} strokeWidth={2} className="inline-icon" /> Inscrito: {formatDate(enrollment.enrolledAt)}
                         </span>
                       </div>
                     </div>
@@ -231,7 +242,9 @@ function MyCourses({ user, onSelectCourse }) {
 
       {courses.length === 0 && (
         <div className="empty-state-large">
-          <div className="empty-icon">📚</div>
+          <div className="empty-icon">
+            <BookMarked size={64} strokeWidth={2} className="text-gray-400" />
+          </div>
           <h3>No tienes cursos asignados</h3>
           <p>Cuando tu profesor te asigne cursos, aparecerán aquí.</p>
         </div>
