@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Crown, Users, UserCog, GraduationCap, CheckCircle, Ban,
+  Search, RefreshCw, AlertTriangle, Clock
+} from 'lucide-react';
 import { getAllUsers, updateUserRole, updateUserStatus } from '../firebase/firestore';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import Navigation from './Navigation';
@@ -38,7 +42,7 @@ function AdminPanel({ user, userRole, onBack }) {
     try {
       const allUsers = await getAllUsers();
       setUsers(allUsers);
-      console.log('✅ Usuarios cargados:', allUsers.length);
+      console.log('Usuarios cargados:', allUsers.length);
     } catch (error) {
       console.error('❌ Error cargando usuarios:', error);
       showError('Error al cargar usuarios');
@@ -158,26 +162,30 @@ function AdminPanel({ user, userRole, onBack }) {
       <div className="admin-panel-container">
         {/* Header */}
         <div className="admin-header">
-          <h1>👑 Panel de Administración</h1>
+          <h1 className="flex items-center gap-3">
+            <Crown size={32} strokeWidth={2} /> Panel de Administración
+          </h1>
           <p className="admin-subtitle">Gestión de usuarios y roles</p>
         </div>
 
       {/* Mensajes */}
       {successMessage && (
         <div className="message success-msg">
-          ✅ {successMessage}
+<CheckCircle size={18} strokeWidth={2} /> {successMessage}
         </div>
       )}
       {errorMessage && (
         <div className="message error-msg">
-          ⚠️ {errorMessage}
+<AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
         </div>
       )}
 
       {/* Estadísticas */}
       <div className="stats-grid">
         <div className="stat-card total">
-          <div className="stat-icon">👥</div>
+          <div className="stat-icon">
+            <Users size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.total}</div>
             <div className="stat-label">Total Usuarios</div>
@@ -185,7 +193,9 @@ function AdminPanel({ user, userRole, onBack }) {
         </div>
         
         <div className="stat-card admins">
-          <div className="stat-icon">👑</div>
+          <div className="stat-icon">
+            <Crown size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.admins}</div>
             <div className="stat-label">Administradores</div>
@@ -193,7 +203,9 @@ function AdminPanel({ user, userRole, onBack }) {
         </div>
         
         <div className="stat-card teachers">
-          <div className="stat-icon">👨‍🏫</div>
+          <div className="stat-icon">
+            <UserCog size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.teachers}</div>
             <div className="stat-label">Profesores</div>
@@ -201,7 +213,9 @@ function AdminPanel({ user, userRole, onBack }) {
         </div>
         
         <div className="stat-card students">
-          <div className="stat-icon">👨‍🎓</div>
+          <div className="stat-icon">
+            <GraduationCap size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.students}</div>
             <div className="stat-label">Alumnos</div>
@@ -209,7 +223,9 @@ function AdminPanel({ user, userRole, onBack }) {
         </div>
         
         <div className="stat-card active">
-          <div className="stat-icon">✅</div>
+          <div className="stat-icon">
+            <CheckCircle size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.active}</div>
             <div className="stat-label">Activos</div>
@@ -217,7 +233,9 @@ function AdminPanel({ user, userRole, onBack }) {
         </div>
         
         <div className="stat-card suspended">
-          <div className="stat-icon">🚫</div>
+          <div className="stat-icon">
+            <Ban size={36} strokeWidth={2} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{stats.suspended}</div>
             <div className="stat-label">Suspendidos</div>
@@ -228,7 +246,9 @@ function AdminPanel({ user, userRole, onBack }) {
       {/* Filtros */}
       <div className="filters-section">
         <div className="search-box">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon">
+            <Search size={18} strokeWidth={2} />
+          </span>
           <input
             type="text"
             placeholder="Buscar por nombre o email..."
@@ -257,8 +277,8 @@ function AdminPanel({ user, userRole, onBack }) {
             className="filter-select"
           >
             <option value="all">Todos los estados</option>
-            <option value="active">✅ Activos</option>
-            <option value="suspended">🚫 Suspendidos</option>
+            <option value="active">Activos</option>
+            <option value="suspended">Suspendidos</option>
           </select>
           
           <button 
@@ -279,7 +299,7 @@ function AdminPanel({ user, userRole, onBack }) {
         <div className="users-header">
           <h2>Usuarios ({filteredUsers.length})</h2>
           <button onClick={loadUsers} className="refresh-btn">
-            🔄 Actualizar
+<RefreshCw size={18} strokeWidth={2} /> Actualizar
           </button>
         </div>
 
@@ -342,9 +362,9 @@ function AdminPanel({ user, userRole, onBack }) {
                         className={`status-select ${userItem.status}`}
                         disabled={isAdminEmail(userItem.email) && userItem.status === 'active'}
                       >
-                        <option value="active">✅ Activo</option>
-                        <option value="suspended">🚫 Suspendido</option>
-                        <option value="pending">⏳ Pendiente</option>
+                        <option value="active">Activo</option>
+                        <option value="suspended">Suspendido</option>
+                        <option value="pending">Pendiente</option>
                       </select>
                     </td>
 
@@ -361,7 +381,7 @@ function AdminPanel({ user, userRole, onBack }) {
                             disabled={isAdminEmail(userItem.email)}
                             title="Suspender usuario"
                           >
-                            🚫
+<Ban size={18} strokeWidth={2} />
                           </button>
                         ) : (
                           <button
@@ -369,7 +389,7 @@ function AdminPanel({ user, userRole, onBack }) {
                             className="action-btn activate-btn"
                             title="Activar usuario"
                           >
-                            ✅
+<CheckCircle size={18} strokeWidth={2} />
                           </button>
                         )}
                       </div>
