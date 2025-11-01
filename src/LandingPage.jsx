@@ -21,7 +21,7 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
             <span className="nav-logo">
               <GraduationCap size={32} strokeWidth={2} />
             </span>
-            <h1>Quiz Xiwen</h1>
+            <h1>XIWEN</h1>
           </div>
           <div className="nav-links">
             <a href="#features">Características</a>
@@ -111,7 +111,7 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
       <section id="features" className="features-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">¿Por qué elegir Quiz Xiwen?</h2>
+            <h2 className="section-title">¿Por qué elegir XIWEN?</h2>
             <p className="section-subtitle">
               Todo lo que necesitas para crear experiencias de aprendizaje inolvidables
             </p>
@@ -340,7 +340,7 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               {activeFAQ === 0 && (
                 <div className="faq-answer">
                   <p>
-                    ¡Para nada! Quiz Xiwen está diseñado para ser intuitivo. Si sabes 
+                    ¡Para nada! XIWEN está diseñado para ser intuitivo. Si sabes 
                     usar WhatsApp o Instagram, puedes crear quizzes en minutos. 
                     Además, tenemos tutoriales y soporte para ayudarte.
                   </p>
@@ -460,7 +460,7 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
           <div className="footer-content">
             <div className="footer-brand">
               <h3 className="flex items-center gap-2">
-                <GraduationCap size={24} strokeWidth={2} /> Quiz Xiwen
+                <GraduationCap size={24} strokeWidth={2} /> XIWEN
               </h3>
               <p>Educación interactiva del futuro</p>
             </div>
@@ -485,7 +485,7 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2025 Quiz Xiwen. Todos los derechos reservados.</p>
+            <p>&copy; 2025 XIWEN. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

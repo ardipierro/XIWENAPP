@@ -166,7 +166,7 @@ function UnifiedLogin() {
     <div className="unified-login-container">
       <div className="unified-login-box">
         <div className="unified-login-header">
-          <h1>🎓 Quiz Xiwen</h1>
+          <h1>XIWEN</h1>
           <p className="unified-login-subtitle">
             {isRegistering ? 'Crear nueva cuenta' : 'Iniciar sesión'}
           </p>

@@ -116,9 +116,9 @@ function Login() {
     <div className="login-container">
       <div className="login-box">
         <div className="login-header">
-          <h1>🎓 Quiz Xiwen</h1>
+          <h1>XIWEN</h1>
           <p className="login-subtitle">
-            {isRegistering ? 'Crear cuenta de profesor' : 'Acceso para profesores'}
+            {isRegistering ? 'Crear cuenta de profesor' : 'Plataforma Educativa'}
           </p>
         </div>
 
