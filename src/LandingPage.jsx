@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import {
+  GraduationCap, Gamepad2, Zap, BarChart3, Globe, Palette, Users,
+  CheckCircle, Check, BookOpen, Target
+} from 'lucide-react';
 import './LandingPage.css';
 
 function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
@@ -14,7 +18,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
       <nav className="landing-nav">
         <div className="container nav-container">
           <div className="nav-brand">
-            <span className="nav-logo">🎓</span>
+            <span className="nav-logo">
+              <GraduationCap size={32} strokeWidth={2} />
+            </span>
             <h1>Quiz Xiwen</h1>
           </div>
           <div className="nav-links">
@@ -112,7 +118,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
           </div>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">🎮</div>
+              <div className="feature-icon">
+                <Gamepad2 size={40} strokeWidth={2} />
+              </div>
               <h3>Gamificación Total</h3>
               <p>
                 Convierte cualquier lección en un juego interactivo. 
@@ -120,7 +128,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">⚡</div>
+              <div className="feature-icon">
+                <Zap size={40} strokeWidth={2} />
+              </div>
               <h3>Resultados Instantáneos</h3>
               <p>
                 Feedback inmediato para estudiantes y análisis en tiempo real 
@@ -128,7 +138,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">📊</div>
+              <div className="feature-icon">
+                <BarChart3 size={40} strokeWidth={2} />
+              </div>
               <h3>Análisis Avanzado</h3>
               <p>
                 Métricas detalladas de rendimiento, progreso individual y 
@@ -136,7 +148,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🌐</div>
+              <div className="feature-icon">
+                <Globe size={40} strokeWidth={2} />
+              </div>
               <h3>100% Online</h3>
               <p>
                 Accesible desde cualquier dispositivo. Clases presenciales, 
@@ -144,7 +158,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🎨</div>
+              <div className="feature-icon">
+                <Palette size={40} strokeWidth={2} />
+              </div>
               <h3>Personalizable</h3>
               <p>
                 Crea quizzes adaptados a tu metodología. Imágenes, audio, 
@@ -152,7 +168,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               </p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">👥</div>
+              <div className="feature-icon">
+                <Users size={40} strokeWidth={2} />
+              </div>
               <h3>Colaborativo</h3>
               <p>
                 Equipos de trabajo, competencias entre grupos y 
@@ -171,11 +189,11 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               <div className="benefit-content">
                 <h3>Para Profesores</h3>
                 <ul className="benefit-list">
-                  <li>✅ Crea quizzes en minutos, no en horas</li>
-                  <li>✅ Gestiona múltiples clases desde un solo lugar</li>
-                  <li>✅ Evalúa automáticamente y ahorra tiempo</li>
-                  <li>✅ Exporta reportes para padres y directivos</li>
-                  <li>✅ Biblioteca de preguntas reutilizables</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Crea quizzes en minutos, no en horas</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Gestiona múltiples clases desde un solo lugar</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Evalúa automáticamente y ahorra tiempo</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Exporta reportes para padres y directivos</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Biblioteca de preguntas reutilizables</li>
                 </ul>
               </div>
               <div className="benefit-image">
@@ -183,9 +201,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                   <div className="mockup-card">
                     <div className="card-header">Dashboard del Profesor</div>
                     <div className="card-stats">
-                      <div className="mini-stat">📚 5 Cursos</div>
-                      <div className="mini-stat">👥 120 Alumnos</div>
-                      <div className="mini-stat">🎯 95% Participación</div>
+                      <div className="mini-stat"><BookOpen size={16} strokeWidth={2} className="inline-icon" /> 5 Cursos</div>
+                      <div className="mini-stat"><Users size={16} strokeWidth={2} className="inline-icon" /> 120 Alumnos</div>
+                      <div className="mini-stat"><Target size={16} strokeWidth={2} className="inline-icon" /> 95% Participación</div>
                     </div>
                   </div>
                 </div>
@@ -217,11 +235,11 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               <div className="benefit-content">
                 <h3>Para Estudiantes</h3>
                 <ul className="benefit-list">
-                  <li>✅ Aprende jugando y divirtiéndote</li>
-                  <li>✅ Ve tu progreso en tiempo real</li>
-                  <li>✅ Compite sanamente con compañeros</li>
-                  <li>✅ Recibe feedback instantáneo</li>
-                  <li>✅ Accede desde móvil o computadora</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Aprende jugando y divirtiéndote</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Ve tu progreso en tiempo real</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Compite sanamente con compañeros</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Recibe feedback instantáneo</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Accede desde móvil o computadora</li>
                 </ul>
               </div>
             </div>
@@ -248,10 +266,10 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                 </div>
               </div>
               <ul className="pricing-features">
-                <li>✓ Hasta 30 estudiantes</li>
-                <li>✓ 10 quizzes por mes</li>
-                <li>✓ Reportes básicos</li>
-                <li>✓ Soporte por email</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Hasta 30 estudiantes</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> 10 quizzes por mes</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Reportes básicos</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Soporte por email</li>
               </ul>
               <button className="btn btn-outline btn-block" onClick={onNavigateToRegister}>
                 Comenzar Gratis
@@ -268,12 +286,12 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                 </div>
               </div>
               <ul className="pricing-features">
-                <li>✓ Estudiantes ilimitados</li>
-                <li>✓ Quizzes ilimitados</li>
-                <li>✓ Análisis avanzado</li>
-                <li>✓ Soporte prioritario</li>
-                <li>✓ Exportar a Excel/PDF</li>
-                <li>✓ Personalización completa</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Estudiantes ilimitados</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Quizzes ilimitados</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Análisis avanzado</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Soporte prioritario</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Exportar a Excel/PDF</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Personalización completa</li>
               </ul>
               <button className="btn btn-primary btn-block" onClick={onNavigateToRegister}>
                 Probar 14 días gratis
@@ -289,12 +307,12 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                 </div>
               </div>
               <ul className="pricing-features">
-                <li>✓ Todo de Profesional</li>
-                <li>✓ Múltiples profesores</li>
-                <li>✓ API access</li>
-                <li>✓ SSO/SAML</li>
-                <li>✓ Capacitación incluida</li>
-                <li>✓ Account manager dedicado</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Todo de Profesional</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Múltiples profesores</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> API access</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> SSO/SAML</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Capacitación incluida</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Account manager dedicado</li>
               </ul>
               <button className="btn btn-outline btn-block" onClick={onNavigateToRegister}>
                 Contactar Ventas
@@ -441,7 +459,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
         <div className="container">
           <div className="footer-content">
             <div className="footer-brand">
-              <h3>🎓 Quiz Xiwen</h3>
+              <h3 className="flex items-center gap-2">
+                <GraduationCap size={24} strokeWidth={2} /> Quiz Xiwen
+              </h3>
               <p>Educación interactiva del futuro</p>
             </div>
             <div className="footer-links">
