@@ -103,6 +103,37 @@
     @apply px-7 py-3.5 text-lg;
   }
 
+  /* Botones Especiales */
+  .btn-close {
+    @apply bg-transparent border-none text-gray-400 dark:text-gray-500;
+    @apply cursor-pointer p-0 flex items-center justify-center leading-none;
+    @apply w-8 h-8 text-3xl transition-colors;
+  }
+
+  .btn-close:hover {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+
+  .btn-remove {
+    @apply bg-transparent border-none text-red-500;
+    @apply cursor-pointer p-0 flex items-center justify-center leading-none;
+    @apply w-5 h-5 text-xl transition-colors;
+  }
+
+  .btn-remove:hover {
+    @apply text-red-600 dark:text-red-400;
+  }
+
+  .btn-cancel-instance {
+    @apply px-2 py-1 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400;
+    @apply border-none rounded text-xs font-semibold cursor-pointer;
+    @apply transition-all;
+  }
+
+  .btn-cancel-instance:hover {
+    @apply bg-red-100 dark:bg-red-900;
+  }
+
   /* Cards - Diseño Minimalista */
   .card {
     @apply bg-white dark:bg-zinc-900 rounded-lg p-6;

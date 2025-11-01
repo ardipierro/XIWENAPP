@@ -206,24 +206,7 @@
   margin: 0;
 }
 
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 32px;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-
-.btn-close:hover {
-  color: #1f2937;
-}
+/* btn-close ahora está en globals.css */
 
 .modal-body {
   padding: 24px;
@@ -301,24 +284,7 @@
   font-weight: 600;
 }
 
-.schedule-chip .btn-remove {
-  background: none;
-  border: none;
-  color: #ef4444;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-
-.schedule-chip .btn-remove:hover {
-  color: #dc2626;
-}
+/* btn-remove ahora está en globals.css */
 
 .schedule-form {
   display: grid;
@@ -715,13 +681,7 @@
   border-color: var(--color-border);
 }
 
-.dark .btn-close {
-  color: var(--color-text-secondary);
-}
-
-.dark .btn-close:hover {
-  color: var(--color-text-primary);
-}
+/* dark mode de btn-close ahora está en globals.css */
 
 /* Responsive */
 @media (max-width: 1024px) {
@@ -937,21 +897,7 @@
   margin-top: 8px;
 }
 
-.btn-cancel-instance {
-  padding: 4px 8px;
-  background: #fee2e2;
-  color: #dc2626;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-cancel-instance:hover {
-  background: #fecaca;
-}
+/* btn-cancel-instance ahora está en globals.css */
 
 .empty-day {
   text-align: center;
