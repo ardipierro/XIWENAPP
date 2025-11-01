@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
+  Users, FileText, BookOpen, Check, Trash2, X
+} from 'lucide-react';
+import {
   getGroupsByTeacher,
   createGroup,
   deleteGroup,
@@ -195,7 +198,9 @@ function GroupManager({ user, courses }) {
       {/* Groups Grid */}
       {filteredGroups.length === 0 ? (
         <div className="card text-center py-12">
-          <div className="text-6xl mb-4">👥</div>
+          <div className="text-6xl mb-4">
+            <Users size={64} strokeWidth={2} className="inline-block" />
+          </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             No hay grupos creados
           </h3>
@@ -225,7 +230,9 @@ function GroupManager({ user, courses }) {
                 {group.description}
               </p>
               <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <span>👥 {group.studentCount || 0} estudiantes</span>
+                <span className="flex items-center gap-1">
+                  <Users size={16} strokeWidth={2} /> {group.studentCount || 0} estudiantes
+                </span>
               </div>
             </div>
           ))}
@@ -251,7 +258,7 @@ function GroupManager({ user, courses }) {
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
-                📝 Información
+                <FileText size={18} strokeWidth={2} className="inline-icon" /> Información
               </button>
               <button
                 type="button"
@@ -262,7 +269,7 @@ function GroupManager({ user, courses }) {
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
-                👥 Estudiantes ({selectedStudents.length})
+                <Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes ({selectedStudents.length})
               </button>
               <button
                 type="button"
@@ -273,7 +280,7 @@ function GroupManager({ user, courses }) {
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
-                📚 Cursos ({selectedCourses.length})
+                <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos ({selectedCourses.length})
               </button>
             </div>
 
@@ -336,7 +343,7 @@ function GroupManager({ user, courses }) {
                               {student.name}
                             </span>
                             {isSelected && (
-                              <span className="text-gray-900 dark:text-gray-100 text-xl">✓</span>
+                              <Check size={20} strokeWidth={2} className="text-gray-900 dark:text-gray-100" />
                             )}
                           </div>
                         </div>
@@ -370,7 +377,7 @@ function GroupManager({ user, courses }) {
                               {course.name}
                             </span>
                             {isSelected && (
-                              <span className="text-gray-900 dark:text-gray-100 text-xl">✓</span>
+                              <Check size={20} strokeWidth={2} className="text-gray-900 dark:text-gray-100" />
                             )}
                           </div>
                           {course.description && (
@@ -388,7 +395,7 @@ function GroupManager({ user, courses }) {
               {/* Actions */}
               <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button type="submit" className="btn btn-primary flex-1">
-                  ✅ Crear Grupo
+                  <Check size={18} strokeWidth={2} className="inline-icon" /> Crear Grupo
                 </button>
                 <button
                   type="button"
@@ -434,13 +441,13 @@ function GroupManager({ user, courses }) {
                   }}
                   className="btn btn-sm btn-danger"
                 >
-                  🗑️ Eliminar
+                  <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
                 </button>
                 <button
                   onClick={() => setSelectedGroup(null)}
                   className="btn btn-ghost"
                 >
-                  ✕
+                  <X size={18} strokeWidth={2} />
                 </button>
               </div>
             </div>
@@ -455,7 +462,7 @@ function GroupManager({ user, courses }) {
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
-                👥 Estudiantes ({groupMembers.length})
+                <Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes ({groupMembers.length})
               </button>
               <button
                 onClick={() => setActiveGroupTab('courses')}
@@ -465,7 +472,7 @@ function GroupManager({ user, courses }) {
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
-                📚 Cursos ({groupCourses.length})
+                <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos ({groupCourses.length})
               </button>
             </div>
 
