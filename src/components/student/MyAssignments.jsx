@@ -123,7 +123,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
       <div className="my-assignments">
         <div className="assignments-header">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Asignado a Mí</h1>
-          <p className="assignments-subtitle">Contenidos y ejercicios asignados directamente por tu profesor</p>
+          <p className="section-subtitle">Contenidos y ejercicios asignados directamente por tu profesor</p>
         </div>
         <div className="loading-state">
           <div className="spinner"></div>
@@ -157,7 +157,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
       {/* Header */}
       <div className="assignments-header">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Asignado a Mí</h1>
-        <p className="assignments-subtitle">Contenidos y ejercicios asignados directamente por tu profesor</p>
+        <p className="section-subtitle">Contenidos y ejercicios asignados directamente por tu profesor</p>
       </div>
 
       {/* Tabs */}

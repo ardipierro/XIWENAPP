@@ -137,7 +137,7 @@ function MyCourses({ user, onSelectCourse }) {
     <div className="my-courses">
       <div className="courses-header">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
-        <p className="courses-subtitle">
+        <p className="section-subtitle">
           {courses.length === 0
             ? 'Aún no tienes cursos asignados'
             : `${courses.length} curso${courses.length !== 1 ? 's' : ''} disponible${courses.length !== 1 ? 's' : ''}`

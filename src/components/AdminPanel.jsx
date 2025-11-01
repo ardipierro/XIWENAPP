@@ -167,7 +167,7 @@ function AdminPanel({ user, userRole, onBack }) {
           <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
             <Crown size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" /> Panel de Administración
           </h1>
-          <p className="admin-subtitle">Usuarios y roles</p>
+          <p className="section-subtitle">Usuarios y roles</p>
         </div>
 
       {/* Mensajes */}
