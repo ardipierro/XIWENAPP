@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trophy, Medal, Clock, BarChart3 } from 'lucide-react'
 
 function ResultsScreen({
   students,
@@ -89,19 +90,19 @@ function ResultsScreen({
             let bgClass = 'bg-gray-100'
             let borderClass = ''
             let trophyIcon = null
-            
+
             if (isFirst) {
               bgClass = 'bg-gradient-to-r from-yellow-200 to-orange-200'
               borderClass = 'border-4 border-yellow-400'
-              trophyIcon = '🏆'
+              trophyIcon = <Trophy size={64} strokeWidth={2} className="text-yellow-600" />
             } else if (isSecond) {
               bgClass = 'bg-gradient-to-r from-gray-200 to-gray-300'
               borderClass = 'border-4 border-gray-400'
-              trophyIcon = '🥈'
+              trophyIcon = <Medal size={64} strokeWidth={2} className="text-gray-600" />
             } else if (isThird) {
               bgClass = 'bg-gradient-to-r from-gray-100 to-gray-200'
               borderClass = 'border-4 border-gray-300'
-              trophyIcon = '🥉'
+              trophyIcon = <Medal size={64} strokeWidth={2} className="text-gray-500" />
             }
             
             return (
@@ -140,8 +141,8 @@ function ResultsScreen({
                             }}
                           ></div>
                         </div>
-                        <div className="text-sm text-gray-600">
-                          ⏱️ Tiempo total: {(responseTimes[student] || 0).toFixed(1)}s 
+                        <div className="text-sm text-gray-600 flex items-center gap-1">
+                          <Clock size={16} strokeWidth={2} className="inline-icon" /> Tiempo total: {(responseTimes[student] || 0).toFixed(1)}s
                           {questionsAnswered[student] > 0 && responseTimes[student] > 0 &&
                             ` (promedio: ${(responseTimes[student] / questionsAnswered[student]).toFixed(1)}s)`
                           }
@@ -180,8 +181,8 @@ function ResultsScreen({
 
       {showExerciseHistory && (
         <div className="max-w-4xl mx-auto mt-6 bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            📊 Historial del ejercicio: {currentCategory}
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <BarChart3 size={24} strokeWidth={2} className="inline-icon" /> Historial del ejercicio: {currentCategory}
           </h2>
           <p className="text-sm text-gray-600 mb-6">
             Todos los alumnos que han jugado este ejercicio
@@ -213,8 +214,8 @@ function ResultsScreen({
                       {player.score}/{player.questionsAnswered} correctas
                     </div>
                     {player.totalTime > 0 && (
-                      <div className="text-xs text-gray-500">
-                        ⏱️ {player.totalTime.toFixed(1)}s total
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <Clock size={14} strokeWidth={2} className="inline-icon" /> {player.totalTime.toFixed(1)}s total
                       </div>
                     )}
                   </div>
