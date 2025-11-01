@@ -468,7 +468,12 @@ function ClassManager({ user, courses }) {
         ) : (
           <div className="classes-grid">
             {classes.map(cls => (
-              <div key={cls.id} className="class-card card">
+              <div
+                key={cls.id}
+                className="class-card card cursor-pointer hover:shadow-lg transition-all duration-300"
+                onClick={() => handleViewDetails(cls)}
+                title="Click para configurar clase"
+              >
                 <div className="class-card-header">
                   <h3>{cls.name}</h3>
                   {cls.courseName && (
@@ -501,12 +506,6 @@ function ClassManager({ user, courses }) {
                   <span className="flex items-center gap-1">
                     <Users size={16} strokeWidth={2} /> {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignados
                   </span>
-                </div>
-
-                <div className="class-actions">
-                  <button onClick={() => handleViewDetails(cls)} className="btn btn-primary">
-                    <Settings size={16} strokeWidth={2} className="inline-icon" /> Configurar
-                  </button>
                 </div>
               </div>
             ))}
