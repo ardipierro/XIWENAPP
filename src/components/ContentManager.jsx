@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2 } from 'lucide-react';
 import { getContentByTeacher, createContent, updateContent, getContentById, deleteContent } from '../firebase/content';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse';
 import {
@@ -144,13 +144,16 @@ function ContentManager({ user, courses = [] }) {
 
   const getTypeIcon = (type) => {
     const iconProps = { size: 32, strokeWidth: 2 };
-    switch (type) {
-      case 'lesson': return <BookOpen {...iconProps} />;
-      case 'reading': return <BookMarked {...iconProps} />;
-      case 'video': return <Video {...iconProps} />;
-      case 'link': return <Link {...iconProps} />;
-      default: return <FileText {...iconProps} />;
+    // Tipos de contenido tradicionales
+    if (type === 'lesson') return <BookOpen {...iconProps} />;
+    if (type === 'reading') return <BookMarked {...iconProps} />;
+    if (type === 'video') return <Video {...iconProps} />;
+    if (type === 'link') return <Link {...iconProps} />;
+    // Tipos de ejercicio
+    if (['multiple_choice', 'fill_blank', 'drag_drop', 'highlight', 'order_sentence', 'true_false', 'matching', 'table'].includes(type)) {
+      return <Gamepad2 {...iconProps} />;
     }
+    return <FileText {...iconProps} />;
   };
 
   const getTypeLabel = (type) => {
@@ -158,7 +161,15 @@ function ContentManager({ user, courses = [] }) {
       lesson: 'Lección',
       reading: 'Lectura',
       video: 'Video',
-      link: 'Enlace'
+      link: 'Enlace',
+      multiple_choice: 'Ejercicio: Opción Múltiple',
+      fill_blank: 'Ejercicio: Completar Espacios',
+      drag_drop: 'Ejercicio: Drag & Drop',
+      highlight: 'Ejercicio: Resaltar Palabras',
+      order_sentence: 'Ejercicio: Ordenar Oración',
+      true_false: 'Ejercicio: Verdadero/Falso',
+      matching: 'Ejercicio: Relacionar',
+      table: 'Ejercicio: Tabla'
     };
     return types[type] || type;
   };
@@ -402,6 +413,15 @@ function ContentManager({ user, courses = [] }) {
                   <option value="reading">Lectura</option>
                   <option value="video">Video</option>
                   <option value="link">Enlace</option>
+                  <option disabled>──────────</option>
+                  <option value="multiple_choice">Ejercicio: Opción Múltiple</option>
+                  <option value="fill_blank">Ejercicio: Completar Espacios</option>
+                  <option value="drag_drop">Ejercicio: Drag & Drop</option>
+                  <option value="highlight">Ejercicio: Resaltar Palabras</option>
+                  <option value="order_sentence">Ejercicio: Ordenar Oración</option>
+                  <option value="true_false">Ejercicio: Verdadero/Falso</option>
+                  <option value="matching">Ejercicio: Relacionar</option>
+                  <option value="table">Ejercicio: Tabla</option>
                 </select>
               </div>
 
@@ -518,6 +538,15 @@ function ContentManager({ user, courses = [] }) {
                   <option value="reading">Lectura</option>
                   <option value="video">Video</option>
                   <option value="link">Enlace</option>
+                  <option disabled>──────────</option>
+                  <option value="multiple_choice">Ejercicio: Opción Múltiple</option>
+                  <option value="fill_blank">Ejercicio: Completar Espacios</option>
+                  <option value="drag_drop">Ejercicio: Drag & Drop</option>
+                  <option value="highlight">Ejercicio: Resaltar Palabras</option>
+                  <option value="order_sentence">Ejercicio: Ordenar Oración</option>
+                  <option value="true_false">Ejercicio: Verdadero/Falso</option>
+                  <option value="matching">Ejercicio: Relacionar</option>
+                  <option value="table">Ejercicio: Tabla</option>
                 </select>
               </div>
 

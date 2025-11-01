@@ -3,7 +3,6 @@ import {
   BarChart3,
   Users,
   BookOpen,
-  Gamepad2,
   FileText,
   UsersRound,
   Calendar,
@@ -37,7 +36,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: Users, label: 'Usuarios', path: '/teacher', action: 'users' },
         { divider: true },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
-        { icon: Gamepad2, label: 'Ejercicios', path: '/teacher', action: 'exercises' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: UsersRound, label: 'Grupos', path: '/teacher', action: 'groups' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
@@ -48,7 +46,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
         { divider: true },
-        { icon: Gamepad2, label: 'Ejercicios', path: '/teacher', action: 'exercises' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: UsersRound, label: 'Grupos', path: '/teacher', action: 'groups' },

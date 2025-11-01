@@ -54,7 +54,6 @@ import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
-import ExerciseManager from './ExerciseManager';
 import ContentManager from './ContentManager';
 import GroupManager from './GroupManager';
 import ClassManager from './ClassManager';
@@ -630,19 +629,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Renderizar Gestión de Ejercicios - CON Layout
-  if (currentScreen === 'exercises') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="exercises-management">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver a Inicio
-          </button>
-          <ExerciseManager user={user} courses={courses} onPlayExercise={handlePlayExercise} />
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   // Renderizar Gestión de Contenido - CON Layout
   if (currentScreen === 'content') {
