@@ -338,7 +338,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       ) : (
         <div className="grid gap-4">
           {filteredExercises.map((exercise) => (
-            <div key={exercise.id} className="card hover:shadow-lg transition-shadow">
+            <div key={exercise.id} className="card">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">

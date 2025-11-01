@@ -385,8 +385,8 @@ function CoursesScreen({ onBack, user }) {
       {/* Courses Display */}
       {filteredCourses.length === 0 ? (
         <div className="card text-center py-12">
-          <div className="text-6xl mb-4">
-            <BookOpen size={64} strokeWidth={2} />
+          <div className="mb-4">
+            <BookOpen size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500 mx-auto" />
           </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {searchTerm ? 'No se encontraron cursos' : 'No hay cursos creados'}
@@ -404,7 +404,7 @@ function CoursesScreen({ onBack, user }) {
         /* Grid View */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredCourses.map((course) => (
-            <div key={course.id} className="card hover:shadow-lg transition-all" style={{ padding: '12px' }}>
+            <div key={course.id} className="card" style={{ padding: '12px' }}>
               {/* Course Image */}
               {course.imageUrl ? (
                 <div className="w-full h-32 mb-2 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -466,7 +466,7 @@ function CoursesScreen({ onBack, user }) {
         /* List View */
         <div className="flex flex-col gap-3">
           {filteredCourses.map((course) => (
-            <div key={course.id} className="card hover:shadow-lg transition-all">
+            <div key={course.id} className="card">
               <div className="flex gap-4 items-start">
                 {/* Course Image - Smaller in list view */}
                 {course.imageUrl ? (

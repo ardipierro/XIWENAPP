@@ -192,8 +192,8 @@ function GroupManager({ user, courses }) {
       {/* Groups Grid */}
       {filteredGroups.length === 0 ? (
         <div className="card text-center py-12">
-          <div className="text-6xl mb-4">
-            <Users size={64} strokeWidth={2} className="inline-block" />
+          <div className="mb-4">
+            <Users size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500 mx-auto" />
           </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             No hay grupos creados
@@ -213,7 +213,7 @@ function GroupManager({ user, courses }) {
           {filteredGroups.map((group) => (
             <div
               key={group.id}
-              className="card cursor-pointer hover:shadow-lg transition-shadow"
+              className="card cursor-pointer"
               style={{ borderLeft: `3px solid #3f3f46` }}
               onClick={() => handleSelectGroup(group)}
             >
