@@ -28,7 +28,7 @@ function GroupManager({ user, courses }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: '#6366f1'
+    color: '#3f3f46'
   });
 
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -74,7 +74,7 @@ function GroupManager({ user, courses }) {
       // Recargar datos y resetear estados
       loadData();
       setShowCreateModal(false);
-      setFormData({ name: '', description: '', color: '#6366f1' });
+      setFormData({ name: '', description: '', color: '#3f3f46' });
       setSelectedStudents([]);
       setSelectedCourses([]);
       setActiveCreateTab('info');
@@ -215,7 +215,7 @@ function GroupManager({ user, courses }) {
             <div
               key={group.id}
               className="card cursor-pointer hover:shadow-lg transition-shadow"
-              style={{ borderLeft: `4px solid ${group.color}` }}
+              style={{ borderLeft: `3px solid #3f3f46` }}
               onClick={() => handleSelectGroup(group)}
             >
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -224,17 +224,8 @@ function GroupManager({ user, courses }) {
               <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
                 {group.description}
               </p>
-              <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                 <span>👥 {group.studentCount || 0} estudiantes</span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(group.id);
-                  }}
-                  className="btn btn-sm btn-danger"
-                >
-                  🗑️
-                </button>
               </div>
             </div>
           ))}
@@ -256,7 +247,7 @@ function GroupManager({ user, courses }) {
                 onClick={() => setActiveCreateTab('info')}
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeCreateTab === 'info'
-                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
@@ -267,7 +258,7 @@ function GroupManager({ user, courses }) {
                 onClick={() => setActiveCreateTab('students')}
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeCreateTab === 'students'
-                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
@@ -278,7 +269,7 @@ function GroupManager({ user, courses }) {
                 onClick={() => setActiveCreateTab('courses')}
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeCreateTab === 'courses'
-                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
@@ -336,7 +327,7 @@ function GroupManager({ user, courses }) {
                           onClick={() => toggleStudentSelection(student)}
                           className={`p-3 rounded cursor-pointer transition-colors ${
                             isSelected
-                              ? 'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-500'
+                              ? 'bg-gray-100 dark:bg-gray-700 border-2 border-gray-400 dark:border-gray-500'
                               : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
@@ -345,7 +336,7 @@ function GroupManager({ user, courses }) {
                               {student.name}
                             </span>
                             {isSelected && (
-                              <span className="text-indigo-600 dark:text-indigo-400 text-xl">✓</span>
+                              <span className="text-gray-900 dark:text-gray-100 text-xl">✓</span>
                             )}
                           </div>
                         </div>
@@ -370,7 +361,7 @@ function GroupManager({ user, courses }) {
                           onClick={() => toggleCourseSelection(course)}
                           className={`p-3 rounded cursor-pointer transition-colors ${
                             isSelected
-                              ? 'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-500'
+                              ? 'bg-gray-100 dark:bg-gray-700 border-2 border-gray-400 dark:border-gray-500'
                               : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                         >
@@ -379,7 +370,7 @@ function GroupManager({ user, courses }) {
                               {course.name}
                             </span>
                             {isSelected && (
-                              <span className="text-indigo-600 dark:text-indigo-400 text-xl">✓</span>
+                              <span className="text-gray-900 dark:text-gray-100 text-xl">✓</span>
                             )}
                           </div>
                           {course.description && (
@@ -403,7 +394,7 @@ function GroupManager({ user, courses }) {
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false);
-                    setFormData({ name: '', description: '', color: '#6366f1' });
+                    setFormData({ name: '', description: '', color: '#3f3f46' });
                     setSelectedStudents([]);
                     setSelectedCourses([]);
                     setActiveCreateTab('info');
@@ -432,12 +423,26 @@ function GroupManager({ user, courses }) {
                   {selectedGroup.description}
                 </p>
               </div>
-              <button
-                onClick={() => setSelectedGroup(null)}
-                className="btn btn-ghost"
-              >
-                ✕
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(`¿Eliminar el grupo "${selectedGroup.name}"?`)) {
+                      handleDelete(selectedGroup.id);
+                      setSelectedGroup(null);
+                    }
+                  }}
+                  className="btn btn-sm btn-danger"
+                >
+                  🗑️ Eliminar
+                </button>
+                <button
+                  onClick={() => setSelectedGroup(null)}
+                  className="btn btn-ghost"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Tabs */}
@@ -446,7 +451,7 @@ function GroupManager({ user, courses }) {
                 onClick={() => setActiveGroupTab('students')}
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeGroupTab === 'students'
-                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
@@ -456,7 +461,7 @@ function GroupManager({ user, courses }) {
                 onClick={() => setActiveGroupTab('courses')}
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeGroupTab === 'courses'
-                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >

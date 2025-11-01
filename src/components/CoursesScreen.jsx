@@ -361,7 +361,7 @@ function CoursesScreen({ onBack, user }) {
             <button
               className={`px-4 py-2 rounded-md transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-white dark:bg-gray-700 shadow-sm font-semibold text-indigo-600 dark:text-indigo-400'
+                  ? 'bg-white dark:bg-gray-700 shadow-sm font-semibold text-gray-900 dark:text-gray-100'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
               onClick={() => setViewMode('grid')}
@@ -372,7 +372,7 @@ function CoursesScreen({ onBack, user }) {
             <button
               className={`px-4 py-2 rounded-md transition-all ${
                 viewMode === 'list'
-                  ? 'bg-white dark:bg-gray-700 shadow-sm font-semibold text-indigo-600 dark:text-indigo-400'
+                  ? 'bg-white dark:bg-gray-700 shadow-sm font-semibold text-gray-900 dark:text-gray-100'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
               onClick={() => setViewMode('list')}
@@ -609,7 +609,7 @@ function CoursesScreen({ onBack, user }) {
                       disabled={uploadingImage}
                     />
                   )}
-                  {uploadingImage && <p className="text-sm text-blue-600 mt-2">⏳ Subiendo imagen...</p>}
+                  {uploadingImage && <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">⏳ Subiendo imagen...</p>}
                   <p className="text-sm text-gray-500 mt-1">Máximo 5MB (JPG, PNG, GIF, WEBP)</p>
                 </div>
               </div>
@@ -647,7 +647,7 @@ function CoursesScreen({ onBack, user }) {
                   onClick={() => setActiveModalTab('info')}
                   className={`py-3 px-4 font-medium border-b-2 transition-colors ${
                     activeModalTab === 'info'
-                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
@@ -657,7 +657,7 @@ function CoursesScreen({ onBack, user }) {
                   onClick={() => setActiveModalTab('content')}
                   className={`py-3 px-4 font-medium border-b-2 transition-colors ${
                     activeModalTab === 'content'
-                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
@@ -667,7 +667,7 @@ function CoursesScreen({ onBack, user }) {
                   onClick={() => setActiveModalTab('exercises')}
                   className={`py-3 px-4 font-medium border-b-2 transition-colors ${
                     activeModalTab === 'exercises'
-                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
@@ -677,7 +677,7 @@ function CoursesScreen({ onBack, user }) {
                   onClick={() => setActiveModalTab('students')}
                   className={`py-3 px-4 font-medium border-b-2 transition-colors ${
                     activeModalTab === 'students'
-                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
@@ -747,7 +747,7 @@ function CoursesScreen({ onBack, user }) {
                             disabled={uploadingImage}
                           />
                         )}
-                        {uploadingImage && <p className="text-sm text-blue-600 mt-2">⏳ Subiendo imagen...</p>}
+                        {uploadingImage && <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">⏳ Subiendo imagen...</p>}
                         <p className="text-sm text-gray-500 mt-1">Máximo 5MB (JPG, PNG, GIF, WEBP)</p>
                       </div>
 

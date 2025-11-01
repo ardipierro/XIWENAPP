@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { Home, BarChart3, Edit, User, Settings, LogOut } from 'lucide-react';
 import './UserMenu.css';
 
 function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
@@ -71,7 +72,7 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
           className="menu-item"
           onClick={() => handleNavigate('/dashboard')}
         >
-          <span className="menu-item-icon">🏠</span>
+          <Home size={18} strokeWidth={2} className="menu-item-icon" />
           <span className="menu-item-text">Ir al Inicio</span>
         </button>
 
@@ -80,7 +81,7 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
             className="menu-item"
             onClick={() => alert('Funcionalidad en desarrollo')}
           >
-            <span className="menu-item-icon">📊</span>
+            <BarChart3 size={18} strokeWidth={2} className="menu-item-icon" />
             <span className="menu-item-text">Mi Progreso</span>
           </button>
         )}
@@ -94,7 +95,7 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
           className="menu-item"
           onClick={onChangeAvatar}
         >
-          <span className="menu-item-icon">✏️</span>
+          <Edit size={18} strokeWidth={2} className="menu-item-icon" />
           <span className="menu-item-text">Cambiar Avatar</span>
         </button>
 
@@ -102,7 +103,7 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
           className="menu-item"
           onClick={() => alert('Funcionalidad de perfil en desarrollo')}
         >
-          <span className="menu-item-icon">👤</span>
+          <User size={18} strokeWidth={2} className="menu-item-icon" />
           <span className="menu-item-text">Ver Perfil</span>
         </button>
 
@@ -110,7 +111,7 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
           className="menu-item"
           onClick={() => alert('Funcionalidad de configuración en desarrollo')}
         >
-          <span className="menu-item-icon">⚙️</span>
+          <Settings size={18} strokeWidth={2} className="menu-item-icon" />
           <span className="menu-item-text">Configuración</span>
         </button>
       </div>
@@ -123,7 +124,7 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
           className="menu-item logout-item"
           onClick={handleLogout}
         >
-          <span className="menu-item-icon">🚪</span>
+          <LogOut size={18} strokeWidth={2} className="menu-item-icon" />
           <span className="menu-item-text">Cerrar Sesión</span>
         </button>
       </div>

@@ -628,7 +628,7 @@ function ContentManager({ user, courses = [] }) {
                     href={selectedContent.body}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                    className="text-gray-700 dark:text-gray-300 hover:underline break-all"
                   >
                     {selectedContent.body}
                   </a>

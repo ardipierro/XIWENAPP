@@ -1,28 +1,33 @@
 import { useState } from 'react';
+import {
+  User, GraduationCap, FlaskConical, Palette, Dumbbell,
+  BookOpen, Star, Rocket, Trophy, Brain, Medal,
+  BookMarked, Crown, Flame, Zap, Smile, Glasses,
+  UserCog, Bot
+} from 'lucide-react';
 import './AvatarSelector.css';
 
-// Avatares disponibles
+// Avatares disponibles con iconos de lucide-react
 export const AVATARS = {
-  default: '👤',
-  student1: '👨‍🎓',
-  student2: '👩‍🎓',
-  scientist: '🧑‍🔬',
-  artist: '🧑‍🎨',
-  athlete: '🏃',
-  reader: '📚',
-  star: '⭐',
-  rocket: '🚀',
-  trophy: '🏆',
-  brain: '🧠',
-  medal: '🥇',
-  teacher: '👨‍🏫',
-  admin: '👑',
-  fire: '🔥',
-  lightning: '⚡',
-  smile: '😊',
-  cool: '😎',
-  ninja: '🥷',
-  robot: '🤖'
+  default: { icon: User, label: 'Usuario' },
+  student1: { icon: GraduationCap, label: 'Estudiante' },
+  student2: { icon: BookOpen, label: 'Lector' },
+  scientist: { icon: FlaskConical, label: 'Científico' },
+  artist: { icon: Palette, label: 'Artista' },
+  athlete: { icon: Dumbbell, label: 'Atleta' },
+  reader: { icon: BookMarked, label: 'Estudioso' },
+  star: { icon: Star, label: 'Estrella' },
+  rocket: { icon: Rocket, label: 'Cohete' },
+  trophy: { icon: Trophy, label: 'Trofeo' },
+  brain: { icon: Brain, label: 'Cerebro' },
+  medal: { icon: Medal, label: 'Medalla' },
+  teacher: { icon: UserCog, label: 'Profesor' },
+  admin: { icon: Crown, label: 'Admin' },
+  fire: { icon: Flame, label: 'Fuego' },
+  lightning: { icon: Zap, label: 'Rayo' },
+  smile: { icon: Smile, label: 'Feliz' },
+  cool: { icon: Glasses, label: 'Cool' },
+  robot: { icon: Bot, label: 'Robot' }
 };
 
 function AvatarSelector({ currentAvatar, onSelectAvatar, onClose }) {
@@ -37,15 +42,18 @@ function AvatarSelector({ currentAvatar, onSelectAvatar, onClose }) {
         </div>
 
         <div className="avatars-grid">
-          {Object.entries(AVATARS).map(([id, emoji]) => (
+          {Object.entries(AVATARS).map(([id, { icon: Icon, label }]) => (
             <button
               key={id}
               className={`avatar-option ${currentAvatar === id ? 'selected' : ''}`}
               onClick={() => onSelectAvatar(id)}
+              title={label}
             >
-              <span className="avatar-emoji">{emoji}</span>
+              <Icon size={32} strokeWidth={2} className="avatar-icon" />
               {currentAvatar === id && (
-                <span className="selected-indicator">✓</span>
+                <div className="selected-indicator">
+                  <Star size={12} fill="currentColor" />
+                </div>
               )}
             </button>
           ))}

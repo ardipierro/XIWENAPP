@@ -29,38 +29,38 @@ export const ROLE_INFO = {
   [ROLES.ADMIN]: {
     name: 'Administrador',
     description: 'Acceso total al sistema, puede gestionar usuarios y roles',
-    icon: '👑',
-    color: '#DC2626' // rojo
+    icon: 'Crown',
+    color: '#ef4444' // rojo
   },
   [ROLES.TEACHER]: {
     name: 'Profesor',
     description: 'Puede crear juegos, gestionar alumnos y ver estadísticas',
-    icon: '👨‍🏫',
-    color: '#7C3AED' // morado
+    icon: 'UserCog',
+    color: '#a1a1aa' // gris
   },
   [ROLES.STUDENT]: {
     name: 'Alumno Regular',
     description: 'Acceso completo a juegos y progreso personal',
-    icon: '👨‍🎓',
-    color: '#2563EB' // azul
+    icon: 'GraduationCap',
+    color: '#71717a' // gris oscuro
   },
   [ROLES.LISTENER]: {
     name: 'Oyente',
     description: 'Solo lectura, no puede participar en juegos',
-    icon: '👂',
-    color: '#059669' // verde
+    icon: 'Ear',
+    color: '#10b981' // verde
   },
   [ROLES.TRIAL]: {
     name: 'Alumno de Prueba',
     description: 'Acceso limitado temporal para pruebas',
-    icon: '🎯',
-    color: '#D97706' // naranja
+    icon: 'Target',
+    color: '#f59e0b' // naranja
   },
   [ROLES.TRIAL_TEACHER]: {
     name: 'Profesor de Prueba',
     description: 'Acceso limitado temporal para profesores',
-    icon: '🔬',
-    color: '#EC4899' // rosa
+    icon: 'FlaskConical',
+    color: '#d1d5db' // gris claro
   }
 };
 

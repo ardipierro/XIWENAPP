@@ -63,8 +63,8 @@
 
 /* Header del menú */
 .sidemenu-header {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid #27272a;
+  padding: 16px;
+  border-bottom: none;
 }
 
 .sidemenu-title {
@@ -79,26 +79,27 @@
 /* Navegación */
 .sidemenu-nav {
   flex: 1;
-  padding: 12px 8px;
+  padding: 8px 0;
 }
 
-/* Items del menú - Minimalista */
+/* Items del menú - Estilo plano como UserMenu */
 .sidemenu-item {
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
-  margin-bottom: 2px;
+  padding: 12px 16px;
+  margin-bottom: 0;
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: 0;
   cursor: pointer;
   transition: none;
   text-align: left;
   color: #f4f4f5;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .sidemenu-item:hover {
@@ -106,19 +107,23 @@
 }
 
 .sidemenu-item.active {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
+  background: #18181b;
+  color: #f4f4f5;
   font-weight: 500;
 }
 
 .sidemenu-item-icon {
-  font-size: 18px;
+  color: #a1a1aa;
   width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.sidemenu-item:hover .sidemenu-item-icon {
+  color: #f4f4f5;
 }
 
 .sidemenu-item-label {
@@ -128,26 +133,16 @@
   text-overflow: ellipsis;
 }
 
-/* Indicador activo - Sutil punto a la izquierda */
-.active-indicator {
-  position: absolute;
-  left: 0;
-  width: 3px;
-  height: 20px;
-  background: #818cf8;
-  border-radius: 0 2px 2px 0;
-}
-
 /* Divisor */
 .sidemenu-divider {
   height: 1px;
   background: #27272a;
-  margin: 8px 16px;
+  margin: 8px 0;
 }
 
 /* Footer */
 .sidemenu-footer {
-  padding: 16px 20px;
+  padding: 16px;
   border-top: 1px solid #27272a;
   margin-top: auto;
 }
@@ -161,7 +156,7 @@
 .version-label {
   font-size: 11px;
   font-weight: 600;
-  color: #818cf8;
+  color: #a1a1aa;
   letter-spacing: 0.5px;
 }
 

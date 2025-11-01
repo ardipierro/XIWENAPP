@@ -68,20 +68,6 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
     navigate(path);
   };
 
-  // Determinar badge de rol
-  const getRoleBadge = () => {
-    const badges = {
-      admin: { text: 'Admin', color: '#ef4444' },
-      teacher: { text: 'Profesor', color: '#10b981' },
-      trial_teacher: { text: 'Profesor (Trial)', color: '#f59e0b' },
-      student: { text: 'Estudiante', color: '#3b82f6' },
-      listener: { text: 'Oyente', color: '#6b7280' },
-      trial: { text: 'Prueba', color: '#f59e0b' },
-    };
-    return badges[userRole] || { text: userRole, color: '#6b7280' };
-  };
-
-  const roleBadge = getRoleBadge();
 
 
   return (
@@ -145,18 +131,15 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
                 {userAvatar && userAvatar.startsWith('http') ? (
                   <img src={userAvatar} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
-                  <span className="avatar-emoji-display">{AVATARS[userAvatar] || AVATARS.default}</span>
+                  (() => {
+                    const AvatarIcon = AVATARS[userAvatar]?.icon || AVATARS.default.icon;
+                    return <AvatarIcon size={20} strokeWidth={2} className="avatar-icon-display" />;
+                  })()
                 )}
                 <div className="avatar-edit-hint">✏️</div>
               </div>
               <div className="user-info">
                 <span className="user-name">{getDisplayName()}</span>
-                <span
-                  className="user-role"
-                  style={{ color: roleBadge.color }}
-                >
-                  {roleBadge.text}
-                </span>
               </div>
               <span className="dropdown-arrow">▼</span>
             </button>

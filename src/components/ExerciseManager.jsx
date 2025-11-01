@@ -707,16 +707,16 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                   <label className="form-label">
                     Preguntas (Formato: 1 pregunta + 4 opciones por línea)
                   </label>
-                  <div className="mb-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
-                    <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                  <div className="mb-2 p-3 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded">
+                    <p className="text-sm text-gray-800 dark:text-gray-200 mb-2">
                       📝 <strong>Formato:</strong>
                     </p>
-                    <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-4">
+                    <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1 ml-4">
                       <li>• Línea 1: Pregunta</li>
                       <li>• Líneas 2-5: Opciones (marca con "1." la respuesta correcta)</li>
                       <li>• Deja una línea en blanco entre preguntas</li>
                     </ul>
-                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
                       Ejemplo:<br/>
                       ¿Cuál es la capital de Argentina?<br/>
                       1. Buenos Aires<br/>

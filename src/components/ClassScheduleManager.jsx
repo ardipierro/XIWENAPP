@@ -473,8 +473,8 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                             fontSize: '13px',
                             border: '1px solid #e5e7eb',
                             borderRadius: '6px',
-                            background: formData.courseName === course.courseName ? '#eef2ff' : 'white',
-                            color: formData.courseName === course.courseName ? '#6366f1' : '#6b7280',
+                            background: formData.courseName === course.courseName ? '#f4f4f5' : 'white',
+                            color: formData.courseName === course.courseName ? '#18181b' : '#6b7280',
                             cursor: 'pointer',
                             transition: 'all 0.2s'
                           }}

@@ -10,51 +10,6 @@
   box-shadow: none;
 }
 
-/* TopBar con tema Admin */
-.admin-theme .topbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.admin-theme .brand-logo,
-.admin-theme .brand-title {
-  color: white;
-}
-
-.admin-theme .sidebar-toggle:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.admin-theme .hamburger span {
-  background: white;
-}
-
-.admin-theme .icon-button {
-  color: white;
-}
-
-.admin-theme .icon-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.admin-theme .topbar-divider {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.admin-theme .user-name,
-.admin-theme .user-role {
-  color: white !important;
-}
-
-.admin-theme .dropdown-arrow {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.admin-theme .user-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
 .topbar-content {
   display: flex;
   align-items: center;

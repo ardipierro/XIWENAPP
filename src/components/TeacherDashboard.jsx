@@ -955,7 +955,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                       onClick={() => setActiveResourceTab('courses')}
                       className={`py-3 px-4 font-medium border-b-2 transition-colors ${
                         activeResourceTab === 'courses'
-                          ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
@@ -965,7 +965,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                       onClick={() => setActiveResourceTab('content')}
                       className={`py-3 px-4 font-medium border-b-2 transition-colors ${
                         activeResourceTab === 'content'
-                          ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
@@ -975,7 +975,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                       onClick={() => setActiveResourceTab('exercises')}
                       className={`py-3 px-4 font-medium border-b-2 transition-colors ${
                         activeResourceTab === 'exercises'
-                          ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >

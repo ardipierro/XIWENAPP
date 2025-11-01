@@ -121,21 +121,21 @@ function ResultsScreen({
                       {isThird && <div className="text-lg text-gray-500 font-semibold">Tercer Lugar</div>}
                       <div className="mt-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-lg font-semibold text-indigo-700">
-                            {questionsAnswered[student] > 0 
-                              ? `${Math.round((scores[student] / questionsAnswered[student]) * 100)}% de aciertos` 
+                          <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                            {questionsAnswered[student] > 0
+                              ? `${Math.round((scores[student] / questionsAnswered[student]) * 100)}% de aciertos`
                               : '0% de aciertos'}
                           </span>
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
                             ({scores[student]}/{questionsAnswered[student]} correctas)
                           </span>
                         </div>
-                        <div className="w-full bg-gray-300 rounded-full h-3 overflow-hidden mb-2">
-                          <div 
-                            className="bg-indigo-600 h-3 rounded-full transition-all duration-500"
-                            style={{ 
-                              width: questionsAnswered[student] > 0 
-                                ? `${(scores[student] / questionsAnswered[student]) * 100}%` 
+                        <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3 overflow-hidden mb-2">
+                          <div
+                            className="bg-gray-600 dark:bg-gray-500 h-3 rounded-full transition-all duration-500"
+                            style={{
+                              width: questionsAnswered[student] > 0
+                                ? `${(scores[student] / questionsAnswered[student]) * 100}%`
                                 : '0%'
                             }}
                           ></div>
@@ -149,7 +149,7 @@ function ResultsScreen({
                       </div>
                     </div>
                   </div>
-                  <div className="text-5xl font-bold text-indigo-600">{scores[student]} puntos</div>
+                  <div className="text-5xl font-bold text-gray-700 dark:text-gray-300">{scores[student]} puntos</div>
                 </div>
               </div>
             )
@@ -158,14 +158,14 @@ function ResultsScreen({
 
         <button
           onClick={resetGame}
-          className="w-full py-4 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 font-semibold text-xl mb-3"
+          className="w-full py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 font-semibold text-xl mb-3"
         >
           Nuevo Juego
         </button>
 
         <button
           onClick={() => setShowExerciseHistory(!showExerciseHistory)}
-          className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-xl mb-3"
+          className="w-full py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 font-semibold text-xl mb-3"
         >
           {showExerciseHistory ? 'Ocultar' : 'Ver'} Historial de este Ejercicio
         </button>
@@ -190,23 +190,23 @@ function ResultsScreen({
           <div className="space-y-3">
             {getExerciseHistory(currentCategory).map((player, index) => (
               <div key={index} className={`p-4 rounded-lg border-2 ${
-                index === 0 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300' :
-                index === 1 ? 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300' :
-                index === 2 ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200' :
-                'bg-white border-gray-200'
+                index === 0 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-700' :
+                index === 1 ? 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:border-gray-600' :
+                index === 2 ? 'bg-gradient-to-r from-gray-100 to-gray-200 border-gray-300 dark:from-gray-700 dark:to-gray-600 dark:border-gray-500' :
+                'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
               }`}>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl font-bold text-gray-600 w-12">#{index + 1}</div>
+                    <div className="text-2xl font-bold text-gray-600 dark:text-gray-400 w-12">#{index + 1}</div>
                     <div>
-                      <div className="text-lg font-bold">{player.name}</div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{player.name}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         {new Date(player.date).toLocaleDateString('es-AR')}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-indigo-600">
+                    <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                       {player.percentage.toFixed(1)}%
                     </div>
                     <div className="text-sm text-gray-600">

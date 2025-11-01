@@ -11,16 +11,16 @@
    ============================================ */
 
 :root {
-  /* Colores Primarios */
-  --color-primary: #3b82f6;        /* Azul principal */
-  --color-primary-dark: #2563eb;   /* Azul oscuro */
-  --color-primary-light: #60a5fa;  /* Azul claro */
-  
+  /* Colores Primarios - Dark Theme */
+  --color-primary: #18181b;        /* Dark gray */
+  --color-primary-dark: #27272a;   /* Medium dark gray */
+  --color-primary-light: #3f3f46;  /* Light dark gray */
+
   /* Colores Secundarios */
   --color-secondary: #10b981;      /* Verde éxito */
   --color-secondary-dark: #059669;
   --color-secondary-light: #34d399;
-  
+
   /* Colores de Acento */
   --color-accent: #f59e0b;         /* Naranja/Amarillo */
   --color-accent-dark: #d97706;
@@ -30,7 +30,7 @@
   --color-success: #10b981;        /* Verde */
   --color-warning: #f59e0b;        /* Amarillo/Naranja */
   --color-error: #ef4444;          /* Rojo */
-  --color-info: #3b82f6;           /* Azul */
+  --color-info: #a1a1aa;           /* Gray neutral */
   
   /* Colores Neutrales */
   --color-background: #f9fafb;     /* Fondo claro */
@@ -41,8 +41,8 @@
   --color-disabled: #d1d5db;       /* Deshabilitado */
   
   /* Colores de Rol */
-  --color-teacher: #8b5cf6;        /* Púrpura para profesor */
-  --color-student: #3b82f6;        /* Azul para estudiante */
+  --color-teacher: #a1a1aa;        /* Gray neutral para profesor */
+  --color-student: #71717a;        /* Gray neutral para estudiante */
   
   /* Sombras */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -355,18 +355,18 @@ body {
 }
 
 .badge-info {
-  background-color: #dbeafe;
-  color: var(--color-primary-dark);
+  background-color: #e5e7eb;
+  color: #52525b;
 }
 
 .badge-teacher {
-  background-color: #ede9fe;
-  color: var(--color-teacher);
+  background-color: #e5e7eb;
+  color: #71717a;
 }
 
 .badge-student {
-  background-color: #dbeafe;
-  color: var(--color-student);
+  background-color: #f3f4f6;
+  color: #71717a;
 }
 
 /* Alerts */
@@ -548,7 +548,7 @@ body {
 }
 
 .dark .btn-ghost:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #27272a;
 }
 
 .dark .btn-outline {

@@ -508,9 +508,6 @@ function ClassManager({ user, courses }) {
                   <button onClick={() => handleViewDetails(cls)} className="btn btn-primary">
                     ⚙️ Configurar
                   </button>
-                  <button onClick={() => handleDeleteClass(cls.id)} className="btn btn-danger btn-sm">
-                    Eliminar
-                  </button>
                 </div>
               </div>
             ))}
@@ -700,12 +697,25 @@ function ClassManager({ user, courses }) {
                       {selectedClass.description}
                     </p>
                   </div>
-                  <button
-                    onClick={() => setShowDetailsModal(false)}
-                    className="btn btn-ghost"
-                  >
-                    ✕
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (confirm(`¿Eliminar la clase "${selectedClass.name}"?`)) {
+                          handleDeleteClass(selectedClass.id);
+                          setShowDetailsModal(false);
+                        }
+                      }}
+                      className="btn btn-sm btn-danger"
+                    >
+                      🗑️ Eliminar
+                    </button>
+                    <button
+                      onClick={() => setShowDetailsModal(false)}
+                      className="btn btn-ghost"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
 
                 {message.text && (
@@ -720,7 +730,7 @@ function ClassManager({ user, courses }) {
                     onClick={() => setDetailsTab('general')}
                     className={`px-4 py-2 font-semibold transition-colors ${
                       detailsTab === 'general'
-                        ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                        ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                   >
@@ -730,7 +740,7 @@ function ClassManager({ user, courses }) {
                     onClick={() => setDetailsTab('asignaciones')}
                     className={`px-4 py-2 font-semibold transition-colors ${
                       detailsTab === 'asignaciones'
-                        ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                        ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                   >
@@ -797,7 +807,7 @@ function ClassManager({ user, courses }) {
                           <div className="mb-4">
                             <div className="flex flex-wrap gap-2 mb-2">
                               {formData.schedules.map((schedule, idx) => (
-                                <div key={idx} className="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-gray-700 border-2 border-indigo-500 rounded-full text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                                <div key={idx} className="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-gray-700 border-2 border-gray-400 dark:border-gray-500 rounded-full text-sm font-medium text-gray-900 dark:text-gray-100">
                                   <span>{getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}</span>
                                   <button onClick={() => handleRemoveSchedule(idx)} className="text-red-500 hover:text-red-700 font-bold">
                                     ×
@@ -878,7 +888,7 @@ function ClassManager({ user, courses }) {
                           </div>
                         </div>
 
-                        <label className="flex items-start gap-2 cursor-pointer mb-3 p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 hover:border-indigo-400">
+                        <label className="flex items-start gap-2 cursor-pointer mb-3 p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500">
                           <input
                             type="checkbox"
                             checked={scheduleForm.autoRenew}
@@ -913,29 +923,29 @@ function ClassManager({ user, courses }) {
                         const nextInstance = upcoming[0];
 
                         return (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
-                            <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+                          <div className="bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded-lg p-4 mb-4">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                               <span>📊</span>
                               <span>Estadísticas de Instancias</span>
                             </h4>
                             <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                               <div>
-                                <span className="text-blue-700 dark:text-blue-300">Total:</span>
-                                <span className="ml-2 font-semibold text-blue-900 dark:text-blue-100">{classInstances.length}</span>
+                                <span className="text-gray-700 dark:text-gray-400">Total:</span>
+                                <span className="ml-2 font-semibold text-gray-900 dark:text-gray-100">{classInstances.length}</span>
                               </div>
                               <div>
-                                <span className="text-blue-700 dark:text-blue-300">Pendientes:</span>
-                                <span className="ml-2 font-semibold text-blue-900 dark:text-blue-100">{upcoming.length}</span>
+                                <span className="text-gray-700 dark:text-gray-400">Pendientes:</span>
+                                <span className="ml-2 font-semibold text-gray-900 dark:text-gray-100">{upcoming.length}</span>
                               </div>
                               <div>
-                                <span className="text-blue-700 dark:text-blue-300">Realizadas:</span>
-                                <span className="ml-2 font-semibold text-blue-900 dark:text-blue-100">{completed.length}</span>
+                                <span className="text-gray-700 dark:text-gray-400">Realizadas:</span>
+                                <span className="ml-2 font-semibold text-gray-900 dark:text-gray-100">{completed.length}</span>
                               </div>
                             </div>
                             {nextInstance && (
-                              <div className="pt-3 border-t border-blue-200 dark:border-blue-800">
-                                <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">Próxima clase:</p>
-                                <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                              <div className="pt-3 border-t border-gray-300 dark:border-gray-700">
+                                <p className="text-xs text-gray-700 dark:text-gray-400 mb-1">Próxima clase:</p>
+                                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                   {nextInstance.date?.toDate().toLocaleDateString('es-ES', {
                                     weekday: 'long',
                                     day: 'numeric',
@@ -982,7 +992,7 @@ function ClassManager({ user, courses }) {
                                     </div>
                                   </div>
                                   <span className={`text-xs px-2 py-1 rounded ${
-                                    instance.status === 'scheduled' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' :
+                                    instance.status === 'scheduled' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' :
                                     instance.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
                                     'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
                                   }`}>

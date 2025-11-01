@@ -1,31 +1,25 @@
+/* ===================================
+   USER MENU - DARK THEME
+   =================================== */
+
 .user-menu {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
   width: 280px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e5e7eb;
+  background: #18181b;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid #27272a;
   overflow: hidden;
-  animation: slideDown 0.2s ease-out;
   z-index: 1001;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Header */
 .user-menu-header {
   padding: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0a0a0a;
+  border-bottom: 1px solid #27272a;
 }
 
 .menu-user-info {
@@ -37,27 +31,29 @@
 .menu-user-name {
   font-size: 16px;
   font-weight: 700;
-  color: white;
+  color: #f4f4f5;
 }
 
 .menu-user-email {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #a1a1aa;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Sections */
 .user-menu-section {
   padding: 8px 0;
 }
 
 .user-menu-divider {
   height: 1px;
-  background: #e5e7eb;
+  background: #27272a;
   margin: 0;
 }
 
+/* Menu Items */
 .menu-item {
   width: 100%;
   display: flex;
@@ -67,37 +63,50 @@
   background: none;
   border: none;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: none;
   text-align: left;
 }
 
 .menu-item:hover {
-  background: #f3f4f6;
+  background: #27272a;
 }
 
 .menu-item-icon {
-  font-size: 18px;
+  color: #a1a1aa;
   width: 24px;
   text-align: center;
   flex-shrink: 0;
 }
 
+.menu-item:hover .menu-item-icon {
+  color: #f4f4f5;
+}
+
 .menu-item-text {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: #f4f4f5;
 }
 
-.logout-item {
-  color: #ef4444;
+/* Logout Item */
+.logout-item .menu-item-icon {
+  color: #f87171;
 }
 
 .logout-item:hover {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.15);
 }
 
 .logout-item .menu-item-text {
-  color: #ef4444;
+  color: #f87171;
+}
+
+.logout-item:hover .menu-item-icon {
+  color: #fca5a5;
+}
+
+.logout-item:hover .menu-item-text {
+  color: #fca5a5;
 }
 
 /* Responsive */

@@ -296,9 +296,9 @@ function QuestionScreen({
                   onClick={togglePause}
                   disabled={showFeedback}
                   className={`px-4 py-2 rounded-lg font-semibold text-base ${
-                    showFeedback ? 'bg-gray-300 cursor-not-allowed' : 
-                    isPaused ? 'bg-green-500 hover:bg-green-600 text-white' : 
-                    'bg-blue-500 hover:bg-blue-600 text-white'
+                    showFeedback ? 'bg-gray-300 cursor-not-allowed' :
+                    isPaused ? 'bg-green-500 hover:bg-green-600 text-white' :
+                    'bg-gray-500 hover:bg-gray-600 text-white'
                   }`}
                 >
                   {isPaused ? (!hasStarted ? 'Iniciar' : 'Reanudar') : 'Pausar'}
@@ -321,20 +321,20 @@ function QuestionScreen({
               <div
                 key={student}
                 className={`p-3 rounded-lg relative ${
-                  student === currentStudent 
-                    ? 'bg-gradient-to-br from-indigo-200 to-purple-200 border-4 border-indigo-600 shadow-lg transform scale-105' 
-                    : 'bg-gray-100'
+                  student === currentStudent
+                    ? 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border-4 border-gray-500 dark:border-gray-400 shadow-lg transform scale-105'
+                    : 'bg-gray-100 dark:bg-gray-800'
                 }`}
               >
                 {student === currentStudent && (
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gray-600 dark:bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     TU TURNO
                   </div>
                 )}
                 <div className={`font-semibold text-2xl truncate ${student === currentStudent ? 'mt-2' : ''}`}>
                   {student}
                 </div>
-                <div className={`text-3xl font-bold ${student === currentStudent ? 'text-indigo-700' : 'text-indigo-600'}`}>
+                <div className={`text-3xl font-bold ${student === currentStudent ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                   {scores[student]} puntos
                 </div>
               </div>
@@ -346,9 +346,9 @@ function QuestionScreen({
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="mb-8">
             {!hasStarted && isPaused && !showFeedback && !unlimitedTime ? (
-              <div className="bg-indigo-50 border-2 border-indigo-300 rounded-lg p-8 text-center">
-                <h3 className="text-2xl font-bold text-indigo-900 mb-2">Juego en Pausa</h3>
-                <p className="text-indigo-700">Presiona "Iniciar" cuando estén listos</p>
+              <div className="bg-gray-100 dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600 rounded-lg p-8 text-center">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Juego en Pausa</h3>
+                <p className="text-gray-700 dark:text-gray-300">Presiona "Iniciar" cuando estén listos</p>
               </div>
             ) : (
               <>
@@ -398,9 +398,9 @@ function QuestionScreen({
             </div>
           )}
 
-          <div className="text-center text-xl text-gray-600">
+          <div className="text-center text-xl text-gray-600 dark:text-gray-400">
             Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
-            <span className="ml-2 text-indigo-600 font-semibold">
+            <span className="ml-2 text-gray-700 dark:text-gray-300 font-semibold">
               ({parsedQuestions.length - currentQuestionIndex - 1} restantes)
             </span>
           </div>

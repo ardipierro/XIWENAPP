@@ -2,11 +2,11 @@ function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
   return (
     <div
       className="card overflow-hidden"
-      style={{ borderLeft: `4px solid ${course.color || '#667eea'}` }}
+      style={{ borderLeft: `3px solid #3f3f46` }}
     >
       {/* Imagen del curso */}
       {course.imageUrl && (
-        <div className="w-full h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
+        <div className="w-full h-48 overflow-hidden bg-gray-800">
           <img
             src={course.imageUrl}
             alt={course.name}

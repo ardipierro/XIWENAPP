@@ -55,10 +55,10 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
                 }}
                 className={`
                   option-btn p-4 rounded-lg border-2 text-left transition-all
-                  ${isSelected ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' : 'border-gray-300 dark:border-gray-600'}
+                  ${isSelected ? 'border-gray-400 bg-gray-100 dark:border-gray-500 dark:bg-gray-700' : 'border-gray-300 dark:border-gray-600'}
                   ${isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : ''}
                   ${isWrong ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : ''}
-                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:border-gray-400 dark:hover:border-gray-500
                 `}
                 disabled={showCorrectAnswer}
               >
@@ -102,7 +102,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
           )}
         </div>
         {showCorrectAnswer && (
-          <div className="mt-3 p-3 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+          <div className="mt-3 p-3 rounded bg-gray-100 dark:bg-gray-800/50 text-gray-800 dark:text-gray-200">
             Respuestas correctas: {exercise.answers.join(', ')}
           </div>
         )}
@@ -179,7 +179,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
             {leftItems.map((item, idx) => (
               <div
                 key={idx}
-                className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded text-gray-900 dark:text-gray-100"
+                className="p-3 bg-gray-100 dark:bg-gray-800/50 rounded text-gray-900 dark:text-gray-100"
               >
                 {item}
               </div>
@@ -266,7 +266,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
           </button>
         )}
         {showCorrectAnswer && (
-          <div className="mt-3 p-3 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+          <div className="mt-3 p-3 rounded bg-gray-100 dark:bg-gray-800/50 text-gray-800 dark:text-gray-200">
             Orden correcto: {exercise.correctOrder.join(' → ')}
           </div>
         )}
@@ -363,7 +363,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
           ))}
         </div>
         {showCorrectAnswer && (
-          <div className="mt-3 p-3 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+          <div className="mt-3 p-3 rounded bg-gray-100 dark:bg-gray-800/50 text-gray-800 dark:text-gray-200">
             Respuestas correctas: {exercise.answers.join(', ')}
           </div>
         )}
@@ -418,7 +418,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
           </table>
         </div>
         {showCorrectAnswer && exercise.answers && (
-          <div className="mt-3 p-3 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+          <div className="mt-3 p-3 rounded bg-gray-100 dark:bg-gray-800/50 text-gray-800 dark:text-gray-200">
             Respuestas: {exercise.answers.join(', ')}
           </div>
         )}

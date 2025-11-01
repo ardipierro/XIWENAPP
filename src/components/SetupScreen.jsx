@@ -159,7 +159,7 @@ function SetupScreen({
               ← Volver
             </button>
           )}
-          <h1 className="text-3xl md:text-4xl font-bold text-indigo-700 flex-1 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-200 flex-1 text-center">
             Juego de Preguntas por Turnos
           </h1>
           {onBack && <div className="w-24"></div>}
@@ -168,9 +168,9 @@ function SetupScreen({
         {/* ============================================ */}
         {/* SECCIÓN: SELECCIÓN DE ALUMNOS (NUEVO) */}
         {/* ============================================ */}
-        <div className="mb-8 p-6 bg-blue-50 rounded-xl border-2 border-blue-200">
+        <div className="mb-8 p-6 bg-gray-100 dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-700">
           <div className="mb-4">
-            <h2 className="text-xl md:text-2xl font-semibold flex items-center text-blue-700">
+            <h2 className="text-xl md:text-2xl font-semibold flex items-center text-gray-800 dark:text-gray-200">
               <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
               </svg>
@@ -245,12 +245,12 @@ function SetupScreen({
         <div className="mb-8 p-6 bg-gray-50 rounded-xl">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl md:text-2xl font-semibold flex items-center">
-              <svg className="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 mr-2 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               Preguntas por Tema
             </h2>
-            <label className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 cursor-pointer transition-colors text-sm md:text-base">
+            <label className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 cursor-pointer transition-colors text-sm md:text-base">
               Importar archivos .txt
               <input
                 type="file"
@@ -305,11 +305,11 @@ function SetupScreen({
             </details>
           ))}
 
-          <details className="mb-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-            <summary className="cursor-pointer p-4 font-semibold text-blue-700 hover:bg-blue-100 rounded-lg">
+          <details className="mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-gray-300 dark:border-gray-700">
+            <summary className="cursor-pointer p-4 font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
               ➕ Agregar nuevo tema
             </summary>
-            <div className="p-4 border-t border-blue-200">
+            <div className="p-4 border-t border-gray-300 dark:border-gray-700">
               <input
                 type="text"
                 value={newCategoryName}
@@ -384,9 +384,9 @@ function SetupScreen({
                 type="checkbox"
                 checked={unlimitedTime}
                 onChange={(e) => setUnlimitedTime(e.target.checked)}
-                className="mr-3 w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+                className="mr-3 w-5 h-5 text-gray-600 dark:text-gray-500 rounded focus:ring-2 focus:ring-gray-500"
               />
-              <span className="text-sm font-medium text-gray-700">⏱️ Tiempo ilimitado por pregunta</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">⏱️ Tiempo ilimitado por pregunta</span>
             </label>
           </div>
 

@@ -87,16 +87,16 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
       </div>
 
       <div className="mb-6">
-        <div className="flex gap-2 border-b border-gray-200">
+        <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setHistoryView('games')}
-            className={`px-4 py-2 font-semibold ${historyView === 'games' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-600'}`}
+            className={`px-4 py-2 font-semibold ${historyView === 'games' ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}
           >
             📋 Por Ejercicio
           </button>
           <button
             onClick={() => setHistoryView('ranking')}
-            className={`px-4 py-2 font-semibold ${historyView === 'ranking' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-600'}`}
+            className={`px-4 py-2 font-semibold ${historyView === 'ranking' ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}
           >
             🏆 Ranking General
           </button>
@@ -124,10 +124,10 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {game.players.map((player, pIndex) => (
-                  <div key={pIndex} className={`p-3 rounded ${pIndex === 0 ? 'bg-yellow-100 border-2 border-yellow-400' : 'bg-white border border-gray-200'}`}>
-                    <div className="text-xs text-gray-600">#{pIndex + 1}</div>
-                    <div className="font-semibold text-sm">{player.name}</div>
-                    <div className="text-indigo-600 font-bold">{player.score} puntos</div>
+                  <div key={pIndex} className={`p-3 rounded ${pIndex === 0 ? 'bg-yellow-100 border-2 border-yellow-400 dark:bg-yellow-900/20 dark:border-yellow-700' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'}`}>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">#{pIndex + 1}</div>
+                    <div className="font-semibold text-sm text-gray-900 dark:text-gray-100">{player.name}</div>
+                    <div className="text-gray-700 dark:text-gray-300 font-bold">{player.score} puntos</div>
                     {player.questionsAnswered > 0 && (
                       <div className="text-xs text-gray-600">
                         {Math.round((player.score / player.questionsAnswered) * 100)}% aciertos
@@ -148,8 +148,8 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
 
       {historyView === 'ranking' && (
         <div className="space-y-3">
-          <div className="bg-indigo-50 p-4 rounded-lg mb-4">
-            <p className="text-sm text-indigo-800">
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4">
+            <p className="text-sm text-gray-800 dark:text-gray-200">
               <strong>🏆 Ranking General:</strong> Ordenado por porcentaje de aciertos, cantidad de preguntas y mejor tiempo.
             </p>
           </div>
@@ -177,10 +177,10 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-indigo-600">
+                    <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                       {percentage.toFixed(1)}%
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       {student.totalScore}/{student.totalAnswered} correctas
                     </div>
                     {student.totalTime > 0 && (
