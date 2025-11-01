@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react';
+import {
+  Calendar, CreditCard, CheckCircle, AlertTriangle, Users, BookOpen,
+  Clock, Video, Info, CircleDot, AlarmClock
+} from 'lucide-react';
 import { getInstancesForStudent } from '../firebase/classInstances';
 import { getStudentAttendance, markAttendanceByLink } from '../firebase/attendance';
 import { getStudentGroups } from '../firebase/groups';
@@ -120,7 +124,7 @@ function StudentClassView({ student }) {
       );
 
       if (result.success) {
-        showMessage('success', '✅ Asistencia registrada. Crédito deducido.');
+        showMessage('success', 'Asistencia registrada. Crédito deducido.');
 
         // Abrir link de videollamada
         if (instance.meetingLink) {
@@ -172,7 +176,8 @@ function StudentClassView({ student }) {
     if (attendance) {
       return {
         status: 'attended',
-        label: '✅ Asistencia registrada',
+        label: 'Asistencia registrada',
+        icon: <CheckCircle size={16} strokeWidth={2} className="inline-icon" />,
         canJoin: false
       };
     }
@@ -182,7 +187,8 @@ function StudentClassView({ student }) {
     if (linkActive) {
       return {
         status: 'active',
-        label: '🟢 Link activo - Únete ahora',
+        label: 'Link activo - Únete ahora',
+        icon: <CircleDot size={16} strokeWidth={2} className="inline-icon text-green-500" />,
         canJoin: true
       };
     }
@@ -199,14 +205,16 @@ function StudentClassView({ student }) {
       const minutesLeft = Math.floor(diff / 60000);
       return {
         status: 'upcoming',
-        label: `⏳ Link activo en ${minutesLeft} min`,
+        label: `Link activo en ${minutesLeft} min`,
+        icon: <Clock size={16} strokeWidth={2} className="inline-icon" />,
         canJoin: false
       };
     }
 
     return {
       status: 'expired',
-      label: '⏰ Ventana de acceso cerrada',
+      label: 'Ventana de acceso cerrada',
+      icon: <AlarmClock size={16} strokeWidth={2} className="inline-icon" />,
       canJoin: false
     };
   };
@@ -225,13 +233,17 @@ function StudentClassView({ student }) {
       {/* Header con créditos */}
       <div className="class-view-header">
         <div>
-          <h2 className="section-title">📅 Mis Clases</h2>
+          <h2 className="section-title flex items-center gap-2">
+            <Calendar size={24} strokeWidth={2} /> Mis Clases
+          </h2>
           <p className="section-subtitle">
             {instances.length} {instances.length === 1 ? 'clase próxima' : 'clases próximas'}
           </p>
         </div>
         <div className="credits-badge">
-          <span className="credits-icon">💳</span>
+          <span className="credits-icon">
+            <CreditCard size={24} strokeWidth={2} />
+          </span>
           <div className="credits-info">
             <div className="credits-value">{credits?.availableCredits || 0}</div>
             <div className="credits-label">Créditos</div>
@@ -242,14 +254,20 @@ function StudentClassView({ student }) {
       {/* Message */}
       {message.text && (
         <div className={`class-message ${message.type}`}>
-          {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+          {message.type === 'success' ? (
+            <CheckCircle size={18} strokeWidth={2} className="inline-icon" />
+          ) : (
+            <AlertTriangle size={18} strokeWidth={2} className="inline-icon" />
+          )} {message.text}
         </div>
       )}
 
       {/* Debug Info - Grupos */}
       {studentGroups.length > 0 && (
         <div className="info-box" style={{ marginBottom: '20px', background: '#e0f2fe', borderLeft: '4px solid #0284c7' }}>
-          <h4 className="info-title">👥 Mis Grupos ({studentGroups.length})</h4>
+          <h4 className="info-title flex items-center gap-2">
+            <Users size={18} strokeWidth={2} /> Mis Grupos ({studentGroups.length})
+          </h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
             {studentGroups.map(group => (
               <span
@@ -272,7 +290,9 @@ function StudentClassView({ student }) {
 
       {studentGroups.length === 0 && (
         <div className="info-box" style={{ marginBottom: '20px', background: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
-          <h4 className="info-title">⚠️ No perteneces a ningún grupo</h4>
+          <h4 className="info-title flex items-center gap-2">
+            <AlertTriangle size={18} strokeWidth={2} /> No perteneces a ningún grupo
+          </h4>
           <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#92400e' }}>
             Debes ser agregado a un grupo por tu profesor para ver las clases programadas.
           </p>
@@ -282,7 +302,9 @@ function StudentClassView({ student }) {
       {/* Instances List */}
       {instances.length === 0 ? (
         <div className="empty-classes">
-          <div className="empty-icon">📚</div>
+          <div className="empty-icon">
+            <BookOpen size={64} strokeWidth={2} className="text-gray-400" />
+          </div>
           <h3 className="empty-title">No hay clases próximas</h3>
           <p className="empty-text">
             Tus próximas clases aparecerán aquí cuando sean programadas
@@ -309,12 +331,14 @@ function StudentClassView({ student }) {
 
                 <div className="class-card-body">
                   <div className="class-datetime">
-                    <span className="datetime-icon">🕒</span>
+                    <span className="datetime-icon">
+                      <Clock size={18} strokeWidth={2} />
+                    </span>
                     <span className="datetime-text">{formatDate(instance.date)}</span>
                   </div>
 
                   <div className={`class-status status-${instanceStatus.status}`}>
-                    {instanceStatus.label}
+                    {instanceStatus.icon} {instanceStatus.label}
                   </div>
 
                   {instanceStatus.canJoin && (
@@ -330,15 +354,15 @@ function StudentClassView({ student }) {
                         </>
                       ) : (
                         <>
-                          🎥 Unirse a la clase
+                          <Video size={18} strokeWidth={2} className="inline-icon" /> Unirse a la clase
                         </>
                       )}
                     </button>
                   )}
 
-                  {sessionStatus.status === 'attended' && (
+                  {instanceStatus.status === 'attended' && (
                     <div className="attendance-confirmed">
-                      ✅ Asistencia confirmada
+                      <CheckCircle size={16} strokeWidth={2} className="inline-icon" /> Asistencia confirmada
                     </div>
                   )}
                 </div>
@@ -350,7 +374,9 @@ function StudentClassView({ student }) {
 
       {/* Info Box */}
       <div className="info-box">
-        <h4 className="info-title">ℹ️ ¿Cómo funciona?</h4>
+        <h4 className="info-title flex items-center gap-2">
+          <Info size={18} strokeWidth={2} /> ¿Cómo funciona?
+        </h4>
         <ul className="info-list">
           <li>El link de la clase se activa <strong>15 minutos antes</strong></li>
           <li>Al unirte, se deduce <strong>1 crédito</strong> automáticamente</li>
