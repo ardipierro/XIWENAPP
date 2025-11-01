@@ -383,30 +383,31 @@
 
 .status-select {
   padding: 8px 12px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: none;
+  background: transparent;
 }
 
 .status-select.active {
-  background: #D1FAE5;
-  border-color: #10B981;
-  color: #065F46;
+  background: transparent;
+  border-color: transparent;
+  color: #10b981;
 }
 
 .status-select.suspended {
-  background: #FEE2E2;
-  border-color: #EF4444;
-  color: #991B1B;
+  background: transparent;
+  border-color: transparent;
+  color: #ef4444;
 }
 
 .status-select.pending {
-  background: #FEF3C7;
-  border-color: #F59E0B;
-  color: #92400E;
+  background: transparent;
+  border-color: transparent;
+  color: #f59e0b;
 }
 
 .status-select:disabled {
