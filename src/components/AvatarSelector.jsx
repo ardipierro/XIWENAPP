@@ -3,7 +3,7 @@ import {
   User, GraduationCap, FlaskConical, Palette, Dumbbell,
   BookOpen, Star, Rocket, Trophy, Brain, Medal,
   BookMarked, Crown, Flame, Zap, Smile, Glasses,
-  UserCog, Bot
+  UserCog, Bot, X
 } from 'lucide-react';
 import './AvatarSelector.css';
 
@@ -37,7 +37,7 @@ function AvatarSelector({ currentAvatar, onSelectAvatar, onClose }) {
         <div className="avatar-selector-header">
           <h3 className="avatar-selector-title">Selecciona tu Avatar</h3>
           <button className="avatar-selector-close" onClick={onClose}>
-            ✕
+            <X size={24} strokeWidth={2} />
           </button>
         </div>
 

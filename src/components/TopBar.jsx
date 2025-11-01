@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageCircle } from 'lucide-react';
+import { Bell, MessageCircle, Edit2 } from 'lucide-react';
 import UserMenu from './UserMenu';
 import AvatarSelector, { AVATARS } from './AvatarSelector';
 import ThemeToggle from './ThemeToggle';
@@ -136,7 +136,9 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
                     return <AvatarIcon size={20} strokeWidth={2} className="avatar-icon-display" />;
                   })()
                 )}
-                <div className="avatar-edit-hint">✏️</div>
+                <div className="avatar-edit-hint">
+                  <Edit2 size={12} strokeWidth={2} />
+                </div>
               </div>
               <div className="user-info">
                 <span className="user-name">{getDisplayName()}</span>

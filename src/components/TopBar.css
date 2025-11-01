@@ -169,17 +169,17 @@
   position: absolute;
   bottom: -2px;
   right: -2px;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   background: #18181b;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
   box-shadow: none;
   opacity: 0;
   transition: none;
+  color: #a1a1aa;
 }
 
 .user-avatar:hover .avatar-edit-hint {

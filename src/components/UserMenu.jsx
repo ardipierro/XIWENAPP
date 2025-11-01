@@ -36,11 +36,11 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      console.log('✅ Sesión cerrada');
+      console.log('Sesión cerrada');
       navigate('/');
       onClose();
     } catch (error) {
-      console.error('❌ Error al cerrar sesión:', error);
+      console.error('Error al cerrar sesión:', error);
     }
   };
 

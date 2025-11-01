@@ -137,7 +137,10 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                 <img src={uploadedImageUrl} alt="Avatar" className="avatar-image" />
               ) : (
                 <div className="avatar-emoji">
-                  {AVATARS[userAvatar] || AVATARS.default}
+                  {(() => {
+                    const AvatarIcon = AVATARS[userAvatar]?.icon || AVATARS.default.icon;
+                    return <AvatarIcon size={48} strokeWidth={2} />;
+                  })()}
                 </div>
               )}
               <button className="avatar-change-btn" onClick={() => setShowAvatarOptions(!showAvatarOptions)}>
@@ -166,15 +169,16 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                   <p className="upload-hint">JPG, PNG o GIF (máx 5MB)</p>
                 </div>
 
-                {/* Emoji Avatars */}
+                {/* Icon Avatars */}
                 <div className="avatar-emoji-grid">
-                  {Object.entries(AVATARS).map(([key, emoji]) => (
+                  {Object.entries(AVATARS).map(([key, { icon: Icon, label }]) => (
                     <button
                       key={key}
                       className={`emoji-option ${userAvatar === key && !uploadedImageUrl ? 'selected' : ''}`}
                       onClick={() => handleSelectEmoji(key)}
+                      title={label}
                     >
-                      {emoji}
+                      <Icon size={32} strokeWidth={2} />
                     </button>
                   ))}
                 </div>
