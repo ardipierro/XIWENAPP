@@ -1,3 +1,5 @@
+import { Users, BookOpen, Edit, Trash2 } from 'lucide-react';
+
 function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
   return (
     <div
@@ -39,10 +41,10 @@ function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
         {/* Estadísticas */}
         <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
           <span className="flex items-center gap-1">
-            👥 {course.students?.length || 0} alumnos
+            <Users size={16} strokeWidth={2} /> {course.students?.length || 0} alumnos
           </span>
           <span className="flex items-center gap-1">
-            📖 {course.lessonsCount || 0} lecciones
+            <BookOpen size={16} strokeWidth={2} /> {course.lessonsCount || 0} lecciones
           </span>
         </div>
 
@@ -52,19 +54,19 @@ function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
             onClick={() => onViewLessons?.(course)}
             className="btn btn-sm btn-primary flex-1"
           >
-            📖 Ver Lecciones
+            <BookOpen size={16} strokeWidth={2} className="inline-icon" /> Ver Lecciones
           </button>
           <button
             onClick={() => onEdit?.(course)}
             className="btn btn-sm btn-outline"
           >
-            ✏️
+            <Edit size={16} strokeWidth={2} />
           </button>
           <button
             onClick={() => onDelete?.(course.id, course.name)}
             className="btn btn-sm btn-danger"
           >
-            🗑️
+            <Trash2 size={16} strokeWidth={2} />
           </button>
         </div>
       </div>
