@@ -721,22 +721,6 @@ function CoursesScreen({ onBack, user }) {
                         <button type="submit" className="btn btn-primary" disabled={uploadingImage}>
                           {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
                         </button>
-
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-2">
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Zona de peligro</p>
-                          <button
-                            type="button"
-                            className="btn btn-danger"
-                            onClick={() => {
-                              if (window.confirm('¿Estás seguro de eliminar este curso? Esta acción no se puede deshacer.')) {
-                                handleDelete(selectedCourse.id);
-                                handleCloseCourseModal();
-                              }
-                            }}
-                          >
-                            <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Curso
-                          </button>
-                        </div>
                       </div>
                     </form>
                   )}
@@ -923,6 +907,28 @@ function CoursesScreen({ onBack, user }) {
                   )}
                 </>
               )}
+            </div>
+
+            {/* Botón Eliminar - Zona de peligro */}
+            <div className="px-6 mt-8 pt-6 border-t-2 border-red-200 dark:border-red-900">
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
+                <p className="text-xs text-red-700 dark:text-red-400 mb-3">
+                  Esta acción eliminará permanentemente el curso, todo su contenido y ejercicios asociados.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => {
+                    if (window.confirm('¿Estás seguro de eliminar este curso? Esta acción no se puede deshacer.')) {
+                      handleDelete(selectedCourse.id);
+                      handleCloseCourseModal();
+                    }
+                  }}
+                >
+                  <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Curso Permanentemente
+                </button>
+              </div>
             </div>
 
             <div className="modal-footer">

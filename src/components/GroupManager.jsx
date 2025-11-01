@@ -473,26 +473,12 @@ function GroupManager({ user, courses }) {
                   {selectedGroup.description}
                 </p>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirm(`¿Eliminar el grupo "${selectedGroup.name}"?`)) {
-                      handleDelete(selectedGroup.id);
-                      setSelectedGroup(null);
-                    }
-                  }}
-                  className="btn btn-danger"
-                >
-                  <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
-                </button>
-                <button
-                  onClick={() => setSelectedGroup(null)}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
-                >
-                  ×
-                </button>
-              </div>
+              <button
+                onClick={() => setSelectedGroup(null)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+              >
+                ×
+              </button>
             </div>
 
             {/* Tabs */}
@@ -594,6 +580,28 @@ function GroupManager({ user, courses }) {
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Botón Eliminar - Zona de peligro */}
+            <div className="mt-8 pt-6 border-t-2 border-red-200 dark:border-red-900">
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
+                <p className="text-xs text-red-700 dark:text-red-400 mb-3">
+                  Esta acción eliminará permanentemente el grupo y removerá todos los miembros.
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(`¿Eliminar el grupo "${selectedGroup.name}"?`)) {
+                      handleDelete(selectedGroup.id);
+                      setSelectedGroup(null);
+                    }
+                  }}
+                  className="btn btn-danger"
+                >
+                  <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Grupo Permanentemente
+                </button>
+              </div>
             </div>
           </div>
         </div>
