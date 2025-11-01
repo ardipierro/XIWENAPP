@@ -441,7 +441,7 @@ function ClassManager({ user, courses }) {
       <div className="class-manager">
         <div className="manager-header">
           <h2 className="flex items-center gap-2">
-            <BookOpen size={28} strokeWidth={2} /> Gestión de Clases
+            <BookOpen size={28} strokeWidth={2} /> Clases
           </h2>
           <div className="header-actions">
             <div className="view-tabs">
@@ -1165,7 +1165,7 @@ function ClassManager({ user, courses }) {
       <div className="class-manager">
         <div className="manager-header">
           <h2 className="flex items-center gap-2">
-            <BookOpen size={28} strokeWidth={2} /> Gestión de Clases
+            <BookOpen size={28} strokeWidth={2} /> Clases
           </h2>
           <div className="header-actions">
             <div className="view-tabs">

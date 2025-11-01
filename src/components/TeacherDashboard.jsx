@@ -744,29 +744,23 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="user-management">
           {/* Header */}
-          <div className="section-header">
-            <button onClick={handleBackToDashboard} className="btn-back">
+          <div className="mb-6">
+            <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
               ← Volver al Dashboard
             </button>
-            <h1 className="section-title-main">
+            <div className="flex items-center gap-3">
               {isAdmin ? (
-                <span className="flex items-center gap-2">
-                  <Crown size={28} strokeWidth={2} />
-                  Gestión de Usuarios
-                </span>
+                <>
+                  <Crown size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Usuarios</h1>
+                </>
               ) : (
-                <span className="flex items-center gap-2">
-                  <Users size={28} strokeWidth={2} />
-                  Gestión de Alumnos
-                </span>
+                <>
+                  <Users size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Alumnos</h1>
+                </>
               )}
-            </h1>
-            <p className="section-subtitle">
-              {isAdmin
-                ? 'Administra usuarios, roles, permisos y asignación de cursos'
-                : 'Gestiona tus alumnos y asigna cursos'
-              }
-            </p>
+            </div>
           </div>
 
           {/* Mensajes */}

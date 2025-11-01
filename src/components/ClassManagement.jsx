@@ -212,7 +212,7 @@ function ClassManagement({ user }) {
       <div className="cm-header">
         <div>
           <h1 className="cm-title flex items-center gap-3">
-            <Calendar size={32} strokeWidth={2} /> Gestión de Clases
+            <Calendar size={32} strokeWidth={2} /> Clases
           </h1>
           <p className="cm-subtitle">
             Vista panorámica de todas tus clases programadas
