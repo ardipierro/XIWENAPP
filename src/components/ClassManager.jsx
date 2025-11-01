@@ -666,7 +666,7 @@ function ClassManager({ user, courses }) {
                       </div>
                     </div>
 
-                    <button onClick={handleAddSchedule} className="btn btn-secondary w-full">
+                    <button onClick={handleAddSchedule} className="btn btn-outline">
                       + Agregar Horario
                     </button>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -916,7 +916,7 @@ function ClassManager({ user, courses }) {
                           </div>
                         </label>
 
-                        <button onClick={handleAddSchedule} className="btn btn-secondary w-full">
+                        <button onClick={handleAddSchedule} className="btn btn-outline">
                           + Agregar Horario
                         </button>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">

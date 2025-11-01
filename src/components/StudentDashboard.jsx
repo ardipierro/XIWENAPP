@@ -438,7 +438,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                   </div>
                 ))}
                 {enrolledCourses.length > 3 && (
-                  <button className="btn btn-outline w-full" onClick={handleViewMyCourses}>
+                  <button className="btn btn-outline" onClick={handleViewMyCourses}>
                     Ver todos mis cursos ({enrolledCourses.length})
                   </button>
                 )}
@@ -468,7 +468,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               <p className="assignments-description">
                 Contenidos y ejercicios asignados directamente por tu profesor para práctica adicional
               </p>
-              <button className="btn btn-primary w-full" onClick={handleViewMyAssignments}>
+              <button className="btn btn-primary" onClick={handleViewMyAssignments}>
                 Ver mis asignaciones
               </button>
             </div>

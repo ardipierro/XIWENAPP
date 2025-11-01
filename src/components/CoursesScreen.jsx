@@ -457,7 +457,7 @@ function CoursesScreen({ onBack, user }) {
 
               {/* Actions */}
               <button
-                className="btn btn-primary w-full"
+                className="btn btn-primary"
                 onClick={() => handleOpenCourseModal(course, 'content')}
                 title="Gestionar curso completo"
               >
@@ -593,8 +593,8 @@ function CoursesScreen({ onBack, user }) {
                   {formData.imageUrl ? (
                     <div className="mb-3">
                       <img src={formData.imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
-                      <button type="button" className="btn btn-outline w-full" onClick={handleRemoveImage}>
-      <Trash2 size={16} strokeWidth={2} /> Eliminar Imagen
+                      <button type="button" className="btn btn-outline" onClick={handleRemoveImage}>
+                        <Trash2 size={16} strokeWidth={2} /> Eliminar Imagen
                       </button>
                     </div>
                   ) : (
@@ -734,8 +734,8 @@ function CoursesScreen({ onBack, user }) {
                         {formData.imageUrl ? (
                           <div className="mb-3">
                             <img src={formData.imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
-                            <button type="button" className="btn btn-outline w-full" onClick={handleRemoveImage}>
-            <Trash2 size={16} strokeWidth={2} /> Eliminar Imagen
+                            <button type="button" className="btn btn-outline" onClick={handleRemoveImage}>
+                              <Trash2 size={16} strokeWidth={2} /> Eliminar Imagen
                             </button>
                           </div>
                         ) : (
@@ -756,7 +756,7 @@ function CoursesScreen({ onBack, user }) {
                       </div>
 
                       <div className="flex flex-col gap-3">
-                        <button type="submit" className="btn btn-primary w-full" disabled={uploadingImage}>
+                        <button type="submit" className="btn btn-primary" disabled={uploadingImage}>
                           {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
                         </button>
 
@@ -764,7 +764,7 @@ function CoursesScreen({ onBack, user }) {
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Zona de peligro</p>
                           <button
                             type="button"
-                            className="btn btn-danger w-full"
+                            className="btn btn-danger"
                             onClick={() => {
                               if (window.confirm('¿Estás seguro de eliminar este curso? Esta acción no se puede deshacer.')) {
                                 handleDelete(selectedCourse.id);
