@@ -104,7 +104,7 @@ function MyCourses({ user, onSelectCourse }) {
     return (
       <div className="my-courses">
         <div className="courses-header">
-          <h1 className="courses-title">Mis Cursos</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
         </div>
         <div className="loading-state">
           <div className="spinner"></div>
@@ -118,7 +118,7 @@ function MyCourses({ user, onSelectCourse }) {
     return (
       <div className="my-courses">
         <div className="courses-header">
-          <h1 className="courses-title">Mis Cursos</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
         </div>
         <div className="error-state">
           <div className="error-icon">
@@ -136,7 +136,7 @@ function MyCourses({ user, onSelectCourse }) {
   return (
     <div className="my-courses">
       <div className="courses-header">
-        <h1 className="courses-title">Mis Cursos</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
         <p className="courses-subtitle">
           {courses.length === 0
             ? 'Aún no tienes cursos asignados'

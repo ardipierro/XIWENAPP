@@ -122,7 +122,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
     return (
       <div className="my-assignments">
         <div className="assignments-header">
-          <h1 className="assignments-title">Asignado a Mí</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Asignado a Mí</h1>
           <p className="assignments-subtitle">Contenidos y ejercicios asignados directamente por tu profesor</p>
         </div>
         <div className="loading-state">
@@ -137,7 +137,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
     return (
       <div className="my-assignments">
         <div className="assignments-header">
-          <h1 className="assignments-title">Asignado a Mí</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Asignado a Mí</h1>
         </div>
         <div className="error-state">
           <div className="error-icon">
@@ -156,7 +156,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
     <div className="my-assignments">
       {/* Header */}
       <div className="assignments-header">
-        <h1 className="assignments-title">Asignado a Mí</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Asignado a Mí</h1>
         <p className="assignments-subtitle">Contenidos y ejercicios asignados directamente por tu profesor</p>
       </div>
 

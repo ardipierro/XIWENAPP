@@ -292,7 +292,7 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
               <><Link size={16} strokeWidth={2} className="inline-icon" /> Enlace</>
             )}
           </div>
-          <h1 className="content-title">{content.title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{content.title}</h1>
           <div className="content-progress-info">
             <span>
               Lección {currentIndex + 1} de {allContent.length}

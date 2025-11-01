@@ -131,7 +131,7 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
             </div>
           )}
           <div className="course-header-info">
-            <h1 className="course-title">{courseData?.name || 'Curso'}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{courseData?.name || 'Curso'}</h1>
             <p className="course-description">{courseData?.description || ''}</p>
 
             {/* Progress Bar */}
