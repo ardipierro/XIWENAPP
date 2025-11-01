@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trophy, Medal, Clock, ClipboardList } from 'lucide-react'
 
 function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsByCategory }) {
   const [historyView, setHistoryView] = useState('games')
@@ -90,15 +91,15 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
         <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setHistoryView('games')}
-            className={`px-4 py-2 font-semibold ${historyView === 'games' ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}
+            className={`px-4 py-2 font-semibold flex items-center gap-2 ${historyView === 'games' ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}
           >
-            📋 Por Ejercicio
+            <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Por Ejercicio
           </button>
           <button
             onClick={() => setHistoryView('ranking')}
-            className={`px-4 py-2 font-semibold ${historyView === 'ranking' ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}
+            className={`px-4 py-2 font-semibold flex items-center gap-2 ${historyView === 'ranking' ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}`}
           >
-            🏆 Ranking General
+            <Trophy size={18} strokeWidth={2} className="inline-icon" /> Ranking General
           </button>
         </div>
       </div>
@@ -134,8 +135,8 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
                       </div>
                     )}
                     {player.totalTime > 0 && (
-                      <div className="text-xs text-gray-500">
-                        ⏱️ {player.totalTime.toFixed(1)}s
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <Clock size={14} strokeWidth={2} className="inline-icon" /> {player.totalTime.toFixed(1)}s
                       </div>
                     )}
                   </div>
@@ -149,8 +150,8 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
       {historyView === 'ranking' && (
         <div className="space-y-3">
           <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4">
-            <p className="text-sm text-gray-800 dark:text-gray-200">
-              <strong>🏆 Ranking General:</strong> Ordenado por porcentaje de aciertos, cantidad de preguntas y mejor tiempo.
+            <p className="text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2">
+              <Trophy size={18} strokeWidth={2} className="inline-icon" /> <strong>Ranking General:</strong> Ordenado por porcentaje de aciertos, cantidad de preguntas y mejor tiempo.
             </p>
           </div>
           {getGlobalRanking().map((student, index) => {
@@ -166,8 +167,16 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
               }`}>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <div className="text-3xl font-bold text-gray-600 w-12">
-                      {index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                    <div className="flex items-center justify-center w-12">
+                      {index === 0 ? (
+                        <Trophy size={40} strokeWidth={2} className="text-yellow-600" />
+                      ) : index === 1 ? (
+                        <Medal size={40} strokeWidth={2} className="text-gray-600" />
+                      ) : index === 2 ? (
+                        <Medal size={40} strokeWidth={2} className="text-gray-500" />
+                      ) : (
+                        <span className="text-3xl font-bold text-gray-600">#{index + 1}</span>
+                      )}
                     </div>
                     <div>
                       <div className="text-xl font-bold">{student.name}</div>
@@ -184,8 +193,8 @@ function HistoryModal({ gameHistory, setGameHistory, parseQuestions, questionsBy
                       {student.totalScore}/{student.totalAnswered} correctas
                     </div>
                     {student.totalTime > 0 && (
-                      <div className="text-xs text-gray-500">
-                        ⏱️ {avgTime.toFixed(1)}s promedio
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <Clock size={14} strokeWidth={2} className="inline-icon" /> {avgTime.toFixed(1)}s promedio
                       </div>
                     )}
                   </div>
