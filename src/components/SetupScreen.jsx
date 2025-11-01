@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Target, BookOpen, Trash2, Plus, Check, AlertTriangle, Settings, Clock } from 'lucide-react'
 import HistoryModal from './HistoryModal'
 import { loadStudents } from '../firebase/firestore'
 
@@ -197,15 +198,15 @@ function SetupScreen({
               </select>
               <button
                 onClick={addSelectedStudent}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center gap-2"
               >
-                ➕ Agregar
+                <Plus size={18} strokeWidth={2} className="inline-icon" /> Agregar
               </button>
             </div>
             
             {availableStudents.length === 0 && (
-              <p className="mt-3 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg">
-                ⚠️ No hay alumnos creados. Ve al Panel del Profesor → Gestionar Alumnos para crear el primero.
+              <p className="mt-3 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg flex items-center gap-2">
+                <AlertTriangle size={18} strokeWidth={2} className="inline-icon flex-shrink-0" /> No hay alumnos creados. Ve al Panel del Profesor → Gestionar Alumnos para crear el primero.
               </p>
             )}
           </div>
@@ -222,11 +223,11 @@ function SetupScreen({
                     <span className="font-medium text-gray-800">{student}</span>
                     <button
                       onClick={() => removeStudent(index)}
-                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
+                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm flex items-center gap-1"
                       disabled={students.length <= 1}
                       title={students.length <= 1 ? "Debe haber al menos 1 alumno" : "Quitar alumno"}
                     >
-                      🗑️ Quitar
+                      <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Quitar
                     </button>
                   </div>
                 ))}
@@ -272,11 +273,11 @@ function SetupScreen({
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="all">
-                  🎯 Mezclar TODAS ({Object.keys(questionsByCategory).length} temas)
+                  Mezclar TODAS ({Object.keys(questionsByCategory).length} temas)
                 </option>
                 {Object.keys(questionsByCategory).map(category => (
                   <option key={category} value={category}>
-                    📖 {category} ({parseQuestions(questionsByCategory[category]).length} preguntas)
+                    {category} ({parseQuestions(questionsByCategory[category]).length} preguntas)
                   </option>
                 ))}
               </select>
@@ -285,8 +286,8 @@ function SetupScreen({
 
           {Object.entries(questionsByCategory).map(([categoryName, categoryQuestions]) => (
             <details key={categoryName} className="mb-4 bg-white rounded-lg border border-gray-200">
-              <summary className="cursor-pointer p-4 font-semibold hover:bg-gray-50 rounded-lg">
-                📖 {categoryName} ({parseQuestions(categoryQuestions).length} preguntas)
+              <summary className="cursor-pointer p-4 font-semibold hover:bg-gray-50 rounded-lg flex items-center gap-2">
+                <BookOpen size={18} strokeWidth={2} className="inline-icon" /> {categoryName} ({parseQuestions(categoryQuestions).length} preguntas)
               </summary>
               <div className="p-4 border-t border-gray-200">
                 <textarea
@@ -297,17 +298,17 @@ function SetupScreen({
                 />
                 <button
                   onClick={() => deleteCategory(categoryName)}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
                 >
-                  🗑️ Eliminar tema
+                  <Trash2 size={18} strokeWidth={2} className="inline-icon" /> Eliminar tema
                 </button>
               </div>
             </details>
           ))}
 
           <details className="mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-gray-300 dark:border-gray-700">
-            <summary className="cursor-pointer p-4 font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
-              ➕ Agregar nuevo tema
+            <summary className="cursor-pointer p-4 font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
+              <Plus size={18} strokeWidth={2} className="inline-icon" /> Agregar nuevo tema
             </summary>
             <div className="p-4 border-t border-gray-300 dark:border-gray-700">
               <input
@@ -326,9 +327,9 @@ function SetupScreen({
               />
               <button
                 onClick={addNewCategory}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
               >
-                ✅ Guardar tema
+                <Check size={18} strokeWidth={2} className="inline-icon" /> Guardar tema
               </button>
             </div>
           </details>
@@ -347,7 +348,9 @@ function SetupScreen({
         {/* SECCIÓN: CONFIGURACIÓN */}
         {/* ============================================ */}
         <div className="mb-8 p-6 bg-gray-50 rounded-xl">
-          <h2 className="text-xl md:text-2xl font-semibold mb-4">⚙️ Configuración</h2>
+          <h2 className="text-xl md:text-2xl font-semibold mb-4 flex items-center gap-2">
+            <Settings size={24} strokeWidth={2} className="inline-icon" /> Configuración
+          </h2>
           
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -358,8 +361,8 @@ function SetupScreen({
               onChange={(e) => setGameMode(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             >
-              <option value="classic">⭐ Clásico (solo puntos positivos)</option>
-              <option value="penalty">⚠️ Con Penalización (-1 por error)</option>
+              <option value="classic">Clásico (solo puntos positivos)</option>
+              <option value="penalty">Con Penalización (-1 por error)</option>
             </select>
           </div>
 
@@ -372,9 +375,9 @@ function SetupScreen({
               onChange={(e) => setRepeatMode(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             >
-              <option value="shuffle">🔀 Reinserción aleatoria (pregunta incorrecta vuelve al mazo)</option>
-              <option value="repeat">🔁 Repetir hasta correcta (no avanza hasta responder bien)</option>
-              <option value="none">➡️ Sin repetición (una sola vez cada pregunta)</option>
+              <option value="shuffle">Reinserción aleatoria (pregunta incorrecta vuelve al mazo)</option>
+              <option value="repeat">Repetir hasta correcta (no avanza hasta responder bien)</option>
+              <option value="none">Sin repetición (una sola vez cada pregunta)</option>
             </select>
           </div>
 
@@ -386,7 +389,9 @@ function SetupScreen({
                 onChange={(e) => setUnlimitedTime(e.target.checked)}
                 className="mr-3 w-5 h-5 text-gray-600 dark:text-gray-500 rounded focus:ring-2 focus:ring-gray-500"
               />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">⏱️ Tiempo ilimitado por pregunta</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Clock size={18} strokeWidth={2} className="inline-icon" /> Tiempo ilimitado por pregunta
+              </span>
             </label>
           </div>
 
