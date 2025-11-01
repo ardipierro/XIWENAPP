@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, X } from 'lucide-react';
 import { EXERCISE_TYPES } from '../utils/exerciseParser';
 
 function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
@@ -63,8 +64,8 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
                 disabled={showCorrectAnswer}
               >
                 <span className="text-gray-900 dark:text-gray-100">{option}</span>
-                {isCorrect && <span className="ml-2">✅</span>}
-                {isWrong && <span className="ml-2">❌</span>}
+                {isCorrect && <span className="ml-2"><Check size={20} strokeWidth={2} className="inline-block text-green-600" /></span>}
+                {isWrong && <span className="ml-2"><X size={20} strokeWidth={2} className="inline-block text-red-600" /></span>}
               </button>
             );
           })}
@@ -130,7 +131,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
             `}
             disabled={showCorrectAnswer}
           >
-            ✅ Verdadero
+            <Check size={20} strokeWidth={2} className="inline-icon" /> Verdadero
           </button>
           <button
             onClick={() => {
@@ -144,7 +145,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
             `}
             disabled={showCorrectAnswer}
           >
-            ❌ Falso
+            <X size={20} strokeWidth={2} className="inline-icon" /> Falso
           </button>
         </div>
       </div>
