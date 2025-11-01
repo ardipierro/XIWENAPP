@@ -207,7 +207,13 @@ function GroupManager({ user, courses }) {
         /* Vista Grilla */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredGroups.map((group) => (
-            <div key={group.id} className="card flex flex-col" style={{ padding: '12px' }}>
+            <div
+              key={group.id}
+              className="card flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300"
+              style={{ padding: '12px' }}
+              onClick={() => handleSelectGroup(group)}
+              title="Click para gestionar grupo"
+            >
               {/* Placeholder con icono */}
               <div className="card-image-placeholder">
                 <Users size={40} strokeWidth={2} />
@@ -225,16 +231,6 @@ function GroupManager({ user, courses }) {
                   <Users size={14} strokeWidth={2} /> {group.studentCount || 0} estudiantes
                 </span>
               </div>
-
-              {/* Botones */}
-              <div className="card-actions">
-                <button
-                  className="btn btn-primary flex-1"
-                  onClick={() => handleSelectGroup(group)}
-                >
-                  <Settings size={16} strokeWidth={2} /> Gestionar
-                </button>
-              </div>
             </div>
           ))}
         </div>
@@ -242,7 +238,12 @@ function GroupManager({ user, courses }) {
         /* Vista Lista */
         <div className="flex flex-col gap-3">
           {filteredGroups.map((group) => (
-            <div key={group.id} className="card card-list">
+            <div
+              key={group.id}
+              className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
+              onClick={() => handleSelectGroup(group)}
+              title="Click para gestionar grupo"
+            >
               <div className="flex gap-4 items-start">
                 {/* Placeholder pequeño */}
                 <div className="card-image-placeholder-sm">
@@ -260,16 +261,6 @@ function GroupManager({ user, courses }) {
                       <Users size={14} strokeWidth={2} /> {group.studentCount || 0} estudiantes
                     </span>
                   </div>
-                </div>
-
-                {/* Botones */}
-                <div className="card-actions-list">
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleSelectGroup(group)}
-                  >
-                    <Settings size={16} strokeWidth={2} /> Gestionar
-                  </button>
                 </div>
               </div>
             </div>

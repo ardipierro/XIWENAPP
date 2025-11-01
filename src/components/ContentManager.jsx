@@ -256,7 +256,13 @@ function ContentManager({ user, courses = [] }) {
         /* Vista Grilla */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredContents.map((content) => (
-            <div key={content.id} className="card flex flex-col" style={{ padding: '12px' }}>
+            <div
+              key={content.id}
+              className="card flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300"
+              style={{ padding: '12px' }}
+              onClick={() => handleEdit(content.id)}
+              title="Click para editar contenido"
+            >
               {/* Placeholder con icono de tipo */}
               <div className="card-image-placeholder">
                 {getTypeIcon(content.type)}
@@ -296,16 +302,6 @@ function ContentManager({ user, courses = [] }) {
                   </span>
                 )}
               </div>
-
-              {/* Botones */}
-              <div className="card-actions">
-                <button
-                  className="btn btn-primary flex-1"
-                  onClick={() => handleEdit(content.id)}
-                >
-                  <Settings size={16} strokeWidth={2} /> Gestionar
-                </button>
-              </div>
             </div>
           ))}
         </div>
@@ -313,7 +309,12 @@ function ContentManager({ user, courses = [] }) {
         /* Vista Lista */
         <div className="flex flex-col gap-3">
           {filteredContents.map((content) => (
-            <div key={content.id} className="card card-list">
+            <div
+              key={content.id}
+              className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
+              onClick={() => handleEdit(content.id)}
+              title="Click para editar contenido"
+            >
               <div className="flex gap-4 items-start">
                 {/* Placeholder pequeño */}
                 <div className="card-image-placeholder-sm">
@@ -350,16 +351,6 @@ function ContentManager({ user, courses = [] }) {
                       </span>
                     ))
                   )}
-                </div>
-
-                {/* Botones */}
-                <div className="card-actions-list">
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleEdit(content.id)}
-                  >
-                    <Settings size={16} strokeWidth={2} /> Gestionar
-                  </button>
                 </div>
               </div>
             </div>
