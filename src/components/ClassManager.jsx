@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
+  BookOpen, ClipboardList, Calendar, CheckCircle, XCircle,
+  CreditCard, Users, Settings, Lightbulb, Trash2, X,
+  FileText, Repeat, BarChart3, AlertTriangle, Save, GraduationCap
+} from 'lucide-react';
+import {
   createClass,
   updateClass,
   deleteClass,
@@ -156,7 +161,7 @@ function ClassManager({ user, courses }) {
     const reason = prompt('Razón de cancelación (opcional):');
     const result = await cancelInstance(instanceId, reason || 'Cancelada por el profesor');
     if (result.success) {
-      showMessage('success', '✅ Instancia cancelada');
+      showMessage('success', 'Instancia cancelada');
       loadData();
     } else {
       showMessage('error', 'Error al cancelar instancia');
@@ -258,7 +263,7 @@ function ClassManager({ user, courses }) {
     }
 
     if (result.success) {
-      alert(editingClass ? '✅ Clase actualizada' : '✅ Clase creada exitosamente');
+      alert(editingClass ? 'Clase actualizada' : 'Clase creada exitosamente');
       setShowModal(false);
       loadData();
 
@@ -266,11 +271,11 @@ function ClassManager({ user, courses }) {
       if (!editingClass && result.classId) {
         const genResult = await generateInstances(result.classId, 4);
         if (genResult.success) {
-          alert(`✅ ${genResult.count} instancias generadas para las próximas 4 semanas`);
+          alert(`${genResult.count} instancias generadas para las próximas 4 semanas`);
         }
       }
     } else {
-      alert('❌ Error: ' + result.error);
+      alert('Error: ' + result.error);
     }
   };
 
@@ -279,14 +284,14 @@ function ClassManager({ user, courses }) {
 
     const result = await deleteClass(classId);
     if (result.success) {
-      alert('✅ Clase eliminada');
+      alert('Clase eliminada');
       loadData();
       if (selectedClass?.id === classId) {
         setSelectedClass(null);
         setActiveTab('list');
       }
     } else {
-      alert('❌ Error: ' + result.error);
+      alert('Error: ' + result.error);
     }
   };
 
@@ -349,7 +354,7 @@ function ClassManager({ user, courses }) {
 
     const result = await updateClass(selectedClass.id, updates);
     if (result.success) {
-      showMessage('success', '✅ Cambios guardados');
+      showMessage('success', ' Cambios guardados');
       // Actualizar selectedClass con los nuevos datos
       const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
       const updatedClass = updated.find(c => c.id === selectedClass.id);
@@ -365,14 +370,14 @@ function ClassManager({ user, courses }) {
 
     const result = await assignGroupToClass(selectedClass.id, groupId);
     if (result.success) {
-      showMessage('success', '✅ Grupo asignado');
+      showMessage('success', ' Grupo asignado');
       loadData();
       // Refresh selected class
       const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
       const updatedClass = updated.find(c => c.id === selectedClass.id);
       setSelectedClass(updatedClass);
     } else {
-      showMessage('error', '❌ Error: ' + result.error);
+      showMessage('error', 'Error: ' + result.error);
     }
   };
 
@@ -381,13 +386,13 @@ function ClassManager({ user, courses }) {
 
     const result = await unassignGroupFromClass(selectedClass.id, groupId);
     if (result.success) {
-      showMessage('success', '✅ Grupo removido');
+      showMessage('success', ' Grupo removido');
       loadData();
       const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
       const updatedClass = updated.find(c => c.id === selectedClass.id);
       setSelectedClass(updatedClass);
     } else {
-      showMessage('error', '❌ Error: ' + result.error);
+      showMessage('error', 'Error: ' + result.error);
     }
   };
 
@@ -396,13 +401,13 @@ function ClassManager({ user, courses }) {
 
     const result = await assignStudentToClass(selectedClass.id, studentId);
     if (result.success) {
-      showMessage('success', '✅ Estudiante asignado');
+      showMessage('success', ' Estudiante asignado');
       loadData();
       const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
       const updatedClass = updated.find(c => c.id === selectedClass.id);
       setSelectedClass(updatedClass);
     } else {
-      showMessage('error', '❌ Error: ' + result.error);
+      showMessage('error', 'Error: ' + result.error);
     }
   };
 
@@ -411,13 +416,13 @@ function ClassManager({ user, courses }) {
 
     const result = await unassignStudentFromClass(selectedClass.id, studentId);
     if (result.success) {
-      showMessage('success', '✅ Estudiante removido');
+      showMessage('success', ' Estudiante removido');
       loadData();
       const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
       const updatedClass = updated.find(c => c.id === selectedClass.id);
       setSelectedClass(updatedClass);
     } else {
-      showMessage('error', '❌ Error: ' + result.error);
+      showMessage('error', 'Error: ' + result.error);
     }
   };
 
@@ -435,20 +440,22 @@ function ClassManager({ user, courses }) {
     return (
       <div className="class-manager">
         <div className="manager-header">
-          <h2>📚 Gestión de Clases</h2>
+          <h2 className="flex items-center gap-2">
+            <BookOpen size={28} strokeWidth={2} /> Gestión de Clases
+          </h2>
           <div className="header-actions">
             <div className="view-tabs">
               <button
                 className={`tab-btn ${activeTab === 'list' ? 'active' : ''}`}
                 onClick={() => setActiveTab('list')}
               >
-                📋 Mis Clases
+                <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Mis Clases
               </button>
               <button
                 className={`tab-btn ${activeTab === 'calendar' ? 'active' : ''}`}
                 onClick={() => setActiveTab('calendar')}
               >
-                📅 Calendario
+                <Calendar size={18} strokeWidth={2} className="inline-icon" /> Calendario
               </button>
             </div>
             <button onClick={handleCreateClass} className="btn btn-primary">
@@ -500,13 +507,17 @@ function ClassManager({ user, courses }) {
                 </div>
 
                 <div className="class-stats">
-                  <span>💳 {cls.creditCost} crédito(s)</span>
-                  <span>👥 {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignados</span>
+                  <span className="flex items-center gap-1">
+                    <CreditCard size={16} strokeWidth={2} /> {cls.creditCost} crédito(s)
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Users size={16} strokeWidth={2} /> {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignados
+                  </span>
                 </div>
 
                 <div className="class-actions">
                   <button onClick={() => handleViewDetails(cls)} className="btn btn-primary">
-                    ⚙️ Configurar
+                    <Settings size={16} strokeWidth={2} className="inline-icon" /> Configurar
                   </button>
                 </div>
               </div>
@@ -659,7 +670,7 @@ function ClassManager({ user, courses }) {
                       + Agregar Horario
                     </button>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      💡 Selecciona varios días para crear horarios múltiples a la vez
+                      <Lightbulb size={14} strokeWidth={2} className="inline-icon" /> Selecciona varios días para crear horarios múltiples a la vez
                     </p>
                   </div>
                 </div>
@@ -707,13 +718,13 @@ function ClassManager({ user, courses }) {
                       }}
                       className="btn btn-sm btn-danger"
                     >
-                      🗑️ Eliminar
+                      <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
                     </button>
                     <button
                       onClick={() => setShowDetailsModal(false)}
                       className="btn btn-ghost"
                     >
-                      ✕
+                      <X size={18} strokeWidth={2} />
                     </button>
                   </div>
                 </div>
@@ -734,7 +745,7 @@ function ClassManager({ user, courses }) {
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                   >
-                    📝 General
+                    <FileText size={18} strokeWidth={2} className="inline-icon" /> General
                   </button>
                   <button
                     onClick={() => setDetailsTab('asignaciones')}
@@ -744,7 +755,7 @@ function ClassManager({ user, courses }) {
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                   >
-                    👥 Asignaciones
+                    <Users size={18} strokeWidth={2} className="inline-icon" /> Asignaciones
                   </button>
                 </div>
 
@@ -896,7 +907,9 @@ function ClassManager({ user, courses }) {
                             className="rounded mt-1"
                           />
                           <div className="flex-1">
-                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">♻️ Auto-renovar instancias</span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              <Repeat size={16} strokeWidth={2} className="inline-icon" /> Auto-renovar instancias
+                            </span>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                               Genera automáticamente {scheduleForm.autoRenewWeeks} semanas más cuando queden menos de 3 instancias
                             </p>
@@ -907,7 +920,7 @@ function ClassManager({ user, courses }) {
                           + Agregar Horario
                         </button>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                          💡 Selecciona varios días para crear horarios múltiples a la vez
+                          <Lightbulb size={14} strokeWidth={2} className="inline-icon" /> Selecciona varios días para crear horarios múltiples a la vez
                         </p>
                       </div>
 
@@ -925,7 +938,7 @@ function ClassManager({ user, courses }) {
                         return (
                           <div className="bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded-lg p-4 mb-4">
                             <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                              <span>📊</span>
+                              <BarChart3 size={20} strokeWidth={2} />
                               <span>Estadísticas de Instancias</span>
                             </h4>
                             <div className="grid grid-cols-2 gap-3 text-sm mb-3">
@@ -957,8 +970,8 @@ function ClassManager({ user, courses }) {
                               </div>
                             )}
                             {upcoming.length < 3 && (
-                              <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200">
-                                ⚠️ Quedan pocas instancias programadas
+                              <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200 flex items-center gap-1">
+                                <AlertTriangle size={14} strokeWidth={2} /> Quedan pocas instancias programadas
                               </div>
                             )}
                           </div>
@@ -1008,7 +1021,7 @@ function ClassManager({ user, courses }) {
 
                       <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800 pb-2">
                         <button onClick={handleSaveClassChanges} className="btn btn-primary flex-1">
-                          💾 Guardar Cambios
+                          <Save size={18} strokeWidth={2} className="inline-icon" /> Guardar Cambios
                         </button>
                       </div>
                     </div>
@@ -1019,7 +1032,9 @@ function ClassManager({ user, courses }) {
                     <div className="max-h-[60vh] overflow-y-auto pr-2">
                       {/* Curso */}
                       <div className="card mb-4">
-                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">📚 Curso Asociado</h4>
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                          <BookOpen size={20} strokeWidth={2} /> Curso Asociado
+                        </h4>
                         <select
                           className="input w-full"
                           value={formData.courseId}
@@ -1042,7 +1057,9 @@ function ClassManager({ user, courses }) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Grupos */}
                         <div className="card">
-                          <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">👥 Grupos Asignados</h4>
+                          <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                            <Users size={20} strokeWidth={2} /> Grupos Asignados
+                          </h4>
 
                         {assignedGroupsList.length === 0 ? (
                           <p className="text-gray-500 dark:text-gray-400 text-center py-4">No hay grupos asignados</p>
@@ -1086,7 +1103,9 @@ function ClassManager({ user, courses }) {
 
                       {/* Estudiantes */}
                       <div className="card">
-                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">👨‍🎓 Estudiantes Individuales</h4>
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                          <GraduationCap size={20} strokeWidth={2} /> Estudiantes Individuales
+                        </h4>
 
                         {assignedStudentsList.length === 0 ? (
                           <p className="text-gray-500 dark:text-gray-400 text-center py-4">No hay estudiantes asignados</p>
@@ -1145,20 +1164,22 @@ function ClassManager({ user, courses }) {
     return (
       <div className="class-manager">
         <div className="manager-header">
-          <h2>📚 Gestión de Clases</h2>
+          <h2 className="flex items-center gap-2">
+            <BookOpen size={28} strokeWidth={2} /> Gestión de Clases
+          </h2>
           <div className="header-actions">
             <div className="view-tabs">
               <button
                 className={`tab-btn ${activeTab === 'list' ? 'active' : ''}`}
                 onClick={() => setActiveTab('list')}
               >
-                📋 Mis Clases
+                <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Mis Clases
               </button>
               <button
                 className={`tab-btn ${activeTab === 'calendar' ? 'active' : ''}`}
                 onClick={() => setActiveTab('calendar')}
               >
-                📅 Calendario
+                <Calendar size={18} strokeWidth={2} className="inline-icon" /> Calendario
               </button>
             </div>
             <button onClick={handleCreateClass} className="btn btn-primary">
@@ -1201,7 +1222,7 @@ function ClassManager({ user, courses }) {
               onClick={() => setWeekOffset(0)}
               title="Volver a esta semana"
             >
-              📅 Hoy
+              <Calendar size={18} strokeWidth={2} className="inline-icon" /> Hoy
             </button>
           )}
           <button
@@ -1209,7 +1230,7 @@ function ClassManager({ user, courses }) {
             onClick={() => setShowWeekends(!showWeekends)}
             title={showWeekends ? 'Ocultar fines de semana' : 'Mostrar fines de semana'}
           >
-            {showWeekends ? '📅 7 días' : '📅 5 días'}
+            <Calendar size={18} strokeWidth={2} className="inline-icon" /> {showWeekends ? '7 días' : '5 días'}
           </button>
         </div>
 
@@ -1243,7 +1264,7 @@ function ClassManager({ user, courses }) {
                               onClick={() => handleCancelInstance(instance.id)}
                               title="Cancelar esta instancia"
                             >
-                              ✕
+                              <X size={16} strokeWidth={2} />
                             </button>
                           </div>
                         </div>
