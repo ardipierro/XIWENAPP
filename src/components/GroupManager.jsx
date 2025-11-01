@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  Users, FileText, BookOpen, Check, Trash2, X
+  Users, FileText, BookOpen, Check, Trash2, X, Settings
 } from 'lucide-react';
 import {
   getGroupsByTeacher,
@@ -20,6 +20,7 @@ function GroupManager({ user, courses }) {
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupMembers, setGroupMembers] = useState([]);
@@ -178,18 +179,38 @@ function GroupManager({ user, courses }) {
         </button>
       </div>
 
-      {/* Search */}
+      {/* Search and Toggle */}
       <div className="card mb-6">
-        <input
-          type="text"
-          placeholder="Buscar grupos..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="input"
-        />
+        <div className="flex gap-3">
+          <input
+            type="text"
+            placeholder="Buscar grupos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="input flex-1"
+          />
+
+          {/* Toggle Vista */}
+          <div className="view-toggle">
+            <button
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Vista de grilla"
+            >
+              ⊞
+            </button>
+            <button
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="Vista de lista"
+            >
+              ☰
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Groups Grid */}
+      {/* Groups Grid/List */}
       {filteredGroups.length === 0 ? (
         <div className="card text-center py-12">
           <div className="mb-4">
@@ -208,25 +229,74 @@ function GroupManager({ user, courses }) {
             Crear Primer Grupo
           </button>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      ) : viewMode === 'grid' ? (
+        /* Vista Grilla */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredGroups.map((group) => (
-            <div
-              key={group.id}
-              className="card cursor-pointer"
-              style={{ borderLeft: `3px solid #3f3f46` }}
-              onClick={() => handleSelectGroup(group)}
-            >
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {group.name}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                {group.description}
-              </p>
-              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+            <div key={group.id} className="card flex flex-col" style={{ padding: '12px' }}>
+              {/* Placeholder con icono */}
+              <div className="card-image-placeholder">
+                <Users size={40} strokeWidth={2} />
+              </div>
+
+              {/* Título */}
+              <h3 className="card-title">{group.name}</h3>
+
+              {/* Descripción */}
+              <p className="card-description">{group.description || 'Sin descripción'}</p>
+
+              {/* Stats */}
+              <div className="card-stats">
                 <span className="flex items-center gap-1">
-                  <Users size={16} strokeWidth={2} /> {group.studentCount || 0} estudiantes
+                  <Users size={14} strokeWidth={2} /> {group.studentCount || 0} estudiantes
                 </span>
+              </div>
+
+              {/* Botones */}
+              <div className="card-actions">
+                <button
+                  className="btn btn-primary flex-1"
+                  onClick={() => handleSelectGroup(group)}
+                >
+                  <Settings size={16} strokeWidth={2} /> Gestionar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Vista Lista */
+        <div className="flex flex-col gap-3">
+          {filteredGroups.map((group) => (
+            <div key={group.id} className="card card-list">
+              <div className="flex gap-4 items-start">
+                {/* Placeholder pequeño */}
+                <div className="card-image-placeholder-sm">
+                  <Users size={32} strokeWidth={2} />
+                </div>
+
+                {/* Contenido principal */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="card-title">{group.name}</h3>
+                  <p className="card-description">{group.description || 'Sin descripción'}</p>
+
+                  {/* Stats */}
+                  <div className="card-stats">
+                    <span className="flex items-center gap-1">
+                      <Users size={14} strokeWidth={2} /> {group.studentCount || 0} estudiantes
+                    </span>
+                  </div>
+                </div>
+
+                {/* Botones */}
+                <div className="card-actions-list">
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleSelectGroup(group)}
+                  >
+                    <Settings size={16} strokeWidth={2} /> Gestionar
+                  </button>
+                </div>
               </div>
             </div>
           ))}

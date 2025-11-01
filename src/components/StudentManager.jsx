@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react';
-import { 
-  loadStudents, 
-  addStudent, 
-  updateStudent, 
+import {
+  loadStudents,
+  addStudent,
+  updateStudent,
   deleteStudent,
   registerStudentProfile,
   checkStudentCodeExists,
   generateStudentCode
 } from '../firebase/firestore';
+import { GraduationCap, Settings, X, UserPlus, Users, RefreshCw } from 'lucide-react';
 import './StudentManager.css';
 
 function StudentManager({ onClose, onStudentSelect }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     grade: '',
@@ -149,31 +153,47 @@ function StudentManager({ onClose, onStudentSelect }) {
     validateAndSetCode(newCode);
   };
 
+  const filteredStudents = students.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.grade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.section?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.studentCode?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return (
-      <div className="student-manager">
-        <div className="loading">🔄 Cargando alumnos...</div>
+      <div className="student-manager-overlay">
+        <div className="student-manager">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="spinner"></div>
+            <p className="ml-4 text-gray-600 dark:text-gray-300">Cargando alumnos...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="student-manager-overlay">
-      <div className="student-manager">
+      <div className="student-manager bg-white dark:bg-gray-800" style={{borderRadius: '16px', maxWidth: '1400px'}}>
         <div className="manager-header">
-          <h2>👥 Gestión de Alumnos</h2>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <h2 className="flex items-center gap-2">
+            <Users size={24} strokeWidth={2} /> Gestión de Alumnos
+          </h2>
+          <button className="close-btn" onClick={onClose}>
+            <X size={24} strokeWidth={2} />
+          </button>
         </div>
 
         <div className="manager-actions">
-          <button 
-            className="btn-add"
+          <button
+            className="btn btn-primary"
             onClick={() => {
               resetForm();
               setShowAddForm(true);
             }}
           >
-            ➕ Agregar Alumno
+            <UserPlus size={16} strokeWidth={2} /> Agregar Alumno
           </button>
           <div className="student-count">
             Total: {students.length} alumno{students.length !== 1 ? 's' : ''}
@@ -248,68 +268,286 @@ function StudentManager({ onClose, onStudentSelect }) {
           </form>
         )}
 
+        {/* Search and Toggle */}
+        <div className="card mb-6">
+          <div className="flex gap-3">
+            <input
+              type="text"
+              placeholder="Buscar por nombre, grado, sección o código..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input flex-1"
+            />
+
+            {/* Toggle Vista */}
+            <div className="view-toggle">
+              <button
+                className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Vista de grilla"
+              >
+                ⊞
+              </button>
+              <button
+                className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="Vista de lista"
+              >
+                ☰
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Students Grid/List */}
         <div className="students-list">
-          {students.length === 0 ? (
-            <div className="empty-state">
-              <p>📝 No hay alumnos registrados</p>
-              <p>Agrega el primero usando el botón de arriba</p>
+          {filteredStudents.length === 0 ? (
+            <div className="card text-center py-12">
+              <div className="mb-4">
+                <GraduationCap size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500 mx-auto" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                {students.length === 0 ? 'No hay alumnos registrados' : 'No se encontraron alumnos'}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                {students.length === 0
+                  ? 'Agrega el primero usando el botón de arriba'
+                  : 'Intenta con otros términos de búsqueda'}
+              </p>
+              {students.length === 0 && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    resetForm();
+                    setShowAddForm(true);
+                  }}
+                >
+                  <UserPlus size={16} strokeWidth={2} /> Agregar Primer Alumno
+                </button>
+              )}
+            </div>
+          ) : viewMode === 'grid' ? (
+            /* Vista Grilla */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredStudents.map((student) => (
+                <div key={student.id} className="card flex flex-col" style={{ padding: '12px' }}>
+                  {/* Avatar con inicial */}
+                  <div className="card-image-placeholder">
+                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto">
+                      <span className="text-2xl text-white font-bold">
+                        {student.name?.[0]?.toUpperCase() || '?'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Nombre */}
+                  <h3 className="card-title text-center">{student.name}</h3>
+
+                  {/* Descripción */}
+                  <p className="card-description text-center">
+                    {student.grade && student.section
+                      ? `${student.grade} - Sección ${student.section}`
+                      : student.grade || student.section || 'Sin grado asignado'}
+                  </p>
+
+                  {/* Badges */}
+                  <div className="card-badges justify-center">
+                    {student.studentCode ? (
+                      <span className="badge badge-success">
+                        Código: {student.studentCode}
+                      </span>
+                    ) : (
+                      <span className="badge badge-warning">
+                        Sin código
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Botones */}
+                  <div className="card-actions">
+                    {onStudentSelect ? (
+                      <button
+                        className="btn btn-primary flex-1"
+                        onClick={() => handleSelectStudent(student)}
+                      >
+                        <Settings size={16} strokeWidth={2} /> Seleccionar
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-primary flex-1"
+                        onClick={() => setSelectedStudent(student)}
+                      >
+                        <Settings size={16} strokeWidth={2} /> Gestionar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
-            <table className="students-table">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Grado</th>
-                  <th>Sección</th>
-                  <th>Código</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((student) => (
-                  <tr key={student.id}>
-                    <td className="student-name">{student.name}</td>
-                    <td>{student.grade || '-'}</td>
-                    <td>{student.section || '-'}</td>
-                    <td>{student.studentCode || 'Sin asignar'}</td>
-                    <td className="actions">
-                      {onStudentSelect && (
+            /* Vista Lista */
+            <div className="flex flex-col gap-3">
+              {filteredStudents.map((student) => (
+                <div key={student.id} className="card card-list">
+                  <div className="flex gap-4 items-start">
+                    {/* Avatar pequeño */}
+                    <div className="card-image-placeholder-sm">
+                      <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+                        <span className="text-2xl text-white font-bold">
+                          {student.name?.[0]?.toUpperCase() || '?'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Contenido principal */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="card-title">{student.name}</h3>
+                      <p className="card-description">
+                        {student.grade && student.section
+                          ? `${student.grade} - Sección ${student.section}`
+                          : student.grade || student.section || 'Sin grado asignado'}
+                      </p>
+                    </div>
+
+                    {/* Badges */}
+                    <div className="card-badges-list">
+                      {student.studentCode ? (
+                        <span className="badge badge-success">
+                          Código: {student.studentCode}
+                        </span>
+                      ) : (
+                        <span className="badge badge-warning">
+                          Sin código
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Botones */}
+                    <div className="card-actions-list">
+                      {onStudentSelect ? (
                         <button
-                          className="btn-select"
+                          className="btn btn-primary"
                           onClick={() => handleSelectStudent(student)}
-                          title="Seleccionar para el juego"
                         >
-                          ✓
+                          <Settings size={16} strokeWidth={2} /> Seleccionar
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => setSelectedStudent(student)}
+                        >
+                          <Settings size={16} strokeWidth={2} /> Gestionar
                         </button>
                       )}
-                      <button
-                        className="btn-edit"
-                        onClick={() => handleEdit(student)}
-                        title="Editar"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className="btn-regenerate"
-                        onClick={() => handleRegenerateCode(student)}
-                        title="Regenerar Código"
-                      >
-                        🔄
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => handleDelete(student.id, student.name)}
-                        title="Eliminar"
-                      >
-                        🗑️
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
+
+        {/* Modal Gestionar Alumno */}
+        {selectedStudent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 2001}}>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    Gestionar Alumno
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedStudent.name}</p>
+                </div>
+                <button
+                  onClick={() => setSelectedStudent(null)}
+                  className="btn btn-ghost"
+                >
+                  <X size={18} strokeWidth={2} />
+                </button>
+              </div>
+
+              {/* Student Info */}
+              <div className="space-y-4">
+                <div>
+                  <label className="label">Nombre Completo</label>
+                  <input
+                    type="text"
+                    value={selectedStudent.name}
+                    className="input"
+                    disabled
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Grado</label>
+                    <input
+                      type="text"
+                      value={selectedStudent.grade || 'Sin asignar'}
+                      className="input"
+                      disabled
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label">Sección</label>
+                    <input
+                      type="text"
+                      value={selectedStudent.section || 'Sin asignar'}
+                      className="input"
+                      disabled
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="label">Código de Ingreso</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={selectedStudent.studentCode || 'Sin asignar'}
+                      className="input flex-1"
+                      disabled
+                    />
+                    <button
+                      onClick={() => {
+                        handleRegenerateCode(selectedStudent);
+                        setSelectedStudent(null);
+                      }}
+                      className="btn btn-outline"
+                      title="Regenerar código"
+                    >
+                      <RefreshCw size={16} strokeWidth={2} /> Regenerar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => {
+                    handleEdit(selectedStudent);
+                    setSelectedStudent(null);
+                  }}
+                  className="btn btn-primary flex-1"
+                >
+                  Editar Alumno
+                </button>
+                <button
+                  onClick={() => {
+                    handleDelete(selectedStudent.id, selectedStudent.name);
+                    setSelectedStudent(null);
+                  }}
+                  className="btn btn-danger flex-1"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

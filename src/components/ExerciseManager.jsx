@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, CheckCircle, AlertTriangle, Calendar, FileText, BookMarked, BarChart3 } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, CheckCircle, AlertTriangle, Calendar, FileText, BookMarked, BarChart3, Settings, Gamepad2 } from 'lucide-react';
 import { getExercisesByTeacher, createExercise, updateExercise, getExerciseById, deleteExercise } from '../firebase/exercises';
 import {
   updateExerciseCourses,
@@ -279,35 +279,49 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
       {/* Filtros y Búsqueda */}
       <div className="card mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex gap-3">
           {/* Búsqueda */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Buscar por título o categoría..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Buscar por título o categoría..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="input flex-1"
+          />
 
           {/* Filtro por tipo */}
-          <div className="w-full md:w-64">
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="input"
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="input w-48"
+          >
+            <option value="all">Todos los tipos</option>
+            <option value="multiple_choice">Opción Múltiple</option>
+            <option value="fill_blank">Completar Espacios</option>
+            <option value="drag_drop">Drag & Drop</option>
+            <option value="highlight">Resaltar Palabras</option>
+            <option value="order_sentence">Ordenar Oración</option>
+            <option value="true_false">Verdadero/Falso</option>
+            <option value="matching">Relacionar</option>
+            <option value="table">Tabla</option>
+          </select>
+
+          {/* Toggle Vista */}
+          <div className="view-toggle">
+            <button
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Vista de grilla"
             >
-              <option value="all">Todos los tipos</option>
-              <option value="multiple_choice">Opción Múltiple</option>
-              <option value="fill_blank">Completar Espacios</option>
-              <option value="drag_drop">Drag & Drop</option>
-              <option value="highlight">Resaltar Palabras</option>
-              <option value="order_sentence">Ordenar Oración</option>
-              <option value="true_false">Verdadero/Falso</option>
-              <option value="matching">Relacionar</option>
-              <option value="table">Tabla</option>
-            </select>
+              ⊞
+            </button>
+            <button
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="Vista de lista"
+            >
+              ☰
+            </button>
           </div>
         </div>
       </div>
@@ -335,86 +349,128 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
             </button>
           )}
         </div>
-      ) : (
-        <div className="grid gap-4">
+      ) : viewMode === 'grid' ? (
+        /* Vista Grilla */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredExercises.map((exercise) => (
-            <div key={exercise.id} className="card">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                      {exercise.title || 'Sin título'}
-                    </h3>
-                    <span className="badge badge-info">
-                      {getTypeLabel(exercise.type)}
+            <div key={exercise.id} className="card flex flex-col" style={{ padding: '12px' }}>
+              {/* Placeholder con icono */}
+              <div className="card-image-placeholder">
+                <Gamepad2 size={40} strokeWidth={2} />
+              </div>
+
+              {/* Título */}
+              <h3 className="card-title">{exercise.title || 'Sin título'}</h3>
+
+              {/* Descripción */}
+              <p className="card-description">{exercise.description || 'Sin descripción'}</p>
+
+              {/* Badges */}
+              <div className="card-badges">
+                <span className="badge badge-info">{getTypeLabel(exercise.type)}</span>
+                {exercise.difficulty && (
+                  <span className={`badge ${getDifficultyColor(exercise.difficulty)}`}>
+                    {exercise.difficulty === 'easy' && 'Fácil'}
+                    {exercise.difficulty === 'medium' && 'Medio'}
+                    {exercise.difficulty === 'hard' && 'Difícil'}
+                  </span>
+                )}
+                {exerciseCourses[exercise.id]?.length > 0 && (
+                  exerciseCourses[exercise.id].slice(0, 1).map(course => (
+                    <span key={course.id} className="badge badge-success">
+                      <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
                     </span>
-                    {exercise.difficulty && (
-                      <span className={`badge ${getDifficultyColor(exercise.difficulty)}`}>
-                        {exercise.difficulty === 'easy' && 'Fácil'}
-                        {exercise.difficulty === 'medium' && 'Medio'}
-                        {exercise.difficulty === 'hard' && 'Difícil'}
+                  ))
+                )}
+                {exerciseCourses[exercise.id]?.length > 1 && (
+                  <span className="badge badge-info">+{exerciseCourses[exercise.id].length - 1}</span>
+                )}
+              </div>
+
+              {/* Stats */}
+              <div className="card-stats">
+                <span className="flex items-center gap-1">
+                  <FileText size={14} strokeWidth={2} /> {exercise.questions?.length || 0} preguntas
+                </span>
+                {exercise.category && (
+                  <span className="flex items-center gap-1">
+                    <FileText size={14} strokeWidth={2} /> {exercise.category}
+                  </span>
+                )}
+              </div>
+
+              {/* Botones */}
+              <div className="card-actions">
+                <button
+                  className="btn btn-primary flex-1"
+                  onClick={() => handleEdit(exercise.id)}
+                >
+                  <Settings size={16} strokeWidth={2} /> Gestionar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Vista Lista */
+        <div className="flex flex-col gap-3">
+          {filteredExercises.map((exercise) => (
+            <div key={exercise.id} className="card card-list">
+              <div className="flex gap-4 items-start">
+                {/* Placeholder pequeño */}
+                <div className="card-image-placeholder-sm">
+                  <Gamepad2 size={32} strokeWidth={2} />
+                </div>
+
+                {/* Contenido principal */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="card-title">{exercise.title || 'Sin título'}</h3>
+                  <p className="card-description">{exercise.description || 'Sin descripción'}</p>
+
+                  {/* Stats */}
+                  <div className="card-stats">
+                    <span className="flex items-center gap-1">
+                      <FileText size={14} strokeWidth={2} /> {exercise.questions?.length || 0} preguntas
+                    </span>
+                    {exercise.category && (
+                      <span className="flex items-center gap-1">
+                        <FileText size={14} strokeWidth={2} /> {exercise.category}
                       </span>
                     )}
-                  </div>
-
-                  <p className="text-gray-600 dark:text-gray-400 mb-3">
-                    {exercise.description || 'Sin descripción'}
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    {exerciseCourses[exercise.id]?.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {exerciseCourses[exercise.id].map(course => (
-                          <span key={course.id} className="badge badge-success">
-                            <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {(!exerciseCourses[exercise.id] || exerciseCourses[exercise.id].length === 0) && (
-                      <span className="text-gray-400">Sin cursos asignados</span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    <span>📁 {exercise.category || 'Sin categoría'}</span>
-                    <span>❓ {exercise.questions?.length || 0} preguntas</span>
-                    {exercise.tags && exercise.tags.length > 0 && (
-                      <span>🏷️ {exercise.tags.join(', ')}</span>
-                    )}
                     {exercise.createdAt && (
-                      <span>📅 {new Date(exercise.createdAt.seconds * 1000).toLocaleDateString('es-AR')}</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar size={14} strokeWidth={2} /> {new Date(exercise.createdAt.seconds * 1000).toLocaleDateString('es-AR')}
+                      </span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex gap-2 ml-4">
-                  {exercise.questions && exercise.questions.length > 0 && (
-                    <button
-                      className="btn btn-sm btn-success"
-                      onClick={() => onPlayExercise && onPlayExercise(exercise.id)}
-                      title="Jugar ejercicio"
-                    >
-                      ▶️ Jugar
-                    </button>
+                {/* Badges */}
+                <div className="card-badges-list">
+                  <span className="badge badge-info">{getTypeLabel(exercise.type)}</span>
+                  {exercise.difficulty && (
+                    <span className={`badge ${getDifficultyColor(exercise.difficulty)}`}>
+                      {exercise.difficulty === 'easy' && 'Fácil'}
+                      {exercise.difficulty === 'medium' && 'Medio'}
+                      {exercise.difficulty === 'hard' && 'Difícil'}
+                    </span>
                   )}
+                  {exerciseCourses[exercise.id]?.length > 0 && (
+                    exerciseCourses[exercise.id].slice(0, 2).map(course => (
+                      <span key={course.id} className="badge badge-success">
+                        <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                {/* Botones */}
+                <div className="card-actions-list">
                   <button
-                    className="btn btn-sm btn-outline"
+                    className="btn btn-primary"
                     onClick={() => handleEdit(exercise.id)}
                   >
-                    <Edit size={16} strokeWidth={2} /> Editar
-                  </button>
-                  <button
-                    className="btn btn-sm btn-ghost"
-                    onClick={() => handleView(exercise.id)}
-                  >
-                    <Eye size={16} strokeWidth={2} /> Ver
-                  </button>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDelete(exercise.id)}
-                  >
-                    <Trash2 size={16} strokeWidth={2} />
+                    <Settings size={16} strokeWidth={2} /> Gestionar
                   </button>
                 </div>
               </div>
