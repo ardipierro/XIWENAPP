@@ -1,6 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Target,
+  Gamepad2,
+  FileText,
+  BookOpen,
+  Crown,
+  Users,
+  UsersRound,
+  BarChart3,
+  Folder,
+  Rocket,
+  Calendar,
+  TrendingUp
+} from 'lucide-react';
+import {
   loadStudents,
   loadGameHistory,
   loadCategories,
@@ -13,6 +27,14 @@ import {
   getStudentEnrollments,
   getStudentEnrolledCoursesCount
 } from '../firebase/firestore';
+import {
+  assignToStudent,
+  removeFromStudent,
+  getStudentAssignments
+} from '../firebase/relationships';
+import { getContentByTeacher } from '../firebase/content';
+import { getExercisesByTeacher } from '../firebase/exercises';
+import { createUser } from '../firebase/users';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
@@ -20,12 +42,19 @@ import GameContainer from './GameContainer';
 import ExerciseManager from './ExerciseManager';
 import ContentManager from './ContentManager';
 import GroupManager from './GroupManager';
+import ClassManager from './ClassManager';
+import ClassManagement from './ClassManagement';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import AttendanceView from './AttendanceView';
+import AddUserModal from './AddUserModal';
+import UserProfile from './UserProfile';
+import ExercisePlayer from './exercises/ExercisePlayer';
 import './TeacherDashboard.css';
 
 function TeacherDashboard({ user, userRole, onLogout }) {
   const navigate = useNavigate();
-  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users
+  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, playExercise
+  const [selectedExerciseId, setSelectedExerciseId] = useState(null);
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalGames: 0,
@@ -44,13 +73,21 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   const [filterStatus, setFilterStatus] = useState('all');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [selectedUserProfile, setSelectedUserProfile] = useState(null);
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
-  // Estados para asignación de cursos
-  const [showEnrollmentModal, setShowEnrollmentModal] = useState(false);
+  // Estados para asignación de recursos (cursos, contenido, ejercicios)
+  const [showResourceModal, setShowResourceModal] = useState(false);
+  const [activeResourceTab, setActiveResourceTab] = useState('courses'); // 'courses', 'content', 'exercises'
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentEnrollments, setStudentEnrollments] = useState([]);
+  const [studentContent, setStudentContent] = useState([]);
+  const [studentExercises, setStudentExercises] = useState([]);
+  const [allContent, setAllContent] = useState([]);
+  const [allExercises, setAllExercises] = useState([]);
   const [enrollmentCounts, setEnrollmentCounts] = useState({});
-  const [loadingEnrollments, setLoadingEnrollments] = useState(false);
+  const [loadingResources, setLoadingResources] = useState(false);
 
   // Determinar si el usuario es admin
   const isAdmin = isAdminEmail(user?.email);
@@ -94,7 +131,53 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
   const handleBackToDashboard = () => {
     setCurrentScreen('dashboard');
+    setSelectedExerciseId(null);
+    setShowUserProfile(false);
+    setSelectedUserProfile(null);
     loadDashboardData(); // Recargar datos al volver al dashboard
+  };
+
+  const handlePlayExercise = (exerciseId) => {
+    setSelectedExerciseId(exerciseId);
+    setCurrentScreen('playExercise');
+  };
+
+  const handleViewUserProfile = (userItem) => {
+    setSelectedUserProfile(userItem);
+    setShowUserProfile(true);
+  };
+
+  const handleBackFromProfile = () => {
+    setShowUserProfile(false);
+    setSelectedUserProfile(null);
+  };
+
+  const handleProfileUpdate = async () => {
+    // Recargar usuarios después de actualizar el perfil
+    await loadUsers();
+  };
+
+  const handleMenuAction = (action) => {
+    // Mapear las acciones del menú lateral a las vistas del dashboard
+    const actionMap = {
+      'dashboard': 'dashboard',
+      'exercises': 'exercises',
+      'content': 'content',
+      'courses': 'courses',
+      'groups': 'groups',
+      'classes': 'classes',
+      'attendance': 'attendance',
+      'setup': 'setup',
+      'analytics': 'analytics',
+      'users': 'users'
+    };
+
+    const screen = actionMap[action];
+
+    if (screen) {
+      setCurrentScreen(screen);
+      setSelectedExerciseId(null);
+    }
   };
 
   const loadDashboardData = async () => {
@@ -234,28 +317,72 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     setTimeout(() => setErrorMessage(''), 3000);
   };
 
-  // Funciones para asignación de cursos
-  const handleOpenEnrollmentModal = async (student) => {
-    setSelectedStudent(student);
-    setShowEnrollmentModal(true);
-    setLoadingEnrollments(true);
-
+  // Función para crear un nuevo usuario
+  const handleCreateUser = async (userData) => {
     try {
-      // Cargar inscripciones del estudiante
-      const enrollments = await getStudentEnrollments(student.id);
-      setStudentEnrollments(enrollments);
-    } catch (error) {
-      console.error('Error cargando inscripciones:', error);
-      showError('Error al cargar cursos del alumno');
-    }
+      const result = await createUser({
+        ...userData,
+        createdBy: user.uid
+      });
 
-    setLoadingEnrollments(false);
+      if (result.success) {
+        showSuccess(`Usuario ${userData.email} creado exitosamente`);
+        // Recargar la lista de usuarios
+        await loadUsers();
+        return { success: true };
+      } else {
+        return { success: false, error: result.error };
+      }
+    } catch (error) {
+      console.error('Error al crear usuario:', error);
+      return { success: false, error: 'Error inesperado al crear usuario' };
+    }
   };
 
-  const handleCloseEnrollmentModal = () => {
-    setShowEnrollmentModal(false);
+  // Funciones para asignación de recursos
+  const handleOpenResourceModal = async (student, initialTab = 'courses') => {
+    setSelectedStudent(student);
+    setActiveResourceTab(initialTab);
+    setShowResourceModal(true);
+    setLoadingResources(true);
+
+    try {
+      // Cargar inscripciones de cursos (método legacy)
+      const enrollments = await getStudentEnrollments(student.id);
+      setStudentEnrollments(enrollments);
+
+      // Cargar asignaciones directas (contenido y ejercicios)
+      const assignments = await getStudentAssignments(student.id);
+
+      // Filtrar contenido y ejercicios asignados
+      const assignedContent = assignments.filter(a => a.itemType === 'content');
+      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
+
+      setStudentContent(assignedContent);
+      setStudentExercises(assignedExercises);
+
+      // Cargar todo el contenido y ejercicios disponibles del profesor
+      const teacherContent = await getContentByTeacher(user.uid);
+      const teacherExercises = await getExercisesByTeacher(user.uid);
+
+      setAllContent(teacherContent);
+      setAllExercises(teacherExercises);
+
+    } catch (error) {
+      console.error('Error cargando recursos:', error);
+      showError('Error al cargar recursos del alumno');
+    }
+
+    setLoadingResources(false);
+  };
+
+  const handleCloseResourceModal = () => {
+    setShowResourceModal(false);
     setSelectedStudent(null);
     setStudentEnrollments([]);
+    setStudentContent([]);
+    setStudentExercises([]);
+    setActiveResourceTab('courses');
   };
 
   const handleEnrollCourse = async (courseId) => {
@@ -320,6 +447,90 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return studentEnrollments.some(enrollment => enrollment.course.id === courseId);
   };
 
+  // Funciones para asignación de contenido
+  const handleAssignContent = async (contentId) => {
+    if (!selectedStudent) return;
+
+    try {
+      await assignToStudent(selectedStudent.id, 'content', contentId, user.uid);
+      showSuccess('Contenido asignado exitosamente');
+
+      // Recargar asignaciones
+      const assignments = await getStudentAssignments(selectedStudent.id);
+      const assignedContent = assignments.filter(a => a.itemType === 'content');
+      setStudentContent(assignedContent);
+    } catch (error) {
+      console.error('Error:', error);
+      showError('Error al asignar contenido');
+    }
+  };
+
+  const handleRemoveContent = async (contentId) => {
+    if (!selectedStudent) return;
+
+    const confirmed = window.confirm('¿Estás seguro de que deseas desasignar este contenido?');
+    if (!confirmed) return;
+
+    try {
+      await removeFromStudent(selectedStudent.id, 'content', contentId);
+      showSuccess('Contenido desasignado exitosamente');
+
+      // Recargar asignaciones
+      const assignments = await getStudentAssignments(selectedStudent.id);
+      const assignedContent = assignments.filter(a => a.itemType === 'content');
+      setStudentContent(assignedContent);
+    } catch (error) {
+      console.error('Error:', error);
+      showError('Error al desasignar contenido');
+    }
+  };
+
+  const isContentAssigned = (contentId) => {
+    return studentContent.some(sc => sc.itemId === contentId);
+  };
+
+  // Funciones para asignación de ejercicios
+  const handleAssignExercise = async (exerciseId) => {
+    if (!selectedStudent) return;
+
+    try {
+      await assignToStudent(selectedStudent.id, 'exercise', exerciseId, user.uid);
+      showSuccess('Ejercicio asignado exitosamente');
+
+      // Recargar asignaciones
+      const assignments = await getStudentAssignments(selectedStudent.id);
+      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
+      setStudentExercises(assignedExercises);
+    } catch (error) {
+      console.error('Error:', error);
+      showError('Error al asignar ejercicio');
+    }
+  };
+
+  const handleRemoveExercise = async (exerciseId) => {
+    if (!selectedStudent) return;
+
+    const confirmed = window.confirm('¿Estás seguro de que deseas desasignar este ejercicio?');
+    if (!confirmed) return;
+
+    try {
+      await removeFromStudent(selectedStudent.id, 'exercise', exerciseId);
+      showSuccess('Ejercicio desasignado exitosamente');
+
+      // Recargar asignaciones
+      const assignments = await getStudentAssignments(selectedStudent.id);
+      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
+      setStudentExercises(assignedExercises);
+    } catch (error) {
+      console.error('Error:', error);
+      showError('Error al desasignar ejercicio');
+    }
+  };
+
+  const isExerciseAssigned = (exerciseId) => {
+    return studentExercises.some(se => se.itemId === exerciseId);
+  };
+
   const filteredUsers = users.filter(userItem => {
     const matchesSearch =
       userItem.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -378,20 +589,39 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return <GameContainer onBack={handleBackToDashboard} />;
   }
 
-  // Renderizar CoursesScreen (Gestionar Cursos) - SIN Layout porque tiene su propia navegación
+  // Renderizar CoursesScreen (Gestionar Cursos) - CON Layout
   if (currentScreen === 'courses') {
-    return <CoursesScreen onBack={handleBackToDashboard} />;
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <CoursesScreen onBack={handleBackToDashboard} user={user} />
+      </DashboardLayout>
+    );
+  }
+
+  // Renderizar ExercisePlayer (Jugar Ejercicio) - SIN Layout, pantalla completa
+  if (currentScreen === 'playExercise' && selectedExerciseId) {
+    return (
+      <ExercisePlayer
+        exerciseId={selectedExerciseId}
+        user={user}
+        onBack={handleBackToDashboard}
+        onComplete={(results) => {
+          console.log('Ejercicio completado:', results);
+          // Aquí podrías guardar resultados en Firebase
+        }}
+      />
+    );
   }
 
   // Renderizar Gestión de Ejercicios - CON Layout
   if (currentScreen === 'exercises') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="exercises-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
           </button>
-          <ExerciseManager user={user} />
+          <ExerciseManager user={user} courses={courses} onPlayExercise={handlePlayExercise} />
         </div>
       </DashboardLayout>
     );
@@ -400,12 +630,12 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Gestión de Contenido - CON Layout
   if (currentScreen === 'content') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="content-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
           </button>
-          <ContentManager user={user} />
+          <ContentManager user={user} courses={courses} />
         </div>
       </DashboardLayout>
     );
@@ -414,7 +644,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Gestión de Grupos - CON Layout
   if (currentScreen === 'groups') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="groups-management">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
@@ -425,10 +655,24 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
+  // Renderizar Class Manager (Clases Recurrentes) - CON Layout
+  if (currentScreen === 'classes') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="classes-management-section">
+          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver al Dashboard
+          </button>
+          <ClassManager user={user} courses={courses} />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   // Renderizar Analytics Dashboard - CON Layout
   if (currentScreen === 'analytics') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="analytics-section">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver al Dashboard
@@ -439,10 +683,39 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
+  // Renderizar Vista de Asistencia - CON Layout
+  if (currentScreen === 'attendance') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="attendance-section">
+          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver al Dashboard
+          </button>
+          <AttendanceView teacher={user} />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Renderizar Perfil de Usuario
+  if (currentScreen === 'users' && showUserProfile && selectedUserProfile) {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <UserProfile
+          selectedUser={selectedUserProfile}
+          currentUser={user}
+          isAdmin={isAdmin}
+          onBack={handleBackFromProfile}
+          onUpdate={handleProfileUpdate}
+        />
+      </DashboardLayout>
+    );
+  }
+
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
   if (currentScreen === 'users') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="user-management">
           {/* Header */}
           <div className="section-header">
@@ -525,9 +798,17 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           <div className="users-section card">
             <div className="users-header">
               <h2>Usuarios ({filteredUsers.length})</h2>
-              <button onClick={loadUsers} className="refresh-btn">
-                🔄 Actualizar
-              </button>
+              <div className="users-header-actions">
+                <button
+                  onClick={() => setShowAddUserModal(true)}
+                  className="add-user-btn"
+                >
+                  ➕ {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
+                </button>
+                <button onClick={loadUsers} className="refresh-btn">
+                  🔄 Actualizar
+                </button>
+              </div>
             </div>
 
             {filteredUsers.length === 0 ? (
@@ -552,7 +833,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                     {filteredUsers.map(userItem => (
                       <tr key={userItem.id} className={userItem.status !== 'active' ? 'suspended-row' : ''}>
                         <td>
-                          <div className="user-cell">
+                          <div
+                            className="user-cell clickable"
+                            onClick={() => handleViewUserProfile(userItem)}
+                            title="Ver perfil completo"
+                          >
                             <div className="user-avatar-small">
                               {ROLE_INFO[userItem.role]?.icon || '👤'}
                             </div>
@@ -602,13 +887,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                           <div className="courses-cell-content">
                             <button
                               className="assign-courses-btn"
-                              onClick={() => handleOpenEnrollmentModal(userItem)}
+                              onClick={() => handleOpenResourceModal(userItem)}
                             >
-                              📚 Asignar Cursos
+                              📋 Asignar Recursos
                             </button>
                             {enrollmentCounts[userItem.id] > 0 && (
                               <span className="enrolled-count">
-                                {enrollmentCounts[userItem.id]} asignado{enrollmentCounts[userItem.id] > 1 ? 's' : ''}
+                                {enrollmentCounts[userItem.id]} recurso{enrollmentCounts[userItem.id] > 1 ? 's' : ''}
                               </span>
                             )}
                           </div>
@@ -650,112 +935,331 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             )}
           </div>
 
-          {/* Modal de Asignación de Cursos */}
-          {showEnrollmentModal && selectedStudent && (
-            <div className="modal-overlay" onClick={handleCloseEnrollmentModal}>
+          {/* Modal de Asignación de Recursos */}
+          {showResourceModal && selectedStudent && (
+            <div className="modal-overlay" onClick={handleCloseResourceModal}>
               <div className="modal-content enrollment-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                   <h2 className="modal-title">
-                    📚 Asignar Cursos a {selectedStudent.name}
+                    📋 Asignar Recursos a {selectedStudent.name}
                   </h2>
-                  <button className="modal-close-btn" onClick={handleCloseEnrollmentModal}>
+                  <button className="modal-close-btn" onClick={handleCloseResourceModal}>
                     ✕
                   </button>
                 </div>
 
+                {/* Tabs Navigation */}
+                <div className="border-b border-gray-200 dark:border-gray-700 px-6">
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setActiveResourceTab('courses')}
+                      className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                        activeResourceTab === 'courses'
+                          ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
+                    >
+                      📚 Cursos ({studentEnrollments.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveResourceTab('content')}
+                      className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                        activeResourceTab === 'content'
+                          ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
+                    >
+                      📄 Contenidos ({studentContent.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveResourceTab('exercises')}
+                      className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                        activeResourceTab === 'exercises'
+                          ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
+                    >
+                      🎮 Ejercicios ({studentExercises.length})
+                    </button>
+                  </div>
+                </div>
+
                 <div className="modal-body">
-                  {loadingEnrollments ? (
+                  {loadingResources ? (
                     <div className="loading-spinner">
                       <div className="spinner"></div>
-                      <p>Cargando cursos...</p>
+                      <p>Cargando recursos...</p>
                     </div>
                   ) : (
                     <>
-                      {/* Cursos Asignados */}
-                      {studentEnrollments.length > 0 && (
-                        <div className="enrolled-courses-section">
-                          <h3 className="section-subtitle">
-                            ✅ Cursos Asignados ({studentEnrollments.length})
-                          </h3>
-                          <div className="courses-list">
-                            {studentEnrollments.map(enrollment => (
-                              <div key={enrollment.enrollmentId} className="course-item enrolled">
-                                <div className="course-info">
-                                  <div className="course-name">{enrollment.course.name}</div>
-                                  <div className="course-meta">
-                                    <span className="course-level">
-                                      Nivel {enrollment.course.level || 1}
-                                    </span>
-                                    <span className="course-progress">
-                                      {enrollment.progress?.percentComplete || 0}% completado
-                                    </span>
-                                  </div>
-                                </div>
-                                <button
-                                  className="btn-unenroll"
-                                  onClick={() => handleUnenrollCourse(enrollment.course.id)}
-                                  title="Desasignar curso"
-                                >
-                                  ✕ Desasignar
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Cursos Disponibles */}
-                      <div className="available-courses-section">
-                        <h3 className="section-subtitle">
-                          📖 Cursos Disponibles
-                        </h3>
-                        {courses.length === 0 ? (
-                          <div className="no-courses">
-                            <p>No hay cursos creados aún.</p>
-                            <p>Crea un curso primero para poder asignarlo.</p>
-                          </div>
-                        ) : (
-                          <div className="courses-list">
-                            {courses
-                              .filter(course => !isEnrolled(course.id))
-                              .map(course => (
-                                <div key={course.id} className="course-item available">
-                                  <div className="course-info">
-                                    <div className="course-name">{course.name}</div>
-                                    <div className="course-meta">
-                                      <span className="course-level">
-                                        Nivel {course.level || 1}
-                                      </span>
-                                      {course.description && (
-                                        <span className="course-description">
-                                          {course.description}
+                      {/* Tab: Cursos */}
+                      {activeResourceTab === 'courses' && (
+                        <>
+                          {/* Cursos Asignados */}
+                          {studentEnrollments.length > 0 && (
+                            <div className="enrolled-courses-section">
+                              <h3 className="section-subtitle">
+                                ✅ Cursos Asignados ({studentEnrollments.length})
+                              </h3>
+                              <div className="courses-list">
+                                {studentEnrollments.map(enrollment => (
+                                  <div key={enrollment.enrollmentId} className="course-item enrolled">
+                                    <div className="course-info">
+                                      <div className="course-name">{enrollment.course.name}</div>
+                                      <div className="course-meta">
+                                        <span className="course-level">
+                                          Nivel {enrollment.course.level || 1}
                                         </span>
-                                      )}
+                                        <span className="course-progress">
+                                          {enrollment.progress?.percentComplete || 0}% completado
+                                        </span>
+                                      </div>
                                     </div>
+                                    <button
+                                      className="btn-unenroll"
+                                      onClick={() => handleUnenrollCourse(enrollment.course.id)}
+                                      title="Desasignar curso"
+                                    >
+                                      ✕ Desasignar
+                                    </button>
                                   </div>
-                                  <button
-                                    className="btn-enroll"
-                                    onClick={() => handleEnrollCourse(course.id)}
-                                    title="Asignar curso"
-                                  >
-                                    + Asignar
-                                  </button>
-                                </div>
-                              ))}
-                            {courses.filter(course => !isEnrolled(course.id)).length === 0 && (
-                              <div className="all-enrolled">
-                                <p>✅ Todos los cursos ya han sido asignados</p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Cursos Disponibles */}
+                          <div className="available-courses-section">
+                            <h3 className="section-subtitle">
+                              📖 Cursos Disponibles
+                            </h3>
+                            {courses.length === 0 ? (
+                              <div className="no-courses">
+                                <p>No hay cursos creados aún.</p>
+                                <p>Crea un curso primero para poder asignarlo.</p>
+                              </div>
+                            ) : (
+                              <div className="courses-list">
+                                {courses
+                                  .filter(course => !isEnrolled(course.id))
+                                  .map(course => (
+                                    <div key={course.id} className="course-item available">
+                                      <div className="course-info">
+                                        <div className="course-name">{course.name}</div>
+                                        <div className="course-meta">
+                                          <span className="course-level">
+                                            Nivel {course.level || 1}
+                                          </span>
+                                          {course.description && (
+                                            <span className="course-description">
+                                              {course.description}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <button
+                                        className="btn-enroll"
+                                        onClick={() => handleEnrollCourse(course.id)}
+                                        title="Asignar curso"
+                                      >
+                                        + Asignar
+                                      </button>
+                                    </div>
+                                  ))}
+                                {courses.filter(course => !isEnrolled(course.id)).length === 0 && (
+                                  <div className="all-enrolled">
+                                    <p>✅ Todos los cursos ya han sido asignados</p>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
-                        )}
-                      </div>
+                        </>
+                      )}
+
+                      {/* Tab: Contenidos */}
+                      {activeResourceTab === 'content' && (
+                        <>
+                          {/* Contenidos Asignados */}
+                          {studentContent.length > 0 && (
+                            <div className="enrolled-courses-section">
+                              <h3 className="section-subtitle">
+                                ✅ Contenidos Asignados ({studentContent.length})
+                              </h3>
+                              <div className="courses-list">
+                                {studentContent.map(assignment => {
+                                  const content = allContent.find(c => c.id === assignment.itemId);
+                                  if (!content) return null;
+                                  return (
+                                    <div key={assignment.id} className="course-item enrolled">
+                                      <div className="course-info">
+                                        <div className="course-name">{content.title}</div>
+                                        <div className="course-meta">
+                                          <span className="course-level">
+                                            {content.type}
+                                          </span>
+                                          {content.duration && (
+                                            <span className="course-description">
+                                              ⏱ {content.duration} min
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <button
+                                        className="btn-unenroll"
+                                        onClick={() => handleRemoveContent(content.id)}
+                                        title="Desasignar contenido"
+                                      >
+                                        ✕ Desasignar
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Contenidos Disponibles */}
+                          <div className="available-courses-section">
+                            <h3 className="section-subtitle">
+                              📖 Contenidos Disponibles
+                            </h3>
+                            {allContent.length === 0 ? (
+                              <div className="no-courses">
+                                <p>No hay contenidos creados aún.</p>
+                                <p>Crea contenido primero para poder asignarlo.</p>
+                              </div>
+                            ) : (
+                              <div className="courses-list">
+                                {allContent
+                                  .filter(content => !isContentAssigned(content.id))
+                                  .map(content => (
+                                    <div key={content.id} className="course-item available">
+                                      <div className="course-info">
+                                        <div className="course-name">{content.title}</div>
+                                        <div className="course-meta">
+                                          <span className="course-level">
+                                            {content.type}
+                                          </span>
+                                          {content.duration && (
+                                            <span className="course-description">
+                                              ⏱ {content.duration} min
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <button
+                                        className="btn-enroll"
+                                        onClick={() => handleAssignContent(content.id)}
+                                        title="Asignar contenido"
+                                      >
+                                        + Asignar
+                                      </button>
+                                    </div>
+                                  ))}
+                                {allContent.filter(c => !isContentAssigned(c.id)).length === 0 && (
+                                  <div className="all-enrolled">
+                                    <p>✅ Todos los contenidos ya han sido asignados</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Tab: Ejercicios */}
+                      {activeResourceTab === 'exercises' && (
+                        <>
+                          {/* Ejercicios Asignados */}
+                          {studentExercises.length > 0 && (
+                            <div className="enrolled-courses-section">
+                              <h3 className="section-subtitle">
+                                ✅ Ejercicios Asignados ({studentExercises.length})
+                              </h3>
+                              <div className="courses-list">
+                                {studentExercises.map(assignment => {
+                                  const exercise = allExercises.find(e => e.id === assignment.itemId);
+                                  if (!exercise) return null;
+                                  return (
+                                    <div key={assignment.id} className="course-item enrolled">
+                                      <div className="course-info">
+                                        <div className="course-name">{exercise.title}</div>
+                                        <div className="course-meta">
+                                          <span className="course-level">
+                                            {exercise.type}
+                                          </span>
+                                          <span className="course-description">
+                                            {exercise.difficulty || 'medium'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <button
+                                        className="btn-unenroll"
+                                        onClick={() => handleRemoveExercise(exercise.id)}
+                                        title="Desasignar ejercicio"
+                                      >
+                                        ✕ Desasignar
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Ejercicios Disponibles */}
+                          <div className="available-courses-section">
+                            <h3 className="section-subtitle">
+                              📖 Ejercicios Disponibles
+                            </h3>
+                            {allExercises.length === 0 ? (
+                              <div className="no-courses">
+                                <p>No hay ejercicios creados aún.</p>
+                                <p>Crea ejercicios primero para poder asignarlos.</p>
+                              </div>
+                            ) : (
+                              <div className="courses-list">
+                                {allExercises
+                                  .filter(exercise => !isExerciseAssigned(exercise.id))
+                                  .map(exercise => (
+                                    <div key={exercise.id} className="course-item available">
+                                      <div className="course-info">
+                                        <div className="course-name">{exercise.title}</div>
+                                        <div className="course-meta">
+                                          <span className="course-level">
+                                            {exercise.type}
+                                          </span>
+                                          <span className="course-description">
+                                            {exercise.difficulty || 'medium'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <button
+                                        className="btn-enroll"
+                                        onClick={() => handleAssignExercise(exercise.id)}
+                                        title="Asignar ejercicio"
+                                      >
+                                        + Asignar
+                                      </button>
+                                    </div>
+                                  ))}
+                                {allExercises.filter(e => !isExerciseAssigned(e.id)).length === 0 && (
+                                  <div className="all-enrolled">
+                                    <p>✅ Todos los ejercicios ya han sido asignados</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
 
                 <div className="modal-footer">
-                  <button className="btn btn-ghost" onClick={handleCloseEnrollmentModal}>
+                  <button className="btn btn-ghost" onClick={handleCloseResourceModal}>
                     Cerrar
                   </button>
                 </div>
@@ -763,6 +1267,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             </div>
           )}
         </div>
+
+        {/* Modal para agregar nuevo usuario/alumno */}
+        <AddUserModal
+          isOpen={showAddUserModal}
+          onClose={() => setShowAddUserModal(false)}
+          onUserCreated={handleCreateUser}
+          userRole={userRole}
+          isAdmin={isAdmin}
+        />
       </DashboardLayout>
     );
   }
@@ -770,7 +1283,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Dashboard Principal con el nuevo layout
   return (
     <>
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="teacher-dashboard">
           {/* Header del Dashboard */}
           <div className="dashboard-welcome">
@@ -786,53 +1299,35 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           </div>
 
           <div className="dashboard-content">
-            {/* Stats Section */}
-            <section className="stats-section">
-              <h2 className="section-title">📊 Resumen General</h2>
-              <div className="stats-grid">
-              <div className="stat-card card border-left-blue">
-                <div className="stat-icon">👥</div>
-                <div className="stat-info">
-                  <div className="stat-value">{stats.totalStudents}</div>
-                  <div className="stat-label">Alumnos totales</div>
-                </div>
-              </div>
-
-              <div className="stat-card card border-left-green">
-                <div className="stat-icon">📚</div>
-                <div className="stat-info">
-                  <div className="stat-value">{stats.totalCourses}</div>
-                  <div className="stat-label">Cursos activos</div>
-                </div>
-              </div>
-
-              <div className="stat-card card border-left-purple">
-                <div className="stat-icon">🎮</div>
-                <div className="stat-info">
-                  <div className="stat-value">{stats.totalGames}</div>
-                  <div className="stat-label">Juegos totales</div>
-                </div>
-              </div>
-
-              <div className="stat-card card border-left-orange">
-                <div className="stat-icon">📚</div>
-                <div className="stat-info">
-                  <div className="stat-value">{stats.totalCategories}</div>
-                  <div className="stat-label">Categorías</div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Tarjetas Principales */}
+            {/* Tarjetas Principales */}
           <section className="main-actions">
-            <h2 className="section-title">🚀 Acciones Principales</h2>
+            <h2 className="section-title">
+              <Rocket size={24} strokeWidth={2} style={{ display: 'inline', marginRight: '8px' }} />
+              Acciones Principales
+            </h2>
             <div className="main-actions-grid">
-              {/* Tarjeta 1: Gestionar Ejercicios */}
-              <button className="main-action-card game-card" onClick={handleManageExercises}>
-                <div className="card-icon">🎮</div>
+              {/* Tarjeta 0: Crear/Iniciar Juego */}
+              <button className="main-action-card play-game-card" onClick={handleStartGame}>
+                <div className="card-icon">
+                  <Target size={48} strokeWidth={2} />
+                </div>
                 <div className="card-content">
-                  <h3 className="card-title">Gestionar Ejercicios</h3>
+                  <h3 className="card-title">Iniciar Juego</h3>
+                  <p className="card-description">Configura y juega con tus estudiantes</p>
+                  <div className="card-stats">
+                    <span className="stat-badge highlight-badge">¡Jugar ahora!</span>
+                  </div>
+                </div>
+                <div className="card-arrow">→</div>
+              </button>
+
+              {/* Tarjeta 1: Ejercicios */}
+              <button className="main-action-card game-card" onClick={handleManageExercises}>
+                <div className="card-icon">
+                  <Gamepad2 size={48} strokeWidth={2} />
+                </div>
+                <div className="card-content">
+                  <h3 className="card-title">Ejercicios</h3>
                   <p className="card-description">Ver, crear y editar ejercicios y quizzes</p>
                   <div className="card-stats">
                     <span className="stat-badge">{stats.totalGames} ejercicios creados</span>
@@ -841,11 +1336,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 <div className="card-arrow">→</div>
               </button>
 
-              {/* Tarjeta 2: Gestionar Contenido */}
+              {/* Tarjeta 2: Contenido */}
               <button className="main-action-card content-card" onClick={handleManageContent}>
-                <div className="card-icon">📄</div>
+                <div className="card-icon">
+                  <FileText size={48} strokeWidth={2} />
+                </div>
                 <div className="card-content">
-                  <h3 className="card-title">Gestionar Contenido</h3>
+                  <h3 className="card-title">Contenido</h3>
                   <p className="card-description">Ver, crear y editar lecciones y materiales</p>
                   <div className="card-stats">
                     <span className="stat-badge">Nuevo</span>
@@ -854,11 +1351,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 <div className="card-arrow">→</div>
               </button>
 
-              {/* Tarjeta 3: Gestionar Cursos/Lecciones */}
+              {/* Tarjeta 3: Cursos */}
               <button className="main-action-card course-card" onClick={handleManageCourses}>
-                <div className="card-icon">📚</div>
+                <div className="card-icon">
+                  <BookOpen size={48} strokeWidth={2} />
+                </div>
                 <div className="card-content">
-                  <h3 className="card-title">Gestionar Cursos</h3>
+                  <h3 className="card-title">Cursos</h3>
                   <p className="card-description">Administra cursos y sus lecciones</p>
                   <div className="card-stats">
                     <span className="stat-badge">{courses.length} cursos activos</span>
@@ -867,18 +1366,20 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 <div className="card-arrow">→</div>
               </button>
 
-              {/* Tarjeta 4: Gestionar Alumnos/Usuarios */}
+              {/* Tarjeta 4: Alumnos/Usuarios */}
               <button
                 className={`main-action-card ${isAdmin ? 'admin-card' : 'students-card'}`}
                 onClick={() => setCurrentScreen('users')}
               >
-                <div className="card-icon">{isAdmin ? '👑' : '👥'}</div>
+                <div className="card-icon">
+                  {isAdmin ? <Crown size={48} strokeWidth={2} /> : <Users size={48} strokeWidth={2} />}
+                </div>
                 <div className="card-content">
-                  <h3 className="card-title">Gestionar Alumnos</h3>
+                  <h3 className="card-title">Alumnos</h3>
                   <p className="card-description">
                     {isAdmin
                       ? 'Administra usuarios, roles, permisos y cursos asignados'
-                      : 'Gestiona tus alumnos y asigna cursos'
+                      : 'Administra tus alumnos y asigna cursos'
                     }
                   </p>
                   <div className="card-stats">
@@ -890,11 +1391,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 <div className="card-arrow">→</div>
               </button>
 
-              {/* Tarjeta 5: Gestionar Grupos */}
+              {/* Tarjeta 5: Grupos */}
               <button className="main-action-card groups-card" onClick={handleManageGroups}>
-                <div className="card-icon">👥</div>
+                <div className="card-icon">
+                  <UsersRound size={48} strokeWidth={2} />
+                </div>
                 <div className="card-content">
-                  <h3 className="card-title">Gestionar Grupos</h3>
+                  <h3 className="card-title">Grupos</h3>
                   <p className="card-description">Organiza estudiantes en grupos y asigna cursos</p>
                   <div className="card-stats">
                     <span className="stat-badge">Nuevo</span>
@@ -905,7 +1408,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
               {/* Tarjeta 6: Ver Analytics */}
               <button className="main-action-card analytics-card" onClick={handleViewAnalytics}>
-                <div className="card-icon">📊</div>
+                <div className="card-icon">
+                  <TrendingUp size={48} strokeWidth={2} />
+                </div>
                 <div className="card-content">
                   <h3 className="card-title">Análisis y Estadísticas</h3>
                   <p className="card-description">Visualiza métricas y rendimiento de estudiantes</p>
@@ -922,11 +1427,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           <section className="secondary-actions">
             <div className="secondary-actions-grid">
               <button className="secondary-action-btn" onClick={handleManageCategories}>
-                <span className="action-icon">📂</span>
+                <span className="action-icon">
+                  <Folder size={20} strokeWidth={2} />
+                </span>
                 <span className="action-label">Categorías</span>
               </button>
               <button className="secondary-action-btn" onClick={handleViewHistory}>
-                <span className="action-icon">📊</span>
+                <span className="action-icon">
+                  <BarChart3 size={20} strokeWidth={2} />
+                </span>
                 <span className="action-label">Historial</span>
               </button>
             </div>
@@ -934,7 +1443,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
           {/* Sección de Gráficos (Placeholder para futuro) */}
           <section className="analytics-section">
-            <h2 className="section-title">📊 Análisis y Rendimiento</h2>
+            <h2 className="section-title">
+              <BarChart3 size={24} strokeWidth={2} style={{ display: 'inline', marginRight: '8px' }} />
+              Análisis y Rendimiento
+            </h2>
             <div className="analytics-grid">
               {/* Gráfico 1: Participación en Ejercicios */}
               <div className="analytics-card">
@@ -1041,6 +1553,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         </div>
       </div>
       </DashboardLayout>
+
+      {/* Modal para agregar nuevo usuario/alumno */}
+      <AddUserModal
+        isOpen={showAddUserModal}
+        onClose={() => setShowAddUserModal(false)}
+        onUserCreated={handleCreateUser}
+        userRole={userRole}
+        isAdmin={isAdmin}
+      />
     </>
   );
 }

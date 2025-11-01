@@ -50,17 +50,27 @@ export async function getAllContent() {
 export async function getContentByTeacher(teacherId) {
   try {
     const contentRef = collection(db, 'content');
+    // Query simple sin orderBy para evitar índice compuesto
     const q = query(
       contentRef,
-      where('createdBy', '==', teacherId),
-      orderBy('createdAt', 'desc')
+      where('createdBy', '==', teacherId)
     );
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    // Ordenar en el cliente
+    const contents = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Ordenar por createdAt descendente
+    contents.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
+
+    return contents;
   } catch (error) {
     console.error('Error al obtener contenido del profesor:', error);
     return [];
@@ -71,17 +81,23 @@ export async function getContentByTeacher(teacherId) {
 export async function getContentByCourse(courseId) {
   try {
     const contentRef = collection(db, 'content');
+    // Query simple sin orderBy para evitar índice compuesto
     const q = query(
       contentRef,
-      where('courseId', '==', courseId),
-      orderBy('order', 'asc')
+      where('courseId', '==', courseId)
     );
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    // Ordenar en el cliente
+    const contents = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Ordenar por order ascendente
+    contents.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    return contents;
   } catch (error) {
     console.error('Error al obtener contenido del curso:', error);
     return [];

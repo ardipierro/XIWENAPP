@@ -1,3 +1,7 @@
+/* ===============================================
+   SIDEMENU - DISEÑO MINIMALISTA
+   =============================================== */
+
 .sidemenu-overlay {
   position: fixed;
   top: 0;
@@ -6,28 +10,20 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 998;
-  animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
+/* Contenedor principal del menú */
 .sidemenu {
   position: fixed;
-  top: 64px; /* Altura del TopBar */
+  top: 64px;
   left: 0;
   bottom: 0;
   width: 260px;
-  background: white;
-  border-right: 1px solid #e5e7eb;
+  background: #0a0a0a;
+  box-shadow: none;
+  border-right: 1px solid #27272a;
   transform: translateX(-100%);
-  transition: transform 0.3s ease-out;
+  transition: transform 0.2s ease;
   z-index: 999;
   display: flex;
   flex-direction: column;
@@ -38,54 +34,8 @@
   transform: translateX(0);
 }
 
-/* SideMenu con tema Admin */
-.admin-theme .sidemenu {
-  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-}
 
-.admin-theme .sidemenu-title {
-  color: white;
-}
-
-.admin-theme .sidemenu-item {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.admin-theme .sidemenu-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-}
-
-.admin-theme .sidemenu-item.active {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-}
-
-.admin-theme .sidemenu-item.active::before {
-  background: white;
-}
-
-.admin-theme .sidemenu-divider {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.admin-theme .version-label {
-  color: white;
-}
-
-.admin-theme .version-number {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.admin-theme .sidemenu-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.admin-theme .sidemenu-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
+/* Contenido scrolleable */
 .sidemenu-content {
   display: flex;
   flex-direction: column;
@@ -94,115 +44,6 @@
   overflow-x: hidden;
 }
 
-.sidemenu-header {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.sidemenu-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0;
-}
-
-.sidemenu-nav {
-  flex: 1;
-  padding: 8px 0;
-}
-
-.sidemenu-item {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-  color: #374151;
-}
-
-.sidemenu-item:hover {
-  background: #f3f4f6;
-  color: #667eea;
-}
-
-.sidemenu-item.active {
-  background: #eef2ff;
-  color: #667eea;
-  font-weight: 600;
-}
-
-.sidemenu-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: #667eea;
-  border-radius: 0 4px 4px 0;
-}
-
-.sidemenu-item-icon {
-  font-size: 20px;
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.sidemenu-item-label {
-  font-size: 14px;
-  font-weight: 500;
-  flex: 1;
-}
-
-.active-indicator {
-  width: 6px;
-  height: 6px;
-  background: #667eea;
-  border-radius: 50%;
-  margin-left: auto;
-}
-
-.sidemenu-divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 8px 20px;
-}
-
-.sidemenu-footer {
-  padding: 16px 20px;
-  border-top: 1px solid #e5e7eb;
-  margin-top: auto;
-}
-
-.sidemenu-version {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  text-align: center;
-}
-
-.version-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #667eea;
-  letter-spacing: 0.5px;
-}
-
-.version-number {
-  font-size: 11px;
-  color: #9ca3af;
-}
-
-/* Scrollbar personalizado */
 .sidemenu-content::-webkit-scrollbar {
   width: 6px;
 }
@@ -212,100 +53,134 @@
 }
 
 .sidemenu-content::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: #27272a;
   border-radius: 3px;
 }
 
 .sidemenu-content::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #3f3f46;
 }
 
-/* ============================================
-   DARK MODE
-   ============================================ */
-
-.dark .sidemenu {
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
+/* Header del menú */
+.sidemenu-header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #27272a;
 }
 
-.dark .sidemenu-header {
-  border-bottom: 1px solid var(--color-border);
+.sidemenu-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0;
 }
 
-.dark .sidemenu-title {
-  color: var(--color-text-secondary);
+/* Navegación */
+.sidemenu-nav {
+  flex: 1;
+  padding: 12px 8px;
 }
 
-.dark .sidemenu-item {
-  color: var(--color-text-primary);
+/* Items del menú - Minimalista */
+.sidemenu-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 2px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: none;
+  text-align: left;
+  color: #f4f4f5;
+  font-size: 14px;
 }
 
-.dark .sidemenu-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+.sidemenu-item:hover {
+  background: #27272a;
+}
+
+.sidemenu-item.active {
+  background: rgba(99, 102, 241, 0.15);
   color: #818cf8;
+  font-weight: 500;
 }
 
-.dark .sidemenu-item.active {
-  background: rgba(129, 140, 248, 0.15);
-  color: #818cf8;
+.sidemenu-item-icon {
+  font-size: 18px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.dark .sidemenu-item.active::before {
+.sidemenu-item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Indicador activo - Sutil punto a la izquierda */
+.active-indicator {
+  position: absolute;
+  left: 0;
+  width: 3px;
+  height: 20px;
   background: #818cf8;
+  border-radius: 0 2px 2px 0;
 }
 
-.dark .active-indicator {
-  background: #818cf8;
+/* Divisor */
+.sidemenu-divider {
+  height: 1px;
+  background: #27272a;
+  margin: 8px 16px;
 }
 
-.dark .sidemenu-divider {
-  background: var(--color-border);
+/* Footer */
+.sidemenu-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #27272a;
+  margin-top: auto;
 }
 
-.dark .sidemenu-footer {
-  border-top: 1px solid var(--color-border);
+.sidemenu-version {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.dark .version-label {
+.version-label {
+  font-size: 11px;
+  font-weight: 600;
   color: #818cf8;
+  letter-spacing: 0.5px;
 }
 
-.dark .version-number {
-  color: var(--color-text-secondary);
+.version-number {
+  font-size: 10px;
+  color: #71717a;
 }
 
-.dark .sidemenu-content::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-}
-
-.dark .sidemenu-content::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
-}
-
-/* Dark mode - Admin theme overrides */
-.dark.admin-theme .sidemenu {
-  background: linear-gradient(180deg, #4338ca 0%, #581c87 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
+/* Dark mode is the default theme */
 
 /* Responsive */
-@media (min-width: 769px) {
-  /* En desktop, el overlay solo aparece cuando el menú está cerrado (no lo necesitamos) */
-  .sidemenu-overlay {
-    display: none;
-  }
-}
-
 @media (max-width: 768px) {
   .sidemenu {
     width: 280px;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   }
 }
 
-@media (max-width: 480px) {
-  .sidemenu {
-    width: 240px;
+@media (min-width: 769px) {
+  .sidemenu-overlay {
+    display: none;
   }
 }

@@ -50,17 +50,27 @@ export async function getAllExercises() {
 export async function getExercisesByTeacher(teacherId) {
   try {
     const exercisesRef = collection(db, 'exercises');
+    // Query simple sin orderBy para evitar índice compuesto
     const q = query(
       exercisesRef,
-      where('createdBy', '==', teacherId),
-      orderBy('createdAt', 'desc')
+      where('createdBy', '==', teacherId)
     );
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    // Ordenar en el cliente
+    const exercises = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Ordenar por createdAt descendente
+    exercises.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
+
+    return exercises;
   } catch (error) {
     console.error('Error al obtener ejercicios del profesor:', error);
     return [];
@@ -114,17 +124,27 @@ export async function deleteExercise(exerciseId) {
 export async function getExercisesByCategory(category) {
   try {
     const exercisesRef = collection(db, 'exercises');
+    // Query simple sin orderBy para evitar índice compuesto
     const q = query(
       exercisesRef,
-      where('category', '==', category),
-      orderBy('createdAt', 'desc')
+      where('category', '==', category)
     );
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    // Ordenar en el cliente
+    const exercises = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Ordenar por createdAt descendente
+    exercises.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
+
+    return exercises;
   } catch (error) {
     console.error('Error al buscar ejercicios por categoría:', error);
     return [];

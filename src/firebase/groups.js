@@ -53,17 +53,27 @@ export async function getAllGroups() {
 export async function getGroupsByTeacher(teacherId) {
   try {
     const groupsRef = collection(db, 'groups');
+    // Query simple sin orderBy para evitar índice compuesto
     const q = query(
       groupsRef,
-      where('teacherId', '==', teacherId),
-      orderBy('createdAt', 'desc')
+      where('teacherId', '==', teacherId)
     );
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    // Ordenar en el cliente
+    const groups = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Ordenar por createdAt descendente
+    groups.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
+
+    return groups;
   } catch (error) {
     console.error('Error al obtener grupos del profesor:', error);
     return [];

@@ -286,13 +286,16 @@
   align-items: center;
   padding: var(--spacing-md);
   background: var(--color-background);
-  border-radius: var(--border-radius-md);
-  transition: all var(--transition-base);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .history-item:hover {
-  background: #f3f4f6;
-  transform: translateX(4px);
+  background: #f9fafb;
+  transform: translateX(2px) scale(1.005);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .history-main {
@@ -455,28 +458,29 @@
 
 .avatar-option {
   aspect-ratio: 1;
-  border: 3px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
+  border: none;
+  border-radius: 12px;
   background: var(--color-background);
   font-size: 36px;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .avatar-option:hover {
   transform: scale(1.05);
-  border-color: var(--theme-color);
   background: #dbeafe;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .avatar-option.selected {
-  border-color: var(--theme-color);
   background: linear-gradient(135deg, var(--theme-color-light) 0%, var(--theme-color) 100%);
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 /* Animations */
@@ -579,7 +583,14 @@
   padding: 24px;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.student-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .student-avatar-section {
@@ -708,16 +719,16 @@
 
 .course-item {
   background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border: none;
+  border-radius: 16px;
   padding: 20px;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .course-item:hover {
-  border-color: #10b981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12), 0 2px 4px rgba(16, 185, 129, 0.08);
+  transform: translateY(-2px) scale(1.005);
 }
 
 .course-header {
@@ -930,4 +941,161 @@
 .dark .position-1 {
   background: rgba(245, 158, 11, 0.15);
   color: #fbbf24;
+}
+
+/* ============================================
+   COURSES QUICK ACCESS
+   ============================================ */
+
+.courses-quick-access {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.courses-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.course-preview-item {
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.course-preview-item:hover {
+  transform: translateX(2px) scale(1.005);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
+.course-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.course-level {
+  padding: 4px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.course-progress-mini {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.course-progress-mini .progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.course-progress-mini .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), #7C3AED);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.course-progress-mini .progress-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 40px;
+  text-align: right;
+}
+
+.empty-courses {
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.empty-courses p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Dark Mode - Courses Quick Access */
+.dark .course-preview-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border);
+}
+
+.dark .course-preview-item:hover {
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark .course-level {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+.dark .course-progress-mini .progress-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   ASSIGNMENTS QUICK ACCESS
+   ============================================ */
+
+.assignments-quick-access {
+  margin-bottom: var(--spacing-lg);
+}
+
+.assignments-info {
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(124, 58, 237, 0.05));
+  border-radius: 16px;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08), 0 1px 2px rgba(99, 102, 241, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.assignments-info:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12), 0 2px 4px rgba(99, 102, 241, 0.08);
+}
+
+.assignments-description {
+  color: var(--color-text-secondary);
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Dark Mode - Assignments Quick Access */
+.dark .assignments-info {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(124, 58, 237, 0.1));
+  border-color: rgba(99, 102, 241, 0.3);
 }

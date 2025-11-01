@@ -1,0 +1,392 @@
+/* ============================================
+   CREDIT MANAGER - ESTILOS MINIMALISTAS
+   ============================================ */
+
+.credit-manager {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.credit-manager.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+/* Message */
+.credit-message {
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.credit-message.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.credit-message.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Stats Grid */
+.credit-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.credit-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.credit-stat-card:hover {
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.credit-stat-card.available {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.credit-stat-card.purchased {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.credit-stat-card.used {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.credit-stat-card.usage {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+}
+
+.credit-stat-card .stat-icon {
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.credit-stat-card .stat-content {
+  flex: 1;
+}
+
+.credit-stat-card .stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.credit-stat-card .stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Actions */
+.credit-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+/* Notes Section */
+.credit-notes-section {
+  padding: 20px;
+  background: var(--color-background, #f9fafb);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.notes-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary, #1f2937);
+  margin: 0;
+}
+
+.btn-group-sm {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  background: white;
+  color: var(--color-text-primary, #1f2937);
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.notes-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.notes-display {
+  padding: 12px 16px;
+  background: white;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--color-text-primary, #374151);
+  min-height: 80px;
+  white-space: pre-wrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Transactions Section */
+.transactions-section {
+  margin-top: 32px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary, #1f2937);
+  margin: 0 0 16px 0;
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--color-surface, white);
+}
+
+.transaction-item:hover {
+  transform: translateX(2px) scale(1.005);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.transaction-item.purchase {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.transaction-item.deduction,
+.transaction-item.class {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.transaction-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.transaction-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.transaction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  gap: 12px;
+}
+
+.transaction-type {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary, #1f2937);
+}
+
+.transaction-amount {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.transaction-amount.positive {
+  color: #059669;
+}
+
+.transaction-amount.negative {
+  color: #d97706;
+}
+
+.transaction-reason {
+  font-size: 13px;
+  color: var(--color-text-secondary, #6b7280);
+  margin-bottom: 8px;
+}
+
+.transaction-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.transaction-date {
+  font-size: 12px;
+  color: var(--color-text-secondary, #9ca3af);
+}
+
+.transaction-balance {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary, #374151);
+  padding: 4px 8px;
+  background: white;
+  border-radius: 6px;
+}
+
+.empty-transactions {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--color-background, #f9fafb);
+  border-radius: 12px;
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 14px;
+}
+
+/* Modal */
+.credit-modal {
+  max-width: 500px;
+}
+
+.warning-message {
+  padding: 12px 16px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+/* Dark Mode */
+.dark .credit-stat-card .stat-value {
+  color: #1f2937;
+}
+
+.dark .credit-stat-card .stat-label {
+  color: #4b5563;
+}
+
+.dark .credit-notes-section {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .notes-textarea,
+.dark .notes-display {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+}
+
+.dark .notes-textarea:focus {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .transaction-item {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .transaction-item.purchase {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+}
+
+.dark .transaction-item.deduction,
+.dark .transaction-item.class {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+}
+
+.dark .transaction-icon {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .transaction-balance {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .empty-transactions {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .warning-message {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .credit-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .credit-actions {
+    flex-direction: column;
+  }
+
+  .credit-actions .btn {
+    width: 100%;
+  }
+
+  .transaction-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .transaction-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

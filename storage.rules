@@ -1,0 +1,53 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Función helper para verificar que el usuario está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Función helper para verificar que es una imagen
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // Función helper para verificar tamaño máximo (5MB)
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Carpeta de cursos - Solo usuarios autenticados pueden subir
+    match /courses/{fileName} {
+      allow read: if true; // Cualquiera puede leer (las imágenes son públicas)
+      allow write: if isAuthenticated()
+                   && isImage()
+                   && isValidSize();
+    }
+
+    // Carpeta de ejercicios
+    match /exercises/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated()
+                   && isImage()
+                   && isValidSize();
+    }
+
+    // Carpeta de avatares de usuarios
+    match /avatars/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && isImage()
+                   && isValidSize();
+    }
+
+    // Bloquear todo lo demás por defecto
+    match /{allPaths=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}

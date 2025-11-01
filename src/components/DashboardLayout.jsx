@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import TopBar from './TopBar';
 import SideMenu from './SideMenu';
+import ViewAsBanner from './ViewAsBanner';
 import { isAdminEmail } from '../firebase/roleConfig';
 import './DashboardLayout.css';
 
-function DashboardLayout({ user, userRole, children, onLogout }) {
+function DashboardLayout({ user, userRole, children, onLogout, onMenuAction }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Determinar si el usuario es admin
@@ -25,6 +26,9 @@ function DashboardLayout({ user, userRole, children, onLogout }) {
         isAdmin={isAdmin}
       />
 
+      {/* Banner "Ver como" (solo visible cuando está activo) */}
+      <ViewAsBanner />
+
       {/* Menú Lateral */}
       <SideMenu
         isOpen={sidebarOpen}
@@ -35,6 +39,7 @@ function DashboardLayout({ user, userRole, children, onLogout }) {
             setSidebarOpen(false);
           }
         }}
+        onMenuAction={onMenuAction}
         isAdmin={isAdmin}
       />
 

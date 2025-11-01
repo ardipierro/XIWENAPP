@@ -4,6 +4,11 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStudentEnrollments } from '../firebase/firestore';
 import DashboardLayout from './DashboardLayout';
+import MyCourses from './student/MyCourses';
+import MyAssignments from './student/MyAssignments';
+import CourseViewer from './student/CourseViewer';
+import ContentPlayer from './student/ContentPlayer';
+import StudentClassView from './StudentClassView';
 import './StudentDashboard.css';
 
 // Avatares disponibles
@@ -29,6 +34,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'classes', 'courseView', 'contentPlayer'
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [selectedCourseData, setSelectedCourseData] = useState(null);
+  const [selectedContentId, setSelectedContentId] = useState(null);
+  const [selectedExerciseId, setSelectedExerciseId] = useState(null);
   const [stats, setStats] = useState({
     totalGames: 0,
     averageScore: 0,
@@ -125,6 +135,91 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
     }
   };
 
+  const handleViewMyCourses = () => {
+    setCurrentView('courses');
+  };
+
+  const handleSelectCourse = (courseId, courseData) => {
+    setSelectedCourseId(courseId);
+    setSelectedCourseData(courseData);
+    setCurrentView('courseView');
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentView('dashboard');
+    setSelectedCourseId(null);
+    setSelectedCourseData(null);
+  };
+
+  const handleBackToCourses = () => {
+    setCurrentView('courses');
+    setSelectedCourseId(null);
+    setSelectedCourseData(null);
+  };
+
+  const handlePlayContent = (contentId) => {
+    setSelectedContentId(contentId);
+    setCurrentView('contentPlayer');
+  };
+
+  const handlePlayExercise = (exerciseId) => {
+    // TODO: Implementar - abrir ExercisePlayer
+    console.log('Jugar ejercicio:', exerciseId);
+    alert('Funcionalidad de ejercicios próximamente');
+  };
+
+  const handleBackToCourseViewer = () => {
+    setCurrentView('courseView');
+    setSelectedContentId(null);
+  };
+
+  const handleContentComplete = () => {
+    // Recargar datos del curso para actualizar progreso
+    console.log('Contenido completado');
+  };
+
+  const handleViewMyAssignments = () => {
+    setCurrentView('assignments');
+  };
+
+  const handleBackToAssignments = () => {
+    setCurrentView('assignments');
+    setSelectedContentId(null);
+    setSelectedExerciseId(null);
+  };
+
+  const handlePlayAssignmentContent = (contentId) => {
+    setSelectedContentId(contentId);
+    setSelectedCourseId(null); // No course context for direct assignments
+    setCurrentView('contentPlayer');
+  };
+
+  const handlePlayAssignmentExercise = (exerciseId) => {
+    // TODO: Implementar - abrir ExercisePlayer
+    setSelectedExerciseId(exerciseId);
+    console.log('Jugar ejercicio asignado:', exerciseId);
+    alert('Funcionalidad de ejercicios próximamente');
+  };
+
+  const handleMenuAction = (action) => {
+    // Mapear las acciones del menú lateral a las vistas del dashboard
+    const actionMap = {
+      'dashboard': 'dashboard',
+      'courses': 'courses',
+      'assignments': 'assignments',
+      'classes': 'classes'
+    };
+
+    const view = actionMap[action];
+
+    if (view) {
+      setCurrentView(view);
+      setSelectedCourseId(null);
+      setSelectedContentId(null);
+      setSelectedExerciseId(null);
+    }
+  };
+
   // Mostrar loading mientras se carga el perfil
   if (loading) {
     return (
@@ -180,8 +275,94 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
   const pointsToNextLevel = 100 - pointsInLevel;
   const progressPercentage = pointsInLevel;
 
+  // Render MyCourses view
+  if (currentView === 'courses') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
+              ← Volver al Dashboard
+            </button>
+            <MyCourses user={user} onSelectCourse={handleSelectCourse} />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render MyAssignments view
+  if (currentView === 'assignments') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
+              ← Volver al Dashboard
+            </button>
+            <MyAssignments
+              user={user}
+              onPlayContent={handlePlayAssignmentContent}
+              onPlayExercise={handlePlayAssignmentExercise}
+            />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render Classes view
+  if (currentView === 'classes') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
+              ← Volver al Dashboard
+            </button>
+            <StudentClassView student={student} />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render CourseViewer view
+  if (currentView === 'courseView' && selectedCourseId) {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <CourseViewer
+            user={user}
+            courseId={selectedCourseId}
+            courseData={selectedCourseData}
+            onBack={handleBackToCourses}
+            onPlayContent={handlePlayContent}
+            onPlayExercise={handlePlayExercise}
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render ContentPlayer view
+  if (currentView === 'contentPlayer' && selectedContentId) {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <ContentPlayer
+          user={user}
+          contentId={selectedContentId}
+          courseId={selectedCourseId} // May be null for direct assignments
+          onBack={selectedCourseId ? handleBackToCourseViewer : handleBackToAssignments}
+          onComplete={handleContentComplete}
+        />
+      </DashboardLayout>
+    );
+  }
+
+  // Main Dashboard view
   return (
-    <DashboardLayout user={user} userRole={userRole} onLogout={onLogout}>
+    <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
       <div className="student-dashboard">
         <div className="dashboard-content">
           {/* Progress Section */}
@@ -246,45 +427,70 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onCh
             <span className="cta-text">¡Jugar Ahora!</span>
           </button>
 
-          {/* Cursos Asignados */}
-          {enrolledCourses.length > 0 && (
-            <div className="courses-section card">
+          {/* Mis Cursos - Quick Access */}
+          <div className="courses-quick-access card">
+            <div className="section-header">
               <h3 className="section-title">📚 Mis Cursos</h3>
-              <div className="courses-list">
-                {enrolledCourses.map((enrollment) => (
-                  <div key={enrollment.enrollmentId} className="course-item">
+              {enrolledCourses.length > 0 && (
+                <button className="btn btn-text" onClick={handleViewMyCourses}>
+                  Ver todos →
+                </button>
+              )}
+            </div>
+            {enrolledCourses.length > 0 ? (
+              <div className="courses-preview">
+                {enrolledCourses.slice(0, 3).map((enrollment) => (
+                  <div key={enrollment.enrollmentId} className="course-preview-item">
                     <div className="course-header">
                       <div className="course-name">{enrollment.course.name}</div>
                       {enrollment.course.level && (
                         <span className="course-level">Nivel {enrollment.course.level}</span>
                       )}
                     </div>
-                    {enrollment.course.description && (
-                      <div className="course-description">{enrollment.course.description}</div>
-                    )}
-                    <div className="course-progress-bar">
-                      <div className="progress-label">
-                        <span>Progreso</span>
-                        <span className="progress-percent">{enrollment.progress?.percentComplete || 0}%</span>
-                      </div>
+                    <div className="course-progress-mini">
                       <div className="progress-track">
                         <div
                           className="progress-fill"
                           style={{ width: `${enrollment.progress?.percentComplete || 0}%` }}
                         ></div>
                       </div>
+                      <span className="progress-text">{enrollment.progress?.percentComplete || 0}%</span>
                     </div>
-                    <button
-                      className="btn btn-outline course-btn"
-                      onClick={() => alert('Funcionalidad de curso en desarrollo')}
-                    >
-                      📖 Continuar Curso
-                    </button>
                   </div>
                 ))}
+                {enrolledCourses.length > 3 && (
+                  <button className="btn btn-outline w-full" onClick={handleViewMyCourses}>
+                    Ver todos mis cursos ({enrolledCourses.length})
+                  </button>
+                )}
               </div>
+            ) : (
+              <div className="empty-courses">
+                <p>No tienes cursos asignados aún</p>
+                <button className="btn btn-primary" onClick={handleViewMyCourses}>
+                  Explorar Cursos
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Asignado a Mí - Quick Access */}
+          <div className="assignments-quick-access card">
+            <div className="section-header">
+              <h3 className="section-title">📋 Asignado a Mí</h3>
+              <button className="btn btn-text" onClick={handleViewMyAssignments}>
+                Ver todos →
+              </button>
             </div>
-          )}
+            <div className="assignments-info">
+              <p className="assignments-description">
+                Contenidos y ejercicios asignados directamente por tu profesor para práctica adicional
+              </p>
+              <button className="btn btn-primary w-full" onClick={handleViewMyAssignments}>
+                Ver mis asignaciones
+              </button>
+            </div>
+          </div>
 
           {/* Game History */}
           {gameHistory.length > 0 ? (

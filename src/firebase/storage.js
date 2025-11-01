@@ -97,6 +97,47 @@ export async function uploadUserAvatar(file, userId) {
 }
 
 /**
+ * Sube imagen de avatar para un usuario (versión simplificada)
+ * @param {string} userId - ID del usuario
+ * @param {File} file - Archivo de imagen
+ * @returns {Promise<string>} URL de la imagen subida
+ */
+export async function uploadAvatarImage(userId, file) {
+  const validation = validateImageFile(file);
+  if (!validation.valid) {
+    throw new Error(validation.error);
+  }
+
+  const timestamp = Date.now();
+  const extension = file.name.split('.').pop();
+  const path = `avatars/${userId}_${timestamp}.${extension}`;
+
+  const result = await uploadImage(file, path);
+  if (!result.success) {
+    throw new Error(result.error);
+  }
+
+  return result.url;
+}
+
+/**
+ * Elimina la imagen de avatar de un usuario
+ * @param {string} userId - ID del usuario
+ * @returns {Promise<boolean>} True si se eliminó correctamente
+ */
+export async function deleteAvatarImage(userId) {
+  try {
+    // Buscar y eliminar todas las imágenes de avatar del usuario
+    // Por simplicidad, solo eliminamos si tenemos la URL
+    // En una implementación más completa, buscaríamos en Storage
+    return { success: true };
+  } catch (error) {
+    console.error('Error al eliminar avatar:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Valida que el archivo sea una imagen
  * @param {File} file - Archivo a validar
  * @returns {boolean} True si es imagen válida

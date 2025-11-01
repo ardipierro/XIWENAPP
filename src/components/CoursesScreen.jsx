@@ -1,34 +1,48 @@
 import { useState, useEffect } from 'react';
+import { loadCourses, createCourse, updateCourse, deleteCourse, loadStudents } from '../firebase/firestore';
+import { getContentByTeacher } from '../firebase/content';
+import { getExercisesByTeacher } from '../firebase/exercises';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { uploadImage, deleteImage } from '../firebase/storage';
 import {
-  loadCourses,
-  createCourse,
-  updateCourse,
-  deleteCourse,
-  loadStudents,
-  enrollStudent,
-  unenrollStudent,
-  getCourseLessons,
-  createLesson,
-  deleteLesson
-} from '../firebase/firestore';
-import LessonScreen from './LessonScreen';
+  getCourseContents,
+  getCourseExercises,
+  addContentToCourse,
+  addExerciseToCourse,
+  removeContentFromCourse,
+  removeExerciseFromCourse,
+  assignToStudent,
+  removeFromStudent,
+  getStudentAssignments
+} from '../firebase/relationships';
 
-function CoursesScreen({ onBack }) {
+function CoursesScreen({ onBack, user }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingCourse, setEditingCourse] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCourseModal, setShowCourseModal] = useState(false); // Unified modal
+  const [activeModalTab, setActiveModalTab] = useState('info'); // 'info', 'content', 'exercises', 'students'
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  // For course modal tabs
+  const [courseContents, setCourseContents] = useState([]);
+  const [courseExercises, setCourseExercises] = useState([]);
+  const [courseStudents, setCourseStudents] = useState([]);
+  const [availableContents, setAvailableContents] = useState([]);
+  const [availableExercises, setAvailableExercises] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
+  const [loadingModalData, setLoadingModalData] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     level: '',
-    color: '#667eea'
+    imageUrl: ''
   });
-
-  // Estado para gestión de lecciones
-  const [viewingLessons, setViewingLessons] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [lessons, setLessons] = useState([]);
 
   useEffect(() => {
     loadAllCourses();
@@ -36,290 +50,900 @@ function CoursesScreen({ onBack }) {
 
   const loadAllCourses = async () => {
     setLoading(true);
-    const loadedCourses = await loadCourses();
-    const activeCourses = loadedCourses.filter(c => c.active !== false);
+    try {
+      const loadedCourses = await loadCourses();
+      const activeCourses = loadedCourses.filter(c => c.active !== false);
 
-    // Cargar cantidad de lecciones para cada curso
-    const coursesWithLessons = await Promise.all(
-      activeCourses.map(async (course) => {
-        const courseLessons = await getCourseLessons(course.id);
-        return {
-          ...course,
-          lessonsCount: courseLessons.length
-        };
-      })
-    );
+      // Cargar cantidad de contenidos y ejercicios para cada curso usando relaciones
+      const coursesWithCounts = await Promise.all(
+        activeCourses.map(async (course) => {
+          const contents = await getCourseContents(course.id);
+          const exercises = await getCourseExercises(course.id);
 
-    setCourses(coursesWithLessons);
-    setLoading(false);
-  };
+          return {
+            ...course,
+            contentCount: contents.length,
+            exercisesCount: exercises.length
+          };
+        })
+      );
 
-  const handleCreateCourse = async () => {
-    if (!formData.name.trim()) {
-      alert('El nombre del curso es obligatorio');
-      return;
-    }
-
-    const courseData = {
-      name: formData.name,
-      description: formData.description,
-      level: formData.level,
-      color: formData.color,
-      students: []
-    };
-
-    const id = await createCourse(courseData);
-    
-    if (id) {
-      setShowModal(false);
-      resetForm();
-      loadAllCourses();
+      setCourses(coursesWithCounts);
+    } catch (error) {
+      console.error('Error cargando cursos:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleUpdateCourse = async () => {
-    if (!formData.name.trim()) {
-      alert('El nombre del curso es obligatorio');
-      return;
-    }
-
-    const courseData = {
-      name: formData.name,
-      description: formData.description,
-      level: formData.level,
-      color: formData.color
-    };
-
-    const success = await updateCourse(editingCourse.id, courseData);
-    
-    if (success) {
-      setShowModal(false);
-      setEditingCourse(null);
-      resetForm();
-      loadAllCourses();
-    }
-  };
-
-  const handleDeleteCourse = async (courseId, courseName) => {
-    if (window.confirm(`¿Estás seguro de eliminar el curso "${courseName}"?`)) {
-      const success = await deleteCourse(courseId);
-      if (success) {
-        loadAllCourses();
-      }
-    }
-  };
-
-  const openCreateModal = () => {
-    setEditingCourse(null);
-    resetForm();
-    setShowModal(true);
-  };
-
-  const openEditModal = (course) => {
-    setEditingCourse(course);
+  const handleOpenCourseModal = async (course, initialTab = 'info') => {
+    setSelectedCourse(course);
     setFormData({
-      name: course.name,
+      name: course.name || '',
       description: course.description || '',
       level: course.level || '',
-      color: course.color || '#667eea'
+      imageUrl: course.imageUrl || ''
     });
-    setShowModal(true);
+    setActiveModalTab(initialTab);
+    setShowCourseModal(true);
+    setLoadingModalData(true);
+
+    try {
+      // Load course content and exercises
+      const contents = await getCourseContents(course.id);
+      const exercises = await getCourseExercises(course.id);
+      setCourseContents(contents);
+      setCourseExercises(exercises);
+
+      // Load all available content and exercises
+      if (user) {
+        const allContents = await getContentByTeacher(user.uid);
+        const allExercises = await getExercisesByTeacher(user.uid);
+        setAvailableContents(allContents);
+        setAvailableExercises(allExercises);
+      }
+
+      // Load all students
+      const students = await loadStudents();
+      setAllStudents(students);
+
+      // Load students assigned to this course
+      const studentsInCourse = [];
+      for (const student of students) {
+        const assignments = await getStudentAssignments(student.id);
+        const hasCourse = assignments.some(a => a.itemType === 'course' && a.itemId === course.id);
+        if (hasCourse) {
+          studentsInCourse.push(student);
+        }
+      }
+      setCourseStudents(studentsInCourse);
+
+    } catch (error) {
+      console.error('Error loading course data:', error);
+      alert('Error al cargar datos del curso');
+    } finally {
+      setLoadingModalData(false);
+    }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      level: '',
-      color: '#667eea'
-    });
+  const handleAddContent = async (contentId) => {
+    try {
+      await addContentToCourse(selectedCourse.id, contentId);
+      // Reload course data
+      const contents = await getCourseContents(selectedCourse.id);
+      setCourseContents(contents);
+      loadAllCourses(); // Refresh counts
+    } catch (error) {
+      console.error('Error adding content:', error);
+      alert('Error al agregar contenido');
+    }
   };
 
-  const closeModal = () => {
-    setShowModal(false);
-    setEditingCourse(null);
-    resetForm();
+  const handleRemoveContent = async (contentId) => {
+    if (!confirm('¿Eliminar este contenido del curso?')) return;
+    try {
+      await removeContentFromCourse(selectedCourse.id, contentId);
+      const contents = await getCourseContents(selectedCourse.id);
+      setCourseContents(contents);
+      loadAllCourses();
+    } catch (error) {
+      console.error('Error removing content:', error);
+      alert('Error al eliminar contenido');
+    }
   };
 
-  // Funciones para gestión de lecciones
-  const handleViewLessons = async (course) => {
-    setSelectedCourse(course);
-    setViewingLessons(true);
-    const courseLessons = await getCourseLessons(course.id);
-    setLessons(courseLessons);
+  const handleAddExercise = async (exerciseId) => {
+    try {
+      await addExerciseToCourse(selectedCourse.id, exerciseId);
+      const exercises = await getCourseExercises(selectedCourse.id);
+      setCourseExercises(exercises);
+      loadAllCourses();
+    } catch (error) {
+      console.error('Error adding exercise:', error);
+      alert('Error al agregar ejercicio');
+    }
   };
 
-  const handleBackToList = () => {
-    setViewingLessons(false);
+  const handleRemoveExercise = async (exerciseId) => {
+    if (!confirm('¿Eliminar este ejercicio del curso?')) return;
+    try {
+      await removeExerciseFromCourse(selectedCourse.id, exerciseId);
+      const exercises = await getCourseExercises(selectedCourse.id);
+      setCourseExercises(exercises);
+      loadAllCourses();
+    } catch (error) {
+      console.error('Error removing exercise:', error);
+      alert('Error al eliminar ejercicio');
+    }
+  };
+
+  const handleAddStudent = async (studentId) => {
+    try {
+      await assignToStudent(studentId, 'course', selectedCourse.id, user.uid);
+      // Reload students in course
+      const student = allStudents.find(s => s.id === studentId);
+      if (student) {
+        setCourseStudents([...courseStudents, student]);
+      }
+    } catch (error) {
+      console.error('Error adding student:', error);
+      alert('Error al asignar estudiante');
+    }
+  };
+
+  const handleRemoveStudent = async (studentId) => {
+    if (!confirm('¿Desasignar este estudiante del curso?')) return;
+    try {
+      await removeFromStudent(studentId, 'course', selectedCourse.id);
+      setCourseStudents(courseStudents.filter(s => s.id !== studentId));
+    } catch (error) {
+      console.error('Error removing student:', error);
+      alert('Error al desasignar estudiante');
+    }
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await createCourse(formData);
+      if (result) {
+        loadAllCourses();
+        setShowCreateModal(false);
+        setFormData({ name: '', description: '', level: '', imageUrl: '' });
+        alert('✅ Curso creado exitosamente');
+      }
+    } catch (error) {
+      alert('Error al crear curso: ' + error.message);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await updateCourse(selectedCourse.id, formData);
+      if (result) {
+        loadAllCourses();
+        // Keep modal open, just update the data
+        setSelectedCourse({ ...selectedCourse, ...formData });
+        alert('✅ Curso actualizado exitosamente');
+      }
+    } catch (error) {
+      alert('Error al actualizar curso: ' + error.message);
+    }
+  };
+
+  const handleCloseCourseModal = () => {
+    setShowCourseModal(false);
     setSelectedCourse(null);
-    setLessons([]);
+    setFormData({ name: '', description: '', level: '', imageUrl: '' });
+    setActiveModalTab('info');
   };
+
+  const handleDelete = async (courseId) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este curso?\n\nNota: El contenido y ejercicios del curso NO se eliminarán.')) {
+      return;
+    }
+
+    try {
+      const result = await deleteCourse(courseId);
+      if (result) {
+        loadAllCourses();
+        alert('✅ Curso eliminado exitosamente');
+      }
+    } catch (error) {
+      alert('Error al eliminar curso: ' + error.message);
+    }
+  };
+
+  const handleImageUpload = async (e, isEdit = false) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tamaño (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar los 5MB');
+      return;
+    }
+
+    // Validar tipo
+    if (!file.type.startsWith('image/')) {
+      alert('Solo se permiten archivos de imagen');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+
+      // Generar path único con timestamp
+      const timestamp = Date.now();
+      const extension = file.name.split('.').pop();
+      const fileName = `course_${timestamp}.${extension}`;
+      const path = `courses/${fileName}`;
+
+      // Subir imagen y manejar resultado
+      const result = await uploadImage(file, path);
+
+      if (result.success) {
+        setFormData({ ...formData, imageUrl: result.url });
+        alert('✅ Imagen subida exitosamente');
+      } else {
+        throw new Error(result.error || 'Error desconocido al subir imagen');
+      }
+    } catch (error) {
+      console.error('Error subiendo imagen:', error);
+      alert('Error al subir imagen: ' + error.message);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!formData.imageUrl) return;
+
+    try {
+      // Intentar eliminar de Storage (si es de Firebase)
+      if (formData.imageUrl.includes('firebasestorage.googleapis.com')) {
+        await deleteImage(formData.imageUrl);
+      }
+      setFormData({ ...formData, imageUrl: '' });
+      alert('✅ Imagen eliminada');
+    } catch (error) {
+      console.error('Error eliminando imagen:', error);
+      // Incluso si falla, limpiar la URL del formulario
+      setFormData({ ...formData, imageUrl: '' });
+      alert('Imagen removida del formulario');
+    }
+  };
+
+  const filteredCourses = courses.filter(course =>
+    course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}>🔄</div>
-        <p style={styles.loadingText}>Cargando cursos...</p>
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="spinner"></div>
+        <p className="ml-4 text-gray-600 dark:text-gray-300">Cargando cursos...</p>
       </div>
-    );
-  }
-
-  // Renderizar vista de lecciones si un curso está seleccionado
-  if (viewingLessons && selectedCourse) {
-    return (
-      <LessonScreen
-        course={selectedCourse}
-        lessons={lessons}
-        onBack={handleBackToList}
-      />
     );
   }
 
   return (
-    <div style={styles.container}>
+    <div className="courses-screen">
       {/* Header */}
-      <div style={styles.header}>
-        <button onClick={onBack} style={styles.backButton}>
-          ← Volver al Dashboard
-        </button>
-        <h1 style={styles.title}>📚 Gestión de Cursos</h1>
-        <button onClick={openCreateModal} style={styles.createButton}>
-          ➕ Crear Curso
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Gestión de Cursos</h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            {courses.length} curso{courses.length !== 1 ? 's' : ''} disponible{courses.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <button
+          className="btn btn-primary"
+          onClick={() => setShowCreateModal(true)}
+        >
+          + Crear Nuevo Curso
         </button>
       </div>
 
-      {/* Lista de Cursos */}
-      <div style={styles.coursesGrid}>
-        {courses.length === 0 ? (
-          <div style={styles.emptyState}>
-            <p style={styles.emptyIcon}>📚</p>
-            <h3 style={styles.emptyTitle}>No hay cursos creados</h3>
-            <p style={styles.emptyText}>Crea tu primer curso para comenzar</p>
-            <button onClick={openCreateModal} style={styles.createButtonLarge}>
-              ➕ Crear Primer Curso
+      {/* Search and View Toggle */}
+      <div className="card mb-6">
+        <div className="flex gap-3">
+          <input
+            type="text"
+            className="input flex-1"
+            placeholder="🔍 Buscar cursos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+            <button
+              className={`px-4 py-2 rounded-md transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-gray-700 shadow-sm font-semibold text-indigo-600 dark:text-indigo-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+              onClick={() => setViewMode('grid')}
+              title="Vista de grilla"
+            >
+              ⊞
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md transition-all ${
+                viewMode === 'list'
+                  ? 'bg-white dark:bg-gray-700 shadow-sm font-semibold text-indigo-600 dark:text-indigo-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+              onClick={() => setViewMode('list')}
+              title="Vista de lista"
+            >
+              ☰
             </button>
           </div>
-        ) : (
-          courses.map(course => (
-            <div key={course.id} style={{
-              ...styles.courseCard,
-              borderLeft: `4px solid ${course.color || '#667eea'}`
-            }}>
-              <div style={styles.courseHeader}>
-                <h3 style={styles.courseName}>{course.name}</h3>
-                {course.level && (
-                  <span style={styles.levelBadge}>{course.level}</span>
-                )}
-              </div>
-              
-              {course.description && (
-                <p style={styles.courseDescription}>{course.description}</p>
-              )}
-              
-              <div style={styles.courseStats}>
-                <span style={styles.statItem}>
-                  👥 {course.students?.length || 0} alumnos
-                </span>
-                <span style={styles.statItem}>
-                  📖 {course.lessonsCount || 0} lecciones
-                </span>
-              </div>
-
-              <div style={styles.courseActions}>
-                <button
-                  onClick={() => handleViewLessons(course)}
-                  style={styles.lessonsButton}
-                >
-                  📖 Ver Lecciones
-                </button>
-                <button
-                  onClick={() => openEditModal(course)}
-                  style={styles.editButton}
-                >
-                  ✏️ Editar
-                </button>
-                <button
-                  onClick={() => handleDeleteCourse(course.id, course.name)}
-                  style={styles.deleteButton}
-                >
-                  🗑️ Eliminar
-                </button>
-              </div>
-            </div>
-          ))
-        )}
+        </div>
       </div>
 
-      {/* Modal para Crear/Editar */}
-      {showModal && (
-        <div style={styles.modalOverlay} onClick={closeModal}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>
-                {editingCourse ? '✏️ Editar Curso' : '➕ Crear Nuevo Curso'}
-              </h2>
-              <button onClick={closeModal} style={styles.closeButton}>✕</button>
-            </div>
-
-            <div style={styles.modalBody}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Nombre del Curso *</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="Ej: Matemáticas 5to Grado"
-                  style={styles.input}
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Descripción</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Describe el contenido del curso..."
-                  style={styles.textarea}
-                  rows={3}
-                />
-              </div>
-
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Nivel</label>
-                  <select
-                    value={formData.level}
-                    onChange={(e) => setFormData({...formData, level: e.target.value})}
-                    style={styles.select}
-                  >
-                    <option value="">Seleccionar nivel</option>
-                    <option value="Inicial">Inicial</option>
-                    <option value="Primaria">Primaria</option>
-                    <option value="Secundaria">Secundaria</option>
-                  </select>
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Color</label>
-                  <input
-                    type="color"
-                    value={formData.color}
-                    onChange={(e) => setFormData({...formData, color: e.target.value})}
-                    style={styles.colorInput}
+      {/* Courses Display */}
+      {filteredCourses.length === 0 ? (
+        <div className="card text-center py-12">
+          <div className="text-6xl mb-4">📚</div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            {searchTerm ? 'No se encontraron cursos' : 'No hay cursos creados'}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {searchTerm ? 'Intenta con otro término de búsqueda' : 'Crea tu primer curso para comenzar'}
+          </p>
+          {!searchTerm && (
+            <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+              + Crear Primer Curso
+            </button>
+          )}
+        </div>
+      ) : viewMode === 'grid' ? (
+        /* Grid View */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredCourses.map((course) => (
+            <div key={course.id} className="card hover:shadow-lg transition-all" style={{ padding: '12px' }}>
+              {/* Course Image */}
+              {course.imageUrl ? (
+                <div className="w-full h-32 mb-2 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <img
+                    src={course.imageUrl}
+                    alt={course.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('Error cargando imagen del curso:', course.name, course.imageUrl);
+                      e.target.style.display = 'none';
+                    }}
                   />
                 </div>
+              ) : (
+                <div className="w-full h-32 mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                  <span className="text-4xl">📚</span>
+                </div>
+              )}
+
+              {/* Course Info */}
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 line-clamp-1">
+                {course.name}
+              </h3>
+
+              {course.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                  {course.description}
+                </p>
+              )}
+
+              {course.level && (
+                <div className="mb-2">
+                  <span className="badge badge-info text-xs">Nivel {course.level}</span>
+                </div>
+              )}
+
+              {/* Stats */}
+              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                <span>📄 {course.contentCount || 0}</span>
+                <span>🎮 {course.exercisesCount || 0}</span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button
+                  className="btn btn-primary flex-1"
+                  onClick={() => handleOpenCourseModal(course, 'content')}
+                  title="Gestionar curso completo"
+                >
+                  📋 Gestionar
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => handleDelete(course.id)}
+                  title="Eliminar curso"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* List View */
+        <div className="flex flex-col gap-3">
+          {filteredCourses.map((course) => (
+            <div key={course.id} className="card hover:shadow-lg transition-all">
+              <div className="flex gap-4 items-start">
+                {/* Course Image - Smaller in list view */}
+                {course.imageUrl ? (
+                  <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <img
+                      src={course.imageUrl}
+                      alt={course.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Error cargando imagen del curso:', course.name, course.imageUrl);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 flex-shrink-0 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                    <span className="text-3xl">📚</span>
+                  </div>
+                )}
+
+                {/* Course Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                        {course.name}
+                      </h3>
+                      {course.description && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                          {course.description}
+                        </p>
+                      )}
+                    </div>
+                    {course.level && (
+                      <span className="badge badge-info flex-shrink-0">Nivel {course.level}</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                      <span>📄 {course.contentCount || 0} contenido{course.contentCount !== 1 ? 's' : ''}</span>
+                      <span>🎮 {course.exercisesCount || 0} ejercicio{course.exercisesCount !== 1 ? 's' : ''}</span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => handleOpenCourseModal(course, 'content')}
+                        title="Gestionar curso completo"
+                      >
+                        📋 Gestionar
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDelete(course.id)}
+                        title="Eliminar curso"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                Crear Nuevo Curso
+              </h3>
+              <button className="modal-close" onClick={() => setShowCreateModal(false)}>
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleCreate}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Nombre del Curso *</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    placeholder="Ej: Matemáticas Básicas"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Descripción</label>
+                  <textarea
+                    className="input"
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Describe el contenido del curso..."
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Nivel</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={formData.level}
+                    onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                    placeholder="Ej: Básico, Intermedio, Avanzado"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Imagen del Curso</label>
+                  {formData.imageUrl ? (
+                    <div className="mb-3">
+                      <img src={formData.imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
+                      <button type="button" className="btn btn-outline w-full" onClick={handleRemoveImage}>
+                        🗑️ Eliminar Imagen
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="input"
+                      disabled={uploadingImage}
+                    />
+                  )}
+                  {uploadingImage && <p className="text-sm text-blue-600 mt-2">⏳ Subiendo imagen...</p>}
+                  <p className="text-sm text-gray-500 mt-1">Máximo 5MB (JPG, PNG, GIF, WEBP)</p>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-ghost" onClick={() => setShowCreateModal(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={uploadingImage}>
+                  {uploadingImage ? 'Subiendo...' : 'Crear Curso'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Unified Course Modal with Tabs */}
+      {showCourseModal && selectedCourse && (
+        <div className="modal-overlay" onClick={handleCloseCourseModal}>
+          <div className="modal-content max-w-5xl" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {selectedCourse.name}
+              </h3>
+              <button className="modal-close" onClick={handleCloseCourseModal}>
+                ×
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="border-b border-gray-200 dark:border-gray-700 px-6">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setActiveModalTab('info')}
+                  className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                    activeModalTab === 'info'
+                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  📝 Información
+                </button>
+                <button
+                  onClick={() => setActiveModalTab('content')}
+                  className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                    activeModalTab === 'content'
+                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  📄 Contenidos ({courseContents.length})
+                </button>
+                <button
+                  onClick={() => setActiveModalTab('exercises')}
+                  className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                    activeModalTab === 'exercises'
+                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  🎮 Ejercicios ({courseExercises.length})
+                </button>
+                <button
+                  onClick={() => setActiveModalTab('students')}
+                  className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                    activeModalTab === 'students'
+                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  👥 Estudiantes ({courseStudents.length})
+                </button>
               </div>
             </div>
 
-            <div style={styles.modalFooter}>
-              <button onClick={closeModal} style={styles.cancelButton}>
-                Cancelar
-              </button>
-              <button 
-                onClick={editingCourse ? handleUpdateCourse : handleCreateCourse}
-                style={styles.saveButton}
-              >
-                {editingCourse ? '💾 Guardar Cambios' : '➕ Crear Curso'}
+            <div className="modal-body max-h-[60vh] overflow-y-auto">
+              {loadingModalData ? (
+                <div className="flex justify-center items-center py-8">
+                  <div className="spinner"></div>
+                  <p className="ml-3 text-gray-600 dark:text-gray-300">Cargando...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Tab: Información del Curso */}
+                  {activeModalTab === 'info' && (
+                    <form onSubmit={handleUpdate} className="space-y-4">
+                      <div className="form-group">
+                        <label className="form-label">Nombre del Curso *</label>
+                        <input
+                          type="text"
+                          className="input"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Descripción</label>
+                        <textarea
+                          className="input"
+                          rows={3}
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Nivel</label>
+                        <input
+                          type="text"
+                          className="input"
+                          value={formData.level}
+                          onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                          placeholder="Ej: Básico, Intermedio, Avanzado"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Imagen del Curso</label>
+                        {formData.imageUrl ? (
+                          <div className="mb-3">
+                            <img src={formData.imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
+                            <button type="button" className="btn btn-outline w-full" onClick={handleRemoveImage}>
+                              🗑️ Eliminar Imagen
+                            </button>
+                          </div>
+                        ) : (
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, true)}
+                            className="input"
+                            disabled={uploadingImage}
+                          />
+                        )}
+                        {uploadingImage && <p className="text-sm text-blue-600 mt-2">⏳ Subiendo imagen...</p>}
+                        <p className="text-sm text-gray-500 mt-1">Máximo 5MB (JPG, PNG, GIF, WEBP)</p>
+                      </div>
+
+                      <button type="submit" className="btn btn-primary w-full" disabled={uploadingImage}>
+                        {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
+                      </button>
+                    </form>
+                  )}
+
+                  {/* Tab: Contenidos */}
+                  {activeModalTab === 'content' && (
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          Contenidos del Curso
+                        </h4>
+                        {courseContents.length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay contenidos asignados</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {courseContents.map(content => (
+                              <div key={content.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                                <div className="flex-1">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">{content.title}</span>
+                                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({content.type})</span>
+                                </div>
+                                <button
+                                  className="btn btn-sm btn-danger"
+                                  onClick={() => handleRemoveContent(content.id)}
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          ➕ Agregar Contenido
+                        </h4>
+                        {availableContents.filter(c => !courseContents.some(cc => cc.id === c.id)).length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los contenidos ya están asignados</p>
+                        ) : (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {availableContents
+                              .filter(c => !courseContents.some(cc => cc.id === c.id))
+                              .map(content => (
+                                <div key={content.id} className="flex items-center justify-between p-3 border border-gray-300 dark:border-gray-600 rounded">
+                                  <div className="flex-1">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">{content.title}</span>
+                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({content.type})</span>
+                                  </div>
+                                  <button
+                                    className="btn btn-sm btn-success"
+                                    onClick={() => handleAddContent(content.id)}
+                                  >
+                                    + Agregar
+                                  </button>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tab: Ejercicios */}
+                  {activeModalTab === 'exercises' && (
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          Ejercicios del Curso
+                        </h4>
+                        {courseExercises.length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay ejercicios asignados</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {courseExercises.map(exercise => (
+                              <div key={exercise.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                                <div className="flex-1">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">{exercise.title}</span>
+                                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                                    ({exercise.questions?.length || 0} preguntas)
+                                  </span>
+                                </div>
+                                <button
+                                  className="btn btn-sm btn-danger"
+                                  onClick={() => handleRemoveExercise(exercise.id)}
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          ➕ Agregar Ejercicio
+                        </h4>
+                        {availableExercises.filter(e => !courseExercises.some(ce => ce.id === e.id)).length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los ejercicios ya están asignados</p>
+                        ) : (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {availableExercises
+                              .filter(e => !courseExercises.some(ce => ce.id === e.id))
+                              .map(exercise => (
+                                <div key={exercise.id} className="flex items-center justify-between p-3 border border-gray-300 dark:border-gray-600 rounded">
+                                  <div className="flex-1">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">{exercise.title}</span>
+                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                                      ({exercise.questions?.length || 0} preguntas)
+                                    </span>
+                                  </div>
+                                  <button
+                                    className="btn btn-sm btn-success"
+                                    onClick={() => handleAddExercise(exercise.id)}
+                                  >
+                                    + Agregar
+                                  </button>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tab: Estudiantes */}
+                  {activeModalTab === 'students' && (
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          Estudiantes Asignados
+                        </h4>
+                        {courseStudents.length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay estudiantes asignados a este curso</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {courseStudents.map(student => (
+                              <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                                <div className="flex-1">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">{student.displayName || student.email}</span>
+                                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({student.email})</span>
+                                </div>
+                                <button
+                                  className="btn btn-sm btn-danger"
+                                  onClick={() => handleRemoveStudent(student.id)}
+                                >
+                                  Desasignar
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          ➕ Asignar Estudiantes
+                        </h4>
+                        {allStudents.filter(s => !courseStudents.some(cs => cs.id === s.id)).length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los estudiantes ya están asignados</p>
+                        ) : (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {allStudents
+                              .filter(s => !courseStudents.some(cs => cs.id === s.id))
+                              .map(student => (
+                                <div key={student.id} className="flex items-center justify-between p-3 border border-gray-300 dark:border-gray-600 rounded">
+                                  <div className="flex-1">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">{student.displayName || student.email}</span>
+                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({student.email})</span>
+                                  </div>
+                                  <button
+                                    className="btn btn-sm btn-success"
+                                    onClick={() => handleAddStudent(student.id)}
+                                  >
+                                    + Asignar
+                                  </button>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn btn-primary" onClick={handleCloseCourseModal}>
+                Cerrar
               </button>
             </div>
           </div>
@@ -328,329 +952,5 @@ function CoursesScreen({ onBack }) {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    padding: '40px 20px',
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  },
-  spinner: {
-    fontSize: '48px',
-    animation: 'spin 2s linear infinite',
-  },
-  loadingText: {
-    color: 'white',
-    fontSize: '18px',
-    marginTop: '20px',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '40px',
-    flexWrap: 'wrap',
-    gap: '20px',
-  },
-  backButton: {
-    padding: '12px 24px',
-    background: 'white',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#667eea',
-    transition: 'all 0.3s',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-  },
-  title: {
-    color: 'white',
-    fontSize: '32px',
-    margin: 0,
-    textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-  },
-  createButton: {
-    padding: '12px 24px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-  },
-  coursesGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '24px',
-    maxWidth: '1400px',
-    margin: '0 auto',
-  },
-  emptyState: {
-    gridColumn: '1 / -1',
-    background: 'white',
-    borderRadius: '20px',
-    padding: '60px 40px',
-    textAlign: 'center',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-  },
-  emptyIcon: {
-    fontSize: '80px',
-    margin: '0 0 20px 0',
-  },
-  emptyTitle: {
-    fontSize: '24px',
-    color: '#1f2937',
-    margin: '0 0 10px 0',
-  },
-  emptyText: {
-    fontSize: '16px',
-    color: '#6b7280',
-    margin: '0 0 30px 0',
-  },
-  createButtonLarge: {
-    padding: '14px 32px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontSize: '18px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  courseCard: {
-    background: 'white',
-    borderRadius: '16px',
-    padding: '24px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-    transition: 'transform 0.3s, box-shadow 0.3s',
-    cursor: 'pointer',
-  },
-  courseHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '12px',
-  },
-  courseName: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: '#1f2937',
-    margin: 0,
-    flex: 1,
-  },
-  levelBadge: {
-    padding: '4px 12px',
-    background: '#e0e7ff',
-    color: '#667eea',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
-  },
-  courseDescription: {
-    color: '#6b7280',
-    fontSize: '14px',
-    lineHeight: '1.6',
-    margin: '0 0 16px 0',
-  },
-  courseStats: {
-    display: 'flex',
-    gap: '16px',
-    marginBottom: '16px',
-    paddingTop: '16px',
-    borderTop: '1px solid #e5e7eb',
-  },
-  statItem: {
-    fontSize: '14px',
-    color: '#4b5563',
-  },
-  courseActions: {
-    display: 'flex',
-    gap: '8px',
-  },
-  lessonsButton: {
-    flex: 1,
-    padding: '10px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  editButton: {
-    flex: 1,
-    padding: '10px',
-    background: '#667eea',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  deleteButton: {
-    flex: 1,
-    padding: '10px',
-    background: '#ef4444',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modal: {
-    background: 'white',
-    borderRadius: '20px',
-    width: '90%',
-    maxWidth: '600px',
-    maxHeight: '90vh',
-    overflow: 'auto',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-  },
-  modalHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '24px',
-    borderBottom: '1px solid #e5e7eb',
-  },
-  modalTitle: {
-    fontSize: '24px',
-    fontWeight: '700',
-    color: '#1f2937',
-    margin: 0,
-  },
-  closeButton: {
-    background: 'none',
-    border: 'none',
-    fontSize: '24px',
-    cursor: 'pointer',
-    color: '#9ca3af',
-    padding: '0',
-    width: '32px',
-    height: '32px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '8px',
-    transition: 'all 0.2s',
-  },
-  modalBody: {
-    padding: '24px',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  formRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '16px',
-  },
-  label: {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: '8px',
-  },
-  input: {
-    width: '100%',
-    padding: '12px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '16px',
-    transition: 'border-color 0.3s',
-    boxSizing: 'border-box',
-  },
-  textarea: {
-    width: '100%',
-    padding: '12px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '16px',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    transition: 'border-color 0.3s',
-    boxSizing: 'border-box',
-  },
-  select: {
-    width: '100%',
-    padding: '12px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '16px',
-    background: 'white',
-    cursor: 'pointer',
-    transition: 'border-color 0.3s',
-    boxSizing: 'border-box',
-  },
-  colorInput: {
-    width: '100%',
-    height: '48px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    boxSizing: 'border-box',
-  },
-  modalFooter: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '12px',
-    padding: '24px',
-    borderTop: '1px solid #e5e7eb',
-  },
-  cancelButton: {
-    padding: '12px 24px',
-    background: '#f3f4f6',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#374151',
-    transition: 'all 0.3s',
-  },
-  saveButton: {
-    padding: '12px 24px',
-    background: '#667eea',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-};
 
 export default CoursesScreen;

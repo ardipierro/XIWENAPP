@@ -1,13 +1,26 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  BarChart3,
+  Users,
+  BookOpen,
+  Gamepad2,
+  FileText,
+  UsersRound,
+  Calendar,
+  TrendingUp,
+  Dice3,
+  Home,
+  ClipboardList
+} from 'lucide-react';
 import './SideMenu.css';
 
-function SideMenu({ isOpen, userRole, onNavigate }) {
+function SideMenu({ isOpen, userRole, onNavigate, onMenuAction }) {
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleNavigation = (path, action) => {
-    if (action) {
-      action(); // Ejecutar acción personalizada (ej: cambiar vista interna)
+    if (action && onMenuAction) {
+      onMenuAction(action);
     } else {
       navigate(path);
     }
@@ -21,47 +34,42 @@ function SideMenu({ isOpen, userRole, onNavigate }) {
   const getMenuItems = () => {
     if (userRole === 'admin') {
       return [
-        { icon: '📊', label: 'Dashboard', path: '/admin', section: 'main' },
-        { icon: '👥', label: 'Gestión de Usuarios', path: '/admin', section: 'users' },
+        { icon: BarChart3, label: 'Dashboard', path: '/teacher', action: 'dashboard' },
+        { icon: Users, label: 'Usuarios', path: '/teacher', action: 'users' },
         { divider: true },
-        { icon: '📚', label: 'Cursos', path: '/admin', section: 'courses' },
-        { icon: '🎮', label: 'Ejercicios', path: '/admin', section: 'games' },
+        { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
+        { icon: Gamepad2, label: 'Ejercicios', path: '/teacher', action: 'exercises' },
+        { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
+        { icon: UsersRound, label: 'Grupos', path: '/teacher', action: 'groups' },
+        { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
         { divider: true },
-        { icon: '📈', label: 'Reportes', path: '/admin', section: 'reports' },
-        { icon: '⚙️', label: 'Configuración', path: '/admin', section: 'settings' },
+        { icon: TrendingUp, label: 'Analytics', path: '/teacher', action: 'analytics' },
       ];
     }
 
     if (['teacher', 'trial_teacher'].includes(userRole)) {
       return [
-        { icon: '📊', label: 'Dashboard', path: '/teacher', action: 'dashboard' },
+        { icon: BarChart3, label: 'Dashboard', path: '/teacher', action: 'dashboard' },
         { divider: true },
-        { icon: '🎮', label: 'Juegos', path: '/teacher', action: 'games' },
-        { icon: '📚', label: 'Cursos', path: '/teacher', action: 'courses' },
-        { icon: '📖', label: 'Lecciones', path: '/teacher', action: 'lessons' },
+        { icon: Gamepad2, label: 'Ejercicios', path: '/teacher', action: 'exercises' },
+        { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
+        { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
+        { icon: UsersRound, label: 'Grupos', path: '/teacher', action: 'groups' },
+        { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
         { divider: true },
-        { icon: '👥', label: 'Alumnos', path: '/teacher', action: 'students' },
-        { icon: '📁', label: 'Categorías', path: '/teacher', action: 'categories' },
-        { divider: true },
-        { icon: '📈', label: 'Historial', path: '/teacher', action: 'history' },
-        { icon: '📊', label: 'Reportes', path: '/teacher', action: 'reports' },
-        { divider: true },
-        { icon: '⚙️', label: 'Configuración', path: '/teacher', action: 'settings' },
+        { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
+        { icon: TrendingUp, label: 'Analytics', path: '/teacher', action: 'analytics' },
+        { icon: Users, label: 'Alumnos', path: '/teacher', action: 'users' },
       ];
     }
 
     if (['student', 'listener', 'trial'].includes(userRole)) {
       return [
-        { icon: '🏠', label: 'Inicio', path: '/student' },
+        { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },
         { divider: true },
-        { icon: '📚', label: 'Mis Cursos', path: '/student', section: 'courses' },
-        { icon: '🎮', label: 'Juegos', path: '/student', section: 'games' },
-        { icon: '📖', label: 'Mis Lecciones', path: '/student', section: 'lessons' },
-        { divider: true },
-        { icon: '📊', label: 'Mi Progreso', path: '/student', section: 'progress' },
-        { icon: '🏆', label: 'Logros', path: '/student', section: 'achievements' },
-        { divider: true },
-        { icon: '⚙️', label: 'Configuración', path: '/student', section: 'settings' },
+        { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
+        { icon: ClipboardList, label: 'Asignado a Mí', path: '/student', action: 'assignments' },
+        { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classes' },
       ];
     }
 
@@ -91,11 +99,6 @@ function SideMenu({ isOpen, userRole, onNavigate }) {
       {/* Menú lateral */}
       <aside className={`sidemenu ${isOpen ? 'open' : ''}`}>
         <div className="sidemenu-content">
-          {/* Título del menú */}
-          <div className="sidemenu-header">
-            <h2 className="sidemenu-title">Menú</h2>
-          </div>
-
           {/* Items del menú */}
           <nav className="sidemenu-nav">
             {menuItems.map((item, index) => {
@@ -105,13 +108,17 @@ function SideMenu({ isOpen, userRole, onNavigate }) {
 
               const active = isActive(item.path, item.section);
 
+              const IconComponent = item.icon;
+
               return (
                 <button
                   key={index}
                   className={`sidemenu-item ${active ? 'active' : ''}`}
                   onClick={() => handleNavigation(item.path, item.action)}
                 >
-                  <span className="sidemenu-item-icon">{item.icon}</span>
+                  <span className="sidemenu-item-icon">
+                    <IconComponent size={18} strokeWidth={2} />
+                  </span>
                   <span className="sidemenu-item-label">{item.label}</span>
                   {active && <span className="active-indicator"></span>}
                 </button>

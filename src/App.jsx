@@ -6,6 +6,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/config';              // Tu archivo de configuración Firebase
 import { getUserRole } from './firebase/firestore';    // Tus funciones de Firestore
 import './firebase/debugPermissions';  // Debug utilities
+import { useViewAs } from './contexts/ViewAsContext';  // ViewAs Context
 
 // Components
 import LandingPage from './LandingPage';
@@ -20,6 +21,11 @@ function App() {
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { viewAsUser, isViewingAs } = useViewAs();
+
+  // Usuario efectivo: usar viewAsUser si está activo, sino el user de Auth
+  const [effectiveUser, setEffectiveUser] = useState(null);
+  const [effectiveRole, setEffectiveRole] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -50,6 +56,25 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  // Actualizar usuario efectivo cuando viewAsUser cambie
+  useEffect(() => {
+    if (isViewingAs && viewAsUser) {
+      // Crear objeto user sintético para viewAsUser
+      const syntheticUser = {
+        uid: viewAsUser.id,
+        email: viewAsUser.email,
+        displayName: viewAsUser.name
+      };
+      setEffectiveUser(syntheticUser);
+      setEffectiveRole(viewAsUser.role);
+      console.log('👁️ Modo ViewAs activado:', viewAsUser.name, '| Rol:', viewAsUser.role);
+    } else {
+      // Usar el usuario real
+      setEffectiveUser(user);
+      setEffectiveRole(userRole);
+    }
+  }, [isViewingAs, viewAsUser, user, userRole]);
+
   if (loading) {
     return (
       <div className="loading-screen">
@@ -62,17 +87,17 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
+        {/* Public Routes - siempre usar el usuario real de Auth */}
         <Route path="/" element={<PublicRoute user={user}><Landing /></PublicRoute>} />
         <Route path="/login" element={<PublicRoute user={user}><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute user={user}><Register /></PublicRoute>} />
 
-        {/* Protected Routes */}
+        {/* Protected Routes - usar usuario efectivo (puede ser viewAsUser) */}
         <Route
           path="/student/*"
           element={
-            <ProtectedRoute user={user} userRole={userRole} allowedRoles={['student', 'listener', 'trial']}>
-              <StudentDashboard user={user} userRole={userRole} />
+            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={['student', 'listener', 'trial']}>
+              <StudentDashboard user={effectiveUser} userRole={effectiveRole} />
             </ProtectedRoute>
           }
         />
@@ -80,8 +105,8 @@ function App() {
         <Route
           path="/teacher/*"
           element={
-            <ProtectedRoute user={user} userRole={userRole} allowedRoles={['teacher', 'trial_teacher', 'admin']}>
-              <TeacherDashboard user={user} userRole={userRole} />
+            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={['teacher', 'trial_teacher', 'admin']}>
+              <TeacherDashboard user={effectiveUser} userRole={effectiveRole} />
             </ProtectedRoute>
           }
         />
@@ -89,16 +114,16 @@ function App() {
         <Route
           path="/admin/*"
           element={
-            <ProtectedRoute user={user} userRole={userRole} allowedRoles={['admin']}>
+            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={['admin']}>
               <Navigate to="/teacher" replace />
             </ProtectedRoute>
           }
         />
 
-        {/* Redirect based on role */}
-        <Route 
-          path="/dashboard" 
-          element={<DashboardRedirect user={user} userRole={userRole} />} 
+        {/* Redirect based on role - usar rol efectivo */}
+        <Route
+          path="/dashboard"
+          element={<DashboardRedirect user={user} userRole={effectiveRole} viewAsActive={isViewingAs} />}
         />
 
         {/* 404 */}
@@ -193,8 +218,8 @@ function PublicRoute({ user, children }) {
 }
 
 // Dashboard Redirect based on role
-function DashboardRedirect({ user, userRole }) {
-  console.log('🔍 DashboardRedirect - user:', user?.uid, 'userRole:', userRole);
+function DashboardRedirect({ user, userRole, viewAsActive }) {
+  console.log('🔍 DashboardRedirect - user:', user?.uid, 'userRole:', userRole, 'viewAsActive:', viewAsActive);
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -217,10 +242,12 @@ function DashboardRedirect({ user, userRole }) {
     case 'student':
     case 'listener':
     case 'trial':
+      console.log(viewAsActive ? '👁️ Redirigiendo a /student (ViewAs)' : '➡️ Redirigiendo a /student');
       return <Navigate to="/student" replace />;
     case 'teacher':
     case 'trial_teacher':
     case 'admin':
+      console.log(viewAsActive ? '👁️ Redirigiendo a /teacher (ViewAs)' : '➡️ Redirigiendo a /teacher');
       return <Navigate to="/teacher" replace />;
     default:
       console.warn('⚠️ Rol desconocido:', userRole);

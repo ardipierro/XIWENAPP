@@ -1,0 +1,345 @@
+import { useState, useEffect } from 'react';
+import { getCourseProgress, getNextContent } from '../../firebase/studentProgress';
+import { ensureStudentProfile } from '../../firebase/firestore';
+import { getCourseContents, getCourseExercises } from '../../firebase/relationships';
+import './CourseViewer.css';
+
+function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPlayExercise }) {
+  const [activeTab, setActiveTab] = useState('content'); // 'content', 'exercises', 'progress'
+  const [loading, setLoading] = useState(true);
+  const [courseContent, setCourseContent] = useState([]);
+  const [courseExercises, setCourseExercises] = useState([]);
+  const [progress, setProgress] = useState(null);
+  const [studentId, setStudentId] = useState(null);
+  const [nextContent, setNextContent] = useState(null);
+
+  useEffect(() => {
+    loadCourseData();
+  }, [courseId, user]);
+
+  const loadCourseData = async () => {
+    try {
+      setLoading(true);
+
+      // Obtener perfil del estudiante
+      const profile = await ensureStudentProfile(user.uid);
+      if (!profile) {
+        console.error('No se pudo obtener perfil del estudiante');
+        return;
+      }
+      setStudentId(profile.id);
+
+      // Cargar progreso del estudiante
+      const progressData = await getCourseProgress(profile.id, courseId);
+      setProgress(progressData);
+
+      // Cargar contenido del curso usando relaciones
+      console.log('🔍 Buscando contenido para courseId:', courseId);
+      const contents = await getCourseContents(courseId);
+      console.log('✅ Total contenidos cargados:', contents.length);
+      setCourseContent(contents); // Already sorted by order
+
+      // Cargar ejercicios del curso usando relaciones
+      const exercises = await getCourseExercises(courseId);
+      console.log('✅ Total ejercicios cargados:', exercises.length);
+      setCourseExercises(exercises); // Already sorted by order
+
+      // Obtener siguiente contenido
+      if (profile.id) {
+        const next = await getNextContent(profile.id, courseId);
+        setNextContent(next);
+      }
+
+    } catch (error) {
+      console.error('Error cargando datos del curso:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isContentCompleted = (contentId) => {
+    return progress?.completedContent?.includes(contentId) || false;
+  };
+
+  const isExerciseCompleted = (exerciseId) => {
+    return progress?.completedExercises?.includes(exerciseId) || false;
+  };
+
+  const getContentIcon = (type) => {
+    switch (type) {
+      case 'lesson': return '📖';
+      case 'video': return '🎥';
+      case 'reading': return '📚';
+      case 'link': return '🔗';
+      default: return '📄';
+    }
+  };
+
+  const getExerciseIcon = (type) => {
+    switch (type) {
+      case 'multiple_choice': return '✅';
+      case 'true_false': return '✓✗';
+      case 'fill_blank': return '📝';
+      case 'drag_drop': return '🔄';
+      case 'order_sentence': return '🔢';
+      case 'matching': return '🔗';
+      case 'highlight': return '✨';
+      case 'table': return '📊';
+      default: return '🎮';
+    }
+  };
+
+  const getDifficultyBadge = (difficulty) => {
+    const badges = {
+      easy: { label: 'Fácil', class: 'difficulty-easy' },
+      medium: { label: 'Medio', class: 'difficulty-medium' },
+      hard: { label: 'Difícil', class: 'difficulty-hard' }
+    };
+    return badges[difficulty] || badges.medium;
+  };
+
+  if (loading) {
+    return (
+      <div className="course-viewer">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Cargando curso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="course-viewer">
+      {/* Header */}
+      <div className="course-viewer-header">
+        <button className="btn-back" onClick={onBack}>
+          ← Volver a Mis Cursos
+        </button>
+
+        <div className="course-header-content">
+          {courseData?.imageUrl && (
+            <div className="course-header-image">
+              <img src={courseData.imageUrl} alt={courseData.name} />
+            </div>
+          )}
+          <div className="course-header-info">
+            <h1 className="course-title">{courseData?.name || 'Curso'}</h1>
+            <p className="course-description">{courseData?.description || ''}</p>
+
+            {/* Progress Bar */}
+            <div className="course-progress-header">
+              <div className="progress-info">
+                <span className="progress-label">Tu progreso</span>
+                <span className="progress-percentage">{progress?.progress || 0}%</span>
+              </div>
+              <div className="progress-bar-large">
+                <div
+                  className="progress-fill-large"
+                  style={{ width: `${progress?.progress || 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Continue Button */}
+            {nextContent && (
+              <button
+                className="btn-continue-course"
+                onClick={() => onPlayContent(nextContent.id)}
+              >
+                ▶ Continuar: {nextContent.title}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="course-tabs">
+        <button
+          className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
+          onClick={() => setActiveTab('content')}
+        >
+          📚 Contenido ({courseContent.length})
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'exercises' ? 'active' : ''}`}
+          onClick={() => setActiveTab('exercises')}
+        >
+          🎮 Ejercicios ({courseExercises.length})
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'progress' ? 'active' : ''}`}
+          onClick={() => setActiveTab('progress')}
+        >
+          📊 Mi Progreso
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="tab-content">
+        {/* Content Tab */}
+        {activeTab === 'content' && (
+          <div className="content-list">
+            {courseContent.length === 0 ? (
+              <div className="empty-tab">
+                <div className="empty-icon">📚</div>
+                <h3>No hay contenido disponible</h3>
+                <p>El profesor aún no ha agregado lecciones a este curso.</p>
+              </div>
+            ) : (
+              <div className="content-items">
+                {courseContent.map((content, index) => {
+                  const isCompleted = isContentCompleted(content.id);
+                  return (
+                    <div
+                      key={content.id}
+                      className={`content-item ${isCompleted ? 'completed' : ''}`}
+                      onClick={() => onPlayContent && onPlayContent(content.id)}
+                    >
+                      <div className="content-item-number">{index + 1}</div>
+                      <div className="content-item-icon">{getContentIcon(content.type)}</div>
+                      <div className="content-item-info">
+                        <h4 className="content-item-title">{content.title}</h4>
+                        <div className="content-item-meta">
+                          <span className="content-type">{content.type}</span>
+                          {content.duration && (
+                            <span className="content-duration">⏱ {content.duration} min</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="content-item-status">
+                        {isCompleted ? (
+                          <span className="status-completed">✓ Completado</span>
+                        ) : (
+                          <span className="status-pending">○ Pendiente</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Exercises Tab */}
+        {activeTab === 'exercises' && (
+          <div className="exercises-list">
+            {courseExercises.length === 0 ? (
+              <div className="empty-tab">
+                <div className="empty-icon">🎮</div>
+                <h3>No hay ejercicios disponibles</h3>
+                <p>El profesor aún no ha agregado ejercicios a este curso.</p>
+              </div>
+            ) : (
+              <div className="exercises-grid">
+                {courseExercises.map(exercise => {
+                  const isCompleted = isExerciseCompleted(exercise.id);
+                  const difficultyBadge = getDifficultyBadge(exercise.difficulty);
+                  return (
+                    <div
+                      key={exercise.id}
+                      className={`exercise-card ${isCompleted ? 'completed' : ''}`}
+                      onClick={() => onPlayExercise && onPlayExercise(exercise.id)}
+                    >
+                      <div className="exercise-card-header">
+                        <div className="exercise-icon-large">
+                          {getExerciseIcon(exercise.type)}
+                        </div>
+                        {isCompleted && (
+                          <span className="completed-badge">✓</span>
+                        )}
+                      </div>
+                      <h4 className="exercise-card-title">{exercise.title}</h4>
+                      <div className="exercise-card-meta">
+                        <span className={`difficulty-badge ${difficultyBadge.class}`}>
+                          {difficultyBadge.label}
+                        </span>
+                        {exercise.questions?.length > 0 && (
+                          <span className="questions-count">
+                            {exercise.questions.length} preguntas
+                          </span>
+                        )}
+                      </div>
+                      <button className="btn-play-exercise">
+                        {isCompleted ? 'Repetir' : 'Jugar'} →
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Progress Tab */}
+        {activeTab === 'progress' && (
+          <div className="progress-stats">
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon">📚</div>
+                <div className="stat-info">
+                  <div className="stat-value">
+                    {progress?.completedContent?.length || 0}/{courseContent.length}
+                  </div>
+                  <div className="stat-label">Lecciones Completadas</div>
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon">🎮</div>
+                <div className="stat-info">
+                  <div className="stat-value">
+                    {progress?.completedExercises?.length || 0}/{courseExercises.length}
+                  </div>
+                  <div className="stat-label">Ejercicios Completados</div>
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon">⏱</div>
+                <div className="stat-info">
+                  <div className="stat-value">
+                    {Math.round((progress?.totalTimeSpent || 0) / 60)} min
+                  </div>
+                  <div className="stat-label">Tiempo Total</div>
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-icon">📈</div>
+                <div className="stat-info">
+                  <div className="stat-value">{progress?.progress || 0}%</div>
+                  <div className="stat-label">Progreso General</div>
+                </div>
+              </div>
+            </div>
+
+            {progress?.status === 'completed' ? (
+              <div className="completion-message">
+                <div className="completion-icon">🎉</div>
+                <h3>¡Felicitaciones!</h3>
+                <p>Has completado este curso exitosamente.</p>
+              </div>
+            ) : (
+              <div className="progress-message">
+                <p>Sigue avanzando para completar el curso</p>
+                {nextContent && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => onPlayContent(nextContent.id)}
+                  >
+                    Continuar con: {nextContent.title}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default CourseViewer;

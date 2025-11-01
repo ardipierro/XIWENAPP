@@ -1,28 +1,14 @@
 .dashboard-layout {
   min-height: 100vh;
-  background: var(--color-background);
-  transition: background-color 0.3s ease;
-}
-
-/* Tema Admin - Fondo degradado */
-.dashboard-layout.admin-theme {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-/* Dark mode - dashboard background */
-.dark .dashboard-layout {
-  background: var(--color-background);
-}
-
-.dark .dashboard-layout.admin-theme {
-  background: linear-gradient(135deg, #4338ca 0%, #581c87 100%);
+  background: #09090b;
+  transition: none;
 }
 
 .dashboard-main {
   margin-top: 64px; /* Altura del TopBar */
   margin-left: 260px; /* Ancho del SideMenu */
   min-height: calc(100vh - 64px);
-  transition: margin-left 0.3s ease-out;
+  transition: margin-left 0.2s ease;
 }
 
 .dashboard-main.sidebar-closed {

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Bell, MessageCircle } from 'lucide-react';
 import UserMenu from './UserMenu';
 import AvatarSelector, { AVATARS } from './AvatarSelector';
 import ThemeToggle from './ThemeToggle';
+import ProfilePanel from './ProfilePanel';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore';
 import './TopBar.css';
 
@@ -10,20 +12,22 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [userAvatar, setUserAvatar] = useState('default');
   const [notificationCount] = useState(0); // Placeholder para futuro
   const [messageCount] = useState(0); // Placeholder para futuro
 
   // Cargar avatar del usuario al montar
   useEffect(() => {
-    const loadAvatar = async () => {
-      if (user?.uid) {
-        const avatar = await getUserAvatar(user.uid);
-        setUserAvatar(avatar);
-      }
-    };
-    loadAvatar();
+    loadUserAvatar();
   }, [user?.uid]);
+
+  const loadUserAvatar = async () => {
+    if (user?.uid) {
+      const avatar = await getUserAvatar(user.uid);
+      setUserAvatar(avatar);
+    }
+  };
 
   // Obtener iniciales para el avatar
   const getUserInitials = () => {
@@ -90,7 +94,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
             onClick={onToggleSidebar}
             aria-label="Toggle sidebar"
           >
-            <span className={`hamburger ${sidebarOpen ? 'open' : ''}`}>
+            <span className="hamburger">
               <span></span>
               <span></span>
               <span></span>
@@ -98,7 +102,6 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
           </button>
 
           <div className="topbar-brand" onClick={() => handleNavigate('/')}>
-            <span className="brand-logo">习文</span>
             <span className="brand-title">XIWEN</span>
           </div>
         </div>
@@ -107,7 +110,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
         <div className="topbar-right">
           {/* Notificaciones */}
           <button className="icon-button" aria-label="Notificaciones">
-            <span className="icon">🔔</span>
+            <Bell size={20} strokeWidth={2} />
             {notificationCount > 0 && (
               <span className="badge">{notificationCount}</span>
             )}
@@ -115,7 +118,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
 
           {/* Mensajes */}
           <button className="icon-button" aria-label="Mensajes">
-            <span className="icon">💬</span>
+            <MessageCircle size={20} strokeWidth={2} />
             {messageCount > 0 && (
               <span className="badge">{messageCount}</span>
             )}
@@ -136,10 +139,14 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
             >
               <div className="user-avatar" onClick={(e) => {
                 e.stopPropagation();
-                setShowAvatarSelector(true);
+                setShowProfilePanel(true);
                 setShowUserMenu(false);
               }}>
-                <span className="avatar-emoji-display">{AVATARS[userAvatar] || AVATARS.default}</span>
+                {userAvatar && userAvatar.startsWith('http') ? (
+                  <img src={userAvatar} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  <span className="avatar-emoji-display">{AVATARS[userAvatar] || AVATARS.default}</span>
+                )}
                 <div className="avatar-edit-hint">✏️</div>
               </div>
               <div className="user-info">
@@ -176,6 +183,16 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
           currentAvatar={userAvatar}
           onSelectAvatar={handleAvatarChange}
           onClose={() => setShowAvatarSelector(false)}
+        />
+      )}
+
+      {/* Profile Panel */}
+      {showProfilePanel && (
+        <ProfilePanel
+          user={user}
+          userRole={userRole}
+          onClose={() => setShowProfilePanel(false)}
+          onUpdate={loadUserAvatar}
         />
       )}
     </div>

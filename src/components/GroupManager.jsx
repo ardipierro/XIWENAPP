@@ -11,7 +11,7 @@ import {
   assignCourseToGroup,
   unassignCourseFromGroup
 } from '../firebase/groups';
-import { getAllStudents } from '../firebase/firestore';
+import { loadStudents } from '../firebase/firestore';
 
 function GroupManager({ user, courses }) {
   const [groups, setGroups] = useState([]);
@@ -22,12 +22,17 @@ function GroupManager({ user, courses }) {
   const [groupMembers, setGroupMembers] = useState([]);
   const [groupCourses, setGroupCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeGroupTab, setActiveGroupTab] = useState('students'); // students, courses, schedules
+  const [activeCreateTab, setActiveCreateTab] = useState('info'); // info, students, courses
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     color: '#6366f1'
   });
+
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectedCourses, setSelectedCourses] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -37,7 +42,7 @@ function GroupManager({ user, courses }) {
     setLoading(true);
     const [groupsData, studentsData] = await Promise.all([
       getGroupsByTeacher(user.uid),
-      getAllStudents()
+      loadStudents()
     ]);
     setGroups(groupsData);
     setStudents(studentsData);
@@ -46,15 +51,33 @@ function GroupManager({ user, courses }) {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+
+    // Crear el grupo
     const result = await createGroup({
       ...formData,
       teacherId: user.uid
     });
 
     if (result.success) {
+      const newGroupId = result.id;
+
+      // Agregar estudiantes seleccionados
+      for (const student of selectedStudents) {
+        await addStudentToGroup(newGroupId, student.id, student.name);
+      }
+
+      // Asignar cursos seleccionados
+      for (const course of selectedCourses) {
+        await assignCourseToGroup(newGroupId, course.id, course.name);
+      }
+
+      // Recargar datos y resetear estados
       loadData();
       setShowCreateModal(false);
       setFormData({ name: '', description: '', color: '#6366f1' });
+      setSelectedStudents([]);
+      setSelectedCourses([]);
+      setActiveCreateTab('info');
     } else {
       alert('Error al crear grupo');
     }
@@ -71,6 +94,7 @@ function GroupManager({ user, courses }) {
 
   const handleSelectGroup = async (group) => {
     setSelectedGroup(group);
+    setActiveGroupTab('students'); // Resetear a primera tab
     const [members, courses] = await Promise.all([
       getGroupMembers(group.id),
       getGroupCourses(group.id)
@@ -99,6 +123,22 @@ function GroupManager({ user, courses }) {
     const result = await assignCourseToGroup(selectedGroup.id, courseId, courseName);
     if (result.success) {
       handleSelectGroup(selectedGroup);
+    }
+  };
+
+  const toggleStudentSelection = (student) => {
+    if (selectedStudents.some(s => s.id === student.id)) {
+      setSelectedStudents(selectedStudents.filter(s => s.id !== student.id));
+    } else {
+      setSelectedStudents([...selectedStudents, student]);
+    }
+  };
+
+  const toggleCourseSelection = (course) => {
+    if (selectedCourses.some(c => c.id === course.id)) {
+      setSelectedCourses(selectedCourses.filter(c => c.id !== course.id));
+    } else {
+      setSelectedCourses([...selectedCourses, course]);
     }
   };
 
@@ -201,49 +241,173 @@ function GroupManager({ user, courses }) {
         </div>
       )}
 
-      {/* Create Modal */}
+      {/* Create Modal with Tabs */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 1000}}>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto" style={{position: 'relative', zIndex: 1001}}>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               Crear Nuevo Grupo
             </h3>
+
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+              <button
+                type="button"
+                onClick={() => setActiveCreateTab('info')}
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  activeCreateTab === 'info'
+                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                📝 Información
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveCreateTab('students')}
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  activeCreateTab === 'students'
+                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                👥 Estudiantes ({selectedStudents.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveCreateTab('courses')}
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  activeCreateTab === 'courses'
+                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                📚 Cursos ({selectedCourses.length})
+              </button>
+            </div>
+
             <form onSubmit={handleCreate}>
-              <div className="mb-4">
-                <label className="label">Nombre del Grupo</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="input"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="label">Descripción</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="input"
-                  rows="3"
-                />
-              </div>
-              <div className="mb-6">
-                <label className="label">Color</label>
-                <input
-                  type="color"
-                  value={formData.color}
-                  onChange={(e) => setFormData({...formData, color: e.target.value})}
-                  className="w-full h-10 rounded cursor-pointer"
-                />
-              </div>
-              <div className="flex gap-2">
+              {/* Tab: Información */}
+              {activeCreateTab === 'info' && (
+                <div>
+                  <div className="mb-4">
+                    <label className="label">Nombre del Grupo</label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="input"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="label">Descripción</label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      className="input"
+                      rows="3"
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label className="label">Color</label>
+                    <input
+                      type="color"
+                      value={formData.color}
+                      onChange={(e) => setFormData({...formData, color: e.target.value})}
+                      className="w-full h-10 rounded cursor-pointer"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Estudiantes */}
+              {activeCreateTab === 'students' && (
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Selecciona los estudiantes que formarán parte de este grupo
+                  </p>
+                  <div className="max-h-[400px] overflow-y-auto space-y-2">
+                    {students.map((student) => {
+                      const isSelected = selectedStudents.some(s => s.id === student.id);
+                      return (
+                        <div
+                          key={student.id}
+                          onClick={() => toggleStudentSelection(student)}
+                          className={`p-3 rounded cursor-pointer transition-colors ${
+                            isSelected
+                              ? 'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-500'
+                              : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-900 dark:text-gray-100 font-medium">
+                              {student.name}
+                            </span>
+                            {isSelected && (
+                              <span className="text-indigo-600 dark:text-indigo-400 text-xl">✓</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Cursos */}
+              {activeCreateTab === 'courses' && (
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Selecciona los cursos que se asignarán a este grupo
+                  </p>
+                  <div className="max-h-[400px] overflow-y-auto space-y-2">
+                    {courses?.map((course) => {
+                      const isSelected = selectedCourses.some(c => c.id === course.id);
+                      return (
+                        <div
+                          key={course.id}
+                          onClick={() => toggleCourseSelection(course)}
+                          className={`p-3 rounded cursor-pointer transition-colors ${
+                            isSelected
+                              ? 'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-500'
+                              : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-900 dark:text-gray-100 font-medium">
+                              {course.name}
+                            </span>
+                            {isSelected && (
+                              <span className="text-indigo-600 dark:text-indigo-400 text-xl">✓</span>
+                            )}
+                          </div>
+                          {course.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              {course.description}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button type="submit" className="btn btn-primary flex-1">
-                  Crear Grupo
+                  ✅ Crear Grupo
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setFormData({ name: '', description: '', color: '#6366f1' });
+                    setSelectedStudents([]);
+                    setSelectedCourses([]);
+                    setActiveCreateTab('info');
+                  }}
                   className="btn btn-ghost flex-1"
                 >
                   Cancelar
@@ -254,10 +418,11 @@ function GroupManager({ user, courses }) {
         </div>
       )}
 
-      {/* Group Detail Modal */}
+      {/* Group Detail Modal with Tabs */}
       {selectedGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 1000}}>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto" style={{position: 'relative', zIndex: 1001}}>
+            {/* Header */}
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -275,79 +440,104 @@ function GroupManager({ user, courses }) {
               </button>
             </div>
 
-            {/* Members */}
-            <div className="mb-6">
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                Estudiantes ({groupMembers.length})
-              </h4>
-              <div className="grid gap-2 mb-3">
-                {groupMembers.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
-                    <span className="text-gray-900 dark:text-gray-100">{member.studentName}</span>
-                    <button
-                      onClick={() => handleRemoveStudent(member.studentId)}
-                      className="btn btn-sm btn-danger"
-                    >
-                      Remover
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {availableStudents.length > 0 && (
-                <details className="bg-gray-50 dark:bg-gray-700 rounded p-3">
-                  <summary className="cursor-pointer font-semibold text-gray-900 dark:text-gray-100">
-                    + Agregar Estudiante
-                  </summary>
-                  <div className="mt-3 grid gap-2">
-                    {availableStudents.map((student) => (
-                      <button
-                        key={student.id}
-                        onClick={() => handleAddStudent(student.id, student.name)}
-                        className="btn btn-sm btn-outline text-left"
-                      >
-                        {student.name}
-                      </button>
-                    ))}
-                  </div>
-                </details>
-              )}
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setActiveGroupTab('students')}
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  activeGroupTab === 'students'
+                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                👥 Estudiantes ({groupMembers.length})
+              </button>
+              <button
+                onClick={() => setActiveGroupTab('courses')}
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  activeGroupTab === 'courses'
+                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                📚 Cursos ({groupCourses.length})
+              </button>
             </div>
 
-            {/* Courses */}
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                Cursos Asignados ({groupCourses.length})
-              </h4>
-              <div className="grid gap-2 mb-3">
-                {groupCourses.map((gc) => (
-                  <div key={gc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
-                    <span className="text-gray-900 dark:text-gray-100">{gc.courseName}</span>
-                    <button
-                      onClick={() => unassignCourseFromGroup(selectedGroup.id, gc.courseId).then(() => handleSelectGroup(selectedGroup))}
-                      className="btn btn-sm btn-danger"
-                    >
-                      Desasignar
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {availableCourses.length > 0 && (
-                <details className="bg-gray-50 dark:bg-gray-700 rounded p-3">
-                  <summary className="cursor-pointer font-semibold text-gray-900 dark:text-gray-100">
-                    + Asignar Curso
-                  </summary>
-                  <div className="mt-3 grid gap-2">
-                    {availableCourses.map((course) => (
-                      <button
-                        key={course.id}
-                        onClick={() => handleAssignCourse(course.id, course.name)}
-                        className="btn btn-sm btn-outline text-left"
-                      >
-                        {course.name}
-                      </button>
+            {/* Tab Content */}
+            <div className="tab-content">
+              {/* Students Tab */}
+              {activeGroupTab === 'students' && (
+                <div>
+                  <div className="grid gap-2 mb-3">
+                    {groupMembers.map((member) => (
+                      <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                        <span className="text-gray-900 dark:text-gray-100">{member.studentName}</span>
+                        <button
+                          onClick={() => handleRemoveStudent(member.studentId)}
+                          className="btn btn-sm btn-danger"
+                        >
+                          Remover
+                        </button>
+                      </div>
                     ))}
                   </div>
-                </details>
+                  {availableStudents.length > 0 && (
+                    <details className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                      <summary className="cursor-pointer font-semibold text-gray-900 dark:text-gray-100">
+                        + Agregar Estudiante
+                      </summary>
+                      <div className="mt-3 grid gap-2">
+                        {availableStudents.map((student) => (
+                          <button
+                            key={student.id}
+                            onClick={() => handleAddStudent(student.id, student.name)}
+                            className="btn btn-sm btn-outline text-left"
+                          >
+                            {student.name}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </div>
+              )}
+
+              {/* Courses Tab */}
+              {activeGroupTab === 'courses' && (
+                <div>
+                  <div className="grid gap-2 mb-3">
+                    {groupCourses.map((gc) => (
+                      <div key={gc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                        <span className="text-gray-900 dark:text-gray-100">{gc.courseName}</span>
+                        <button
+                          onClick={() => unassignCourseFromGroup(selectedGroup.id, gc.courseId).then(() => handleSelectGroup(selectedGroup))}
+                          className="btn btn-sm btn-danger"
+                        >
+                          Desasignar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {availableCourses.length > 0 && (
+                    <details className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                      <summary className="cursor-pointer font-semibold text-gray-900 dark:text-gray-100">
+                        + Asignar Curso
+                      </summary>
+                      <div className="mt-3 grid gap-2">
+                        {availableCourses.map((course) => (
+                          <button
+                            key={course.id}
+                            onClick={() => handleAssignCourse(course.id, course.name)}
+                            className="btn btn-sm btn-outline text-left"
+                          >
+                            {course.name}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </div>
               )}
             </div>
           </div>
