@@ -1167,26 +1167,7 @@
   z-index: 1000;
 }
 
-/* Estilos base para todos los modales */
-.modal-content {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 8px;
-  max-width: 700px;
-  width: 90%;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Modal más ancho para contenido largo */
-.modal-content.max-w-4xl {
-  max-width: 56rem;
-}
-
-.modal-content.enrollment-modal {
-  max-width: 700px;
-}
+/* Estilos viejos de modal removidos - ahora se usan los de globals.css (.modal-box) */
 
 .modal-header {
   display: flex;
@@ -1563,14 +1544,7 @@
   border-color: #3f3f46;
 }
 
-/* Modals */
-.dark .modal-content {
-  background: var(--color-surface);
-}
-
-.dark .modal-title {
-  color: var(--color-text-primary);
-}
+/* Modals dark mode - ahora manejados por globals.css */
 
 /* Loading & Empty States */
 .dark .loading-state p,
