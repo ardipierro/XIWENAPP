@@ -476,7 +476,7 @@
   color: var(--color-text-secondary, #6b7280);
 }
 
-/* Buttons */
+/* Buttons - DESHABILITADO: usar globals.css
 .btn {
   padding: 10px 20px;
   border-radius: 10px;
@@ -487,6 +487,7 @@
   border: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
+*/
 
 .btn:disabled {
   opacity: 0.5;

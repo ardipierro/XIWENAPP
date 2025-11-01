@@ -157,10 +157,7 @@
   flex-wrap: wrap;
 }
 
-.class-actions .btn {
-  flex: 1;
-  min-width: 100px;
-}
+/* Eliminado: .class-actions .btn sobrescribía globals.css */
 
 /* Modal Styles */
 .modal-overlay {
@@ -728,9 +725,7 @@
     flex-direction: column;
   }
 
-  .class-actions .btn {
-    width: 100%;
-  }
+  /* Eliminado: .class-actions .btn width: 100% sobrescribía globals.css */
 }
 
 /* Calendar View */
