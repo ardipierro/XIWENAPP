@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react';
+import {
+  Calendar, BarChart3, CheckCircle, AlertTriangle, XCircle,
+  Clock, FileText, Loader, User, Video
+} from 'lucide-react';
 import { getTeacherSessions, getClassSession } from '../firebase/classSessions';
 import { getSessionAttendance, markBulkAttendance, updateAttendanceStatus } from '../firebase/attendance';
 import { getGroupMembers } from '../firebase/groups';
@@ -107,7 +111,7 @@ function AttendanceView({ teacher }) {
       );
 
       if (result.success) {
-        showMessage('success', `✅ ${result.marked} asistencias marcadas`);
+        showMessage('success', `${result.marked} asistencias marcadas`);
         await loadSessionDetails();
       } else {
         showMessage('error', 'Error al marcar asistencias');
@@ -127,15 +131,15 @@ function AttendanceView({ teacher }) {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'present':
-        return '✅';
+        return <CheckCircle size={16} strokeWidth={2} className="inline-icon" />;
       case 'absent':
-        return '❌';
+        return <XCircle size={16} strokeWidth={2} className="inline-icon" />;
       case 'late':
-        return '⏰';
+        return <Clock size={16} strokeWidth={2} className="inline-icon" />;
       case 'excused':
-        return '📝';
+        return <FileText size={16} strokeWidth={2} className="inline-icon" />;
       default:
-        return '⏳';
+        return <Loader size={16} strokeWidth={2} className="inline-icon" />;
     }
   };
 
@@ -199,7 +203,9 @@ function AttendanceView({ teacher }) {
     return (
       <div className="attendance-view">
         <div className="empty-sessions">
-          <div className="empty-icon">📅</div>
+          <div className="empty-icon">
+            <Calendar size={64} strokeWidth={2} />
+          </div>
           <h3 className="empty-title">No hay clases programadas</h3>
           <p className="empty-text">
             Crea horarios para tus grupos para ver las sesiones aquí
@@ -215,7 +221,9 @@ function AttendanceView({ teacher }) {
     <div className="attendance-view">
       {/* Header con estadísticas */}
       <div className="attendance-header">
-        <h2 className="attendance-title">📊 Asistencia de Clases</h2>
+        <h2 className="attendance-title flex items-center gap-2">
+          <BarChart3 size={28} strokeWidth={2} /> Asistencia de Clases
+        </h2>
 
         {selectedSession && (
           <div className="attendance-stats">
@@ -238,7 +246,11 @@ function AttendanceView({ teacher }) {
       {/* Message */}
       {message.text && (
         <div className={`attendance-message ${message.type}`}>
-          {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+          {message.type === 'success' ? (
+            <CheckCircle size={18} strokeWidth={2} className="inline-icon" />
+          ) : (
+            <AlertTriangle size={18} strokeWidth={2} className="inline-icon" />
+          )} {message.text}
         </div>
       )}
 
@@ -282,7 +294,7 @@ function AttendanceView({ teacher }) {
                   className="btn btn-primary"
                   onClick={handleMarkAllPresent}
                 >
-                  ✅ Marcar Todos Presentes
+                  <CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Marcar Todos Presentes
                 </button>
               </div>
 
@@ -298,12 +310,14 @@ function AttendanceView({ teacher }) {
                     return (
                       <div key={member.id} className="student-item">
                         <div className="student-info">
-                          <div className="student-avatar">👤</div>
+                          <div className="student-avatar">
+                            <User size={24} strokeWidth={2} />
+                          </div>
                           <div className="student-details">
                             <div className="student-name">{member.studentName}</div>
                             {attStatus && attStatus.linkClicked && (
                               <div className="link-clicked-badge">
-                                🎥 Entró por link
+                                <Video size={14} strokeWidth={2} className="inline-icon" /> Entró por link
                               </div>
                             )}
                           </div>
@@ -316,7 +330,7 @@ function AttendanceView({ teacher }) {
                             </div>
                           ) : (
                             <div className="status-badge status-pending">
-                              ⏳ Pendiente
+                              <Loader size={16} strokeWidth={2} className="inline-icon" /> Pendiente
                             </div>
                           )}
                         </div>
