@@ -443,24 +443,20 @@ function ClassManager({ user, courses }) {
           <h2 className="flex items-center gap-2">
             <BookOpen size={28} strokeWidth={2} /> Clases
           </h2>
-          <div className="header-actions" style={{ gap: '12px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button
-                className={`btn ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setActiveTab('list')}
-                style={{ height: '42px' }}
-              >
-                <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Mis Clases
-              </button>
-              <button
-                className={`btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setActiveTab('calendar')}
-                style={{ height: '42px' }}
-              >
-                <Calendar size={18} strokeWidth={2} className="inline-icon" /> Calendario
-              </button>
-            </div>
-            <button onClick={handleCreateClass} className="btn btn-primary" style={{ height: '42px' }}>
+          <div className="flex items-center gap-3">
+            <button
+              className={`btn ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setActiveTab('list')}
+            >
+              <ClipboardList size={16} strokeWidth={2} /> Mis Clases
+            </button>
+            <button
+              className={`btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setActiveTab('calendar')}
+            >
+              <Calendar size={16} strokeWidth={2} /> Calendario
+            </button>
+            <button onClick={handleCreateClass} className="btn btn-primary">
               + Nueva Clase
             </button>
           </div>
@@ -1169,24 +1165,20 @@ function ClassManager({ user, courses }) {
           <h2 className="flex items-center gap-2">
             <BookOpen size={28} strokeWidth={2} /> Clases
           </h2>
-          <div className="header-actions" style={{ gap: '12px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button
-                className={`btn ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setActiveTab('list')}
-                style={{ height: '42px' }}
-              >
-                <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Mis Clases
-              </button>
-              <button
-                className={`btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setActiveTab('calendar')}
-                style={{ height: '42px' }}
-              >
-                <Calendar size={18} strokeWidth={2} className="inline-icon" /> Calendario
-              </button>
-            </div>
-            <button onClick={handleCreateClass} className="btn btn-primary" style={{ height: '42px' }}>
+          <div className="flex items-center gap-3">
+            <button
+              className={`btn ${activeTab === 'list' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setActiveTab('list')}
+            >
+              <ClipboardList size={16} strokeWidth={2} /> Mis Clases
+            </button>
+            <button
+              className={`btn ${activeTab === 'calendar' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setActiveTab('calendar')}
+            >
+              <Calendar size={16} strokeWidth={2} /> Calendario
+            </button>
+            <button onClick={handleCreateClass} className="btn btn-primary">
               + Nueva Clase
             </button>
           </div>

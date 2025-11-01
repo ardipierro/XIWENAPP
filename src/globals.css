@@ -35,8 +35,9 @@
 @layer components {
   /* Botones Base */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5;
-    @apply text-base font-medium leading-normal rounded-md;
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 min-h-[42px];
+    @apply text-base font-medium leading-tight rounded-md;
     @apply border border-transparent cursor-pointer;
     @apply transition-none outline-none no-underline whitespace-nowrap;
     @apply w-auto flex-shrink-0;
