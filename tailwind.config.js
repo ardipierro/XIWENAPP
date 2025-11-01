@@ -7,22 +7,23 @@ export default {
   ],
   theme: {
     extend: {
-      // Colores personalizados de XIWENAPP
+      // Colores personalizados de XIWENAPP - Dark Gray Theme
       colors: {
         primary: {
-          DEFAULT: '#3b82f6',
-          dark: '#2563eb',
-          light: '#60a5fa',
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          DEFAULT: '#18181b',      // zinc-900
+          dark: '#09090b',         // zinc-950
+          light: '#27272a',        // zinc-800
+          50: '#fafafa',           // zinc-50
+          100: '#f4f4f5',          // zinc-100
+          200: '#e4e4e7',          // zinc-200
+          300: '#d4d4d8',          // zinc-300
+          400: '#a1a1aa',          // zinc-400
+          500: '#71717a',          // zinc-500
+          600: '#52525b',          // zinc-600
+          700: '#3f3f46',          // zinc-700
+          800: '#27272a',          // zinc-800
+          900: '#18181b',          // zinc-900
+          950: '#09090b',          // zinc-950
         },
         secondary: {
           DEFAULT: '#10b981',
@@ -55,19 +56,19 @@ export default {
           900: '#78350f',
         },
         teacher: {
-          DEFAULT: '#8b5cf6',
-          light: '#a78bfa',
-          dark: '#7c3aed',
+          DEFAULT: '#a1a1aa',      // zinc-400 (gris neutral)
+          light: '#d4d4d8',        // zinc-300
+          dark: '#71717a',         // zinc-500
         },
         student: {
-          DEFAULT: '#3b82f6',
-          light: '#60a5fa',
-          dark: '#2563eb',
+          DEFAULT: '#71717a',      // zinc-500 (gris neutral)
+          light: '#a1a1aa',        // zinc-400
+          dark: '#52525b',         // zinc-600
         },
-        success: '#10b981',
-        warning: '#f59e0b',
-        error: '#ef4444',
-        info: '#3b82f6',
+        success: '#10b981',        // green-500
+        warning: '#f59e0b',        // amber-500
+        error: '#ef4444',          // red-500
+        info: '#a1a1aa',           // zinc-400 (gris neutral)
       },
       
       // Espaciado personalizado
