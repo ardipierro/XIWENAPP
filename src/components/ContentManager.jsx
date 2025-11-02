@@ -394,7 +394,7 @@ function ContentManager({ user, courses = [] }) {
               <div className="form-group">
                 <label className="form-label">Tipo*</label>
                 <select
-                  className="input"
+                  className="select"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                 >
@@ -529,7 +529,7 @@ function ContentManager({ user, courses = [] }) {
               <div className="form-group">
                 <label className="form-label">Tipo*</label>
                 <select
-                  className="input"
+                  className="select"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                 >

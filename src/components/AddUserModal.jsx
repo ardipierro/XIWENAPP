@@ -182,7 +182,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="form-select"
+                className="select"
                 required
                 disabled={loading}
               >

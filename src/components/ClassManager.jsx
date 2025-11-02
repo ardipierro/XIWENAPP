@@ -608,7 +608,7 @@ function ClassManager({ user, courses }) {
                   <div className="form-group">
                     <label className="form-label">Curso Asociado</label>
                     <select
-                      className="input"
+                      className="select"
                       value={formData.courseId}
                       onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
                     >
@@ -967,7 +967,7 @@ function ClassManager({ user, courses }) {
                               Semanas a generar
                             </label>
                             <select
-                              className="input w-full"
+                              className="select w-full"
                               value={scheduleForm.weeksToGenerate}
                               onChange={(e) => setScheduleForm({ ...scheduleForm, weeksToGenerate: parseInt(e.target.value) })}
                             >
@@ -1048,7 +1048,7 @@ function ClassManager({ user, courses }) {
                           <BookOpen size={20} strokeWidth={2} /> Curso Asociado
                         </h4>
                         <select
-                          className="input w-full"
+                          className="select w-full"
                           value={formData.courseId}
                           onChange={(e) => {
                             setFormData({ ...formData, courseId: e.target.value });
@@ -1096,7 +1096,7 @@ function ClassManager({ user, courses }) {
 
                         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                           <select
-                            className="input"
+                            className="select"
                             onChange={(e) => {
                               if (e.target.value) {
                                 handleAssignGroup(e.target.value);
@@ -1142,7 +1142,7 @@ function ClassManager({ user, courses }) {
 
                         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                           <select
-                            className="input"
+                            className="select"
                             onChange={(e) => {
                               if (e.target.value) {
                                 handleAssignStudent(e.target.value);

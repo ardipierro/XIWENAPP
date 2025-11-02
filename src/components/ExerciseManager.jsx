@@ -470,7 +470,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                 <div className="form-group">
                   <label className="form-label">Tipo de Ejercicio*</label>
                   <select
-                    className="input"
+                    className="select"
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   >
@@ -511,7 +511,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                   <div className="form-group">
                     <label className="form-label">Dificultad</label>
                     <select
-                      className="input"
+                      className="select"
                       value={formData.difficulty}
                       onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                     >
@@ -624,7 +624,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                 <div className="form-group">
                   <label className="form-label">Tipo de Ejercicio*</label>
                   <select
-                    className="input"
+                    className="select"
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   >
@@ -665,7 +665,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                   <div className="form-group">
                     <label className="form-label">Dificultad</label>
                     <select
-                      className="input"
+                      className="select"
                       value={formData.difficulty}
                       onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                     >
