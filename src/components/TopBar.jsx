@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, MessageCircle, Edit2 } from 'lucide-react';
+import { Bell, MessageCircle } from 'lucide-react';
 import UserMenu from './UserMenu';
 import AvatarSelector, { AVATARS } from './AvatarSelector';
-import ThemeToggle from './ThemeToggle';
 import ProfilePanel from './ProfilePanel';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore';
 import './TopBar.css';
@@ -110,9 +109,6 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
             )}
           </button>
 
-          {/* Theme Toggle */}
-          <ThemeToggle />
-
           {/* Separador */}
           <div className="topbar-divider"></div>
 
@@ -123,11 +119,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
               onClick={() => setShowUserMenu(!showUserMenu)}
               aria-label="Menú de usuario"
             >
-              <div className="user-avatar" onClick={(e) => {
-                e.stopPropagation();
-                setShowProfilePanel(true);
-                setShowUserMenu(false);
-              }}>
+              <div className="user-avatar">
                 {userAvatar && userAvatar.startsWith('http') ? (
                   <img src={userAvatar} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
@@ -136,9 +128,6 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
                     return <AvatarIcon size={20} strokeWidth={2} className="avatar-icon-display" />;
                   })()
                 )}
-                <div className="avatar-edit-hint">
-                  <Edit2 size={12} strokeWidth={2} />
-                </div>
               </div>
               <div className="user-info">
                 <span className="user-name">{getDisplayName()}</span>

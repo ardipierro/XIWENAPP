@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { Home, BarChart3, Edit, User, Settings, LogOut } from 'lucide-react';
+import { Home, BarChart3, User, Settings, LogOut } from 'lucide-react';
 import './UserMenu.css';
 
 function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
@@ -56,16 +56,6 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
 
   return (
     <div className="user-menu" ref={menuRef}>
-      {/* Header del menú */}
-      <div className="user-menu-header">
-        <div className="menu-user-info">
-          <span className="menu-user-name">{user?.displayName || user?.email?.split('@')[0] || 'Usuario'}</span>
-          <span className="menu-user-email">{user?.email}</span>
-        </div>
-      </div>
-
-      <div className="user-menu-divider"></div>
-
       {/* Opciones de navegación */}
       <div className="user-menu-section">
         <button
@@ -91,14 +81,6 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
 
       {/* Configuración */}
       <div className="user-menu-section">
-        <button
-          className="menu-item"
-          onClick={onChangeAvatar}
-        >
-          <Edit size={18} strokeWidth={2} className="menu-item-icon" />
-          <span className="menu-item-text">Cambiar Avatar</span>
-        </button>
-
         <button
           className="menu-item"
           onClick={onViewProfile}

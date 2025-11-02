@@ -33,7 +33,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
         { icon: Users, label: 'Usuarios', path: '/teacher', action: 'users' },
-        { divider: true },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
@@ -43,11 +42,9 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     if (['teacher', 'trial_teacher'].includes(userRole)) {
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
-        { divider: true },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
-        { divider: true },
         { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
         { icon: Users, label: 'Alumnos', path: '/teacher', action: 'users' },
       ];
@@ -56,7 +53,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     if (['student', 'listener', 'trial'].includes(userRole)) {
       return [
         { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },
-        { divider: true },
         { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
         { icon: ClipboardList, label: 'Asignado a Mí', path: '/student', action: 'assignments' },
         { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classes' },
@@ -89,10 +85,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           {/* Items del menú */}
           <nav className="sidemenu-nav">
             {menuItems.map((item, index) => {
-              if (item.divider) {
-                return <div key={`divider-${index}`} className="sidemenu-divider"></div>;
-              }
-
               const active = isActive(item.action);
 
               const IconComponent = item.icon;
