@@ -349,7 +349,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="info-input"
+                    className="input"
                     placeholder="Nombre del usuario"
                     autoComplete="off"
                     readOnly={false}
@@ -369,7 +369,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className="info-select"
+                    className="select"
                   >
                     {Object.values(ROLES).map(role => (
                       <option key={role} value={role}>
@@ -392,7 +392,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="info-select"
+                    className="select"
                   >
                     <option value="active">Activo</option>
                     <option value="suspended">Suspendido</option>
@@ -413,7 +413,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="info-input"
+                    className="input"
                     placeholder="Teléfono de contacto"
                     autoComplete="off"
                     readOnly={false}
@@ -441,7 +441,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                     name="notes"
                     value={formData.notes}
                     onChange={handleChange}
-                    className="info-textarea"
+                    className="input"
                     placeholder="Notas adicionales sobre el usuario..."
                     rows="4"
                     readOnly={false}

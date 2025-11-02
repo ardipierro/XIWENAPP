@@ -10,7 +10,8 @@
       "Bash(firebase --version:*)",
       "Bash(firebase deploy:*)",
       "Bash(firebase login:*)",
-      "Bash(\"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\ClassManager.jsx.tmp\")"
+      "Bash(\"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\ClassManager.jsx.tmp\")",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
