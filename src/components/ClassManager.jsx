@@ -1147,7 +1147,6 @@ function ClassManager({ user, courses }) {
                     </button>
                   </div>
                 </div>
-                </div>
               </div>
             </div>
           );
