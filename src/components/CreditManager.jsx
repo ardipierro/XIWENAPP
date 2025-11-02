@@ -197,42 +197,42 @@ function CreditManager({ userId, currentUser, onUpdate }) {
       )}
 
       {/* Stats Cards */}
-      <div className="credit-stats-grid">
-        <div className="credit-stat-card available">
+      <div className="stats-grid">
+        <div className="stat-card">
           <div className="stat-icon">
             <CreditCard size={32} strokeWidth={2} />
           </div>
-          <div className="stat-content">
+          <div className="stat-info">
             <div className="stat-value">{stats.availableCredits}</div>
             <div className="stat-label">Créditos Disponibles</div>
           </div>
         </div>
 
-        <div className="credit-stat-card purchased">
+        <div className="stat-card">
           <div className="stat-icon">
             <ShoppingCart size={32} strokeWidth={2} />
           </div>
-          <div className="stat-content">
+          <div className="stat-info">
             <div className="stat-value">{stats.totalPurchased}</div>
             <div className="stat-label">Total Comprados</div>
           </div>
         </div>
 
-        <div className="credit-stat-card used">
+        <div className="stat-card">
           <div className="stat-icon">
             <BarChart3 size={32} strokeWidth={2} />
           </div>
-          <div className="stat-content">
+          <div className="stat-info">
             <div className="stat-value">{stats.totalUsed}</div>
             <div className="stat-label">Total Usados</div>
           </div>
         </div>
 
-        <div className="credit-stat-card usage">
+        <div className="stat-card">
           <div className="stat-icon">
             <TrendingUp size={32} strokeWidth={2} />
           </div>
-          <div className="stat-content">
+          <div className="stat-info">
             <div className="stat-value">{stats.usagePercentage}%</div>
             <div className="stat-label">Uso</div>
           </div>
@@ -350,34 +350,38 @@ function CreditManager({ userId, currentUser, onUpdate }) {
       {/* Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-box credit-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title flex items-center gap-2">
+              <h2 className="modal-title">
                 {modalType === 'add' ? (
-                  <><Plus size={20} strokeWidth={2} /> Agregar Créditos</>
+                  <><Plus size={20} strokeWidth={2} className="inline-icon" /> Agregar Créditos</>
                 ) : (
-                  <><Minus size={20} strokeWidth={2} /> Quitar Créditos</>
+                  <><Minus size={20} strokeWidth={2} className="inline-icon" /> Quitar Créditos</>
                 )}
               </h2>
               <button
-                className="modal-close"
+                className="modal-close-btn"
                 onClick={handleCloseModal}
                 disabled={processing}
+                aria-label="Cerrar modal"
               >
-                <X size={18} strokeWidth={2} />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
-            <form onSubmit={handleModalSubmit}>
-              <div className="modal-body">
+            <div className="modal-content">
+              <form onSubmit={handleModalSubmit} className="space-y-4">
                 <div className="form-group">
-                  <label className="form-label">Cantidad</label>
+                  <label className="label">Cantidad</label>
                   <input
                     type="number"
                     min="1"
                     value={modalForm.amount}
                     onChange={(e) => setModalForm({ ...modalForm, amount: e.target.value })}
-                    className="form-input"
+                    className="input"
                     placeholder="Ej: 10"
                     required
                     disabled={processing}
@@ -385,11 +389,11 @@ function CreditManager({ userId, currentUser, onUpdate }) {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Razón</label>
+                  <label className="label">Razón</label>
                   <textarea
                     value={modalForm.reason}
                     onChange={(e) => setModalForm({ ...modalForm, reason: e.target.value })}
-                    className="form-textarea"
+                    className="input"
                     placeholder="Describe el motivo de esta operación..."
                     rows="3"
                     required
@@ -398,38 +402,39 @@ function CreditManager({ userId, currentUser, onUpdate }) {
                 </div>
 
                 {modalType === 'deduct' && stats.availableCredits < parseInt(modalForm.amount || 0) && (
-                  <div className="warning-message flex items-center gap-2">
+                  <div className="alert alert-warning">
                     <AlertTriangle size={18} strokeWidth={2} /> El usuario no tiene suficientes créditos disponibles
                   </div>
                 )}
-              </div>
+              </form>
+            </div>
 
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={handleCloseModal}
-                  disabled={processing}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={processing}
-                >
-                  {processing ? (
-                    <><Loader size={18} strokeWidth={2} className="inline-icon animate-spin" /> Procesando...</>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={handleCloseModal}
+                disabled={processing}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={processing}
+                onClick={handleModalSubmit}
+              >
+                {processing ? (
+                  <><Loader size={18} strokeWidth={2} className="inline-icon animate-spin" /> Procesando...</>
+                ) : (
+                  modalType === 'add' ? (
+                    <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Agregar</>
                   ) : (
-                    modalType === 'add' ? (
-                      <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Agregar</>
-                    ) : (
-                      <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Quitar</>
-                    )
-                  )}
-                </button>
-              </div>
-            </form>
+                    <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Quitar</>
+                  )
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

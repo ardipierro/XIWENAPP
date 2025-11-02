@@ -264,22 +264,16 @@ function StudentClassView({ student }) {
 
       {/* Debug Info - Grupos */}
       {studentGroups.length > 0 && (
-        <div className="info-box" style={{ marginBottom: '20px', background: '#e0f2fe', borderLeft: '4px solid #0284c7' }}>
-          <h4 className="info-title flex items-center gap-2">
+        <div className="alert" style={{ marginBottom: '20px', background: 'var(--color-bg-info)', borderLeft: '4px solid var(--color-border-info)' }}>
+          <h4 className="font-semibold flex items-center gap-2 mb-2">
             <Users size={18} strokeWidth={2} /> Mis Grupos ({studentGroups.length})
           </h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+          <div className="flex flex-wrap gap-2">
             {studentGroups.map(group => (
               <span
                 key={group.id}
-                style={{
-                  padding: '4px 12px',
-                  background: group.color || '#6366f1',
-                  color: 'white',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  fontWeight: '600'
-                }}
+                className="px-3 py-1 text-white rounded-md text-sm font-semibold"
+                style={{ background: group.color || '#6366f1' }}
               >
                 {group.name}
               </span>
@@ -289,11 +283,11 @@ function StudentClassView({ student }) {
       )}
 
       {studentGroups.length === 0 && (
-        <div className="info-box" style={{ marginBottom: '20px', background: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
-          <h4 className="info-title flex items-center gap-2">
+        <div className="alert alert-warning mb-5">
+          <h4 className="font-semibold flex items-center gap-2 mb-2">
             <AlertTriangle size={18} strokeWidth={2} /> No perteneces a ningún grupo
           </h4>
-          <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#92400e' }}>
+          <p className="text-sm">
             Debes ser agregado a un grupo por tu profesor para ver las clases programadas.
           </p>
         </div>
@@ -373,15 +367,27 @@ function StudentClassView({ student }) {
       )}
 
       {/* Info Box */}
-      <div className="info-box">
-        <h4 className="info-title flex items-center gap-2">
+      <div className="alert" style={{ background: 'var(--color-bg-info)', borderLeft: '4px solid var(--color-border-info)' }}>
+        <h4 className="font-semibold flex items-center gap-2 mb-3">
           <Info size={18} strokeWidth={2} /> ¿Cómo funciona?
         </h4>
-        <ul className="info-list">
-          <li>El link de la clase se activa <strong>15 minutos antes</strong></li>
-          <li>Al unirte, se deduce <strong>1 crédito</strong> automáticamente</li>
-          <li>Tienes hasta <strong>15 minutos después</strong> del inicio para unirte</li>
-          <li>Si no tienes créditos, no podrás unirte a la clase</li>
+        <ul className="space-y-2 text-sm">
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+            <span>El link de la clase se activa <strong>15 minutos antes</strong></span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+            <span>Al unirte, se deduce <strong>1 crédito</strong> automáticamente</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+            <span>Tienes hasta <strong>15 minutos después</strong> del inicio para unirte</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+            <span>Si no tienes créditos, no podrás unirte a la clase</span>
+          </li>
         </ul>
       </div>
     </div>

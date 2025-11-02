@@ -371,15 +371,22 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                     onChange={handleChange}
                     className="select"
                   >
-                    {Object.values(ROLES).map(role => (
-                      <option key={role} value={role}>
-                        {ROLE_INFO[role].icon} {ROLE_INFO[role].name}
-                      </option>
-                    ))}
+                    {Object.values(ROLES).map(role => {
+                      const IconComponent = ICON_MAP[ROLE_INFO[role].icon];
+                      return (
+                        <option key={role} value={role}>
+                          {ROLE_INFO[role].name}
+                        </option>
+                      );
+                    })}
                   </select>
                 ) : (
-                  <div className="info-value">
-                    {ROLE_INFO[selectedUser.role]?.icon} {ROLE_INFO[selectedUser.role]?.name}
+                  <div className="info-value flex items-center gap-2">
+                    {(() => {
+                      const IconComponent = ICON_MAP[ROLE_INFO[selectedUser.role]?.icon];
+                      return IconComponent ? <IconComponent size={18} strokeWidth={2} /> : null;
+                    })()}
+                    <span>{ROLE_INFO[selectedUser.role]?.name}</span>
                   </div>
                 )}
               </div>
@@ -470,24 +477,22 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               <>
                 {/* Cursos matriculados */}
                 {enrolledCourses.length > 0 && (
-                  <div className="courses-section">
-                    <h3 className="section-subtitle flex items-center gap-2">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
                       <BookOpen size={18} strokeWidth={2} />
                       Matriculado ({enrolledCourses.length})
                     </h3>
-                    <div className="courses-list">
+                    <div className="space-y-2">
                       {enrolledCourses.map(enrollment => (
-                        <div key={enrollment.id} className="course-card enrolled">
-                          <div className="course-info">
-                            <div className="course-name">{enrollment.courseName}</div>
-                            <div className="course-meta">
-                              <span className="course-date">
-                                Asignado: {formatDate(enrollment.enrolledAt)}
-                              </span>
+                        <div key={enrollment.id} className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900 dark:text-gray-100">{enrollment.courseName}</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Asignado: {formatDate(enrollment.enrolledAt)}
                             </div>
                           </div>
                           <button
-                            className="btn-unenroll"
+                            className="btn btn-outline text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
                             onClick={() => handleUnenrollCourse(enrollment.courseId)}
                           >
                             ✕ Quitar
@@ -499,32 +504,32 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 )}
 
                 {/* Cursos disponibles */}
-                <div className="courses-section">
-                  <h3 className="section-subtitle flex items-center gap-2">
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
                     <Plus size={18} strokeWidth={2} className="inline-icon" /> Disponibles para asignar
                   </h3>
                   {availableCourses.filter(c => !isCourseEnrolled(c.id)).length === 0 ? (
-                    <div className="empty-message">
-                      <p className="flex items-center gap-2 justify-center">
-                        <CheckCircle size={18} strokeWidth={2} className="inline-icon text-green-600" /> Todos los cursos ya han sido asignados
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-center">
+                      <p className="flex items-center gap-2 justify-center text-green-700 dark:text-green-400">
+                        <CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Todos los cursos ya han sido asignados
                       </p>
                     </div>
                   ) : (
-                    <div className="courses-list">
+                    <div className="space-y-2">
                       {availableCourses
                         .filter(c => !isCourseEnrolled(c.id))
                         .map(course => (
-                          <div key={course.id} className="course-card available">
-                            <div className="course-info">
-                              <div className="course-name">{course.name}</div>
+                          <div key={course.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900 dark:text-gray-100">{course.name}</div>
                               {course.description && (
-                                <div className="course-description">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                   {course.description}
                                 </div>
                               )}
                             </div>
                             <button
-                              className="btn-enroll"
+                              className="btn btn-primary"
                               onClick={() => handleEnrollCourse(course.id)}
                             >
                               + Asignar

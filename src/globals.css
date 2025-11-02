@@ -26,6 +26,16 @@
   .dark body {
     @apply bg-zinc-950 text-zinc-100;
   }
+
+  :root {
+    --color-bg-info: #e0f2fe;
+    --color-border-info: #0284c7;
+  }
+
+  .dark {
+    --color-bg-info: rgba(14, 116, 144, 0.2);
+    --color-border-info: #06b6d4;
+  }
 }
 
 /* ============================================
