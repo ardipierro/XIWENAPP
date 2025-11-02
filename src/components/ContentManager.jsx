@@ -429,6 +429,18 @@ function ContentManager({ user, courses = [] }) {
               </div>
 
               <div className="form-group">
+                <label className="form-label">Orden</label>
+                <input
+                  type="number"
+                  className="input"
+                  value={formData.order}
+                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                  min="0"
+                />
+              </div>
+
+              {/* Asignación de Cursos - Al final */}
+              <div className="form-group">
                 <label className="form-label">Asignar a Cursos (opcional)</label>
                 <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
                   {courses.length === 0 ? (
@@ -458,17 +470,6 @@ function ContentManager({ user, courses = [] }) {
                     {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
                   </p>
                 )}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Orden</label>
-                <input
-                  type="number"
-                  className="input"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                  min="0"
-                />
               </div>
               </form>
             </div>
@@ -564,6 +565,18 @@ function ContentManager({ user, courses = [] }) {
               </div>
 
               <div className="form-group">
+                <label className="form-label">Orden</label>
+                <input
+                  type="number"
+                  className="input"
+                  value={formData.order}
+                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                  min="0"
+                />
+              </div>
+
+              {/* Asignación de Cursos - Al final */}
+              <div className="form-group">
                 <label className="form-label">Asignar a Cursos (opcional)</label>
                 <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
                   {courses.length === 0 ? (
@@ -593,17 +606,6 @@ function ContentManager({ user, courses = [] }) {
                     {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
                   </p>
                 )}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Orden</label>
-                <input
-                  type="number"
-                  className="input"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                  min="0"
-                />
               </div>
               </form>
             </div>
