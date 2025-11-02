@@ -184,20 +184,29 @@ function MyCourses({ user, onSelectCourse }) {
                     className="course-card"
                     onClick={() => onSelectCourse(enrollment.course?.id, enrollment.course)}
                   >
-                    {/* Course Image */}
-                    <div className="course-image">
-                      {enrollment.course?.imageUrl ? (
-                        <img src={enrollment.course.imageUrl} alt={enrollment.course?.name || 'Curso'} />
-                      ) : (
-                        <div className="course-image-placeholder">
-                          <BookMarked size={48} strokeWidth={2} />
+                    {/* Course Image - Mitad superior sin bordes */}
+                    {enrollment.course?.imageUrl ? (
+                      <div className="w-full h-48 overflow-hidden bg-gray-800 flex-shrink-0 relative">
+                        <img
+                          src={enrollment.course.imageUrl}
+                          alt={enrollment.course?.name || 'Curso'}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-3 right-3">
+                          {getStatusBadge(enrollment.status)}
                         </div>
-                      )}
-                      {getStatusBadge(enrollment.status)}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="w-full h-48 bg-gray-800 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 relative">
+                        <BookMarked size={64} strokeWidth={2} className="text-gray-600 dark:text-gray-500" />
+                        <div className="absolute top-3 right-3">
+                          {getStatusBadge(enrollment.status)}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Course Info */}
-                    <div className="course-info">
+                    <div className="course-info" style={{ padding: '16px' }}>
                       <h3 className="course-name">{enrollment.course?.name || 'Curso sin nombre'}</h3>
                       <p className="course-description">
                         {enrollment.course?.description || 'Sin descripción'}

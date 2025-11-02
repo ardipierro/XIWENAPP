@@ -66,6 +66,7 @@
   transition: all 0.3s;
   display: flex;
   flex-direction: column;
+  padding: 0; /* Sin padding, el contenido tiene su propio padding */
 }
 
 .course-card:hover {
@@ -74,35 +75,8 @@
   border-color: var(--color-primary, #4F46E5);
 }
 
-/* Course Image */
-.course-image {
-  position: relative;
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.course-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.course-image-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 64px;
-}
-
 /* Status Badge */
 .status-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
@@ -127,8 +101,9 @@
 
 /* Course Info */
 .course-info {
-  padding: 20px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .course-name {
