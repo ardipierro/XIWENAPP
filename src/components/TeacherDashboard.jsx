@@ -633,12 +633,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (currentScreen === 'content') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="content-management">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver a Inicio
-          </button>
-          <ContentManager user={user} courses={courses} />
-        </div>
+        <ContentManager user={user} courses={courses} onBack={handleBackToDashboard} />
       </DashboardLayout>
     );
   }
@@ -647,12 +642,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (currentScreen === 'classes') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="classes-management-section">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver a Inicio
-          </button>
-          <ClassManager user={user} courses={courses} />
-        </div>
+        <ClassManager user={user} courses={courses} onBack={handleBackToDashboard} />
       </DashboardLayout>
     );
   }
@@ -705,11 +695,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="user-management">
-          {/* Header */}
-          <div className="mb-6">
-            <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-              ← Volver a Inicio
-            </button>
+          {/* Botón Volver */}
+          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver a Inicio
+          </button>
+
+          {/* Header unificado */}
+          <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               {isAdmin ? (
                 <>
@@ -722,6 +714,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Alumnos</h1>
                 </>
               )}
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={loadUsers} className="btn btn-outline">
+                <RefreshCw size={18} strokeWidth={2} /> Actualizar
+              </button>
+              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
+                <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
+              </button>
             </div>
           </div>
 
@@ -737,23 +737,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             </div>
           )}
 
-
           {/* Tabla de usuarios */}
           <div className="users-section card">
-            <div className="users-header">
-              <h2>Usuarios ({filteredUsers.length})</h2>
-              <div className="users-header-actions">
-                <button
-                  onClick={() => setShowAddUserModal(true)}
-                  className="add-user-btn"
-                >
-                  <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
-                </button>
-                <button onClick={loadUsers} className="refresh-btn">
-                  <RefreshCw size={18} strokeWidth={2} /> Actualizar
-                </button>
-              </div>
-            </div>
 
             {filteredUsers.length === 0 ? (
               <div className="no-users">

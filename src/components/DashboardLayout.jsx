@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TopBar from './TopBar';
 import SideMenu from './SideMenu';
 import ViewAsBanner from './ViewAsBanner';
@@ -6,7 +6,8 @@ import { isAdminEmail } from '../firebase/roleConfig';
 import './DashboardLayout.css';
 
 function DashboardLayout({ user, userRole, children, onLogout, onMenuAction, currentScreen }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Menú escondido por defecto en tablets (< 1024px) y móviles
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
 
   // Determinar si el usuario es admin
   const isAdmin = isAdminEmail(user?.email);

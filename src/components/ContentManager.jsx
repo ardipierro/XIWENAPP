@@ -8,7 +8,7 @@ import {
   removeContentFromCourse
 } from '../firebase/relationships';
 
-function ContentManager({ user, courses = [] }) {
+function ContentManager({ user, courses = [], onBack }) {
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, lesson, reading, video, link
@@ -212,6 +212,13 @@ function ContentManager({ user, courses = [] }) {
 
   return (
     <div className="content-manager">
+      {/* Botón Volver */}
+      {onBack && (
+        <button onClick={onBack} className="btn btn-ghost mb-4">
+          ← Volver a Inicio
+        </button>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">

@@ -32,7 +32,7 @@ import './ClassManager.css';
  * Gestor de Clases Recurrentes
  * Permite crear clases con horarios y asignarles grupos/estudiantes
  */
-function ClassManager({ user, courses }) {
+function ClassManager({ user, courses, onBack }) {
   const [classes, setClasses] = useState([]);
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
@@ -479,6 +479,13 @@ function ClassManager({ user, courses }) {
   if (activeTab === 'list') {
     return (
       <div className="class-manager">
+        {/* Botón Volver */}
+        {onBack && (
+          <button onClick={onBack} className="btn btn-ghost mb-4">
+            ← Volver a Inicio
+          </button>
+        )}
+
         {/* Header unificado */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
