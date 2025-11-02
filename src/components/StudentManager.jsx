@@ -300,56 +300,58 @@ function StudentManager({ onClose, onStudentSelect }) {
             /* Vista Grilla */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredStudents.map((student) => (
-                <div key={student.id} className="card flex flex-col" style={{ padding: '12px' }}>
-                  {/* Avatar con inicial */}
-                  <div className="card-image-placeholder">
-                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto">
-                      <span className="text-2xl text-white font-bold">
+                <div key={student.id} className="card flex flex-col overflow-hidden" style={{ padding: 0 }}>
+                  {/* Avatar con inicial - Mitad superior sin bordes */}
+                  <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                    <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center">
+                      <span className="text-4xl text-white font-bold">
                         {student.name?.[0]?.toUpperCase() || '?'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Nombre */}
-                  <h3 className="card-title text-center">{student.name}</h3>
+                  <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
+                    {/* Nombre */}
+                    <h3 className="card-title text-center">{student.name}</h3>
 
-                  {/* Descripción */}
-                  <p className="card-description text-center">
-                    {student.grade && student.section
-                      ? `${student.grade} - Sección ${student.section}`
-                      : student.grade || student.section || 'Sin grado asignado'}
-                  </p>
+                    {/* Descripción */}
+                    <p className="card-description text-center">
+                      {student.grade && student.section
+                        ? `${student.grade} - Sección ${student.section}`
+                        : student.grade || student.section || 'Sin grado asignado'}
+                    </p>
 
-                  {/* Badges */}
-                  <div className="card-badges justify-center">
-                    {student.studentCode ? (
-                      <span className="badge badge-success">
-                        Código: {student.studentCode}
-                      </span>
-                    ) : (
-                      <span className="badge badge-warning">
-                        Sin código
-                      </span>
-                    )}
-                  </div>
+                    {/* Badges */}
+                    <div className="card-badges justify-center">
+                      {student.studentCode ? (
+                        <span className="badge badge-success">
+                          Código: {student.studentCode}
+                        </span>
+                      ) : (
+                        <span className="badge badge-warning">
+                          Sin código
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Botones */}
-                  <div className="card-actions">
-                    {onStudentSelect ? (
-                      <button
-                        className="btn btn-primary flex-1"
-                        onClick={() => handleSelectStudent(student)}
-                      >
-                        <Settings size={16} strokeWidth={2} /> Seleccionar
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-primary flex-1"
-                        onClick={() => setSelectedStudent(student)}
-                      >
-                        <Settings size={16} strokeWidth={2} /> Gestionar
-                      </button>
-                    )}
+                    {/* Botones */}
+                    <div className="card-actions">
+                      {onStudentSelect ? (
+                        <button
+                          className="btn btn-primary flex-1"
+                          onClick={() => handleSelectStudent(student)}
+                        >
+                          <Settings size={16} strokeWidth={2} /> Seleccionar
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn-primary flex-1"
+                          onClick={() => setSelectedStudent(student)}
+                        >
+                          <Settings size={16} strokeWidth={2} /> Gestionar
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

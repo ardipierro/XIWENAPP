@@ -309,20 +309,21 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
         /* Vista Grilla */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredExercises.map((exercise) => (
-            <div key={exercise.id} className="card flex flex-col" style={{ padding: '12px' }}>
-              {/* Placeholder con icono */}
-              <div className="card-image-placeholder">
-                <Gamepad2 size={40} strokeWidth={2} />
+            <div key={exercise.id} className="card flex flex-col overflow-hidden" style={{ padding: 0 }}>
+              {/* Placeholder con icono - Mitad superior sin bordes */}
+              <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                <Gamepad2 size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
               </div>
 
-              {/* Título */}
-              <h3 className="card-title">{exercise.title || 'Sin título'}</h3>
+              <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
+                {/* Título */}
+                <h3 className="card-title">{exercise.title || 'Sin título'}</h3>
 
-              {/* Descripción */}
-              <p className="card-description">{exercise.description || 'Sin descripción'}</p>
+                {/* Descripción */}
+                <p className="card-description">{exercise.description || 'Sin descripción'}</p>
 
-              {/* Badges */}
-              <div className="card-badges">
+                {/* Badges */}
+                <div className="card-badges">
                 <span className="badge badge-info">{getTypeLabel(exercise.type)}</span>
                 {exercise.difficulty && (
                   <span className={`badge ${getDifficultyColor(exercise.difficulty)}`}>
@@ -353,16 +354,17 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                     <FileText size={14} strokeWidth={2} /> {exercise.category}
                   </span>
                 )}
-              </div>
+                </div>
 
-              {/* Botones */}
-              <div className="card-actions">
-                <button
-                  className="btn btn-primary flex-1"
-                  onClick={() => handleEdit(exercise.id)}
-                >
-                  <Settings size={16} strokeWidth={2} /> Gestionar
-                </button>
+                {/* Botones */}
+                <div className="card-actions">
+                  <button
+                    className="btn btn-primary flex-1"
+                    onClick={() => handleEdit(exercise.id)}
+                  >
+                    <Settings size={16} strokeWidth={2} /> Gestionar
+                  </button>
+                </div>
               </div>
             </div>
           ))}

@@ -271,57 +271,59 @@ function AdminPanel({ user, userRole, onBack }) {
           /* Vista Grilla */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredUsers.map((userItem) => (
-              <div key={userItem.id} className="card flex flex-col" style={{ padding: '12px' }}>
-                {/* Avatar con inicial */}
-                <div className="card-image-placeholder">
-                  <div className="w-16 h-16 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center mx-auto">
-                    <span className="text-2xl text-gray-700 dark:text-gray-200 font-bold">
+              <div key={userItem.id} className="card flex flex-col overflow-hidden" style={{ padding: 0 }}>
+                {/* Avatar con inicial - Mitad superior sin bordes */}
+                <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                  <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+                    <span className="text-4xl text-gray-700 dark:text-gray-200 font-bold">
                       {userItem.name?.[0]?.toUpperCase() || '?'}
                     </span>
                   </div>
                 </div>
 
-                {/* Nombre */}
-                <h3 className="card-title text-center">{userItem.name}</h3>
+                <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
+                  {/* Nombre */}
+                  <h3 className="card-title text-center">{userItem.name}</h3>
 
-                {/* Email */}
-                <p className="card-description text-center">{userItem.email}</p>
+                  {/* Email */}
+                  <p className="card-description text-center">{userItem.email}</p>
 
-                {/* Badges */}
-                <div className="card-badges justify-center">
-                  {isAdminEmail(userItem.email) && (
-                    <span className="badge bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
-                      <Crown size={14} strokeWidth={2} className="inline-icon" /> ADMIN PRINCIPAL
+                  {/* Badges */}
+                  <div className="card-badges justify-center">
+                    {isAdminEmail(userItem.email) && (
+                      <span className="badge bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
+                        <Crown size={14} strokeWidth={2} className="inline-icon" /> ADMIN PRINCIPAL
+                      </span>
+                    )}
+                    <span className="badge badge-info">
+                      {ROLE_INFO[userItem.role]?.icon} {ROLE_INFO[userItem.role]?.name}
                     </span>
-                  )}
-                  <span className="badge badge-info">
-                    {ROLE_INFO[userItem.role]?.icon} {ROLE_INFO[userItem.role]?.name}
-                  </span>
-                  <span className={`badge ${
-                    userItem.status === 'active' ? 'badge-success' :
-                    userItem.status === 'suspended' ? 'badge-error' : 'badge-warning'
-                  }`}>
-                    {userItem.status === 'active' && 'Activo'}
-                    {userItem.status === 'suspended' && 'Suspendido'}
-                    {userItem.status === 'pending' && 'Pendiente'}
-                  </span>
-                </div>
+                    <span className={`badge ${
+                      userItem.status === 'active' ? 'badge-success' :
+                      userItem.status === 'suspended' ? 'badge-error' : 'badge-warning'
+                    }`}>
+                      {userItem.status === 'active' && 'Activo'}
+                      {userItem.status === 'suspended' && 'Suspendido'}
+                      {userItem.status === 'pending' && 'Pendiente'}
+                    </span>
+                  </div>
 
-                {/* Stats */}
-                <div className="card-stats justify-center">
-                  <span className="flex items-center gap-1">
-                    <Clock size={14} strokeWidth={2} /> {formatDate(userItem.createdAt)}
-                  </span>
-                </div>
+                  {/* Stats */}
+                  <div className="card-stats justify-center">
+                    <span className="flex items-center gap-1">
+                      <Clock size={14} strokeWidth={2} /> {formatDate(userItem.createdAt)}
+                    </span>
+                  </div>
 
-                {/* Botones */}
-                <div className="card-actions">
-                  <button
-                    className="btn btn-primary flex-1"
-                    onClick={() => setSelectedUser(userItem)}
-                  >
-                    <Settings size={16} strokeWidth={2} /> Gestionar
-                  </button>
+                  {/* Botones */}
+                  <div className="card-actions">
+                    <button
+                      className="btn btn-primary flex-1"
+                      onClick={() => setSelectedUser(userItem)}
+                    >
+                      <Settings size={16} strokeWidth={2} /> Gestionar
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

@@ -258,49 +258,51 @@ function ContentManager({ user, courses = [] }) {
           {filteredContents.map((content) => (
             <div
               key={content.id}
-              className="card flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300"
-              style={{ padding: '12px' }}
+              className="card flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
+              style={{ padding: 0 }}
               onClick={() => handleEdit(content.id)}
               title="Click para editar contenido"
             >
-              {/* Placeholder con icono de tipo */}
-              <div className="card-image-placeholder">
+              {/* Placeholder con icono de tipo - Mitad superior sin bordes */}
+              <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                 {getTypeIcon(content.type)}
               </div>
 
-              {/* Título */}
-              <h3 className="card-title">{content.title || 'Sin título'}</h3>
+              <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
+                {/* Título */}
+                <h3 className="card-title">{content.title || 'Sin título'}</h3>
 
-              {/* Descripción */}
-              <p className="card-description">{content.body || 'Sin contenido'}</p>
+                {/* Descripción */}
+                <p className="card-description">{content.body || 'Sin contenido'}</p>
 
-              {/* Badges */}
-              <div className="card-badges">
-                <span className="badge badge-info">{getTypeLabel(content.type)}</span>
-                {contentCourses[content.id]?.length > 0 && (
-                  contentCourses[content.id].slice(0, 2).map(course => (
-                    <span key={course.id} className="badge badge-success">
-                      <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
+                {/* Badges */}
+                <div className="card-badges">
+                  <span className="badge badge-info">{getTypeLabel(content.type)}</span>
+                  {contentCourses[content.id]?.length > 0 && (
+                    contentCourses[content.id].slice(0, 2).map(course => (
+                      <span key={course.id} className="badge badge-success">
+                        <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
+                      </span>
+                    ))
+                  )}
+                  {contentCourses[content.id]?.length > 2 && (
+                    <span className="badge badge-info">+{contentCourses[content.id].length - 2}</span>
+                  )}
+                </div>
+
+                {/* Stats */}
+                <div className="card-stats">
+                  {content.order !== undefined && (
+                    <span className="flex items-center gap-1">
+                      <BarChart3 size={14} strokeWidth={2} /> Orden: {content.order}
                     </span>
-                  ))
-                )}
-                {contentCourses[content.id]?.length > 2 && (
-                  <span className="badge badge-info">+{contentCourses[content.id].length - 2}</span>
-                )}
-              </div>
-
-              {/* Stats */}
-              <div className="card-stats">
-                {content.order !== undefined && (
-                  <span className="flex items-center gap-1">
-                    <BarChart3 size={14} strokeWidth={2} /> Orden: {content.order}
-                  </span>
-                )}
-                {content.createdAt && (
-                  <span className="flex items-center gap-1">
-                    <Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}
-                  </span>
-                )}
+                  )}
+                  {content.createdAt && (
+                    <span className="flex items-center gap-1">
+                      <Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           ))}

@@ -209,27 +209,29 @@ function GroupManager({ user, courses }) {
           {filteredGroups.map((group) => (
             <div
               key={group.id}
-              className="card flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300"
-              style={{ padding: '12px' }}
+              className="card flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
+              style={{ padding: 0 }}
               onClick={() => handleSelectGroup(group)}
               title="Click para gestionar grupo"
             >
-              {/* Placeholder con icono */}
-              <div className="card-image-placeholder">
-                <Users size={40} strokeWidth={2} />
+              {/* Placeholder con icono - Mitad superior sin bordes */}
+              <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                <Users size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
               </div>
 
-              {/* Título */}
-              <h3 className="card-title">{group.name}</h3>
+              <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
+                {/* Título */}
+                <h3 className="card-title">{group.name}</h3>
 
-              {/* Descripción */}
-              <p className="card-description">{group.description || 'Sin descripción'}</p>
+                {/* Descripción */}
+                <p className="card-description">{group.description || 'Sin descripción'}</p>
 
-              {/* Stats */}
-              <div className="card-stats">
-                <span className="flex items-center gap-1">
-                  <Users size={14} strokeWidth={2} /> {group.studentCount || 0} estudiantes
-                </span>
+                {/* Stats */}
+                <div className="card-stats">
+                  <span className="flex items-center gap-1">
+                    <Users size={14} strokeWidth={2} /> {group.studentCount || 0} estudiantes
+                  </span>
+                </div>
               </div>
             </div>
           ))}

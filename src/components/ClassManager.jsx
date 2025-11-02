@@ -510,14 +510,14 @@ function ClassManager({ user, courses }) {
             {classes.map(cls => (
               <div
                 key={cls.id}
-                className="class-card card cursor-pointer hover:shadow-lg transition-all duration-300"
+                className="class-card card cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
                 onClick={() => handleViewDetails(cls)}
                 title="Click para configurar clase"
-                style={{ padding: '12px' }}
+                style={{ padding: 0 }}
               >
-                {/* Class Image */}
+                {/* Class Image - Mitad superior sin bordes */}
                 {cls.imageUrl ? (
-                  <div className="w-full h-32 mb-3 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <div className="w-full h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
                     <img
                       src={cls.imageUrl}
                       alt={cls.name}
@@ -529,43 +529,45 @@ function ClassManager({ user, courses }) {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-32 mb-3 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                    <Calendar size={40} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
+                  <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                    <Calendar size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
                   </div>
                 )}
 
-                <div className="class-card-header">
-                  <h3>{cls.name}</h3>
-                  {cls.courseName && (
-                    <span className="badge badge-primary">{cls.courseName}</span>
+                <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
+                  <div className="class-card-header">
+                    <h3>{cls.name}</h3>
+                    {cls.courseName && (
+                      <span className="badge badge-primary">{cls.courseName}</span>
+                    )}
+                  </div>
+
+                  {cls.description && (
+                    <p className="class-description">{cls.description}</p>
                   )}
-                </div>
 
-                {cls.description && (
-                  <p className="class-description">{cls.description}</p>
-                )}
-
-                <div className="class-schedules">
-                  <strong>Horarios:</strong>
-                  <div className="schedule-list">
-                    {cls.schedules?.map((schedule, idx) => (
-                      <div key={idx} className="schedule-item">
-                        <span className="schedule-day">{getDayName(schedule.day)}</span>
-                        <span className="schedule-time">
-                          {schedule.startTime} - {schedule.endTime}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="class-schedules">
+                    <strong>Horarios:</strong>
+                    <div className="schedule-list">
+                      {cls.schedules?.map((schedule, idx) => (
+                        <div key={idx} className="schedule-item">
+                          <span className="schedule-day">{getDayName(schedule.day)}</span>
+                          <span className="schedule-time">
+                            {schedule.startTime} - {schedule.endTime}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                <div className="class-stats">
-                  <span className="flex items-center gap-1">
-                    <CreditCard size={16} strokeWidth={2} /> {cls.creditCost} crédito(s)
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users size={16} strokeWidth={2} /> {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignados
-                  </span>
+                  <div className="class-stats">
+                    <span className="flex items-center gap-1">
+                      <CreditCard size={16} strokeWidth={2} /> {cls.creditCost} crédito(s)
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users size={16} strokeWidth={2} /> {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignados
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
