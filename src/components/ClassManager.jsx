@@ -904,98 +904,30 @@ function ClassManager({ user, courses }) {
                         </p>
                       </div>
 
-                      {/* Estadísticas de Instancias */}
-                      {classInstances.length > 0 && (() => {
-                        const now = new Date();
-                        const scheduled = classInstances.filter(i => i.status === 'scheduled');
-                        const upcoming = scheduled.filter(i => {
-                          const instDate = i.date?.toDate ? i.date.toDate() : new Date(i.date);
-                          return instDate >= now;
-                        });
-                        const completed = classInstances.filter(i => i.status === 'completed');
-                        const nextInstance = upcoming[0];
-
-                        return (
-                          <div className="bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded-lg p-4 mb-4">
-                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                              <BarChart3 size={20} strokeWidth={2} />
-                              <span>Estadísticas de Instancias</span>
-                            </h4>
-                            <div className="grid grid-cols-2 gap-3 text-sm mb-3">
-                              <div>
-                                <span className="text-gray-700 dark:text-gray-400">Total:</span>
-                                <span className="ml-2 font-semibold text-gray-900 dark:text-gray-100">{classInstances.length}</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-700 dark:text-gray-400">Pendientes:</span>
-                                <span className="ml-2 font-semibold text-gray-900 dark:text-gray-100">{upcoming.length}</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-700 dark:text-gray-400">Realizadas:</span>
-                                <span className="ml-2 font-semibold text-gray-900 dark:text-gray-100">{completed.length}</span>
-                              </div>
-                            </div>
-                            {nextInstance && (
-                              <div className="pt-3 border-t border-gray-300 dark:border-gray-700">
-                                <p className="text-xs text-gray-700 dark:text-gray-400 mb-1">Próxima clase:</p>
-                                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                  {nextInstance.date?.toDate().toLocaleDateString('es-ES', {
-                                    weekday: 'long',
-                                    day: 'numeric',
-                                    month: 'long',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </p>
-                              </div>
-                            )}
-                            {upcoming.length < 3 && (
-                              <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200 flex items-center gap-1">
-                                <AlertTriangle size={14} strokeWidth={2} /> Quedan pocas instancias programadas
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
-
-                      {/* Lista compacta de instancias */}
+                      {/* Sesiones Programadas - Vista Simplificada */}
                       <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg mb-4">
                         <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">Instancias Próximas</h4>
+                          <div className="flex items-center gap-3">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-100">Sesiones Programadas</h4>
+                            <span className="px-3 py-1 bg-gray-200 dark:bg-gray-600 rounded-full text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {(() => {
+                                const now = new Date();
+                                const upcoming = classInstances.filter(i => {
+                                  const instDate = i.date?.toDate ? i.date.toDate() : new Date(i.date);
+                                  return i.status === 'scheduled' && instDate >= now;
+                                });
+                                return upcoming.length;
+                              })()} pendientes
+                            </span>
+                          </div>
                           <button onClick={() => handleGenerateInstances(selectedClass.id)} className="btn btn-primary">
-                            + Generar Más
+                            + Agregar Más Sesiones
                           </button>
                         </div>
-                        {classInstances.length === 0 ? (
+                        {classInstances.length === 0 && (
                           <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                            No hay instancias generadas. Haz click en "Generar Más" para crear las próximas clases.
+                            No hay sesiones generadas. Haz click en "Agregar Más Sesiones" para programar las próximas clases.
                           </p>
-                        ) : (
-                          <div className="space-y-2 max-h-48 overflow-y-auto">
-                            {classInstances.slice(0, 10).map(instance => {
-                              const instanceDate = instance.date?.toDate ? instance.date.toDate() : new Date(instance.date);
-                              return (
-                                <div key={instance.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-700 rounded text-sm">
-                                  <div className="flex-1">
-                                    <div className="font-medium text-gray-900 dark:text-gray-100">
-                                      {instanceDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                                    </div>
-                                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                                      {instance.startTime} - {instance.endTime}
-                                    </div>
-                                  </div>
-                                  <span className={`text-xs px-2 py-1 rounded ${
-                                    instance.status === 'scheduled' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' :
-                                    instance.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
-                                    'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                                  }`}>
-                                    {instance.status === 'scheduled' ? 'Programada' :
-                                     instance.status === 'completed' ? 'Realizada' : 'Cancelada'}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
                         )}
                       </div>
 
