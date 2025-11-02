@@ -722,7 +722,6 @@ function ContentManager({ user, courses = [] }) {
                   Editar
                 </button>
               </div>
-            </div>
           </div>
         </div>
       )}
