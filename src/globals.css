@@ -532,6 +532,22 @@
   .dark .custom-scrollbar {
     scrollbar-color: rgba(156, 163, 175, 0.2) transparent;
   }
+
+  /* Botón cerrar modal - diseño redondo y grande */
+  .modal-close-btn {
+    @apply w-10 h-10 rounded-full;
+    @apply flex items-center justify-center;
+    @apply bg-gray-100 dark:bg-gray-700;
+    @apply text-gray-600 dark:text-gray-300;
+    @apply hover:bg-gray-200 dark:hover:bg-gray-600;
+    @apply hover:text-gray-900 dark:hover:text-gray-100;
+    @apply transition-all duration-200;
+    @apply flex-shrink-0;
+  }
+
+  .modal-close-btn:hover {
+    transform: scale(1.05);
+  }
 }
 
 /* ============================================
