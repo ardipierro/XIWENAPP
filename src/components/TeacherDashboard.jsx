@@ -716,11 +716,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button onClick={loadUsers} className="btn btn-outline">
-                <RefreshCw size={18} strokeWidth={2} /> Actualizar
-              </button>
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
                 <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
+              </button>
+              <button onClick={loadUsers} className="btn btn-primary">
+                <RefreshCw size={18} strokeWidth={2} /> Actualizar
               </button>
             </div>
           </div>

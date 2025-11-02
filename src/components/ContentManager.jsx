@@ -447,39 +447,6 @@ function ContentManager({ user, courses = [], onBack }) {
                   min="0"
                 />
               </div>
-
-              {/* Asignación de Cursos - Al final */}
-              <div className="form-group">
-                <label className="form-label">Asignar a Cursos (opcional)</label>
-                <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
-                  {courses.length === 0 ? (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay cursos disponibles</p>
-                  ) : (
-                    courses.map(course => (
-                      <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-1 rounded">
-                        <input
-                          type="checkbox"
-                          checked={formData.courseIds.includes(course.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setFormData({ ...formData, courseIds: [...formData.courseIds, course.id] });
-                            } else {
-                              setFormData({ ...formData, courseIds: formData.courseIds.filter(id => id !== course.id) });
-                            }
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{course.name}</span>
-                      </label>
-                    ))
-                  )}
-                </div>
-                {formData.courseIds.length > 0 && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
-                  </p>
-                )}
-              </div>
               </form>
             </div>
 
@@ -582,39 +549,6 @@ function ContentManager({ user, courses = [], onBack }) {
                   onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
                   min="0"
                 />
-              </div>
-
-              {/* Asignación de Cursos - Al final */}
-              <div className="form-group">
-                <label className="form-label">Asignar a Cursos (opcional)</label>
-                <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
-                  {courses.length === 0 ? (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay cursos disponibles</p>
-                  ) : (
-                    courses.map(course => (
-                      <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-1 rounded">
-                        <input
-                          type="checkbox"
-                          checked={formData.courseIds.includes(course.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setFormData({ ...formData, courseIds: [...formData.courseIds, course.id] });
-                            } else {
-                              setFormData({ ...formData, courseIds: formData.courseIds.filter(id => id !== course.id) });
-                            }
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{course.name}</span>
-                      </label>
-                    ))
-                  )}
-                </div>
-                {formData.courseIds.length > 0 && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
-                  </p>
-                )}
               </div>
               </form>
             </div>

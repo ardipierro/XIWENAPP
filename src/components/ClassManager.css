@@ -3,7 +3,7 @@
    ============================================ */
 
 .class-manager {
-  padding: 24px;
+  /* Sin padding para que el título esté al mismo nivel que Cursos/Contenido */
   max-width: 1400px;
   margin: 0 auto;
 }
