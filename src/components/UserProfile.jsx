@@ -263,30 +263,30 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       )}
 
       {/* Tabs */}
-      <div className="profile-tabs">
+      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 mb-6">
         <button
-          className={`profile-tab ${activeTab === 'info' ? 'active' : ''}`}
+          className={activeTab === 'info' ? 'tab-active' : 'tab'}
           onClick={() => setActiveTab('info')}
         >
-          <BarChart3 size={18} strokeWidth={2} /> Información
+          <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> Información
         </button>
         <button
-          className={`profile-tab ${activeTab === 'courses' ? 'active' : ''}`}
+          className={activeTab === 'courses' ? 'tab-active' : 'tab'}
           onClick={() => setActiveTab('courses')}
         >
-          <BookOpen size={18} strokeWidth={2} /> Cursos
+          <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos
         </button>
         <button
-          className={`profile-tab ${activeTab === 'credits' ? 'active' : ''}`}
+          className={activeTab === 'credits' ? 'tab-active' : 'tab'}
           onClick={() => setActiveTab('credits')}
         >
-          <CreditCard size={18} strokeWidth={2} /> Créditos
+          <CreditCard size={18} strokeWidth={2} className="inline-icon" /> Créditos
         </button>
         <button
-          className={`profile-tab ${activeTab === 'classes' ? 'active' : ''}`}
+          className={activeTab === 'classes' ? 'tab-active' : 'tab'}
           onClick={() => setActiveTab('classes')}
         >
-          <Calendar size={18} strokeWidth={2} /> Clases
+          <Calendar size={18} strokeWidth={2} className="inline-icon" /> Clases
         </button>
       </div>
 
@@ -294,17 +294,17 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       <div className="profile-content">
         {/* Tab: Información Básica */}
         {activeTab === 'info' && (
-          <div className="profile-tab-content">
-            <div className="tab-header">
-              <h2 className="tab-title">Información Básica</h2>
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Información Básica</h2>
               {!editing ? (
                 <button className="btn btn-secondary" onClick={() => setEditing(true)}>
                   <Edit size={18} strokeWidth={2} /> Editar
                 </button>
               ) : (
-                <div className="btn-group">
+                <div className="flex gap-2">
                   <button
-                    className="btn btn-ghost"
+                    className="btn btn-outline"
                     onClick={() => {
                       setEditing(false);
                       setFormData({
@@ -334,7 +334,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
             <div className="info-grid">
               {/* Email (no editable) */}
               <div className="info-field">
-                <label className="info-label">Email</label>
+                <label className="label">Email</label>
                 <div className="info-value readonly">
                   {selectedUser.email}
                 </div>
@@ -342,7 +342,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
               {/* Nombre */}
               <div className="info-field">
-                <label className="info-label">Nombre completo</label>
+                <label className="label">Nombre completo</label>
                 {editing ? (
                   <input
                     type="text"
@@ -363,7 +363,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
               {/* Rol (solo admin puede editar) */}
               <div className="info-field">
-                <label className="info-label">Rol</label>
+                <label className="label">Rol</label>
                 {editing && isAdmin ? (
                   <select
                     name="role"
@@ -386,7 +386,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
               {/* Estado (solo admin puede editar) */}
               <div className="info-field">
-                <label className="info-label">Estado</label>
+                <label className="label">Estado</label>
                 {editing && isAdmin ? (
                   <select
                     name="status"
@@ -406,7 +406,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
               {/* Teléfono */}
               <div className="info-field">
-                <label className="info-label">Teléfono</label>
+                <label className="label">Teléfono</label>
                 {editing ? (
                   <input
                     type="tel"
@@ -427,7 +427,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
               {/* Fecha de registro */}
               <div className="info-field">
-                <label className="info-label">Fecha de registro</label>
+                <label className="label">Fecha de registro</label>
                 <div className="info-value readonly">
                   {formatDate(selectedUser.createdAt)}
                 </div>
@@ -435,7 +435,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
               {/* Notas */}
               <div className="info-field full-width">
-                <label className="info-label">Notas</label>
+                <label className="label">Notas</label>
                 {editing ? (
                   <textarea
                     name="notes"
@@ -458,8 +458,8 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
         {/* Tab: Cursos */}
         {activeTab === 'courses' && (
-          <div className="profile-tab-content">
-            <h2 className="tab-title">Cursos Asignados</h2>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Cursos Asignados</h2>
 
             {loadingCourses ? (
               <div className="loading-state">
@@ -541,7 +541,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
         {/* Tab: Créditos */}
         {activeTab === 'credits' && (
-          <div className="profile-tab-content">
+          <div>
             <CreditManager
               userId={selectedUser.id}
               currentUser={currentUser}
@@ -552,7 +552,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
         {/* Tab: Clases */}
         {activeTab === 'classes' && (
-          <div className="profile-tab-content">
+          <div>
             <StudentClassView student={selectedUser} />
           </div>
         )}
