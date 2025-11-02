@@ -367,14 +367,19 @@ function ContentManager({ user, courses = [] }) {
                 Crear Nuevo Contenido
               </h3>
               <button
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                className="modal-close-btn"
                 onClick={() => setShowCreateModal(false)}
+                aria-label="Cerrar modal"
               >
-                ×
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="modal-content">
+            <div className="modal-content">
+              <form onSubmit={handleCreate} className="space-y-4">
               <div className="form-group">
                 <label className="form-label">Título*</label>
                 <input
@@ -465,20 +470,25 @@ function ContentManager({ user, courses = [] }) {
                   min="0"
                 />
               </div>
+              </form>
+            </div>
 
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Crear Contenido
-                </button>
-              </div>
-            </form>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setShowCreateModal(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                onClick={handleCreate}
+              >
+                Crear Contenido
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -492,14 +502,19 @@ function ContentManager({ user, courses = [] }) {
                 Editar Contenido
               </h3>
               <button
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                className="modal-close-btn"
                 onClick={() => setShowEditModal(false)}
+                aria-label="Cerrar modal"
               >
-                ×
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
-            <form onSubmit={handleUpdate} className="modal-content">
+            <div className="modal-content">
+              <form onSubmit={handleUpdate} className="space-y-4">
               <div className="form-group">
                 <label className="form-label">Título*</label>
                 <input
@@ -590,20 +605,25 @@ function ContentManager({ user, courses = [] }) {
                   min="0"
                 />
               </div>
+              </form>
+            </div>
 
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Guardar Cambios
-                </button>
-              </div>
-            </form>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setShowEditModal(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                onClick={handleUpdate}
+              >
+                Guardar Cambios
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -617,10 +637,14 @@ function ContentManager({ user, courses = [] }) {
                 {selectedContent.title}
               </h3>
               <button
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                className="modal-close-btn"
                 onClick={() => setShowViewModal(false)}
+                aria-label="Cerrar modal"
               >
-                ×
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
@@ -679,8 +703,9 @@ function ContentManager({ user, courses = [] }) {
                   </p>
                 )}
               </div>
+            </div>
 
-              <div className="modal-footer">
+            <div className="modal-footer">
                 <button
                   className="btn btn-outline"
                   onClick={() => setShowViewModal(false)}

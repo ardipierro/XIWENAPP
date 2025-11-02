@@ -113,20 +113,24 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
         {/* Header */}
         <div className="modal-header">
           <h2 className="modal-title">
-            {isAdmin ? '➕ Crear Nuevo Usuario' : '➕ Agregar Alumno'}
+            {isAdmin ? 'Crear Nuevo Usuario' : 'Agregar Alumno'}
           </h2>
           <button
-            className="modal-close"
+            className="modal-close-btn"
             onClick={handleClose}
             disabled={loading}
+            aria-label="Cerrar modal"
           >
-            ✕
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
         </div>
 
         {/* Body */}
-        <div className="modal-body">
-          <form onSubmit={handleSubmit}>
+        <div className="modal-content">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email (obligatorio) */}
             <div className="form-group">
               <label htmlFor="email" className="form-label required">
@@ -233,26 +237,27 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 ⚠️ {error}
               </div>
             )}
-
-            {/* Footer con botones */}
-            <div className="modal-footer">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="btn btn-ghost"
-                disabled={loading}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loading}
-              >
-                {loading ? '⏳ Creando...' : '✅ Crear Usuario'}
-              </button>
-            </div>
           </form>
+        </div>
+
+        {/* Footer con botones */}
+        <div className="modal-footer">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="btn btn-outline"
+            disabled={loading}
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            onClick={handleSubmit}
+          >
+            {loading ? 'Creando...' : 'Crear Usuario'}
+          </button>
         </div>
       </div>
     </div>

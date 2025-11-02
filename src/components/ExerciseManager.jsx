@@ -438,136 +438,141 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       {/* Modal Crear Ejercicio */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
               <h3 className="modal-title">
                 Crear Nuevo Ejercicio
               </h3>
               <button
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                className="modal-close-btn"
                 onClick={() => setShowCreateModal(false)}
               >
-                ×
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="modal-content">
-              <div className="form-group">
-                <label className="form-label">Título*</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Tipo de Ejercicio*</label>
-                <select
-                  className="input"
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                >
-                  <option value="multiple_choice">Opción Múltiple</option>
-                  <option value="fill_blank">Completar Espacios</option>
-                  <option value="drag_drop">Drag & Drop</option>
-                  <option value="highlight">Resaltar Palabras</option>
-                  <option value="order_sentence">Ordenar Oración</option>
-                  <option value="true_false">Verdadero/Falso</option>
-                  <option value="matching">Relacionar</option>
-                  <option value="table">Tabla</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Descripción</label>
-                <textarea
-                  className="input"
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe el ejercicio..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleCreate} className="flex flex-col flex-1 min-h-0">
+              <div className="modal-content flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
                 <div className="form-group">
-                  <label className="form-label">Categoría</label>
+                  <label className="form-label">Título*</label>
                   <input
                     type="text"
                     className="input"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="Ej: Vocabulario, Gramática..."
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Dificultad</label>
+                  <label className="form-label">Tipo de Ejercicio*</label>
                   <select
                     className="input"
-                    value={formData.difficulty}
-                    onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   >
-                    <option value="easy">Fácil</option>
-                    <option value="medium">Medio</option>
-                    <option value="hard">Difícil</option>
+                    <option value="multiple_choice">Opción Múltiple</option>
+                    <option value="fill_blank">Completar Espacios</option>
+                    <option value="drag_drop">Drag & Drop</option>
+                    <option value="highlight">Resaltar Palabras</option>
+                    <option value="order_sentence">Ordenar Oración</option>
+                    <option value="true_false">Verdadero/Falso</option>
+                    <option value="matching">Relacionar</option>
+                    <option value="table">Tabla</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="form-group">
-                <label className="form-label">Etiquetas (separadas por comas)</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  placeholder="Ej: HSK1, Principiante, Básico"
-                />
-              </div>
+                <div className="form-group">
+                  <label className="form-label">Descripción</label>
+                  <textarea
+                    className="input"
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Describe el ejercicio..."
+                  />
+                </div>
 
-              <div className="form-group">
-                <label className="form-label">Asignar a Cursos (opcional)</label>
-                <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
-                  {courses.length === 0 ? (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay cursos disponibles</p>
-                  ) : (
-                    courses.map(course => (
-                      <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-1 rounded">
-                        <input
-                          type="checkbox"
-                          checked={formData.courseIds.includes(course.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setFormData({ ...formData, courseIds: [...formData.courseIds, course.id] });
-                            } else {
-                              setFormData({ ...formData, courseIds: formData.courseIds.filter(id => id !== course.id) });
-                            }
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{course.name}</span>
-                      </label>
-                    ))
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="form-group">
+                    <label className="form-label">Categoría</label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      placeholder="Ej: Vocabulario, Gramática..."
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Dificultad</label>
+                    <select
+                      className="input"
+                      value={formData.difficulty}
+                      onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                    >
+                      <option value="easy">Fácil</option>
+                      <option value="medium">Medio</option>
+                      <option value="hard">Difícil</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Etiquetas (separadas por comas)</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={formData.tags}
+                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    placeholder="Ej: HSK1, Principiante, Básico"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Asignar a Cursos (opcional)</label>
+                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
+                    {courses.length === 0 ? (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No hay cursos disponibles</p>
+                    ) : (
+                      courses.map(course => (
+                        <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-1 rounded">
+                          <input
+                            type="checkbox"
+                            checked={formData.courseIds.includes(course.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({ ...formData, courseIds: [...formData.courseIds, course.id] });
+                              } else {
+                                setFormData({ ...formData, courseIds: formData.courseIds.filter(id => id !== course.id) });
+                              }
+                            }}
+                            className="w-4 h-4"
+                          />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{course.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                  {formData.courseIds.length > 0 && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
+                    </p>
                   )}
                 </div>
-                {formData.courseIds.length > 0 && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
+
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    ℹ️ Las preguntas del ejercicio se pueden agregar después de crear el ejercicio, usando el botón "Editar".
                   </p>
-                )}
+                </div>
               </div>
 
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  ℹ️ Las preguntas del ejercicio se pueden agregar después de crear el ejercicio, usando el botón "Editar".
-                </p>
-              </div>
-
-              <div className="modal-footer">
+              <div className="modal-footer flex-shrink-0 px-6 pb-6 pt-4">
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -587,169 +592,174 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       {/* Modal Editar Ejercicio */}
       {showEditModal && selectedExercise && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
               <h3 className="modal-title">
                 Editar Ejercicio
               </h3>
               <button
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                className="modal-close-btn"
                 onClick={() => setShowEditModal(false)}
               >
-                ×
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
-            <form onSubmit={handleUpdate} className="modal-content">
-              <div className="form-group">
-                <label className="form-label">Título*</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Tipo de Ejercicio*</label>
-                <select
-                  className="input"
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                >
-                  <option value="multiple_choice">Opción Múltiple</option>
-                  <option value="fill_blank">Completar Espacios</option>
-                  <option value="drag_drop">Drag & Drop</option>
-                  <option value="highlight">Resaltar Palabras</option>
-                  <option value="order_sentence">Ordenar Oración</option>
-                  <option value="true_false">Verdadero/Falso</option>
-                  <option value="matching">Relacionar</option>
-                  <option value="table">Tabla</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Descripción</label>
-                <textarea
-                  className="input"
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe el ejercicio..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleUpdate} className="flex flex-col flex-1 min-h-0">
+              <div className="modal-content flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
                 <div className="form-group">
-                  <label className="form-label">Categoría</label>
+                  <label className="form-label">Título*</label>
                   <input
                     type="text"
                     className="input"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="Ej: Vocabulario, Gramática..."
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Dificultad</label>
+                  <label className="form-label">Tipo de Ejercicio*</label>
                   <select
                     className="input"
-                    value={formData.difficulty}
-                    onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   >
-                    <option value="easy">Fácil</option>
-                    <option value="medium">Medio</option>
-                    <option value="hard">Difícil</option>
+                    <option value="multiple_choice">Opción Múltiple</option>
+                    <option value="fill_blank">Completar Espacios</option>
+                    <option value="drag_drop">Drag & Drop</option>
+                    <option value="highlight">Resaltar Palabras</option>
+                    <option value="order_sentence">Ordenar Oración</option>
+                    <option value="true_false">Verdadero/Falso</option>
+                    <option value="matching">Relacionar</option>
+                    <option value="table">Tabla</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="form-group">
-                <label className="form-label">Etiquetas (separadas por comas)</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  placeholder="Ej: HSK1, Principiante, Básico"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Asignar a Cursos (opcional)</label>
-                <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
-                  {courses.length === 0 ? (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No hay cursos disponibles</p>
-                  ) : (
-                    courses.map(course => (
-                      <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-1 rounded">
-                        <input
-                          type="checkbox"
-                          checked={formData.courseIds.includes(course.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setFormData({ ...formData, courseIds: [...formData.courseIds, course.id] });
-                            } else {
-                              setFormData({ ...formData, courseIds: formData.courseIds.filter(id => id !== course.id) });
-                            }
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{course.name}</span>
-                      </label>
-                    ))
-                  )}
-                </div>
-                {formData.courseIds.length > 0 && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
-                  </p>
-                )}
-              </div>
-
-              {/* Sección de Preguntas */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
                 <div className="form-group">
-                  <label className="form-label">
-                    Preguntas (Formato: 1 pregunta + 4 opciones por línea)
-                  </label>
-                  <div className="mb-2 p-3 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded">
-                    <p className="text-sm text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
-                      <FileText size={18} strokeWidth={2} className="inline-icon" /> <strong>Formato:</strong>
-                    </p>
-                    <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1 ml-4">
-                      <li>• Línea 1: Pregunta</li>
-                      <li>• Líneas 2-5: Opciones (marca con "1." la respuesta correcta)</li>
-                      <li>• Deja una línea en blanco entre preguntas</li>
-                    </ul>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                      Ejemplo:<br/>
-                      ¿Cuál es la capital de Argentina?<br/>
-                      1. Buenos Aires<br/>
-                      2. Córdoba<br/>
-                      3. Rosario<br/>
-                      4. Mendoza
-                    </p>
-                  </div>
+                  <label className="form-label">Descripción</label>
                   <textarea
-                    className="input font-mono text-sm"
-                    rows={12}
-                    value={questionsText}
-                    onChange={(e) => setQuestionsText(e.target.value)}
-                    placeholder="Ingresa las preguntas en el formato indicado..."
+                    className="input"
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Describe el ejercicio..."
                   />
-                  {questionsText.trim() && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
-                      <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> {parseQuestions(questionsText).length} pregunta(s) detectada(s)
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="form-group">
+                    <label className="form-label">Categoría</label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      placeholder="Ej: Vocabulario, Gramática..."
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Dificultad</label>
+                    <select
+                      className="input"
+                      value={formData.difficulty}
+                      onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                    >
+                      <option value="easy">Fácil</option>
+                      <option value="medium">Medio</option>
+                      <option value="hard">Difícil</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Etiquetas (separadas por comas)</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={formData.tags}
+                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    placeholder="Ej: HSK1, Principiante, Básico"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Asignar a Cursos (opcional)</label>
+                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
+                    {courses.length === 0 ? (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No hay cursos disponibles</p>
+                    ) : (
+                      courses.map(course => (
+                        <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-1 rounded">
+                          <input
+                            type="checkbox"
+                            checked={formData.courseIds.includes(course.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({ ...formData, courseIds: [...formData.courseIds, course.id] });
+                              } else {
+                                setFormData({ ...formData, courseIds: formData.courseIds.filter(id => id !== course.id) });
+                              }
+                            }}
+                            className="w-4 h-4"
+                          />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{course.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                  {formData.courseIds.length > 0 && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
                     </p>
                   )}
                 </div>
+
+                {/* Sección de Preguntas */}
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                  <div className="form-group">
+                    <label className="form-label">
+                      Preguntas (Formato: 1 pregunta + 4 opciones por línea)
+                    </label>
+                    <div className="mb-2 p-3 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded">
+                      <p className="text-sm text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                        <FileText size={18} strokeWidth={2} className="inline-icon" /> <strong>Formato:</strong>
+                      </p>
+                      <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1 ml-4">
+                        <li>• Línea 1: Pregunta</li>
+                        <li>• Líneas 2-5: Opciones (marca con "1." la respuesta correcta)</li>
+                        <li>• Deja una línea en blanco entre preguntas</li>
+                      </ul>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Ejemplo:<br/>
+                        ¿Cuál es la capital de Argentina?<br/>
+                        1. Buenos Aires<br/>
+                        2. Córdoba<br/>
+                        3. Rosario<br/>
+                        4. Mendoza
+                      </p>
+                    </div>
+                    <textarea
+                      className="input font-mono text-sm"
+                      rows={12}
+                      value={questionsText}
+                      onChange={(e) => setQuestionsText(e.target.value)}
+                      placeholder="Ingresa las preguntas en el formato indicado..."
+                    />
+                    {questionsText.trim() && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
+                        <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> {parseQuestions(questionsText).length} pregunta(s) detectada(s)
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div className="modal-footer">
+              <div className="modal-footer flex-shrink-0 px-6 pb-6 pt-4">
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -769,20 +779,23 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       {/* Modal Ver Ejercicio */}
       {showViewModal && selectedExercise && (
         <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal-box max-w-4xl" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modal-box max-w-4xl flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
               <h3 className="modal-title">
                 {selectedExercise.title}
               </h3>
               <button
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                className="modal-close-btn"
                 onClick={() => setShowViewModal(false)}
               >
-                ×
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
-            <div className="modal-content">
+            <div className="modal-content flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
               <div className="flex gap-2 mb-4">
                 <span className="badge badge-info">
                   {getTypeLabel(selectedExercise.type)}
@@ -862,24 +875,24 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                   </p>
                 )}
               </div>
+            </div>
 
-              <div className="modal-footer">
-                <button
-                  className="btn btn-outline"
-                  onClick={() => setShowViewModal(false)}
-                >
-                  Cerrar
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    setShowViewModal(false);
-                    handleEdit(selectedExercise.id);
-                  }}
-                >
-                  Editar
-                </button>
-              </div>
+            <div className="modal-footer flex-shrink-0 px-6 pb-6 pt-4">
+              <button
+                className="btn btn-outline"
+                onClick={() => setShowViewModal(false)}
+              >
+                Cerrar
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowViewModal(false);
+                  handleEdit(selectedExercise.id);
+                }}
+              >
+                Editar
+              </button>
             </div>
           </div>
         </div>
