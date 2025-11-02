@@ -55,10 +55,8 @@ import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
 import ContentManager from './ContentManager';
-import GroupManager from './GroupManager';
 import ClassManager from './ClassManager';
 import ClassManagement from './ClassManagement';
-import CalendarView from './CalendarView';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
@@ -645,20 +643,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Renderizar Gestión de Grupos - CON Layout
-  if (currentScreen === 'groups') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="groups-management">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver a Inicio
-          </button>
-          <GroupManager user={user} courses={courses} />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   // Renderizar Class Manager (Clases Recurrentes) - CON Layout
   if (currentScreen === 'classes') {
     return (
@@ -668,20 +652,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             ← Volver a Inicio
           </button>
           <ClassManager user={user} courses={courses} />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Renderizar Calendario - CON Layout
-  if (currentScreen === 'calendar') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="calendar-section">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver a Inicio
-          </button>
-          <CalendarView user={user} />
         </div>
       </DashboardLayout>
     );

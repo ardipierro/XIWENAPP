@@ -4,9 +4,7 @@ import {
   Users,
   BookOpen,
   FileText,
-  UsersRound,
   Calendar,
-  CalendarDays,
   Dice3,
   Home,
   ClipboardList
@@ -38,9 +36,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { divider: true },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
-        { icon: UsersRound, label: 'Grupos', path: '/teacher', action: 'groups' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
-        { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
       ];
     }
 
@@ -50,9 +46,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { divider: true },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
-        { icon: UsersRound, label: 'Grupos', path: '/teacher', action: 'groups' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
-        { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
         { divider: true },
         { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
         { icon: Users, label: 'Alumnos', path: '/teacher', action: 'users' },
