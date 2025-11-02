@@ -25,6 +25,7 @@ import {
 import { getAllGroups } from '../firebase/groups';
 import { getAllUsers } from '../firebase/firestore';
 import { isAdminEmail } from '../firebase/roleConfig';
+import { uploadImage, deleteImage } from '../firebase/storage';
 import './ClassManager.css';
 
 /**
@@ -59,6 +60,7 @@ function ClassManager({ user, courses }) {
     courseId: '',
     creditCost: 1,
     meetingLink: '',
+    imageUrl: '',
     schedules: [] // [{ day: 1, startTime: "10:00", endTime: "11:00" }]
   });
 
@@ -70,6 +72,8 @@ function ClassManager({ user, courses }) {
     autoRenew: false, // Auto-renovación
     autoRenewWeeks: 4 // Semanas en cada renovación
   });
+
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const isAdmin = isAdminEmail(user?.email);
 
@@ -295,6 +299,41 @@ function ClassManager({ user, courses }) {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      showMessage('error', 'El archivo es demasiado grande. Máximo 5MB.');
+      return;
+    }
+
+    setUploadingImage(true);
+    const path = `classes/${user.uid}/${Date.now()}_${file.name}`;
+    const result = await uploadImage(file, path);
+
+    if (result.success) {
+      setFormData({ ...formData, imageUrl: result.url });
+      showMessage('success', '✅ Imagen subida correctamente');
+    } else {
+      showMessage('error', 'Error al subir imagen: ' + result.error);
+    }
+    setUploadingImage(false);
+  };
+
+  const handleImageDelete = async () => {
+    if (!formData.imageUrl) return;
+
+    setUploadingImage(true);
+    if (formData.imageUrl.includes('firebasestorage.googleapis.com')) {
+      await deleteImage(formData.imageUrl);
+    }
+    setFormData({ ...formData, imageUrl: '' });
+    showMessage('success', '✅ Imagen eliminada');
+    setUploadingImage(false);
+  };
+
   const handleViewDetails = async (classData) => {
     setSelectedClass(classData);
     setDetailsTab('general');
@@ -306,6 +345,7 @@ function ClassManager({ user, courses }) {
       courseId: classData.courseId || '',
       creditCost: classData.creditCost || 1,
       meetingLink: classData.meetingLink || '',
+      imageUrl: classData.imageUrl || '',
       schedules: classData.schedules || []
     });
 
@@ -473,7 +513,27 @@ function ClassManager({ user, courses }) {
                 className="class-card card cursor-pointer hover:shadow-lg transition-all duration-300"
                 onClick={() => handleViewDetails(cls)}
                 title="Click para configurar clase"
+                style={{ padding: '12px' }}
               >
+                {/* Class Image */}
+                {cls.imageUrl ? (
+                  <div className="w-full h-32 mb-3 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <img
+                      src={cls.imageUrl}
+                      alt={cls.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Error cargando imagen de clase:', cls.name, cls.imageUrl);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-32 mb-3 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <Calendar size={40} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
+                  </div>
+                )}
+
                 <div className="class-card-header">
                   <h3>{cls.name}</h3>
                   {cls.courseName && (
@@ -753,6 +813,46 @@ function ClassManager({ user, courses }) {
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           placeholder="Ej: Mandarín HSK 1"
                         />
+                      </div>
+
+                      {/* Imagen de la clase */}
+                      <div className="mb-4">
+                        <label className="label">Imagen de la Clase</label>
+                        {formData.imageUrl ? (
+                          <div className="relative">
+                            <img
+                              src={formData.imageUrl}
+                              alt="Preview"
+                              className="w-full h-48 object-cover rounded-lg mb-2"
+                            />
+                            <button
+                              onClick={handleImageDelete}
+                              disabled={uploadingImage}
+                              className="btn btn-danger btn-sm"
+                            >
+                              {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
+                            </button>
+                          </div>
+                        ) : (
+                          <div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              disabled={uploadingImage}
+                              className="block w-full text-sm text-gray-900 dark:text-gray-100
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-primary file:text-white
+                                hover:file:bg-primary-light
+                                file:cursor-pointer cursor-pointer"
+                            />
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              PNG, JPG o GIF (máx. 5MB)
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       <div className="mb-4">
