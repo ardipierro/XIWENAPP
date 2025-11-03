@@ -67,11 +67,22 @@ function ContentManager({ user, courses = [], onBack }) {
   const loadCoursesForContents = async () => {
     if (!content || content.length === 0) return;
 
+    const startTime = performance.now();
+
+    // Cargar cursos en paralelo para todos los contenidos
+    const coursePromises = content.map(item =>
+      getCoursesWithContent(item.id).then(courses => ({ id: item.id, courses }))
+    );
+
+    const results = await Promise.all(coursePromises);
+
     const coursesMap = {};
-    for (const item of content) {
-      const contentCrs = await getCoursesWithContent(item.id);
-      coursesMap[item.id] = contentCrs;
-    }
+    results.forEach(({ id, courses }) => {
+      coursesMap[id] = courses;
+    });
+
+    console.log(`⏱️ [ContentManager] Cargar cursos de contenidos: ${(performance.now() - startTime).toFixed(0)}ms - ${content.length} contenidos`);
+
     setContentCourses(coursesMap);
   };
 

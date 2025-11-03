@@ -23,11 +23,23 @@
   margin-bottom: 30px;
 }
 
+.unified-login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.unified-login-brand svg {
+  color: #3b82f6;
+}
+
 .unified-login-header h1 {
   font-size: 28px;
   font-weight: 700;
   color: #f4f4f5;
-  margin: 0 0 10px 0;
+  margin: 0;
   letter-spacing: -0.02em;
 }
 

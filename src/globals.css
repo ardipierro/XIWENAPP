@@ -22,12 +22,37 @@
 
   html {
     @apply text-base antialiased;
+    /* Pantalla completa en móviles */
+    height: 100%;
+    overflow: hidden;
   }
 
   body {
     @apply font-sans leading-normal;
     background: var(--color-bg-primary);
     color: var(--color-text-primary);
+    /* Pantalla completa en móviles */
+    height: 100%;
+    overflow: auto;
+    /* Prevenir zoom en iOS cuando se hace doble tap */
+    touch-action: manipulation;
+    /* Suavizar scroll en iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Ocupar espacio de safe area en iPhone con notch */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  #root {
+    min-height: 100vh;
+    /* Ocupar espacio de safe area */
+    min-height: -webkit-fill-available;
+  }
+
+  /* Prevenir bounce/rubber-band scroll en iOS */
+  body.prevent-bounce {
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
   }
 
   :root {

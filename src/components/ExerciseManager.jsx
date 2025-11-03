@@ -66,11 +66,22 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
   const loadCoursesForExercises = async () => {
     if (!exercises || exercises.length === 0) return;
 
+    const startTime = performance.now();
+
+    // Cargar cursos en paralelo para todos los ejercicios
+    const coursePromises = exercises.map(exercise =>
+      getCoursesWithExercise(exercise.id).then(courses => ({ id: exercise.id, courses }))
+    );
+
+    const results = await Promise.all(coursePromises);
+
     const coursesMap = {};
-    for (const exercise of exercises) {
-      const exerciseCrs = await getCoursesWithExercise(exercise.id);
-      coursesMap[exercise.id] = exerciseCrs;
-    }
+    results.forEach(({ id, courses }) => {
+      coursesMap[id] = courses;
+    });
+
+    console.log(`⏱️ [ExerciseManager] Cargar cursos de ejercicios: ${(performance.now() - startTime).toFixed(0)}ms - ${exercises.length} ejercicios`);
+
     setExerciseCourses(coursesMap);
   };
 

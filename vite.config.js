@@ -8,23 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg'],
-      manifest: {
-        name: 'XIWEN - Plataforma Educativa',
-        short_name: 'XIWEN',
-        description: 'Plataforma educativa con juegos, ejercicios y cursos interactivos',
-        theme_color: '#4F46E5',
-        background_color: '#ffffff',
-        display: 'standalone',
-        start_url: '/',
-        icons: [
-          {
-            src: 'icons/icon.svg',
-            sizes: '192x192 512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable'
-          }
-        ]
-      },
+      manifest: false, // Usar manifest.json estático en public/
+      injectRegister: 'auto',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [

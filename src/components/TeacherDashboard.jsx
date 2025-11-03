@@ -205,7 +205,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     setSelectedExerciseId(null);
     setShowUserProfile(false);
     setSelectedUserProfile(null);
-    loadDashboardData(); // Recargar datos al volver al dashboard
+    // No recargar datos - ya están en caché y son actuales
   };
 
   const handlePlayExercise = (exerciseId) => {
@@ -254,41 +254,39 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // Cargar usuarios/alumnos para la tarjeta
+      const startTime = performance.now();
+
+      // Cargar datos en paralelo
+      const [allUsers, students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
+        getAllUsers(),
+        loadStudents(),
+        loadGameHistory(),
+        loadCategories(),
+        loadCourses(),
+        getContentByTeacher(user.uid),
+        getClassesByTeacher(user.uid)
+      ]);
+
+      console.log(`⏱️ [TeacherDashboard] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
+
+      // Filtrar usuarios según rol
       if (isAdmin) {
-        const allUsers = await getAllUsers();
         setUsers(allUsers);
       } else {
-        const allUsers = await getAllUsers();
-        const students = allUsers.filter(u =>
+        const filteredStudents = allUsers.filter(u =>
           ['student', 'listener', 'trial'].includes(u.role)
         );
-        setUsers(students);
+        setUsers(filteredStudents);
       }
 
-      // Cargar alumnos
-      const students = await loadStudents();
       const activeStudents = students.filter(s => s.active !== false);
-
-      // Cargar historial de juegos
-      const games = await loadGameHistory();
-
-      // Cargar categorías
-      const categories = await loadCategories();
-
-      // Cargar cursos
-      const allCourses = await loadCourses();
       const activeCourses = allCourses.filter(c => c.active !== false);
       setCourses(activeCourses);
-
-      // Cargar contenido y clases del profesor
-      const teacherContent = await getContentByTeacher(user.uid);
       setAllContent(teacherContent);
-
-      const teacherClasses = await getClassesByTeacher(user.uid);
       setAllClasses(teacherClasses);
 
       // Calcular top students
+      const processingStart = performance.now();
       const studentGameCounts = {};
       games.forEach(game => {
         game.players?.forEach(player => {
@@ -313,6 +311,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         .sort((a, b) => b.gamesPlayed - a.gamesPlayed)
         .slice(0, 5);
 
+      console.log(`⏱️ [TeacherDashboard] Procesamiento datos: ${(performance.now() - processingStart).toFixed(0)}ms`);
+
       setStats({
         totalStudents: activeStudents.length,
         totalGames: games.length,
@@ -322,6 +322,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
       setRecentGames(games.slice(0, 5));
       setTopStudents(topStudentsArray);
+
+      console.log(`⏱️ [TeacherDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
     } catch (error) {
       console.error('Error cargando datos del dashboard:', error);
     }

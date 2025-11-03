@@ -44,10 +44,15 @@ function GroupManager({ user, courses }) {
 
   const loadData = async () => {
     setLoading(true);
+    const startTime = performance.now();
+
     const [groupsData, studentsData] = await Promise.all([
       getGroupsByTeacher(user.uid),
       loadStudents()
     ]);
+
+    console.log(`⏱️ [GroupManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${groupsData.length} grupos`);
+
     setGroups(groupsData);
     setStudents(studentsData);
     setLoading(false);

@@ -43,9 +43,13 @@ function AdminPanel({ user, userRole, onBack }) {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const allUsers = await getAllUsers();
+      const startTime = performance.now();
 
-      // Cargar créditos para cada usuario
+      const allUsers = await getAllUsers();
+      console.log(`⏱️ [AdminPanel] getAllUsers: ${(performance.now() - startTime).toFixed(0)}ms - ${allUsers.length} usuarios`);
+
+      // Cargar créditos para cada usuario en paralelo
+      const creditsStart = performance.now();
       const usersWithCredits = await Promise.all(
         allUsers.map(async (user) => {
           const credits = await getUserCredits(user.id);
@@ -56,8 +60,10 @@ function AdminPanel({ user, userRole, onBack }) {
         })
       );
 
+      console.log(`⏱️ [AdminPanel] Cargar créditos: ${(performance.now() - creditsStart).toFixed(0)}ms`);
+      console.log(`⏱️ [AdminPanel] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
+
       setUsers(usersWithCredits);
-      console.log('Usuarios cargados:', usersWithCredits.length);
     } catch (error) {
       console.error('❌ Error cargando usuarios:', error);
       showError('Error al cargar usuarios');

@@ -95,12 +95,17 @@ function ClassManager({ user, courses, onBack }) {
   const loadData = async () => {
     setLoading(true);
     try {
+      const startTime = performance.now();
+
       const [classesData, groupsData, usersData, instancesData] = await Promise.all([
         isAdmin ? getAllClasses() : getClassesByTeacher(user.uid),
         getAllGroups(),
         getAllUsers(),
         getUpcomingInstances(100)
       ]);
+
+      console.log(`⏱️ [ClassManager] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
+      console.log(`⏱️ [ClassManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${classesData.length} clases, ${instancesData.length} instancias`);
 
       setClasses(classesData);
       setGroups(groupsData);

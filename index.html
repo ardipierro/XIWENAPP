@@ -2,27 +2,130 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
     <!-- PWA Meta Tags -->
     <meta name="description" content="Plataforma educativa con juegos, ejercicios y cursos interactivos" />
-    <meta name="theme-color" content="#18181b" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="XIWEN" />
 
+    <!-- Prevent iOS bounce/rubber-band scroll -->
+    <meta name="format-detection" content="telephone=no" />
+
     <!-- Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
     <!-- Icons -->
-    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon.svg" />
 
     <title>XIWEN - Plataforma Educativa</title>
+
+    <style>
+      /* Splash screen / Loading inicial */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #09090b;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+
+      #loading-screen.hide {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .loading-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      .loading-logo svg {
+        width: 48px;
+        height: 48px;
+        stroke: #f4f4f5;
+      }
+
+      .loading-logo h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #f4f4f5;
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #27272a;
+        border-top-color: #f4f4f5;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Fondo oscuro desde el inicio */
+      body {
+        margin: 0;
+        padding: 0;
+        background: #09090b;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      }
+    </style>
   </head>
   <body>
+    <!-- Splash Screen / Loading Screen -->
+    <div id="loading-screen">
+      <div class="loading-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+        <h1>XIWEN</h1>
+      </div>
+      <div class="loading-spinner"></div>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <script>
+      // Ocultar loading screen cuando React esté listo
+      window.addEventListener('load', () => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          setTimeout(() => {
+            loadingScreen.classList.add('hide');
+            setTimeout(() => {
+              loadingScreen.remove();
+            }, 300);
+          }, 200);
+        }
+      });
+    </script>
   </body>
 </html>

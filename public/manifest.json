@@ -3,10 +3,13 @@
   "short_name": "XIWEN",
   "description": "Plataforma educativa con juegos, ejercicios y cursos interactivos",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#f9fafb",
-  "theme_color": "#18181b",
-  "orientation": "portrait-primary",
+  "display_override": ["window-controls-overlay", "standalone", "fullscreen"],
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "any",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon.svg",

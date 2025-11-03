@@ -229,47 +229,27 @@ export async function getUpcomingInstances(limit = 20) {
  */
 export async function getInstancesForStudent(studentId, limit = 50) {
   try {
-    // 1. Obtener todas las clases asignadas al estudiante (directamente o por grupos)
+    const startTime = performance.now();
+
+    // 1. Obtener clases asignadas al estudiante (ya filtra por activas y asignación)
     const assignedClasses = await getClassesForStudent(studentId);
+    console.log(`⏱️ getClassesForStudent: ${(performance.now() - startTime).toFixed(0)}ms`);
 
-    // 2. Obtener grupos del estudiante
-    const studentGroups = await getStudentGroups(studentId);
-    const studentGroupIds = studentGroups.map(g => g.id);
-
-    // 3. Obtener todas las clases activas
-    const allClassesQuery = query(
-      collection(db, 'classes'),
-      where('active', '==', true)
-    );
-    const allClassesSnapshot = await getDocs(allClassesQuery);
-    const allClasses = allClassesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    // 4. Filtrar clases donde el estudiante está asignado (directamente o por grupo)
-    const relevantClassIds = allClasses
-      .filter(cls => {
-        // Asignado directamente
-        if (cls.assignedStudents?.includes(studentId)) return true;
-        // Asignado por grupo
-        if (cls.assignedGroups?.some(groupId => studentGroupIds.includes(groupId))) return true;
-        return false;
-      })
-      .map(cls => cls.id);
-
-    if (relevantClassIds.length === 0) {
-      console.log('📚 No hay clases asignadas para el estudiante:', studentId);
+    if (!assignedClasses || assignedClasses.length === 0) {
       return [];
     }
 
-    console.log('📚 Clases asignadas:', relevantClassIds.length, relevantClassIds);
+    const relevantClassIds = assignedClasses.map(cls => cls.id);
+    console.log(`📚 Clases encontradas: ${relevantClassIds.length}`);
 
-    // 5. Obtener todas las instancias de esas clases
+    // 2. Obtener instancias en paralelo
+    const queryStart = performance.now();
     const allInstances = [];
 
     // Hacer queries en batches de 10 (límite de Firestore para 'in')
     const batchSize = 10;
+    const batchPromises = [];
+
     for (let i = 0; i < relevantClassIds.length; i += batchSize) {
       const batch = relevantClassIds.slice(i, i + batchSize);
       const q = query(
@@ -277,25 +257,44 @@ export async function getInstancesForStudent(studentId, limit = 50) {
         where('classId', 'in', batch)
       );
 
-      const snapshot = await getDocs(q);
+      // Ejecutar queries en paralelo
+      batchPromises.push(getDocs(q));
+    }
+
+    // Esperar todas las queries en paralelo
+    const snapshots = await Promise.all(batchPromises);
+    console.log(`⏱️ Queries de instancias: ${(performance.now() - queryStart).toFixed(0)}ms`);
+
+    // Procesar resultados
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+
+    snapshots.forEach(snapshot => {
       const instances = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-
       allInstances.push(...instances);
-    }
+    });
 
-    // 6. Ordenar por fecha ascendente
-    allInstances.sort((a, b) => {
+    // Filtrar solo instancias desde ayer en adelante
+    const futureInstances = allInstances.filter(inst => {
+      const instDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
+      return instDate >= yesterday;
+    });
+
+    // Ordenar por fecha ascendente
+    futureInstances.sort((a, b) => {
       const dateA = a.date?.toMillis?.() || 0;
       const dateB = b.date?.toMillis?.() || 0;
       return dateA - dateB;
     });
 
-    console.log('📅 Total de instancias encontradas:', allInstances.length);
-
-    return allInstances.slice(0, limit);
+    // Limitar al número solicitado
+    const result = futureInstances.slice(0, limit);
+    console.log(`⏱️ TOTAL getInstancesForStudent: ${(performance.now() - startTime).toFixed(0)}ms - ${result.length} instancias`);
+    return result;
   } catch (error) {
     console.error('❌ Error obteniendo instancias del estudiante:', error);
     return [];

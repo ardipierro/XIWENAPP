@@ -36,10 +36,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   // Cargar perfil del estudiante al montar el componente
   useEffect(() => {
     const loadProfile = async () => {
-      setLoading(true); // Asegurar que loading está en true
+      setLoading(true);
+      const startTime = performance.now();
 
       if (!studentProp && user) {
-        // Intentar cargar o crear el perfil del estudiante desde Firestore
         console.log('Cargando perfil de estudiante para:', user.uid);
         const profile = await ensureStudentProfile(user.uid);
 
@@ -47,18 +47,20 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           console.log('Perfil de estudiante cargado/creado:', profile);
           setStudent(profile);
 
-          // Cargar historial de juegos
-          const history = await getStudentGameHistory(profile.id);
+          // Cargar datos en paralelo
+          const dataStart = performance.now();
+          const [history, enrollments, instances] = await Promise.all([
+            getStudentGameHistory(profile.id),
+            getStudentEnrollments(profile.id),
+            getInstancesForStudent(profile.id, 10)
+          ]);
+
+          console.log(`⏱️ [StudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
+
           setGameHistory(history);
           calculateStats(history);
-
-          // Cargar cursos asignados
-          const enrollments = await getStudentEnrollments(profile.id);
           setEnrolledCourses(enrollments);
-          console.log('Cursos asignados:', enrollments);
 
-          // Cargar próximas clases
-          const instances = await getInstancesForStudent(profile.id, 10);
           const now = new Date();
           const futureInstances = instances.filter(inst => {
             const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
@@ -71,18 +73,20 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       } else if (studentProp) {
         setStudent(studentProp);
 
-        // Cargar historial de juegos
-        const history = await getStudentGameHistory(studentProp.id);
+        // Cargar datos en paralelo
+        const dataStart = performance.now();
+        const [history, enrollments, instances] = await Promise.all([
+          getStudentGameHistory(studentProp.id),
+          getStudentEnrollments(studentProp.id),
+          getInstancesForStudent(studentProp.id, 10)
+        ]);
+
+        console.log(`⏱️ [StudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
+
         setGameHistory(history);
         calculateStats(history);
-
-        // Cargar cursos asignados
-        const enrollments = await getStudentEnrollments(studentProp.id);
         setEnrolledCourses(enrollments);
-        console.log('Cursos asignados:', enrollments);
 
-        // Cargar próximas clases
-        const instances = await getInstancesForStudent(studentProp.id, 10);
         const now = new Date();
         const futureInstances = instances.filter(inst => {
           const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
@@ -91,11 +95,12 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         setUpcomingClasses(futureInstances.slice(0, 3));
       }
 
-      setLoading(false); // Siempre terminar con loading en false
+      console.log(`⏱️ [StudentDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
+      setLoading(false);
     };
 
     loadProfile();
-  }, [user?.uid, studentProp]); // Ejecutar solo cuando cambie el uid o el prop inicial
+  }, []);
 
   const calculateStats = (history) => {
     if (!history || history.length === 0) {

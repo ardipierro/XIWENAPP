@@ -320,7 +320,20 @@ export async function unassignStudentFromClass(classId, studentId) {
  */
 export async function getClassesForStudent(studentId) {
   try {
-    // Buscar clases donde el estudiante está asignado directamente
+    const startTime = performance.now();
+
+    // 1. Obtener grupos del estudiante
+    const { getStudentGroups } = await import('./groups');
+    const studentGroups = await getStudentGroups(studentId);
+    const groupIds = studentGroups.map(g => g.id);
+
+    console.log(`⏱️ [getClassesForStudent] getStudentGroups: ${(performance.now() - startTime).toFixed(0)}ms - ${groupIds.length} grupos`);
+
+    // 2. Buscar clases asignadas directamente O a los grupos del estudiante
+    const classesMap = new Map();
+
+    // 2a. Clases con asignación directa
+    const queryStart1 = performance.now();
     const q1 = query(
       collection(db, 'classes'),
       where('assignedStudents', 'array-contains', studentId),
@@ -328,16 +341,54 @@ export async function getClassesForStudent(studentId) {
     );
 
     const snapshot1 = await getDocs(q1);
-    const directClasses = snapshot1.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      assignmentType: 'individual'
-    }));
+    snapshot1.docs.forEach(doc => {
+      classesMap.set(doc.id, {
+        id: doc.id,
+        ...doc.data(),
+        assignmentType: 'individual'
+      });
+    });
+    console.log(`⏱️ [getClassesForStudent] Query directa: ${(performance.now() - queryStart1).toFixed(0)}ms - ${snapshot1.size} clases`);
 
-    // TODO: También buscar clases asignadas a grupos del estudiante
-    // Esto requeriría consultar group_members primero
+    // 2b. Clases asignadas a grupos (solo si el estudiante tiene grupos)
+    if (groupIds.length > 0) {
+      const queryStart2 = performance.now();
 
-    return directClasses;
+      // Firestore permite máximo 10 elementos en 'array-contains-any'
+      const batchSize = 10;
+      const batchPromises = [];
+
+      for (let i = 0; i < groupIds.length; i += batchSize) {
+        const batch = groupIds.slice(i, i + batchSize);
+        const q2 = query(
+          collection(db, 'classes'),
+          where('assignedGroups', 'array-contains-any', batch),
+          where('active', '==', true)
+        );
+        batchPromises.push(getDocs(q2));
+      }
+
+      const groupSnapshots = await Promise.all(batchPromises);
+
+      groupSnapshots.forEach(snapshot => {
+        snapshot.docs.forEach(doc => {
+          if (!classesMap.has(doc.id)) {
+            classesMap.set(doc.id, {
+              id: doc.id,
+              ...doc.data(),
+              assignmentType: 'group'
+            });
+          }
+        });
+      });
+
+      console.log(`⏱️ [getClassesForStudent] Query grupos: ${(performance.now() - queryStart2).toFixed(0)}ms - ${classesMap.size} clases totales`);
+    }
+
+    const allClasses = Array.from(classesMap.values());
+    console.log(`⏱️ [getClassesForStudent] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${allClasses.length} clases`);
+
+    return allClasses;
   } catch (error) {
     console.error('❌ Error obteniendo clases del estudiante:', error);
     return [];

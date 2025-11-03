@@ -38,9 +38,6 @@ function StudentClassView({ student }) {
   useEffect(() => {
     if (student) {
       loadData();
-      // Refresh cada 30 segundos para actualizar estado de links
-      const interval = setInterval(loadData, 30000);
-      return () => clearInterval(interval);
     }
   }, [student]);
 
@@ -82,12 +79,23 @@ function StudentClassView({ student }) {
 
       setInstances(futureInstances);
 
-      // Verificar asistencia para cada instancia
+      // Verificar asistencia para cada instancia (en paralelo)
+      const attendanceStart = performance.now();
+      const attendancePromises = futureInstances.map(instance =>
+        getStudentAttendance(instance.id, student.id).then(attendance => ({
+          instanceId: instance.id,
+          attendance
+        }))
+      );
+
+      const attendanceResults = await Promise.all(attendancePromises);
+
       const attendanceStatusMap = {};
-      for (const instance of futureInstances) {
-        const attendance = await getStudentAttendance(instance.id, student.id);
-        attendanceStatusMap[instance.id] = attendance;
-      }
+      attendanceResults.forEach(({ instanceId, attendance }) => {
+        attendanceStatusMap[instanceId] = attendance;
+      });
+
+      console.log(`⏱️ Verificación de asistencia: ${(performance.now() - attendanceStart).toFixed(0)}ms - ${futureInstances.length} instancias`);
       setAttendanceStatus(attendanceStatusMap);
     } catch (error) {
       console.error('Error al cargar datos:', error);
@@ -298,10 +306,6 @@ function StudentClassView({ student }) {
                       <Clock size={18} strokeWidth={2} />
                     </span>
                     <span className="datetime-text">{formatDate(instance.date)}</span>
-                  </div>
-
-                  <div className={`class-status status-${instanceStatus.status}`}>
-                    {instanceStatus.icon} {instanceStatus.label}
                   </div>
 
                   {instanceStatus.canJoin && (

@@ -5,7 +5,7 @@ import {
   sendPasswordResetEmail,
   signOut
 } from 'firebase/auth';
-import { LogIn, UserPlus, Mail, Lock, User, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, User, AlertCircle, CheckCircle, Loader, GraduationCap } from 'lucide-react';
 import { auth } from '../firebase/config';
 import { createUserProfile, getUserRole } from '../firebase/firestore';
 import { isAdminEmail, getDefaultRole, ROLE_INFO } from '../firebase/roleConfig';
@@ -167,7 +167,10 @@ function UnifiedLogin() {
     <div className="unified-login-container">
       <div className="unified-login-box">
         <div className="unified-login-header">
-          <h1>XIWEN</h1>
+          <div className="unified-login-brand">
+            <GraduationCap size={32} strokeWidth={2} />
+            <h1>XIWEN</h1>
+          </div>
           <p className="unified-login-subtitle">
             {isRegistering ? 'Crear nueva cuenta' : 'Iniciar sesión'}
           </p>

@@ -60,10 +60,15 @@ function CoursesScreen({ onBack, user }) {
   const loadAllCourses = async () => {
     setLoading(true);
     try {
+      const startTime = performance.now();
+
       const loadedCourses = await loadCourses();
+      console.log(`⏱️ [CoursesScreen] loadCourses: ${(performance.now() - startTime).toFixed(0)}ms - ${loadedCourses.length} cursos`);
+
       const activeCourses = loadedCourses.filter(c => c.active !== false);
 
       // Cargar cantidad de contenidos y ejercicios para cada curso usando relaciones
+      const countsStart = performance.now();
       const coursesWithCounts = await Promise.all(
         activeCourses.map(async (course) => {
           const contents = await getCourseContents(course.id);
@@ -76,6 +81,9 @@ function CoursesScreen({ onBack, user }) {
           };
         })
       );
+
+      console.log(`⏱️ [CoursesScreen] Cargar conteos: ${(performance.now() - countsStart).toFixed(0)}ms`);
+      console.log(`⏱️ [CoursesScreen] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${coursesWithCounts.length} cursos activos`);
 
       setCourses(coursesWithCounts);
     } catch (error) {
@@ -98,6 +106,8 @@ function CoursesScreen({ onBack, user }) {
     setLoadingModalData(true);
 
     try {
+      const modalStart = performance.now();
+
       // Load data in parallel for better performance
       const [contents, exercises, allContents, allExercises, students] = await Promise.all([
         getCourseContents(course.id),
@@ -107,6 +117,8 @@ function CoursesScreen({ onBack, user }) {
         loadStudents()
       ]);
 
+      console.log(`⏱️ [CourseModal] Datos paralelos: ${(performance.now() - modalStart).toFixed(0)}ms`);
+
       setCourseContents(contents);
       setCourseExercises(exercises);
       setAvailableContents(allContents);
@@ -114,6 +126,7 @@ function CoursesScreen({ onBack, user }) {
       setAllStudents(students);
 
       // Query students assigned to this course in a single optimized query
+      const assignmentsStart = performance.now();
       const assignmentsQuery = query(
         collection(db, 'student_assignments'),
         where('itemType', '==', 'course'),
@@ -124,6 +137,9 @@ function CoursesScreen({ onBack, user }) {
 
       const studentsInCourse = students.filter(student => assignedStudentIds.has(student.id));
       setCourseStudents(studentsInCourse);
+
+      console.log(`⏱️ [CourseModal] Query asignaciones: ${(performance.now() - assignmentsStart).toFixed(0)}ms`);
+      console.log(`⏱️ [CourseModal] TOTAL: ${(performance.now() - modalStart).toFixed(0)}ms`);
 
     } catch (error) {
       console.error('Error loading course data:', error);
