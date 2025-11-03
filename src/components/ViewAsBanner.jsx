@@ -1,4 +1,5 @@
 import { Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useViewAs } from '../contexts/ViewAsContext';
 import './ViewAsBanner.css';
 
@@ -7,6 +8,7 @@ import './ViewAsBanner.css';
  * Solo visible cuando está activo el modo "Ver como"
  */
 function ViewAsBanner() {
+  const navigate = useNavigate();
   const { isViewingAs, viewAsUser, stopViewingAs } = useViewAs();
 
   if (!isViewingAs) {
@@ -14,8 +16,10 @@ function ViewAsBanner() {
   }
 
   const handleExitViewAs = () => {
+    // Desactivar modo "Ver como"
     stopViewingAs();
-    // Recargar y volver al dashboard de admin
+
+    // Recargar la página para volver al teacher dashboard
     window.location.href = '/teacher';
   };
 

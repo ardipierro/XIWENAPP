@@ -14,8 +14,8 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './config';
-import { getClassById } from './classes';
-import { getGroupMembers } from './groups';
+import { getClassById, getClassesForStudent } from './classes';
+import { getGroupMembers, getStudentGroups } from './groups';
 
 /**
  * CRUD para Instancias de Clase
@@ -27,9 +27,10 @@ import { getGroupMembers } from './groups';
  * Generar instancias para una clase recurrente
  * @param {string} classId - ID de la clase recurrente
  * @param {number} weeksAhead - Número de semanas a generar
+ * @param {Date|string|null} startDate - Fecha de inicio opcional (default: hoy)
  * @returns {Promise<Object>} - {success: boolean, count: number, error?: string}
  */
-export async function generateInstances(classId, weeksAhead = 4) {
+export async function generateInstances(classId, weeksAhead = 4, startDate = null) {
   try {
     const classData = await getClassById(classId);
     if (!classData) {
@@ -43,8 +44,16 @@ export async function generateInstances(classId, weeksAhead = 4) {
     }
 
     const instances = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Usar fecha de inicio proporcionada o la fecha de inicio de la clase o hoy
+    let baseDate;
+    if (startDate) {
+      baseDate = typeof startDate === 'string' ? new Date(startDate) : startDate;
+    } else if (classData.startDate) {
+      baseDate = typeof classData.startDate === 'string' ? new Date(classData.startDate) : classData.startDate;
+    } else {
+      baseDate = new Date();
+    }
+    baseDate.setHours(0, 0, 0, 0);
 
     // Obtener estudiantes de grupos asignados
     const allStudentIds = new Set();
@@ -68,12 +77,14 @@ export async function generateInstances(classId, weeksAhead = 4) {
         const { day, startTime, endTime } = schedule;
 
         // Calcular la fecha de esta instancia
-        const instanceDate = new Date(today);
-        const daysUntilTarget = (day - today.getDay() + 7) % 7;
-        instanceDate.setDate(today.getDate() + daysUntilTarget + (week * 7));
+        const instanceDate = new Date(baseDate);
+        const daysUntilTarget = (day - baseDate.getDay() + 7) % 7;
+        instanceDate.setDate(baseDate.getDate() + daysUntilTarget + (week * 7));
 
-        // Solo crear si es fecha futura
-        if (instanceDate < today) continue;
+        // Solo crear si es fecha futura (respecto a hoy)
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        if (instanceDate < now) continue;
 
         // Verificar si ya existe una instancia para esta fecha/hora
         const existingInstance = await getInstanceByDateAndClass(classId, instanceDate, startTime);
@@ -218,26 +229,73 @@ export async function getUpcomingInstances(limit = 20) {
  */
 export async function getInstancesForStudent(studentId, limit = 50) {
   try {
-    // Query simplificado sin orderBy para evitar requerir índice compuesto
-    const q = query(
-      collection(db, 'class_instances'),
-      where('studentIds', 'array-contains', studentId)
-    );
+    // 1. Obtener todas las clases asignadas al estudiante (directamente o por grupos)
+    const assignedClasses = await getClassesForStudent(studentId);
 
-    const snapshot = await getDocs(q);
-    const instances = snapshot.docs
-      .map(doc => ({
+    // 2. Obtener grupos del estudiante
+    const studentGroups = await getStudentGroups(studentId);
+    const studentGroupIds = studentGroups.map(g => g.id);
+
+    // 3. Obtener todas las clases activas
+    const allClassesQuery = query(
+      collection(db, 'classes'),
+      where('active', '==', true)
+    );
+    const allClassesSnapshot = await getDocs(allClassesQuery);
+    const allClasses = allClassesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // 4. Filtrar clases donde el estudiante está asignado (directamente o por grupo)
+    const relevantClassIds = allClasses
+      .filter(cls => {
+        // Asignado directamente
+        if (cls.assignedStudents?.includes(studentId)) return true;
+        // Asignado por grupo
+        if (cls.assignedGroups?.some(groupId => studentGroupIds.includes(groupId))) return true;
+        return false;
+      })
+      .map(cls => cls.id);
+
+    if (relevantClassIds.length === 0) {
+      console.log('📚 No hay clases asignadas para el estudiante:', studentId);
+      return [];
+    }
+
+    console.log('📚 Clases asignadas:', relevantClassIds.length, relevantClassIds);
+
+    // 5. Obtener todas las instancias de esas clases
+    const allInstances = [];
+
+    // Hacer queries en batches de 10 (límite de Firestore para 'in')
+    const batchSize = 10;
+    for (let i = 0; i < relevantClassIds.length; i += batchSize) {
+      const batch = relevantClassIds.slice(i, i + batchSize);
+      const q = query(
+        collection(db, 'class_instances'),
+        where('classId', 'in', batch)
+      );
+
+      const snapshot = await getDocs(q);
+      const instances = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }))
-      // Ordenar en memoria por fecha
-      .sort((a, b) => {
-        const dateA = a.date?.toMillis?.() || 0;
-        const dateB = b.date?.toMillis?.() || 0;
-        return dateA - dateB; // Ascendente
-      });
+      }));
 
-    return instances.slice(0, limit);
+      allInstances.push(...instances);
+    }
+
+    // 6. Ordenar por fecha ascendente
+    allInstances.sort((a, b) => {
+      const dateA = a.date?.toMillis?.() || 0;
+      const dateB = b.date?.toMillis?.() || 0;
+      return dateA - dateB;
+    });
+
+    console.log('📅 Total de instancias encontradas:', allInstances.length);
+
+    return allInstances.slice(0, limit);
   } catch (error) {
     console.error('❌ Error obteniendo instancias del estudiante:', error);
     return [];

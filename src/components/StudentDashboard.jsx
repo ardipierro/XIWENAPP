@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStudentEnrollments } from '../firebase/firestore';
-import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText } from 'lucide-react';
+import { getInstancesForStudent } from '../firebase/classInstances';
+import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import MyCourses from './student/MyCourses';
 import MyAssignments from './student/MyAssignments';
@@ -17,6 +18,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   const [student, setStudent] = useState(studentProp);
   const [gameHistory, setGameHistory] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'classes', 'courseView', 'contentPlayer'
   const [selectedCourseId, setSelectedCourseId] = useState(null);
@@ -54,6 +56,15 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           const enrollments = await getStudentEnrollments(profile.id);
           setEnrolledCourses(enrollments);
           console.log('Cursos asignados:', enrollments);
+
+          // Cargar próximas clases
+          const instances = await getInstancesForStudent(profile.id, 10);
+          const now = new Date();
+          const futureInstances = instances.filter(inst => {
+            const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
+            return instanceDate >= now;
+          });
+          setUpcomingClasses(futureInstances.slice(0, 3));
         } else {
           console.warn('No se pudo cargar ni crear perfil de estudiante para:', user.uid);
         }
@@ -69,6 +80,15 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         const enrollments = await getStudentEnrollments(studentProp.id);
         setEnrolledCourses(enrollments);
         console.log('Cursos asignados:', enrollments);
+
+        // Cargar próximas clases
+        const instances = await getInstancesForStudent(studentProp.id, 10);
+        const now = new Date();
+        const futureInstances = instances.filter(inst => {
+          const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
+          return instanceDate >= now;
+        });
+        setUpcomingClasses(futureInstances.slice(0, 3));
       }
 
       setLoading(false); // Siempre terminar con loading en false
@@ -356,11 +376,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           <div className="stats-grid">
             <div className="stat-card card">
               <div className="stat-icon">
-                <Gamepad2 size={40} strokeWidth={2} />
+                <Target size={40} strokeWidth={2} />
               </div>
               <div className="stat-info">
                 <div className="stat-value">{stats.totalGames}</div>
-                <div className="stat-label">Juegos jugados</div>
+                <div className="stat-label">Ejercicios completados</div>
               </div>
             </div>
 
@@ -394,14 +414,6 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               </div>
             </div>
           </div>
-
-          {/* Call to Action */}
-          <button className="btn-play student-cta" onClick={onStartGame}>
-            <span className="cta-icon">
-              <Gamepad2 size={24} strokeWidth={2} />
-            </span>
-            <span className="cta-text">¡Jugar Ahora!</span>
-          </button>
 
           {/* Mis Cursos - Quick Access */}
           <div className="courses-quick-access card">
@@ -448,6 +460,70 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 <p>No tienes cursos asignados aún</p>
                 <button className="btn btn-primary" onClick={handleViewMyCourses}>
                   Explorar Cursos
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Próximas Clases - Quick Access */}
+          <div className="upcoming-classes-section card">
+            <div className="section-header">
+              <h3 className="section-title flex items-center gap-2">
+                <Calendar size={20} strokeWidth={2} />
+                Próximas Clases
+              </h3>
+              {upcomingClasses.length > 0 && (
+                <button className="btn btn-text" onClick={() => setCurrentView('classes')}>
+                  Ver todas →
+                </button>
+              )}
+            </div>
+            {upcomingClasses.length > 0 ? (
+              <div className="classes-preview">
+                {upcomingClasses.map((instance) => {
+                  const instanceDate = instance.date.toDate ? instance.date.toDate() : new Date(instance.date);
+                  const today = new Date();
+                  const tomorrow = new Date(today);
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+
+                  const isToday = instanceDate.toDateString() === today.toDateString();
+                  const isTomorrow = instanceDate.toDateString() === tomorrow.toDateString();
+
+                  let dateLabel;
+                  if (isToday) {
+                    dateLabel = `Hoy, ${instance.startTime}`;
+                  } else if (isTomorrow) {
+                    dateLabel = `Mañana, ${instance.startTime}`;
+                  } else {
+                    dateLabel = instanceDate.toLocaleDateString('es-ES', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short'
+                    }) + ', ' + instance.startTime;
+                  }
+
+                  return (
+                    <div key={instance.id} className="class-preview-item">
+                      <div className="class-preview-header">
+                        <div className="class-preview-name">{instance.className}</div>
+                        <div className="class-preview-cost">
+                          <CreditCard size={14} strokeWidth={2} />
+                          {instance.creditCost}
+                        </div>
+                      </div>
+                      <div className="class-preview-datetime">
+                        <Clock size={14} strokeWidth={2} />
+                        <span>{dateLabel}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="empty-classes-preview">
+                <p>No tienes clases programadas próximamente</p>
+                <button className="btn btn-outline" onClick={() => setCurrentView('classes')}>
+                  Ver calendario de clases
                 </button>
               </div>
             )}
@@ -506,10 +582,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               <div className="empty-icon">
                 <Target size={64} strokeWidth={2} />
               </div>
-              <h3>¡Aún no has jugado!</h3>
-              <p>Comienza tu primera partida y empieza a ganar puntos</p>
+              <h3>¡Aún no has completado ejercicios!</h3>
+              <p>Comienza tu primer ejercicio y empieza a ganar puntos</p>
               <button className="btn btn-primary" onClick={onStartGame}>
-                Jugar primer juego
+                Comenzar ejercicios
               </button>
             </div>
           )}

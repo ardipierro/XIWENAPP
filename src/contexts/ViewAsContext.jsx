@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 /**
  * Contexto para el modo "Ver como" (impersonación)
@@ -30,23 +30,19 @@ export function ViewAsProvider({ children }) {
   };
 
   /**
-   * Verificar si está en modo "Ver como"
-   */
-  const isViewingAs = () => {
-    return viewAsUser !== null;
-  };
-
-  /**
    * Obtener el usuario efectivo (el que se está viendo)
    */
   const getEffectiveUser = (currentUser) => {
     return viewAsUser || currentUser;
   };
 
+  // Calcular isViewingAs como valor derivado del estado
+  const isViewingAs = viewAsUser !== null;
+
   const value = {
     viewAsUser,
     originalUser,
-    isViewingAs: isViewingAs(),
+    isViewingAs, // Ahora es un valor booleano que se actualiza con viewAsUser
     startViewingAs,
     stopViewingAs,
     getEffectiveUser

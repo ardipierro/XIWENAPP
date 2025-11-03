@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Target,
   Gamepad2,
@@ -80,6 +80,7 @@ const ICON_MAP = {
 
 function TeacherDashboard({ user, userRole, onLogout }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, playExercise
   const [selectedExerciseId, setSelectedExerciseId] = useState(null);
   const [stats, setStats] = useState({
@@ -122,6 +123,48 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
   useEffect(() => {
     loadDashboardData();
+  }, []);
+
+  // Detectar si se debe reabrir UserProfile al volver de "Ver como"
+  useEffect(() => {
+    const userId = sessionStorage.getItem('viewAsReturnUserId');
+
+    if (userId) {
+      // Limpiar inmediatamente
+      sessionStorage.removeItem('viewAsReturnUserId');
+
+      // Esperar a que los usuarios se carguen
+      const timer = setTimeout(async () => {
+        setCurrentScreen('users');
+
+        // Cargar usuarios si es necesario
+        let allUsers = users;
+        if (users.length === 0) {
+          allUsers = await getAllUsers();
+          const usersWithCredits = await Promise.all(
+            allUsers.map(async (userItem) => {
+              try {
+                const creditsData = await getUserCredits(userItem.id);
+                return { ...userItem, credits: creditsData?.availableCredits || 0 };
+              } catch (error) {
+                return { ...userItem, credits: 0 };
+              }
+            })
+          );
+          setUsers(usersWithCredits);
+          allUsers = usersWithCredits;
+        }
+
+        // Buscar y abrir el perfil
+        const userToOpen = allUsers.find(u => u.id === userId);
+        if (userToOpen) {
+          setSelectedUserProfile(userToOpen);
+          setShowUserProfile(true);
+        }
+      }, 200);
+
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   // Handlers de navegación

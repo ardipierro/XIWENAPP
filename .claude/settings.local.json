@@ -22,7 +22,8 @@
       "Bash(dir:*)",
       "Bash(printf:*)",
       "Bash(git checkout:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

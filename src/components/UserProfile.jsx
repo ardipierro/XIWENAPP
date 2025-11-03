@@ -201,9 +201,13 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   };
 
   const handleViewAs = () => {
+    // Guardar userId para reabrir el perfil al volver
+    sessionStorage.setItem('viewAsReturnUserId', selectedUser.id);
+
     // Activar modo "Ver como"
     startViewingAs(currentUser, selectedUser);
-    // Navegar a dashboard para que redirija según el rol del usuario que estamos viendo
+
+    // Navegar según el rol del usuario
     navigate('/dashboard');
   };
 

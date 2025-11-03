@@ -61,7 +61,8 @@ function ClassManager({ user, courses, onBack }) {
     creditCost: 1,
     meetingLink: '',
     imageUrl: '',
-    schedules: [] // [{ day: 1, startTime: "10:00", endTime: "11:00" }]
+    schedules: [], // [{ day: 1, startTime: "10:00", endTime: "11:00" }]
+    startDate: new Date().toISOString().split('T')[0] // Fecha de inicio (formato YYYY-MM-DD)
   });
 
   const [scheduleForm, setScheduleForm] = useState({
@@ -190,9 +191,17 @@ function ClassManager({ user, courses, onBack }) {
       courseId: '',
       creditCost: 1,
       meetingLink: '',
-      schedules: []
+      schedules: [],
+      startDate: new Date().toISOString().split('T')[0]
     });
-    setScheduleForm({ day: 1, startTime: '10:00', endTime: '11:00' });
+    setScheduleForm({
+      daysOfWeek: [1],
+      startTime: '10:00',
+      endTime: '11:00',
+      weeksToGenerate: 4,
+      autoRenew: false,
+      autoRenewWeeks: 4
+    });
     setShowModal(true);
   };
 
@@ -204,7 +213,8 @@ function ClassManager({ user, courses, onBack }) {
       courseId: classData.courseId || '',
       creditCost: classData.creditCost || 1,
       meetingLink: classData.meetingLink || '',
-      schedules: classData.schedules || []
+      schedules: classData.schedules || [],
+      startDate: classData.startDate || new Date().toISOString().split('T')[0]
     });
     setShowModal(true);
   };
@@ -236,9 +246,10 @@ function ClassManager({ user, courses, onBack }) {
 
   const handleDayToggle = (dayValue) => {
     setScheduleForm(prev => {
-      const newDays = prev.daysOfWeek.includes(dayValue)
-        ? prev.daysOfWeek.filter(d => d !== dayValue)
-        : [...prev.daysOfWeek, dayValue];
+      const currentDays = prev?.daysOfWeek || [];
+      const newDays = currentDays.includes(dayValue)
+        ? currentDays.filter(d => d !== dayValue)
+        : [...currentDays, dayValue];
       return { ...prev, daysOfWeek: newDays.sort((a, b) => a - b) };
     });
   };
@@ -356,7 +367,8 @@ function ClassManager({ user, courses, onBack }) {
       creditCost: classData.creditCost || 1,
       meetingLink: classData.meetingLink || '',
       imageUrl: classData.imageUrl || '',
-      schedules: classData.schedules || []
+      schedules: classData.schedules || [],
+      startDate: classData.startDate || new Date().toISOString().split('T')[0]
     });
 
     // Cargar instancias de esta clase
@@ -631,6 +643,19 @@ function ClassManager({ user, courses, onBack }) {
                     </div>
 
                     <div className="form-group">
+                      <label className="form-label">Fecha de Inicio *</label>
+                      <input
+                        type="date"
+                        className="input"
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Las instancias se generarán a partir de esta fecha
+                      </p>
+                    </div>
+
+                    <div className="form-group">
                       <label className="form-label">Descripción</label>
                       <textarea
                         className="input"
@@ -870,6 +895,19 @@ function ClassManager({ user, courses, onBack }) {
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           placeholder="Ej: Mandarín HSK 1"
                         />
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="label">Fecha de Inicio *</label>
+                        <input
+                          type="date"
+                          className="input"
+                          value={formData.startDate || new Date().toISOString().split('T')[0]}
+                          onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Las nuevas instancias se generarán a partir de esta fecha
+                        </p>
                       </div>
 
                       <div className="mb-4">
