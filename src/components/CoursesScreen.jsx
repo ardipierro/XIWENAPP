@@ -508,8 +508,9 @@ function CoursesScreen({ onBack, user }) {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modal-box max-w-5xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            {/* Header - Fixed */}
+            <div className="modal-header flex-shrink-0">
               <h3 className="modal-title">
                 Crear Nuevo Curso
               </h3>
@@ -525,8 +526,20 @@ function CoursesScreen({ onBack, user }) {
               </button>
             </div>
 
-            <form onSubmit={handleCreate}>
-              <div className="modal-content">
+            {/* Tabs - Fixed */}
+            <div className="modal-tabs-container">
+              <div className="modal-tabs">
+                <button
+                  className="py-2 px-4 font-semibold border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100 transition-colors whitespace-nowrap"
+                >
+                  <Info size={18} strokeWidth={2} className="inline-icon" /> Información
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+              <form onSubmit={handleCreate} className="space-y-4 pt-6">
                 <div className="form-group">
                   <label className="form-label">Nombre del Curso *</label>
                   <input
@@ -605,17 +618,29 @@ function CoursesScreen({ onBack, user }) {
                     </p>
                   )}
                 </div>
-              </div>
+              </form>
+            </div>
 
-              <div className="modal-footer">
-                <button type="button" className="btn btn-ghost" onClick={() => setShowCreateModal(false)}>
+            {/* Footer con botones (sin zona de peligro en crear) */}
+            <div className="px-6 pt-4 pb-4 flex-shrink-0">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="btn btn-outline flex-1"
+                  onClick={() => setShowCreateModal(false)}
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={uploadingImage}>
+                <button
+                  type="submit"
+                  className="btn btn-primary flex-1"
+                  onClick={handleCreate}
+                  disabled={uploadingImage}
+                >
                   {uploadingImage ? 'Subiendo...' : 'Crear Curso'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

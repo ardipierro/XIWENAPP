@@ -235,6 +235,11 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* En móvil, el banner tiene altura variable (~85px) */
+  .dashboard-layout.has-banner .topbar {
+    top: 85px;
+  }
+
   .topbar-content {
     padding: 0 12px;
   }

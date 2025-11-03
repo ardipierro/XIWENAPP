@@ -511,8 +511,8 @@ function ContentManager({ user, courses = [], onBack }) {
       {/* Modal Crear Contenido */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
               <h3 className="modal-title">
                 Crear Nuevo Contenido
               </h3>
@@ -521,80 +521,168 @@ function ContentManager({ user, courses = [], onBack }) {
                 onClick={() => setShowCreateModal(false)}
                 aria-label="Cerrar modal"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
             </div>
 
-            <div className="modal-content">
-              <form onSubmit={handleCreate} className="space-y-4">
-              <div className="form-group">
-                <label className="form-label">Título*</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Tipo*</label>
-                <select
-                  className="select"
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            <div className="flex flex-col flex-1 min-h-0">
+              {/* Tabs */}
+              <div className="modal-tabs-container">
+                <div className="modal-tabs">
+                <button
+                  onClick={() => setActiveTab('general')}
+                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                    activeTab === 'general'
+                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
                 >
-                  <option value="lesson">Lección</option>
-                  <option value="reading">Lectura</option>
-                  <option value="video">Video</option>
-                  <option value="link">Enlace</option>
-                  <option disabled>──────────</option>
-                  <option value="multiple_choice">Ejercicio: Opción Múltiple</option>
-                  <option value="fill_blank">Ejercicio: Completar Espacios</option>
-                  <option value="drag_drop">Ejercicio: Drag & Drop</option>
-                  <option value="highlight">Ejercicio: Resaltar Palabras</option>
-                  <option value="order_sentence">Ejercicio: Ordenar Oración</option>
-                  <option value="true_false">Ejercicio: Verdadero/Falso</option>
-                  <option value="matching">Ejercicio: Relacionar</option>
-                  <option value="table">Ejercicio: Tabla</option>
-                </select>
+                  <FileText size={18} strokeWidth={2} className="inline-icon" /> General
+                </button>
+                <button
+                  onClick={() => setActiveTab('config')}
+                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                    activeTab === 'config'
+                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <Settings size={18} strokeWidth={2} className="inline-icon" /> Configuración
+                </button>
+                </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">
-                  {formData.type === 'link' ? 'URL' : 'Contenido'}*
-                </label>
-                <textarea
-                  className="input"
-                  rows={formData.type === 'link' ? 2 : 6}
-                  value={formData.body}
-                  onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                  placeholder={formData.type === 'link' ? 'https://...' : 'Escribe el contenido...'}
-                  required
-                />
-              </div>
-              </form>
-            </div>
+              <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+                {/* TAB: GENERAL */}
+                {activeTab === 'general' && (
+                  <div className="pt-6">
+                    <div className="form-group">
+                      <label className="form-label">Título*</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </div>
 
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => setShowCreateModal(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                onClick={handleCreate}
-              >
-                Crear Contenido
-              </button>
+                    <div className="form-group">
+                      <label className="form-label">Tipo*</label>
+                      <select
+                        className="select"
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      >
+                        <option value="lesson">Lección</option>
+                        <option value="reading">Lectura</option>
+                        <option value="video">Video</option>
+                        <option value="link">Enlace</option>
+                        <option disabled>──────────</option>
+                        <option value="multiple_choice">Ejercicio: Opción Múltiple</option>
+                        <option value="fill_blank">Ejercicio: Completar Espacios</option>
+                        <option value="drag_drop">Ejercicio: Drag & Drop</option>
+                        <option value="highlight">Ejercicio: Resaltar Palabras</option>
+                        <option value="order_sentence">Ejercicio: Ordenar Oración</option>
+                        <option value="true_false">Ejercicio: Verdadero/Falso</option>
+                        <option value="matching">Ejercicio: Relacionar</option>
+                        <option value="table">Ejercicio: Tabla</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">
+                        {formData.type === 'link' ? 'URL' : 'Contenido'}*
+                      </label>
+                      <textarea
+                        className="input"
+                        rows={formData.type === 'link' ? 2 : 6}
+                        value={formData.body}
+                        onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+                        placeholder={formData.type === 'link' ? 'https://...' : 'Escribe el contenido...'}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Imagen del Contenido</label>
+                      {formData.imageUrl ? (
+                        <div className="relative">
+                          <img
+                            src={formData.imageUrl}
+                            alt="Vista previa de la imagen del contenido"
+                            className="w-full h-48 object-cover rounded-lg mb-2"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            disabled={uploadingImage}
+                            className="btn btn-danger btn-sm"
+                          >
+                            {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            disabled={uploadingImage}
+                            className="block w-full text-sm text-gray-900 dark:text-gray-100
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-md file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-primary file:text-white
+                              hover:file:bg-primary-light
+                              file:cursor-pointer cursor-pointer"
+                          />
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            PNG, JPG, GIF o WEBP (máx. 5MB)
+                          </p>
+                        </div>
+                      )}
+                      {uploadingImage && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
+                          <Clock size={14} strokeWidth={2} /> Subiendo imagen...
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: CONFIGURACIÓN */}
+                {activeTab === 'config' && (
+                  <div className="space-y-6 pt-6">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      Próximamente: Configuraciones avanzadas del contenido
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer con botones (sin zona de peligro en crear) */}
+              <div className="px-6 pt-4 pb-4 flex-shrink-0">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline flex-1"
+                    onClick={() => setShowCreateModal(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary flex-1"
+                    onClick={handleCreate}
+                  >
+                    Crear Contenido
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -28,6 +28,7 @@ import {
   unenrollStudentFromCourse
 } from '../firebase/firestore';
 import { loadCourses } from '../firebase/firestore';
+import { getUserCredits } from '../firebase/credits';
 import CreditManager from './CreditManager';
 import StudentClassView from './StudentClassView';
 import { useViewAs } from '../contexts/ViewAsContext';
@@ -65,6 +66,9 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   const [availableCourses, setAvailableCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
 
+  // Estado para créditos
+  const [userCredits, setUserCredits] = useState(selectedUser?.credits || 0);
+
   useEffect(() => {
     // Only update formData if not currently editing
     // This prevents losing user changes if selectedUser updates
@@ -85,6 +89,23 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       loadCoursesData();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    // Cargar créditos del usuario
+    const loadUserCredits = async () => {
+      if (selectedUser?.id) {
+        try {
+          const creditsData = await getUserCredits(selectedUser.id);
+          if (creditsData) {
+            setUserCredits(creditsData.availableCredits || 0);
+          }
+        } catch (error) {
+          console.error('Error al cargar créditos:', error);
+        }
+      }
+    };
+    loadUserCredits();
+  }, [selectedUser?.id]);
 
   const loadCoursesData = async () => {
     setLoadingCourses(true);
@@ -211,7 +232,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   }
 
   return (
-    <>
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
       <div className="modal-header flex-shrink-0">
         <div className="flex items-center gap-4 flex-1">
@@ -224,26 +245,47 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
           </div>
           <div className="flex-1">
             <h3 className="modal-title mb-2 sm:mb-2">{selectedUser.name || selectedUser.email}</h3>
-            <div className="flex items-center gap-2 flex-wrap mt-2 sm:mt-0">
+            <div className="flex items-center gap-2 flex-wrap mt-2">
+              {/* Badge de Rol */}
               <span className="profile-role-badge">
                 {(() => {
                   const iconName = ROLE_INFO[selectedUser.role]?.icon || 'User';
                   const IconComponent = ICON_MAP[iconName] || User;
-                  return <IconComponent size={16} strokeWidth={2} style={{ display: 'inline', marginRight: '4px' }} />;
+                  return <IconComponent size={16} strokeWidth={2} className="inline mr-1" />;
                 })()}
                 {ROLE_INFO[selectedUser.role]?.name}
               </span>
+
+              {/* Badge de Estado */}
               <span className={`profile-status-badge status-${selectedUser.status}`}>
                 {selectedUser.status === 'active' ? (
-                  <span className="flex items-center gap-1"><CheckCircle size={16} strokeWidth={2} /> Activo</span>
+                  <span className="flex items-center gap-1">
+                    <CheckCircle size={16} strokeWidth={2} /> Activo
+                  </span>
                 ) : (
-                  <span className="flex items-center gap-1"><Ban size={16} strokeWidth={2} /> Suspendido</span>
+                  <span className="flex items-center gap-1">
+                    <Ban size={16} strokeWidth={2} /> Suspendido
+                  </span>
                 )}
               </span>
+
+              {/* Badge de Créditos */}
+              <span className="profile-role-badge" style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: '#78350f', border: '1px solid #fbbf24' }}>
+                <CreditCard size={16} strokeWidth={2} className="inline mr-1" />
+                {userCredits} créditos
+              </span>
+
+              {/* Badge Ver como (clickeable) */}
               {isAdmin && currentUser.uid !== selectedUser.id && (
-                <button onClick={handleViewAs} className="btn-view-as ml-2">
-                  <Eye size={16} strokeWidth={2} /> Ver como
-                </button>
+                <span
+                  onClick={handleViewAs}
+                  className="profile-role-badge cursor-pointer hover:opacity-80 transition-opacity"
+                  style={{ background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)', color: 'white', border: '1px solid #fb923c' }}
+                  title="Cambiar a la vista de este usuario"
+                >
+                  <Eye size={16} strokeWidth={2} className="inline mr-1" />
+                  Ver como
+                </span>
               )}
             </div>
           </div>
@@ -426,42 +468,6 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 )}
               </div>
             </div>
-
-            {/* Botones de acción al final */}
-            <div className="modal-footer">
-              {!editing ? (
-                <button className="btn btn-primary w-full" onClick={() => setEditing(true)}>
-                  <Edit size={18} strokeWidth={2} /> Editar Información
-                </button>
-              ) : (
-                <>
-                  <button
-                    className="btn btn-outline flex-1"
-                    onClick={() => {
-                      setEditing(false);
-                      setFormData({
-                        name: selectedUser.name || '',
-                        email: selectedUser.email || '',
-                        role: selectedUser.role || 'student',
-                        status: selectedUser.status || 'active',
-                        phone: selectedUser.phone || '',
-                        notes: selectedUser.notes || ''
-                      });
-                    }}
-                    disabled={saving}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    className="btn btn-primary flex-1"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
-                    <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar Cambios'}
-                  </button>
-                </>
-              )}
-            </div>
           </div>
         )}
 
@@ -564,7 +570,45 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
           </div>
         )}
       </div>
-    </>
+
+      {/* Footer - Fixed */}
+      <div className="px-6 pt-4 pb-4 flex-shrink-0">
+        <div className="flex gap-2">
+          {!editing ? (
+            <button className="btn btn-primary flex-1" onClick={() => setEditing(true)}>
+              <Edit size={18} strokeWidth={2} /> Editar Información
+            </button>
+          ) : (
+            <>
+              <button
+                className="btn btn-outline flex-1"
+                onClick={() => {
+                  setEditing(false);
+                  setFormData({
+                    name: selectedUser.name || '',
+                    email: selectedUser.email || '',
+                    role: selectedUser.role || 'student',
+                    status: selectedUser.status || 'active',
+                    phone: selectedUser.phone || '',
+                    notes: selectedUser.notes || ''
+                  });
+                }}
+                disabled={saving}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn btn-primary flex-1"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar Cambios'}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

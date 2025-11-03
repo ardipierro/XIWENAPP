@@ -715,8 +715,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
                 <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
               </button>
-              <button onClick={loadUsers} className="btn-icon-refresh" title="Actualizar">
-                <RefreshCw size={20} strokeWidth={2} />
+              <button onClick={loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Actualizar lista de usuarios">
+                <RefreshCw size={18} strokeWidth={2} /> Actualizar
               </button>
             </div>
           </div>

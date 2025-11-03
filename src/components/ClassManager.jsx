@@ -594,161 +594,184 @@ function ClassManager({ user, courses, onBack }) {
         {/* Modal de Crear/Editar Clase */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-box large" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>{editingClass ? 'Editar Clase' : 'Nueva Clase'}</h3>
-                <button onClick={() => setShowModal(false)} className="btn-close">×</button>
+            <div className="modal-box flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+              {/* Header - Fixed */}
+              <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
+                <h3 className="modal-title">{editingClass ? 'Editar Clase' : 'Nueva Clase'}</h3>
+                <button onClick={() => setShowModal(false)} className="modal-close-btn">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
               </div>
 
-              <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Nombre de la Clase *</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Ej: Mandarín HSK 1"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Descripción</label>
-                  <textarea
-                    className="input"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Descripción de la clase..."
-                    rows="3"
-                  />
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Curso Asociado</label>
-                    <select
-                      className="select"
-                      value={formData.courseId}
-                      onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
-                    >
-                      <option value="">-- Sin curso --</option>
-                      {courses.map(course => (
-                        <option key={course.id} value={course.id}>{course.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Costo en Créditos</label>
-                    <input
-                      type="number"
-                      className="input"
-                      value={formData.creditCost}
-                      onChange={(e) => setFormData({ ...formData, creditCost: parseInt(e.target.value) || 1 })}
-                      min="0"
-                      max="10"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Link de Videollamada</label>
-                  <input
-                    type="url"
-                    className="input"
-                    value={formData.meetingLink}
-                    onChange={(e) => setFormData({ ...formData, meetingLink: e.target.value })}
-                    placeholder="https://meet.google.com/..."
-                  />
-                </div>
-
-                {/* Sección de Horarios */}
-                <div className="schedules-section">
-                  <h4>Horarios de la Clase</h4>
-
-                  {formData.schedules.length > 0 && (
-                    <div className="mb-4">
-                      <div className="added-schedules mb-3">
-                        {formData.schedules.map((schedule, idx) => (
-                          <div key={idx} className="schedule-chip">
-                            <span>{getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}</span>
-                            <button onClick={() => handleRemoveSchedule(idx)} className="btn-remove">×</button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="space-y-3">
-                    <div className="mb-3">
-                      <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                        Días de la semana (selecciona uno o más)
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { value: 1, label: 'Lun' },
-                          { value: 2, label: 'Mar' },
-                          { value: 3, label: 'Mié' },
-                          { value: 4, label: 'Jue' },
-                          { value: 5, label: 'Vie' },
-                          { value: 6, label: 'Sáb' },
-                          { value: 0, label: 'Dom' }
-                        ].map(day => (
-                          <label key={day.value} className="flex items-center gap-1 cursor-pointer bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
-                            <input
-                              type="checkbox"
-                              checked={scheduleForm.daysOfWeek.includes(day.value)}
-                              onChange={() => handleDayToggle(day.value)}
-                              className="rounded"
-                            />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{day.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                          Hora de inicio
-                        </label>
-                        <input
-                          type="time"
-                          className="input w-full"
-                          value={scheduleForm.startTime}
-                          onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                          Hora de fin
-                        </label>
-                        <input
-                          type="time"
-                          className="input w-full"
-                          value={scheduleForm.endTime}
-                          onChange={(e) => setScheduleForm({ ...scheduleForm, endTime: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <button onClick={handleAddSchedule} className="btn btn-outline">
-                      + Agregar Horario
+              {/* Tabs Container - Fixed */}
+              <div className="flex flex-col flex-1 min-h-0">
+                <div className="modal-tabs-container">
+                  <div className="modal-tabs">
+                    <button className="py-2 px-4 font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-gray-400 dark:border-gray-500">
+                      <Calendar size={18} className="inline-block mr-1 mb-0.5" />
+                      Información
                     </button>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      <Lightbulb size={14} strokeWidth={2} className="inline-icon" /> Selecciona varios días para crear horarios múltiples a la vez
-                    </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="modal-footer">
-                <button onClick={() => setShowModal(false)} className="btn btn-ghost">
-                  Cancelar
-                </button>
-                <button onClick={handleSaveClass} className="btn btn-primary">
-                  {editingClass ? 'Guardar Cambios' : 'Crear Clase'}
-                </button>
+                {/* Modal Body - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+                  <div className="space-y-4 pt-6">
+                    <div className="form-group">
+                      <label className="form-label">Nombre de la Clase *</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Ej: Mandarín HSK 1"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Descripción</label>
+                      <textarea
+                        className="input"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Descripción de la clase..."
+                        rows="3"
+                      />
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Curso Asociado</label>
+                        <select
+                          className="select"
+                          value={formData.courseId}
+                          onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
+                        >
+                          <option value="">-- Sin curso --</option>
+                          {courses.map(course => (
+                            <option key={course.id} value={course.id}>{course.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Costo en Créditos</label>
+                        <input
+                          type="number"
+                          className="input"
+                          value={formData.creditCost}
+                          onChange={(e) => setFormData({ ...formData, creditCost: parseInt(e.target.value) || 1 })}
+                          min="0"
+                          max="10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Link de Videollamada</label>
+                      <input
+                        type="url"
+                        className="input"
+                        value={formData.meetingLink}
+                        onChange={(e) => setFormData({ ...formData, meetingLink: e.target.value })}
+                        placeholder="https://meet.google.com/..."
+                      />
+                    </div>
+
+                    {/* Sección de Horarios */}
+                    <div className="schedules-section">
+                      <h4>Horarios de la Clase</h4>
+
+                      {formData.schedules.length > 0 && (
+                        <div className="mb-4">
+                          <div className="added-schedules mb-3">
+                            {formData.schedules.map((schedule, idx) => (
+                              <div key={idx} className="schedule-chip">
+                                <span>{getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}</span>
+                                <button onClick={() => handleRemoveSchedule(idx)} className="btn-remove">×</button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-3">
+                        <div className="mb-3">
+                          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                            Días de la semana (selecciona uno o más)
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { value: 1, label: 'Lun' },
+                              { value: 2, label: 'Mar' },
+                              { value: 3, label: 'Mié' },
+                              { value: 4, label: 'Jue' },
+                              { value: 5, label: 'Vie' },
+                              { value: 6, label: 'Sáb' },
+                              { value: 0, label: 'Dom' }
+                            ].map(day => (
+                              <label key={day.value} className="flex items-center gap-1 cursor-pointer bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                                <input
+                                  type="checkbox"
+                                  checked={scheduleForm?.daysOfWeek?.includes(day.value) || false}
+                                  onChange={() => handleDayToggle(day.value)}
+                                  className="rounded"
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">{day.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                              Hora de inicio
+                            </label>
+                            <input
+                              type="time"
+                              className="input w-full"
+                              value={scheduleForm?.startTime || '10:00'}
+                              onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                              Hora de fin
+                            </label>
+                            <input
+                              type="time"
+                              className="input w-full"
+                              value={scheduleForm?.endTime || '11:00'}
+                              onChange={(e) => setScheduleForm({ ...scheduleForm, endTime: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <button onClick={handleAddSchedule} className="btn btn-outline">
+                          + Agregar Horario
+                        </button>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <Lightbulb size={14} strokeWidth={2} className="inline-icon" /> Selecciona varios días para crear horarios múltiples a la vez
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer - Fixed */}
+                <div className="px-6 pt-4 pb-4 flex-shrink-0">
+                  <div className="flex gap-2">
+                    <button onClick={() => setShowModal(false)} className="btn btn-outline flex-1">
+                      Cancelar
+                    </button>
+                    <button onClick={handleSaveClass} className="btn btn-primary flex-1">
+                      {editingClass ? 'Guardar Cambios' : 'Crear Clase'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
