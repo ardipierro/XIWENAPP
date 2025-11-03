@@ -51,6 +51,7 @@ import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
 import { getClassesByTeacher } from '../firebase/classes';
 import { createUser } from '../firebase/users';
+import { getUserCredits } from '../firebase/credits';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
@@ -210,6 +211,18 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
+      // Cargar usuarios/alumnos para la tarjeta
+      if (isAdmin) {
+        const allUsers = await getAllUsers();
+        setUsers(allUsers);
+      } else {
+        const allUsers = await getAllUsers();
+        const students = allUsers.filter(u =>
+          ['student', 'listener', 'trial'].includes(u.role)
+        );
+        setUsers(students);
+      }
+
       // Cargar alumnos
       const students = await loadStudents();
       const activeStudents = students.filter(s => s.active !== false);
@@ -275,20 +288,39 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Funciones para gestión de usuarios/alumnos
   const loadUsers = async () => {
     try {
+      let usersToLoad;
       if (isAdmin) {
         // Admin ve todos los usuarios
-        const allUsers = await getAllUsers();
-        setUsers(allUsers);
-        console.log('Usuarios cargados:', allUsers.length);
+        usersToLoad = await getAllUsers();
       } else {
         // Profesores solo ven alumnos
         const allUsers = await getAllUsers();
-        const students = allUsers.filter(u =>
+        usersToLoad = allUsers.filter(u =>
           ['student', 'listener', 'trial'].includes(u.role)
         );
-        setUsers(students);
-        console.log('Alumnos cargados:', students.length);
       }
+
+      // Cargar créditos para cada usuario
+      const usersWithCredits = await Promise.all(
+        usersToLoad.map(async (userItem) => {
+          try {
+            const creditsData = await getUserCredits(userItem.id);
+            return {
+              ...userItem,
+              credits: creditsData?.availableCredits || 0
+            };
+          } catch (error) {
+            console.error(`Error cargando créditos para ${userItem.id}:`, error);
+            return {
+              ...userItem,
+              credits: 0
+            };
+          }
+        })
+      );
+
+      setUsers(usersWithCredits);
+      console.log('Usuarios cargados:', usersWithCredits.length);
     } catch (error) {
       console.error('Error cargando usuarios:', error);
       showError('Error al cargar usuarios');
@@ -697,7 +729,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           </button>
 
           {/* Header unificado */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
               {isAdmin ? (
                 <>
@@ -711,11 +743,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 </>
               )}
             </div>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary w-full sm:w-auto">
                 <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
               </button>
-              <button onClick={loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Actualizar lista de usuarios">
+              <button onClick={loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full sm:w-auto" title="Actualizar lista de usuarios">
                 <RefreshCw size={18} strokeWidth={2} /> Actualizar
               </button>
             </div>
@@ -746,8 +778,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   <thead>
                     <tr>
                       <th>Usuario</th>
-                      <th>Email</th>
                       <th>Créditos</th>
+                      <th>Email</th>
                       {isAdmin && <th>Rol</th>}
                       <th>Estado</th>
                       {isAdmin && <th>Registro</th>}
@@ -778,9 +810,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                           </div>
                         </td>
 
-                        <td className="email-cell">{userItem.email}</td>
-
                         <td className="credits-cell">{userItem.credits || 0}</td>
+
+                        <td className="email-cell">{userItem.email}</td>
 
                         {isAdmin && (
                           <td>
