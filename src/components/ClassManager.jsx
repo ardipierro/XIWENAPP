@@ -1343,7 +1343,7 @@ function ClassManager({ user, courses, onBack }) {
                       }}
                       className="btn btn-danger w-full"
                     >
-                      <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Clase Permanentemente
+                      <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Permanentemente
                     </button>
                   </div>
 

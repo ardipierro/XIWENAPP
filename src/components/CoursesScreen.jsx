@@ -943,7 +943,7 @@ function CoursesScreen({ onBack, user }) {
                     }
                   }}
                 >
-                  <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Curso Permanentemente
+                  <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Permanentemente
                 </button>
               </div>
 

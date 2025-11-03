@@ -861,7 +861,7 @@ function ContentManager({ user, courses = [], onBack }) {
                       }
                     }}
                   >
-                    <Trash2 size={16} strokeWidth={2} /> Eliminar Contenido Permanentemente
+                    <Trash2 size={16} strokeWidth={2} /> Eliminar Permanentemente
                   </button>
                 </div>
 
