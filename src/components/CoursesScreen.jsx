@@ -902,7 +902,7 @@ function CoursesScreen({ onBack, user }) {
             </div>
 
             {/* Zona de Peligro + Botones - Footer fijo */}
-            <div className="px-6 pt-4 pb-4 border-t-2 border-red-200 dark:border-red-900 flex-shrink-0">
+            <div className="px-6 pt-4 pb-4 flex-shrink-0">
               <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4">
                 <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
                 <p className="text-xs text-red-700 dark:text-red-400 mb-3">
