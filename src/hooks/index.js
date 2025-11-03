@@ -3,13 +3,21 @@
  * @module hooks
  */
 
-// Hooks existentes
+// Hooks de autenticación y datos
 export { default as useAuth } from './useAuth.js';
 export { default as useFirestore } from './useFirestore.js';
+
+// Hooks de recursos
 export { default as useCourses } from './useCourses.js';
 export { default as useStudents } from './useStudents.js';
+export { useUsers } from './useUsers.js';
+export { default as useClasses } from './useClasses.js';
+export { default as useContent } from './useContent.js';
+export { default as useExercises } from './useExercises.js';
+export { default as useGroups } from './useGroups.js';
+export { useDashboard } from './useDashboard.js';
 
-// Nuevos hooks utilitarios
+// Hooks utilitarios
 export { useDateFormatter, default as useDateFormatterDefault } from './useDateFormatter.js';
 export { useModal, default as useModalDefault } from './useModal.js';
 export { useRole, default as useRoleDefault } from './useRole.js';
@@ -18,3 +26,5 @@ export { useFirebaseError, default as useFirebaseErrorDefault } from './useFireb
 export { useDebounce, default as useDebounceDefault } from './useDebounce.js';
 export { useLocalStorage, default as useLocalStorageDefault } from './useLocalStorage.js';
 export { usePagination, default as usePaginationDefault } from './usePagination.js';
+export { useProfileEditor } from './useProfileEditor.js';
+export { useEnrollments } from './useEnrollments.js';
