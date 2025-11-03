@@ -1,14 +1,40 @@
+/**
+ * @fileoverview Gestor de ejercicios con CRUD completo
+ * @module components/ExerciseManager
+ */
+
 import { useState, useEffect } from 'react';
 import { Eye, Trash2, Edit, Plus, CheckCircle, AlertTriangle, Calendar, FileText, BookMarked, BarChart3, Settings, Gamepad2 } from 'lucide-react';
-import { getExercisesByTeacher, createExercise, updateExercise, getExerciseById, deleteExercise } from '../firebase/exercises';
+import { useExercises } from '../hooks/useExercises.js';
+import ExerciseRepository from '../services/ExerciseRepository.js';
 import {
   updateExerciseCourses,
   getCoursesWithExercise
-} from '../firebase/relationships';
+} from '../firebase/relationships.js';
+import logger from '../utils/logger.js';
 
+/**
+ * Componente para gestión de ejercicios
+ * @param {Object} props
+ * @param {Object} props.user - Usuario actual
+ * @param {Function} [props.onPlayExercise] - Callback al iniciar ejercicio
+ * @param {Array} [props.courses] - Cursos disponibles
+ */
 function ExerciseManager({ user, onPlayExercise, courses = [] }) {
-  const [exercises, setExercises] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Hook de ejercicios
+  const {
+    exercises,
+    loading,
+    error,
+    operationLoading,
+    operationError,
+    createExercise: createExerciseHook,
+    updateExercise: updateExerciseHook,
+    deleteExercise: deleteExerciseHook,
+    refetch
+  } = useExercises({ teacherId: user.uid });
+
+  // Estados locales de UI
   const [filter, setFilter] = useState('all'); // all, multiple_choice, fill_blank, etc.
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
@@ -29,24 +55,23 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
   });
   const [questionsText, setQuestionsText] = useState('');
 
+  // Cargar relaciones de cursos cuando cambian los ejercicios
   useEffect(() => {
-    loadExercises();
-  }, [user]);
+    loadCoursesForExercises();
+  }, [exercises]);
 
-  const loadExercises = async () => {
-    setLoading(true);
-    const data = await getExercisesByTeacher(user.uid);
-    setExercises(data);
+  /**
+   * Carga las relaciones de cursos para todos los ejercicios
+   */
+  const loadCoursesForExercises = async () => {
+    if (!exercises || exercises.length === 0) return;
 
-    // Load course relationships for each exercise
     const coursesMap = {};
-    for (const exercise of data) {
+    for (const exercise of exercises) {
       const exerciseCrs = await getCoursesWithExercise(exercise.id);
       coursesMap[exercise.id] = exerciseCrs;
     }
     setExerciseCourses(coursesMap);
-
-    setLoading(false);
   };
 
   // Función para parsear preguntas desde texto (formato: 1 pregunta + 4 opciones)
@@ -86,11 +111,15 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
     return parsedQuestions;
   };
 
+  /**
+   * Crea un nuevo ejercicio
+   * @param {Event} e - Evento del formulario
+   */
   const handleCreate = async (e) => {
     e.preventDefault();
 
-    // Create exercise without courseId (will use relationships instead)
-    const result = await createExercise({
+    // Create exercise using hook
+    const result = await createExerciseHook({
       title: formData.title,
       type: formData.type,
       description: formData.description,
@@ -107,7 +136,9 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
         await updateExerciseCourses(result.id, formData.courseIds);
       }
 
-      loadExercises();
+      // Refetch después de crear relaciones
+      await refetch();
+
       setShowCreateModal(false);
       setFormData({
         title: '',
@@ -119,51 +150,72 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
         courseIds: [],
         questions: []
       });
+
+      logger.info('Ejercicio creado exitosamente', 'ExerciseManager');
     } else {
       alert('Error al crear ejercicio: ' + result.error);
+      logger.error('Error al crear ejercicio', result.error, 'ExerciseManager');
     }
   };
 
+  /**
+   * Abre el modal de edición con los datos del ejercicio
+   * @param {string} exerciseId - ID del ejercicio a editar
+   */
   const handleEdit = async (exerciseId) => {
-    const exercise = await getExerciseById(exerciseId);
-    if (exercise) {
-      // Load course relationships
-      const exerciseCrs = await getCoursesWithExercise(exerciseId);
-      const courseIds = exerciseCrs.map(c => c.id);
+    try {
+      const result = await ExerciseRepository.getById(exerciseId);
 
-      setSelectedExercise(exercise);
-      setFormData({
-        title: exercise.title || '',
-        type: exercise.type || 'multiple_choice',
-        description: exercise.description || '',
-        category: exercise.category || '',
-        difficulty: exercise.difficulty || 'medium',
-        tags: exercise.tags ? exercise.tags.join(', ') : '',
-        courseIds: courseIds,
-        questions: exercise.questions || []
-      });
+      if (result.success && result.data) {
+        const exercise = result.data;
 
-      // Convertir preguntas existentes a formato texto
-      if (exercise.questions && exercise.questions.length > 0) {
-        const questionsAsText = exercise.questions.map(q => {
-          const lines = [q.question || q.text];
-          if (q.options) {
-            q.options.forEach((opt, idx) => {
-              const prefix = idx === q.correctAnswer ? '1. ' : `${idx + 1}. `;
-              lines.push(prefix + opt);
-            });
-          }
-          return lines.join('\n');
-        }).join('\n\n');
-        setQuestionsText(questionsAsText);
+        // Load course relationships
+        const exerciseCrs = await getCoursesWithExercise(exerciseId);
+        const courseIds = exerciseCrs.map(c => c.id);
+
+        setSelectedExercise(exercise);
+        setFormData({
+          title: exercise.title || '',
+          type: exercise.type || 'multiple_choice',
+          description: exercise.description || '',
+          category: exercise.category || '',
+          difficulty: exercise.difficulty || 'medium',
+          tags: exercise.tags ? exercise.tags.join(', ') : '',
+          courseIds: courseIds,
+          questions: exercise.questions || []
+        });
+
+        // Convertir preguntas existentes a formato texto
+        if (exercise.questions && exercise.questions.length > 0) {
+          const questionsAsText = exercise.questions.map(q => {
+            const lines = [q.question || q.text];
+            if (q.options) {
+              q.options.forEach((opt, idx) => {
+                const prefix = idx === q.correctAnswer ? '1. ' : `${idx + 1}. `;
+                lines.push(prefix + opt);
+              });
+            }
+            return lines.join('\n');
+          }).join('\n\n');
+          setQuestionsText(questionsAsText);
+        } else {
+          setQuestionsText('');
+        }
+
+        setShowEditModal(true);
       } else {
-        setQuestionsText('');
+        alert('Error al cargar ejercicio: ' + result.error);
       }
-
-      setShowEditModal(true);
+    } catch (err) {
+      logger.error('Error en handleEdit', err, 'ExerciseManager');
+      alert('Error al cargar ejercicio');
     }
   };
 
+  /**
+   * Actualiza un ejercicio existente
+   * @param {Event} e - Evento del formulario
+   */
   const handleUpdate = async (e) => {
     e.preventDefault();
 
@@ -173,8 +225,8 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       parsedQuestions = parseQuestions(questionsText);
     }
 
-    // Update exercise data
-    const result = await updateExercise(selectedExercise.id, {
+    // Update exercise data using hook
+    const result = await updateExerciseHook(selectedExercise.id, {
       title: formData.title,
       type: formData.type,
       description: formData.description,
@@ -188,7 +240,9 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       // Update course relationships
       await updateExerciseCourses(selectedExercise.id, formData.courseIds);
 
-      loadExercises();
+      // Refetch después de actualizar relaciones
+      await refetch();
+
       setShowEditModal(false);
       setSelectedExercise(null);
       setFormData({
@@ -202,26 +256,47 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
         questions: []
       });
       setQuestionsText('');
+
+      logger.info('Ejercicio actualizado exitosamente', 'ExerciseManager');
     } else {
       alert('Error al actualizar ejercicio: ' + result.error);
+      logger.error('Error al actualizar ejercicio', result.error, 'ExerciseManager');
     }
   };
 
+  /**
+   * Abre el modal de visualización del ejercicio
+   * @param {string} exerciseId - ID del ejercicio a visualizar
+   */
   const handleView = async (exerciseId) => {
-    const exercise = await getExerciseById(exerciseId);
-    if (exercise) {
-      setSelectedExercise(exercise);
-      setShowViewModal(true);
+    try {
+      const result = await ExerciseRepository.getById(exerciseId);
+
+      if (result.success && result.data) {
+        setSelectedExercise(result.data);
+        setShowViewModal(true);
+      } else {
+        alert('Error al cargar ejercicio: ' + result.error);
+      }
+    } catch (err) {
+      logger.error('Error en handleView', err, 'ExerciseManager');
+      alert('Error al cargar ejercicio');
     }
   };
 
+  /**
+   * Elimina un ejercicio
+   * @param {string} exerciseId - ID del ejercicio a eliminar
+   */
   const handleDelete = async (exerciseId) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este ejercicio?')) {
-      const result = await deleteExercise(exerciseId);
+      const result = await deleteExerciseHook(exerciseId);
       if (result.success) {
-        setExercises(exercises.filter(ex => ex.id !== exerciseId));
+        logger.info('Ejercicio eliminado exitosamente', 'ExerciseManager');
+        // El hook ya actualiza la lista automáticamente con refetch
       } else {
-        alert('Error al eliminar el ejercicio');
+        alert('Error al eliminar el ejercicio: ' + result.error);
+        logger.error('Error al eliminar ejercicio', result.error, 'ExerciseManager');
       }
     }
   };
@@ -268,13 +343,13 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
   return (
     <div className="exercise-manager">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-3">
           <Gamepad2 size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Ejercicios</h1>
         </div>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary w-full sm:w-auto"
           onClick={() => setShowCreateModal(true)}
         >
           + Crear Nuevo Ejercicio
@@ -309,7 +384,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
         /* Vista Grilla */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredExercises.map((exercise) => (
-            <div key={exercise.id} className="card flex flex-col overflow-hidden" style={{ padding: 0 }}>
+            <div key={exercise.id} className="card card-grid-item flex flex-col overflow-hidden" style={{ padding: 0 }}>
               {/* Placeholder con icono - Mitad superior sin bordes */}
               <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                 <Gamepad2 size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />

@@ -22,7 +22,7 @@
 
 .form-label.required::after {
   content: ' *';
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 /* Inputs */
@@ -45,8 +45,8 @@
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--color-bg-primary);
+  box-shadow: var(--shadow-focus), var(--shadow-md);
 }
 
 .form-input:disabled,
@@ -74,8 +74,8 @@
 /* Error Message */
 .error-message {
   padding: 12px 16px;
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-error-bg);
+  color: var(--color-error-dark);
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;

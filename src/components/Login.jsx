@@ -1,120 +1,137 @@
+/**
+ * @fileoverview Componente de Login/Registro refactorizado
+ * Usa useAuth hook para toda la lógica de autenticación
+ * @module components/Login
+ */
+
 import { useState } from 'react';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail 
-} from 'firebase/auth';
-import { auth } from '../firebase/config';
-import { setUserRole } from '../firebase/firestore'; // ⭐ NUEVO: Importar para setear rol en register
+import { LogIn, UserPlus, AlertCircle, CheckCircle, Loader, Lock } from 'lucide-react';
+import useAuth from '../hooks/useAuth.js';
+import { PASSWORD_RESET_NOTIFICATION_DURATION } from '../constants/auth.js';
 import './Login.css';
 
+/**
+ * Componente de Login y Registro
+ * Maneja ambos flujos en un solo componente con toggle
+ */
 function Login() {
+  // Estado local del componente (solo UI)
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
+  // Hook de autenticación (toda la lógica viene de aquí)
+  const { login, register, resetPassword, loading } = useAuth();
+
+  /**
+   * Maneja el inicio de sesión
+   * @param {React.FormEvent} e - Evento del formulario
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setFieldErrors({});
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // El usuario ya está autenticado, App.jsx lo manejará
-    } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      
-      // Mensajes de error en español
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        setError('Email o contraseña incorrectos');
-      } else if (error.code === 'auth/user-not-found') {
-        setError('No existe una cuenta con este email');
-      } else if (error.code === 'auth/invalid-email') {
-        setError('Email inválido');
-      } else if (error.code === 'auth/too-many-requests') {
-        setError('Demasiados intentos. Intenta más tarde');
+    const result = await login(email, password);
+
+    if (!result.success) {
+      if (result.errors) {
+        // Errores de validación por campo
+        setFieldErrors(result.errors);
+        // Mostrar el primer error como mensaje general
+        const firstError = Object.values(result.errors)[0];
+        setError(firstError);
       } else {
-        setError('Error al iniciar sesión. Intenta de nuevo');
+        // Error general de autenticación
+        setError(result.error);
       }
-    } finally {
-      setLoading(false);
     }
+    // Si success=true, el AuthContext ya actualizó el user y App.jsx redirigirá
   };
 
+  /**
+   * Maneja el registro de nuevo usuario
+   * @param {React.FormEvent} e - Evento del formulario
+   */
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
 
-    // Validaciones
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
+    const result = await register({
+      email,
+      password,
+      confirmPassword,
+      name: email.split('@')[0] // Default name del email
+    });
 
-    if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // ⭐ NUEVO: Setear rol default 'teacher' en Firestore
-      await setUserRole(userCredential.user.uid, 'teacher');
-      // El usuario ya está autenticado, App.jsx lo manejará
-    } catch (error) {
-      console.error('Error al registrarse:', error);
-      
-      if (error.code === 'auth/email-already-in-use') {
-        setError('Ya existe una cuenta con este email');
-      } else if (error.code === 'auth/invalid-email') {
-        setError('Email inválido');
-      } else if (error.code === 'auth/weak-password') {
-        setError('La contraseña es muy débil');
+    if (!result.success) {
+      if (result.errors) {
+        // Errores de validación por campo
+        setFieldErrors(result.errors);
+        // Mostrar el primer error como mensaje general
+        const firstError = Object.values(result.errors)[0];
+        setError(firstError);
       } else {
-        setError('Error al crear la cuenta. Intenta de nuevo');
+        // Error general
+        setError(result.error);
       }
-    } finally {
-      setLoading(false);
     }
+    // Si success=true, el usuario ya está autenticado y App.jsx redirigirá
   };
 
+  /**
+   * Maneja el reseteo de contraseña
+   */
   const handleResetPassword = async () => {
+    setError('');
+    setFieldErrors({});
+
     if (!email) {
       setError('Ingresa tu email para recuperar la contraseña');
       return;
     }
 
-    setError('');
-    setLoading(true);
+    const result = await resetPassword(email);
 
-    try {
-      await sendPasswordResetEmail(auth, email);
+    if (result.success) {
       setResetEmailSent(true);
-      setTimeout(() => setResetEmailSent(false), 5000);
-    } catch (error) {
-      console.error('Error al enviar email:', error);
-      
-      if (error.code === 'auth/user-not-found') {
-        setError('No existe una cuenta con este email');
-      } else if (error.code === 'auth/invalid-email') {
-        setError('Email inválido');
-      } else {
-        setError('Error al enviar el email. Intenta de nuevo');
-      }
-    } finally {
-      setLoading(false);
+      setError('');
+      // Auto-hide después de 5 segundos
+      setTimeout(() => setResetEmailSent(false), PASSWORD_RESET_NOTIFICATION_DURATION);
+    } else {
+      setError(result.error);
     }
+  };
+
+  /**
+   * Cambia entre modo login y registro
+   */
+  const toggleMode = () => {
+    setIsRegistering(!isRegistering);
+    setError('');
+    setFieldErrors({});
+    setConfirmPassword('');
+    setResetEmailSent(false);
+  };
+
+  /**
+   * Verifica si un campo tiene error de validación
+   * @param {string} field - Nombre del campo
+   * @returns {boolean}
+   */
+  const hasFieldError = (field) => {
+    return fieldErrors[field] !== undefined;
   };
 
   return (
     <div className="login-container">
       <div className="login-box">
+        {/* Header */}
         <div className="login-header">
           <h1>XIWEN</h1>
           <p className="login-subtitle">
@@ -122,7 +139,9 @@ function Login() {
           </p>
         </div>
 
+        {/* Formulario */}
         <form onSubmit={isRegistering ? handleRegister : handleLogin}>
+          {/* Email */}
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -133,9 +152,18 @@ function Login() {
               placeholder="profesor@escuela.com"
               required
               disabled={loading}
+              className={hasFieldError('email') ? 'input-error' : ''}
+              aria-invalid={hasFieldError('email')}
+              aria-describedby={hasFieldError('email') ? 'email-error' : undefined}
             />
+            {hasFieldError('email') && (
+              <span id="email-error" className="field-error">
+                {fieldErrors.email}
+              </span>
+            )}
           </div>
 
+          {/* Contraseña */}
           <div className="form-group">
             <label htmlFor="password">Contraseña</label>
             <input
@@ -146,9 +174,18 @@ function Login() {
               placeholder="Mínimo 6 caracteres"
               required
               disabled={loading}
+              className={hasFieldError('password') ? 'input-error' : ''}
+              aria-invalid={hasFieldError('password')}
+              aria-describedby={hasFieldError('password') ? 'password-error' : undefined}
             />
+            {hasFieldError('password') && (
+              <span id="password-error" className="field-error">
+                {fieldErrors.password}
+              </span>
+            )}
           </div>
 
+          {/* Confirmar contraseña (solo en registro) */}
           {isRegistering && (
             <div className="form-group">
               <label htmlFor="confirmPassword">Confirmar contraseña</label>
@@ -160,30 +197,55 @@ function Login() {
                 placeholder="Repite tu contraseña"
                 required
                 disabled={loading}
+                className={hasFieldError('confirmPassword') ? 'input-error' : ''}
+                aria-invalid={hasFieldError('confirmPassword')}
+                aria-describedby={hasFieldError('confirmPassword') ? 'confirm-password-error' : undefined}
               />
+              {hasFieldError('confirmPassword') && (
+                <span id="confirm-password-error" className="field-error">
+                  {fieldErrors.confirmPassword}
+                </span>
+              )}
             </div>
           )}
 
+          {/* Mensajes de error */}
           {error && (
-            <div className="error-message">
-              ⚠️ {error}
+            <div className="error-message" role="alert">
+              <AlertCircle size={16} />
+              <span>{error}</span>
             </div>
           )}
 
+          {/* Mensaje de éxito (reseteo de contraseña) */}
           {resetEmailSent && (
-            <div className="success-message">
-              ✅ Email enviado. Revisa tu bandeja de entrada
+            <div className="success-message" role="status">
+              <CheckCircle size={16} />
+              <span>Email enviado. Revisa tu bandeja de entrada</span>
             </div>
           )}
 
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading}
-          >
-            {loading ? '⏳ Cargando...' : (isRegistering ? '✅ Crear cuenta' : '🔓 Ingresar')}
+          {/* Botón principal */}
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader size={16} className="spinner" />
+                <span>Cargando...</span>
+              </>
+            ) : isRegistering ? (
+              <>
+                <UserPlus size={16} />
+                <span>Crear cuenta</span>
+              </>
+            ) : (
+              <>
+                <LogIn size={16} />
+                <span>Ingresar</span>
+              </>
+            )}
           </button>
 
+          {/* Botón de resetear contraseña (solo en login) */}
           {!isRegistering && (
             <button
               type="button"
@@ -195,33 +257,19 @@ function Login() {
             </button>
           )}
 
+          {/* Toggle entre login/registro */}
           <div className="toggle-mode">
             {isRegistering ? (
               <p>
                 ¿Ya tienes cuenta?{' '}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsRegistering(false);
-                    setError('');
-                    setConfirmPassword('');
-                  }}
-                  disabled={loading}
-                >
+                <button type="button" onClick={toggleMode} disabled={loading}>
                   Inicia sesión
                 </button>
               </p>
             ) : (
               <p>
                 ¿Primera vez?{' '}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsRegistering(true);
-                    setError('');
-                  }}
-                  disabled={loading}
-                >
+                <button type="button" onClick={toggleMode} disabled={loading}>
                   Crear cuenta
                 </button>
               </p>
@@ -229,8 +277,12 @@ function Login() {
           </div>
         </form>
 
+        {/* Footer */}
         <div className="login-footer">
-          <p>🔒 Acceso exclusivo para profesores</p>
+          <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <Lock size={14} />
+            <span>Acceso exclusivo para profesores</span>
+          </p>
           <p className="info-text">
             Todas las preguntas, alumnos e historial son compartidos entre profesores
           </p>

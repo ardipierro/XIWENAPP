@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Menú lateral de navegación del dashboard
+ * @module components/SideMenu
+ */
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   BarChart3,
@@ -11,6 +16,17 @@ import {
 } from 'lucide-react';
 import './SideMenu.css';
 
+/**
+ * Menú lateral de navegación
+ * Renderiza diferentes opciones según el rol del usuario
+ *
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Si el menú está abierto
+ * @param {string} props.userRole - Rol del usuario
+ * @param {Function} props.onNavigate - Callback al navegar
+ * @param {Function} props.onMenuAction - Callback para acciones del menú
+ * @param {string} props.currentScreen - Pantalla actual activa
+ */
 function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -103,14 +119,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               );
             })}
           </nav>
-
-          {/* Footer del menú */}
-          <div className="sidemenu-footer">
-            <div className="sidemenu-version">
-              <span className="version-label">XIWEN APP</span>
-              <span className="version-number">v1.0.0</span>
-            </div>
-          </div>
         </div>
       </aside>
     </>

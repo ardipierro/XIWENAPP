@@ -262,37 +262,6 @@ function StudentClassView({ student }) {
         </div>
       )}
 
-      {/* Debug Info - Grupos */}
-      {studentGroups.length > 0 && (
-        <div className="alert" style={{ marginBottom: '20px', background: 'var(--color-bg-info)', borderLeft: '4px solid var(--color-border-info)' }}>
-          <h4 className="font-semibold flex items-center gap-2 mb-2">
-            <Users size={18} strokeWidth={2} /> Mis Grupos ({studentGroups.length})
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {studentGroups.map(group => (
-              <span
-                key={group.id}
-                className="px-3 py-1 text-white rounded-md text-sm font-semibold"
-                style={{ background: group.color || '#6366f1' }}
-              >
-                {group.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {studentGroups.length === 0 && (
-        <div className="alert alert-warning mb-5">
-          <h4 className="font-semibold flex items-center gap-2 mb-2">
-            <AlertTriangle size={18} strokeWidth={2} /> No perteneces a ningún grupo
-          </h4>
-          <p className="text-sm">
-            Debes ser agregado a un grupo por tu profesor para ver las clases programadas.
-          </p>
-        </div>
-      )}
-
       {/* Instances List */}
       {instances.length === 0 ? (
         <div className="empty-classes">

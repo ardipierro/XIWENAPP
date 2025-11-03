@@ -218,17 +218,24 @@ export async function getUpcomingInstances(limit = 20) {
  */
 export async function getInstancesForStudent(studentId, limit = 50) {
   try {
+    // Query simplificado sin orderBy para evitar requerir índice compuesto
     const q = query(
       collection(db, 'class_instances'),
-      where('studentIds', 'array-contains', studentId),
-      orderBy('date', 'asc')
+      where('studentIds', 'array-contains', studentId)
     );
 
     const snapshot = await getDocs(q);
-    const instances = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const instances = snapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      // Ordenar en memoria por fecha
+      .sort((a, b) => {
+        const dateA = a.date?.toMillis?.() || 0;
+        const dateB = b.date?.toMillis?.() || 0;
+        return dateA - dateB; // Ascendente
+      });
 
     return instances.slice(0, limit);
   } catch (error) {

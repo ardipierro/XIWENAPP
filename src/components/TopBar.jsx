@@ -1,12 +1,28 @@
+/**
+ * @fileoverview Barra superior del dashboard con navegación y menú de usuario
+ * @module components/TopBar
+ */
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, MessageCircle } from 'lucide-react';
-import UserMenu from './UserMenu';
-import AvatarSelector, { AVATARS } from './AvatarSelector';
-import ProfilePanel from './ProfilePanel';
-import { getUserAvatar, updateUserAvatar } from '../firebase/firestore';
+import UserMenu from './UserMenu.jsx';
+import AvatarSelector, { AVATARS } from './AvatarSelector.jsx';
+import ProfilePanel from './ProfilePanel.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
+import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
 import './TopBar.css';
 
+/**
+ * Barra superior del dashboard
+ * Incluye toggle del sidebar, notificaciones, mensajes y menú de usuario
+ *
+ * @param {Object} props
+ * @param {Object} props.user - Usuario autenticado
+ * @param {string} props.userRole - Rol del usuario
+ * @param {Function} props.onToggleSidebar - Callback para toggle del sidebar
+ * @param {boolean} props.sidebarOpen - Si el sidebar está abierto
+ */
 function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -91,8 +107,11 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
           </div>
         </div>
 
-        {/* Sección Derecha: Notificaciones + Mensajes + Avatar */}
+        {/* Sección Derecha: Theme Toggle + Notificaciones + Mensajes + Avatar */}
         <div className="topbar-right">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Notificaciones */}
           <button className="icon-button" aria-label="Notificaciones">
             <Bell size={20} strokeWidth={2} />

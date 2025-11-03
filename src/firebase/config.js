@@ -1,11 +1,20 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { getFunctions } from "firebase/functions"; // ⭐ NUEVO: Para Cloud Functions si se usa para custom claims
-import { getStorage } from "firebase/storage"; // ⭐ NUEVO: Para almacenamiento de archivos
+/**
+ * @fileoverview Configuración centralizada de Firebase
+ * @module firebase/config
+ */
 
-// Your web app's Firebase configuration
-export const firebaseConfig = {
+import { initializeApp } from 'firebase/app';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import logger from '../utils/logger.js';
+
+/**
+ * Configuración de Firebase desde variables de entorno
+ * @type {import('firebase/app').FirebaseOptions}
+ */
+const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -14,19 +23,96 @@ export const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+/**
+ * Valida que todas las variables de entorno requeridas estén presentes
+ * @throws {Error} Si falta alguna variable de entorno
+ */
+function validateConfig() {
+  const required = [
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN',
+    'VITE_FIREBASE_PROJECT_ID',
+    'VITE_FIREBASE_STORAGE_BUCKET',
+    'VITE_FIREBASE_MESSAGING_SENDER_ID',
+    'VITE_FIREBASE_APP_ID'
+  ];
 
-// Initialize Firestore
+  const missing = required.filter((key) => !import.meta.env[key]);
+
+  if (missing.length > 0) {
+    const errorMessage = `Faltan variables de entorno de Firebase: ${missing.join(', ')}`;
+    logger.error(errorMessage, null, 'FirebaseConfig');
+    throw new Error(errorMessage);
+  }
+
+  logger.info('Configuración de Firebase validada correctamente', 'FirebaseConfig');
+}
+
+// Validar configuración antes de inicializar
+validateConfig();
+
+/**
+ * Instancia de Firebase App
+ * @type {import('firebase/app').FirebaseApp}
+ */
+let app;
+
+try {
+  app = initializeApp(firebaseConfig);
+  logger.info(`Firebase inicializado para proyecto: ${firebaseConfig.projectId}`, 'FirebaseConfig');
+} catch (error) {
+  logger.error('Error al inicializar Firebase', error, 'FirebaseConfig');
+  throw error;
+}
+
+/**
+ * Instancia de Firestore Database
+ * @type {import('firebase/firestore').Firestore}
+ */
 export const db = getFirestore(app);
 
-// Initialize Auth
+/**
+ * Instancia de Firebase Authentication
+ * @type {import('firebase/auth').Auth}
+ */
 export const auth = getAuth(app);
 
-// ⭐ NUEVO: Initialize Functions (para custom claims en futuro, opcional por ahora)
+/**
+ * Instancia de Firebase Functions
+ * @type {import('firebase/functions').Functions}
+ */
 export const functions = getFunctions(app);
 
-// ⭐ NUEVO: Initialize Storage (para subir imágenes y archivos)
+/**
+ * Instancia de Firebase Storage
+ * @type {import('firebase/storage').FirebaseStorage}
+ */
 export const storage = getStorage(app);
+
+/**
+ * Conectar a emuladores de Firebase si está en modo desarrollo
+ * Útil para testing local sin afectar producción
+ */
+if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true') {
+  try {
+    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    connectFunctionsEmulator(functions, 'localhost', 5001);
+    connectStorageEmulator(storage, 'localhost', 9199);
+    logger.info('Conectado a emuladores de Firebase', 'FirebaseConfig');
+  } catch (error) {
+    logger.warn('Error al conectar con emuladores de Firebase', 'FirebaseConfig');
+  }
+}
+
+/**
+ * Configuración exportada (solo para debugging, no incluye secrets)
+ */
+export const config = {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+  isDevelopment: import.meta.env.DEV,
+  isProduction: import.meta.env.PROD
+};
 
 export default app;

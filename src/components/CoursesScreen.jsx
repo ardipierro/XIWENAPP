@@ -41,6 +41,11 @@ function CoursesScreen({ onBack, user }) {
   const [allStudents, setAllStudents] = useState([]);
   const [loadingModalData, setLoadingModalData] = useState(false);
 
+  // Dropdown selections
+  const [selectedContentToAdd, setSelectedContentToAdd] = useState('');
+  const [selectedExerciseToAdd, setSelectedExerciseToAdd] = useState('');
+  const [selectedStudentToAdd, setSelectedStudentToAdd] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -93,33 +98,31 @@ function CoursesScreen({ onBack, user }) {
     setLoadingModalData(true);
 
     try {
-      // Load course content and exercises
-      const contents = await getCourseContents(course.id);
-      const exercises = await getCourseExercises(course.id);
+      // Load data in parallel for better performance
+      const [contents, exercises, allContents, allExercises, students] = await Promise.all([
+        getCourseContents(course.id),
+        getCourseExercises(course.id),
+        user ? getContentByTeacher(user.uid) : Promise.resolve([]),
+        user ? getExercisesByTeacher(user.uid) : Promise.resolve([]),
+        loadStudents()
+      ]);
+
       setCourseContents(contents);
       setCourseExercises(exercises);
-
-      // Load all available content and exercises
-      if (user) {
-        const allContents = await getContentByTeacher(user.uid);
-        const allExercises = await getExercisesByTeacher(user.uid);
-        setAvailableContents(allContents);
-        setAvailableExercises(allExercises);
-      }
-
-      // Load all students
-      const students = await loadStudents();
+      setAvailableContents(allContents);
+      setAvailableExercises(allExercises);
       setAllStudents(students);
 
-      // Load students assigned to this course
-      const studentsInCourse = [];
-      for (const student of students) {
-        const assignments = await getStudentAssignments(student.id);
-        const hasCourse = assignments.some(a => a.itemType === 'course' && a.itemId === course.id);
-        if (hasCourse) {
-          studentsInCourse.push(student);
-        }
-      }
+      // Query students assigned to this course in a single optimized query
+      const assignmentsQuery = query(
+        collection(db, 'student_assignments'),
+        where('itemType', '==', 'course'),
+        where('itemId', '==', course.id)
+      );
+      const assignmentsSnapshot = await getDocs(assignmentsQuery);
+      const assignedStudentIds = new Set(assignmentsSnapshot.docs.map(doc => doc.data().studentId));
+
+      const studentsInCourse = students.filter(student => assignedStudentIds.has(student.id));
       setCourseStudents(studentsInCourse);
 
     } catch (error) {
@@ -131,11 +134,13 @@ function CoursesScreen({ onBack, user }) {
   };
 
   const handleAddContent = async (contentId) => {
+    if (!contentId) return;
     try {
       await addContentToCourse(selectedCourse.id, contentId);
       // Reload course data
       const contents = await getCourseContents(selectedCourse.id);
       setCourseContents(contents);
+      setSelectedContentToAdd(''); // Reset dropdown
       loadAllCourses(); // Refresh counts
     } catch (error) {
       console.error('Error adding content:', error);
@@ -157,10 +162,12 @@ function CoursesScreen({ onBack, user }) {
   };
 
   const handleAddExercise = async (exerciseId) => {
+    if (!exerciseId) return;
     try {
       await addExerciseToCourse(selectedCourse.id, exerciseId);
       const exercises = await getCourseExercises(selectedCourse.id);
       setCourseExercises(exercises);
+      setSelectedExerciseToAdd(''); // Reset dropdown
       loadAllCourses();
     } catch (error) {
       console.error('Error adding exercise:', error);
@@ -182,6 +189,7 @@ function CoursesScreen({ onBack, user }) {
   };
 
   const handleAddStudent = async (studentId) => {
+    if (!studentId) return;
     try {
       await assignToStudent(studentId, 'course', selectedCourse.id, user.uid);
       // Reload students in course
@@ -189,6 +197,7 @@ function CoursesScreen({ onBack, user }) {
       if (student) {
         setCourseStudents([...courseStudents, student]);
       }
+      setSelectedStudentToAdd(''); // Reset dropdown
     } catch (error) {
       console.error('Error adding student:', error);
       alert('Error al asignar estudiante');
@@ -343,13 +352,13 @@ function CoursesScreen({ onBack, user }) {
       )}
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-3">
           <BookOpen size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Cursos</h1>
         </div>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary w-full sm:w-auto"
           onClick={() => setShowCreateModal(true)}
         >
           + Crear Nuevo Curso
@@ -381,14 +390,14 @@ function CoursesScreen({ onBack, user }) {
           {filteredCourses.map((course) => (
             <div
               key={course.id}
-              className="card cursor-pointer hover:shadow-lg transition-all duration-300"
-              style={{ padding: '12px' }}
-              onClick={() => handleOpenCourseModal(course, 'content')}
+              className="card card-grid-item flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
+              style={{ padding: 0 }}
+              onClick={() => handleOpenCourseModal(course, 'info')}
               title="Click para gestionar curso"
             >
-              {/* Course Image */}
+              {/* Course Image - Mitad superior sin bordes */}
               {course.imageUrl ? (
-                <div className="w-full h-32 mb-2 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                <div className="card-image-large">
                   <img
                     src={course.imageUrl}
                     alt={course.name}
@@ -400,36 +409,34 @@ function CoursesScreen({ onBack, user }) {
                   />
                 </div>
               ) : (
-                <div className="w-full h-32 mb-2 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <BookOpen size={40} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
+                <div className="card-image-large-placeholder">
+                  <BookOpen size={64} strokeWidth={2} />
                 </div>
               )}
 
-              {/* Course Info */}
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 line-clamp-1">
-                {course.name}
-              </h3>
+              <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
+                {/* Course Info */}
+                <h3 className="card-title">{course.name}</h3>
 
-              {course.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                  {course.description}
-                </p>
-              )}
+                {course.description && (
+                  <p className="card-description">{course.description}</p>
+                )}
 
-              {course.level && (
-                <div className="mb-2">
-                  <span className="badge badge-info text-xs">Nivel {course.level}</span>
+                {course.level && (
+                  <div className="card-badges">
+                    <span className="badge badge-info">Nivel {course.level}</span>
+                  </div>
+                )}
+
+                {/* Stats */}
+                <div className="card-stats">
+                  <span className="flex items-center gap-1">
+                    <FileText size={16} strokeWidth={2} /> {course.contentCount || 0} contenidos
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0} ejercicios
+                  </span>
                 </div>
-              )}
-
-              {/* Stats */}
-              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                <span className="flex items-center gap-1">
-                  <FileText size={16} strokeWidth={2} /> {course.contentCount || 0}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0}
-                </span>
               </div>
             </div>
           ))}
@@ -441,13 +448,13 @@ function CoursesScreen({ onBack, user }) {
             <div
               key={course.id}
               className="card cursor-pointer hover:shadow-lg transition-all duration-300"
-              onClick={() => handleOpenCourseModal(course, 'content')}
+              onClick={() => handleOpenCourseModal(course, 'info')}
               title="Click para gestionar curso"
             >
               <div className="flex gap-4 items-start">
                 {/* Course Image - Smaller in list view */}
                 {course.imageUrl ? (
-                  <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <div className="card-image-placeholder-sm overflow-hidden">
                     <img
                       src={course.imageUrl}
                       alt={course.name}
@@ -459,8 +466,8 @@ function CoursesScreen({ onBack, user }) {
                     />
                   </div>
                 ) : (
-                  <div className="w-24 h-24 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                    <BookOpen size={32} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
+                  <div className="card-image-placeholder-sm">
+                    <BookOpen size={48} strokeWidth={2} />
                   </div>
                 )}
 
@@ -507,10 +514,14 @@ function CoursesScreen({ onBack, user }) {
                 Crear Nuevo Curso
               </h3>
               <button
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+                className="modal-close-btn"
                 onClick={() => setShowCreateModal(false)}
+                aria-label="Cerrar modal"
               >
-                ×
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
 
@@ -553,23 +564,46 @@ function CoursesScreen({ onBack, user }) {
                 <div className="form-group">
                   <label className="form-label">Imagen del Curso</label>
                   {formData.imageUrl ? (
-                    <div className="mb-3">
-                      <img src={formData.imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
-                      <button type="button" className="btn btn-outline" onClick={handleRemoveImage}>
-                        <Trash2 size={16} strokeWidth={2} /> Eliminar Imagen
+                    <div className="relative">
+                      <img
+                        src={formData.imageUrl}
+                        alt="Vista previa de la imagen del curso"
+                        className="w-full h-48 object-cover rounded-lg mb-2"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        disabled={uploadingImage}
+                        className="btn btn-danger btn-sm"
+                      >
+                        {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
                       </button>
                     </div>
                   ) : (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="input"
-                      disabled={uploadingImage}
-                    />
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                        className="block w-full text-sm text-gray-900 dark:text-gray-100
+                          file:mr-4 file:py-2 file:px-4
+                          file:rounded-md file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-primary file:text-white
+                          hover:file:bg-primary-light
+                          file:cursor-pointer cursor-pointer"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        PNG, JPG, GIF o WEBP (máx. 5MB)
+                      </p>
+                    </div>
                   )}
-                  {uploadingImage && <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">⏳ Subiendo imagen...</p>}
-                  <p className="text-sm text-gray-500 mt-1">Máximo 5MB (JPG, PNG, GIF, WEBP)</p>
+                  {uploadingImage && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
+                      <Clock size={14} strokeWidth={2} /> Subiendo imagen...
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -608,11 +642,11 @@ function CoursesScreen({ onBack, user }) {
             </div>
 
             {/* Tabs - Fixed */}
-            <div className="border-b border-gray-200 dark:border-gray-700 px-6 flex-shrink-0">
-              <div className="flex gap-4">
+            <div className="modal-tabs-container">
+              <div className="modal-tabs">
                 <button
                   onClick={() => setActiveModalTab('info')}
-                  className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeModalTab === 'info'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -622,39 +656,29 @@ function CoursesScreen({ onBack, user }) {
                 </button>
                 <button
                   onClick={() => setActiveModalTab('content')}
-                  className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeModalTab === 'content'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
-<FileText size={18} strokeWidth={2} /> Contenidos ({courseContents.length})
-                </button>
-                <button
-                  onClick={() => setActiveModalTab('exercises')}
-                  className={`py-3 px-4 font-medium border-b-2 transition-colors ${
-                    activeModalTab === 'exercises'
-                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
-                >
-<Gamepad2 size={18} strokeWidth={2} /> Ejercicios ({courseExercises.length})
+<FileText size={18} strokeWidth={2} className="inline-icon" /> Contenidos ({courseContents.length})
                 </button>
                 <button
                   onClick={() => setActiveModalTab('students')}
-                  className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeModalTab === 'students'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
-<Users size={18} strokeWidth={2} /> Estudiantes ({courseStudents.length})
+<Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes ({courseStudents.length})
                 </button>
               </div>
             </div>
 
             {/* Modal Body - Scrollable */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
               {loadingModalData ? (
                 <div className="flex justify-center items-center py-8">
                   <div className="spinner"></div>
@@ -664,7 +688,7 @@ function CoursesScreen({ onBack, user }) {
                 <>
                   {/* Tab: Información del Curso */}
                   {activeModalTab === 'info' && (
-                    <form onSubmit={handleUpdate} className="space-y-4">
+                    <form onSubmit={handleUpdate} className="space-y-4 pt-6">
                       <div className="form-group">
                         <label className="form-label">Nombre del Curso *</label>
                         <input
@@ -700,40 +724,53 @@ function CoursesScreen({ onBack, user }) {
                       <div className="form-group">
                         <label className="form-label">Imagen del Curso</label>
                         {formData.imageUrl ? (
-                          <div className="mb-3">
-                            <img src={formData.imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg mb-2" />
-                            <button type="button" className="btn btn-outline" onClick={handleRemoveImage}>
-                              <Trash2 size={16} strokeWidth={2} /> Eliminar Imagen
+                          <div className="relative">
+                            <img
+                              src={formData.imageUrl}
+                              alt="Vista previa de la imagen del curso"
+                              className="w-full h-48 object-cover rounded-lg mb-2"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleRemoveImage}
+                              disabled={uploadingImage}
+                              className="btn btn-danger btn-sm"
+                            >
+                              {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
                             </button>
                           </div>
                         ) : (
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageUpload(e, true)}
-                            className="input"
-                            disabled={uploadingImage}
-                          />
+                          <div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleImageUpload(e, true)}
+                              disabled={uploadingImage}
+                              className="block w-full text-sm text-gray-900 dark:text-gray-100
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-primary file:text-white
+                                hover:file:bg-primary-light
+                                file:cursor-pointer cursor-pointer"
+                            />
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              PNG, JPG, GIF o WEBP (máx. 5MB)
+                            </p>
+                          </div>
                         )}
                         {uploadingImage && (
                           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
                             <Clock size={14} strokeWidth={2} /> Subiendo imagen...
                           </p>
                         )}
-                        <p className="text-sm text-gray-500 mt-1">Máximo 5MB (JPG, PNG, GIF, WEBP)</p>
-                      </div>
-
-                      <div className="flex flex-col gap-3">
-                        <button type="submit" className="btn btn-primary" disabled={uploadingImage}>
-                          {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
-                        </button>
                       </div>
                     </form>
                   )}
 
                   {/* Tab: Contenidos */}
                   {activeModalTab === 'content' && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 pt-6">
                       <div>
                         <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
                           Contenidos del Curso
@@ -761,92 +798,35 @@ function CoursesScreen({ onBack, user }) {
                       </div>
 
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-<Plus size={16} strokeWidth={2} /> Agregar Contenido
-                        </h4>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Agregar Contenido</h4>
+                        </div>
                         {availableContents.filter(c => !courseContents.some(cc => cc.id === c.id)).length === 0 ? (
                           <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los contenidos ya están asignados</p>
                         ) : (
-                          <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {availableContents
-                              .filter(c => !courseContents.some(cc => cc.id === c.id))
-                              .map(content => (
-                                <div key={content.id} className="flex items-center justify-between p-3 border border-gray-300 dark:border-gray-600 rounded">
-                                  <div className="flex-1">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">{content.title}</span>
-                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({content.type})</span>
-                                  </div>
-                                  <button
-                                    className="btn btn-sm btn-success"
-                                    onClick={() => handleAddContent(content.id)}
-                                  >
-                                    + Agregar
-                                  </button>
-                                </div>
-                              ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Tab: Ejercicios */}
-                  {activeModalTab === 'exercises' && (
-                    <div className="space-y-6">
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                          Ejercicios del Curso
-                        </h4>
-                        {courseExercises.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay ejercicios asignados</p>
-                        ) : (
-                          <div className="space-y-2">
-                            {courseExercises.map(exercise => (
-                              <div key={exercise.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                                <div className="flex-1">
-                                  <span className="font-medium text-gray-900 dark:text-gray-100">{exercise.title}</span>
-                                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                                    ({exercise.questions?.length || 0} preguntas)
-                                  </span>
-                                </div>
-                                <button
-                                  className="btn btn-sm btn-danger"
-                                  onClick={() => handleRemoveExercise(exercise.id)}
-                                >
-                                  Eliminar
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-<Plus size={16} strokeWidth={2} /> Agregar Ejercicio
-                        </h4>
-                        {availableExercises.filter(e => !courseExercises.some(ce => ce.id === e.id)).length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los ejercicios ya están asignados</p>
-                        ) : (
-                          <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {availableExercises
-                              .filter(e => !courseExercises.some(ce => ce.id === e.id))
-                              .map(exercise => (
-                                <div key={exercise.id} className="flex items-center justify-between p-3 border border-gray-300 dark:border-gray-600 rounded">
-                                  <div className="flex-1">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">{exercise.title}</span>
-                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                                      ({exercise.questions?.length || 0} preguntas)
-                                    </span>
-                                  </div>
-                                  <button
-                                    className="btn btn-sm btn-success"
-                                    onClick={() => handleAddExercise(exercise.id)}
-                                  >
-                                    + Agregar
-                                  </button>
-                                </div>
-                              ))}
+                          <div className="flex gap-3">
+                            <select
+                              className="select flex-1"
+                              value={selectedContentToAdd}
+                              onChange={(e) => setSelectedContentToAdd(e.target.value)}
+                            >
+                              <option value="">Selecciona un contenido...</option>
+                              {availableContents
+                                .filter(c => !courseContents.some(cc => cc.id === c.id))
+                                .map(content => (
+                                  <option key={content.id} value={content.id}>
+                                    {content.title} ({content.type})
+                                  </option>
+                                ))}
+                            </select>
+                            <button
+                              className="btn btn-success"
+                              onClick={() => handleAddContent(selectedContentToAdd)}
+                              disabled={!selectedContentToAdd}
+                            >
+                              <Plus size={16} strokeWidth={2} /> Agregar
+                            </button>
                           </div>
                         )}
                       </div>
@@ -855,7 +835,7 @@ function CoursesScreen({ onBack, user }) {
 
                   {/* Tab: Estudiantes */}
                   {activeModalTab === 'students' && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 pt-6">
                       <div>
                         <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
                           Estudiantes Asignados
@@ -874,7 +854,7 @@ function CoursesScreen({ onBack, user }) {
                                   className="btn btn-sm btn-danger"
                                   onClick={() => handleRemoveStudent(student.id)}
                                 >
-                                  Desasignar
+                                  Eliminar
                                 </button>
                               </div>
                             ))}
@@ -883,29 +863,35 @@ function CoursesScreen({ onBack, user }) {
                       </div>
 
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-<Plus size={16} strokeWidth={2} /> Asignar Estudiantes
-                        </h4>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asignar Estudiante</h4>
+                        </div>
                         {allStudents.filter(s => !courseStudents.some(cs => cs.id === s.id)).length === 0 ? (
                           <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los estudiantes ya están asignados</p>
                         ) : (
-                          <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {allStudents
-                              .filter(s => !courseStudents.some(cs => cs.id === s.id))
-                              .map(student => (
-                                <div key={student.id} className="flex items-center justify-between p-3 border border-gray-300 dark:border-gray-600 rounded">
-                                  <div className="flex-1">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">{student.displayName || student.email}</span>
-                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({student.email})</span>
-                                  </div>
-                                  <button
-                                    className="btn btn-sm btn-success"
-                                    onClick={() => handleAddStudent(student.id)}
-                                  >
-                                    + Asignar
-                                  </button>
-                                </div>
-                              ))}
+                          <div className="flex gap-3">
+                            <select
+                              className="select flex-1"
+                              value={selectedStudentToAdd}
+                              onChange={(e) => setSelectedStudentToAdd(e.target.value)}
+                            >
+                              <option value="">Selecciona un estudiante...</option>
+                              {allStudents
+                                .filter(s => !courseStudents.some(cs => cs.id === s.id))
+                                .map(student => (
+                                  <option key={student.id} value={student.id}>
+                                    {student.displayName || student.email} ({student.email})
+                                  </option>
+                                ))}
+                            </select>
+                            <button
+                              className="btn btn-success"
+                              onClick={() => handleAddStudent(selectedStudentToAdd)}
+                              disabled={!selectedStudentToAdd}
+                            >
+                              <Plus size={16} strokeWidth={2} /> Agregar
+                            </button>
                           </div>
                         )}
                       </div>
@@ -915,16 +901,16 @@ function CoursesScreen({ onBack, user }) {
               )}
             </div>
 
-            {/* Botón Eliminar - Zona de peligro */}
+            {/* Zona de Peligro + Botones - Footer fijo */}
             <div className="px-6 pt-4 pb-4 border-t-2 border-red-200 dark:border-red-900 flex-shrink-0">
-              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4">
                 <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
                 <p className="text-xs text-red-700 dark:text-red-400 mb-3">
                   Esta acción eliminará permanentemente el curso, todo su contenido y ejercicios asociados.
                 </p>
                 <button
                   type="button"
-                  className="btn btn-danger"
+                  className="btn btn-danger w-full"
                   onClick={() => {
                     if (window.confirm('¿Estás seguro de eliminar este curso? Esta acción no se puede deshacer.')) {
                       handleDelete(selectedCourse.id);
@@ -935,11 +921,17 @@ function CoursesScreen({ onBack, user }) {
                   <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Curso Permanentemente
                 </button>
               </div>
-            </div>
 
-            <div className="modal-footer flex-shrink-0">
-              <button className="btn btn-primary" onClick={handleCloseCourseModal}>
-                Cerrar
+              <button
+                type="button"
+                className="btn btn-primary w-full"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleUpdate(e);
+                }}
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
               </button>
             </div>
           </div>

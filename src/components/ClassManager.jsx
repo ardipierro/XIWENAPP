@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   BookOpen, ClipboardList, Calendar, CheckCircle, XCircle,
   CreditCard, Users, Settings, Lightbulb, Trash2, X,
-  FileText, Repeat, BarChart3, AlertTriangle, Save, GraduationCap
+  FileText, Repeat, BarChart3, AlertTriangle, Save, GraduationCap, Clock, Plus
 } from 'lucide-react';
 import {
   createClass,
@@ -72,6 +72,16 @@ function ClassManager({ user, courses, onBack }) {
     autoRenew: false, // Auto-renovación
     autoRenewWeeks: 4 // Semanas en cada renovación
   });
+
+  // Helper para actualizar hora/minuto
+  const updateTime = (type, field, value) => {
+    const currentTime = scheduleForm[type];
+    const [hour, minute] = currentTime.split(':');
+    const newTime = field === 'hour'
+      ? `${value}:${minute}`
+      : `${hour}:${value}`;
+    setScheduleForm({ ...scheduleForm, [type]: newTime });
+  };
 
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -487,13 +497,13 @@ function ClassManager({ user, courses, onBack }) {
         )}
 
         {/* Header unificado */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
             <BookOpen size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Clases</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={handleCreateClass} className="btn btn-primary">
+            <button onClick={handleCreateClass} className="btn btn-primary w-full sm:w-auto">
               + Nueva Clase
             </button>
           </div>
@@ -513,18 +523,18 @@ function ClassManager({ user, courses, onBack }) {
             </button>
           </div>
         ) : (
-          <div className="classes-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {classes.map(cls => (
               <div
                 key={cls.id}
-                className="class-card card cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
+                className="class-card card card-grid-item cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
                 onClick={() => handleViewDetails(cls)}
                 title="Click para configurar clase"
                 style={{ padding: 0 }}
               >
                 {/* Class Image - Mitad superior sin bordes */}
                 {cls.imageUrl ? (
-                  <div className="w-full h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                  <div className="card-image-large overflow-hidden">
                     <img
                       src={cls.imageUrl}
                       alt={cls.name}
@@ -536,21 +546,21 @@ function ClassManager({ user, courses, onBack }) {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                    <Calendar size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
+                  <div className="card-image-large-placeholder">
+                    <Calendar size={64} strokeWidth={2} />
                   </div>
                 )}
 
                 <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
                   <div className="class-card-header">
-                    <h3>{cls.name}</h3>
+                    <h3 className="card-title" style={{margin: 0}}>{cls.name}</h3>
                     {cls.courseName && (
                       <span className="badge badge-primary">{cls.courseName}</span>
                     )}
                   </div>
 
                   {cls.description && (
-                    <p className="class-description">{cls.description}</p>
+                    <p className="card-description">{cls.description}</p>
                   )}
 
                   <div className="class-schedules">
@@ -567,7 +577,7 @@ function ClassManager({ user, courses, onBack }) {
                     </div>
                   </div>
 
-                  <div className="class-stats">
+                  <div className="card-stats">
                     <span className="flex items-center gap-1">
                       <CreditCard size={16} strokeWidth={2} /> {cls.creditCost} crédito(s)
                     </span>
@@ -753,66 +763,81 @@ function ClassManager({ user, courses, onBack }) {
 
           return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 1000}} onClick={() => setShowDetailsModal(false)}>
-              <div className="bg-white dark:bg-gray-800 rounded-lg max-w-5xl w-full max-h-[90vh] flex flex-col" style={{position: 'relative', zIndex: 1001}} onClick={(e) => e.stopPropagation()}>
+              <div className="bg-white dark:bg-gray-800 rounded-lg max-w-5xl w-full flex flex-col" style={{position: 'relative', zIndex: 1001, height: '700px', maxHeight: '90vh'}} onClick={(e) => e.stopPropagation()}>
                 {/* Header - Fixed */}
-                <div className="flex-shrink-0 px-6 pt-6">
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        {selectedClass.name}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        {selectedClass.description}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setShowDetailsModal(false)}
-                      className="modal-close-btn"
-                      aria-label="Cerrar modal"
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
+                <div className="modal-header flex-shrink-0">
+                  <h3 className="modal-title">
+                    {selectedClass.name}
+                  </h3>
+                  <button
+                    onClick={() => setShowDetailsModal(false)}
+                    className="modal-close-btn"
+                    aria-label="Cerrar modal"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+
+                {message.text && (
+                  <div className={`cm-message ${message.type}`} style={{margin: '0 24px'}}>
+                    {message.text}
                   </div>
+                )}
 
-                  {message.text && (
-                    <div className={`cm-message ${message.type}`}>
-                      {message.text}
-                    </div>
-                  )}
-
-                  {/* Tabs */}
-                  <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+                {/* Tabs */}
+                <div className="modal-tabs-container">
+                  <div className="modal-tabs">
                   <button
                     onClick={() => setDetailsTab('general')}
-                    className={`px-4 py-2 font-semibold transition-colors ${
+                    className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                       detailsTab === 'general'
-                        ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                        ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                   >
                     <FileText size={18} strokeWidth={2} className="inline-icon" /> General
                   </button>
                   <button
-                    onClick={() => setDetailsTab('asignaciones')}
-                    className={`px-4 py-2 font-semibold transition-colors ${
-                      detailsTab === 'asignaciones'
-                        ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    onClick={() => setDetailsTab('horarios')}
+                    className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                      detailsTab === 'horarios'
+                        ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                   >
-                    <Users size={18} strokeWidth={2} className="inline-icon" /> Asignaciones
+                    <Calendar size={18} strokeWidth={2} className="inline-icon" /> Horarios
+                  </button>
+                  <button
+                    onClick={() => setDetailsTab('asignaciones')}
+                    className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                      detailsTab === 'asignaciones'
+                        ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Curso
+                  </button>
+                  <button
+                    onClick={() => setDetailsTab('estudiantes')}
+                    className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                      detailsTab === 'estudiantes'
+                        ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    <Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes
                   </button>
                   </div>
                 </div>
 
                 {/* Tab Content - Scrollable */}
-                <div className="flex-1 overflow-y-auto px-6 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
                   {/* TAB: GENERAL */}
                   {detailsTab === 'general' && (
-                    <div>
+                    <div className="pt-6">
                       <div className="mb-4">
                         <label className="label">Nombre de la Clase *</label>
                         <input
@@ -822,46 +847,6 @@ function ClassManager({ user, courses, onBack }) {
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           placeholder="Ej: Mandarín HSK 1"
                         />
-                      </div>
-
-                      {/* Imagen de la clase */}
-                      <div className="mb-4">
-                        <label className="label">Imagen de la Clase</label>
-                        {formData.imageUrl ? (
-                          <div className="relative">
-                            <img
-                              src={formData.imageUrl}
-                              alt="Preview"
-                              className="w-full h-48 object-cover rounded-lg mb-2"
-                            />
-                            <button
-                              onClick={handleImageDelete}
-                              disabled={uploadingImage}
-                              className="btn btn-danger btn-sm"
-                            >
-                              {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                            </button>
-                          </div>
-                        ) : (
-                          <div>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              disabled={uploadingImage}
-                              className="block w-full text-sm text-gray-900 dark:text-gray-100
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-md file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-primary file:text-white
-                                hover:file:bg-primary-light
-                                file:cursor-pointer cursor-pointer"
-                            />
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              PNG, JPG o GIF (máx. 5MB)
-                            </p>
-                          </div>
-                        )}
                       </div>
 
                       <div className="mb-4">
@@ -899,282 +884,391 @@ function ClassManager({ user, courses, onBack }) {
                         </div>
                       </div>
 
-                      {/* Sección de Horarios */}
-                      <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg mb-4">
-                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Horarios de la Clase</h4>
-
-                        {formData.schedules.length > 0 && (
-                          <div className="mb-4">
-                            <div className="flex flex-wrap gap-2 mb-2">
-                              {formData.schedules.map((schedule, idx) => (
-                                <div key={idx} className="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-gray-700 border-2 border-gray-400 dark:border-gray-500 rounded-full text-sm font-medium text-gray-900 dark:text-gray-100">
-                                  <span>{getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}</span>
-                                  <button onClick={() => handleRemoveSchedule(idx)} className="text-red-500 hover:text-red-700 font-bold">
-                                    ×
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="mb-3">
-                          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                            Días de la semana (selecciona uno o más)
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {[
-                              { value: 1, label: 'Lun' },
-                              { value: 2, label: 'Mar' },
-                              { value: 3, label: 'Mié' },
-                              { value: 4, label: 'Jue' },
-                              { value: 5, label: 'Vie' },
-                              { value: 6, label: 'Sáb' },
-                              { value: 0, label: 'Dom' }
-                            ].map(day => (
-                              <label key={day.value} className="flex items-center gap-1 cursor-pointer bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
-                                <input
-                                  type="checkbox"
-                                  checked={scheduleForm.daysOfWeek.includes(day.value)}
-                                  onChange={() => handleDayToggle(day.value)}
-                                  className="rounded"
-                                />
-                                <span className="text-sm text-gray-700 dark:text-gray-300">{day.label}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                          <div>
-                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                              Hora de inicio
-                            </label>
-                            <input
-                              type="time"
-                              className="input w-full"
-                              value={scheduleForm.startTime}
-                              onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })}
+                      {/* Imagen de la clase */}
+                      <div className="form-group">
+                        <label className="form-label">Imagen de la Clase</label>
+                        {formData.imageUrl ? (
+                          <div className="relative">
+                            <img
+                              src={formData.imageUrl}
+                              alt="Preview"
+                              className="w-full h-48 object-cover rounded-lg mb-2"
                             />
-                          </div>
-                          <div>
-                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                              Hora de fin
-                            </label>
-                            <input
-                              type="time"
-                              className="input w-full"
-                              value={scheduleForm.endTime}
-                              onChange={(e) => setScheduleForm({ ...scheduleForm, endTime: e.target.value })}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                          <div>
-                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                              Semanas a generar
-                            </label>
-                            <select
-                              className="select w-full"
-                              value={scheduleForm.weeksToGenerate}
-                              onChange={(e) => setScheduleForm({ ...scheduleForm, weeksToGenerate: parseInt(e.target.value) })}
+                            <button
+                              type="button"
+                              onClick={handleImageDelete}
+                              disabled={uploadingImage}
+                              className="btn btn-danger btn-sm"
                             >
-                              <option value={4}>4 semanas</option>
-                              <option value={8}>8 semanas (2 meses)</option>
-                              <option value={12}>12 semanas (3 meses)</option>
-                              <option value={16}>16 semanas (4 meses)</option>
-                            </select>
+                              {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
+                            </button>
                           </div>
-                        </div>
-
-                        <label className="flex items-start gap-2 cursor-pointer mb-3 p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500">
-                          <input
-                            type="checkbox"
-                            checked={scheduleForm.autoRenew}
-                            onChange={(e) => setScheduleForm({ ...scheduleForm, autoRenew: e.target.checked })}
-                            className="rounded mt-1"
-                          />
-                          <div className="flex-1">
-                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                              <Repeat size={16} strokeWidth={2} className="inline-icon" /> Auto-renovar instancias
-                            </span>
+                        ) : (
+                          <div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              disabled={uploadingImage}
+                              className="block w-full text-sm text-gray-900 dark:text-gray-100
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-primary file:text-white
+                                hover:file:bg-primary-light
+                                file:cursor-pointer cursor-pointer"
+                            />
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              Genera automáticamente {scheduleForm.autoRenewWeeks} semanas más cuando queden menos de 3 instancias
+                              PNG, JPG, GIF o WEBP (máx. 5MB)
                             </p>
                           </div>
-                        </label>
-
-                        <button onClick={handleAddSchedule} className="btn btn-outline">
-                          + Agregar Horario
-                        </button>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                          <Lightbulb size={14} strokeWidth={2} className="inline-icon" /> Selecciona varios días para crear horarios múltiples a la vez
-                        </p>
-                      </div>
-
-                      {/* Sesiones Programadas - Vista Simplificada */}
-                      <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg mb-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <h4 className="font-semibold text-gray-900 dark:text-gray-100">Sesiones Programadas</h4>
-                            <span className="px-3 py-1 bg-gray-200 dark:bg-gray-600 rounded-full text-sm font-semibold text-gray-900 dark:text-gray-100">
-                              {(() => {
-                                const now = new Date();
-                                const upcoming = classInstances.filter(i => {
-                                  const instDate = i.date?.toDate ? i.date.toDate() : new Date(i.date);
-                                  return i.status === 'scheduled' && instDate >= now;
-                                });
-                                return upcoming.length;
-                              })()} pendientes
-                            </span>
-                          </div>
-                          <button onClick={() => handleGenerateInstances(selectedClass.id)} className="btn btn-primary">
-                            + Agregar Más Sesiones
-                          </button>
-                        </div>
-                        {classInstances.length === 0 && (
-                          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                            No hay sesiones generadas. Haz click en "Agregar Más Sesiones" para programar las próximas clases.
+                        )}
+                        {uploadingImage && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
+                            <Clock size={14} strokeWidth={2} /> Subiendo imagen...
                           </p>
                         )}
-                      </div>
-
-                      <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800 pb-2">
-                        <button onClick={handleSaveClassChanges} className="btn btn-primary flex-1">
-                          <Save size={18} strokeWidth={2} className="inline-icon" /> Guardar Cambios
-                        </button>
                       </div>
                     </div>
                   )}
 
-                  {/* TAB: ASIGNACIONES */}
-                  {detailsTab === 'asignaciones' && (
-                    <div>
-                      {/* Curso */}
-                      <div className="card mb-4">
-                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                          <BookOpen size={20} strokeWidth={2} /> Curso Asociado
+                  {/* TAB: HORARIOS */}
+                  {detailsTab === 'horarios' && (
+                    <div className="space-y-6 pt-6">
+                      {/* Horarios Configurados */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          Horarios Configurados
                         </h4>
-                        <select
-                          className="select w-full"
-                          value={formData.courseId}
-                          onChange={(e) => {
-                            setFormData({ ...formData, courseId: e.target.value });
-                            // Auto-guardar el curso
-                            handleSaveClassChanges();
-                          }}
-                        >
-                          <option value="">-- Sin curso --</option>
-                          {courses.map(course => (
-                            <option key={course.id} value={course.id}>{course.name}</option>
-                          ))}
-                        </select>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                          El curso asociado ayuda a organizar y categorizar esta clase
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Grupos */}
-                        <div className="card">
-                          <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <Users size={20} strokeWidth={2} /> Grupos Asignados
-                          </h4>
-
-                        {assignedGroupsList.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-center py-4">No hay grupos asignados</p>
+                        {formData.schedules.length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay horarios configurados</p>
                         ) : (
-                          <div className="space-y-2 mb-4">
-                            {assignedGroupsList.map(group => (
-                              <div key={group.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
-                                <div>
-                                  <div className="font-medium text-gray-900 dark:text-gray-100">{group.name}</div>
-                                  <div className="text-sm text-gray-600 dark:text-gray-400">{group.studentCount || 0} estudiantes</div>
+                          <div className="space-y-2">
+                            {formData.schedules.map((schedule, idx) => {
+                              // Contar sesiones pendientes para este horario específico
+                              const now = new Date();
+                              const upcomingForSchedule = classInstances.filter(i => {
+                                const instDate = i.date?.toDate ? i.date.toDate() : new Date(i.date);
+                                const dayMatches = instDate.getDay() === schedule.day;
+                                return i.status === 'scheduled' && instDate >= now && dayMatches;
+                              });
+
+                              return (
+                                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                                  <div className="flex-1">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                      {getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}
+                                    </span>
+                                    <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                      ({upcomingForSchedule.length} {upcomingForSchedule.length === 1 ? 'sesión pendiente' : 'sesiones pendientes'})
+                                    </span>
+                                  </div>
+                                  <button
+                                    className="btn btn-sm btn-danger"
+                                    onClick={() => handleRemoveSchedule(idx)}
+                                  >
+                                    Eliminar
+                                  </button>
                                 </div>
-                                <button
-                                  onClick={() => handleUnassignGroup(group.id)}
-                                  className="btn btn-danger"
-                                >
-                                  Remover
-                                </button>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
-
-                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <select
-                            className="select"
-                            onChange={(e) => {
-                              if (e.target.value) {
-                                handleAssignGroup(e.target.value);
-                                e.target.value = '';
-                              }
-                            }}
-                            value=""
-                          >
-                            <option value="">-- Asignar grupo --</option>
-                            {unassignedGroups.map(group => (
-                              <option key={group.id} value={group.id}>{group.name}</option>
-                            ))}
-                          </select>
-                        </div>
                       </div>
 
-                      {/* Estudiantes */}
-                      <div className="card">
-                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                          <GraduationCap size={20} strokeWidth={2} /> Estudiantes Individuales
-                        </h4>
+                      {/* Agregar Horario */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Agregar Horario</h4>
+                        </div>
 
-                        {assignedStudentsList.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-center py-4">No hay estudiantes asignados</p>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                              Días de la semana
+                            </label>
+                            <div className="grid grid-cols-7 gap-2">
+                              {[
+                                { value: 1, label: 'Lun' },
+                                { value: 2, label: 'Mar' },
+                                { value: 3, label: 'Mié' },
+                                { value: 4, label: 'Jue' },
+                                { value: 5, label: 'Vie' },
+                                { value: 6, label: 'Sáb' },
+                                { value: 0, label: 'Dom' }
+                              ].map(day => (
+                                <label key={day.value} className="flex flex-col items-center justify-center cursor-pointer bg-gray-100 dark:bg-gray-700 px-2 py-3 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                  <input
+                                    type="checkbox"
+                                    checked={scheduleForm.daysOfWeek.includes(day.value)}
+                                    onChange={() => handleDayToggle(day.value)}
+                                    className="rounded mb-1"
+                                  />
+                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{day.label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                Hora de inicio
+                              </label>
+                              <div className="flex gap-2">
+                                <select
+                                  className="select flex-1"
+                                  value={scheduleForm.startTime.split(':')[0]}
+                                  onChange={(e) => updateTime('startTime', 'hour', e.target.value)}
+                                >
+                                  {Array.from({ length: 24 }, (_, h) => {
+                                    const hour = String(h).padStart(2, '0');
+                                    return <option key={hour} value={hour}>{hour}</option>;
+                                  })}
+                                </select>
+                                <span className="flex items-center text-gray-500 dark:text-gray-400 font-bold">:</span>
+                                <select
+                                  className="select flex-1"
+                                  value={scheduleForm.startTime.split(':')[1]}
+                                  onChange={(e) => updateTime('startTime', 'minute', e.target.value)}
+                                >
+                                  {Array.from({ length: 12 }, (_, i) => {
+                                    const min = String(i * 5).padStart(2, '0');
+                                    return <option key={min} value={min}>{min}</option>;
+                                  })}
+                                </select>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                Hora de fin
+                              </label>
+                              <div className="flex gap-2">
+                                <select
+                                  className="select flex-1"
+                                  value={scheduleForm.endTime.split(':')[0]}
+                                  onChange={(e) => updateTime('endTime', 'hour', e.target.value)}
+                                >
+                                  {Array.from({ length: 24 }, (_, h) => {
+                                    const hour = String(h).padStart(2, '0');
+                                    return <option key={hour} value={hour}>{hour}</option>;
+                                  })}
+                                </select>
+                                <span className="flex items-center text-gray-500 dark:text-gray-400 font-bold">:</span>
+                                <select
+                                  className="select flex-1"
+                                  value={scheduleForm.endTime.split(':')[1]}
+                                  onChange={(e) => updateTime('endTime', 'minute', e.target.value)}
+                                >
+                                  {Array.from({ length: 12 }, (_, i) => {
+                                    const min = String(i * 5).padStart(2, '0');
+                                    return <option key={min} value={min}>{min}</option>;
+                                  })}
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-3">
+                            <div className="flex-1">
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                Semanas a generar
+                              </label>
+                              <select
+                                className="select w-full"
+                                value={scheduleForm.weeksToGenerate}
+                                onChange={(e) => setScheduleForm({ ...scheduleForm, weeksToGenerate: parseInt(e.target.value) })}
+                              >
+                                <option value={4}>4 semanas</option>
+                                <option value={8}>8 semanas (2 meses)</option>
+                                <option value={12}>12 semanas (3 meses)</option>
+                                <option value={16}>16 semanas (4 meses)</option>
+                              </select>
+                            </div>
+                            <div className="flex items-end">
+                              <button onClick={handleAddSchedule} className="btn btn-success">
+                                <Plus size={16} strokeWidth={2} /> Agregar
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                            <input
+                              type="checkbox"
+                              checked={scheduleForm.autoRenew}
+                              onChange={(e) => setScheduleForm({ ...scheduleForm, autoRenew: e.target.checked })}
+                              className="rounded mt-1"
+                            />
+                            <div className="flex-1">
+                              <label className="text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer">
+                                Auto-renovar instancias
+                              </label>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                Genera automáticamente {scheduleForm.autoRenewWeeks} semanas más cuando queden menos de 3 instancias
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB: CURSO */}
+                  {detailsTab === 'asignaciones' && (
+                    <div className="space-y-6 pt-6">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          Curso Asociado
+                        </h4>
+                        {formData.courseId ? (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                              <div className="flex-1">
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  {courses.find(c => c.id === formData.courseId)?.name || 'Curso no encontrado'}
+                                </span>
+                              </div>
+                              <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => {
+                                  setFormData({ ...formData, courseId: '' });
+                                  handleSaveClassChanges();
+                                }}
+                              >
+                                Eliminar
+                              </button>
+                            </div>
+                          </div>
                         ) : (
-                          <div className="space-y-2 mb-4">
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay curso asociado a esta clase</p>
+                        )}
+                      </div>
+
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asignar Curso</h4>
+                        </div>
+                        {formData.courseId ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">Ya hay un curso asignado. Elimínalo para asignar otro.</p>
+                        ) : courses.length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay cursos disponibles</p>
+                        ) : (
+                          <div className="flex gap-3">
+                            <select
+                              className="select flex-1"
+                              value=""
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  setFormData({ ...formData, courseId: e.target.value });
+                                  handleSaveClassChanges();
+                                }
+                              }}
+                            >
+                              <option value="">Selecciona un curso...</option>
+                              {courses.map(course => (
+                                <option key={course.id} value={course.id}>
+                                  {course.name}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              className="btn btn-success"
+                              onClick={() => {
+                                const select = document.querySelector('.select');
+                                if (select && select.value) {
+                                  setFormData({ ...formData, courseId: select.value });
+                                  handleSaveClassChanges();
+                                  select.value = '';
+                                }
+                              }}
+                            >
+                              <Plus size={16} strokeWidth={2} /> Agregar
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB: ESTUDIANTES */}
+                  {detailsTab === 'estudiantes' && (
+                    <div className="space-y-6 pt-6">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          Estudiantes Asignados
+                        </h4>
+                        {assignedStudentsList.length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay estudiantes asignados a esta clase</p>
+                        ) : (
+                          <div className="space-y-2">
                             {assignedStudentsList.map(student => (
-                              <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
-                                <div>
+                              <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                                <div className="flex-1">
                                   <div className="font-medium text-gray-900 dark:text-gray-100">{student.name}</div>
                                   <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
                                 </div>
                                 <button
+                                  className="btn btn-sm btn-danger"
                                   onClick={() => handleUnassignStudent(student.id)}
-                                  className="btn btn-danger"
                                 >
-                                  Remover
+                                  Eliminar
                                 </button>
                               </div>
                             ))}
                           </div>
                         )}
-
-                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <select
-                            className="select"
-                            onChange={(e) => {
-                              if (e.target.value) {
-                                handleAssignStudent(e.target.value);
-                                e.target.value = '';
-                              }
-                            }}
-                            value=""
-                          >
-                            <option value="">-- Asignar estudiante --</option>
-                            {unassignedStudents.map(student => (
-                              <option key={student.id} value={student.id}>{student.name}</option>
-                            ))}
-                          </select>
-                        </div>
                       </div>
-                    </div>
+
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asignar Estudiante</h4>
+                        </div>
+                        {unassignedStudents.length === 0 ? (
+                          <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los estudiantes ya están asignados</p>
+                        ) : (
+                          <div className="flex gap-3">
+                            <select
+                              className="select flex-1"
+                              value=""
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  handleAssignStudent(e.target.value);
+                                  e.target.value = '';
+                                }
+                              }}
+                            >
+                              <option value="">Selecciona un estudiante...</option>
+                              {unassignedStudents.map(student => (
+                                <option key={student.id} value={student.id}>
+                                  {student.name} ({student.email})
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              className="btn btn-success"
+                              onClick={() => {
+                                const select = document.querySelector('.select');
+                                if (select.value) {
+                                  handleAssignStudent(select.value);
+                                  select.value = '';
+                                }
+                              }}
+                            >
+                              <Plus size={16} strokeWidth={2} /> Agregar
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {/* Botón Eliminar - Zona de peligro */}
-                <div className="px-6 mt-4 pt-4 pb-4 border-t-2 border-red-200 dark:border-red-900 flex-shrink-0">
-                  <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                {/* Zona de Peligro + Botones - Footer fijo */}
+                <div className="px-6 pt-4 pb-4 border-t-2 border-red-200 dark:border-red-900 flex-shrink-0">
+                  <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4">
                     <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
                     <p className="text-xs text-red-700 dark:text-red-400 mb-3">
                       Esta acción eliminará permanentemente la clase y todas sus instancias programadas.
@@ -1186,12 +1280,21 @@ function ClassManager({ user, courses, onBack }) {
                           setShowDetailsModal(false);
                         }
                       }}
-                      className="btn btn-danger"
+                      className="btn btn-danger w-full"
                     >
                       <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Clase Permanentemente
                     </button>
                   </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary w-full"
+                    onClick={handleSaveClassChanges}
+                  >
+                    <Save size={18} strokeWidth={2} className="inline-icon" /> Guardar Cambios
+                  </button>
                 </div>
+
               </div>
             </div>
           );

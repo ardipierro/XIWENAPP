@@ -38,9 +38,23 @@
 /* Stats Grid */
 .credit-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
   margin-bottom: 24px;
+}
+
+/* Tablet: 2 columnas */
+@media (min-width: 640px) {
+  .credit-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 4 columnas */
+@media (min-width: 1024px) {
+  .credit-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .credit-stat-card {
@@ -106,6 +120,16 @@
   gap: 12px;
   margin-bottom: 24px;
   flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.credit-actions .btn {
+  white-space: nowrap;
+  padding: 10px 20px !important;
+  min-height: 42px !important;
+  height: 42px;
+  line-height: 1.5;
+  font-size: 16px;
 }
 
 /* Notes Section */
@@ -368,10 +392,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .credit-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .credit-actions {
     flex-direction: column;
   }

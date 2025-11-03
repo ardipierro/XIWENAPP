@@ -3,8 +3,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
+  // Detectar preferencia inicial del sistema o usar guardado en localStorage
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Cargar preferencia guardada o detectar preferencia del sistema
     const saved = localStorage.getItem('theme');
     if (saved) {
       return saved === 'dark';

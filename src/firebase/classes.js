@@ -129,18 +129,25 @@ export async function deleteClass(classId) {
  */
 export async function getClassesByTeacher(teacherId) {
   try {
+    // Consulta simplificada sin orderBy para evitar requerir índice compuesto
     const q = query(
       collection(db, 'classes'),
-      where('teacherId', '==', teacherId),
-      where('active', '==', true),
-      orderBy('createdAt', 'desc')
+      where('teacherId', '==', teacherId)
     );
 
     const snapshot = await getDocs(q);
-    const classes = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const classes = snapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      // Filtrar activos y ordenar en memoria
+      .filter(cls => cls.active !== false)
+      .sort((a, b) => {
+        const dateA = a.createdAt?.toMillis?.() || 0;
+        const dateB = b.createdAt?.toMillis?.() || 0;
+        return dateB - dateA;
+      });
 
     return classes;
   } catch (error) {

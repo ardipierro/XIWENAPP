@@ -11,7 +11,18 @@
       "Bash(firebase deploy:*)",
       "Bash(firebase login:*)",
       "Bash(\"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\ClassManager.jsx.tmp\")",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(awk:*)",
+      "Bash(npm outdated:*)",
+      "Bash(npm update:*)",
+      "Bash(vercel --version:*)",
+      "Bash(vercel --prod:*)",
+      "Bash(vercel inspect:*)",
+      "Bash(vercel env:*)",
+      "Bash(dir:*)",
+      "Bash(printf:*)",
+      "Bash(git checkout:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

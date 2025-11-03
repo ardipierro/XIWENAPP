@@ -211,15 +211,10 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   }
 
   return (
-    <div className="user-profile-container">
+    <>
       {/* Header */}
-      <div className="profile-header">
-        <div className="profile-header-actions">
-          <button onClick={onBack} className="btn-back">
-            ← Volver
-          </button>
-        </div>
-        <div className="profile-header-content">
+      <div className="modal-header flex-shrink-0">
+        <div className="flex items-center gap-4 flex-1">
           <div className="profile-avatar-large">
             {(() => {
               const iconName = ROLE_INFO[selectedUser.role]?.icon || 'User';
@@ -227,9 +222,9 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               return <IconComponent size={48} strokeWidth={2} />;
             })()}
           </div>
-          <div className="profile-header-info">
-            <h1 className="profile-name">{selectedUser.name || selectedUser.email}</h1>
-            <div className="profile-meta">
+          <div className="flex-1">
+            <h3 className="modal-title mb-2 sm:mb-2">{selectedUser.name || selectedUser.email}</h3>
+            <div className="flex items-center gap-2 flex-wrap mt-2 sm:mt-0">
               <span className="profile-role-badge">
                 {(() => {
                   const iconName = ROLE_INFO[selectedUser.role]?.icon || 'User';
@@ -246,13 +241,16 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 )}
               </span>
               {isAdmin && currentUser.uid !== selectedUser.id && (
-                <button onClick={handleViewAs} className="btn-view-as">
+                <button onClick={handleViewAs} className="btn-view-as ml-2">
                   <Eye size={16} strokeWidth={2} /> Ver como
                 </button>
               )}
             </div>
           </div>
         </div>
+        <button onClick={onBack} className="modal-close-btn" title="Cerrar">
+          ×
+        </button>
       </div>
 
       {/* Message */}
@@ -263,73 +261,41 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 mb-6">
-        <button
-          className={activeTab === 'info' ? 'tab-active' : 'tab'}
-          onClick={() => setActiveTab('info')}
-        >
-          <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> Información
-        </button>
-        <button
-          className={activeTab === 'courses' ? 'tab-active' : 'tab'}
-          onClick={() => setActiveTab('courses')}
-        >
-          <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos
-        </button>
-        <button
-          className={activeTab === 'credits' ? 'tab-active' : 'tab'}
-          onClick={() => setActiveTab('credits')}
-        >
-          <CreditCard size={18} strokeWidth={2} className="inline-icon" /> Créditos
-        </button>
-        <button
-          className={activeTab === 'classes' ? 'tab-active' : 'tab'}
-          onClick={() => setActiveTab('classes')}
-        >
-          <Calendar size={18} strokeWidth={2} className="inline-icon" /> Clases
-        </button>
+      <div className="modal-tabs-container">
+        <div className="modal-tabs">
+          <button
+            className={activeTab === 'info' ? 'tab-active' : 'tab'}
+            onClick={() => setActiveTab('info')}
+          >
+            <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> Información
+          </button>
+          <button
+            className={activeTab === 'courses' ? 'tab-active' : 'tab'}
+            onClick={() => setActiveTab('courses')}
+          >
+            <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos
+          </button>
+          <button
+            className={activeTab === 'credits' ? 'tab-active' : 'tab'}
+            onClick={() => setActiveTab('credits')}
+          >
+            <CreditCard size={18} strokeWidth={2} className="inline-icon" /> Créditos
+          </button>
+          <button
+            className={activeTab === 'classes' ? 'tab-active' : 'tab'}
+            onClick={() => setActiveTab('classes')}
+          >
+            <Calendar size={18} strokeWidth={2} className="inline-icon" /> Clases
+          </button>
+        </div>
       </div>
 
       {/* Tab Content */}
-      <div className="profile-content">
+      <div className="modal-body flex-1 overflow-y-auto">
         {/* Tab: Información Básica */}
         {activeTab === 'info' && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Información Básica</h2>
-              {!editing ? (
-                <button className="btn btn-secondary" onClick={() => setEditing(true)}>
-                  <Edit size={18} strokeWidth={2} /> Editar
-                </button>
-              ) : (
-                <div className="flex gap-2">
-                  <button
-                    className="btn btn-outline"
-                    onClick={() => {
-                      setEditing(false);
-                      setFormData({
-                        name: selectedUser.name || '',
-                        email: selectedUser.email || '',
-                        role: selectedUser.role || 'student',
-                        status: selectedUser.status || 'active',
-                        phone: selectedUser.phone || '',
-                        notes: selectedUser.notes || ''
-                      });
-                    }}
-                    disabled={saving}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
-                    <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar'}
-                  </button>
-                </div>
-              )}
-            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Información Básica</h2>
 
             <div className="info-grid">
               {/* Email (no editable) */}
@@ -460,6 +426,42 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 )}
               </div>
             </div>
+
+            {/* Botones de acción al final */}
+            <div className="modal-footer">
+              {!editing ? (
+                <button className="btn btn-primary w-full" onClick={() => setEditing(true)}>
+                  <Edit size={18} strokeWidth={2} /> Editar Información
+                </button>
+              ) : (
+                <>
+                  <button
+                    className="btn btn-outline flex-1"
+                    onClick={() => {
+                      setEditing(false);
+                      setFormData({
+                        name: selectedUser.name || '',
+                        email: selectedUser.email || '',
+                        role: selectedUser.role || 'student',
+                        status: selectedUser.status || 'active',
+                        phone: selectedUser.phone || '',
+                        notes: selectedUser.notes || ''
+                      });
+                    }}
+                    disabled={saving}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="btn btn-primary flex-1"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar Cambios'}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
 
@@ -562,7 +564,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
 

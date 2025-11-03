@@ -5,6 +5,7 @@ import {
   sendPasswordResetEmail,
   signOut
 } from 'firebase/auth';
+import { LogIn, UserPlus, Mail, Lock, User, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import { auth } from '../firebase/config';
 import { createUserProfile, getUserRole } from '../firebase/firestore';
 import { isAdminEmail, getDefaultRole, ROLE_INFO } from '../firebase/roleConfig';
@@ -231,22 +232,39 @@ function UnifiedLogin() {
 
           {error && (
             <div className="error-message">
-              ⚠️ {error}
+              <AlertCircle size={16} />
+              <span>{error}</span>
             </div>
           )}
 
           {resetEmailSent && (
             <div className="success-message">
-              ✅ Email enviado. Revisa tu bandeja de entrada
+              <CheckCircle size={16} />
+              <span>Email enviado. Revisa tu bandeja de entrada</span>
             </div>
           )}
 
           <button
             type="submit"
-            className="btn btn-primary"
+            className="btn-primary"
             disabled={loading}
           >
-            {loading ? '⏳ Cargando...' : (isRegistering ? '✨ Crear cuenta' : '🔓 Ingresar')}
+            {loading ? (
+              <>
+                <Loader size={16} className="spinner" />
+                <span>Cargando...</span>
+              </>
+            ) : isRegistering ? (
+              <>
+                <UserPlus size={16} />
+                <span>Crear cuenta</span>
+              </>
+            ) : (
+              <>
+                <LogIn size={16} />
+                <span>Ingresar</span>
+              </>
+            )}
           </button>
 
           {!isRegistering && (
@@ -296,7 +314,7 @@ function UnifiedLogin() {
         </form>
 
         <div className="unified-login-footer">
-          <p>✨ Aprende jugando con Xiwen</p>
+          <p>Aprende jugando con Xiwen</p>
           {isRegistering && (
             <p className="info-text">
               Tu rol será asignado automáticamente al registrarte

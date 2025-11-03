@@ -197,42 +197,42 @@ function CreditManager({ userId, currentUser, onUpdate }) {
       )}
 
       {/* Stats Cards */}
-      <div className="stats-grid">
-        <div className="stat-card">
+      <div className="credit-stats-grid">
+        <div className="credit-stat-card available">
           <div className="stat-icon">
             <CreditCard size={32} strokeWidth={2} />
           </div>
-          <div className="stat-info">
+          <div className="stat-content">
             <div className="stat-value">{stats.availableCredits}</div>
             <div className="stat-label">Créditos Disponibles</div>
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="credit-stat-card purchased">
           <div className="stat-icon">
             <ShoppingCart size={32} strokeWidth={2} />
           </div>
-          <div className="stat-info">
+          <div className="stat-content">
             <div className="stat-value">{stats.totalPurchased}</div>
             <div className="stat-label">Total Comprados</div>
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="credit-stat-card used">
           <div className="stat-icon">
             <BarChart3 size={32} strokeWidth={2} />
           </div>
-          <div className="stat-info">
+          <div className="stat-content">
             <div className="stat-value">{stats.totalUsed}</div>
             <div className="stat-label">Total Usados</div>
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="credit-stat-card usage">
           <div className="stat-icon">
             <TrendingUp size={32} strokeWidth={2} />
           </div>
-          <div className="stat-info">
+          <div className="stat-content">
             <div className="stat-value">{stats.usagePercentage}%</div>
             <div className="stat-label">Uso</div>
           </div>
@@ -245,13 +245,15 @@ function CreditManager({ userId, currentUser, onUpdate }) {
           className="btn btn-primary"
           onClick={() => handleOpenModal('add')}
         >
-          <Plus size={18} strokeWidth={2} className="inline-icon" /> Agregar Créditos
+          <Plus size={18} strokeWidth={2} />
+          Agregar Créditos
         </button>
         <button
           className="btn btn-secondary"
           onClick={() => handleOpenModal('deduct')}
         >
-          <Minus size={18} strokeWidth={2} className="inline-icon" /> Quitar Créditos
+          <Minus size={18} strokeWidth={2} />
+          Quitar Créditos
         </button>
       </div>
 

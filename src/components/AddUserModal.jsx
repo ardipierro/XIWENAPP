@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { z } from 'zod';
 import { ROLES, ROLE_INFO } from '../firebase/roleConfig';
+import { userSchema, validateData } from '../utils/validationSchemas';
 import './AddUserModal.css';
 
 function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
@@ -12,6 +14,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Determinar qué roles puede crear este usuario
   const getAvailableRoles = () => {
@@ -32,27 +35,34 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
       ...prev,
       [name]: value
     }));
-    setError(''); // Limpiar error al escribir
+    setError(''); // Limpiar error general al escribir
+    setFieldErrors(prev => ({ ...prev, [name]: '' })); // Limpiar error del campo
   };
 
   const validateForm = () => {
-    if (!formData.email.trim()) {
-      setError('El email es obligatorio');
+    // Crear schema personalizado sin password (no requerido en creación)
+    const createUserSchema = userSchema.omit({ password: true }).extend({
+      name: userSchema.shape.name.optional().or(z.literal('')),
+      phone: userSchema.shape.phone
+    });
+
+    // Validar con Zod
+    const validation = validateData(createUserSchema, {
+      name: formData.name || undefined,
+      email: formData.email,
+      role: formData.role,
+      phone: formData.phone || undefined
+    });
+
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      // Tomar el primer error para mostrar como error general
+      const firstError = Object.values(validation.errors)[0];
+      setError(firstError);
       return false;
     }
 
-    // Validación básica de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('El email no es válido');
-      return false;
-    }
-
-    if (!formData.role) {
-      setError('Debes seleccionar un rol');
-      return false;
-    }
-
+    setFieldErrors({});
     return true;
   };
 
@@ -142,14 +152,18 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="form-input"
+                className={`form-input ${fieldErrors.email ? 'error' : ''}`}
                 placeholder="usuario@ejemplo.com"
                 required
                 disabled={loading}
               />
-              <span className="form-hint">
-                El usuario usará este email para iniciar sesión
-              </span>
+              {fieldErrors.email ? (
+                <span className="form-error">{fieldErrors.email}</span>
+              ) : (
+                <span className="form-hint">
+                  El usuario usará este email para iniciar sesión
+                </span>
+              )}
             </div>
 
             {/* Nombre (opcional) */}
@@ -163,13 +177,17 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="form-input"
+                className={`form-input ${fieldErrors.name ? 'error' : ''}`}
                 placeholder="Ej: Juan Pérez"
                 disabled={loading}
               />
-              <span className="form-hint">
-                Opcional - puede configurarlo después
-              </span>
+              {fieldErrors.name ? (
+                <span className="form-error">{fieldErrors.name}</span>
+              ) : (
+                <span className="form-hint">
+                  Opcional - puede configurarlo después
+                </span>
+              )}
             </div>
 
             {/* Rol */}
@@ -182,7 +200,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="select"
+                className={`select ${fieldErrors.role ? 'error' : ''}`}
                 required
                 disabled={loading}
               >
@@ -192,9 +210,13 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                   </option>
                 ))}
               </select>
-              <span className="form-hint">
-                {ROLE_INFO[formData.role]?.description}
-              </span>
+              {fieldErrors.role ? (
+                <span className="form-error">{fieldErrors.role}</span>
+              ) : (
+                <span className="form-hint">
+                  {ROLE_INFO[formData.role]?.description}
+                </span>
+              )}
             </div>
 
             {/* Teléfono (opcional) */}
@@ -208,10 +230,13 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="form-input"
-                placeholder="Ej: +54 11 1234-5678"
+                className={`form-input ${fieldErrors.phone ? 'error' : ''}`}
+                placeholder="Ej: 123456789"
                 disabled={loading}
               />
+              {fieldErrors.phone && (
+                <span className="form-error">{fieldErrors.phone}</span>
+              )}
             </div>
 
             {/* Notas (opcional) */}

@@ -46,4 +46,22 @@ export default defineConfig({
       }
     })
   ],
+  // Eliminar console.log y debugger en producción
+  esbuild: {
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+  },
+  // Optimizaciones de build
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+          'ui-vendor': ['lucide-react', 'recharts']
+        }
+      }
+    },
+    // Aumentar límite de chunk para evitar warnings
+    chunkSizeWarningLimit: 1000
+  }
 })

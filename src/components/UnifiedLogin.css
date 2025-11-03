@@ -1,3 +1,4 @@
+/* Login Container - Siempre modo oscuro */
 .unified-login-container {
   min-height: 100vh;
   display: flex;
@@ -9,9 +10,9 @@
 
 .unified-login-box {
   background: #18181b;
-  border-radius: 8px;
+  border-radius: 16px;
   border: 1px solid #27272a;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
   padding: 40px;
   width: 100%;
   max-width: 450px;
@@ -23,10 +24,11 @@
 }
 
 .unified-login-header h1 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: #f4f4f5;
   margin: 0 0 10px 0;
+  letter-spacing: -0.02em;
 }
 
 .unified-login-subtitle {
@@ -49,11 +51,11 @@
 
 .form-group input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 14px;
   font-size: 14px;
   border: 1px solid #3f3f46;
-  border-radius: 4px;
-  transition: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   box-sizing: border-box;
   background: #0a0a0a;
   color: #f4f4f5;
@@ -62,6 +64,7 @@
 .form-group input:focus {
   outline: none;
   border-color: #52525b;
+  background: #18181b;
 }
 
 .form-group input:disabled {
@@ -70,11 +73,15 @@
   opacity: 0.5;
 }
 
+.form-group input::placeholder {
+  color: #52525b;
+}
+
 .error-message {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 4px;
-  padding: 10px 14px;
+  border-radius: 8px;
+  padding: 12px 14px;
   margin-bottom: 16px;
   color: #fca5a5;
   font-size: 13px;
@@ -86,8 +93,8 @@
 .success-message {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 4px;
-  padding: 10px 14px;
+  border-radius: 8px;
+  padding: 12px 14px;
   margin-bottom: 16px;
   color: #34d399;
   font-size: 13px;
@@ -98,24 +105,33 @@
 
 .btn-primary {
   width: 100%;
-  padding: 12px;
+  padding: 14px 20px;
   font-size: 14px;
-  font-weight: 500;
-  color: white;
+  font-weight: 600;
+  color: #f4f4f5;
   background: #27272a;
   border: 1px solid #3f3f46;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: none;
+  transition: all 0.2s ease;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-primary:hover:not(:disabled) {
   background: #3f3f46;
+  border-color: #52525b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .btn-primary:active:not(:disabled) {
   background: #27272a;
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .btn-primary:disabled {
@@ -123,20 +139,34 @@
   cursor: not-allowed;
 }
 
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .btn-link {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   font-size: 13px;
   color: #a1a1aa;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: none;
+  transition: color 0.2s ease;
   margin-bottom: 16px;
 }
 
 .btn-link:hover:not(:disabled) {
   color: #f4f4f5;
+  text-decoration: underline;
 }
 
 .btn-link:disabled {
@@ -146,7 +176,7 @@
 
 .toggle-mode {
   text-align: center;
-  padding-top: 16px;
+  padding-top: 20px;
   border-top: 1px solid #27272a;
 }
 
@@ -160,15 +190,16 @@
   background: none;
   border: none;
   color: #d4d4d8;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   padding: 0;
   text-decoration: none;
-  transition: none;
+  transition: color 0.2s ease;
 }
 
 .toggle-mode button:hover:not(:disabled) {
   color: #f4f4f5;
+  text-decoration: underline;
 }
 
 .toggle-mode button:disabled {
@@ -186,12 +217,14 @@
 .unified-login-footer p {
   margin: 8px 0;
   color: #71717a;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .info-text {
   font-size: 12px;
   color: #52525b;
+  font-weight: 400;
 }
 
 /* Responsive */
@@ -201,6 +234,6 @@
   }
 
   .unified-login-header h1 {
-    font-size: 22px;
+    font-size: 24px;
   }
 }

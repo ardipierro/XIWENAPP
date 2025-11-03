@@ -1,62 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
+/**
+ * @fileoverview Componente principal de la aplicación
+ * Maneja routing y autenticación global
+ * @module App
+ */
 
-// ✅ IMPORTS CORREGIDOS SEGÚN TUS ARCHIVOS
-import { auth } from './firebase/config';              // Tu archivo de configuración Firebase
-import { getUserRole } from './firebase/firestore';    // Tus funciones de Firestore
-import './firebase/debugPermissions';  // Debug utilities
-import { useViewAs } from './contexts/ViewAsContext';  // ViewAs Context
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import useAuth from './hooks/useAuth.js';
+import { useViewAs } from './contexts/ViewAsContext.jsx';
+import { TEACHER_ROLES, STUDENT_ROLES } from './constants/auth.js';
 
 // Components
 import LandingPage from './LandingPage';
-import UnifiedLogin from './components/UnifiedLogin';
+import Login from './components/Login.jsx';
 import StudentDashboard from './components/StudentDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
-import AdminPanel from './components/AdminPanel';
 
 import './App.css';
 
+/**
+ * Componente principal de la aplicación
+ * Usa useAuth hook para obtener estado de autenticación
+ */
 function App() {
-  const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Estado de autenticación desde AuthContext
+  const { user, userRole, loading } = useAuth();
+
+  // ViewAs context (para profesores viendo como alumno)
   const { viewAsUser, isViewingAs } = useViewAs();
 
-  // Usuario efectivo: usar viewAsUser si está activo, sino el user de Auth
+  // Usuario y rol efectivos (ViewAs o real)
   const [effectiveUser, setEffectiveUser] = useState(null);
   const [effectiveRole, setEffectiveRole] = useState(null);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        console.log('🔍 Usuario autenticado:', currentUser.uid, currentUser.email);
-
-        // Dar un pequeño delay para asegurar que Firestore esté sincronizado
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        let role = await getUserRole(currentUser.uid);
-        console.log('🔍 Rol obtenido:', role);
-
-        // Si el usuario no tiene rol después del delay, algo está mal
-        if (!role) {
-          console.warn('⚠️ Usuario sin rol en Firestore');
-          // Nota: UnifiedLogin debería haber prevenido esto
-        }
-
-        setUserRole(role);
-      } else {
-        setUser(null);
-        setUserRole(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Actualizar usuario efectivo cuando viewAsUser cambie
+  /**
+   * Actualiza usuario efectivo cuando cambia viewAsUser
+   */
   useEffect(() => {
     if (isViewingAs && viewAsUser) {
       // Crear objeto user sintético para viewAsUser
@@ -67,7 +46,6 @@ function App() {
       };
       setEffectiveUser(syntheticUser);
       setEffectiveRole(viewAsUser.role);
-      console.log('Modo ViewAs activado:', viewAsUser.name, '| Rol:', viewAsUser.role);
     } else {
       // Usar el usuario real
       setEffectiveUser(user);
@@ -75,6 +53,7 @@ function App() {
     }
   }, [isViewingAs, viewAsUser, user, userRole]);
 
+  // Mostrar loading mientras se inicializa autenticación
   if (loading) {
     return (
       <div className="loading-screen">
@@ -87,16 +66,37 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Routes - siempre usar el usuario real de Auth */}
-        <Route path="/" element={<PublicRoute user={user}><Landing /></PublicRoute>} />
-        <Route path="/login" element={<PublicRoute user={user}><Login /></PublicRoute>} />
-        <Route path="/register" element={<PublicRoute user={user}><Register /></PublicRoute>} />
+        {/* Public Routes - solo accesibles sin autenticación */}
+        <Route
+          path="/"
+          element={
+            <PublicRoute user={user}>
+              <Landing />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute user={user}>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute user={user}>
+              <Register />
+            </PublicRoute>
+          }
+        />
 
-        {/* Protected Routes - usar usuario efectivo (puede ser viewAsUser) */}
+        {/* Protected Routes - requieren autenticación */}
         <Route
           path="/student/*"
           element={
-            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={['student', 'listener', 'trial']}>
+            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={STUDENT_ROLES}>
               <StudentDashboard user={effectiveUser} userRole={effectiveRole} />
             </ProtectedRoute>
           }
@@ -105,25 +105,16 @@ function App() {
         <Route
           path="/teacher/*"
           element={
-            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={['teacher', 'trial_teacher', 'admin']}>
+            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={TEACHER_ROLES}>
               <TeacherDashboard user={effectiveUser} userRole={effectiveRole} />
             </ProtectedRoute>
           }
         />
 
-        <Route
-          path="/admin/*"
-          element={
-            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={['admin']}>
-              <Navigate to="/teacher" replace />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Redirect based on role - usar rol efectivo */}
+        {/* Dashboard redirect - redirige según rol */}
         <Route
           path="/dashboard"
-          element={<DashboardRedirect user={user} userRole={effectiveRole} viewAsActive={isViewingAs} />}
+          element={<DashboardRedirect user={user} userRole={effectiveRole} />}
         />
 
         {/* 404 */}
@@ -133,32 +124,24 @@ function App() {
   );
 }
 
-// Landing Page Wrapper
+/**
+ * Landing Page Wrapper
+ */
 function Landing() {
   const navigate = useNavigate();
 
   return (
-    <LandingPage 
+    <LandingPage
       onNavigateToLogin={() => navigate('/login')}
       onNavigateToRegister={() => navigate('/register')}
     />
   );
 }
 
-// Login Wrapper
-function Login() {
-  const navigate = useNavigate();
-
-  return (
-    <UnifiedLogin 
-      onLoginSuccess={() => navigate('/dashboard')}
-      onNavigateToRegister={() => navigate('/register')}
-      onNavigateToHome={() => navigate('/')}
-    />
-  );
-}
-
-// Register Wrapper (placeholder)
+/**
+ * Register Placeholder
+ * TODO: Implementar formulario de registro completo
+ */
 function Register() {
   const navigate = useNavigate();
 
@@ -168,17 +151,10 @@ function Register() {
         <h2>Crear Cuenta</h2>
         <p>El registro completo estará disponible próximamente.</p>
         <p>Por ahora, contacta al administrador para crear una cuenta.</p>
-        <button 
-          className="btn btn-primary"
-          onClick={() => navigate('/login')}
-        >
+        <button className="btn btn-primary" onClick={() => navigate('/login')}>
           Ir al Login
         </button>
-        <button 
-          className="btn btn-outline"
-          onClick={() => navigate('/')}
-          style={{ marginTop: '12px' }}
-        >
+        <button className="btn btn-outline" onClick={() => navigate('/')} style={{ marginTop: '12px' }}>
           Volver al Inicio
         </button>
       </div>
@@ -186,30 +162,48 @@ function Register() {
   );
 }
 
-// Protected Route Component
+/**
+ * Protected Route Component
+ * Redirige a login si no hay usuario o si el rol no está permitido
+ *
+ * @param {Object} props
+ * @param {Object|null} props.user - Usuario autenticado
+ * @param {string|null} props.userRole - Rol del usuario
+ * @param {string[]} props.allowedRoles - Roles permitidos para esta ruta
+ * @param {React.ReactNode} props.children - Contenido a renderizar
+ */
 function ProtectedRoute({ user, userRole, allowedRoles, children }) {
+  // Si no hay usuario, redirigir a login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
+  // Si aún no se cargó el rol, mostrar loading
   if (!userRole) {
     return (
       <div className="loading-screen">
         <div className="spinner"></div>
-        <p>Cargando...</p>
+        <p>Cargando perfil...</p>
       </div>
     );
   }
 
+  // Si el rol no está en los roles permitidos, redirigir a dashboard
   if (!allowedRoles.includes(userRole)) {
-    console.log('🚫 Acceso denegado - rol:', userRole, 'roles permitidos:', allowedRoles);
     return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 }
 
-// Public Route Component (redirect if already logged in)
+/**
+ * Public Route Component
+ * Redirige a dashboard si ya está autenticado
+ *
+ * @param {Object} props
+ * @param {Object|null} props.user - Usuario autenticado
+ * @param {React.ReactNode} props.children - Contenido a renderizar
+ */
 function PublicRoute({ user, children }) {
   if (user) {
     return <Navigate to="/dashboard" replace />;
@@ -217,16 +211,22 @@ function PublicRoute({ user, children }) {
   return children;
 }
 
-// Dashboard Redirect based on role
-function DashboardRedirect({ user, userRole, viewAsActive }) {
-  console.log('🔍 DashboardRedirect - user:', user?.uid, 'userRole:', userRole, 'viewAsActive:', viewAsActive);
-
+/**
+ * Dashboard Redirect
+ * Redirige según el rol del usuario
+ *
+ * @param {Object} props
+ * @param {Object|null} props.user - Usuario autenticado
+ * @param {string|null} props.userRole - Rol del usuario
+ */
+function DashboardRedirect({ user, userRole }) {
+  // Si no hay usuario, redirigir a login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
+  // Si no hay rol, mostrar loading con mensaje
   if (!userRole) {
-    console.warn('⚠️ Usuario sin rol en Firestore. Necesita ser creado en la colección "users"');
     return (
       <div className="loading-screen">
         <div className="spinner"></div>
@@ -238,24 +238,22 @@ function DashboardRedirect({ user, userRole, viewAsActive }) {
     );
   }
 
-  switch (userRole) {
-    case 'student':
-    case 'listener':
-    case 'trial':
-      console.log(viewAsActive ? 'Redirigiendo a /student (ViewAs)' : 'Redirigiendo a /student');
-      return <Navigate to="/student" replace />;
-    case 'teacher':
-    case 'trial_teacher':
-    case 'admin':
-      console.log(viewAsActive ? 'Redirigiendo a /teacher (ViewAs)' : 'Redirigiendo a /teacher');
-      return <Navigate to="/teacher" replace />;
-    default:
-      console.warn('⚠️ Rol desconocido:', userRole);
-      return <Navigate to="/login" replace />;
+  // Redirigir según rol
+  if (STUDENT_ROLES.includes(userRole)) {
+    return <Navigate to="/student" replace />;
   }
+
+  if (TEACHER_ROLES.includes(userRole)) {
+    return <Navigate to="/teacher" replace />;
+  }
+
+  // Rol desconocido - redirigir a login
+  return <Navigate to="/login" replace />;
 }
 
-// 404 Page
+/**
+ * 404 Page
+ */
 function NotFound() {
   const navigate = useNavigate();
 
@@ -265,10 +263,7 @@ function NotFound() {
         <h1>404</h1>
         <h2>Página No Encontrada</h2>
         <p>Lo sentimos, la página que buscas no existe.</p>
-        <button 
-          className="btn btn-primary"
-          onClick={() => navigate('/')}
-        >
+        <button className="btn btn-primary" onClick={() => navigate('/')}>
           Volver al Inicio
         </button>
       </div>

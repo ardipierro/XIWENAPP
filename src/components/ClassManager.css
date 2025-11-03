@@ -139,15 +139,9 @@
   color: #6b7280;
 }
 
-/* Class Stats */
+/* Class Stats - usando estilos globales */
 .class-stats {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 14px;
-  color: #6b7280;
+  /* Los estilos se heredan de .card-stats en globals.css */
 }
 
 /* Class Actions */
@@ -217,18 +211,7 @@
   border-top: 1px solid #e5e7eb;
 }
 
-/* Form Styles */
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 8px;
-}
+/* Form Styles - ahora heredan de globals.css */
 
 .form-row {
   display: grid;

@@ -49,6 +49,7 @@ import {
 } from '../firebase/relationships';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
+import { getClassesByTeacher } from '../firebase/classes';
 import { createUser } from '../firebase/users';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
@@ -61,6 +62,7 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
+import QuickAccessCard from './QuickAccessCard';
 import ExercisePlayer from './exercises/ExercisePlayer';
 import './TeacherDashboard.css';
 
@@ -110,6 +112,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   const [studentExercises, setStudentExercises] = useState([]);
   const [allContent, setAllContent] = useState([]);
   const [allExercises, setAllExercises] = useState([]);
+  const [allClasses, setAllClasses] = useState([]);
   const [enrollmentCounts, setEnrollmentCounts] = useState({});
   const [loadingResources, setLoadingResources] = useState(false);
 
@@ -221,6 +224,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       const allCourses = await loadCourses();
       const activeCourses = allCourses.filter(c => c.active !== false);
       setCourses(activeCourses);
+
+      // Cargar contenido y clases del profesor
+      const teacherContent = await getContentByTeacher(user.uid);
+      setAllContent(teacherContent);
+
+      const teacherClasses = await getClassesByTeacher(user.uid);
+      setAllClasses(teacherClasses);
 
       // Calcular top students
       const studentGameCounts = {};
@@ -675,20 +685,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Renderizar Perfil de Usuario
-  if (currentScreen === 'users' && showUserProfile && selectedUserProfile) {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <UserProfile
-          selectedUser={selectedUserProfile}
-          currentUser={user}
-          isAdmin={isAdmin}
-          onBack={handleBackFromProfile}
-          onUpdate={handleProfileUpdate}
-        />
-      </DashboardLayout>
-    );
-  }
 
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
   if (currentScreen === 'users') {
@@ -719,8 +715,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
                 <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
               </button>
-              <button onClick={loadUsers} className="btn btn-primary">
-                <RefreshCw size={18} strokeWidth={2} /> Actualizar
+              <button onClick={loadUsers} className="btn-icon-refresh" title="Actualizar">
+                <RefreshCw size={20} strokeWidth={2} />
               </button>
             </div>
           </div>
@@ -738,7 +734,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           )}
 
           {/* Tabla de usuarios */}
-          <div className="users-section card">
+          <div className="users-section">
 
             {filteredUsers.length === 0 ? (
               <div className="no-users">
@@ -751,10 +747,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                     <tr>
                       <th>Usuario</th>
                       <th>Email</th>
+                      <th>Créditos</th>
                       {isAdmin && <th>Rol</th>}
                       <th>Estado</th>
                       {isAdmin && <th>Registro</th>}
-                      <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -783,6 +779,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                         </td>
 
                         <td className="email-cell">{userItem.email}</td>
+
+                        <td className="credits-cell">{userItem.credits || 0}</td>
 
                         {isAdmin && (
                           <td>
@@ -820,29 +818,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             {formatDate(userItem.createdAt)}
                           </td>
                         )}
-
-                        <td>
-                          <div className="actions-cell">
-                            {userItem.status === 'active' ? (
-                              <button
-                                onClick={() => handleStatusChange(userItem.id, 'suspended')}
-                                className="action-btn suspend-btn"
-                                disabled={isAdminEmail(userItem.email)}
-                                title="Suspender usuario"
-                              >
-                                <Ban size={18} strokeWidth={2} />
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleStatusChange(userItem.id, 'active')}
-                                className="action-btn activate-btn"
-                                title="Activar usuario"
-                              >
-                                <Check size={18} strokeWidth={2} />
-                              </button>
-                            )}
-                          </div>
-                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1211,6 +1186,21 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           userRole={userRole}
           isAdmin={isAdmin}
         />
+
+        {/* Modal de User Profile */}
+        {showUserProfile && selectedUserProfile && (
+          <div className="modal-overlay" onClick={handleBackFromProfile}>
+            <div className="modal-box max-w-5xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+              <UserProfile
+                selectedUser={selectedUserProfile}
+                currentUser={user}
+                isAdmin={isAdmin}
+                onBack={handleBackFromProfile}
+                onUpdate={handleProfileUpdate}
+              />
+            </div>
+          </div>
+        )}
       </DashboardLayout>
     );
   }
@@ -1220,8 +1210,46 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="teacher-dashboard">
-          <div className="dashboard-content">
-            {/* Inicio - Listo para nuevas tarjetas */}
+          <div className="dashboard-content mt-6">
+            {/* Quick Access Cards */}
+            <div className="quick-access-grid">
+              <QuickAccessCard
+                icon={isAdmin ? Crown : Users}
+                title={isAdmin ? "Usuarios" : "Alumnos"}
+                count={users.length}
+                countLabel={users.length === 1 ? "usuario" : "usuarios"}
+                onClick={() => setCurrentScreen('users')}
+                createLabel={isAdmin ? "Nuevo Usuario" : "Nuevo Alumno"}
+                onCreateClick={() => setShowAddUserModal(true)}
+              />
+              <QuickAccessCard
+                icon={BookOpen}
+                title="Cursos"
+                count={courses.length}
+                countLabel={courses.length === 1 ? "curso" : "cursos"}
+                onClick={() => setCurrentScreen('courses')}
+                createLabel="Nuevo Curso"
+                onCreateClick={() => setCurrentScreen('courses')}
+              />
+              <QuickAccessCard
+                icon={FileText}
+                title="Contenidos"
+                count={allContent.length}
+                countLabel={allContent.length === 1 ? "contenido" : "contenidos"}
+                onClick={() => setCurrentScreen('content')}
+                createLabel="Nuevo Contenido"
+                onCreateClick={() => setCurrentScreen('content')}
+              />
+              <QuickAccessCard
+                icon={Calendar}
+                title="Clases"
+                count={allClasses.length}
+                countLabel={allClasses.length === 1 ? "clase" : "clases"}
+                onClick={() => setCurrentScreen('classes')}
+                createLabel="Nueva Clase"
+                onCreateClick={() => setCurrentScreen('classes')}
+              />
+            </div>
           </div>
       </div>
       </DashboardLayout>

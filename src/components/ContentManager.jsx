@@ -1,16 +1,43 @@
+/**
+ * @fileoverview Gestor de contenido educativo con CRUD completo
+ * @module components/ContentManager
+ */
+
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2 } from 'lucide-react';
-import { getContentByTeacher, createContent, updateContent, getContentById, deleteContent } from '../firebase/content';
-import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock } from 'lucide-react';
+import { useContent } from '../hooks/useContent.js';
+import ContentRepository from '../services/ContentRepository.js';
+import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse.js';
 import {
   updateContentCourses,
   getCoursesWithContent,
   removeContentFromCourse
-} from '../firebase/relationships';
+} from '../firebase/relationships.js';
+import { uploadImage, deleteImage } from '../firebase/storage';
+import logger from '../utils/logger.js';
 
+/**
+ * Componente para gestión de contenido educativo
+ * @param {Object} props
+ * @param {Object} props.user - Usuario actual
+ * @param {Array} [props.courses] - Cursos disponibles
+ * @param {Function} [props.onBack] - Callback para volver atrás
+ */
 function ContentManager({ user, courses = [], onBack }) {
-  const [contents, setContents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Hook de contenido
+  const {
+    content,
+    loading,
+    error,
+    operationLoading,
+    operationError,
+    createContent: createContentHook,
+    updateContent: updateContentHook,
+    deleteContent: deleteContentHook,
+    refetch
+  } = useContent({ teacherId: user.uid });
+
+  // Estados locales de UI
   const [filter, setFilter] = useState('all'); // all, lesson, reading, video, link
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
@@ -19,43 +46,50 @@ function ContentManager({ user, courses = [], onBack }) {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentCourses, setContentCourses] = useState({}); // Map contentId -> courses[]
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [activeTab, setActiveTab] = useState('general'); // 'general' or 'config'
   const [formData, setFormData] = useState({
     title: '',
     type: 'lesson',
     body: '',
     courseIds: [], // Changed from courseId to courseIds array
-    order: 0
+    imageUrl: ''
   });
 
+  // Cargar relaciones de cursos cuando cambia el contenido
   useEffect(() => {
-    loadContents();
-  }, [user]);
+    loadCoursesForContents();
+  }, [content]);
 
-  const loadContents = async () => {
-    setLoading(true);
-    const data = await getContentByTeacher(user.uid);
-    setContents(data);
+  /**
+   * Carga las relaciones de cursos para todo el contenido
+   */
+  const loadCoursesForContents = async () => {
+    if (!content || content.length === 0) return;
 
-    // Load course relationships for each content
     const coursesMap = {};
-    for (const content of data) {
-      const contentCrs = await getCoursesWithContent(content.id);
-      coursesMap[content.id] = contentCrs;
+    for (const item of content) {
+      const contentCrs = await getCoursesWithContent(item.id);
+      coursesMap[item.id] = contentCrs;
     }
     setContentCourses(coursesMap);
-
-    setLoading(false);
   };
 
+  // Alias para compatibilidad con código existente
+  const contents = content;
+
+  /**
+   * Crea nuevo contenido
+   * @param {Event} e - Evento del formulario
+   */
   const handleCreate = async (e) => {
     e.preventDefault();
 
-    // Create content without courseId (will use relationships instead)
-    const result = await createContent({
+    // Create content using hook
+    const result = await createContentHook({
       title: formData.title,
       type: formData.type,
       body: formData.body,
-      order: formData.order,
       createdBy: user.uid
     });
 
@@ -65,72 +99,183 @@ function ContentManager({ user, courses = [], onBack }) {
         await updateContentCourses(result.id, formData.courseIds);
       }
 
-      loadContents();
+      // Refetch después de crear relaciones
+      await refetch();
+
       setShowCreateModal(false);
-      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], order: 0 });
+      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '' });
+
+      logger.info('Contenido creado exitosamente', 'ContentManager');
     } else {
       alert('Error al crear contenido: ' + result.error);
+      logger.error('Error al crear contenido', result.error, 'ContentManager');
     }
   };
 
+  /**
+   * Abre el modal de edición con los datos del contenido
+   * @param {string} contentId - ID del contenido a editar
+   */
   const handleEdit = async (contentId) => {
-    const content = await getContentById(contentId);
-    if (content) {
-      // Load course relationships
-      const contentCrs = await getCoursesWithContent(contentId);
-      const courseIds = contentCrs.map(c => c.id);
+    try {
+      const result = await ContentRepository.getById(contentId);
 
-      setSelectedContent(content);
-      setFormData({
-        title: content.title || '',
-        type: content.type || 'lesson',
-        body: content.body || '',
-        courseIds: courseIds,
-        order: content.order || 0
-      });
-      setShowEditModal(true);
+      if (result.success && result.data) {
+        const contentItem = result.data;
+
+        // Load course relationships
+        const contentCrs = await getCoursesWithContent(contentId);
+        const courseIds = contentCrs.map(c => c.id);
+
+        setSelectedContent(contentItem);
+        setFormData({
+          title: contentItem.title || '',
+          type: contentItem.type || 'lesson',
+          body: contentItem.body || '',
+          courseIds: courseIds,
+          imageUrl: contentItem.imageUrl || ''
+        });
+        setShowEditModal(true);
+      } else {
+        alert('Error al cargar contenido: ' + result.error);
+      }
+    } catch (err) {
+      logger.error('Error en handleEdit', err, 'ContentManager');
+      alert('Error al cargar contenido');
     }
   };
 
+  /**
+   * Actualiza un contenido existente
+   * @param {Event} e - Evento del formulario
+   */
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    // Update content data
-    const result = await updateContent(selectedContent.id, {
+    // Update content data using hook
+    const result = await updateContentHook(selectedContent.id, {
       title: formData.title,
       type: formData.type,
-      body: formData.body,
-      order: formData.order
+      body: formData.body
     });
 
     if (result.success) {
       // Update course relationships
       await updateContentCourses(selectedContent.id, formData.courseIds);
 
-      loadContents();
+      // Refetch después de actualizar relaciones
+      await refetch();
+
       setShowEditModal(false);
       setSelectedContent(null);
-      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], order: 0 });
+      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '' });
+
+      logger.info('Contenido actualizado exitosamente', 'ContentManager');
     } else {
       alert('Error al actualizar contenido: ' + result.error);
+      logger.error('Error al actualizar contenido', result.error, 'ContentManager');
     }
   };
 
+  /**
+   * Maneja la subida de imagen
+   */
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tamaño (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar los 5MB');
+      return;
+    }
+
+    // Validar tipo
+    if (!file.type.startsWith('image/')) {
+      alert('Solo se permiten archivos de imagen');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+
+      // Generar path único con timestamp
+      const timestamp = Date.now();
+      const extension = file.name.split('.').pop();
+      const fileName = `content_${timestamp}.${extension}`;
+      const path = `content/${fileName}`;
+
+      // Subir imagen
+      const result = await uploadImage(file, path);
+
+      if (result.success) {
+        setFormData({ ...formData, imageUrl: result.url });
+        alert('✅ Imagen subida exitosamente');
+      } else {
+        throw new Error(result.error || 'Error desconocido al subir imagen');
+      }
+    } catch (error) {
+      console.error('Error subiendo imagen:', error);
+      alert('Error al subir imagen: ' + error.message);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  /**
+   * Elimina la imagen actual
+   */
+  const handleRemoveImage = async () => {
+    if (!formData.imageUrl) return;
+
+    try {
+      // Intentar eliminar de Storage (si es de Firebase)
+      if (formData.imageUrl.includes('firebasestorage.googleapis.com')) {
+        await deleteImage(formData.imageUrl);
+      }
+      setFormData({ ...formData, imageUrl: '' });
+      alert('✅ Imagen eliminada');
+    } catch (error) {
+      console.error('Error eliminando imagen:', error);
+      // Incluso si falla, limpiar la URL del formulario
+      setFormData({ ...formData, imageUrl: '' });
+      alert('Imagen removida del formulario');
+    }
+  };
+
+  /**
+   * Abre el modal de visualización del contenido
+   * @param {string} contentId - ID del contenido a visualizar
+   */
   const handleView = async (contentId) => {
-    const content = await getContentById(contentId);
-    if (content) {
-      setSelectedContent(content);
-      setShowViewModal(true);
+    try {
+      const result = await ContentRepository.getById(contentId);
+
+      if (result.success && result.data) {
+        setSelectedContent(result.data);
+        setShowViewModal(true);
+      } else {
+        alert('Error al cargar contenido: ' + result.error);
+      }
+    } catch (err) {
+      logger.error('Error en handleView', err, 'ContentManager');
+      alert('Error al cargar contenido');
     }
   };
 
+  /**
+   * Elimina un contenido
+   * @param {string} contentId - ID del contenido a eliminar
+   */
   const handleDelete = async (contentId) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este contenido?')) {
-      const result = await deleteContent(contentId);
+      const result = await deleteContentHook(contentId);
       if (result.success) {
-        setContents(contents.filter(c => c.id !== contentId));
+        logger.info('Contenido eliminado exitosamente', 'ContentManager');
+        // El hook ya actualiza la lista automáticamente con refetch
       } else {
-        alert('Error al eliminar el contenido');
+        alert('Error al eliminar el contenido: ' + result.error);
+        logger.error('Error al eliminar contenido', result.error, 'ContentManager');
       }
     }
   };
@@ -143,7 +288,7 @@ function ContentManager({ user, courses = [], onBack }) {
   });
 
   const getTypeIcon = (type) => {
-    const iconProps = { size: 32, strokeWidth: 2 };
+    const iconProps = { size: 48, strokeWidth: 2 };
     // Tipos de contenido tradicionales
     if (type === 'lesson') return <BookOpen {...iconProps} />;
     if (type === 'reading') return <BookMarked {...iconProps} />;
@@ -174,6 +319,9 @@ function ContentManager({ user, courses = [], onBack }) {
     return types[type] || type;
   };
 
+  /**
+   * Asigna contenido sin asignar a un curso
+   */
   const handleAssignUnassignedContent = async () => {
     if (courses.length === 0) {
       alert('No hay cursos disponibles. Crea un curso primero.');
@@ -197,7 +345,10 @@ function ContentManager({ user, courses = [], onBack }) {
 
     const result = await assignUnassignedContentToCourse(selectedCourseId, user.uid);
     if (result.success) {
-      loadContents(); // Recargar para actualizar la vista
+      await refetch(); // Recargar para actualizar la vista
+      logger.info('Contenido sin asignar asignado exitosamente', 'ContentManager');
+    } else {
+      logger.error('Error asignando contenido sin asignar', result.error, 'ContentManager');
     }
   };
 
@@ -220,14 +371,14 @@ function ContentManager({ user, courses = [], onBack }) {
       )}
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-3">
           <FileText size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Contenido</h1>
         </div>
         <div className="flex items-center gap-3">
           <button
-            className="btn btn-primary"
+            className="btn btn-primary w-full sm:w-auto"
             onClick={() => setShowCreateModal(true)}
           >
             + Crear Nuevo Contenido
@@ -265,13 +416,13 @@ function ContentManager({ user, courses = [], onBack }) {
           {filteredContents.map((content) => (
             <div
               key={content.id}
-              className="card flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
+              className="card card-grid-item flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
               style={{ padding: 0 }}
               onClick={() => handleEdit(content.id)}
               title="Click para editar contenido"
             >
               {/* Placeholder con icono de tipo - Mitad superior sin bordes */}
-              <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+              <div className="card-image-large-placeholder">
                 {getTypeIcon(content.type)}
               </div>
 
@@ -299,14 +450,9 @@ function ContentManager({ user, courses = [], onBack }) {
 
                 {/* Stats */}
                 <div className="card-stats">
-                  {content.order !== undefined && (
-                    <span className="flex items-center gap-1">
-                      <BarChart3 size={14} strokeWidth={2} /> Orden: {content.order}
-                    </span>
-                  )}
                   {content.createdAt && (
                     <span className="flex items-center gap-1">
-                      <Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}
+                      <Calendar size={16} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}
                     </span>
                   )}
                 </div>
@@ -337,11 +483,6 @@ function ContentManager({ user, courses = [], onBack }) {
 
                   {/* Stats */}
                   <div className="card-stats">
-                    {content.order !== undefined && (
-                      <span className="flex items-center gap-1">
-                        <BarChart3 size={14} strokeWidth={2} /> Orden: {content.order}
-                      </span>
-                    )}
                     {content.createdAt && (
                       <span className="flex items-center gap-1">
                         <Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR')}
@@ -436,17 +577,6 @@ function ContentManager({ user, courses = [], onBack }) {
                   required
                 />
               </div>
-
-              <div className="form-group">
-                <label className="form-label">Orden</label>
-                <input
-                  type="number"
-                  className="input"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                  min="0"
-                />
-              </div>
               </form>
             </div>
 
@@ -473,8 +603,8 @@ function ContentManager({ user, courses = [], onBack }) {
       {/* Modal Editar Contenido */}
       {showEditModal && selectedContent && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
               <h3 className="modal-title">
                 Editar Contenido
               </h3>
@@ -483,91 +613,181 @@ function ContentManager({ user, courses = [], onBack }) {
                 onClick={() => setShowEditModal(false)}
                 aria-label="Cerrar modal"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
             </div>
 
-            <div className="modal-content">
-              <form onSubmit={handleUpdate} className="space-y-4">
-              <div className="form-group">
-                <label className="form-label">Título*</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Tipo*</label>
-                <select
-                  className="select"
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            <div className="flex flex-col flex-1 min-h-0">
+              {/* Tabs */}
+              <div className="modal-tabs-container">
+                <div className="modal-tabs">
+                <button
+                  onClick={() => setActiveTab('general')}
+                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                    activeTab === 'general'
+                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
                 >
-                  <option value="lesson">Lección</option>
-                  <option value="reading">Lectura</option>
-                  <option value="video">Video</option>
-                  <option value="link">Enlace</option>
-                  <option disabled>──────────</option>
-                  <option value="multiple_choice">Ejercicio: Opción Múltiple</option>
-                  <option value="fill_blank">Ejercicio: Completar Espacios</option>
-                  <option value="drag_drop">Ejercicio: Drag & Drop</option>
-                  <option value="highlight">Ejercicio: Resaltar Palabras</option>
-                  <option value="order_sentence">Ejercicio: Ordenar Oración</option>
-                  <option value="true_false">Ejercicio: Verdadero/Falso</option>
-                  <option value="matching">Ejercicio: Relacionar</option>
-                  <option value="table">Ejercicio: Tabla</option>
-                </select>
+                  <FileText size={18} strokeWidth={2} className="inline-icon" /> General
+                </button>
+                <button
+                  onClick={() => setActiveTab('config')}
+                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                    activeTab === 'config'
+                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <Settings size={18} strokeWidth={2} className="inline-icon" /> Configuración
+                </button>
+                </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">
-                  {formData.type === 'link' ? 'URL' : 'Contenido'}*
-                </label>
-                <textarea
-                  className="input"
-                  rows={formData.type === 'link' ? 2 : 6}
-                  value={formData.body}
-                  onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                  placeholder={formData.type === 'link' ? 'https://...' : 'Escribe el contenido...'}
-                  required
-                />
+              <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+                {/* TAB: GENERAL */}
+                {activeTab === 'general' && (
+                  <div className="pt-6">
+                    <div className="form-group">
+                      <label className="form-label">Título*</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Tipo*</label>
+                      <select
+                        className="select"
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      >
+                        <option value="lesson">Lección</option>
+                        <option value="reading">Lectura</option>
+                        <option value="video">Video</option>
+                        <option value="link">Enlace</option>
+                        <option disabled>──────────</option>
+                        <option value="multiple_choice">Ejercicio: Opción Múltiple</option>
+                        <option value="fill_blank">Ejercicio: Completar Espacios</option>
+                        <option value="drag_drop">Ejercicio: Drag & Drop</option>
+                        <option value="highlight">Ejercicio: Resaltar Palabras</option>
+                        <option value="order_sentence">Ejercicio: Ordenar Oración</option>
+                        <option value="true_false">Ejercicio: Verdadero/Falso</option>
+                        <option value="matching">Ejercicio: Relacionar</option>
+                        <option value="table">Ejercicio: Tabla</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">
+                        {formData.type === 'link' ? 'URL' : 'Contenido'}*
+                      </label>
+                      <textarea
+                        className="input"
+                        rows={formData.type === 'link' ? 2 : 6}
+                        value={formData.body}
+                        onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+                        placeholder={formData.type === 'link' ? 'https://...' : 'Escribe el contenido...'}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Imagen del Contenido</label>
+                      {formData.imageUrl ? (
+                        <div className="relative">
+                          <img
+                            src={formData.imageUrl}
+                            alt="Vista previa de la imagen del contenido"
+                            className="w-full h-48 object-cover rounded-lg mb-2"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            disabled={uploadingImage}
+                            className="btn btn-danger btn-sm"
+                          >
+                            {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            disabled={uploadingImage}
+                            className="block w-full text-sm text-gray-900 dark:text-gray-100
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-md file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-primary file:text-white
+                              hover:file:bg-primary-light
+                              file:cursor-pointer cursor-pointer"
+                          />
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            PNG, JPG, GIF o WEBP (máx. 5MB)
+                          </p>
+                        </div>
+                      )}
+                      {uploadingImage && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
+                          <Clock size={14} strokeWidth={2} /> Subiendo imagen...
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: CONFIGURACIÓN */}
+                {activeTab === 'config' && (
+                  <div className="space-y-6 pt-6">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      Próximamente: Configuraciones avanzadas del contenido
+                    </p>
+                  </div>
+                )}
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Orden</label>
-                <input
-                  type="number"
-                  className="input"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                  min="0"
-                />
-              </div>
-              </form>
-            </div>
+              {/* Zona de Peligro + Botones - Footer fijo */}
+              <div className="px-6 pt-4 pb-4 border-t-2 border-red-200 dark:border-red-900 flex-shrink-0">
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4">
+                  <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
+                  <p className="text-xs text-red-700 dark:text-red-400 mb-3">
+                    Esta acción eliminará permanentemente el contenido.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-danger w-full"
+                    onClick={() => {
+                      if (window.confirm('¿Estás seguro de que quieres eliminar este contenido? Esta acción no se puede deshacer.')) {
+                        handleDelete(selectedContent.id);
+                        setShowEditModal(false);
+                      }
+                    }}
+                  >
+                    <Trash2 size={16} strokeWidth={2} /> Eliminar Contenido Permanentemente
+                  </button>
+                </div>
 
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => setShowEditModal(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                onClick={handleUpdate}
-              >
-                Guardar Cambios
-              </button>
+                <button
+                  type="button"
+                  className="btn btn-primary w-full"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleUpdate(e);
+                  }}
+                >
+                  Guardar Cambios
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -111,8 +111,8 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
             <User size={24} strokeWidth={2} />
             Perfil de Usuario
           </h2>
-          <button className="profile-close" onClick={onClose}>
-            <X size={24} strokeWidth={2} />
+          <button className="modal-close-btn" onClick={onClose}>
+            <X size={20} strokeWidth={2} />
           </button>
         </div>
 
@@ -227,13 +227,6 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="profile-footer">
-          <button className="btn-profile-close" onClick={onClose}>
-            Cerrar
-          </button>
         </div>
       </div>
     </div>

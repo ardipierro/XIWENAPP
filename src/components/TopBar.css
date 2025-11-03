@@ -4,10 +4,16 @@
   left: 0;
   right: 0;
   height: 64px;
-  background: #0a0a0a;
-  border-bottom: 1px solid #27272a;
-  z-index: 1000;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  z-index: var(--z-dropdown);
   box-shadow: none;
+  transition: top var(--transition-slow) ease;
+}
+
+/* Cuando hay banner, TopBar se mueve hacia abajo */
+.dashboard-layout.has-banner .topbar {
+  top: 44px; /* Altura del banner */
 }
 
 .topbar-content {
@@ -39,7 +45,7 @@
 }
 
 .sidebar-toggle:hover {
-  background: #27272a;
+  background: var(--color-bg-tertiary);
 }
 
 .hamburger {
@@ -52,7 +58,7 @@
 .hamburger span {
   display: block;
   height: 3px;
-  background: #f4f4f5;
+  background: var(--color-text-primary);
   border-radius: 2px;
   transition: none;
 }
@@ -68,7 +74,7 @@
 .brand-title {
   font-size: 18px;
   font-weight: 700;
-  color: #f4f4f5;
+  color: var(--color-text-primary);
   letter-spacing: 0.5px;
 }
 
@@ -90,10 +96,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-text-secondary);
 }
 
 .icon-button:hover {
-  background: #27272a;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .icon-button .icon {
@@ -104,7 +112,7 @@
   position: absolute;
   top: 4px;
   right: 4px;
-  background: #ef4444;
+  background: var(--color-error);
   color: white;
   font-size: 10px;
   font-weight: 700;
@@ -117,7 +125,7 @@
 .topbar-divider {
   width: 1px;
   height: 32px;
-  background: #27272a;
+  background: var(--color-border);
   margin: 0 8px;
 }
 
@@ -136,10 +144,11 @@
   padding: 6px 12px 6px 6px;
   border-radius: 8px;
   transition: none;
+  color: var(--color-text-primary);
 }
 
 .user-button:hover {
-  background: #27272a;
+  background: var(--color-bg-tertiary);
 }
 
 .user-avatar {
@@ -147,17 +156,18 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #27272a;
+  background: var(--color-bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   cursor: pointer;
   transition: none;
+  color: var(--color-text-secondary);
 }
 
 .user-avatar:hover {
-  background: #3f3f46;
+  background: var(--color-bg-quaternary);
 }
 
 .avatar-emoji-display {
@@ -171,7 +181,7 @@
   right: -2px;
   width: 20px;
   height: 20px;
-  background: #18181b;
+  background: var(--color-bg-secondary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -179,7 +189,7 @@
   box-shadow: none;
   opacity: 0;
   transition: none;
-  color: #a1a1aa;
+  color: var(--color-text-tertiary);
 }
 
 .user-avatar:hover .avatar-edit-hint {
@@ -197,7 +207,7 @@
 .user-name {
   font-size: 14px;
   font-weight: 600;
-  color: #f4f4f5;
+  color: var(--color-text-primary) !important;
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -213,12 +223,12 @@
 
 .dropdown-arrow {
   font-size: 10px;
-  color: #a1a1aa;
+  color: var(--color-text-tertiary);
   transition: none;
 }
 
 .user-button:hover .dropdown-arrow {
-  color: #f4f4f5;
+  color: var(--color-text-primary);
 }
 
 /* Admin theme overrides removed - using dark theme by default */

@@ -1,0 +1,214 @@
+REGLAS DE FIRESTORE PARA XIWEN APP
+=====================================
+
+Copia estas reglas en Firebase Console > Firestore Database > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================
+    // USUARIOS
+    // ============================================
+    // Permitir que usuarios autenticados lean y escriban su propia información
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ============================================
+    // CRÉDITOS
+    // ============================================
+    // Permitir lectura de créditos al usuario propietario
+    match /user_credits/{document} {
+      allow read: if request.auth != null &&
+                     resource.data.userId == request.auth.uid;
+      allow write: if false; // Solo administradores pueden modificar créditos
+    }
+
+    // Historial de transacciones de créditos
+    match /credit_transactions/{document} {
+      allow read: if request.auth != null &&
+                     resource.data.userId == request.auth.uid;
+      allow write: if false; // Solo el sistema puede crear transacciones
+    }
+
+    // ============================================
+    // CURSOS
+    // ============================================
+    match /courses/{courseId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo administradores/profesores
+    }
+
+    // ============================================
+    // CONTENIDO
+    // ============================================
+    match /course_content/{contentId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo administradores/profesores
+    }
+
+    // ============================================
+    // EJERCICIOS
+    // ============================================
+    match /exercises/{exerciseId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo administradores/profesores
+    }
+
+    // ============================================
+    // CLASES PROGRAMADAS
+    // ============================================
+    match /scheduled_classes/{classId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo administradores/profesores
+    }
+
+    // ============================================
+    // ASISTENCIA
+    // ============================================
+    match /class_attendance/{attendanceId} {
+      allow read: if request.auth != null &&
+                     resource.data.studentId == request.auth.uid;
+      allow write: if false; // Solo profesores pueden marcar asistencia
+    }
+
+    // ============================================
+    // GRUPOS
+    // ============================================
+    match /groups/{groupId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo profesores/administradores
+    }
+
+    match /group_members/{memberId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo profesores/administradores
+    }
+
+    match /group_courses/{groupCourseId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo profesores/administradores
+    }
+
+    // ============================================
+    // INSCRIPCIONES (ENROLLMENTS)
+    // ============================================
+    match /course_enrollments/{enrollmentId} {
+      allow read: if request.auth != null &&
+                     resource.data.studentId == request.auth.uid;
+      allow write: if false; // Solo profesores/administradores
+    }
+
+    // ============================================
+    // ADMINISTRADORES Y PROFESORES
+    // ============================================
+    // Los administradores pueden leer y escribir todo
+    match /{document=**} {
+      allow read, write: if request.auth != null &&
+                            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Los profesores pueden leer y escribir en sus colecciones específicas
+    match /courses/{courseId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /course_content/{contentId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /exercises/{exerciseId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /scheduled_classes/{classId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /class_attendance/{attendanceId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /groups/{groupId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /group_members/{memberId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /group_courses/{groupCourseId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /course_enrollments/{enrollmentId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /user_credits/{creditId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    match /credit_transactions/{transactionId} {
+      allow write: if request.auth != null &&
+                      (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher' ||
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'trial_teacher');
+    }
+
+    // ============================================
+    // REGLA DE SEGURIDAD POR DEFECTO
+    // ============================================
+    // Denegar todo lo que no esté explícitamente permitido
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+
+INSTRUCCIONES:
+==============
+1. Ve a Firebase Console: https://console.firebase.google.com
+2. Selecciona tu proyecto
+3. Ve a Firestore Database
+4. Click en la pestaña "Rules"
+5. Copia y pega estas reglas
+6. Click en "Publish"
+
+IMPORTANTE:
+===========
+- Estas reglas permiten que los usuarios lean su propia información
+- Los administradores tienen acceso completo
+- Los profesores pueden gestionar cursos, contenido, ejercicios, clases y créditos
+- Los estudiantes solo pueden ver su propia información y recursos asignados
+
+NOTA:
+=====
+Si después de aplicar estas reglas sigues teniendo problemas, verifica también:
+1. Authentication > Settings > Authorized domains
+   - Agrega: xiwenapp-m0x2j03o7-ardipierros-projects.vercel.app
+2. Storage > Rules (si usas Firebase Storage para avatares)

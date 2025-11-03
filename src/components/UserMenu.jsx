@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { Home, BarChart3, User, Settings, LogOut } from 'lucide-react';
+import { BarChart3, User, Settings, LogOut } from 'lucide-react';
 import './UserMenu.css';
 
 function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
@@ -57,16 +57,8 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
   return (
     <div className="user-menu" ref={menuRef}>
       {/* Opciones de navegación */}
-      <div className="user-menu-section">
-        <button
-          className="menu-item"
-          onClick={() => handleNavigate('/dashboard')}
-        >
-          <Home size={18} strokeWidth={2} className="menu-item-icon" />
-          <span className="menu-item-text">Ir al Inicio</span>
-        </button>
-
-        {isStudent && (
+      {isStudent && (
+        <div className="user-menu-section">
           <button
             className="menu-item"
             onClick={() => alert('Funcionalidad en desarrollo')}
@@ -74,10 +66,8 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
             <BarChart3 size={18} strokeWidth={2} className="menu-item-icon" />
             <span className="menu-item-text">Mi Progreso</span>
           </button>
-        )}
-      </div>
-
-      <div className="user-menu-divider"></div>
+        </div>
+      )}
 
       {/* Configuración */}
       <div className="user-menu-section">
@@ -97,8 +87,6 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
           <span className="menu-item-text">Configuración</span>
         </button>
       </div>
-
-      <div className="user-menu-divider"></div>
 
       {/* Cerrar sesión */}
       <div className="user-menu-section">
