@@ -12,7 +12,7 @@ import {
   orderBy,
   serverTimestamp
 } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from './config';
 
 // ============================================
@@ -48,6 +48,9 @@ function generateTemporaryPassword() {
  * @returns {Promise<Object>} - {success: boolean, id?: string, password?: string, error?: string}
  */
 export async function createUser(userData) {
+  // Guardar usuario actual antes de crear uno nuevo
+  const currentUser = auth.currentUser;
+
   try {
     const usersRef = collection(db, 'users');
 
@@ -65,16 +68,17 @@ export async function createUser(userData) {
     // Generar contraseña temporal
     const temporaryPassword = generateTemporaryPassword();
 
-    // Crear usuario en Firebase Authentication
+    // IMPORTANTE: Crear usuario en Firebase Authentication
+    // Esto automáticamente inicia sesión con el nuevo usuario
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       userData.email,
       temporaryPassword
     );
-    const authUser = userCredential.user;
+    const newAuthUser = userCredential.user;
 
     // Crear el documento en Firestore con el mismo UID de Auth
-    const userDocRef = doc(db, 'users', authUser.uid);
+    const userDocRef = doc(db, 'users', newAuthUser.uid);
     await setDoc(userDocRef, {
       email: userData.email,
       name: userData.name || '',
@@ -92,13 +96,26 @@ export async function createUser(userData) {
       notes: userData.notes || ''
     });
 
+    // CRÍTICO: Cerrar sesión del nuevo usuario y restaurar la sesión del admin
+    // Firebase Auth automáticamente inició sesión con el nuevo usuario
+    // Necesitamos cerrar esa sesión inmediatamente
+    await signOut(auth);
+
+    // Nota: No podemos restaurar la sesión aquí porque no tenemos la contraseña del admin
+    // La aplicación manejará el re-login automáticamente a través de onAuthStateChanged
+    // O el admin tendrá que hacer login de nuevo
+
     return {
       success: true,
-      id: authUser.uid,
-      password: temporaryPassword
+      id: newAuthUser.uid,
+      password: temporaryPassword,
+      warning: 'Serás desconectado y deberás volver a iniciar sesión'
     };
   } catch (error) {
     console.error('Error al crear usuario:', error);
+
+    // Si hubo un error, intentar restaurar la sesión del usuario actual
+    // (aunque esto probablemente no sea necesario si la creación falló)
 
     // Mensajes de error más específicos
     if (error.code === 'auth/email-already-in-use') {
