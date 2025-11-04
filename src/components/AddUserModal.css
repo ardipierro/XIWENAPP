@@ -2,11 +2,6 @@
    ADD USER MODAL - ESTILOS MINIMALISTAS
    ============================================ */
 
-.add-user-modal {
-  max-width: 600px;
-  width: 90%;
-}
-
 /* Form Groups */
 .form-group {
   margin-bottom: 24px;
@@ -84,56 +79,7 @@
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
 }
 
-/* Modal Footer */
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-border, #e5e7eb);
-  margin-top: 8px;
-}
-
-/* Buttons - DESHABILITADO: usar globals.css
-.btn {
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-*/
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--color-text-secondary, #6b7280);
-  box-shadow: none;
-  border: 2px solid var(--color-border, #e5e7eb);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: var(--color-background, #f3f4f6);
-  color: var(--color-text-primary, #374151);
-}
-
-.btn-primary {
-  background: #6366f1;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #5558d3;
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
+/* Buttons - Usar globals.css */
 
 /* Dark Mode */
 .dark .form-input,
@@ -166,15 +112,7 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .add-user-modal {
-    max-width: 95%;
-  }
-
-  .modal-footer {
-    flex-direction: column-reverse;
-  }
-
-  .modal-footer .btn {
-    width: 100%;
+  .form-group {
+    margin-bottom: 20px;
   }
 }

@@ -9,18 +9,30 @@ import './ViewAsBanner.css';
  */
 function ViewAsBanner() {
   const navigate = useNavigate();
-  const { isViewingAs, viewAsUser, stopViewingAs } = useViewAs();
+  const { isViewingAs, viewAsUser, returnToUserId, stopViewingAs, clearViewAsState } = useViewAs();
 
   if (!isViewingAs) {
     return null;
   }
 
   const handleExitViewAs = () => {
+    console.log('ViewAsBanner: Saliendo del modo Ver Como');
+    console.log('ViewAsBanner: returnToUserId =', returnToUserId);
+
     // Desactivar modo "Ver como"
     stopViewingAs();
 
-    // Recargar la página para volver al teacher dashboard
-    window.location.href = '/teacher';
+    // Navegar a la ruta del usuario específico
+    if (returnToUserId) {
+      console.log('ViewAsBanner: Navegando a /teacher/users/' + returnToUserId);
+      navigate(`/teacher/users/${returnToUserId}`);
+    } else {
+      console.warn('ViewAsBanner: No hay returnToUserId, navegando a /teacher/users');
+      navigate('/teacher/users');
+    }
+
+    // Limpiar el estado después de navegar
+    setTimeout(() => clearViewAsState(), 100);
   };
 
   return (

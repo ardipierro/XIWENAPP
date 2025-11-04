@@ -12,6 +12,8 @@ import {
   getCoursesWithExercise
 } from '../firebase/relationships.js';
 import logger from '../utils/logger.js';
+import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
 
 /**
  * Componente para gestión de ejercicios
@@ -354,18 +356,20 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
   return (
     <div className="exercise-manager">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <Gamepad2 size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Ejercicios</h1>
-        </div>
-        <button
-          className="btn btn-primary w-full sm:w-auto"
-          onClick={() => setShowCreateModal(true)}
-        >
-          + Crear Nuevo Ejercicio
-        </button>
-      </div>
+      <PageHeader
+        icon={Gamepad2}
+        title="Ejercicios"
+        actionLabel="+ Crear Nuevo Ejercicio"
+        onAction={() => setShowCreateModal(true)}
+      />
+
+      {/* Search Bar */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar ejercicios..."
+        className="mb-6"
+      />
 
 
       {/* Lista de Ejercicios */}
@@ -660,7 +664,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                 </div>
               </div>
 
-              <div className="modal-footer flex-shrink-0 px-6 pb-6 pt-4">
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -847,7 +851,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                 </div>
               </div>
 
-              <div className="modal-footer flex-shrink-0 px-6 pb-6 pt-4">
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -965,7 +969,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               </div>
             </div>
 
-            <div className="modal-footer flex-shrink-0 px-6 pb-6 pt-4">
+            <div className="modal-footer">
               <button
                 className="btn btn-outline"
                 onClick={() => setShowViewModal(false)}

@@ -1,0 +1,43 @@
+/* ConfirmModal - Modal de confirmación compacto */
+
+.confirm-modal-overlay {
+  z-index: 1100; /* Por encima de otros modales */
+}
+
+.confirm-modal-box {
+  max-width: 440px;
+  height: auto;
+  max-height: 90vh;
+}
+
+.confirm-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.confirm-icon.danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.dark .confirm-icon.danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.confirm-message {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  white-space: pre-line; /* Respeta saltos de línea */
+  margin: 0;
+}
+
+.dark .confirm-message {
+  color: var(--color-text-secondary);
+}

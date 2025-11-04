@@ -9,7 +9,7 @@ import { Bell, MessageCircle } from 'lucide-react';
 import UserMenu from './UserMenu.jsx';
 import AvatarSelector, { AVATARS } from './AvatarSelector.jsx';
 import ProfilePanel from './ProfilePanel.jsx';
-import ThemeToggle from './ThemeToggle.jsx';
+import ThemeSwitcher from './ThemeSwitcher.jsx';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
 import './TopBar.css';
 
@@ -107,10 +107,10 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
           </div>
         </div>
 
-        {/* Sección Derecha: Theme Toggle + Notificaciones + Mensajes + Avatar */}
+        {/* Sección Derecha: Theme Switcher + Notificaciones + Mensajes + Avatar */}
         <div className="topbar-right">
-          {/* Theme Toggle */}
-          <ThemeToggle />
+          {/* Theme Switcher */}
+          <ThemeSwitcher />
 
           {/* Notificaciones */}
           <button className="icon-button" aria-label="Notificaciones">

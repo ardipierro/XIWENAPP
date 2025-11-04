@@ -65,6 +65,7 @@ import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
 import QuickAccessCard from './QuickAccessCard';
 import ExercisePlayer from './exercises/ExercisePlayer';
+import SearchBar from './common/SearchBar';
 import './TeacherDashboard.css';
 
 // Icon mapping for role icons from roleConfig
@@ -118,6 +119,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   const [enrollmentCounts, setEnrollmentCounts] = useState({});
   const [loadingResources, setLoadingResources] = useState(false);
 
+  // Estados para controlar apertura de modales desde quick access
+  const [openCourseModal, setOpenCourseModal] = useState(false);
+  const [openContentModal, setOpenContentModal] = useState(false);
+  const [openClassModal, setOpenClassModal] = useState(false);
+
+  // Flag para evitar doble ejecución del useEffect de retorno
+  const [hasProcessedReturn, setHasProcessedReturn] = useState(false);
+
   // Determinar si el usuario es admin
   const isAdmin = isAdminEmail(user?.email);
 
@@ -125,21 +134,63 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     loadDashboardData();
   }, []);
 
+  // Detectar cambios de ruta para abrir sección correspondiente
+  useEffect(() => {
+    console.log('[TeacherDashboard] Ruta cambió:', location.pathname);
+
+    if (location.pathname === '/teacher/users') {
+      console.log('[TeacherDashboard] Abriendo sección usuarios');
+      setCurrentScreen('users');
+    } else if (location.pathname.startsWith('/teacher/users/')) {
+      // Extraer userId de la URL
+      const userId = location.pathname.split('/teacher/users/')[1];
+      console.log('[TeacherDashboard] Ruta de usuario detectada:', userId);
+
+      // Guardar en sessionStorage para que el otro useEffect lo procese
+      sessionStorage.setItem('viewAsReturnUserId', userId);
+      setCurrentScreen('users');
+
+      // Reset del flag para permitir procesamiento
+      setHasProcessedReturn(false);
+    } else if (location.pathname === '/teacher') {
+      console.log('[TeacherDashboard] Volviendo al dashboard');
+      setCurrentScreen('dashboard');
+    }
+  }, [location.pathname]);
+
   // Detectar si se debe reabrir UserProfile al volver de "Ver como"
   useEffect(() => {
+    console.log('TeacherDashboard: useEffect ejecutado, location =', location.pathname);
+    console.log('TeacherDashboard: hasProcessedReturn =', hasProcessedReturn);
+
+    // Si ya procesamos el retorno, no hacer nada
+    if (hasProcessedReturn) {
+      console.log('TeacherDashboard: Ya se procesó el retorno, saltando');
+      return;
+    }
+
     const userId = sessionStorage.getItem('viewAsReturnUserId');
+    console.log('TeacherDashboard: userId desde sessionStorage =', userId);
 
     if (userId) {
-      // Limpiar inmediatamente
+      console.log('TeacherDashboard: Encontrado userId, procesando...');
+
+      // Marcar como procesado ANTES de limpiar sessionStorage
+      setHasProcessedReturn(true);
+
+      // Limpiar sessionStorage
       sessionStorage.removeItem('viewAsReturnUserId');
 
       // Esperar a que los usuarios se carguen
       const timer = setTimeout(async () => {
+        console.log('TeacherDashboard: Cambiando a pantalla users');
         setCurrentScreen('users');
 
         // Cargar usuarios si es necesario
         let allUsers = users;
+        console.log('TeacherDashboard: users.length =', users.length);
         if (users.length === 0) {
+          console.log('TeacherDashboard: Cargando usuarios...');
           allUsers = await getAllUsers();
           const usersWithCredits = await Promise.all(
             allUsers.map(async (userItem) => {
@@ -153,19 +204,27 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           );
           setUsers(usersWithCredits);
           allUsers = usersWithCredits;
+          console.log('TeacherDashboard: Usuarios cargados:', allUsers.length);
         }
 
         // Buscar y abrir el perfil
+        console.log('TeacherDashboard: Buscando usuario con id:', userId);
         const userToOpen = allUsers.find(u => u.id === userId);
+        console.log('TeacherDashboard: Usuario encontrado:', userToOpen);
         if (userToOpen) {
           setSelectedUserProfile(userToOpen);
           setShowUserProfile(true);
+          console.log('TeacherDashboard: UserProfile abierto');
+        } else {
+          console.warn('TeacherDashboard: No se encontró usuario con id:', userId);
         }
       }, 200);
 
       return () => clearTimeout(timer);
+    } else {
+      console.log('TeacherDashboard: No hay userId en sessionStorage');
     }
-  }, []);
+  }, [location, hasProcessedReturn]);
 
   // Handlers de navegación
   const handleStartGame = () => {
@@ -205,6 +264,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     setSelectedExerciseId(null);
     setShowUserProfile(false);
     setSelectedUserProfile(null);
+    // Reset modal flags
+    setOpenCourseModal(false);
+    setOpenContentModal(false);
+    setOpenClassModal(false);
     // No recargar datos - ya están en caché y son actuales
   };
 
@@ -642,7 +705,17 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return studentExercises.some(se => se.itemId === exerciseId);
   };
 
-  const filteredUsers = users;
+  // Filtrar usuarios por término de búsqueda
+  const filteredUsers = users.filter(userItem => {
+    if (!searchTerm) return true;
+
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      userItem.name?.toLowerCase().includes(searchLower) ||
+      userItem.email?.toLowerCase().includes(searchLower) ||
+      ROLE_INFO[userItem.role]?.name?.toLowerCase().includes(searchLower)
+    );
+  });
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
@@ -695,7 +768,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (currentScreen === 'courses') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <CoursesScreen onBack={handleBackToDashboard} user={user} />
+        <CoursesScreen onBack={handleBackToDashboard} user={user} openCreateModal={openCourseModal} />
       </DashboardLayout>
     );
   }
@@ -720,7 +793,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (currentScreen === 'content') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <ContentManager user={user} courses={courses} onBack={handleBackToDashboard} />
+        <ContentManager user={user} courses={courses} onBack={handleBackToDashboard} openCreateModal={openContentModal} />
       </DashboardLayout>
     );
   }
@@ -729,7 +802,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (currentScreen === 'classes') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <ClassManager user={user} courses={courses} onBack={handleBackToDashboard} />
+        <ClassManager user={user} courses={courses} onBack={handleBackToDashboard} openCreateModal={openClassModal} />
       </DashboardLayout>
     );
   }
@@ -797,6 +870,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               </button>
             </div>
           </div>
+
+          {/* Search Bar */}
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder={isAdmin ? "Buscar usuarios..." : "Buscar alumnos..."}
+            className="mb-6"
+          />
 
           {/* Mensajes */}
           {successMessage && (
@@ -1267,7 +1348,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         {/* Modal de User Profile */}
         {showUserProfile && selectedUserProfile && (
           <div className="modal-overlay" onClick={handleBackFromProfile}>
-            <div className="modal-box max-w-5xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
               <UserProfile
                 selectedUser={selectedUserProfile}
                 currentUser={user}
@@ -1306,7 +1387,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 countLabel={courses.length === 1 ? "curso" : "cursos"}
                 onClick={() => setCurrentScreen('courses')}
                 createLabel="Nuevo Curso"
-                onCreateClick={() => setCurrentScreen('courses')}
+                onCreateClick={() => {
+                  setOpenCourseModal(true);
+                  setCurrentScreen('courses');
+                }}
               />
               <QuickAccessCard
                 icon={FileText}
@@ -1315,7 +1399,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 countLabel={allContent.length === 1 ? "contenido" : "contenidos"}
                 onClick={() => setCurrentScreen('content')}
                 createLabel="Nuevo Contenido"
-                onCreateClick={() => setCurrentScreen('content')}
+                onCreateClick={() => {
+                  setOpenContentModal(true);
+                  setCurrentScreen('content');
+                }}
               />
               <QuickAccessCard
                 icon={Calendar}
@@ -1324,7 +1411,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 countLabel={allClasses.length === 1 ? "clase" : "clases"}
                 onClick={() => setCurrentScreen('classes')}
                 createLabel="Nueva Clase"
-                onCreateClick={() => setCurrentScreen('classes')}
+                onCreateClick={() => {
+                  setOpenClassModal(true);
+                  setCurrentScreen('classes');
+                }}
               />
             </div>
           </div>

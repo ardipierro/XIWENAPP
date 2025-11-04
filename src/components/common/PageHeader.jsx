@@ -1,8 +1,13 @@
-import PropTypes from 'prop-types';
-
 /**
  * PageHeader - Header de página con título, ícono y botón de acción
  * Responsive: se apila en móvil, horizontal en desktop
+ *
+ * @param {Object} props
+ * @param {React.ComponentType} props.icon - Componente de icono (lucide-react)
+ * @param {string} props.title - Título de la página
+ * @param {string} [props.actionLabel] - Texto del botón de acción (opcional)
+ * @param {Function} [props.onAction] - Handler del click del botón (opcional)
+ * @param {number} [props.iconSize=32] - Tamaño del icono
  */
 function PageHeader({
   icon: Icon,
@@ -37,13 +42,5 @@ function PageHeader({
     </div>
   );
 }
-
-PageHeader.propTypes = {
-  icon: PropTypes.elementType,
-  title: PropTypes.string.isRequired,
-  actionLabel: PropTypes.string,
-  onAction: PropTypes.func,
-  iconSize: PropTypes.number
-};
 
 export default PageHeader;

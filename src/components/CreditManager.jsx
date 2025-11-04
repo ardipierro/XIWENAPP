@@ -198,44 +198,36 @@ function CreditManager({ userId, currentUser, onUpdate }) {
 
       {/* Stats Cards */}
       <div className="credit-stats-grid">
-        <div className="credit-stat-card available">
+        <div className="credit-stat-card">
           <div className="stat-icon">
-            <CreditCard size={32} strokeWidth={2} />
+            <CreditCard size={20} strokeWidth={2} />
           </div>
-          <div className="stat-content">
-            <div className="stat-value">{stats.availableCredits}</div>
-            <div className="stat-label">Créditos Disponibles</div>
-          </div>
+          <div className="stat-value">{stats.availableCredits}</div>
+          <div className="stat-label">Disponibles</div>
         </div>
 
-        <div className="credit-stat-card purchased">
+        <div className="credit-stat-card">
           <div className="stat-icon">
-            <ShoppingCart size={32} strokeWidth={2} />
+            <ShoppingCart size={20} strokeWidth={2} />
           </div>
-          <div className="stat-content">
-            <div className="stat-value">{stats.totalPurchased}</div>
-            <div className="stat-label">Total Comprados</div>
-          </div>
+          <div className="stat-value">{stats.totalPurchased}</div>
+          <div className="stat-label">Comprados</div>
         </div>
 
-        <div className="credit-stat-card used">
+        <div className="credit-stat-card">
           <div className="stat-icon">
-            <BarChart3 size={32} strokeWidth={2} />
+            <BarChart3 size={20} strokeWidth={2} />
           </div>
-          <div className="stat-content">
-            <div className="stat-value">{stats.totalUsed}</div>
-            <div className="stat-label">Total Usados</div>
-          </div>
+          <div className="stat-value">{stats.totalUsed}</div>
+          <div className="stat-label">Usados</div>
         </div>
 
-        <div className="credit-stat-card usage">
+        <div className="credit-stat-card">
           <div className="stat-icon">
-            <TrendingUp size={32} strokeWidth={2} />
+            <TrendingUp size={20} strokeWidth={2} />
           </div>
-          <div className="stat-content">
-            <div className="stat-value">{stats.usagePercentage}%</div>
-            <div className="stat-label">Uso</div>
-          </div>
+          <div className="stat-value">{stats.usagePercentage}%</div>
+          <div className="stat-label">Uso</div>
         </div>
       </div>
 

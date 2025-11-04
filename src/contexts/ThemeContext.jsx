@@ -2,35 +2,92 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext();
 
+// Definición de temas disponibles
+export const THEMES = {
+  LIGHT: 'light',
+  DARK: 'dark',
+  OCEAN: 'ocean',
+  FOREST: 'forest',
+  SUNSET: 'sunset',
+  MIDNIGHT: 'midnight'
+};
+
+// Información sobre cada tema
+export const THEME_INFO = {
+  [THEMES.LIGHT]: {
+    name: 'Claro',
+    description: 'Tema claro predeterminado',
+    isDark: false
+  },
+  [THEMES.DARK]: {
+    name: 'Oscuro',
+    description: 'Tema oscuro predeterminado',
+    isDark: true
+  },
+  [THEMES.OCEAN]: {
+    name: 'Océano',
+    description: 'Tonos azules y turquesa',
+    isDark: false
+  },
+  [THEMES.FOREST]: {
+    name: 'Bosque',
+    description: 'Tonos verdes naturales',
+    isDark: false
+  },
+  [THEMES.SUNSET]: {
+    name: 'Atardecer',
+    description: 'Tonos naranjas y rosados',
+    isDark: false
+  },
+  [THEMES.MIDNIGHT]: {
+    name: 'Medianoche',
+    description: 'Azul oscuro profundo',
+    isDark: true
+  }
+};
+
 export function ThemeProvider({ children }) {
-  // Detectar preferencia inicial del sistema o usar guardado en localStorage
-  const [isDarkMode, setIsDarkMode] = useState(() => {
+  // Estado del tema actual
+  const [currentTheme, setCurrentTheme] = useState(() => {
     const saved = localStorage.getItem('theme');
-    if (saved) {
-      return saved === 'dark';
+    if (saved && Object.values(THEMES).includes(saved)) {
+      return saved;
     }
-    // Detectar preferencia del sistema
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Tema oscuro por defecto
+    return THEMES.DARK;
   });
 
+  // Mantener compatibilidad con código existente
+  const isDarkMode = THEME_INFO[currentTheme]?.isDark || false;
+
   useEffect(() => {
-    // Aplicar la clase dark al elemento html
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      // Actualizar color de la barra de estado en móviles (dark mode)
-      updateThemeColor('#09090b');
+    const root = document.documentElement;
+
+    // Limpiar todas las clases de tema
+    Object.values(THEMES).forEach(theme => {
+      root.classList.remove(theme);
+    });
+
+    // Aplicar el tema actual
+    root.classList.add(currentTheme);
+
+    // Mantener la clase 'dark' para compatibilidad con estilos existentes
+    if (THEME_INFO[currentTheme]?.isDark) {
+      root.classList.add('dark');
     } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      // Actualizar color de la barra de estado en móviles (light mode)
-      updateThemeColor('#ffffff');
+      root.classList.remove('dark');
     }
-  }, [isDarkMode]);
+
+    // Guardar en localStorage
+    localStorage.setItem('theme', currentTheme);
+
+    // Actualizar color de la barra de estado
+    const themeColor = THEME_INFO[currentTheme]?.isDark ? '#09090b' : '#ffffff';
+    updateThemeColor(themeColor);
+  }, [currentTheme]);
 
   // Función para actualizar dinámicamente el color de la barra de estado
   const updateThemeColor = (color) => {
-    // Actualizar meta tag theme-color
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (!metaThemeColor) {
       metaThemeColor = document.createElement('meta');
@@ -39,7 +96,6 @@ export function ThemeProvider({ children }) {
     }
     metaThemeColor.content = color;
 
-    // Actualizar también para navegadores que usan media queries
     const metaThemeColorDark = document.querySelector('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]');
     const metaThemeColorLight = document.querySelector('meta[name="theme-color"][media="(prefers-color-scheme: light)"]');
 
@@ -47,12 +103,27 @@ export function ThemeProvider({ children }) {
     if (metaThemeColorLight) metaThemeColorLight.content = color;
   };
 
+  // Función para cambiar a un tema específico
+  const setTheme = (theme) => {
+    if (Object.values(THEMES).includes(theme)) {
+      setCurrentTheme(theme);
+    }
+  };
+
+  // Toggle simple light/dark (mantener compatibilidad)
   const toggleTheme = () => {
-    setIsDarkMode(prev => !prev);
+    setCurrentTheme(prev =>
+      THEME_INFO[prev]?.isDark ? THEMES.LIGHT : THEMES.DARK
+    );
   };
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+    <ThemeContext.Provider value={{
+      currentTheme,
+      setTheme,
+      isDarkMode,
+      toggleTheme
+    }}>
       {children}
     </ThemeContext.Provider>
   );

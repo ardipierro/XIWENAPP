@@ -9,6 +9,7 @@ import {
   generateStudentCode
 } from '../firebase/firestore';
 import { GraduationCap, Settings, X, UserPlus, Users, RefreshCw } from 'lucide-react';
+import SearchBar from './common/SearchBar';
 import './StudentManager.css';
 
 function StudentManager({ onClose, onStudentSelect }) {
@@ -184,6 +185,14 @@ function StudentManager({ onClose, onStudentSelect }) {
             <X size={24} strokeWidth={2} />
           </button>
         </div>
+
+        {/* Search Bar */}
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar estudiantes..."
+          className="mb-4"
+        />
 
         <div className="manager-actions">
           <button

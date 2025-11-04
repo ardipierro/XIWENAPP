@@ -151,40 +151,7 @@
   color: #991b1b;
 }
 
-/* Tabs */
-.profile-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding: 8px;
-  background: var(--color-surface, white);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.profile-tab {
-  flex: 1;
-  padding: 12px 20px;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-secondary, #6b7280);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.profile-tab:hover {
-  background: rgba(99, 102, 241, 0.05);
-  color: #6366f1;
-}
-
-.profile-tab.active {
-  background: #6366f1;
-  color: white;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-}
+/* Tabs - usan estilos globales de globals.css (.modal-tabs-container, .modal-tabs, .tab, .tab-active) */
 
 /* Content */
 .profile-content {
@@ -521,17 +488,7 @@
   color: #1f2937;
 }
 
-.btn-ghost {
-  background: transparent;
-  color: var(--color-text-secondary, #6b7280);
-  box-shadow: none;
-  border: 2px solid var(--color-border, #e5e7eb);
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: var(--color-background, #f3f4f6);
-  color: var(--color-text-primary, #374151);
-}
+/* btn-ghost ahora está en globals.css */
 
 /* Dark Mode */
 .dark .profile-header-content,

@@ -9,6 +9,8 @@ import { getExercisesByTeacher } from '../firebase/exercises';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadImage, deleteImage } from '../firebase/storage';
+import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
 import {
   getCourseContents,
   getCourseExercises,
@@ -20,14 +22,16 @@ import {
   removeFromStudent,
   getStudentAssignments
 } from '../firebase/relationships';
+import ConfirmModal from './ConfirmModal';
 
-function CoursesScreen({ onBack, user }) {
+function CoursesScreen({ onBack, user, openCreateModal = false }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(openCreateModal);
   const [showCourseModal, setShowCourseModal] = useState(false); // Unified modal
   const [activeModalTab, setActiveModalTab] = useState('info'); // 'info', 'content', 'exercises', 'students'
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -90,6 +94,28 @@ function CoursesScreen({ onBack, user }) {
       console.error('Error cargando cursos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para actualizar solo un curso específico (sin recargar toda la lista)
+  const refreshSingleCourse = async (courseId) => {
+    try {
+      const contents = await getCourseContents(courseId);
+      const exercises = await getCourseExercises(courseId);
+
+      setCourses(prevCourses =>
+        prevCourses.map(course =>
+          course.id === courseId
+            ? {
+                ...course,
+                contentCount: contents.length,
+                exercisesCount: exercises.length
+              }
+            : course
+        )
+      );
+    } catch (error) {
+      console.error('Error refrescando curso:', error);
     }
   };
 
@@ -157,7 +183,7 @@ function CoursesScreen({ onBack, user }) {
       const contents = await getCourseContents(selectedCourse.id);
       setCourseContents(contents);
       setSelectedContentToAdd(''); // Reset dropdown
-      loadAllCourses(); // Refresh counts
+      refreshSingleCourse(selectedCourse.id); // Refresh counts (sin recargar toda la lista)
     } catch (error) {
       console.error('Error adding content:', error);
       alert('Error al agregar contenido');
@@ -170,7 +196,7 @@ function CoursesScreen({ onBack, user }) {
       await removeContentFromCourse(selectedCourse.id, contentId);
       const contents = await getCourseContents(selectedCourse.id);
       setCourseContents(contents);
-      loadAllCourses();
+      refreshSingleCourse(selectedCourse.id);
     } catch (error) {
       console.error('Error removing content:', error);
       alert('Error al eliminar contenido');
@@ -184,7 +210,7 @@ function CoursesScreen({ onBack, user }) {
       const exercises = await getCourseExercises(selectedCourse.id);
       setCourseExercises(exercises);
       setSelectedExerciseToAdd(''); // Reset dropdown
-      loadAllCourses();
+      refreshSingleCourse(selectedCourse.id);
     } catch (error) {
       console.error('Error adding exercise:', error);
       alert('Error al agregar ejercicio');
@@ -197,7 +223,7 @@ function CoursesScreen({ onBack, user }) {
       await removeExerciseFromCourse(selectedCourse.id, exerciseId);
       const exercises = await getCourseExercises(selectedCourse.id);
       setCourseExercises(exercises);
-      loadAllCourses();
+      refreshSingleCourse(selectedCourse.id);
     } catch (error) {
       console.error('Error removing exercise:', error);
       alert('Error al eliminar ejercicio');
@@ -368,19 +394,20 @@ function CoursesScreen({ onBack, user }) {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <BookOpen size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Cursos</h1>
-        </div>
-        <button
-          className="btn btn-primary w-full sm:w-auto"
-          onClick={() => setShowCreateModal(true)}
-        >
-          + Crear Nuevo Curso
-        </button>
-      </div>
+      <PageHeader
+        icon={BookOpen}
+        title="Cursos"
+        actionLabel="+ Crear Nuevo Curso"
+        onAction={() => setShowCreateModal(true)}
+      />
 
+      {/* Search Bar */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar cursos..."
+        className="mb-6"
+      />
 
       {/* Courses Display */}
       {filteredCourses.length === 0 ? (
@@ -524,7 +551,7 @@ function CoursesScreen({ onBack, user }) {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-box max-w-5xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
             {/* Header - Fixed */}
             <div className="modal-header flex-shrink-0">
               <h3 className="modal-title">
@@ -638,24 +665,22 @@ function CoursesScreen({ onBack, user }) {
             </div>
 
             {/* Footer con botones (sin zona de peligro en crear) */}
-            <div className="px-6 pt-4 pb-4 flex-shrink-0">
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="btn btn-outline flex-1"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary flex-1"
-                  onClick={handleCreate}
-                  disabled={uploadingImage}
-                >
-                  {uploadingImage ? 'Subiendo...' : 'Crear Curso'}
-                </button>
-              </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setShowCreateModal(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                onClick={handleCreate}
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? 'Subiendo...' : 'Crear Curso'}
+              </button>
             </div>
           </div>
         </div>
@@ -664,7 +689,7 @@ function CoursesScreen({ onBack, user }) {
       {/* Unified Course Modal with Tabs */}
       {showCourseModal && selectedCourse && (
         <div className="modal-overlay" onClick={handleCloseCourseModal}>
-          <div className="modal-box max-w-5xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
             {/* Header - Fixed */}
             <div className="modal-header flex-shrink-0">
               <h3 className="modal-title">
@@ -942,30 +967,25 @@ function CoursesScreen({ onBack, user }) {
               )}
             </div>
 
-            {/* Zona de Peligro + Botones - Footer fijo */}
-            <div className="px-6 pt-4 pb-4 flex-shrink-0">
-              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4">
-                <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
-                <p className="text-xs text-red-700 dark:text-red-400 mb-3">
-                  Esta acción eliminará permanentemente el curso, todo su contenido y ejercicios asociados.
-                </p>
-                <button
-                  type="button"
-                  className="btn btn-danger w-full"
-                  onClick={() => {
-                    if (window.confirm('¿Estás seguro de eliminar este curso? Esta acción no se puede deshacer.')) {
-                      handleDelete(selectedCourse.id);
-                      handleCloseCourseModal();
-                    }
-                  }}
-                >
-                  <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Permanentemente
-                </button>
-              </div>
-
+            {/* Footer con botones */}
+            <div className="modal-footer">
               <button
                 type="button"
-                className="btn btn-primary w-full"
+                className="btn btn-danger"
+                onClick={() => setShowConfirmDelete(true)}
+              >
+                <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={handleCloseCourseModal}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
                 onClick={(e) => {
                   e.preventDefault();
                   handleUpdate(e);
@@ -978,6 +998,22 @@ function CoursesScreen({ onBack, user }) {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación para eliminar */}
+      <ConfirmModal
+        isOpen={showConfirmDelete}
+        title="Eliminar Curso"
+        message={`¿Estás seguro de que deseas eliminar el curso "${selectedCourse?.name}"?\n\nEsta acción eliminará permanentemente el curso, todo su contenido y ejercicios asociados.\n\nEsta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        isDanger={true}
+        onConfirm={() => {
+          handleDelete(selectedCourse.id);
+          handleCloseCourseModal();
+          setShowConfirmDelete(false);
+        }}
+        onCancel={() => setShowConfirmDelete(false)}
+      />
     </div>
   );
 }

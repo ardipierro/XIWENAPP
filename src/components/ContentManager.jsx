@@ -15,6 +15,9 @@ import {
 } from '../firebase/relationships.js';
 import { uploadImage, deleteImage } from '../firebase/storage';
 import logger from '../utils/logger.js';
+import ConfirmModal from './ConfirmModal';
+import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
 
 /**
  * Componente para gestión de contenido educativo
@@ -23,7 +26,7 @@ import logger from '../utils/logger.js';
  * @param {Array} [props.courses] - Cursos disponibles
  * @param {Function} [props.onBack] - Callback para volver atrás
  */
-function ContentManager({ user, courses = [], onBack }) {
+function ContentManager({ user, courses = [], onBack, openCreateModal = false }) {
   // Hook de contenido
   const {
     content,
@@ -41,13 +44,14 @@ function ContentManager({ user, courses = [], onBack }) {
   const [filter, setFilter] = useState('all'); // all, lesson, reading, video, link
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(openCreateModal);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentCourses, setContentCourses] = useState({}); // Map contentId -> courses[]
   const [uploadingImage, setUploadingImage] = useState(false);
   const [activeTab, setActiveTab] = useState('general'); // 'general' or 'config'
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     type: 'lesson',
@@ -279,15 +283,13 @@ function ContentManager({ user, courses = [], onBack }) {
    * @param {string} contentId - ID del contenido a eliminar
    */
   const handleDelete = async (contentId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este contenido?')) {
-      const result = await deleteContentHook(contentId);
-      if (result.success) {
-        logger.info('Contenido eliminado exitosamente', 'ContentManager');
-        // El hook ya actualiza la lista automáticamente con refetch
-      } else {
-        alert('Error al eliminar el contenido: ' + result.error);
-        logger.error('Error al eliminar contenido', result.error, 'ContentManager');
-      }
+    const result = await deleteContentHook(contentId);
+    if (result.success) {
+      logger.info('Contenido eliminado exitosamente', 'ContentManager');
+      // El hook ya actualiza la lista automáticamente con refetch
+    } else {
+      alert('Error al eliminar el contenido: ' + result.error);
+      logger.error('Error al eliminar contenido', result.error, 'ContentManager');
     }
   };
 
@@ -382,21 +384,20 @@ function ContentManager({ user, courses = [], onBack }) {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <FileText size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Contenido</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            className="btn btn-primary w-full sm:w-auto"
-            onClick={() => setShowCreateModal(true)}
-          >
-            + Crear Nuevo Contenido
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={FileText}
+        title="Contenido"
+        actionLabel="+ Crear Nuevo Contenido"
+        onAction={() => setShowCreateModal(true)}
+      />
 
+      {/* Search Bar */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar contenido..."
+        className="mb-6"
+      />
 
       {/* Lista de Contenido */}
       {filteredContents.length === 0 ? (
@@ -855,30 +856,25 @@ function ContentManager({ user, courses = [], onBack }) {
                 )}
               </div>
 
-              {/* Zona de Peligro + Botones - Footer fijo */}
-              <div className="px-6 pt-4 pb-4 flex-shrink-0">
-                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4">
-                  <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
-                  <p className="text-xs text-red-700 dark:text-red-400 mb-3">
-                    Esta acción eliminará permanentemente el contenido.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn btn-danger w-full"
-                    onClick={() => {
-                      if (window.confirm('¿Estás seguro de que quieres eliminar este contenido? Esta acción no se puede deshacer.')) {
-                        handleDelete(selectedContent.id);
-                        setShowEditModal(false);
-                      }
-                    }}
-                  >
-                    <Trash2 size={16} strokeWidth={2} /> Eliminar Permanentemente
-                  </button>
-                </div>
-
+              {/* Footer con botones */}
+              <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-primary w-full"
+                  className="btn btn-danger"
+                  onClick={() => setShowConfirmDelete(true)}
+                >
+                  <Trash2 size={16} strokeWidth={2} /> Eliminar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
                   onClick={(e) => {
                     e.preventDefault();
                     handleUpdate(e);
@@ -989,6 +985,22 @@ function ContentManager({ user, courses = [], onBack }) {
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación de eliminación */}
+      <ConfirmModal
+        isOpen={showConfirmDelete}
+        title="Eliminar Contenido"
+        message={`¿Estás seguro de que deseas eliminar el contenido "${selectedContent?.title}"?\n\nEsta acción eliminará permanentemente el contenido de todos los cursos en los que esté asignado.\n\nEsta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        isDanger={true}
+        onConfirm={() => {
+          handleDelete(selectedContent.id);
+          setShowEditModal(false);
+          setShowConfirmDelete(false);
+        }}
+        onCancel={() => setShowConfirmDelete(false)}
+      />
     </div>
   );
 }

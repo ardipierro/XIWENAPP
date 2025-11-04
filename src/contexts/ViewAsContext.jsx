@@ -10,6 +10,7 @@ const ViewAsContext = createContext();
 export function ViewAsProvider({ children }) {
   const [viewAsUser, setViewAsUser] = useState(null);
   const [originalUser, setOriginalUser] = useState(null);
+  const [returnToUserId, setReturnToUserId] = useState(null); // ID del usuario a retornar
 
   /**
    * Activar modo "Ver como"
@@ -19,6 +20,8 @@ export function ViewAsProvider({ children }) {
   const startViewingAs = (currentUser, targetUser) => {
     setOriginalUser(currentUser);
     setViewAsUser(targetUser);
+    // Guardar el ID del usuario para volver al UserProfile correcto
+    setReturnToUserId(targetUser.id || targetUser.uid);
   };
 
   /**
@@ -27,6 +30,16 @@ export function ViewAsProvider({ children }) {
   const stopViewingAs = () => {
     setViewAsUser(null);
     setOriginalUser(null);
+    // NO limpiar returnToUserId aquí - se usa en ViewAsBanner
+  };
+
+  /**
+   * Limpiar completamente el estado (después de navegar)
+   */
+  const clearViewAsState = () => {
+    setViewAsUser(null);
+    setOriginalUser(null);
+    setReturnToUserId(null);
   };
 
   /**
@@ -42,9 +55,11 @@ export function ViewAsProvider({ children }) {
   const value = {
     viewAsUser,
     originalUser,
+    returnToUserId,
     isViewingAs, // Ahora es un valor booleano que se actualiza con viewAsUser
     startViewingAs,
     stopViewingAs,
+    clearViewAsState,
     getEffectiveUser
   };
 

@@ -665,7 +665,7 @@
 }
 
 .dark .day-count {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 
 /* Responsive */

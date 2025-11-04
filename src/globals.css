@@ -40,6 +40,8 @@
     -webkit-overflow-scrolling: touch;
     /* Ocupar espacio de safe area en iPhone con notch */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    /* Prevenir pull-to-refresh del navegador (implementaremos el nuestro) */
+    overscroll-behavior-y: contain;
   }
 
   #root {
@@ -56,68 +58,50 @@
   }
 
   :root {
-    /* ===== SISTEMA DE DISEÑO CENTRALIZADO - MODO CLARO POR DEFECTO ===== */
+    /* ===== SISTEMA DE DISEÑO COMPACTO - MODO CLARO ===== */
 
-    /* === FONDOS === */
+    /* === FONDOS (4 niveles) === */
     --color-bg-primary: #ffffff;        /* Blanco - Fondo principal */
-    --color-bg-secondary: #f9fafb;      /* gray-50 - Fondo secundario (cards, modals) */
-    --color-bg-tertiary: #f3f4f6;       /* gray-100 - Fondo terciario (hovers, botones) */
-    --color-bg-quaternary: #e5e7eb;     /* gray-200 - Fondo cuaternario (estados activos) */
-    --color-bg-input: #f9fafb;          /* gray-50 - Inputs y text areas (más claro que oscuro) */
+    --color-bg-secondary: #f9fafb;      /* gray-50 - Cards, modals */
+    --color-bg-tertiary: #f3f4f6;       /* gray-100 - Hovers, inputs */
+    --color-bg-hover: #e5e7eb;          /* gray-200 - Estados activos */
 
-    /* === TEXTOS === */
+    /* === TEXTOS (3 niveles) === */
     --color-text-primary: #18181b;      /* zinc-900 - Texto principal */
-    --color-text-secondary: #3f3f46;    /* zinc-700 - Texto secundario */
-    --color-text-tertiary: #71717a;     /* zinc-500 - Texto terciario */
-    --color-text-quaternary: #a1a1aa;   /* zinc-400 - Texto cuaternario (hints, disabled) */
-    --color-text-placeholder: #d4d4d8;  /* zinc-300 - Placeholders */
-    --color-text-muted: #e4e4e7;        /* zinc-200 - Muy tenue */
+    --color-text-secondary: #71717a;    /* zinc-500 - Texto secundario */
+    --color-text-muted: #a1a1aa;        /* zinc-400 - Disabled, placeholders */
 
-    /* === BORDES === */
-    --color-border: #e5e7eb;            /* gray-200 - Borde principal */
-    --color-border-hover: #d1d5db;      /* gray-300 - Borde hover */
-    --color-border-focus: #9ca3af;      /* gray-400 - Borde focus */
-    --color-border-active: #6b7280;     /* gray-500 - Borde activo */
+    /* === BORDES (2 niveles) === */
+    --color-border: #e5e7eb;            /* gray-200 - Borde por defecto */
+    --color-border-focus: #d1d5db;      /* gray-300 - Hover/focus/active */
 
-    /* === ESTADOS === */
+    /* === COLORES SEMÁNTICOS === */
     --color-success: #10b981;           /* green-500 */
-    --color-success-light: #34d399;     /* green-400 */
     --color-success-dark: #059669;      /* green-600 */
     --color-success-bg: rgba(16, 185, 129, 0.1);
-    --color-success-border: rgba(16, 185, 129, 0.3);
 
     --color-error: #ef4444;             /* red-500 */
-    --color-error-light: #fca5a5;       /* red-300 */
     --color-error-dark: #dc2626;        /* red-600 */
     --color-error-bg: rgba(239, 68, 68, 0.1);
-    --color-error-border: rgba(239, 68, 68, 0.3);
 
     --color-warning: #f59e0b;           /* amber-500 */
-    --color-warning-light: #fbbf24;     /* amber-400 */
     --color-warning-dark: #d97706;      /* amber-600 */
     --color-warning-bg: rgba(245, 158, 11, 0.1);
-    --color-warning-border: rgba(245, 158, 11, 0.3);
 
     --color-info: #06b6d4;              /* cyan-500 */
-    --color-info-light: #22d3ee;        /* cyan-400 */
     --color-info-dark: #0891b2;         /* cyan-600 */
-    --color-info-bg: rgba(14, 116, 144, 0.2);
-    --color-info-border: #06b6d4;
+    --color-info-bg: rgba(6, 182, 212, 0.1);
 
-    /* === ACENTOS === */
-    --color-accent: #6366f1;            /* indigo-500 - Color de acento */
+    /* === ACENTO (Brand) === */
+    --color-accent: #6366f1;            /* indigo-500 */
     --color-accent-light: #818cf8;      /* indigo-400 */
     --color-accent-dark: #4f46e5;       /* indigo-600 */
 
-    /* === SOMBRAS === */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-    --shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    --shadow-error: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    /* === SOMBRAS (4 niveles) === */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.15);
 
     /* === BORDER RADIUS === */
     --border-radius-sm: 0.375rem;       /* 6px */
@@ -176,38 +160,93 @@
     --opacity-overlay: 0.75;
   }
 
-  /* Dark mode - Valores oscuros sobrescriben los claros */
+  /* Dark mode - VERSIÓN COMPACTADA */
   .dark {
-    /* === FONDOS === */
-    --color-bg-primary: #09090b;        /* zinc-950 - Fondo principal (más oscuro) */
-    --color-bg-secondary: #09090b;      /* zinc-950 - Igual que primary para continuidad */
-    --color-bg-tertiary: #27272a;       /* zinc-800 - Fondo terciario (hovers, botones) */
-    --color-bg-quaternary: #3f3f46;     /* zinc-700 - Fondo cuaternario (estados activos) */
-    --color-bg-input: #0a0a0a;          /* Negro - Inputs y text areas */
+    /* === FONDOS (4 niveles) === */
+    --color-bg-primary: #09090b;        /* zinc-950 - Fondo principal */
+    --color-bg-secondary: #18181b;      /* zinc-900 - Cards, modals */
+    --color-bg-tertiary: #27272a;       /* zinc-800 - Hovers, inputs */
+    --color-bg-hover: #3f3f46;          /* zinc-700 - Estados activos */
 
-    /* === TEXTOS === */
+    /* === TEXTOS (3 niveles) === */
     --color-text-primary: #f4f4f5;      /* zinc-100 - Texto principal */
-    --color-text-secondary: #d1d5db;    /* zinc-300 - Texto secundario */
-    --color-text-tertiary: #a1a1aa;     /* zinc-400 - Texto terciario */
-    --color-text-quaternary: #71717a;   /* zinc-500 - Texto cuaternario (hints, disabled) */
-    --color-text-placeholder: #52525b;  /* zinc-600 - Placeholders */
-    --color-text-muted: #3f3f46;        /* zinc-700 - Muy tenue */
+    --color-text-secondary: #a1a1aa;    /* zinc-400 - Texto secundario */
+    --color-text-muted: #71717a;        /* zinc-500 - Disabled, placeholders */
 
-    /* === BORDES === */
-    --color-border: #27272a;            /* zinc-800 - Borde principal */
-    --color-border-hover: #3f3f46;      /* zinc-700 - Borde hover */
-    --color-border-focus: #52525b;      /* zinc-600 - Borde focus */
-    --color-border-active: #71717a;     /* zinc-500 - Borde activo */
+    /* === BORDES (2 niveles) === */
+    --color-border: #27272a;            /* zinc-800 - Borde por defecto */
+    --color-border-focus: #3f3f46;      /* zinc-700 - Hover/focus/active */
 
-    /* === SOMBRAS === */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.6);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -4px rgba(0, 0, 0, 0.7);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.8);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
-    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-    --shadow-focus: 0 0 0 3px rgba(82, 82, 91, 0.1);
-    --shadow-error: 0 0 0 3px rgba(239, 68, 68, 0.3);
+    /* === SOMBRAS (4 niveles) === */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+    --shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  }
+
+  /* Ocean theme - Tonos azules y turquesa */
+  .ocean {
+    --color-bg-primary: #f0f9ff;        /* sky-50 */
+    --color-bg-secondary: #e0f2fe;      /* sky-100 */
+    --color-bg-tertiary: #bae6fd;       /* sky-200 */
+    --color-bg-hover: #7dd3fc;          /* sky-300 */
+
+    --color-text-primary: #0c4a6e;      /* sky-900 */
+    --color-text-secondary: #0369a1;    /* sky-700 */
+    --color-text-muted: #0ea5e9;        /* sky-500 */
+
+    --color-border: #bae6fd;            /* sky-200 */
+    --color-border-focus: #38bdf8;      /* sky-400 */
+  }
+
+  /* Forest theme - Tonos verdes naturales */
+  .forest {
+    --color-bg-primary: #f0fdf4;        /* green-50 */
+    --color-bg-secondary: #dcfce7;      /* green-100 */
+    --color-bg-tertiary: #bbf7d0;       /* green-200 */
+    --color-bg-hover: #86efac;          /* green-300 */
+
+    --color-text-primary: #14532d;      /* green-900 */
+    --color-text-secondary: #15803d;    /* green-700 */
+    --color-text-muted: #22c55e;        /* green-500 */
+
+    --color-border: #bbf7d0;            /* green-200 */
+    --color-border-focus: #4ade80;      /* green-400 */
+  }
+
+  /* Sunset theme - Tonos naranjas y rosados */
+  .sunset {
+    --color-bg-primary: #fff7ed;        /* orange-50 */
+    --color-bg-secondary: #ffedd5;      /* orange-100 */
+    --color-bg-tertiary: #fed7aa;       /* orange-200 */
+    --color-bg-hover: #fdba74;          /* orange-300 */
+
+    --color-text-primary: #7c2d12;      /* orange-900 */
+    --color-text-secondary: #c2410c;    /* orange-700 */
+    --color-text-muted: #f97316;        /* orange-500 */
+
+    --color-border: #fed7aa;            /* orange-200 */
+    --color-border-focus: #fb923c;      /* orange-400 */
+  }
+
+  /* Midnight theme - Azul oscuro profundo */
+  .midnight {
+    --color-bg-primary: #0c1221;        /* Azul muy oscuro */
+    --color-bg-secondary: #0f172a;      /* slate-900 */
+    --color-bg-tertiary: #1e293b;       /* slate-800 */
+    --color-bg-hover: #334155;          /* slate-700 */
+
+    --color-text-primary: #f1f5f9;      /* slate-100 */
+    --color-text-secondary: #94a3b8;    /* slate-400 */
+    --color-text-muted: #64748b;        /* slate-500 */
+
+    --color-border: #1e293b;            /* slate-800 */
+    --color-border-focus: #475569;      /* slate-600 */
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.7);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.8);
+    --shadow-focus: 0 0 0 3px rgba(100, 116, 139, 0.3);
   }
 }
 
@@ -595,8 +634,13 @@
   }
 
   .modal-footer {
-    @apply flex gap-2 px-6 pb-6 pt-4 border-t border-gray-200 dark:border-gray-700;
+    @apply flex gap-3 px-6 pb-6 pt-4 border-t border-gray-200 dark:border-gray-700;
     @apply flex-shrink-0;
+  }
+
+  .modal-footer .btn {
+    @apply flex-1;
+    height: 42px; /* Altura fija para todos los botones */
   }
 
   /* Form Groups */
@@ -671,7 +715,7 @@
 
   .tab-active {
     @apply px-4 py-2 font-semibold whitespace-nowrap;
-    @apply border-b-2 border-primary;
+    border-bottom: 2px solid #6366f1;
     min-width: 100px;
     @apply text-gray-900 dark:text-gray-100;
   }
@@ -848,7 +892,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
   }
 
   /* Filas */
@@ -969,7 +1013,7 @@
   }
 
   .modal-close-btn:hover {
-    background: var(--color-bg-quaternary);
+    background: var(--color-bg-hover);
     color: var(--color-text-primary);
     transform: scale(1.05);
   }
@@ -983,7 +1027,7 @@
 input:not([type="checkbox"]):not([type="radio"]),
 textarea,
 select {
-  background: var(--color-bg-input) !important;
+  background: var(--color-bg-tertiary) !important;
   color: var(--color-text-primary) !important;
   border-color: var(--color-border) !important;
 }
@@ -997,7 +1041,7 @@ select:focus {
 
 input::placeholder,
 textarea::placeholder {
-  color: var(--color-text-placeholder) !important;
+  color: var(--color-text-muted) !important;
 }
 
 /* Fix para autocomplete del navegador */
@@ -1005,7 +1049,7 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px var(--color-bg-input) inset !important;
+  -webkit-box-shadow: 0 0 0 30px var(--color-bg-tertiary) inset !important;
   -webkit-text-fill-color: var(--color-text-primary) !important;
 }
 

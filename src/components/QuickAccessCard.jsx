@@ -5,7 +5,14 @@ import './QuickAccessCard.css';
  * Tarjeta de acceso rápido para el dashboard
  * Diseño consistente con las tarjetas de los managers
  */
-function QuickAccessCard({ icon: Icon, title, description, count, countLabel, onClick, createLabel }) {
+function QuickAccessCard({ icon: Icon, title, description, count, countLabel, onClick, createLabel, onCreateClick }) {
+  const handleBadgeClick = (e) => {
+    e.stopPropagation(); // Evitar que se dispare el onClick de la tarjeta
+    if (onCreateClick) {
+      onCreateClick();
+    }
+  };
+
   return (
     <div className="quick-access-card" onClick={onClick}>
       {/* Icon Header - Similar a card-image-placeholder */}
@@ -30,7 +37,11 @@ function QuickAccessCard({ icon: Icon, title, description, count, countLabel, on
         )}
 
         {/* Action Badge */}
-        <div className="quick-access-badge">
+        <div
+          className="quick-access-badge"
+          onClick={handleBadgeClick}
+          style={{ cursor: onCreateClick ? 'pointer' : 'default' }}
+        >
           <Plus size={16} strokeWidth={2} />
           <span>{createLabel}</span>
         </div>

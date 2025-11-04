@@ -924,7 +924,7 @@
 }
 
 .dark .day-count {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 
 .dark .calendar-instance-item {
@@ -1020,7 +1020,7 @@
 }
 
 .dark .participants-count {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 
 /* Dark Mode for Form Actions */

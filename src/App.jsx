@@ -53,14 +53,9 @@ function App() {
     }
   }, [isViewingAs, viewAsUser, user, userRole]);
 
-  // Mostrar loading mientras se inicializa autenticación
+  // No mostrar nada mientras se inicializa autenticación (carga instantánea)
   if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner"></div>
-        <p>Cargando...</p>
-      </div>
-    );
+    return null;
   }
 
   return (

@@ -18,10 +18,11 @@ import {
   Ear,
   Target,
   FlaskConical,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react';
-import { ROLES, ROLE_INFO } from '../firebase/roleConfig';
-import { updateUser } from '../firebase/users';
+import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
+import { updateUser, deleteUser } from '../firebase/users';
 import {
   getStudentEnrollments,
   enrollStudentInCourse,
@@ -31,6 +32,7 @@ import { loadCourses } from '../firebase/firestore';
 import { getUserCredits } from '../firebase/credits';
 import CreditManager from './CreditManager';
 import StudentClassView from './StudentClassView';
+import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
 import './UserProfile.css';
 
@@ -47,6 +49,7 @@ const ICON_MAP = {
 
 function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   const { startViewingAs } = useViewAs();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('info');
   const [editing, setEditing] = useState(false);
@@ -65,6 +68,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [availableCourses, setAvailableCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
+  const [selectedCourseToAdd, setSelectedCourseToAdd] = useState('');
 
   // Estado para créditos
   const [userCredits, setUserCredits] = useState(selectedUser?.credits || 0);
@@ -169,6 +173,48 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
     } catch (error) {
       console.error('Error al guardar:', error);
       showMessage('error', 'Error inesperado al guardar');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    // No permitir eliminar al admin principal
+    if (isAdminEmail(selectedUser.email)) {
+      showMessage('error', 'No se puede eliminar al administrador principal');
+      return;
+    }
+
+    // No permitir eliminar al usuario actual
+    if (currentUser.uid === selectedUser.id) {
+      showMessage('error', 'No puedes eliminar tu propia cuenta');
+      return;
+    }
+
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false);
+    setSaving(true);
+    try {
+      const result = await deleteUser(selectedUser.id);
+
+      if (result.success) {
+        showMessage('success', 'Usuario eliminado exitosamente');
+        // Esperar un momento para que el usuario vea el mensaje
+        setTimeout(() => {
+          if (onUpdate) {
+            onUpdate();
+          }
+          onBack();
+        }, 1000);
+      } else {
+        showMessage('error', result.error || 'Error al eliminar usuario');
+      }
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+      showMessage('error', 'Error inesperado al eliminar usuario');
     } finally {
       setSaving(false);
     }
@@ -478,80 +524,82 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         {/* Tab: Cursos */}
         {activeTab === 'courses' && (
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Cursos Asignados</h2>
-
             {loadingCourses ? (
               <div className="loading-state">
                 <div className="spinner"></div>
                 <p>Cargando cursos...</p>
               </div>
             ) : (
-              <>
+              <div className="space-y-6">
                 {/* Cursos matriculados */}
-                {enrolledCourses.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
-                      <BookOpen size={18} strokeWidth={2} />
-                      Matriculado ({enrolledCourses.length})
-                    </h3>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                    Cursos Asignados
+                  </h4>
+                  {enrolledCourses.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No hay cursos asignados</p>
+                  ) : (
                     <div className="space-y-2">
                       {enrolledCourses.map(enrollment => (
-                        <div key={enrollment.id} className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <div key={enrollment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
                           <div className="flex-1">
-                            <div className="font-medium text-gray-900 dark:text-gray-100">{enrollment.courseName}</div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              Asignado: {formatDate(enrollment.enrolledAt)}
-                            </div>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{enrollment.courseName}</span>
+                            <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                              (Asignado: {formatDate(enrollment.enrolledAt)})
+                            </span>
                           </div>
                           <button
-                            className="btn btn-outline text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+                            className="btn btn-sm btn-danger"
                             onClick={() => handleUnenrollCourse(enrollment.courseId)}
                           >
-                            ✕ Quitar
+                            Eliminar
                           </button>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
-                {/* Cursos disponibles */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-3">
-                    <Plus size={18} strokeWidth={2} className="inline-icon" /> Disponibles para asignar
-                  </h3>
+                {/* Agregar curso */}
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asignar Curso</h4>
+                  </div>
                   {availableCourses.filter(c => !isCourseEnrolled(c.id)).length === 0 ? (
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-center">
-                      <p className="flex items-center gap-2 justify-center text-green-700 dark:text-green-400">
-                        <CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Todos los cursos ya han sido asignados
-                      </p>
-                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los cursos ya están asignados</p>
                   ) : (
-                    <div className="space-y-2">
-                      {availableCourses
-                        .filter(c => !isCourseEnrolled(c.id))
-                        .map(course => (
-                          <div key={course.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <div className="flex-1">
-                              <div className="font-medium text-gray-900 dark:text-gray-100">{course.name}</div>
-                              {course.description && (
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                  {course.description}
-                                </div>
-                              )}
-                            </div>
-                            <button
-                              className="btn btn-primary"
-                              onClick={() => handleEnrollCourse(course.id)}
-                            >
-                              + Asignar
-                            </button>
-                          </div>
-                        ))}
+                    <div className="flex gap-3">
+                      <select
+                        className="select flex-1"
+                        value={selectedCourseToAdd}
+                        onChange={(e) => setSelectedCourseToAdd(e.target.value)}
+                      >
+                        <option value="">Selecciona un curso...</option>
+                        {availableCourses
+                          .filter(c => !isCourseEnrolled(c.id))
+                          .map(course => (
+                            <option key={course.id} value={course.id}>
+                              {course.name}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        className="btn btn-success"
+                        onClick={() => {
+                          if (selectedCourseToAdd) {
+                            handleEnrollCourse(selectedCourseToAdd);
+                            setSelectedCourseToAdd('');
+                          }
+                        }}
+                        disabled={!selectedCourseToAdd}
+                      >
+                        <Plus size={16} strokeWidth={2} /> Agregar
+                      </button>
                     </div>
                   )}
                 </div>
-              </>
+              </div>
             )}
           </div>
         )}
@@ -576,42 +624,69 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       </div>
 
       {/* Footer - Fixed */}
-      <div className="px-6 pt-4 pb-4 flex-shrink-0">
-        <div className="flex gap-2">
-          {!editing ? (
-            <button className="btn btn-primary flex-1" onClick={() => setEditing(true)}>
-              <Edit size={18} strokeWidth={2} /> Editar Información
+      <div className="modal-footer">
+        {!editing ? (
+          <>
+            {isAdmin && !isAdminEmail(selectedUser.email) && currentUser.uid !== selectedUser.id && (
+              <button
+                className="btn btn-danger"
+                onClick={handleDeleteClick}
+                disabled={saving}
+              >
+                <Trash2 size={18} strokeWidth={2} /> Eliminar
+              </button>
+            )}
+            <button className="btn btn-outline" onClick={onBack}>
+              Cancelar
             </button>
-          ) : (
-            <>
-              <button
-                className="btn btn-outline flex-1"
-                onClick={() => {
-                  setEditing(false);
-                  setFormData({
-                    name: selectedUser.name || '',
-                    email: selectedUser.email || '',
-                    role: selectedUser.role || 'student',
-                    status: selectedUser.status || 'active',
-                    phone: selectedUser.phone || '',
-                    notes: selectedUser.notes || ''
-                  });
-                }}
-                disabled={saving}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn btn-primary flex-1"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar Cambios'}
-              </button>
-            </>
-          )}
-        </div>
+            <button className="btn btn-primary" onClick={() => setEditing(true)}>
+              <Edit size={18} strokeWidth={2} /> Editar
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className="btn btn-outline"
+              onClick={() => {
+                setEditing(false);
+                setFormData({
+                  name: selectedUser.name || '',
+                  email: selectedUser.email || '',
+                  role: selectedUser.role || 'student',
+                  status: selectedUser.status || 'active',
+                  phone: selectedUser.phone || '',
+                  notes: selectedUser.notes || ''
+                });
+              }}
+              disabled={saving}
+            >
+              Cancelar
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+          </>
+        )}
       </div>
+
+      {/* Modal de Confirmación de Eliminación */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Eliminar Usuario"
+        message={`¿Estás seguro de que deseas eliminar a ${selectedUser.name || selectedUser.email}?\n\nEsta acción eliminará permanentemente todos los datos del usuario.\n\nEsta acción no se puede deshacer.`}
+        confirmText="Eliminar Usuario"
+        cancelText="Cancelar"
+        isDanger={true}
+        onConfirm={() => {
+          handleDelete();
+          setShowDeleteConfirm(false);
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

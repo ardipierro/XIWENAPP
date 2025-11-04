@@ -8,6 +8,7 @@ import { getAllUsers, updateUserRole, updateUserStatus } from '../firebase/fires
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { getUserCredits } from '../firebase/credits';
 import Navigation from './Navigation';
+import SearchBar from './common/SearchBar';
 import './AdminPanel.css';
 
 function AdminPanel({ user, userRole, onBack }) {
@@ -188,6 +189,14 @@ function AdminPanel({ user, userRole, onBack }) {
           </h1>
           <p className="section-subtitle">Usuarios y roles</p>
         </div>
+
+      {/* Search Bar */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar usuarios..."
+        className="mb-6"
+      />
 
       {/* Mensajes */}
       {successMessage && (

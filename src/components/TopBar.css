@@ -167,7 +167,7 @@
 }
 
 .user-avatar:hover {
-  background: var(--color-bg-quaternary);
+  background: var(--color-bg-hover);
 }
 
 .avatar-emoji-display {
@@ -189,7 +189,7 @@
   box-shadow: none;
   opacity: 0;
   transition: none;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 
 .user-avatar:hover .avatar-edit-hint {
@@ -223,7 +223,7 @@
 
 .dropdown-arrow {
   font-size: 10px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   transition: none;
 }
 

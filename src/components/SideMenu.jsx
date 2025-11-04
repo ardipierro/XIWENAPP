@@ -48,7 +48,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     if (userRole === 'admin') {
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
-        { icon: Users, label: 'Usuarios', path: '/teacher', action: 'users' },
+        { icon: Users, label: 'Usuarios', path: '/teacher/users', action: null },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
@@ -62,7 +62,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
         { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
-        { icon: Users, label: 'Alumnos', path: '/teacher', action: 'users' },
+        { icon: Users, label: 'Alumnos', path: '/teacher/users', action: null },
       ];
     }
 

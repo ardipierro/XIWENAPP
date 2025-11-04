@@ -119,27 +119,24 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-box add-user-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="modal-header">
-          <h2 className="modal-title">
+      <div className="modal-box flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+        {/* Header - Fixed */}
+        <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
+          <h3 className="modal-title">
             {isAdmin ? 'Crear Nuevo Usuario' : 'Agregar Alumno'}
-          </h2>
+          </h3>
           <button
             className="modal-close-btn"
             onClick={handleClose}
             disabled={loading}
             aria-label="Cerrar modal"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            ✕
           </button>
         </div>
 
-        {/* Body */}
-        <div className="modal-content">
+        {/* Body - Scrollable */}
+        <div className="modal-body flex-1 overflow-y-auto px-6 pb-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email (obligatorio) */}
             <div className="form-group">
@@ -200,7 +197,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className={`select ${fieldErrors.role ? 'error' : ''}`}
+                className={`form-select ${fieldErrors.role ? 'error' : ''}`}
                 required
                 disabled={loading}
               >
@@ -265,12 +262,12 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
           </form>
         </div>
 
-        {/* Footer con botones */}
+        {/* Footer - Fixed */}
         <div className="modal-footer">
           <button
             type="button"
             onClick={handleClose}
-            className="btn btn-outline"
+            className="btn btn-ghost"
             disabled={loading}
           >
             Cancelar

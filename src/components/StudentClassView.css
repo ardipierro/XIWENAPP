@@ -54,20 +54,31 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  padding: 14px 20px;
+  background: white;
+  border: 2px solid #e5e7eb;
   border-radius: 12px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  transition: all 0.2s ease;
+}
+
+.credits-badge:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dark .credits-badge {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%);
-  border-color: rgba(99, 102, 241, 0.3);
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.dark .credits-badge:hover {
+  border-color: #4b5563;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .credits-icon {
-  font-size: 32px;
-  color: #3b82f6;
+  font-size: 24px;
+  color: #6366f1;
 }
 
 .dark .credits-icon {
@@ -77,22 +88,30 @@
 .credits-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .credits-value {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--color-text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
   line-height: 1;
+}
+
+.dark .credits-value {
+  color: #f9fafb;
 }
 
 .credits-label {
   font-size: 11px;
-  font-weight: 700;
-  color: var(--color-text-tertiary);
+  font-weight: 600;
+  color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 2px;
+}
+
+.dark .credits-label {
+  color: #9ca3af;
 }
 
 /* Message - usa alert system de globals.css */
@@ -167,59 +186,37 @@
 .classes-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 24px;
 }
 
-/* Class Card - usa .card de globals.css como base */
+/* Class Card */
 .class-card {
-  padding: 24px;
+  padding: 20px;
   background: white;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.2s ease;
 }
 
 .dark .class-card {
-  background: #18181b;
-  border-color: #27272a;
+  background: #1f2937;
+  border-color: #374151;
 }
 
 .class-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dark .class-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: #4b5563;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Class Card States */
-.class-card.active {
-  border-left: 4px solid #10b981;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-}
-
-.dark .class-card.active {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
-  border-left-color: #34d399;
-}
-
+/* Class Card States - solo opacidad para diferenciar */
 .class-card.attended {
-  border-left: 4px solid #3b82f6;
-  opacity: 0.7;
-}
-
-.dark .class-card.attended {
-  border-left-color: #60a5fa;
-}
-
-.class-card.upcoming {
-  border-left: 4px solid #f59e0b;
-}
-
-.dark .class-card.upcoming {
-  border-left-color: #fbbf24;
+  opacity: 0.6;
 }
 
 .class-card.expired {
@@ -257,15 +254,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 16px;
+  padding: 12px 16px;
   background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
 }
 
 .dark .class-cost {
-  background: #27272a;
-  border-color: #3f3f46;
+  background: #374151;
+  border-color: #4b5563;
 }
 
 .cost-value {
@@ -278,7 +275,7 @@
 .cost-label {
   font-size: 10px;
   font-weight: 700;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 2px;
@@ -294,16 +291,16 @@
 .class-datetime {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 12px 16px;
   background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
 }
 
 .dark .class-datetime {
-  background: #27272a;
-  border-color: #3f3f46;
+  background: #374151;
+  border-color: #4b5563;
 }
 
 .datetime-icon {
@@ -326,60 +323,60 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   text-align: center;
-  border: 1px solid;
+  border: 2px solid;
 }
 
 .class-status.status-active {
-  background: rgba(16, 185, 129, 0.1);
+  background: #d1fae5;
   color: #059669;
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
 }
 
 .dark .class-status.status-active {
   background: rgba(16, 185, 129, 0.15);
   color: #34d399;
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: #34d399;
 }
 
 .class-status.status-upcoming {
-  background: rgba(245, 158, 11, 0.1);
+  background: #fef3c7;
   color: #d97706;
-  border-color: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
 }
 
 .dark .class-status.status-upcoming {
   background: rgba(245, 158, 11, 0.15);
   color: #fbbf24;
-  border-color: rgba(245, 158, 11, 0.3);
+  border-color: #fbbf24;
 }
 
 .class-status.status-attended {
-  background: rgba(59, 130, 246, 0.1);
+  background: #dbeafe;
   color: #2563eb;
-  border-color: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
 }
 
 .dark .class-status.status-attended {
   background: rgba(59, 130, 246, 0.15);
   color: #60a5fa;
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: #60a5fa;
 }
 
 .class-status.status-expired {
   background: #f3f4f6;
   color: #6b7280;
-  border-color: #e5e7eb;
+  border-color: #d1d5db;
 }
 
 .dark .class-status.status-expired {
-  background: #27272a;
+  background: #374151;
   color: #9ca3af;
-  border-color: #3f3f46;
+  border-color: #4b5563;
 }
 
 /* Join Button - usa .btn de globals.css como base */

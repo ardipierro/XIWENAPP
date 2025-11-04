@@ -26,23 +26,28 @@ import { getAllGroups } from '../firebase/groups';
 import { getAllUsers } from '../firebase/firestore';
 import { isAdminEmail } from '../firebase/roleConfig';
 import { uploadImage, deleteImage } from '../firebase/storage';
+import ConfirmModal from './ConfirmModal';
+import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
 import './ClassManager.css';
 
 /**
  * Gestor de Clases Recurrentes
  * Permite crear clases con horarios y asignarles grupos/estudiantes
  */
-function ClassManager({ user, courses, onBack }) {
+function ClassManager({ user, courses, onBack, openCreateModal = false }) {
   const [classes, setClasses] = useState([]);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(openCreateModal);
   const [editingClass, setEditingClass] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('list'); // list, calendar
   const [detailsTab, setDetailsTab] = useState('general'); // general, asignaciones, instancias
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Calendar states
   const [instances, setInstances] = useState([]);
@@ -493,6 +498,12 @@ function ClassManager({ user, courses, onBack }) {
     }
   };
 
+  // Filtrar clases por búsqueda
+  const filteredClasses = classes.filter(cls =>
+    cls.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cls.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -513,18 +524,21 @@ function ClassManager({ user, courses, onBack }) {
           </button>
         )}
 
-        {/* Header unificado */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <BookOpen size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Clases</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button onClick={handleCreateClass} className="btn btn-primary w-full sm:w-auto">
-              + Nueva Clase
-            </button>
-          </div>
-        </div>
+        {/* Header */}
+        <PageHeader
+          icon={BookOpen}
+          title="Clases"
+          actionLabel="+ Nueva Clase"
+          onAction={handleCreateClass}
+        />
+
+        {/* Search Bar */}
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar clases..."
+          className="mb-6"
+        />
 
         {message.text && (
           <div className={`cm-message ${message.type}`}>
@@ -532,16 +546,18 @@ function ClassManager({ user, courses, onBack }) {
           </div>
         )}
 
-        {classes.length === 0 ? (
+        {filteredClasses.length === 0 ? (
           <div className="empty-state">
-            <p>No hay clases creadas aún</p>
-            <button onClick={handleCreateClass} className="btn btn-primary">
-              Crear primera clase
-            </button>
+            <p>{searchTerm ? 'No se encontraron clases' : 'No hay clases creadas aún'}</p>
+            {!searchTerm && (
+              <button onClick={handleCreateClass} className="btn btn-primary">
+                Crear primera clase
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {classes.map(cls => (
+            {filteredClasses.map(cls => (
               <div
                 key={cls.id}
                 className="class-card card card-grid-item cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
@@ -792,15 +808,13 @@ function ClassManager({ user, courses, onBack }) {
                 </div>
 
                 {/* Footer - Fixed */}
-                <div className="px-6 pt-4 pb-4 flex-shrink-0">
-                  <div className="flex gap-2">
-                    <button onClick={() => setShowModal(false)} className="btn btn-outline flex-1">
-                      Cancelar
-                    </button>
-                    <button onClick={handleSaveClass} className="btn btn-primary flex-1">
-                      {editingClass ? 'Guardar Cambios' : 'Crear Clase'}
-                    </button>
-                  </div>
+                <div className="modal-footer">
+                  <button onClick={() => setShowModal(false)} className="btn btn-outline">
+                    Cancelar
+                  </button>
+                  <button onClick={handleSaveClass} className="btn btn-primary">
+                    {editingClass ? 'Guardar Cambios' : 'Crear Clase'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -816,7 +830,7 @@ function ClassManager({ user, courses, onBack }) {
 
           return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 1000}} onClick={() => setShowDetailsModal(false)}>
-              <div className="bg-white dark:bg-gray-800 rounded-lg max-w-5xl w-full flex flex-col" style={{position: 'relative', zIndex: 1001, height: '700px', maxHeight: '90vh'}} onClick={(e) => e.stopPropagation()}>
+              <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full flex flex-col" style={{position: 'relative', zIndex: 1001, height: '700px', maxHeight: '90vh'}} onClick={(e) => e.stopPropagation()}>
                 {/* Header - Fixed */}
                 <div className="modal-header flex-shrink-0">
                   <h3 className="modal-title">
@@ -1332,29 +1346,25 @@ function ClassManager({ user, courses, onBack }) {
                   )}
                 </div>
 
-                {/* Zona de Peligro + Botones - Footer fijo */}
-                <div className="px-6 pt-4 pb-4 flex-shrink-0">
-                  <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mb-4">
-                    <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">Zona de Peligro</h4>
-                    <p className="text-xs text-red-700 dark:text-red-400 mb-3">
-                      Esta acción eliminará permanentemente la clase y todas sus instancias programadas.
-                    </p>
-                    <button
-                      onClick={() => {
-                        if (confirm(`¿Eliminar la clase "${selectedClass.name}"?`)) {
-                          handleDeleteClass(selectedClass.id);
-                          setShowDetailsModal(false);
-                        }
-                      }}
-                      className="btn btn-danger w-full"
-                    >
-                      <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Permanentemente
-                    </button>
-                  </div>
-
+                {/* Footer con botones */}
+                <div className="modal-footer">
                   <button
                     type="button"
-                    className="btn btn-primary w-full"
+                    className="btn btn-danger"
+                    onClick={() => setShowConfirmDelete(true)}
+                  >
+                    <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => setShowDetailsModal(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
                     onClick={handleSaveClassChanges}
                   >
                     <Save size={18} strokeWidth={2} className="inline-icon" /> Guardar Cambios
@@ -1365,6 +1375,22 @@ function ClassManager({ user, courses, onBack }) {
             </div>
           );
         })()}
+
+        {/* Modal de confirmación de eliminación */}
+        <ConfirmModal
+          isOpen={showConfirmDelete}
+          title="Eliminar Clase"
+          message={`¿Estás seguro de que deseas eliminar la clase "${selectedClass?.name}"?\n\nEsta acción eliminará permanentemente la clase y todas sus instancias programadas.\n\nEsta acción no se puede deshacer.`}
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          isDanger={true}
+          onConfirm={() => {
+            handleDeleteClass(selectedClass.id);
+            setShowDetailsModal(false);
+            setShowConfirmDelete(false);
+          }}
+          onCancel={() => setShowConfirmDelete(false)}
+        />
       </div>
     );
   }

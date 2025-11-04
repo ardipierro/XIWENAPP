@@ -36,7 +36,7 @@
 
 .menu-user-email {
   font-size: 13px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -87,7 +87,7 @@
 }
 
 .menu-item-icon {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   width: 24px;
   text-align: center;
   flex-shrink: 0;
