@@ -49,8 +49,8 @@
   gap: 8px;
   padding: 16px;
   border-radius: 12px;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
   transition: all 0.2s ease;
 }
 
@@ -143,7 +143,7 @@
   font-size: 14px;
   border: none;
   border-radius: 10px;
-  background: white;
+  background: var(--color-bg-secondary);
   color: var(--color-text-primary, #1f2937);
   resize: vertical;
   min-height: 80px;
@@ -160,7 +160,7 @@
 
 .notes-display {
   padding: 12px 16px;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 10px;
   font-size: 14px;
   color: var(--color-text-primary, #374151);
@@ -193,8 +193,8 @@
   gap: 16px;
   padding: 16px;
   border-radius: 12px;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
   transition: all 0.2s ease;
 }
 

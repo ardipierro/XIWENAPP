@@ -13,7 +13,13 @@
 
 /* Cuando hay banner, TopBar se mueve hacia abajo */
 .dashboard-layout.has-banner .topbar {
-  top: 44px; /* Altura del banner */
+  top: 44px; /* Altura exacta del banner en desktop */
+}
+
+@media (max-width: 640px) {
+  .dashboard-layout.has-banner .topbar {
+    top: 38px; /* Altura exacta del banner en móvil */
+  }
 }
 
 .topbar-content {
@@ -229,11 +235,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  /* En móvil, el banner tiene altura variable (~85px) */
-  .dashboard-layout.has-banner .topbar {
-    top: 85px;
-  }
-
   .topbar-content {
     padding: 0 12px;
   }

@@ -2,13 +2,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg-primary, #F9FAFB);
+  background: var(--color-bg-primary);
 }
 
 /* Header */
 .content-player-header {
-  background: var(--color-surface, white);
-  border-bottom: 2px solid var(--color-border, #E5E7EB);
+  background: var(--color-bg-secondary);
+  border-bottom: 2px solid var(--color-border);
   padding: 20px 32px;
   position: sticky;
   top: 0;
@@ -18,7 +18,7 @@
 .btn-close {
   background: transparent;
   border: none;
-  color: var(--color-text-secondary, #6B7280);
+  color: var(--color-text-secondary);
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
@@ -32,8 +32,8 @@
 }
 
 .btn-close:hover {
-  background: var(--color-bg-secondary, #F3F4F6);
-  color: var(--color-primary, #4F46E5);
+  background: var(--color-bg-tertiary);
+  color: var(--color-accent);
   transform: translateX(-4px);
 }
 
@@ -45,18 +45,18 @@
 .content-type-badge {
   display: inline-block;
   padding: 6px 14px;
-  background: var(--color-bg-secondary, #F3F4F6);
+  background: var(--color-bg-tertiary);
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-text-secondary, #6B7280);
+  color: var(--color-text-secondary);
   margin-bottom: 12px;
 }
 
 .content-title {
   font-size: 32px;
   font-weight: 700;
-  color: var(--color-text-primary, #1F2937);
+  color: var(--color-text-primary);
   margin: 0 0 12px 0;
   line-height: 1.2;
 }
@@ -65,7 +65,7 @@
   display: flex;
   gap: 20px;
   font-size: 14px;
-  color: var(--color-text-secondary, #6B7280);
+  color: var(--color-text-secondary);
 }
 
 /* Body */
@@ -78,8 +78,8 @@
 .content-container {
   max-width: 900px;
   margin: 0 auto;
-  background: var(--color-surface, white);
-  border: 2px solid var(--color-border, #E5E7EB);
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
   border-radius: 16px;
   padding: 40px;
   min-height: 400px;
@@ -89,7 +89,7 @@
 .content-lesson {
   font-size: 16px;
   line-height: 1.8;
-  color: var(--color-text-primary, #1F2937);
+  color: var(--color-text-primary);
 }
 
 .lesson-content {
@@ -134,21 +134,21 @@
 .video-description h3 {
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-text-primary, #1F2937);
+  color: var(--color-text-primary);
   margin: 0 0 12px 0;
 }
 
 .video-description p {
   font-size: 15px;
   line-height: 1.7;
-  color: var(--color-text-secondary, #6B7280);
+  color: var(--color-text-secondary);
 }
 
 /* Reading Content */
 .content-reading {
   font-size: 16px;
   line-height: 1.8;
-  color: var(--color-text-primary, #1F2937);
+  color: var(--color-text-primary);
 }
 
 .reading-content {
@@ -175,7 +175,7 @@
   align-items: center;
   gap: 20px;
   padding: 24px 32px;
-  background: var(--color-bg-secondary, #F3F4F6);
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
   max-width: 500px;
 }
@@ -188,13 +188,13 @@
 .link-info h3 {
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-text-primary, #1F2937);
+  color: var(--color-text-primary);
   margin: 0 0 4px 0;
 }
 
 .link-info p {
   font-size: 14px;
-  color: var(--color-text-secondary, #6B7280);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -203,7 +203,7 @@
   align-items: center;
   gap: 8px;
   padding: 14px 28px;
-  background: var(--color-primary, #4F46E5);
+  background: var(--color-accent);
   color: white;
   border: none;
   border-radius: 8px;
@@ -215,9 +215,9 @@
 }
 
 .btn-open-link:hover {
-  background: #4338CA;
+  background: var(--color-accent-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .link-description {
@@ -228,20 +228,20 @@
 .link-description h4 {
   font-size: 16px;
   font-weight: 700;
-  color: var(--color-text-primary, #1F2937);
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .link-description p {
   font-size: 15px;
   line-height: 1.7;
-  color: var(--color-text-secondary, #6B7280);
+  color: var(--color-text-secondary);
 }
 
 /* Footer */
 .content-player-footer {
-  background: var(--color-surface, white);
-  border-top: 2px solid var(--color-border, #E5E7EB);
+  background: var(--color-bg-secondary);
+  border-top: 2px solid var(--color-border);
   padding: 20px 32px;
   display: flex;
   justify-content: space-between;
@@ -257,7 +257,7 @@
 
 .btn-mark-complete {
   padding: 12px 24px;
-  background: #10B981;
+  background: var(--color-success);
   color: white;
   border: none;
   border-radius: 8px;
@@ -271,9 +271,9 @@
 }
 
 .btn-mark-complete:hover {
-  background: #059669;
+  background: var(--color-success-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .completed-indicator {
@@ -281,8 +281,8 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #ECFDF5;
-  color: #10B981;
+  background: var(--color-success-bg);
+  color: var(--color-success);
   border-radius: 8px;
   font-weight: 600;
   font-size: 15px;
@@ -295,9 +295,9 @@
 
 .btn-nav {
   padding: 12px 24px;
-  background: var(--color-bg-secondary, #F3F4F6);
-  color: var(--color-text-primary, #1F2937);
-  border: 2px solid var(--color-border, #E5E7EB);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-weight: 600;
   font-size: 15px;
@@ -306,9 +306,9 @@
 }
 
 .btn-nav:hover:not(:disabled) {
-  background: var(--color-primary, #4F46E5);
+  background: var(--color-accent);
   color: white;
-  border-color: var(--color-primary, #4F46E5);
+  border-color: var(--color-accent);
   transform: translateY(-2px);
 }
 
@@ -318,14 +318,14 @@
 }
 
 .btn-nav-next {
-  background: var(--color-primary, #4F46E5);
+  background: var(--color-accent);
   color: white;
-  border-color: var(--color-primary, #4F46E5);
+  border-color: var(--color-accent);
 }
 
 .btn-nav-next:hover:not(:disabled) {
-  background: #4338CA;
-  border-color: #4338CA;
+  background: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
 }
 
 /* Loading & Error */
@@ -343,7 +343,7 @@
 .loading-container p,
 .error-container p {
   margin-top: 16px;
-  color: var(--color-text-secondary, #6B7280);
+  color: var(--color-text-secondary);
   font-size: 16px;
 }
 
@@ -355,57 +355,11 @@
 .error-container h2 {
   font-size: 24px;
   font-weight: 700;
-  color: var(--color-text-primary, #1F2937);
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
-/* Dark Mode */
-.dark .content-player {
-  background: var(--color-bg-primary);
-}
-
-.dark .content-player-header {
-  background: var(--color-surface);
-  border-bottom-color: var(--color-border);
-}
-
-.dark .btn-close:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.dark .content-type-badge {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text-secondary);
-}
-
-.dark .content-container {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-}
-
-.dark .link-info {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.dark .content-player-footer {
-  background: var(--color-surface);
-  border-top-color: var(--color-border);
-}
-
-.dark .btn-nav {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--color-border);
-}
-
-.dark .btn-nav:hover:not(:disabled) {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-.dark .completed-indicator {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
-}
+/* Dark Mode - Ya no es necesario, las variables se adaptan automáticamente */
 
 /* Responsive */
 @media (max-width: 768px) {

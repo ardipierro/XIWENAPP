@@ -5,8 +5,8 @@
 .quick-access-card {
   display: flex;
   flex-direction: column;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

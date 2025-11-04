@@ -21,13 +21,8 @@
 }
 
 .confirm-icon.danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.dark .confirm-icon.danger {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
+  background: var(--color-error-bg);
+  color: var(--color-error);
 }
 
 .confirm-message {
@@ -36,8 +31,4 @@
   color: var(--color-text-secondary);
   white-space: pre-line; /* Respeta saltos de línea */
   margin: 0;
-}
-
-.dark .confirm-message {
-  color: var(--color-text-secondary);
 }

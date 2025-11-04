@@ -102,14 +102,16 @@
     margin-left: 0;
   }
 
-  /* En móvil, el banner tiene altura variable (~85px) */
-  .dashboard-layout.has-banner .dashboard-main {
-    margin-top: 149px; /* 64px TopBar + 85px Banner */
-    height: calc(100vh - 149px);
-  }
-
   .dashboard-main-content {
     padding: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* En móvil, el banner es más compacto (38px) */
+  .dashboard-layout.has-banner .dashboard-main {
+    margin-top: 102px; /* 64px TopBar + 38px Banner */
+    height: calc(100vh - 102px);
   }
 }
 

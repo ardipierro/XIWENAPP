@@ -61,7 +61,7 @@
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 16px;
   max-width: 600px;
   margin: 0 auto;
@@ -81,7 +81,7 @@
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 16px;
   max-width: 600px;
   margin: 0 auto;
@@ -112,7 +112,7 @@
 .results-container {
   max-width: 900px;
   margin: 0 auto;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -316,7 +316,7 @@
 .coming-soon {
   max-width: 600px;
   margin: 0 auto;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 16px;
   padding: 60px 40px;
   text-align: center;

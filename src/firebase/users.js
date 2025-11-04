@@ -254,23 +254,33 @@ export async function permanentlyDeleteUser(userId) {
 export async function getAllUsers(filters = {}) {
   try {
     const usersRef = collection(db, 'users');
-    let q = query(usersRef);
 
-    // Aplicar filtros
+    // Construir array de condiciones
+    const conditions = [];
+
     if (filters.role) {
-      q = query(usersRef, where('role', '==', filters.role));
+      conditions.push(where('role', '==', filters.role));
     }
 
-    if (filters.activeOnly) {
-      q = query(usersRef, where('active', '==', true));
-    }
+    // No aplicar filtro activeOnly en la query de Firestore
+    // Lo haremos en memoria para incluir usuarios sin el campo 'active'
+
+    // Crear query con las condiciones de Firestore
+    const q = conditions.length > 0
+      ? query(usersRef, ...conditions)
+      : query(usersRef);
 
     const snapshot = await getDocs(q);
 
-    const users = snapshot.docs.map(doc => ({
+    let users = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Filtrar usuarios activos en memoria (incluye usuarios sin campo 'active')
+    if (filters.activeOnly) {
+      users = users.filter(user => user.active !== false);
+    }
 
     // Ordenar por createdAt descendente (más recientes primero)
     users.sort((a, b) => {

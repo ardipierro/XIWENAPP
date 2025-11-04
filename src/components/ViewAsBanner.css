@@ -18,7 +18,8 @@
   animation: slideDown 0.3s ease-out;
   gap: 16px;
   flex-wrap: nowrap;
-  height: 44px; /* Reducido ~10% de 48px */
+  height: 44px;
+  box-sizing: border-box; /* Asegurar que padding está incluido en height */
 }
 
 .banner-content {
@@ -28,7 +29,7 @@
 }
 
 .banner-icon {
-  font-size: 24px;
+  font-size: 28px;
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -42,7 +43,7 @@
 }
 
 .banner-text {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.3px;
 }
@@ -53,26 +54,34 @@
 }
 
 .banner-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: none;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
   white-space: nowrap;
 }
 
+.banner-button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s ease-in-out infinite;
+}
+
 .banner-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateX(-2px);
+  opacity: 0.8;
 }
 
 .banner-button:active {
-  transform: translateX(0);
+  opacity: 1;
 }
 
 @keyframes slideDown {
@@ -86,27 +95,68 @@
   }
 }
 
+/* Ocultar/mostrar texto según pantalla */
+.banner-label {
+  /* Visible en desktop */
+}
+
+.banner-button-full {
+  /* Visible en desktop */
+}
+
+.banner-button-short {
+  display: none; /* Oculto en desktop */
+}
+
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .view-as-banner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 12px 16px;
-    height: auto; /* Permitir que el banner se expanda */
-    gap: 10px;
+    padding: 8px 16px;
+    height: 38px; /* Más compacto en móvil */
+    gap: 12px;
+    box-sizing: border-box; /* Asegurar que padding está incluido */
   }
 
   .banner-content {
     gap: 8px;
+    flex: 1;
+    min-width: 0; /* Permitir que el texto se contraiga */
+  }
+
+  .banner-icon {
+    font-size: 22px;
   }
 
   .banner-text {
-    font-size: 13px;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
+  /* Ocultar "Modo Visualización:" en móvil */
+  .banner-label {
+    display: none;
+  }
+
+  /* Botón: "Admin" en móvil */
   .banner-button {
-    width: 100%;
-    text-align: center;
-    padding: 8px 14px;
+    padding: 4px 10px;
+    flex-shrink: 0;
+    font-size: 14px;
+    height: auto; /* Dejar que el contenido determine la altura */
+    gap: 6px;
+  }
+
+  .banner-button-icon {
+    font-size: 18px;
+  }
+
+  .banner-button-full {
+    display: none; /* Ocultar texto completo */
+  }
+
+  .banner-button-short {
+    display: inline; /* Mostrar "← Admin" */
   }
 }

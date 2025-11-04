@@ -1,4 +1,4 @@
-import { Eye } from 'lucide-react';
+import { Eye, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useViewAs } from '../contexts/ViewAsContext';
 import './ViewAsBanner.css';
@@ -43,14 +43,18 @@ function ViewAsBanner() {
           <Eye size={20} strokeWidth={2} />
         </div>
         <div className="banner-text">
-          <strong>Modo Visualización:</strong> Viendo como {viewAsUser?.name || viewAsUser?.email}
+          <strong className="banner-label">Modo Visualización:</strong> Viendo como {viewAsUser?.name || viewAsUser?.email}
         </div>
       </div>
       <button
         onClick={handleExitViewAs}
         className="banner-button"
       >
-        ← Volver a Admin
+        <div className="banner-button-icon">
+          <ArrowLeft size={20} strokeWidth={2} />
+        </div>
+        <span className="banner-button-full">Volver a Admin</span>
+        <span className="banner-button-short">Admin</span>
       </button>
     </div>
   );

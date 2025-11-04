@@ -190,13 +190,46 @@
 /* Dark mode is the default theme */
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
+  /* En móviles, el menú se despliega desde arriba como dropdown */
   .sidemenu {
-    width: 200px; /* Mismo ancho que desktop */
+    position: fixed;
+    top: 72px;
+    left: 12px;
+    right: 12px;
+    bottom: auto;
+    width: auto;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 88px);
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-120%);
+    opacity: 0;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  }
+
+  .sidemenu.open {
+    transform: translateY(0) !important;
+    opacity: 1;
+  }
+
+  /* Cuando hay banner, el dropdown se mueve hacia abajo */
+  .dashboard-layout.has-banner .sidemenu {
+    top: 110px; /* 72px dropdown + 38px Banner (móvil) */
+  }
+
+  /* Ajustar padding del contenido */
+  .sidemenu-content {
+    padding: 8px 0;
+  }
+
+  .sidemenu-nav {
+    padding: 4px 0;
   }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 641px) {
   .sidemenu-overlay {
     display: none;
   }

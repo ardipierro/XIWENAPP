@@ -55,8 +55,8 @@
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   transition: all 0.2s ease;
 }
@@ -193,8 +193,8 @@
 /* Class Card */
 .class-card {
   padding: 20px;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   transition: all 0.2s ease;
 }

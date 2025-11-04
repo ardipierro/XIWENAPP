@@ -909,7 +909,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  background: white;
+  background: var(--color-bg-secondary);
 }
 
 .users-table thead {

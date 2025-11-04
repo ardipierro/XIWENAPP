@@ -37,11 +37,11 @@
 
 .tab-btn {
   padding: 10px 20px;
-  border: 2px solid #e5e7eb;
-  background: white;
+  border: 2px solid var(--color-border);
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 14px;
@@ -204,7 +204,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: white;
+  background: var(--color-bg-secondary);
   border: 2px solid #6366f1;
   border-radius: 20px;
   font-size: 14px;
@@ -672,11 +672,11 @@
 
 .week-nav-btn {
   padding: 10px 20px;
-  border: 2px solid #e5e7eb;
-  background: white;
+  border: 2px solid var(--color-border);
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 14px;
@@ -700,8 +700,8 @@
 }
 
 .week-nav-btn.weekend-toggle {
-  background: white;
-  border-color: #d1d5db;
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
 }
 
 .week-nav-btn.weekend-toggle:hover {
@@ -728,7 +728,7 @@
 
 .calendar-day-column {
   min-width: 0;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;

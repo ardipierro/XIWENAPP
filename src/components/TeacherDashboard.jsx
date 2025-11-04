@@ -37,7 +37,6 @@ import {
   loadGameHistory,
   loadCategories,
   loadCourses,
-  getAllUsers,
   updateUserRole,
   updateUserStatus,
   enrollStudentInCourse,
@@ -45,6 +44,7 @@ import {
   getStudentEnrollments,
   getStudentEnrolledCoursesCount
 } from '../firebase/firestore';
+import { getAllUsers } from '../firebase/users';
 import {
   assignToStudent,
   removeFromStudent,
@@ -132,8 +132,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Flag para evitar doble ejecución del useEffect de retorno
   const [hasProcessedReturn, setHasProcessedReturn] = useState(false);
 
-  // Determinar si el usuario es admin
-  const isAdmin = isAdminEmail(user?.email);
+  // Determinar si el usuario es admin (verificar tanto email como rol en Firestore)
+  const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
 
   useEffect(() => {
     loadDashboardData();

@@ -94,11 +94,41 @@ export function AuthProvider({ children }) {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Obtener rol
-      const role = await getUserRole(firebaseUser.uid);
+      let role = await getUserRole(firebaseUser.uid);
 
+      // Si no tiene rol, el documento en Firestore no existe
+      // Crear documento básico para sincronizar Auth con Firestore
       if (!role) {
-        logger.warn('Usuario sin rol en Firestore', 'AuthContext');
-        // Podríamos hacer logout automático aquí si es crítico
+        logger.warn('Usuario sin documento en Firestore, creando documento básico...', 'AuthContext');
+
+        try {
+          // Importar dinámicamente para evitar dependencias circulares
+          const { setDoc, doc, serverTimestamp } = await import('firebase/firestore');
+          const { db } = await import('../firebase/config.js');
+
+          // Crear documento básico con rol student por defecto
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          await setDoc(userDocRef, {
+            email: firebaseUser.email,
+            name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+            role: 'student',
+            status: 'active',
+            active: true,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            lastLogin: null,
+            avatar: '🎓',
+            temporaryPassword: false
+          });
+
+          role = 'student';
+          logger.info('Documento de usuario creado exitosamente con rol: student', 'AuthContext');
+        } catch (createError) {
+          logger.error('Error creando documento de usuario', createError, 'AuthContext');
+          // Hacer logout si no se puede crear el documento
+          await signOut(auth);
+          return;
+        }
       }
 
       // Cargar perfil completo

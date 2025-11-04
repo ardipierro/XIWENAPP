@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   BookOpen, ClipboardList, Calendar, CheckCircle, XCircle,
   CreditCard, Users, Settings, Lightbulb, Trash2, X,
-  FileText, Repeat, BarChart3, AlertTriangle, Save, GraduationCap, Clock, Plus
+  FileText, Repeat, BarChart3, AlertTriangle, Save, GraduationCap, Clock, Plus, Grid, List
 } from 'lucide-react';
 import {
   createClass,
@@ -48,6 +48,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
   const [activeTab, setActiveTab] = useState('list'); // list, calendar
   const [detailsTab, setDetailsTab] = useState('general'); // general, asignaciones, instancias
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   // Calendar states
   const [instances, setInstances] = useState([]);
@@ -532,13 +533,32 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
           onAction={handleCreateClass}
         />
 
-        {/* Search Bar */}
-        <SearchBar
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Buscar clases..."
-          className="mb-6"
-        />
+        {/* Search Bar + Toggle de Vista */}
+        <div className="flex gap-3 items-center mb-6">
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Buscar clases..."
+            className="flex-1"
+          />
+
+          <div className="view-toggle">
+            <button
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Vista en cuadrícula"
+            >
+              <Grid size={18} />
+            </button>
+            <button
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="Vista en lista"
+            >
+              <List size={18} />
+            </button>
+          </div>
+        </div>
 
         {message.text && (
           <div className={`cm-message ${message.type}`}>
@@ -555,7 +575,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
               </button>
             )}
           </div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredClasses.map(cls => (
               <div
@@ -617,6 +637,79 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                     <span className="flex items-center gap-1">
                       <Users size={16} strokeWidth={2} /> {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignados
                     </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {filteredClasses.map(cls => (
+              <div
+                key={cls.id}
+                className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
+                onClick={() => handleViewDetails(cls)}
+                title="Click para configurar clase"
+              >
+                <div className="flex gap-4 items-start">
+                  {/* Class Image - Smaller in list view */}
+                  {cls.imageUrl ? (
+                    <div className="card-image-placeholder-sm overflow-hidden">
+                      <img
+                        src={cls.imageUrl}
+                        alt={cls.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error('Error cargando imagen de clase:', cls.name, cls.imageUrl);
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="card-image-placeholder-sm">
+                      <Calendar size={48} strokeWidth={2} />
+                    </div>
+                  )}
+
+                  {/* Class Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                          {cls.name}
+                        </h3>
+                        {cls.description && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                            {cls.description}
+                          </p>
+                        )}
+                        {cls.courseName && (
+                          <span className="badge badge-primary">{cls.courseName}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Horarios */}
+                    <div className="mb-2">
+                      <strong className="text-sm text-gray-700 dark:text-gray-300">Horarios:</strong>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {cls.schedules?.map((schedule, idx) => (
+                          <span key={idx} className="text-sm text-gray-600 dark:text-gray-400">
+                            {getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <CreditCard size={16} strokeWidth={2} /> {cls.creditCost} crédito{cls.creditCost !== 1 ? 's' : ''}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users size={16} strokeWidth={2} /> {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignado{((cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)) !== 1 ? 's' : ''}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

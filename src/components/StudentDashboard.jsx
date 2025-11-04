@@ -66,7 +66,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
             return instanceDate >= now;
           });
-          setUpcomingClasses(futureInstances.slice(0, 3));
+          setUpcomingClasses(futureInstances.slice(0, 1));
         } else {
           console.warn('No se pudo cargar ni crear perfil de estudiante para:', user.uid);
         }
@@ -92,7 +92,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
           return instanceDate >= now;
         });
-        setUpcomingClasses(futureInstances.slice(0, 3));
+        setUpcomingClasses(futureInstances.slice(0, 1));
       }
 
       console.log(`⏱️ [StudentDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
@@ -356,6 +356,70 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
       <div className="student-dashboard">
         <div className="dashboard-content">
+          {/* Próxima Clase - Quick Access */}
+          <div className="upcoming-classes-section card">
+            <div className="section-header">
+              <h3 className="section-title flex items-center gap-2">
+                <Calendar size={20} strokeWidth={2} />
+                Próxima Clase
+              </h3>
+              {upcomingClasses.length > 0 && (
+                <button className="btn btn-text" onClick={() => setCurrentView('classes')}>
+                  Ver todas →
+                </button>
+              )}
+            </div>
+            {upcomingClasses.length > 0 ? (
+              <div className="classes-preview">
+                {upcomingClasses.map((instance) => {
+                  const instanceDate = instance.date.toDate ? instance.date.toDate() : new Date(instance.date);
+                  const today = new Date();
+                  const tomorrow = new Date(today);
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+
+                  const isToday = instanceDate.toDateString() === today.toDateString();
+                  const isTomorrow = instanceDate.toDateString() === tomorrow.toDateString();
+
+                  let dateLabel;
+                  if (isToday) {
+                    dateLabel = `Hoy, ${instance.startTime}`;
+                  } else if (isTomorrow) {
+                    dateLabel = `Mañana, ${instance.startTime}`;
+                  } else {
+                    dateLabel = instanceDate.toLocaleDateString('es-ES', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short'
+                    }) + ', ' + instance.startTime;
+                  }
+
+                  return (
+                    <div key={instance.id} className="class-preview-item">
+                      <div className="class-preview-header">
+                        <div className="class-preview-name">{instance.className}</div>
+                        <div className="class-preview-cost">
+                          <CreditCard size={14} strokeWidth={2} />
+                          {instance.creditCost}
+                        </div>
+                      </div>
+                      <div className="class-preview-datetime">
+                        <Clock size={14} strokeWidth={2} />
+                        <span>{dateLabel}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="empty-classes-preview">
+                <p>No tienes clases programadas próximamente</p>
+                <button className="btn btn-outline" onClick={() => setCurrentView('classes')}>
+                  Ver calendario de clases
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Progress Section */}
           <div className="progress-section card">
             <div className="progress-header">
@@ -370,7 +434,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               </div>
             </div>
             <div className="level-progress">
-              <div 
+              <div
                 className="level-progress-fill student-progress"
                 style={{ width: `${progressPercentage}%` }}
               ></div>
@@ -465,70 +529,6 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 <p>No tienes cursos asignados aún</p>
                 <button className="btn btn-primary" onClick={handleViewMyCourses}>
                   Explorar Cursos
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Próximas Clases - Quick Access */}
-          <div className="upcoming-classes-section card">
-            <div className="section-header">
-              <h3 className="section-title flex items-center gap-2">
-                <Calendar size={20} strokeWidth={2} />
-                Próximas Clases
-              </h3>
-              {upcomingClasses.length > 0 && (
-                <button className="btn btn-text" onClick={() => setCurrentView('classes')}>
-                  Ver todas →
-                </button>
-              )}
-            </div>
-            {upcomingClasses.length > 0 ? (
-              <div className="classes-preview">
-                {upcomingClasses.map((instance) => {
-                  const instanceDate = instance.date.toDate ? instance.date.toDate() : new Date(instance.date);
-                  const today = new Date();
-                  const tomorrow = new Date(today);
-                  tomorrow.setDate(tomorrow.getDate() + 1);
-
-                  const isToday = instanceDate.toDateString() === today.toDateString();
-                  const isTomorrow = instanceDate.toDateString() === tomorrow.toDateString();
-
-                  let dateLabel;
-                  if (isToday) {
-                    dateLabel = `Hoy, ${instance.startTime}`;
-                  } else if (isTomorrow) {
-                    dateLabel = `Mañana, ${instance.startTime}`;
-                  } else {
-                    dateLabel = instanceDate.toLocaleDateString('es-ES', {
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short'
-                    }) + ', ' + instance.startTime;
-                  }
-
-                  return (
-                    <div key={instance.id} className="class-preview-item">
-                      <div className="class-preview-header">
-                        <div className="class-preview-name">{instance.className}</div>
-                        <div className="class-preview-cost">
-                          <CreditCard size={14} strokeWidth={2} />
-                          {instance.creditCost}
-                        </div>
-                      </div>
-                      <div className="class-preview-datetime">
-                        <Clock size={14} strokeWidth={2} />
-                        <span>{dateLabel}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="empty-classes-preview">
-                <p>No tienes clases programadas próximamente</p>
-                <button className="btn btn-outline" onClick={() => setCurrentView('classes')}>
-                  Ver calendario de clases
                 </button>
               </div>
             )}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Search, BookOpen, FileText, Gamepad2, List, Trash2, Clock,
-  Plus, Users, Image as ImageIcon, Settings, Info
+  Plus, Users, Image as ImageIcon, Settings, Info, Grid
 } from 'lucide-react';
 import { loadCourses, createCourse, updateCourse, deleteCourse, loadStudents } from '../firebase/firestore';
 import { getContentByTeacher } from '../firebase/content';
@@ -401,13 +401,32 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
         onAction={() => setShowCreateModal(true)}
       />
 
-      {/* Search Bar */}
-      <SearchBar
-        value={searchTerm}
-        onChange={setSearchTerm}
-        placeholder="Buscar cursos..."
-        className="mb-6"
-      />
+      {/* Search Bar + Toggle de Vista */}
+      <div className="flex gap-3 items-center mb-6">
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar cursos..."
+          className="flex-1"
+        />
+
+        <div className="view-toggle">
+          <button
+            className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+            onClick={() => setViewMode('grid')}
+            title="Vista en cuadrícula"
+          >
+            <Grid size={18} />
+          </button>
+          <button
+            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => setViewMode('list')}
+            title="Vista en lista"
+          >
+            <List size={18} />
+          </button>
+        </div>
+      </div>
 
       {/* Courses Display */}
       {filteredCourses.length === 0 ? (
@@ -490,7 +509,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
           {filteredCourses.map((course) => (
             <div
               key={course.id}
-              className="card cursor-pointer hover:shadow-lg transition-all duration-300"
+              className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
               onClick={() => handleOpenCourseModal(course, 'info')}
               title="Click para gestionar curso"
             >
