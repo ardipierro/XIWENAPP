@@ -167,11 +167,21 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     console.log('TeacherDashboard: useEffect ejecutado, location =', location.pathname);
     console.log('TeacherDashboard: hasProcessedReturn =', hasProcessedReturn);
     console.log('TeacherDashboard: currentScreen =', currentScreen);
+    console.log('TeacherDashboard: users.length =', users.length);
 
     // Solo ejecutar si estamos en la pantalla de usuarios
     if (currentScreen !== 'users') {
       console.log('TeacherDashboard: No estamos en users, saltando');
       return;
+    }
+
+    const userId = sessionStorage.getItem('viewAsReturnUserId');
+    console.log('TeacherDashboard: userId desde sessionStorage =', userId);
+
+    // Si hay userId pendiente pero aún no procesamos, mantener el flag
+    if (userId && !hasProcessedReturn) {
+      // Este flag evitará que se muestre la lista hasta que se procese
+      console.log('TeacherDashboard: Procesando retorno de Ver Como...');
     }
 
     // Si ya procesamos el retorno, no hacer nada
@@ -180,36 +190,42 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       return;
     }
 
-    const userId = sessionStorage.getItem('viewAsReturnUserId');
-    console.log('TeacherDashboard: userId desde sessionStorage =', userId);
+    // Solo procesar si NO hay userId pendiente
+    if (!userId) {
+      console.log('TeacherDashboard: No hay userId en sessionStorage');
+      return;
+    }
 
-    if (userId && users.length > 0) {
-      console.log('TeacherDashboard: Encontrado userId y usuarios cargados, procesando...');
+    // Esperar a que se carguen los usuarios
+    if (users.length === 0) {
+      console.log('TeacherDashboard: userId encontrado pero usuarios aún no cargados, esperando...');
+      return;
+    }
 
-      // Marcar como procesado ANTES de limpiar sessionStorage
+    // Usuarios cargados y userId presente - procesar
+    console.log('TeacherDashboard: Encontrado userId y usuarios cargados, procesando...');
+
+    // Buscar y abrir el perfil
+    console.log('TeacherDashboard: Buscando usuario con id:', userId);
+    const userToOpen = users.find(u => u.id === userId);
+    console.log('TeacherDashboard: Usuario encontrado:', userToOpen);
+
+    if (userToOpen) {
+      // Marcar como procesado ANTES de abrir el modal
       setHasProcessedReturn(true);
 
       // Limpiar sessionStorage
       sessionStorage.removeItem('viewAsReturnUserId');
+      sessionStorage.removeItem('viewAsReturning');
 
-      // Buscar y abrir el perfil
-      console.log('TeacherDashboard: Buscando usuario con id:', userId);
-      const userToOpen = users.find(u => u.id === userId);
-      console.log('TeacherDashboard: Usuario encontrado:', userToOpen);
-
-      if (userToOpen) {
-        setSelectedUserProfile(userToOpen);
-        setShowUserProfile(true);
-        console.log('TeacherDashboard: UserProfile abierto');
-      } else {
-        console.warn('TeacherDashboard: No se encontró usuario con id:', userId);
-      }
-    } else if (userId && users.length === 0) {
-      console.log('TeacherDashboard: userId encontrado pero usuarios aún no cargados, esperando...');
+      setSelectedUserProfile(userToOpen);
+      setShowUserProfile(true);
+      console.log('TeacherDashboard: UserProfile abierto');
     } else {
-      console.log('TeacherDashboard: No hay userId en sessionStorage');
+      console.warn('TeacherDashboard: No se encontró usuario con id:', userId, 'en', users.length, 'usuarios');
+      // No marcar como procesado para reintentar si se cargan más usuarios
     }
-  }, [currentScreen, hasProcessedReturn, users]);
+  }, [currentScreen, hasProcessedReturn, users.length]);
 
   // Handlers de navegación
   const handleStartGame = () => {
@@ -764,12 +780,27 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     });
   };
 
-  // Cargar usuarios cuando cambia a pantalla de usuarios
+  // Cargar usuarios cuando cambia a pantalla de usuarios O cuando cambia isAdmin
   useEffect(() => {
+    console.log('TeacherDashboard: useEffect loadUsers triggered');
+    console.log('  - currentScreen:', currentScreen);
+    console.log('  - user.email:', user?.email);
+    console.log('  - userRole:', userRole);
+    console.log('  - isAdmin:', isAdmin);
+    console.log('  - isAdminEmail:', isAdminEmail(user?.email));
+
     if (currentScreen === 'users') {
+      // Si estamos procesando un retorno de "Ver como", esperar a que isAdmin esté sincronizado
+      const pendingReturn = sessionStorage.getItem('viewAsReturnUserId');
+      if (pendingReturn && !isAdminEmail(user?.email) && !userRole) {
+        console.log('TeacherDashboard: Esperando isAdmin antes de cargar usuarios...');
+        return;
+      }
+
+      console.log('TeacherDashboard: Cargando usuarios, isAdmin =', isAdmin);
       loadUsers();
     }
-  }, [currentScreen]);
+  }, [currentScreen, isAdmin, userRole]);
 
   // Cargar contadores de inscripciones cuando se cargan usuarios
   useEffect(() => {
@@ -875,6 +906,18 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
   if (currentScreen === 'users') {
+    // Mostrar loading fullscreen si estamos procesando retorno de Ver Como
+    if (sessionStorage.getItem('viewAsReturning') === 'true' && !hasProcessedReturn) {
+      return (
+        <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+          <div className="loading-state" style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+            <div className="spinner"></div>
+            <p>Volviendo...</p>
+          </div>
+        </DashboardLayout>
+      );
+    }
+
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="user-management">
@@ -931,7 +974,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           {/* Tabla de usuarios */}
           <div className="users-section">
 
-            {filteredUsers.length === 0 ? (
+            {/* Mostrar loading si estamos esperando userRole para procesar retorno */}
+            {sessionStorage.getItem('viewAsReturnUserId') && !hasProcessedReturn && users.length === 0 ? (
+              <div className="loading-state">
+                <div className="spinner"></div>
+                <p>Cargando...</p>
+              </div>
+            ) : filteredUsers.length === 0 ? (
               <div className="no-users">
                 <p>No se encontraron usuarios con los filtros seleccionados</p>
               </div>

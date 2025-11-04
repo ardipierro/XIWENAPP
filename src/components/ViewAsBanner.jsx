@@ -19,6 +19,9 @@ function ViewAsBanner() {
     console.log('ViewAsBanner: Saliendo del modo Ver Como');
     console.log('ViewAsBanner: returnToUserId =', returnToUserId);
 
+    // Marcar que estamos procesando el retorno (para mostrar loading)
+    sessionStorage.setItem('viewAsReturning', 'true');
+
     // Guardar el userId en sessionStorage ANTES de navegar
     if (returnToUserId) {
       console.log('ViewAsBanner: Guardando returnToUserId en sessionStorage:', returnToUserId);
@@ -28,9 +31,11 @@ function ViewAsBanner() {
     // Desactivar modo "Ver como"
     stopViewingAs();
 
-    // Navegar a la pantalla de usuarios (sin userId en la URL)
-    console.log('ViewAsBanner: Navegando a /teacher');
-    navigate('/teacher');
+    // Navegar a la pantalla de usuarios si hay un userId para reabrir
+    // De lo contrario, ir al dashboard principal
+    const targetRoute = returnToUserId ? '/teacher/users' : '/teacher';
+    console.log('ViewAsBanner: Navegando a', targetRoute);
+    navigate(targetRoute);
 
     // Limpiar el contexto después de navegar
     setTimeout(() => clearViewAsState(), 100);
