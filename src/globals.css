@@ -677,12 +677,17 @@
   .modal-tabs-container {
     @apply px-6 flex-shrink-0 overflow-x-auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(156, 163, 175, 0.3) transparent; /* Consistente con .custom-scrollbar */
+    scrollbar-color: transparent transparent; /* Invisible por defecto */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling en móviles */
+    transition: scrollbar-color 0.3s ease;
   }
 
-  .dark .modal-tabs-container {
-    scrollbar-color: rgba(156, 163, 175, 0.2) transparent; /* Consistente con .custom-scrollbar en dark mode */
+  .modal-tabs-container:hover {
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent; /* Visible al hover */
+  }
+
+  .dark .modal-tabs-container:hover {
+    scrollbar-color: rgba(156, 163, 175, 0.2) transparent;
   }
 
   .modal-tabs-container::-webkit-scrollbar {
@@ -691,28 +696,31 @@
   }
 
   .modal-tabs-container::-webkit-scrollbar-track {
-    background: transparent; /* Consistente con .custom-scrollbar */
-  }
-
-  .modal-tabs-container::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.3); /* Consistente con .custom-scrollbar */
-    border-radius: 10px;
-  }
-
-  .modal-tabs-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 163, 175, 0.5); /* Consistente con .custom-scrollbar */
-  }
-
-  .dark .modal-tabs-container::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .dark .modal-tabs-container::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.2); /* Consistente con .custom-scrollbar */
+  /* Invisible por defecto */
+  .modal-tabs-container::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+  }
+
+  /* Visible al hacer hover sobre el área scrollable */
+  .modal-tabs-container:hover::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+  }
+
+  .modal-tabs-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.5);
+  }
+
+  .dark .modal-tabs-container:hover::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.2);
   }
 
   .dark .modal-tabs-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 163, 175, 0.4); /* Consistente con .custom-scrollbar */
+    background: rgba(156, 163, 175, 0.4);
   }
 
   .modal-tabs {
@@ -977,6 +985,7 @@
   }
 
   /* Scrollbar personalizado - minimal (vertical y horizontal) */
+  /* Solo aparece al hacer hover o durante el scroll */
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;   /* Ancho de scrollbar vertical */
     height: 8px;  /* Alto de scrollbar horizontal */
@@ -986,16 +995,25 @@
     background: transparent;
   }
 
+  /* Invisible por defecto */
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.3);
+    background: transparent;
     border-radius: 10px;
+    transition: background 0.3s ease;
   }
 
+  /* Visible al hacer hover sobre el área scrollable */
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+  }
+
+  /* Más oscuro al hacer hover directo sobre el thumb */
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(156, 163, 175, 0.5);
   }
 
-  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  /* Dark mode */
+  .dark .custom-scrollbar:hover::-webkit-scrollbar-thumb {
     background: rgba(156, 163, 175, 0.2);
   }
 
@@ -1003,13 +1021,18 @@
     background: rgba(156, 163, 175, 0.4);
   }
 
-  /* Firefox */
+  /* Firefox - auto-hide scrollbar */
   .custom-scrollbar {
     scrollbar-width: thin;
+    scrollbar-color: transparent transparent; /* Invisible por defecto */
+    transition: scrollbar-color 0.3s ease;
+  }
+
+  .custom-scrollbar:hover {
     scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
   }
 
-  .dark .custom-scrollbar {
+  .dark .custom-scrollbar:hover {
     scrollbar-color: rgba(156, 163, 175, 0.2) transparent;
   }
 
