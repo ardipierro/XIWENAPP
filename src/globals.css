@@ -682,33 +682,33 @@
   }
 
   .modal-tabs-container::-webkit-scrollbar {
-    height: 6px; /* Más visible */
+    height: 8px; /* Consistente con scrollbar vertical */
+    width: 8px;  /* Por si hay scroll vertical también */
   }
 
   .modal-tabs-container::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    border-radius: 3px;
+    background: transparent; /* Consistente con .custom-scrollbar */
   }
 
   .modal-tabs-container::-webkit-scrollbar-thumb {
-    background: #9ca3af;
-    border-radius: 3px;
+    background: rgba(156, 163, 175, 0.3); /* Consistente con .custom-scrollbar */
+    border-radius: 10px;
   }
 
   .modal-tabs-container::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
+    background: rgba(156, 163, 175, 0.5); /* Consistente con .custom-scrollbar */
   }
 
   .dark .modal-tabs-container::-webkit-scrollbar-track {
-    background: #1f2937;
+    background: transparent;
   }
 
   .dark .modal-tabs-container::-webkit-scrollbar-thumb {
-    background: #4b5563;
+    background: rgba(156, 163, 175, 0.2); /* Consistente con .custom-scrollbar */
   }
 
   .dark .modal-tabs-container::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
+    background: rgba(156, 163, 175, 0.4); /* Consistente con .custom-scrollbar */
   }
 
   .modal-tabs {
@@ -972,9 +972,10 @@
     @apply bg-white/80 dark:bg-zinc-900/80;
   }
 
-  /* Scrollbar personalizado - minimal */
+  /* Scrollbar personalizado - minimal (vertical y horizontal) */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
+    width: 8px;   /* Ancho de scrollbar vertical */
+    height: 8px;  /* Alto de scrollbar horizontal */
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
