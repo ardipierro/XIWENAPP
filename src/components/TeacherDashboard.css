@@ -913,7 +913,7 @@
 }
 
 .users-table thead {
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-primary);
 }
 
 .users-table th {
@@ -921,10 +921,32 @@
   text-align: left;
   font-size: 13px;
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border-focus);
+}
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sortable-header:hover {
+  background: var(--color-bg-hover);
+}
+
+.sort-icon-inactive {
+  opacity: 0.3;
+  transition: opacity var(--transition-base);
+}
+
+.sortable-header:hover .sort-icon-inactive {
+  opacity: 0.6;
 }
 
 .users-table td {
@@ -933,8 +955,8 @@
   color: #1f2937;
 }
 
-.users-table tbody tr:hover {
-  background: var(--color-bg-hover);
+.users-table tr:hover {
+  background: var(--color-bg-secondary);
 }
 
 .suspended-row {
@@ -1519,13 +1541,13 @@
 }
 
 .dark .users-table thead {
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-primary);
 }
 
 .dark .users-table th {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-border-focus);
 }
 
 .dark .users-table td {
@@ -1533,8 +1555,8 @@
   color: var(--color-text-primary);
 }
 
-.dark .users-table tbody tr:hover {
-  background: var(--color-bg-hover);
+.dark .users-table tr:hover {
+  background: var(--color-bg-tertiary);
 }
 
 .dark .user-name {

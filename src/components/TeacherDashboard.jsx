@@ -27,7 +27,10 @@ import {
   GraduationCap,
   UserCog,
   Ear,
-  FlaskConical
+  FlaskConical,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import {
   loadStudents,
@@ -100,6 +103,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [sortField, setSortField] = useState('name'); // 'name', 'credits', 'email', 'role', 'status', 'createdAt'
+  const [sortDirection, setSortDirection] = useState('asc'); // 'asc' or 'desc'
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -686,16 +691,65 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   };
 
   // Filtrar usuarios por término de búsqueda
-  const filteredUsers = users.filter(userItem => {
-    if (!searchTerm) return true;
+  // Función para manejar el click en las cabeceras de la tabla
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // Si ya está ordenando por este campo, invertir dirección
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Nuevo campo, empezar con ascendente
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
 
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      userItem.name?.toLowerCase().includes(searchLower) ||
-      userItem.email?.toLowerCase().includes(searchLower) ||
-      ROLE_INFO[userItem.role]?.name?.toLowerCase().includes(searchLower)
-    );
-  });
+  const filteredUsers = users
+    .filter(userItem => {
+      if (!searchTerm) return true;
+
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        userItem.name?.toLowerCase().includes(searchLower) ||
+        userItem.email?.toLowerCase().includes(searchLower) ||
+        ROLE_INFO[userItem.role]?.name?.toLowerCase().includes(searchLower)
+      );
+    })
+    .sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortField) {
+        case 'name':
+          aValue = a.name?.toLowerCase() || '';
+          bValue = b.name?.toLowerCase() || '';
+          break;
+        case 'credits':
+          aValue = a.credits || 0;
+          bValue = b.credits || 0;
+          break;
+        case 'email':
+          aValue = a.email?.toLowerCase() || '';
+          bValue = b.email?.toLowerCase() || '';
+          break;
+        case 'role':
+          aValue = ROLE_INFO[a.role]?.name || '';
+          bValue = ROLE_INFO[b.role]?.name || '';
+          break;
+        case 'status':
+          aValue = a.status || 'active';
+          bValue = b.status || 'active';
+          break;
+        case 'createdAt':
+          aValue = a.createdAt?.toMillis?.() || 0;
+          bValue = b.createdAt?.toMillis?.() || 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
@@ -883,12 +937,58 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 <table className="users-table">
                   <thead>
                     <tr>
-                      <th>Usuario</th>
-                      <th>Créditos</th>
-                      <th>Email</th>
-                      {isAdmin && <th>Rol</th>}
-                      <th>Estado</th>
-                      {isAdmin && <th>Registro</th>}
+                      <th onClick={() => handleSort('name')} className="sortable-header">
+                        <span>Usuario</span>
+                        {sortField === 'name' ? (
+                          sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                        ) : (
+                          <ArrowUpDown size={14} className="sort-icon-inactive" />
+                        )}
+                      </th>
+                      <th onClick={() => handleSort('credits')} className="sortable-header">
+                        <span>Créditos</span>
+                        {sortField === 'credits' ? (
+                          sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                        ) : (
+                          <ArrowUpDown size={14} className="sort-icon-inactive" />
+                        )}
+                      </th>
+                      <th onClick={() => handleSort('email')} className="sortable-header">
+                        <span>Email</span>
+                        {sortField === 'email' ? (
+                          sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                        ) : (
+                          <ArrowUpDown size={14} className="sort-icon-inactive" />
+                        )}
+                      </th>
+                      {isAdmin && (
+                        <th onClick={() => handleSort('role')} className="sortable-header">
+                          <span>Rol</span>
+                          {sortField === 'role' ? (
+                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          ) : (
+                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                          )}
+                        </th>
+                      )}
+                      <th onClick={() => handleSort('status')} className="sortable-header">
+                        <span>Estado</span>
+                        {sortField === 'status' ? (
+                          sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                        ) : (
+                          <ArrowUpDown size={14} className="sort-icon-inactive" />
+                        )}
+                      </th>
+                      {isAdmin && (
+                        <th onClick={() => handleSort('createdAt')} className="sortable-header">
+                          <span>Registro</span>
+                          {sortField === 'createdAt' ? (
+                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          ) : (
+                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                          )}
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
