@@ -152,7 +152,7 @@ function Login() {
               placeholder="profesor@escuela.com"
               required
               disabled={loading}
-              className={hasFieldError('email') ? 'input-error' : ''}
+              className={hasFieldError('email') ? 'input input-error' : 'input'}
               aria-invalid={hasFieldError('email')}
               aria-describedby={hasFieldError('email') ? 'email-error' : undefined}
             />
@@ -174,7 +174,7 @@ function Login() {
               placeholder="Mínimo 6 caracteres"
               required
               disabled={loading}
-              className={hasFieldError('password') ? 'input-error' : ''}
+              className={hasFieldError('password') ? 'input input-error' : 'input'}
               aria-invalid={hasFieldError('password')}
               aria-describedby={hasFieldError('password') ? 'password-error' : undefined}
             />
@@ -197,7 +197,7 @@ function Login() {
                 placeholder="Repite tu contraseña"
                 required
                 disabled={loading}
-                className={hasFieldError('confirmPassword') ? 'input-error' : ''}
+                className={hasFieldError('confirmPassword') ? 'input input-error' : 'input'}
                 aria-invalid={hasFieldError('confirmPassword')}
                 aria-describedby={hasFieldError('confirmPassword') ? 'confirm-password-error' : undefined}
               />
@@ -226,7 +226,7 @@ function Login() {
           )}
 
           {/* Botón principal */}
-          <button type="submit" className="btn-primary" disabled={loading}>
+          <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? (
               <>
                 <Loader size={16} className="spinner" />
