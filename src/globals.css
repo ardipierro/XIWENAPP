@@ -512,6 +512,112 @@
     @apply bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400;
   }
 
+  /* ============================================
+     DROPDOWNS - Sistema unificado
+     ============================================ */
+
+  /* Dropdown Container */
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 280px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    z-index: var(--z-dropdown);
+    animation: dropdownFadeIn var(--transition-fast);
+  }
+
+  @keyframes dropdownFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive: Ajustar dropdown en móvil */
+  @media (max-width: 640px) {
+    .dropdown {
+      position: fixed;
+      top: 60px;
+      right: 12px;
+      left: 12px;
+      bottom: auto;
+      min-width: auto;
+      max-width: calc(100vw - 24px);
+    }
+  }
+
+  /* Dropdown Options Container */
+  .dropdown-options {
+    padding: 8px;
+  }
+
+  /* Dropdown Option (Item) */
+  .dropdown-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-align: left;
+  }
+
+  .dropdown-option:hover {
+    background: var(--color-bg-tertiary);
+  }
+
+  .dropdown-option.selected {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border-focus);
+  }
+
+  /* Dropdown Option Content */
+  .dropdown-option-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .dropdown-option-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+  }
+
+  .dropdown-option-description {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Dropdown Icon */
+  .dropdown-icon {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+  }
+
+  /* Dropdown Check (for selected items) */
+  .dropdown-check {
+    flex-shrink: 0;
+    color: var(--color-success);
+  }
+
   /* Alerts */
   .alert {
     @apply p-4 rounded-md border-l-4 mb-4;

@@ -1,43 +1,9 @@
 /* ===================================
-   USER MENU - TEMA ADAPTABLE (estilo ThemeSwitcher)
+   USER MENU - Usa clases globales .dropdown de globals.css
    =================================== */
 
 .user-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 280px;
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-  z-index: var(--z-dropdown);
-  animation: fadeIn var(--transition-fast);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsive: Ajustar dropdown en móvil */
-@media (max-width: 640px) {
-  .user-menu {
-    position: fixed;
-    top: 60px;
-    right: 12px;
-    left: 12px;
-    bottom: auto;
-    min-width: auto;
-    max-width: calc(100vw - 24px);
-  }
+  /* Hereda de .dropdown en globals.css */
 }
 
 /* Header */
@@ -67,13 +33,13 @@
   white-space: nowrap;
 }
 
-/* Sections */
+/* Sections - Alias de .dropdown-options */
 .user-menu-section {
-  padding: 8px;
+  /* Hereda padding de .dropdown-options en globals.css */
 }
 
 .user-menu-section:not(:last-child) {
-  border-bottom: none; /* Eliminamos borde entre secciones para aspecto más limpio */
+  border-bottom: none;
 }
 
 .user-menu-divider {
@@ -82,24 +48,10 @@
   margin: 0;
 }
 
-/* Menu Items - Estilo ThemeSwitcher */
+/* Menu Items - Alias de .dropdown-option */
 .menu-item {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  width: 100%;
-  padding: 12px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  text-align: left;
-}
-
-.menu-item:hover {
-  background: var(--color-bg-tertiary);
+  /* Hereda de .dropdown-option en globals.css */
+  justify-content: flex-start; /* Override para alinear a la izquierda */
 }
 
 /* En móvil, hover se activa con active para dispositivos táctiles */
@@ -114,11 +66,11 @@
 }
 
 .menu-item-icon {
-  color: var(--color-text-secondary);
-  flex-shrink: 0;
+  /* Hereda de .dropdown-icon en globals.css */
 }
 
 .menu-item-text {
+  /* Similar a .dropdown-option-title pero sin margin-bottom */
   flex: 1;
   min-width: 0;
   font-size: 14px;

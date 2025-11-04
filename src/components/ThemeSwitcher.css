@@ -1,4 +1,4 @@
-/* Theme Switcher - Selector de temas avanzado */
+/* Theme Switcher - Usa clases globales .dropdown de globals.css */
 
 .theme-switcher {
   position: relative;
@@ -22,107 +22,31 @@
   border-color: var(--color-border-focus);
 }
 
-/* Dropdown */
+/* Aliases para compatibilidad - usan clases globales */
 .theme-switcher-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 280px;
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-  z-index: var(--z-dropdown);
-  animation: fadeIn var(--transition-fast);
+  /* Hereda de .dropdown en globals.css */
 }
 
-/* Responsive: Ajustar dropdown en móvil */
-@media (max-width: 640px) {
-  .theme-switcher-dropdown {
-    position: fixed;
-    top: 60px;
-    right: 12px;
-    left: 12px;
-    bottom: auto;
-    min-width: auto;
-    max-width: calc(100vw - 24px);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.theme-switcher-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-/* Theme Options */
 .theme-switcher-options {
-  padding: 8px;
+  /* Hereda de .dropdown-options en globals.css */
 }
 
 .theme-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  padding: 12px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  text-align: left;
-}
-
-.theme-option:hover {
-  background: var(--color-bg-tertiary);
-}
-
-.theme-option.selected {
-  background: var(--color-bg-tertiary);
-  border-color: var(--color-border-focus);
+  /* Hereda de .dropdown-option en globals.css */
 }
 
 .theme-option-info {
-  flex: 1;
-  min-width: 0;
+  /* Hereda de .dropdown-option-content en globals.css */
 }
 
 .theme-option-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 2px;
+  /* Hereda de .dropdown-option-title en globals.css */
 }
 
 .theme-option-description {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Hereda de .dropdown-option-description en globals.css */
 }
 
 .theme-option-check {
-  flex-shrink: 0;
-  color: var(--color-success);
+  /* Hereda de .dropdown-check en globals.css */
 }

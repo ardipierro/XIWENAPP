@@ -55,46 +55,46 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
   const isStudent = ['student', 'listener', 'trial'].includes(userRole);
 
   return (
-    <div className="user-menu" ref={menuRef}>
+    <div className="dropdown user-menu" ref={menuRef}>
       {/* Opciones de navegación */}
       {isStudent && (
-        <div className="user-menu-section">
+        <div className="dropdown-options user-menu-section">
           <button
-            className="menu-item"
+            className="dropdown-option menu-item"
             onClick={() => alert('Funcionalidad en desarrollo')}
           >
-            <BarChart3 size={18} strokeWidth={2} className="menu-item-icon" />
+            <BarChart3 size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
             <span className="menu-item-text">Mi Progreso</span>
           </button>
         </div>
       )}
 
       {/* Configuración */}
-      <div className="user-menu-section">
+      <div className="dropdown-options user-menu-section">
         <button
-          className="menu-item"
+          className="dropdown-option menu-item"
           onClick={onViewProfile}
         >
-          <User size={18} strokeWidth={2} className="menu-item-icon" />
+          <User size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
           <span className="menu-item-text">Ver Perfil</span>
         </button>
 
         <button
-          className="menu-item"
+          className="dropdown-option menu-item"
           onClick={() => alert('Funcionalidad de configuración en desarrollo')}
         >
-          <Settings size={18} strokeWidth={2} className="menu-item-icon" />
+          <Settings size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
           <span className="menu-item-text">Configuración</span>
         </button>
       </div>
 
       {/* Cerrar sesión */}
-      <div className="user-menu-section">
+      <div className="dropdown-options user-menu-section">
         <button
-          className="menu-item logout-item"
+          className="dropdown-option menu-item logout-item"
           onClick={handleLogout}
         >
-          <LogOut size={18} strokeWidth={2} className="menu-item-icon" />
+          <LogOut size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
           <span className="menu-item-text">Cerrar Sesión</span>
         </button>
       </div>

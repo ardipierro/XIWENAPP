@@ -44,8 +44,8 @@ function ThemeSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="theme-switcher-dropdown">
-          <div className="theme-switcher-options">
+        <div className="dropdown theme-switcher-dropdown">
+          <div className="dropdown-options theme-switcher-options">
             {Object.values(THEMES).map((theme) => {
               const info = THEME_INFO[theme];
               const isSelected = currentTheme === theme;
@@ -53,15 +53,15 @@ function ThemeSwitcher() {
               return (
                 <button
                   key={theme}
-                  className={`theme-option ${isSelected ? 'selected' : ''}`}
+                  className={`dropdown-option theme-option ${isSelected ? 'selected' : ''}`}
                   onClick={() => handleThemeSelect(theme)}
                 >
-                  <div className="theme-option-info">
-                    <div className="theme-option-name">{info.name}</div>
-                    <div className="theme-option-description">{info.description}</div>
+                  <div className="dropdown-option-content theme-option-info">
+                    <div className="dropdown-option-title theme-option-name">{info.name}</div>
+                    <div className="dropdown-option-description theme-option-description">{info.description}</div>
                   </div>
                   {isSelected && (
-                    <Check size={18} strokeWidth={2} className="theme-option-check" />
+                    <Check size={18} strokeWidth={2} className="dropdown-check theme-option-check" />
                   )}
                 </button>
               );
