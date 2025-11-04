@@ -54,31 +54,51 @@ export async function createUser(userData) {
   try {
     const usersRef = collection(db, 'users');
 
-    // Verificar si el email ya existe en Firestore
-    const q = query(usersRef, where('email', '==', userData.email));
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      return {
-        success: false,
-        error: 'Ya existe un usuario con ese email'
-      };
-    }
-
     // Usar la contraseña proporcionada o generar una automática
     const password = userData.password || generateTemporaryPassword();
     const isGenerated = !userData.password;
 
-    // IMPORTANTE: Crear usuario en Firebase Authentication
-    // Esto automáticamente inicia sesión con el nuevo usuario
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      userData.email,
-      password
-    );
-    const newAuthUser = userCredential.user;
+    let newAuthUser;
+    let emailAlreadyExisted = false;
 
-    // Crear el documento en Firestore con el mismo UID de Auth
+    try {
+      // IMPORTANTE: Intentar crear usuario en Firebase Authentication
+      // Esto automáticamente inicia sesión con el nuevo usuario
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        userData.email,
+        password
+      );
+      newAuthUser = userCredential.user;
+    } catch (authError) {
+      // Si el email ya existe en Auth, buscar el usuario existente
+      if (authError.code === 'auth/email-already-in-use') {
+        emailAlreadyExisted = true;
+        console.log('⚠️ Email ya registrado en Auth, buscando UID existente...');
+
+        // Buscar el UID del usuario con ese email en Firestore
+        const q = query(usersRef, where('email', '==', userData.email));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+          // Usuario existe en Firestore, usar su UID
+          const existingDoc = snapshot.docs[0];
+          newAuthUser = { uid: existingDoc.id };
+          console.log('✅ Encontrado usuario existente, se actualizará su documento');
+        } else {
+          // No existe en Firestore pero sí en Auth - no podemos obtener el UID sin login
+          return {
+            success: false,
+            error: 'El email ya está registrado pero no se puede acceder al usuario. Contacta al administrador.'
+          };
+        }
+      } else {
+        // Otro error de autenticación
+        throw authError;
+      }
+    }
+
+    // Crear o actualizar el documento en Firestore con el mismo UID de Auth
     const userDocRef = doc(db, 'users', newAuthUser.uid);
     await setDoc(userDocRef, {
       email: userData.email,
@@ -95,12 +115,13 @@ export async function createUser(userData) {
       // Campos opcionales
       phone: userData.phone || '',
       notes: userData.notes || ''
-    });
+    }, { merge: true }); // merge: true para actualizar si ya existe
 
-    // CRÍTICO: Cerrar sesión del nuevo usuario y restaurar la sesión del admin
+    // CRÍTICO: Cerrar sesión del nuevo usuario si se creó uno nuevo
     // Firebase Auth automáticamente inició sesión con el nuevo usuario
-    // Necesitamos cerrar esa sesión inmediatamente
-    await signOut(auth);
+    if (!emailAlreadyExisted) {
+      await signOut(auth);
+    }
 
     // Nota: No podemos restaurar la sesión aquí porque no tenemos la contraseña del admin
     // La aplicación manejará el re-login automáticamente a través de onAuthStateChanged
@@ -109,20 +130,15 @@ export async function createUser(userData) {
     return {
       success: true,
       id: newAuthUser.uid,
-      password: password,
-      isGenerated: isGenerated,
-      warning: 'Serás desconectado y deberás volver a iniciar sesión'
+      password: emailAlreadyExisted ? null : password,
+      isGenerated: emailAlreadyExisted ? false : isGenerated,
+      warning: emailAlreadyExisted
+        ? 'Usuario actualizado (el email ya estaba registrado)'
+        : 'Serás desconectado y deberás volver a iniciar sesión',
+      emailAlreadyExisted: emailAlreadyExisted
     };
   } catch (error) {
     console.error('Error al crear usuario:', error);
-
-    // Si hubo un error, intentar restaurar la sesión del usuario actual
-    // (aunque esto probablemente no sea necesario si la creación falló)
-
-    // Mensajes de error más específicos
-    if (error.code === 'auth/email-already-in-use') {
-      return { success: false, error: 'Ya existe una cuenta con ese email' };
-    }
 
     return { success: false, error: error.message };
   }
