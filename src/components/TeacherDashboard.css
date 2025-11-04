@@ -927,6 +927,55 @@
   border-bottom: none;
 }
 
+/* Ajuste de anchos de columnas - con mínimo pero sin máximo */
+.users-table th:nth-child(1),
+.users-table td:nth-child(1) {
+  min-width: 150px;
+  width: 20%;
+}
+
+.users-table th:nth-child(2),
+.users-table td:nth-child(2) {
+  min-width: 80px;
+  width: 10%;
+}
+
+.users-table th:nth-child(3),
+.users-table td:nth-child(3) {
+  min-width: 120px;
+  width: 15%;
+}
+
+.users-table th:nth-child(4),
+.users-table td:nth-child(4) {
+  min-width: 100px;
+  width: 15%;
+}
+
+.users-table th:nth-child(5),
+.users-table td:nth-child(5) {
+  min-width: 100px;
+  width: 15%;
+}
+
+.users-table th:last-child,
+.users-table td:last-child {
+  min-width: 180px;
+  width: 25%;
+}
+
+/* Evitar saltos de línea en celdas */
+.users-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.users-table th {
+  white-space: nowrap;
+  overflow: visible;
+}
+
 .sortable-header {
   cursor: pointer;
   user-select: none;
@@ -940,15 +989,19 @@
   position: relative;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.6;
 }
 
 .sortable-header:hover {
-  background: var(--color-bg-hover);
+  background: rgba(var(--color-bg-hover-rgb, 63, 63, 70), 0.3);
 }
 
 /* Cuando la columna está activa (siendo ordenada) */
 .sortable-header.active {
-  border-bottom-color: var(--color-accent);
+  border-bottom-color: var(--color-text-primary);
 }
 
 .sort-icon-inactive {
@@ -970,8 +1023,8 @@
   color: #1f2937;
 }
 
-.users-table tr:hover {
-  background: var(--color-bg-secondary);
+.users-table tbody tr:hover {
+  background: rgba(var(--color-bg-hover-rgb, 63, 63, 70), 0.15);
 }
 
 .suspended-row {
@@ -1570,8 +1623,8 @@
   color: var(--color-text-primary);
 }
 
-.dark .users-table tr:hover {
-  background: var(--color-bg-tertiary);
+.dark .users-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .dark .user-name {
@@ -1579,7 +1632,7 @@
 }
 
 .dark .user-cell.clickable:hover {
-  background: var(--color-bg-tertiary);
+  background: transparent;
 }
 
 .dark .user-avatar-small {

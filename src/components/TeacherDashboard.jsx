@@ -957,16 +957,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th>
-                        <div onClick={() => handleSort('email')} className={`sortable-header ${sortField === 'email' ? 'active' : ''}`}>
-                          <span>Email</span>
-                          {sortField === 'email' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
-                          ) : (
-                            <ArrowUpDown size={14} className="sort-icon-inactive" />
-                          )}
-                        </div>
-                      </th>
                       {isAdmin && (
                         <th>
                           <div onClick={() => handleSort('role')} className={`sortable-header ${sortField === 'role' ? 'active' : ''}`}>
@@ -1001,6 +991,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                           </div>
                         </th>
                       )}
+                      <th>
+                        <div onClick={() => handleSort('email')} className={`sortable-header ${sortField === 'email' ? 'active' : ''}`}>
+                          <span>Email</span>
+                          {sortField === 'email' ? (
+                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          ) : (
+                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                          )}
+                        </div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1029,8 +1029,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                         </td>
 
                         <td className="credits-cell">{userItem.credits || 0}</td>
-
-                        <td className="email-cell">{userItem.email}</td>
 
                         {isAdmin && (
                           <td>
@@ -1068,6 +1066,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             {formatDate(userItem.createdAt)}
                           </td>
                         )}
+
+                        <td className="email-cell">{userItem.email}</td>
                       </tr>
                     ))}
                   </tbody>
