@@ -19,19 +19,20 @@ function ViewAsBanner() {
     console.log('ViewAsBanner: Saliendo del modo Ver Como');
     console.log('ViewAsBanner: returnToUserId =', returnToUserId);
 
+    // Guardar el userId en sessionStorage ANTES de navegar
+    if (returnToUserId) {
+      console.log('ViewAsBanner: Guardando returnToUserId en sessionStorage:', returnToUserId);
+      sessionStorage.setItem('viewAsReturnUserId', returnToUserId);
+    }
+
     // Desactivar modo "Ver como"
     stopViewingAs();
 
-    // Navegar a la ruta del usuario específico
-    if (returnToUserId) {
-      console.log('ViewAsBanner: Navegando a /teacher/users/' + returnToUserId);
-      navigate(`/teacher/users/${returnToUserId}`);
-    } else {
-      console.warn('ViewAsBanner: No hay returnToUserId, navegando a /teacher/users');
-      navigate('/teacher/users');
-    }
+    // Navegar a la pantalla de usuarios (sin userId en la URL)
+    console.log('ViewAsBanner: Navegando a /teacher');
+    navigate('/teacher');
 
-    // Limpiar el estado después de navegar
+    // Limpiar el contexto después de navegar
     setTimeout(() => clearViewAsState(), 100);
   };
 

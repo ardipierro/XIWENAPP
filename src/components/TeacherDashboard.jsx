@@ -138,20 +138,19 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   useEffect(() => {
     console.log('[TeacherDashboard] Ruta cambió:', location.pathname);
 
+    // Verificar si hay un userId pendiente de procesar (retorno de "Ver como")
+    const pendingUserId = sessionStorage.getItem('viewAsReturnUserId');
+
+    if (pendingUserId) {
+      console.log('[TeacherDashboard] Retorno desde Ver Como detectado, userId:', pendingUserId);
+      setCurrentScreen('users');
+      setHasProcessedReturn(false);
+      return; // No procesar otras rutas
+    }
+
     if (location.pathname === '/teacher/users') {
       console.log('[TeacherDashboard] Abriendo sección usuarios');
       setCurrentScreen('users');
-    } else if (location.pathname.startsWith('/teacher/users/')) {
-      // Extraer userId de la URL
-      const userId = location.pathname.split('/teacher/users/')[1];
-      console.log('[TeacherDashboard] Ruta de usuario detectada:', userId);
-
-      // Guardar en sessionStorage para que el otro useEffect lo procese
-      sessionStorage.setItem('viewAsReturnUserId', userId);
-      setCurrentScreen('users');
-
-      // Reset del flag para permitir procesamiento
-      setHasProcessedReturn(false);
     } else if (location.pathname === '/teacher') {
       console.log('[TeacherDashboard] Volviendo al dashboard');
       setCurrentScreen('dashboard');
@@ -162,6 +161,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   useEffect(() => {
     console.log('TeacherDashboard: useEffect ejecutado, location =', location.pathname);
     console.log('TeacherDashboard: hasProcessedReturn =', hasProcessedReturn);
+    console.log('TeacherDashboard: currentScreen =', currentScreen);
+
+    // Solo ejecutar si estamos en la pantalla de usuarios
+    if (currentScreen !== 'users') {
+      console.log('TeacherDashboard: No estamos en users, saltando');
+      return;
+    }
 
     // Si ya procesamos el retorno, no hacer nada
     if (hasProcessedReturn) {
@@ -172,8 +178,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     const userId = sessionStorage.getItem('viewAsReturnUserId');
     console.log('TeacherDashboard: userId desde sessionStorage =', userId);
 
-    if (userId) {
-      console.log('TeacherDashboard: Encontrado userId, procesando...');
+    if (userId && users.length > 0) {
+      console.log('TeacherDashboard: Encontrado userId y usuarios cargados, procesando...');
 
       // Marcar como procesado ANTES de limpiar sessionStorage
       setHasProcessedReturn(true);
@@ -181,50 +187,24 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       // Limpiar sessionStorage
       sessionStorage.removeItem('viewAsReturnUserId');
 
-      // Esperar a que los usuarios se carguen
-      const timer = setTimeout(async () => {
-        console.log('TeacherDashboard: Cambiando a pantalla users');
-        setCurrentScreen('users');
+      // Buscar y abrir el perfil
+      console.log('TeacherDashboard: Buscando usuario con id:', userId);
+      const userToOpen = users.find(u => u.id === userId);
+      console.log('TeacherDashboard: Usuario encontrado:', userToOpen);
 
-        // Cargar usuarios si es necesario
-        let allUsers = users;
-        console.log('TeacherDashboard: users.length =', users.length);
-        if (users.length === 0) {
-          console.log('TeacherDashboard: Cargando usuarios...');
-          allUsers = await getAllUsers();
-          const usersWithCredits = await Promise.all(
-            allUsers.map(async (userItem) => {
-              try {
-                const creditsData = await getUserCredits(userItem.id);
-                return { ...userItem, credits: creditsData?.availableCredits || 0 };
-              } catch (error) {
-                return { ...userItem, credits: 0 };
-              }
-            })
-          );
-          setUsers(usersWithCredits);
-          allUsers = usersWithCredits;
-          console.log('TeacherDashboard: Usuarios cargados:', allUsers.length);
-        }
-
-        // Buscar y abrir el perfil
-        console.log('TeacherDashboard: Buscando usuario con id:', userId);
-        const userToOpen = allUsers.find(u => u.id === userId);
-        console.log('TeacherDashboard: Usuario encontrado:', userToOpen);
-        if (userToOpen) {
-          setSelectedUserProfile(userToOpen);
-          setShowUserProfile(true);
-          console.log('TeacherDashboard: UserProfile abierto');
-        } else {
-          console.warn('TeacherDashboard: No se encontró usuario con id:', userId);
-        }
-      }, 200);
-
-      return () => clearTimeout(timer);
+      if (userToOpen) {
+        setSelectedUserProfile(userToOpen);
+        setShowUserProfile(true);
+        console.log('TeacherDashboard: UserProfile abierto');
+      } else {
+        console.warn('TeacherDashboard: No se encontró usuario con id:', userId);
+      }
+    } else if (userId && users.length === 0) {
+      console.log('TeacherDashboard: userId encontrado pero usuarios aún no cargados, esperando...');
     } else {
       console.log('TeacherDashboard: No hay userId en sessionStorage');
     }
-  }, [location, hasProcessedReturn]);
+  }, [currentScreen, hasProcessedReturn, users]);
 
   // Handlers de navegación
   const handleStartGame = () => {
