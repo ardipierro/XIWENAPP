@@ -33,20 +33,7 @@
   white-space: nowrap;
 }
 
-/* Sections - Alias de .dropdown-options */
-.user-menu-section {
-  /* Hereda padding de .dropdown-options en globals.css */
-}
-
-.user-menu-section:not(:last-child) {
-  border-bottom: none;
-}
-
-.user-menu-divider {
-  height: 1px;
-  background: var(--color-border);
-  margin: 0;
-}
+/* Ya no necesitamos .user-menu-section - removido */
 
 /* Menu Items - Alias de .dropdown-option */
 .menu-item {

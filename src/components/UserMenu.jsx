@@ -56,9 +56,9 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
 
   return (
     <div className="dropdown user-menu" ref={menuRef}>
-      {/* Opciones de navegación */}
-      {isStudent && (
-        <div className="dropdown-options user-menu-section">
+      <div className="dropdown-options">
+        {/* Opciones de navegación */}
+        {isStudent && (
           <button
             className="dropdown-option menu-item"
             onClick={() => alert('Funcionalidad en desarrollo')}
@@ -66,11 +66,9 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
             <BarChart3 size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
             <span className="menu-item-text">Mi Progreso</span>
           </button>
-        </div>
-      )}
+        )}
 
-      {/* Configuración */}
-      <div className="dropdown-options user-menu-section">
+        {/* Configuración */}
         <button
           className="dropdown-option menu-item"
           onClick={onViewProfile}
@@ -86,10 +84,8 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
           <Settings size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
           <span className="menu-item-text">Configuración</span>
         </button>
-      </div>
 
-      {/* Cerrar sesión */}
-      <div className="dropdown-options user-menu-section">
+        {/* Cerrar sesión */}
         <button
           className="dropdown-option menu-item logout-item"
           onClick={handleLogout}
