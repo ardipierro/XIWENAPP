@@ -141,7 +141,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 12px 6px 6px;
+  padding: 8px 12px 8px 8px; /* Igualado a 8px vertical para alinear con theme-switcher */
   border-radius: 8px;
   transition: none;
   color: var(--color-text-primary);
@@ -253,7 +253,7 @@
   }
 
   .user-button {
-    padding: 6px;
+    padding: 8px; /* Mantener consistencia vertical con desktop */
   }
 
   .brand-title {
