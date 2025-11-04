@@ -312,8 +312,8 @@
 }
 
 .admin-card {
-  background: linear-gradient(135deg, var(--color-error-dark) 0%, #B91C1C 100%) !important;
-  border-color: #991B1B !important;
+  background: linear-gradient(135deg, var(--color-error-dark) 0%, var(--color-error-dark) 100%) !important;
+  border-color: var(--color-error-dark) !important;
 }
 
 .admin-card:hover {
@@ -478,7 +478,7 @@
 
 .admin-card .card-description {
   opacity: 0.9;
-  color: #e5e5e5;
+  color: var(--color-text-primary);
 }
 
 .admin-card .stat-badge.admin-badge-special {
@@ -749,7 +749,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: var(--font-size-lg);
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 
 .search-box input {
@@ -891,8 +891,8 @@
 }
 
 .dark .btn-icon-refresh {
-  color: #4ade80;
-  border-color: #4ade80;
+  color: var(--color-success-light);
+  border-color: var(--color-success-light);
 }
 
 .dark .btn-icon-refresh:hover {
@@ -1020,7 +1020,7 @@
 .users-table td {
   padding: var(--spacing-md) 12px;
   border-bottom: none;
-  color: #1f2937;
+  color: var(--color-text-primary);
 }
 
 .users-table tbody tr:hover {
@@ -1063,7 +1063,7 @@
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-xl);
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .user-name {
@@ -1145,7 +1145,7 @@
 }
 
 .date-cell {
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 
@@ -1185,7 +1185,7 @@
 
 .activate-btn:hover {
   background: var(--color-success-bg);
-  color: #6ee7b7;
+  color: var(--color-success-light);
 }
 
 .action-btn:disabled {
@@ -1196,7 +1196,7 @@
 .no-users {
   text-align: center;
   padding: 60px 20px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: var(--font-size-base);
 }
 
@@ -1317,7 +1317,7 @@
 .section-subtitle {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
-  color: #374151;
+  color: var(--color-text-primary);
   margin: 0 0 var(--spacing-md) 0;
   display: flex;
   align-items: center;
@@ -1393,7 +1393,7 @@
 
 .course-description {
   font-size: var(--font-size-xs);
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .btn-enroll,

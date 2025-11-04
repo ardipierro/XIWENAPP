@@ -23,7 +23,7 @@
 .attendance-title {
   font-size: 24px;
   font-weight: 800;
-  color: var(--color-text-primary, #1f2937);
+  color: var(--color-text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -41,51 +41,31 @@
 }
 
 .stat-item.stat-present {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  background: var(--color-success-bg);
 }
 
 .stat-item.stat-pending {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: var(--color-warning-bg);
 }
 
 .stat-item.stat-percentage {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-}
-
-.dark .stat-item.stat-present {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
-}
-
-.dark .stat-item.stat-pending {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
-}
-
-.dark .stat-item.stat-percentage {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+  background: var(--color-info-bg);
 }
 
 .stat-value {
   font-size: 28px;
   font-weight: 800;
-  color: #1f2937;
+  color: var(--color-text-primary);
   line-height: 1;
   margin-bottom: 4px;
-}
-
-.dark .stat-value {
-  color: #f3f4f6;
 }
 
 .stat-label {
   font-size: 12px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.dark .stat-label {
-  color: #9ca3af;
 }
 
 /* Message */
@@ -99,23 +79,13 @@
 }
 
 .attendance-message.success {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success-bg);
+  color: var(--color-success-dark);
 }
 
 .attendance-message.error {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.dark .attendance-message.success {
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
-}
-
-.dark .attendance-message.error {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
+  background: var(--color-error-bg);
+  color: var(--color-error-dark);
 }
 
 /* Content Layout */
@@ -127,7 +97,7 @@
 
 /* Sessions Sidebar */
 .sessions-sidebar {
-  background: var(--color-surface, white);
+  background: var(--color-bg-secondary);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -135,14 +105,10 @@
   overflow-y: auto;
 }
 
-.dark .sessions-sidebar {
-  background: rgba(255, 255, 255, 0.05);
-}
-
 .sidebar-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--color-text-primary, #1f2937);
+  color: var(--color-text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -154,7 +120,7 @@
 
 .session-item {
   padding: 12px;
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--color-bg-tertiary);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -162,56 +128,40 @@
 }
 
 .session-item:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-bg-hover);
 }
 
 .session-item.selected {
-  background: rgba(99, 102, 241, 0.1);
-  border-left-color: #6366f1;
-}
-
-.dark .session-item {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.dark .session-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.dark .session-item.selected {
-  background: rgba(99, 102, 241, 0.15);
+  background: var(--color-bg-hover);
+  border-left-color: var(--color-border-focus);
 }
 
 .session-name {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-primary, #1f2937);
+  color: var(--color-text-primary);
   margin-bottom: 4px;
 }
 
 .session-group {
   font-size: 12px;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-text-secondary);
   margin-bottom: 4px;
 }
 
 .session-datetime {
   font-size: 11px;
-  color: var(--color-text-secondary, #9ca3af);
+  color: var(--color-text-secondary);
   text-transform: capitalize;
 }
 
 /* Attendance Detail */
 .attendance-detail {
-  background: var(--color-surface, white);
+  background: var(--color-bg-secondary);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   min-height: 400px;
-}
-
-.dark .attendance-detail {
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .detail-header {
@@ -220,25 +170,21 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--color-border);
   flex-wrap: wrap;
   gap: 16px;
-}
-
-.dark .detail-header {
-  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .detail-title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-text-primary, #1f2937);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .detail-subtitle {
   font-size: 14px;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-text-secondary);
   margin: 4px 0 0 0;
 }
 
@@ -254,22 +200,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--color-bg-tertiary);
   border-radius: 10px;
   transition: all 0.2s ease;
 }
 
 .student-item:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-bg-hover);
   transform: translateX(2px);
-}
-
-.dark .student-item {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.dark .student-item:hover {
-  background: rgba(255, 255, 255, 0.06);
 }
 
 .student-info {
@@ -284,7 +222,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: var(--color-bg-tertiary);
   border-radius: 50%;
   font-size: 20px;
   flex-shrink: 0;
@@ -299,7 +237,7 @@
 .student-name {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-primary, #1f2937);
+  color: var(--color-text-primary);
 }
 
 .link-clicked-badge {
@@ -307,16 +245,11 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  background: var(--color-success-bg);
+  color: var(--color-success-dark);
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
-}
-
-.dark .link-clicked-badge {
-  background: rgba(16, 185, 129, 0.2);
-  color: #6ee7b7;
 }
 
 /* Status Badge */
@@ -329,53 +262,28 @@
 }
 
 .status-badge.status-present {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success-bg);
+  color: var(--color-success-dark);
 }
 
 .status-badge.status-absent {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-error-bg);
+  color: var(--color-error-dark);
 }
 
 .status-badge.status-late {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-dark);
 }
 
 .status-badge.status-excused {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--color-info-bg);
+  color: var(--color-info-dark);
 }
 
 .status-badge.status-pending {
-  background: #f3f4f6;
-  color: #6b7280;
-}
-
-.dark .status-badge.status-present {
-  background: rgba(16, 185, 129, 0.2);
-  color: #6ee7b7;
-}
-
-.dark .status-badge.status-absent {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-}
-
-.dark .status-badge.status-late {
-  background: rgba(245, 158, 11, 0.2);
-  color: #fbbf24;
-}
-
-.dark .status-badge.status-excused {
-  background: rgba(59, 130, 246, 0.2);
-  color: #93c5fd;
-}
-
-.dark .status-badge.status-pending {
-  background: rgba(255, 255, 255, 0.05);
-  color: #9ca3af;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
 }
 
 /* Empty States */
@@ -383,7 +291,7 @@
 .empty-students {
   text-align: center;
   padding: 60px 20px;
-  background: var(--color-background, #f9fafb);
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
 }
 
@@ -395,19 +303,14 @@
 .empty-title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-text-primary, #1f2937);
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .empty-text {
   font-size: 14px;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-text-secondary);
   margin: 0;
-}
-
-.dark .empty-sessions,
-.dark .empty-students {
-  background: rgba(255, 255, 255, 0.03);
 }
 
 .empty-students {
@@ -415,7 +318,7 @@
 }
 
 .empty-students p {
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 

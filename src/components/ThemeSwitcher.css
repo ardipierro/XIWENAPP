@@ -12,7 +12,7 @@
   background: none;
   border: none;
   border-radius: 6px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: all var(--transition-base);
 }

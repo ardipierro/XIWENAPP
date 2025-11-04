@@ -5,12 +5,8 @@
 
 .admin-panel-container {
   min-height: 100vh;
-  background: #f9fafb;
+  background: var(--color-bg-primary);
   padding: 40px 20px;
-}
-
-.dark .admin-panel-container {
-  background: #09090b;
 }
 
 .admin-loading {
@@ -19,22 +15,14 @@
   align-items: center;
   justify-content: center;
   min-height: 50vh;
-  color: #1f2937;
-}
-
-.dark .admin-loading {
-  color: white;
+  color: var(--color-text-primary);
 }
 
 /* Header */
 .admin-header {
   text-align: center;
   margin-bottom: 40px;
-  color: #1f2937;
-}
-
-.dark .admin-header {
-  color: white;
+  color: var(--color-text-primary);
 }
 
 .admin-header h1 {
@@ -67,12 +55,12 @@
 }
 
 .success-msg {
-  background: #10B981;
+  background: var(--color-success);
   color: white;
 }
 
 .error-msg {
-  background: #EF4444;
+  background: var(--color-error);
   color: white;
 }
 
@@ -100,12 +88,12 @@
 }
 
 /* Colores específicos por tipo de stat */
-.admin-panel-container .stat-card.total { background: #27272a; }
-.admin-panel-container .stat-card.admins { background: #ef4444; }
-.admin-panel-container .stat-card.teachers { background: #3f3f46; }
-.admin-panel-container .stat-card.students { background: #3f3f46; }
-.admin-panel-container .stat-card.active { background: #10B981; }
-.admin-panel-container .stat-card.suspended { background: #F59E0B; }
+.admin-panel-container .stat-card.total { background: var(--color-bg-tertiary); }
+.admin-panel-container .stat-card.admins { background: var(--color-error); }
+.admin-panel-container .stat-card.teachers { background: var(--color-bg-tertiary); }
+.admin-panel-container .stat-card.students { background: var(--color-bg-tertiary); }
+.admin-panel-container .stat-card.active { background: var(--color-success); }
+.admin-panel-container .stat-card.suspended { background: var(--color-warning); }
 
 .admin-panel-container .stat-icon {
   font-size: 36px;
@@ -147,7 +135,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--color-text-muted);
   pointer-events: none;
 }
 
@@ -170,12 +158,8 @@
 .users-header h2 {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-text-primary);
   margin: 0;
-}
-
-.dark .users-header h2 {
-  color: #fafafa;
 }
 
 /* Responsive */

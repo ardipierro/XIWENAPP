@@ -51,16 +51,16 @@
 .hamburger {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 24px;
+  justify-content: space-between;
+  width: 20px;
+  height: 14px;
 }
 
 .hamburger span {
   display: block;
-  height: 3px;
+  width: 20px;
+  height: 2px;
   background: var(--color-text-primary);
-  border-radius: 2px;
-  transition: none;
 }
 
 .topbar-brand {
@@ -96,12 +96,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .icon-button:hover {
   background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
 }
 
 .icon-button .icon {
@@ -162,7 +161,7 @@
   justify-content: center;
   flex-shrink: 0;
   transition: none;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .avatar-emoji-display {
