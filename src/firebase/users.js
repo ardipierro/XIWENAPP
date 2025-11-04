@@ -65,15 +65,16 @@ export async function createUser(userData) {
       };
     }
 
-    // Generar contraseña temporal
-    const temporaryPassword = generateTemporaryPassword();
+    // Usar la contraseña proporcionada o generar una automática
+    const password = userData.password || generateTemporaryPassword();
+    const isGenerated = !userData.password;
 
     // IMPORTANTE: Crear usuario en Firebase Authentication
     // Esto automáticamente inicia sesión con el nuevo usuario
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       userData.email,
-      temporaryPassword
+      password
     );
     const newAuthUser = userCredential.user;
 
@@ -90,7 +91,7 @@ export async function createUser(userData) {
       updatedAt: serverTimestamp(),
       lastLogin: null,
       avatar: userData.avatar || '🎓',
-      temporaryPassword: true, // Marca para indicar que debe cambiar contraseña
+      temporaryPassword: isGenerated, // Marca para indicar que debe cambiar contraseña
       // Campos opcionales
       phone: userData.phone || '',
       notes: userData.notes || ''
@@ -108,7 +109,8 @@ export async function createUser(userData) {
     return {
       success: true,
       id: newAuthUser.uid,
-      password: temporaryPassword,
+      password: password,
+      isGenerated: isGenerated,
       warning: 'Serás desconectado y deberás volver a iniciar sesión'
     };
   } catch (error) {

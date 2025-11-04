@@ -9,6 +9,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
     name: '',
     email: '',
     role: 'student',
+    password: '',
     phone: '',
     notes: ''
   });
@@ -82,15 +83,16 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
       const result = await onUserCreated(formData);
 
       if (result.success) {
-        // Mostrar contraseña generada
-        if (result.password) {
+        // Mostrar contraseña generada si fue automática
+        if (result.password && result.isGenerated) {
           setGeneratedPassword(result.password);
         } else {
-          // Si no hay contraseña, cerrar inmediatamente
+          // Si el usuario estableció su propia contraseña, cerrar inmediatamente
           setFormData({
             name: '',
             email: '',
             role: 'student',
+            password: '',
             phone: '',
             notes: ''
           });
@@ -113,10 +115,12 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
         name: '',
         email: '',
         role: 'student',
+        password: '',
         phone: '',
         notes: ''
       });
       setError('');
+      setGeneratedPassword('');
       onClose();
     }
   };
@@ -165,6 +169,30 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
               ) : (
                 <span className="form-hint">
                   El usuario usará este email para iniciar sesión
+                </span>
+              )}
+            </div>
+
+            {/* Contraseña (opcional - se genera automática si no se provee) */}
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
+                Contraseña
+              </label>
+              <input
+                type="text"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`form-input ${fieldErrors.password ? 'error' : ''}`}
+                placeholder="Dejar vacío para generar automáticamente"
+                disabled={loading}
+              />
+              {fieldErrors.password ? (
+                <span className="form-error">{fieldErrors.password}</span>
+              ) : (
+                <span className="form-hint">
+                  Si no ingresas una, se generará automáticamente
                 </span>
               )}
             </div>
@@ -307,6 +335,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                   name: '',
                   email: '',
                   role: 'student',
+                  password: '',
                   phone: '',
                   notes: ''
                 });
