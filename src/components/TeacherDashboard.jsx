@@ -306,7 +306,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
       // Cargar datos en paralelo
       const [allUsers, students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
-        getAllUsers(),
+        getAllUsers({ activeOnly: true }),
         loadStudents(),
         loadGameHistory(),
         loadCategories(),
@@ -383,11 +383,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     try {
       let usersToLoad;
       if (isAdmin) {
-        // Admin ve todos los usuarios
-        usersToLoad = await getAllUsers();
+        // Admin ve todos los usuarios activos
+        usersToLoad = await getAllUsers({ activeOnly: true });
       } else {
-        // Profesores solo ven alumnos
-        const allUsers = await getAllUsers();
+        // Profesores solo ven alumnos activos
+        const allUsers = await getAllUsers({ activeOnly: true });
         usersToLoad = allUsers.filter(u =>
           ['student', 'listener', 'trial'].includes(u.role)
         );
