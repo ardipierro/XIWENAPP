@@ -937,56 +937,68 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 <table className="users-table">
                   <thead>
                     <tr>
-                      <th onClick={() => handleSort('name')} className="sortable-header">
-                        <span>Usuario</span>
-                        {sortField === 'name' ? (
-                          sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
-                        ) : (
-                          <ArrowUpDown size={14} className="sort-icon-inactive" />
-                        )}
-                      </th>
-                      <th onClick={() => handleSort('credits')} className="sortable-header">
-                        <span>Créditos</span>
-                        {sortField === 'credits' ? (
-                          sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
-                        ) : (
-                          <ArrowUpDown size={14} className="sort-icon-inactive" />
-                        )}
-                      </th>
-                      <th onClick={() => handleSort('email')} className="sortable-header">
-                        <span>Email</span>
-                        {sortField === 'email' ? (
-                          sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
-                        ) : (
-                          <ArrowUpDown size={14} className="sort-icon-inactive" />
-                        )}
-                      </th>
-                      {isAdmin && (
-                        <th onClick={() => handleSort('role')} className="sortable-header">
-                          <span>Rol</span>
-                          {sortField === 'role' ? (
+                      <th>
+                        <div onClick={() => handleSort('name')} className={`sortable-header ${sortField === 'name' ? 'active' : ''}`}>
+                          <span>Usuario</span>
+                          {sortField === 'name' ? (
                             sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="sort-icon-inactive" />
                           )}
+                        </div>
+                      </th>
+                      <th>
+                        <div onClick={() => handleSort('credits')} className={`sortable-header ${sortField === 'credits' ? 'active' : ''}`}>
+                          <span>Créditos</span>
+                          {sortField === 'credits' ? (
+                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          ) : (
+                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                          )}
+                        </div>
+                      </th>
+                      <th>
+                        <div onClick={() => handleSort('email')} className={`sortable-header ${sortField === 'email' ? 'active' : ''}`}>
+                          <span>Email</span>
+                          {sortField === 'email' ? (
+                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          ) : (
+                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                          )}
+                        </div>
+                      </th>
+                      {isAdmin && (
+                        <th>
+                          <div onClick={() => handleSort('role')} className={`sortable-header ${sortField === 'role' ? 'active' : ''}`}>
+                            <span>Rol</span>
+                            {sortField === 'role' ? (
+                              sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                            ) : (
+                              <ArrowUpDown size={14} className="sort-icon-inactive" />
+                            )}
+                          </div>
                         </th>
                       )}
-                      <th onClick={() => handleSort('status')} className="sortable-header">
-                        <span>Estado</span>
-                        {sortField === 'status' ? (
-                          sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
-                        ) : (
-                          <ArrowUpDown size={14} className="sort-icon-inactive" />
-                        )}
-                      </th>
-                      {isAdmin && (
-                        <th onClick={() => handleSort('createdAt')} className="sortable-header">
-                          <span>Registro</span>
-                          {sortField === 'createdAt' ? (
+                      <th>
+                        <div onClick={() => handleSort('status')} className={`sortable-header ${sortField === 'status' ? 'active' : ''}`}>
+                          <span>Estado</span>
+                          {sortField === 'status' ? (
                             sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="sort-icon-inactive" />
                           )}
+                        </div>
+                      </th>
+                      {isAdmin && (
+                        <th>
+                          <div onClick={() => handleSort('createdAt')} className={`sortable-header ${sortField === 'createdAt' ? 'active' : ''}`}>
+                            <span>Registro</span>
+                            {sortField === 'createdAt' ? (
+                              sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                            ) : (
+                              <ArrowUpDown size={14} className="sort-icon-inactive" />
+                            )}
+                          </div>
                         </th>
                       )}
                     </tr>

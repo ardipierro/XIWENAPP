@@ -917,27 +917,38 @@
 }
 
 .users-table th {
-  padding: var(--spacing-md) 12px;
+  padding: 0;
   text-align: left;
   font-size: 13px;
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid var(--color-border-focus);
+  border-bottom: none;
 }
 
 .sortable-header {
   cursor: pointer;
   user-select: none;
-  transition: background var(--transition-base);
+  transition: all var(--transition-base);
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: var(--spacing-md) 12px;
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
 }
 
 .sortable-header:hover {
   background: var(--color-bg-hover);
+}
+
+/* Cuando la columna está activa (siendo ordenada) */
+.sortable-header.active {
+  border-bottom-color: var(--color-accent);
 }
 
 .sort-icon-inactive {
@@ -949,9 +960,13 @@
   opacity: 0.6;
 }
 
+.sortable-header.active .sort-icon-inactive {
+  opacity: 1;
+}
+
 .users-table td {
   padding: var(--spacing-md) 12px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: none;
   color: #1f2937;
 }
 
@@ -1547,11 +1562,11 @@
 .dark .users-table th {
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  border-bottom: 2px solid var(--color-border-focus);
+  border-bottom: none;
 }
 
 .dark .users-table td {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: none;
   color: var(--color-text-primary);
 }
 
