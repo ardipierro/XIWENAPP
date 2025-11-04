@@ -35,10 +35,9 @@
 
 /* Ya no necesitamos .user-menu-section - removido */
 
-/* Menu Items - Alias de .dropdown-option */
+/* Menu Items - 100% heredado de .dropdown-option en globals.css */
 .menu-item {
-  /* Hereda de .dropdown-option en globals.css */
-  justify-content: flex-start; /* Override para alinear a la izquierda */
+  /* No necesita override - la clase global ya maneja todo */
 }
 
 /* En móvil, hover se activa con active para dispositivos táctiles */
@@ -46,23 +45,15 @@
   .menu-item:active {
     background: var(--color-bg-tertiary);
   }
-
-  .sidemenu-item:active {
-    background: var(--color-bg-tertiary);
-  }
 }
 
 .menu-item-icon {
-  /* Hereda de .dropdown-icon en globals.css */
+  /* 100% heredado de .dropdown-icon en globals.css */
 }
 
 .menu-item-text {
-  /* Similar a .dropdown-option-title pero sin margin-bottom */
-  flex: 1;
-  min-width: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  /* 100% heredado de .dropdown-option-title en globals.css */
+  /* La única diferencia es que no tiene descripción debajo */
 }
 
 /* Logout Item - Destacado con estilo especial */

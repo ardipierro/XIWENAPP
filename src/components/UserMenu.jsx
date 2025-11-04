@@ -64,7 +64,9 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
             onClick={() => alert('Funcionalidad en desarrollo')}
           >
             <BarChart3 size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
-            <span className="menu-item-text">Mi Progreso</span>
+            <div className="dropdown-option-content">
+              <div className="dropdown-option-title menu-item-text">Mi Progreso</div>
+            </div>
           </button>
         )}
 
@@ -74,7 +76,9 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
           onClick={onViewProfile}
         >
           <User size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
-          <span className="menu-item-text">Ver Perfil</span>
+          <div className="dropdown-option-content">
+            <div className="dropdown-option-title menu-item-text">Ver Perfil</div>
+          </div>
         </button>
 
         <button
@@ -82,7 +86,9 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
           onClick={() => alert('Funcionalidad de configuración en desarrollo')}
         >
           <Settings size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
-          <span className="menu-item-text">Configuración</span>
+          <div className="dropdown-option-content">
+            <div className="dropdown-option-title menu-item-text">Configuración</div>
+          </div>
         </button>
 
         {/* Cerrar sesión */}
@@ -91,7 +97,9 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
           onClick={handleLogout}
         >
           <LogOut size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
-          <span className="menu-item-text">Cerrar Sesión</span>
+          <div className="dropdown-option-content">
+            <div className="dropdown-option-title menu-item-text">Cerrar Sesión</div>
+          </div>
         </button>
       </div>
     </div>
