@@ -133,7 +133,7 @@ function Login() {
       <div className="login-box">
         {/* Header */}
         <div className="login-header">
-          <h1>XIWEN</h1>
+          <h1 onClick={() => window.location.href = '/'} style={{ cursor: 'pointer' }}>XIWEN</h1>
           <p className="login-subtitle">
             {isRegistering ? 'Crear cuenta de profesor' : 'Plataforma Educativa'}
           </p>

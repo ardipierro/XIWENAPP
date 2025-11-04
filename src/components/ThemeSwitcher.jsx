@@ -45,11 +45,6 @@ function ThemeSwitcher() {
 
       {isOpen && (
         <div className="theme-switcher-dropdown">
-          <div className="theme-switcher-header">
-            <Palette size={16} strokeWidth={2} />
-            <span>Seleccionar Tema</span>
-          </div>
-
           <div className="theme-switcher-options">
             {Object.values(THEMES).map((theme) => {
               const info = THEME_INFO[theme];

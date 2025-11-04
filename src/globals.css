@@ -643,6 +643,18 @@
     height: 42px; /* Altura fija para todos los botones */
   }
 
+  /* Responsive: Stack buttons en móvil */
+  @media (max-width: 640px) {
+    .modal-footer {
+      @apply flex-col gap-2;
+    }
+
+    .modal-footer .btn {
+      @apply w-full;
+      flex: none; /* Anula flex-1 en móvil */
+    }
+  }
+
   /* Form Groups */
   .form-group {
     margin-bottom: 24px;

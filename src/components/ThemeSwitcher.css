@@ -37,6 +37,19 @@
   animation: fadeIn var(--transition-fast);
 }
 
+/* Responsive: Ajustar dropdown en móvil */
+@media (max-width: 640px) {
+  .theme-switcher-dropdown {
+    position: fixed;
+    top: 60px;
+    right: 12px;
+    left: 12px;
+    bottom: auto;
+    min-width: auto;
+    max-width: calc(100vw - 24px);
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
