@@ -15,6 +15,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [generatedPassword, setGeneratedPassword] = useState('');
 
   // Determinar qué roles puede crear este usuario
   const getAvailableRoles = () => {
@@ -81,15 +82,20 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
       const result = await onUserCreated(formData);
 
       if (result.success) {
-        // Limpiar formulario y cerrar
-        setFormData({
-          name: '',
-          email: '',
-          role: 'student',
-          phone: '',
-          notes: ''
-        });
-        onClose();
+        // Mostrar contraseña generada
+        if (result.password) {
+          setGeneratedPassword(result.password);
+        } else {
+          // Si no hay contraseña, cerrar inmediatamente
+          setFormData({
+            name: '',
+            email: '',
+            role: 'student',
+            phone: '',
+            notes: ''
+          });
+          onClose();
+        }
       } else {
         setError(result.error || 'Error al crear usuario');
       }
@@ -259,27 +265,77 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 ⚠️ {error}
               </div>
             )}
+
+            {/* Success message with generated password */}
+            {generatedPassword && (
+              <div className="success-message-box">
+                <div className="success-header">
+                  ✅ Usuario creado exitosamente
+                </div>
+                <div className="password-display">
+                  <p className="password-label">Contraseña temporal:</p>
+                  <div className="password-value">
+                    <code>{generatedPassword}</code>
+                    <button
+                      type="button"
+                      className="copy-password-btn"
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedPassword);
+                        alert('Contraseña copiada al portapapeles');
+                      }}
+                    >
+                      📋 Copiar
+                    </button>
+                  </div>
+                  <p className="password-warning">
+                    ⚠️ Guarda esta contraseña. El usuario deberá usarla para su primer inicio de sesión.
+                  </p>
+                </div>
+              </div>
+            )}
           </form>
         </div>
 
         {/* Footer - Fixed */}
         <div className="modal-footer">
-          <button
-            type="button"
-            onClick={handleClose}
-            className="btn btn-ghost"
-            disabled={loading}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading}
-            onClick={handleSubmit}
-          >
-            {loading ? 'Creando...' : 'Crear Usuario'}
-          </button>
+          {generatedPassword ? (
+            <button
+              type="button"
+              onClick={() => {
+                setGeneratedPassword('');
+                setFormData({
+                  name: '',
+                  email: '',
+                  role: 'student',
+                  phone: '',
+                  notes: ''
+                });
+                onClose();
+              }}
+              className="btn btn-primary"
+            >
+              Cerrar
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="btn btn-ghost"
+                disabled={loading}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+                onClick={handleSubmit}
+              >
+                {loading ? 'Creando...' : 'Crear Usuario'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

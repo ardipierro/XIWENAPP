@@ -488,7 +488,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         showSuccess(`Usuario ${userData.email} creado exitosamente`);
         // Recargar la lista de usuarios
         await loadUsers();
-        return { success: true };
+        return {
+          success: true,
+          password: result.password // Pasar la contraseña generada
+        };
       } else {
         return { success: false, error: result.error };
       }

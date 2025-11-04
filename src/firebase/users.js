@@ -4,6 +4,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -11,26 +12,46 @@ import {
   orderBy,
   serverTimestamp
 } from 'firebase/firestore';
-import { db } from './config';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, auth } from './config';
+
+// ============================================
+// UTILIDADES
+// ============================================
+
+/**
+ * Generar una contraseña temporal segura
+ * @returns {string} - Contraseña temporal de 8 caracteres
+ */
+function generateTemporaryPassword() {
+  const length = 8;
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  return password;
+}
 
 // ============================================
 // USUARIOS - CRUD
 // ============================================
 
 /**
- * Crear un nuevo usuario en Firestore
+ * Crear un nuevo usuario en Firestore y Firebase Authentication
  * @param {Object} userData - Datos del usuario
  * @param {string} userData.email - Email del usuario
  * @param {string} userData.name - Nombre del usuario
  * @param {string} userData.role - Rol del usuario
  * @param {string} userData.createdBy - UID del usuario que lo creó
- * @returns {Promise<Object>} - {success: boolean, id?: string, error?: string}
+ * @returns {Promise<Object>} - {success: boolean, id?: string, password?: string, error?: string}
  */
 export async function createUser(userData) {
   try {
     const usersRef = collection(db, 'users');
 
-    // Verificar si el email ya existe
+    // Verificar si el email ya existe en Firestore
     const q = query(usersRef, where('email', '==', userData.email));
     const snapshot = await getDocs(q);
 
@@ -41,8 +62,20 @@ export async function createUser(userData) {
       };
     }
 
-    // Crear el usuario
-    const docRef = await addDoc(usersRef, {
+    // Generar contraseña temporal
+    const temporaryPassword = generateTemporaryPassword();
+
+    // Crear usuario en Firebase Authentication
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      userData.email,
+      temporaryPassword
+    );
+    const authUser = userCredential.user;
+
+    // Crear el documento en Firestore con el mismo UID de Auth
+    const userDocRef = doc(db, 'users', authUser.uid);
+    await setDoc(userDocRef, {
       email: userData.email,
       name: userData.name || '',
       role: userData.role || 'student',
@@ -53,14 +86,25 @@ export async function createUser(userData) {
       updatedAt: serverTimestamp(),
       lastLogin: null,
       avatar: userData.avatar || '🎓',
+      temporaryPassword: true, // Marca para indicar que debe cambiar contraseña
       // Campos opcionales
       phone: userData.phone || '',
       notes: userData.notes || ''
     });
 
-    return { success: true, id: docRef.id };
+    return {
+      success: true,
+      id: authUser.uid,
+      password: temporaryPassword
+    };
   } catch (error) {
     console.error('Error al crear usuario:', error);
+
+    // Mensajes de error más específicos
+    if (error.code === 'auth/email-already-in-use') {
+      return { success: false, error: 'Ya existe una cuenta con ese email' };
+    }
+
     return { success: false, error: error.message };
   }
 }
