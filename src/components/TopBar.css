@@ -4,8 +4,8 @@
   left: 0;
   right: 0;
   height: 64px;
-  background: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  border-bottom: none;
   z-index: var(--z-dropdown);
   box-shadow: none;
   transition: top var(--transition-slow) ease;
@@ -153,21 +153,16 @@
 
 .user-avatar {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--color-bg-tertiary);
+  background: none;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  cursor: pointer;
   transition: none;
   color: var(--color-text-secondary);
-}
-
-.user-avatar:hover {
-  background: var(--color-bg-hover);
 }
 
 .avatar-emoji-display {

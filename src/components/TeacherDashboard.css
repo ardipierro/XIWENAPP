@@ -243,7 +243,7 @@
 
 .student-rank.rank-3 {
   background: rgba(251, 146, 60, 0.15);
-  color: #fb923c;
+  color: var(--color-warning-light);
 }
 
 .student-rank:not(.rank-1):not(.rank-2):not(.rank-3) {

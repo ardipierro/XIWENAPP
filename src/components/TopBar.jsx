@@ -151,7 +151,6 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
               <div className="user-info">
                 <span className="user-name">{getDisplayName()}</span>
               </div>
-              <span className="dropdown-arrow">▼</span>
             </button>
 
             {/* User Dropdown Menu */}

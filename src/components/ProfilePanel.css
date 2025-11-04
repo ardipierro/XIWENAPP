@@ -87,6 +87,12 @@
   width: 120px;
   height: 120px;
   margin: 0 auto 20px;
+  transition: var(--transition-base);
+}
+
+.avatar-display:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
 }
 
 .avatar-image {
@@ -107,28 +113,6 @@
   justify-content: center;
   font-size: 64px;
   border: 3px solid var(--color-border);
-}
-
-.avatar-change-btn {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  border: 3px solid var(--color-bg-secondary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: var(--transition-base);
-}
-
-.avatar-change-btn:hover {
-  background: var(--color-accent-dark);
-  transform: scale(1.05);
 }
 
 /* Avatar Options */
@@ -160,9 +144,9 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background: #6366f1;
-  color: white;
-  border: 1px solid #4f46e5;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-focus);
   border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
@@ -171,13 +155,13 @@
 }
 
 .upload-btn:hover {
-  background: #4f46e5;
+  background: var(--color-bg-tertiary);
 }
 
 .upload-hint {
   margin-top: 8px;
   font-size: 12px;
-  color: #71717a;
+  color: var(--color-text-secondary);
 }
 
 /* Emoji Grid */
@@ -190,7 +174,7 @@
 .emoji-option {
   aspect-ratio: 1;
   background: var(--color-bg-secondary);
-  border: 2px solid #27272a;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-size: 32px;
   cursor: pointer;
@@ -201,13 +185,13 @@
 }
 
 .emoji-option:hover {
-  border-color: #6366f1;
+  border-color: var(--color-border-focus);
   background: var(--color-bg-tertiary);
 }
 
 .emoji-option.selected {
-  border-color: #6366f1;
-  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--color-border-focus);
+  background: var(--color-bg-hover);
 }
 
 /* Info Section */
@@ -237,7 +221,7 @@
   padding: 10px 14px;
   font-size: 15px;
   color: var(--color-text-primary);
-  background: #09090b;
+  background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   transition: none;
@@ -245,7 +229,7 @@
 
 .info-input:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--color-border-focus);
 }
 
 .info-input:disabled {
@@ -255,7 +239,7 @@
 
 .info-hint {
   font-size: 12px;
-  color: #71717a;
+  color: var(--color-text-muted);
   margin: 0;
 }
 

@@ -33,7 +33,7 @@
     color: var(--color-text-primary);
     /* Pantalla completa en móviles */
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     /* Prevenir zoom en iOS cuando se hace doble tap */
     touch-action: manipulation;
     /* Suavizar scroll en iOS */
@@ -42,6 +42,57 @@
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     /* Prevenir pull-to-refresh del navegador (implementaremos el nuestro) */
     overscroll-behavior-y: contain;
+  }
+
+  /* Scrollbar del body - auto-hide */
+  body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  body::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+  }
+
+  body:hover::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+  }
+
+  body::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.5);
+  }
+
+  /* Ocultar las flechas de scroll */
+  body::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  .dark body:hover::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.2);
+  }
+
+  .dark body::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.4);
+  }
+
+  /* Firefox - auto-hide scrollbar */
+  body {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
+  }
+
+  body:hover {
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+  }
+
+  .dark body:hover {
+    scrollbar-color: rgba(156, 163, 175, 0.2) transparent;
   }
 
   #root {

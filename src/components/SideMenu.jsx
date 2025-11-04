@@ -97,7 +97,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
 
       {/* Menú lateral */}
       <aside className={`sidemenu ${isOpen ? 'open' : ''}`}>
-        <div className="sidemenu-content">
+        <div className="sidemenu-content custom-scrollbar">
           {/* Items del menú */}
           <nav className="sidemenu-nav">
             {menuItems.map((item, index) => {

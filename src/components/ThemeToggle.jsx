@@ -24,7 +24,7 @@ function ThemeToggle() {
       title={isDarkMode ? 'Modo claro' : 'Modo oscuro'}
     >
       {isDarkMode ? (
-        <Sun size={20} style={{ color: '#ffffff' }} />
+        <Sun size={20} style={{ color: 'var(--color-text-secondary)' }} />
       ) : (
         <Moon size={20} style={{ color: 'var(--color-text-secondary)' }} />
       )}

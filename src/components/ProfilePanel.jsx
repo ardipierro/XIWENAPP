@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Shield, Upload, X, Camera } from 'lucide-react';
+import { User, Mail, Shield, Upload, X } from 'lucide-react';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore';
 import { uploadAvatarImage, deleteAvatarImage } from '../firebase/storage';
 import { AVATARS } from './AvatarSelector';
@@ -132,7 +132,12 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
 
           {/* Avatar Section */}
           <div className="profile-avatar-section">
-            <div className="avatar-display">
+            <div
+              className="avatar-display"
+              onClick={() => setShowAvatarOptions(!showAvatarOptions)}
+              style={{ cursor: 'pointer' }}
+              title="Click para cambiar avatar"
+            >
               {uploadedImageUrl ? (
                 <img src={uploadedImageUrl} alt="Avatar" className="avatar-image" />
               ) : (
@@ -143,9 +148,6 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                   })()}
                 </div>
               )}
-              <button className="avatar-change-btn" onClick={() => setShowAvatarOptions(!showAvatarOptions)}>
-                <Camera size={20} strokeWidth={2} />
-              </button>
             </div>
 
             {showAvatarOptions && (
