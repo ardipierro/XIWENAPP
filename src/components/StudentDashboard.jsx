@@ -230,7 +230,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       <div className="dashboard-container">
         <div className="loading-state">
           <div className="spinner"></div>
-          <p>Cargando tu perfil...</p>
+          <p>Cargando...</p>
         </div>
       </div>
     );

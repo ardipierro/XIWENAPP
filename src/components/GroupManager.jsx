@@ -472,7 +472,7 @@ function GroupManager({ user, courses }) {
       {/* Group Detail Modal with Tabs */}
       {selectedGroup && (
         <div className="modal-overlay" onClick={() => setSelectedGroup(null)}>
-          <div className="modal-box max-w-5xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box max-w-5xl flex flex-col" onClick={(e) => e.stopPropagation()}>
             {/* Header - Fixed */}
             <div className="modal-header flex-shrink-0">
               <div>

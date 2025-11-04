@@ -1190,15 +1190,17 @@
 
   /* Vista Lista */
   .card-list {
-    @apply p-4;
+    @apply p-0;
+    @apply flex flex-row overflow-hidden;
   }
 
   .card-image-placeholder-sm {
-    @apply w-24 h-24 flex-shrink-0 rounded-lg;
+    @apply w-24 flex-shrink-0;
     @apply flex items-center justify-center;
     background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
     color: #6b7280;
     font-size: 48px;
+    align-self: stretch; /* Ocupar toda la altura del card-list */
   }
 
   .dark .card-image-placeholder-sm {

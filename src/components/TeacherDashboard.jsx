@@ -30,7 +30,9 @@ import {
   FlaskConical,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Grid3x3,
+  List
 } from 'lucide-react';
 import {
   loadStudents,
@@ -69,6 +71,7 @@ import UserProfile from './UserProfile';
 import QuickAccessCard from './QuickAccessCard';
 import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
+import Whiteboard from './Whiteboard';
 import './TeacherDashboard.css';
 
 // Icon mapping for role icons from roleConfig
@@ -85,7 +88,7 @@ const ICON_MAP = {
 function TeacherDashboard({ user, userRole, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, playExercise
+  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, playExercise, whiteboard
   const [selectedExerciseId, setSelectedExerciseId] = useState(null);
   const [stats, setStats] = useState({
     totalStudents: 0,
@@ -132,6 +135,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Flag para evitar doble ejecución del useEffect de retorno
   const [hasProcessedReturn, setHasProcessedReturn] = useState(false);
 
+  // Estados para búsqueda y vista en dashboard principal
+  const [dashboardSearchTerm, setDashboardSearchTerm] = useState('');
+  const [dashboardViewMode, setDashboardViewMode] = useState('grid'); // 'grid' or 'list'
+
   // Determinar si el usuario es admin (verificar tanto email como rol en Firestore)
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
 
@@ -141,90 +148,62 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
   // Detectar cambios de ruta para abrir sección correspondiente
   useEffect(() => {
-    console.log('[TeacherDashboard] Ruta cambió:', location.pathname);
-
     // Verificar si hay un userId pendiente de procesar (retorno de "Ver como")
     const pendingUserId = sessionStorage.getItem('viewAsReturnUserId');
 
     if (pendingUserId) {
-      console.log('[TeacherDashboard] Retorno desde Ver Como detectado, userId:', pendingUserId);
+      // Forzar pantalla de usuarios y resetear flag de procesamiento
       setCurrentScreen('users');
       setHasProcessedReturn(false);
       return; // No procesar otras rutas
     }
 
+    // Manejar rutas normales
     if (location.pathname === '/teacher/users') {
-      console.log('[TeacherDashboard] Abriendo sección usuarios');
       setCurrentScreen('users');
     } else if (location.pathname === '/teacher') {
-      console.log('[TeacherDashboard] Volviendo al dashboard');
       setCurrentScreen('dashboard');
     }
   }, [location.pathname]);
 
   // Detectar si se debe reabrir UserProfile al volver de "Ver como"
   useEffect(() => {
-    console.log('TeacherDashboard: useEffect ejecutado, location =', location.pathname);
-    console.log('TeacherDashboard: hasProcessedReturn =', hasProcessedReturn);
-    console.log('TeacherDashboard: currentScreen =', currentScreen);
-    console.log('TeacherDashboard: users.length =', users.length);
-
     // Solo ejecutar si estamos en la pantalla de usuarios
     if (currentScreen !== 'users') {
-      console.log('TeacherDashboard: No estamos en users, saltando');
       return;
-    }
-
-    const userId = sessionStorage.getItem('viewAsReturnUserId');
-    console.log('TeacherDashboard: userId desde sessionStorage =', userId);
-
-    // Si hay userId pendiente pero aún no procesamos, mantener el flag
-    if (userId && !hasProcessedReturn) {
-      // Este flag evitará que se muestre la lista hasta que se procese
-      console.log('TeacherDashboard: Procesando retorno de Ver Como...');
     }
 
     // Si ya procesamos el retorno, no hacer nada
     if (hasProcessedReturn) {
-      console.log('TeacherDashboard: Ya se procesó el retorno, saltando');
       return;
     }
 
-    // Solo procesar si NO hay userId pendiente
+    const userId = sessionStorage.getItem('viewAsReturnUserId');
+
+    // Solo procesar si hay userId pendiente
     if (!userId) {
-      console.log('TeacherDashboard: No hay userId en sessionStorage');
       return;
     }
 
     // Esperar a que se carguen los usuarios
     if (users.length === 0) {
-      console.log('TeacherDashboard: userId encontrado pero usuarios aún no cargados, esperando...');
       return;
     }
 
-    // Usuarios cargados y userId presente - procesar
-    console.log('TeacherDashboard: Encontrado userId y usuarios cargados, procesando...');
-
     // Buscar y abrir el perfil
-    console.log('TeacherDashboard: Buscando usuario con id:', userId);
     const userToOpen = users.find(u => u.id === userId);
-    console.log('TeacherDashboard: Usuario encontrado:', userToOpen);
 
     if (userToOpen) {
-      // Marcar como procesado ANTES de abrir el modal
+      // Marcar como procesado y limpiar sessionStorage
       setHasProcessedReturn(true);
-
-      // Limpiar sessionStorage
       sessionStorage.removeItem('viewAsReturnUserId');
       sessionStorage.removeItem('viewAsReturning');
 
+      // Abrir el perfil del usuario
       setSelectedUserProfile(userToOpen);
       setShowUserProfile(true);
-      console.log('TeacherDashboard: UserProfile abierto');
-    } else {
-      console.warn('TeacherDashboard: No se encontró usuario con id:', userId, 'en', users.length, 'usuarios');
-      // No marcar como procesado para reintentar si se cargan más usuarios
     }
+    // Si no se encuentra el usuario, reintentar cuando se carguen más usuarios
   }, [currentScreen, hasProcessedReturn, users.length]);
 
   // Handlers de navegación
@@ -304,7 +283,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       'attendance': 'attendance',
       'setup': 'setup',
       'analytics': 'analytics',
-      'users': 'users'
+      'users': 'users',
+      'whiteboard': 'whiteboard'
     };
 
     const screen = actionMap[action];
@@ -782,22 +762,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
   // Cargar usuarios cuando cambia a pantalla de usuarios O cuando cambia isAdmin
   useEffect(() => {
-    console.log('TeacherDashboard: useEffect loadUsers triggered');
-    console.log('  - currentScreen:', currentScreen);
-    console.log('  - user.email:', user?.email);
-    console.log('  - userRole:', userRole);
-    console.log('  - isAdmin:', isAdmin);
-    console.log('  - isAdminEmail:', isAdminEmail(user?.email));
-
     if (currentScreen === 'users') {
-      // Si estamos procesando un retorno de "Ver como", esperar a que isAdmin esté sincronizado
+      // Si estamos procesando un retorno de "Ver como", esperar a que el rol esté sincronizado
       const pendingReturn = sessionStorage.getItem('viewAsReturnUserId');
       if (pendingReturn && !isAdminEmail(user?.email) && !userRole) {
-        console.log('TeacherDashboard: Esperando isAdmin antes de cargar usuarios...');
+        // Esperar a que userRole se actualice para cargar con permisos correctos
         return;
       }
 
-      console.log('TeacherDashboard: Cargando usuarios, isAdmin =', isAdmin);
       loadUsers();
     }
   }, [currentScreen, isAdmin, userRole]);
@@ -817,11 +789,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
   // Renderizar pantalla de carga
   if (loading) {
+    // Si estamos procesando un retorno de ViewAs, mostrar mensaje específico
+    const isReturningFromViewAs = sessionStorage.getItem('viewAsReturning') === 'true';
+
     return (
       <div className="dashboard-container">
         <div className="loading-state">
           <div className="spinner"></div>
-          <p>Cargando panel del profesor...</p>
+          <p>{isReturningFromViewAs ? 'Volviendo...' : 'Cargando...'}</p>
         </div>
       </div>
     );
@@ -903,6 +878,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
+  // Renderizar Pizarra Interactiva - SIN Layout, pantalla completa
+  if (currentScreen === 'whiteboard') {
+    return <Whiteboard onBack={handleBackToDashboard} />;
+  }
 
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
   if (currentScreen === 'users') {
@@ -1185,7 +1164,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   {loadingResources ? (
                     <div className="loading-spinner">
                       <div className="spinner"></div>
-                      <p>Cargando recursos...</p>
+                      <p>Cargando...</p>
                     </div>
                   ) : (
                     <>
@@ -1507,59 +1486,109 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
+  // Filtrar tarjetas según búsqueda
+  const dashboardCards = [
+    {
+      id: 'users',
+      icon: isAdmin ? Crown : Users,
+      title: isAdmin ? "Usuarios" : "Alumnos",
+      count: users.length,
+      countLabel: users.length === 1 ? "usuario" : "usuarios",
+      onClick: () => setCurrentScreen('users'),
+      createLabel: isAdmin ? "Nuevo Usuario" : "Nuevo Alumno",
+      onCreateClick: () => setShowAddUserModal(true)
+    },
+    {
+      id: 'courses',
+      icon: BookOpen,
+      title: "Cursos",
+      count: courses.length,
+      countLabel: courses.length === 1 ? "curso" : "cursos",
+      onClick: () => setCurrentScreen('courses'),
+      createLabel: "Nuevo Curso",
+      onCreateClick: () => {
+        setOpenCourseModal(true);
+        setCurrentScreen('courses');
+      }
+    },
+    {
+      id: 'content',
+      icon: FileText,
+      title: "Contenidos",
+      count: allContent.length,
+      countLabel: allContent.length === 1 ? "contenido" : "contenidos",
+      onClick: () => setCurrentScreen('content'),
+      createLabel: "Nuevo Contenido",
+      onCreateClick: () => {
+        setOpenContentModal(true);
+        setCurrentScreen('content');
+      }
+    },
+    {
+      id: 'classes',
+      icon: Calendar,
+      title: "Clases",
+      count: allClasses.length,
+      countLabel: allClasses.length === 1 ? "clase" : "clases",
+      onClick: () => setCurrentScreen('classes'),
+      createLabel: "Nueva Clase",
+      onCreateClick: () => {
+        setOpenClassModal(true);
+        setCurrentScreen('classes');
+      }
+    }
+  ];
+
+  const filteredDashboardCards = dashboardCards.filter(card =>
+    card.title.toLowerCase().includes(dashboardSearchTerm.toLowerCase())
+  );
+
   // Renderizar Dashboard Principal con el nuevo layout
   return (
     <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="teacher-dashboard">
           <div className="dashboard-content mt-6">
+            {/* Barra de búsqueda y selector de vista */}
+            <div className="flex gap-3 items-center mb-6">
+              <SearchBar
+                value={dashboardSearchTerm}
+                onChange={setDashboardSearchTerm}
+                placeholder="Buscar secciones..."
+                className="flex-1"
+              />
+              <div className="view-toggle">
+                <button
+                  onClick={() => setDashboardViewMode('grid')}
+                  className={`view-toggle-btn ${dashboardViewMode === 'grid' ? 'active' : ''}`}
+                  title="Vista grilla"
+                >
+                  <Grid3x3 size={18} strokeWidth={2} />
+                </button>
+                <button
+                  onClick={() => setDashboardViewMode('list')}
+                  className={`view-toggle-btn ${dashboardViewMode === 'list' ? 'active' : ''}`}
+                  title="Vista lista"
+                >
+                  <List size={18} strokeWidth={2} />
+                </button>
+              </div>
+            </div>
+
             {/* Quick Access Cards */}
-            <div className="quick-access-grid">
-              <QuickAccessCard
-                icon={isAdmin ? Crown : Users}
-                title={isAdmin ? "Usuarios" : "Alumnos"}
-                count={users.length}
-                countLabel={users.length === 1 ? "usuario" : "usuarios"}
-                onClick={() => setCurrentScreen('users')}
-                createLabel={isAdmin ? "Nuevo Usuario" : "Nuevo Alumno"}
-                onCreateClick={() => setShowAddUserModal(true)}
-              />
-              <QuickAccessCard
-                icon={BookOpen}
-                title="Cursos"
-                count={courses.length}
-                countLabel={courses.length === 1 ? "curso" : "cursos"}
-                onClick={() => setCurrentScreen('courses')}
-                createLabel="Nuevo Curso"
-                onCreateClick={() => {
-                  setOpenCourseModal(true);
-                  setCurrentScreen('courses');
-                }}
-              />
-              <QuickAccessCard
-                icon={FileText}
-                title="Contenidos"
-                count={allContent.length}
-                countLabel={allContent.length === 1 ? "contenido" : "contenidos"}
-                onClick={() => setCurrentScreen('content')}
-                createLabel="Nuevo Contenido"
-                onCreateClick={() => {
-                  setOpenContentModal(true);
-                  setCurrentScreen('content');
-                }}
-              />
-              <QuickAccessCard
-                icon={Calendar}
-                title="Clases"
-                count={allClasses.length}
-                countLabel={allClasses.length === 1 ? "clase" : "clases"}
-                onClick={() => setCurrentScreen('classes')}
-                createLabel="Nueva Clase"
-                onCreateClick={() => {
-                  setOpenClassModal(true);
-                  setCurrentScreen('classes');
-                }}
-              />
+            <div className={dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
+              {filteredDashboardCards.map(card => (
+                <QuickAccessCard
+                  key={card.id}
+                  icon={card.icon}
+                  title={card.title}
+                  count={card.count}
+                  countLabel={card.countLabel}
+                  onClick={card.onClick}
+                  createLabel={card.createLabel}
+                  onCreateClick={card.onCreateClick}
+                />
+              ))}
             </div>
           </div>
       </div>

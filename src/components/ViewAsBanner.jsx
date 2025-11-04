@@ -16,25 +16,20 @@ function ViewAsBanner() {
   }
 
   const handleExitViewAs = () => {
-    console.log('ViewAsBanner: Saliendo del modo Ver Como');
-    console.log('ViewAsBanner: returnToUserId =', returnToUserId);
-
     // Marcar que estamos procesando el retorno (para mostrar loading)
     sessionStorage.setItem('viewAsReturning', 'true');
 
-    // Guardar el userId en sessionStorage ANTES de navegar
+    // Guardar el userId del usuario que estábamos viendo
     if (returnToUserId) {
-      console.log('ViewAsBanner: Guardando returnToUserId en sessionStorage:', returnToUserId);
       sessionStorage.setItem('viewAsReturnUserId', returnToUserId);
     }
 
     // Desactivar modo "Ver como"
     stopViewingAs();
 
-    // Navegar a la pantalla de usuarios si hay un userId para reabrir
+    // Navegar a la pantalla de usuarios si hay un perfil para reabrir
     // De lo contrario, ir al dashboard principal
     const targetRoute = returnToUserId ? '/teacher/users' : '/teacher';
-    console.log('ViewAsBanner: Navegando a', targetRoute);
     navigate(targetRoute);
 
     // Limpiar el contexto después de navegar

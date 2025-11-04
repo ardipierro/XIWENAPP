@@ -129,7 +129,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-box flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header - Fixed */}
         <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
           <h3 className="modal-title">

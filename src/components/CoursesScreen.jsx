@@ -513,53 +513,51 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
               onClick={() => handleOpenCourseModal(course, 'info')}
               title="Click para gestionar curso"
             >
-              <div className="flex gap-4 items-start">
-                {/* Course Image - Smaller in list view */}
-                {course.imageUrl ? (
-                  <div className="card-image-placeholder-sm overflow-hidden">
-                    <img
-                      src={course.imageUrl}
-                      alt={course.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        console.error('Error cargando imagen del curso:', course.name, course.imageUrl);
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="card-image-placeholder-sm">
-                    <BookOpen size={48} strokeWidth={2} />
-                  </div>
-                )}
+              {/* Course Image - Smaller in list view */}
+              {course.imageUrl ? (
+                <div className="card-image-placeholder-sm overflow-hidden">
+                  <img
+                    src={course.imageUrl}
+                    alt={course.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('Error cargando imagen del curso:', course.name, course.imageUrl);
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="card-image-placeholder-sm">
+                  <BookOpen size={48} strokeWidth={2} />
+                </div>
+              )}
 
-                {/* Course Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                        {course.name}
-                      </h3>
-                      {course.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                          {course.description}
-                        </p>
-                      )}
-                    </div>
-                    {course.level && (
-                      <span className="badge badge-info flex-shrink-0">Nivel {course.level}</span>
+              {/* Course Info */}
+              <div className="flex-1 min-w-0 p-4">
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                      {course.name}
+                    </h3>
+                    {course.description && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                        {course.description}
+                      </p>
                     )}
                   </div>
+                  {course.level && (
+                    <span className="badge badge-info flex-shrink-0">Nivel {course.level}</span>
+                  )}
+                </div>
 
-                  {/* Stats */}
-                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <FileText size={16} strokeWidth={2} /> {course.contentCount || 0} contenido{course.contentCount !== 1 ? 's' : ''}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0} ejercicio{course.exercisesCount !== 1 ? 's' : ''}
-                    </span>
-                  </div>
+                {/* Stats */}
+                <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                  <span className="flex items-center gap-1">
+                    <FileText size={16} strokeWidth={2} /> {course.contentCount || 0} contenido{course.contentCount !== 1 ? 's' : ''}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Gamepad2 size={16} strokeWidth={2} /> {course.exercisesCount || 0} ejercicio{course.exercisesCount !== 1 ? 's' : ''}
+                  </span>
                 </div>
               </div>
             </div>
@@ -570,7 +568,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-box flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
             {/* Header - Fixed */}
             <div className="modal-header flex-shrink-0">
               <h3 className="modal-title">
@@ -708,7 +706,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       {/* Unified Course Modal with Tabs */}
       {showCourseModal && selectedCourse && (
         <div className="modal-overlay" onClick={handleCloseCourseModal}>
-          <div className="modal-box flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
             {/* Header - Fixed */}
             <div className="modal-header flex-shrink-0">
               <h3 className="modal-title">

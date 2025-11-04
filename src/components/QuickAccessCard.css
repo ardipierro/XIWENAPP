@@ -158,3 +158,63 @@
 .quick-access-card {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* ============================================
+   VISTA LISTA
+   ============================================ */
+.quick-access-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.quick-access-list .quick-access-card {
+  flex-direction: row;
+  height: auto;
+  min-height: 100px;
+}
+
+.quick-access-list .quick-access-header {
+  width: 120px;
+  height: auto;
+  min-height: 100px;
+  flex-shrink: 0;
+}
+
+.quick-access-list .quick-access-content {
+  padding: 16px 20px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.quick-access-list .quick-access-stats {
+  margin: 0;
+  padding: 0;
+  border: none;
+  flex-shrink: 0;
+}
+
+.quick-access-list .quick-access-badge {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .quick-access-list .quick-access-header {
+    width: 80px;
+    min-height: 80px;
+  }
+
+  .quick-access-list .quick-access-content {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .quick-access-list .quick-access-stats {
+    width: 100%;
+  }
+}

@@ -12,7 +12,8 @@ import {
   Calendar,
   Dice3,
   Home,
-  ClipboardList
+  ClipboardList,
+  Presentation
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -52,6 +53,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
+        { icon: Presentation, label: 'Pizarra', path: '/teacher', action: 'whiteboard' },
       ];
     }
 
@@ -61,6 +63,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
+        { icon: Presentation, label: 'Pizarra', path: '/teacher', action: 'whiteboard' },
         { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
         { icon: Users, label: 'Alumnos', path: '/teacher', action: 'users' },
       ];

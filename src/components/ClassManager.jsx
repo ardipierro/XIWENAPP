@@ -651,65 +651,63 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                 onClick={() => handleViewDetails(cls)}
                 title="Click para configurar clase"
               >
-                <div className="flex gap-4 items-start">
-                  {/* Class Image - Smaller in list view */}
-                  {cls.imageUrl ? (
-                    <div className="card-image-placeholder-sm overflow-hidden">
-                      <img
-                        src={cls.imageUrl}
-                        alt={cls.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.error('Error cargando imagen de clase:', cls.name, cls.imageUrl);
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="card-image-placeholder-sm">
-                      <Calendar size={48} strokeWidth={2} />
-                    </div>
-                  )}
+                {/* Class Image - Smaller in list view */}
+                {cls.imageUrl ? (
+                  <div className="card-image-placeholder-sm overflow-hidden">
+                    <img
+                      src={cls.imageUrl}
+                      alt={cls.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Error cargando imagen de clase:', cls.name, cls.imageUrl);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="card-image-placeholder-sm">
+                    <Calendar size={48} strokeWidth={2} />
+                  </div>
+                )}
 
-                  {/* Class Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                          {cls.name}
-                        </h3>
-                        {cls.description && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
-                            {cls.description}
-                          </p>
-                        )}
-                        {cls.courseName && (
-                          <span className="badge badge-primary">{cls.courseName}</span>
-                        )}
-                      </div>
+                {/* Class Info */}
+                <div className="flex-1 min-w-0 p-4">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                        {cls.name}
+                      </h3>
+                      {cls.description && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                          {cls.description}
+                        </p>
+                      )}
+                      {cls.courseName && (
+                        <span className="badge badge-primary">{cls.courseName}</span>
+                      )}
                     </div>
+                  </div>
 
-                    {/* Horarios */}
-                    <div className="mb-2">
-                      <strong className="text-sm text-gray-700 dark:text-gray-300">Horarios:</strong>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {cls.schedules?.map((schedule, idx) => (
-                          <span key={idx} className="text-sm text-gray-600 dark:text-gray-400">
-                            {getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}
-                          </span>
-                        ))}
-                      </div>
+                  {/* Horarios */}
+                  <div className="mb-2">
+                    <strong className="text-sm text-gray-700 dark:text-gray-300">Horarios:</strong>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {cls.schedules?.map((schedule, idx) => (
+                        <span key={idx} className="text-sm text-gray-600 dark:text-gray-400">
+                          {getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}
+                        </span>
+                      ))}
                     </div>
+                  </div>
 
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <CreditCard size={16} strokeWidth={2} /> {cls.creditCost} crédito{cls.creditCost !== 1 ? 's' : ''}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users size={16} strokeWidth={2} /> {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignado{((cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)) !== 1 ? 's' : ''}
-                      </span>
-                    </div>
+                  {/* Stats */}
+                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <CreditCard size={16} strokeWidth={2} /> {cls.creditCost} crédito{cls.creditCost !== 1 ? 's' : ''}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users size={16} strokeWidth={2} /> {(cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)} asignado{((cls.assignedGroups?.length || 0) + (cls.assignedStudents?.length || 0)) !== 1 ? 's' : ''}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -720,7 +718,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
         {/* Modal de Crear/Editar Clase */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-box flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
               {/* Header - Fixed */}
               <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
                 <h3 className="modal-title">{editingClass ? 'Editar Clase' : 'Nueva Clase'}</h3>
@@ -922,8 +920,8 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
           const unassignedStudents = students.filter(s => !selectedClass.assignedStudents?.includes(s.id));
 
           return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 1000}} onClick={() => setShowDetailsModal(false)}>
-              <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full flex flex-col" style={{position: 'relative', zIndex: 1001, height: '700px', maxHeight: '90vh'}} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
+              <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
                 {/* Header - Fixed */}
                 <div className="modal-header flex-shrink-0">
                   <h3 className="modal-title">

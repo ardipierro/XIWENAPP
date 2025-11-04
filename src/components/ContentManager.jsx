@@ -502,37 +502,39 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
               onClick={() => handleEdit(content.id)}
               title="Click para editar contenido"
             >
-              <div className="flex gap-4 items-start">
-                {/* Placeholder pequeño */}
-                <div className="card-image-placeholder-sm">
-                  {getTypeIcon(content.type)}
-                </div>
+              {/* Placeholder pequeño */}
+              <div className="card-image-placeholder-sm">
+                {getTypeIcon(content.type)}
+              </div>
 
-                {/* Contenido principal */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="card-title">{content.title || 'Sin título'}</h3>
-                  <p className="card-description">{content.body || 'Sin contenido'}</p>
+              {/* Contenido principal */}
+              <div className="flex-1 min-w-0 p-4">
+                <div className="flex gap-4 items-start">
+                  <div className="flex-1">
+                    <h3 className="card-title">{content.title || 'Sin título'}</h3>
+                    <p className="card-description">{content.body || 'Sin contenido'}</p>
 
-                  {/* Stats */}
-                  <div className="card-stats">
-                    {content.createdAt && (
-                      <span className="flex items-center gap-1">
-                        <Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR')}
-                      </span>
+                    {/* Stats */}
+                    <div className="card-stats">
+                      {content.createdAt && (
+                        <span className="flex items-center gap-1">
+                          <Calendar size={14} strokeWidth={2} /> {new Date(content.createdAt.seconds * 1000).toLocaleDateString('es-AR')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Badges */}
+                  <div className="card-badges-list">
+                    <span className="badge badge-info">{getTypeLabel(content.type)}</span>
+                    {contentCourses[content.id]?.length > 0 && (
+                      contentCourses[content.id].slice(0, 2).map(course => (
+                        <span key={course.id} className="badge badge-success">
+                          <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
+                        </span>
+                      ))
                     )}
                   </div>
-                </div>
-
-                {/* Badges */}
-                <div className="card-badges-list">
-                  <span className="badge badge-info">{getTypeLabel(content.type)}</span>
-                  {contentCourses[content.id]?.length > 0 && (
-                    contentCourses[content.id].slice(0, 2).map(course => (
-                      <span key={course.id} className="badge badge-success">
-                        <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
-                      </span>
-                    ))
-                  )}
                 </div>
               </div>
             </div>
