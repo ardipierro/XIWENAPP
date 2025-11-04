@@ -17,32 +17,38 @@ export const THEME_INFO = {
   [THEMES.LIGHT]: {
     name: 'Claro',
     description: 'Tema claro predeterminado',
-    isDark: false
+    isDark: false,
+    themeColor: '#ffffff'
   },
   [THEMES.DARK]: {
     name: 'Oscuro',
     description: 'Tema oscuro predeterminado',
-    isDark: true
+    isDark: true,
+    themeColor: '#09090b'
   },
   [THEMES.OCEAN]: {
     name: 'Océano',
     description: 'Tonos azules y turquesa',
-    isDark: false
+    isDark: false,
+    themeColor: '#f0f9ff'
   },
   [THEMES.FOREST]: {
     name: 'Bosque',
     description: 'Tonos verdes naturales',
-    isDark: false
+    isDark: false,
+    themeColor: '#f0fdf4'
   },
   [THEMES.SUNSET]: {
     name: 'Atardecer',
     description: 'Tonos naranjas y rosados',
-    isDark: false
+    isDark: false,
+    themeColor: '#fff7ed'
   },
   [THEMES.MIDNIGHT]: {
     name: 'Medianoche',
     description: 'Azul oscuro profundo',
-    isDark: true
+    isDark: true,
+    themeColor: '#0c1221'
   }
 };
 
@@ -81,14 +87,15 @@ export function ThemeProvider({ children }) {
     // Guardar en localStorage
     localStorage.setItem('theme', currentTheme);
 
-    // Actualizar color de la barra de estado
-    const themeColor = THEME_INFO[currentTheme]?.isDark ? '#09090b' : '#ffffff';
+    // Actualizar color de la barra de estado con el color específico del tema
+    const themeColor = THEME_INFO[currentTheme]?.themeColor || '#09090b';
     updateThemeColor(themeColor);
   }, [currentTheme]);
 
   // Función para actualizar dinámicamente el color de la barra de estado
   const updateThemeColor = (color) => {
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    // Actualizar o crear la meta tag principal
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]:not([media])');
     if (!metaThemeColor) {
       metaThemeColor = document.createElement('meta');
       metaThemeColor.name = 'theme-color';
@@ -96,6 +103,7 @@ export function ThemeProvider({ children }) {
     }
     metaThemeColor.content = color;
 
+    // Actualizar las meta tags con media queries para que coincidan
     const metaThemeColorDark = document.querySelector('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]');
     const metaThemeColorLight = document.querySelector('meta[name="theme-color"][media="(prefers-color-scheme: light)"]');
 
