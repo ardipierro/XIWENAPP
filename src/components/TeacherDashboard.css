@@ -1188,63 +1188,7 @@
    MODAL DE ASIGNACIÓN DE CURSOS
    ============================================ */
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: var(--z-modal-backdrop);
-}
-
-/* Estilos viejos de modal removidos - ahora se usan los de globals.css (.modal-box) */
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.modal-title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.modal-close-btn,
-.modal-close {
-  background: none;
-  border: none;
-  font-size: var(--spacing-lg);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--border-radius-sm);
-  transition: none;
-}
-
-.modal-close-btn:hover,
-.modal-close:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-.modal-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-lg);
-}
+/* Estilos de modal ahora se usan de globals.css (.modal-overlay, .modal-box, .modal-header, .modal-title, .modal-close, .modal-body, .modal-footer) */
 
 .loading-spinner {
   display: flex;
