@@ -677,8 +677,12 @@
   .modal-tabs-container {
     @apply px-6 flex-shrink-0 overflow-x-auto;
     scrollbar-width: thin;
-    scrollbar-color: #d1d5db transparent;
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent; /* Consistente con .custom-scrollbar */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling en móviles */
+  }
+
+  .dark .modal-tabs-container {
+    scrollbar-color: rgba(156, 163, 175, 0.2) transparent; /* Consistente con .custom-scrollbar en dark mode */
   }
 
   .modal-tabs-container::-webkit-scrollbar {
