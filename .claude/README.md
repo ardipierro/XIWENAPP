@@ -2,23 +2,55 @@
 
 ## 🎯 Para Claude Code Web (Browser)
 
+### 🚀 EMPIEZA AQUÍ
+
+**Primera vez usando el proyecto? Lee este archivo primero:**
+
+```
+.claude/START_HERE.md  ← GUÍA COMPLETA PARA COMENZAR
+```
+
+### ⚡ Archivos Clave
+
+**Para coding standards:**
+```
+.claude/CODING_STANDARDS_QUICK.md  ← 8 REGLAS CORE
+```
+
+**Para componentes:**
+```
+.claude/BASE_COMPONENTS.md  ← 11 COMPONENTES BASE
+```
+
 ### Archivos Importantes del Proyecto:
 
 **Documentación de Estándares:**
-- `CODING_STANDARDS.md` - 📘 Documento maestro de estándares y mejores prácticas (22KB)
+
+**OPCIÓN 1: Archivos en .claude/ (RECOMENDADO para Web)**
+- `.claude/CODING_STANDARDS_QUICK.md` - 📘 Quick Reference (6KB)
+  - **Ruta para leer:** `.claude/CODING_STANDARDS_QUICK.md`
+  - Contiene las 8 reglas core con ejemplos
+  - ✅ Garantizado accesible desde Claude Code Web
+
+- `.claude/BASE_COMPONENTS.md` - 🧩 Guía de Componentes Base (8KB)
+  - **Ruta para leer:** `.claude/BASE_COMPONENTS.md`
+  - Referencia rápida de los 11 componentes base
+  - Props, ejemplos, y patrones de uso
+  - ✅ Garantizado accesible desde Claude Code Web
+
+**OPCIÓN 2: Archivos en raíz (puede fallar en Web)**
+- `CODING_STANDARDS.md` - 📘 Documento maestro (22KB)
   - **Ruta para leer:** `CODING_STANDARDS.md`
   - Incluye: Reglas de Tailwind, BaseModal, Custom Hooks, Logger, Dark Mode
+  - ⚠️ Puede no ser accesible desde Claude Code Web
 
 - `CODING_STANDARDS_QUICK.md` - 📘 Quick Reference (6KB)
   - **Ruta para leer:** `CODING_STANDARDS_QUICK.md`
-  - **⚡ USAR ESTE SI EL PRINCIPAL NO CARGA** - Contiene las 8 reglas core con ejemplos
   - Más ligero, sin bloques de código extensos
 
 - `DESIGN_SYSTEM.md` - 🎨 Sistema de diseño y componentes (11KB)
   - **Ruta para leer:** `DESIGN_SYSTEM.md`
   - Incluye: Colores, tipografía, espaciado, componentes UI
-
-**IMPORTANTE:** Ambos documentos están en la raíz del proyecto. NO uses rutas absolutas de Windows.
 
 **Componentes Base:**
 - `src/components/common/` - Todos los componentes base reutilizables
