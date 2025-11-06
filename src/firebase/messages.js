@@ -319,6 +319,44 @@ export async function archiveConversation(conversationId, userId) {
 }
 
 /**
+ * Set typing indicator
+ * @param {string} conversationId - Conversation ID
+ * @param {string} userId - User ID who is typing
+ * @param {string} userName - User name
+ * @returns {Promise<void>}
+ */
+export async function setTyping(conversationId, userId, userName) {
+  try {
+    const conversationRef = doc(db, 'conversations', conversationId);
+    await updateDoc(conversationRef, {
+      [`typing.${userId}`]: {
+        name: userName,
+        timestamp: serverTimestamp()
+      }
+    });
+  } catch (error) {
+    logger.error('Error setting typing indicator', error, 'Messages');
+  }
+}
+
+/**
+ * Clear typing indicator
+ * @param {string} conversationId - Conversation ID
+ * @param {string} userId - User ID
+ * @returns {Promise<void>}
+ */
+export async function clearTyping(conversationId, userId) {
+  try {
+    const conversationRef = doc(db, 'conversations', conversationId);
+    await updateDoc(conversationRef, {
+      [`typing.${userId}`]: null
+    });
+  } catch (error) {
+    logger.error('Error clearing typing indicator', error, 'Messages');
+  }
+}
+
+/**
  * Search for users to start a conversation
  * @param {string} searchTerm - Search term (name or email)
  * @param {string} currentUserId - Current user ID (to exclude)
@@ -355,5 +393,7 @@ export default {
   subscribeToMessages,
   subscribeToConversations,
   archiveConversation,
-  searchUsers
+  searchUsers,
+  setTyping,
+  clearTyping
 };

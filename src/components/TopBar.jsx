@@ -12,6 +12,7 @@ import ProfilePanel from './ProfilePanel.jsx';
 import ThemeSwitcher from './ThemeSwitcher.jsx';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
 import { isAdminEmail } from '../firebase/roleConfig.js';
+import { useUnreadMessages } from '../hooks/useUnreadMessages.js';
 import './TopBar.css';
 
 /**
@@ -32,7 +33,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [userAvatar, setUserAvatar] = useState('default');
   const [notificationCount] = useState(0); // Placeholder para futuro
-  const [messageCount] = useState(0); // Placeholder para futuro
+  const messageCount = useUnreadMessages(user?.uid); // Real-time unread count
 
   // Verificar si es admin
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
