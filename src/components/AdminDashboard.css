@@ -367,6 +367,27 @@
   display: block !important;
 }
 
+/* Forzar color visible en cada tema */
+.sunset .user-name {
+  color: #7c2d12 !important; /* orange-900 */
+}
+
+.dark .user-name {
+  color: #f4f4f5 !important; /* zinc-100 */
+}
+
+.ocean .user-name {
+  color: #0c4a6e !important; /* sky-900 */
+}
+
+.forest .user-name {
+  color: #14532d !important; /* green-900 */
+}
+
+.midnight .user-name {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
 /* Badges */
 .credits-badge {
   display: inline-block;
