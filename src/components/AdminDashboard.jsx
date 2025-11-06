@@ -43,25 +43,12 @@ import {
   loadStudents,
   loadGameHistory,
   loadCategories,
-  loadCourses,
-  updateUserRole,
-  updateUserStatus,
-  enrollStudentInCourse,
-  unenrollStudentFromCourse,
-  getStudentEnrollments,
-  getStudentEnrolledCoursesCount,
-  getBatchEnrollmentCounts
+  loadCourses
 } from '../firebase/firestore';
-import { getAllUsers, createUser, deleteUser } from '../firebase/users';
-import {
-  assignToStudent,
-  removeFromStudent,
-  getStudentAssignments
-} from '../firebase/relationships';
+import { deleteUser } from '../firebase/users';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
 import { getClassesByTeacher } from '../firebase/classes';
-import { getUserCredits } from '../firebase/credits';
 import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
@@ -88,6 +75,11 @@ import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 
+// Custom hooks
+import { useUserManagement } from '../hooks/useUserManagement';
+import { useResourceAssignment } from '../hooks/useResourceAssignment';
+import { useScreenNavigation } from '../hooks/useScreenNavigation';
+
 // Icon mapping for role icons from roleConfig
 const ICON_MAP = {
   'Crown': Crown,
@@ -103,81 +95,37 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Navigation states
-  const [currentScreen, setCurrentScreen] = useState('dashboard');
+  // Check if user is admin
+  const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
+
+  // Admin permissions
+  const permissions = { canViewAll: true, canManageRoles: true };
+
+  // CUSTOM HOOKS
+  const userManagement = useUserManagement(user, permissions);
+  const resourceAssignment = useResourceAssignment();
+  const navigation = useScreenNavigation();
+
+  // Local states (admin-specific)
   const [loading, setLoading] = useState(true);
-
-  // Collapsible menu states
-  const [adminSectionExpanded, setAdminSectionExpanded] = useState(true);
-  const [teachingSectionExpanded, setTeachingSectionExpanded] = useState(false);
-
-  // User management states
-  const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [sortField, setSortField] = useState('name');
-  const [sortDirection, setSortDirection] = useState('asc');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [selectedUserProfile, setSelectedUserProfile] = useState(null);
-  const [showUserProfile, setShowUserProfile] = useState(false);
 
-  // Statistics
-  const [stats, setStats] = useState({
-    total: 0,
-    admins: 0,
-    teachers: 0,
-    students: 0,
-    active: 0,
-    suspended: 0,
+  // Admin-specific stats (extended from userManagement.stats)
+  const [adminStats, setAdminStats] = useState({
     totalGames: 0,
     totalCategories: 0,
     totalCourses: 0
   });
 
-  // Teacher functionality states
+  // Teacher functionality states (admin has teacher features too)
   const [courses, setCourses] = useState([]);
   const [recentGames, setRecentGames] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
-  const [selectedExerciseId, setSelectedExerciseId] = useState(null);
-  const [selectedWhiteboardSession, setSelectedWhiteboardSession] = useState(null);
-  const [whiteboardManagerKey, setWhiteboardManagerKey] = useState(0);
-  const [selectedExcalidrawSession, setSelectedExcalidrawSession] = useState(null);
-  const [excalidrawManagerKey, setExcalidrawManagerKey] = useState(0);
-  const [selectedLiveClass, setSelectedLiveClass] = useState(null);
-  const [liveGameSessionId, setLiveGameSessionId] = useState(null);
-
-  // Resource assignment states
-  const [showResourceModal, setShowResourceModal] = useState(false);
-  const [activeResourceTab, setActiveResourceTab] = useState('courses');
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [studentEnrollments, setStudentEnrollments] = useState([]);
-  const [studentContent, setStudentContent] = useState([]);
-  const [studentExercises, setStudentExercises] = useState([]);
   const [allContent, setAllContent] = useState([]);
   const [allExercises, setAllExercises] = useState([]);
   const [allClasses, setAllClasses] = useState([]);
-  const [enrollmentCounts, setEnrollmentCounts] = useState({});
-  const [loadingResources, setLoadingResources] = useState(false);
-
-  // Quick access modal flags
-  const [openCourseModal, setOpenCourseModal] = useState(false);
-  const [openContentModal, setOpenContentModal] = useState(false);
-  const [openClassModal, setOpenClassModal] = useState(false);
-
-  // Return from ViewAs flag
-  const [hasProcessedReturn, setHasProcessedReturn] = useState(false);
-
-  // Dashboard view states
-  const [dashboardSearchTerm, setDashboardSearchTerm] = useState('');
-  const [dashboardViewMode, setDashboardViewMode] = useState('grid');
-  const [studentsSearchTerm, setStudentsSearchTerm] = useState('');
-  const [studentsViewMode, setStudentsViewMode] = useState('grid');
-
-  // Check if user is admin
-  const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
 
   // Load dashboard data on mount
   useEffect(() => {
@@ -191,34 +139,34 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // Detect return from ViewAs
   useEffect(() => {
     const returnUserId = sessionStorage.getItem('viewAsReturnUserId');
-    if (returnUserId && users.length > 0 && !hasProcessedReturn) {
+    if (returnUserId && userManagement.users.length > 0 && !navigation.hasProcessedReturn) {
       logger.debug('🔄 [AdminDashboard] Detected return from ViewAs, userId:', returnUserId);
-      setHasProcessedReturn(true);
+      navigation.setHasProcessedReturn(true);
       sessionStorage.removeItem('viewAsReturning');
       sessionStorage.removeItem('viewAsReturnUserId');
 
-      const targetUser = users.find(u => u.id === returnUserId);
+      const targetUser = userManagement.users.find(u => u.id === returnUserId);
       if (targetUser) {
         handleViewUserProfile(targetUser);
       }
 
-      setCurrentScreen('users');
+      navigation.setCurrentScreen('users');
     }
-  }, [users, hasProcessedReturn]);
+  }, [userManagement.users, navigation.hasProcessedReturn]);
 
   // Handle route changes
   useEffect(() => {
     const pendingUserId = sessionStorage.getItem('viewAsReturnUserId');
     if (pendingUserId) {
-      setCurrentScreen('users');
-      setHasProcessedReturn(false);
+      navigation.setCurrentScreen('users');
+      navigation.setHasProcessedReturn(false);
       return;
     }
 
     if (location.pathname === '/admin/users') {
-      setCurrentScreen('users');
+      navigation.setCurrentScreen('users');
     } else if (location.pathname === '/admin') {
-      setCurrentScreen('dashboard');
+      navigation.setCurrentScreen('dashboard');
     }
   }, [location.pathname]);
 
@@ -228,35 +176,18 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const startTime = performance.now();
 
       // Load all data in parallel
-      const [allUsers, students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
-        getAllUsers({ activeOnly: true }),
+      const [students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
         loadStudents(),
         loadGameHistory(),
         loadCategories(),
         loadCourses(),
         getContentByTeacher(user.uid),
-        getClassesByTeacher(user.uid)
+        getClassesByTeacher(user.uid),
+        userManagement.loadUsers() // Load users with credits via hook
       ]);
 
       logger.debug(`⏱️ [AdminDashboard] Parallel queries: ${(performance.now() - startTime).toFixed(0)}ms`);
 
-      // Load credits for each user
-      const creditsStart = performance.now();
-      const usersWithCredits = await Promise.all(
-        allUsers.map(async (userItem) => {
-          const credits = await getUserCredits(userItem.id);
-          return {
-            ...userItem,
-            credits: credits?.availableCredits || 0
-          };
-        })
-      );
-
-      logger.debug(`⏱️ [AdminDashboard] Load credits: ${(performance.now() - creditsStart).toFixed(0)}ms`);
-
-      setUsers(usersWithCredits);
-
-      const activeStudents = students.filter(s => s.active !== false);
       const activeCourses = allCourses.filter(c => c.active !== false);
       setCourses(activeCourses);
       setAllContent(teacherContent);
@@ -287,13 +218,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
         .sort((a, b) => b.gamesPlayed - a.gamesPlayed)
         .slice(0, 5);
 
-      setStats({
-        total: usersWithCredits.length,
-        admins: usersWithCredits.filter(u => u.role === ROLES.ADMIN).length,
-        teachers: usersWithCredits.filter(u => u.role === ROLES.TEACHER || u.role === ROLES.TRIAL_TEACHER).length,
-        students: usersWithCredits.filter(u => u.role === ROLES.STUDENT || u.role === ROLES.LISTENER || u.role === ROLES.TRIAL).length,
-        active: usersWithCredits.filter(u => u.status === 'active').length,
-        suspended: usersWithCredits.filter(u => u.status === 'suspended').length,
+      // Set admin-specific stats
+      setAdminStats({
         totalGames: games.length,
         totalCategories: Object.keys(categories).length,
         totalCourses: activeCourses.length
@@ -310,154 +236,56 @@ function AdminDashboard({ user, userRole, onLogout }) {
     setLoading(false);
   };
 
-  const loadUsers = async () => {
-    try {
-      const startTime = performance.now();
-      const allUsers = await getAllUsers({ activeOnly: true });
-      logger.debug(`⏱️ [AdminDashboard] getAllUsers: ${(performance.now() - startTime).toFixed(0)}ms - ${allUsers.length} users`);
-
-      const creditsStart = performance.now();
-      const usersWithCredits = await Promise.all(
-        allUsers.map(async (userItem) => {
-          const credits = await getUserCredits(userItem.id);
-          return {
-            ...userItem,
-            credits: credits?.availableCredits || 0
-          };
-        })
-      );
-
-      logger.debug(`⏱️ [AdminDashboard] Load credits: ${(performance.now() - creditsStart).toFixed(0)}ms`);
-      logger.debug(`⏱️ [AdminDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
-
-      setUsers(usersWithCredits);
-      calculateStats(usersWithCredits);
-    } catch (error) {
-      logger.error('❌ Error loading users:', error);
-      showError('Error loading users');
-    }
-  };
-
-  const calculateStats = (usersList) => {
-    setStats(prevStats => ({
-      ...prevStats,
-      total: usersList.length,
-      admins: usersList.filter(u => u.role === ROLES.ADMIN).length,
-      teachers: usersList.filter(u => u.role === ROLES.TEACHER || u.role === ROLES.TRIAL_TEACHER).length,
-      students: usersList.filter(u => u.role === ROLES.STUDENT || u.role === ROLES.LISTENER || u.role === ROLES.TRIAL).length,
-      active: usersList.filter(u => u.status === 'active').length,
-      suspended: usersList.filter(u => u.status === 'suspended').length
-    }));
-  };
-
+  // Wrapper for role change with admin-specific checks
   const handleRoleChange = useCallback(async (userId, newRole) => {
-    const targetUser = users.find(u => u.id === userId);
+    const targetUser = userManagement.users.find(u => u.id === userId);
     if (targetUser && isAdminEmail(targetUser.email) && user.email === targetUser.email) {
       showError('Cannot change your own admin role');
       return;
     }
 
-    try {
-      const success = await updateUserRole(userId, newRole);
-      if (success) {
-        const updatedUsers = users.map(u =>
-          u.id === userId ? { ...u, role: newRole } : u
-        );
-        setUsers(updatedUsers);
-        calculateStats(updatedUsers);
-        showSuccess(`Role updated to ${ROLE_INFO[newRole].name}`);
-      } else {
-        showError('Error updating role');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error updating role');
+    const result = await userManagement.handleRoleChange(userId, newRole);
+    if (result.success) {
+      showSuccess(`Role updated to ${ROLE_INFO[newRole].name}`);
+    } else {
+      showError(result.error || 'Error updating role');
     }
-  }, [users, user.email]);
+  }, [userManagement.users, user.email]);
 
+  // Wrapper for status change with admin-specific checks
   const handleStatusChange = useCallback(async (userId, newStatus) => {
-    const targetUser = users.find(u => u.id === userId);
+    const targetUser = userManagement.users.find(u => u.id === userId);
     if (targetUser && isAdminEmail(targetUser.email) && newStatus === 'suspended') {
       showError('Cannot suspend main admin');
       return;
     }
 
-    try {
-      const success = await updateUserStatus(userId, newStatus);
-      if (success) {
-        const updatedUsers = users.map(u =>
-          u.id === userId ? { ...u, status: newStatus } : u
-        );
-        setUsers(updatedUsers);
-        calculateStats(updatedUsers);
-        showSuccess(`Status updated to ${newStatus}`);
-      } else {
-        showError('Error updating status');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error updating status');
-    }
-  }, [users]);
-
-  const handleSort = useCallback((field) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    const result = await userManagement.handleStatusChange(userId, newStatus);
+    if (result.success) {
+      showSuccess(`Status updated to ${newStatus}`);
     } else {
-      setSortField(field);
-      setSortDirection('asc');
+      showError(result.error || 'Error updating status');
     }
-  }, [sortField, sortDirection]);
+  }, [userManagement.users]);
 
+  // View user profile
   const handleViewUserProfile = useCallback((userItem) => {
-    setSelectedUserProfile(userItem);
-    setShowUserProfile(true);
+    navigation.setSelectedUserProfile(userItem);
+    navigation.setShowUserProfile(true);
   }, []);
 
+  // Close user profile
   const handleCloseUserProfile = useCallback(() => {
-    setShowUserProfile(false);
-    setSelectedUserProfile(null);
-    loadUsers();
+    navigation.setShowUserProfile(false);
+    navigation.setSelectedUserProfile(null);
+    userManagement.loadUsers();
   }, []);
 
+  // User created
   const handleUserCreated = useCallback(() => {
     setShowAddUserModal(false);
-    loadUsers();
+    userManagement.loadUsers();
     showSuccess('User created successfully');
-  }, []);
-
-  const handleMenuAction = useCallback((action) => {
-    const actionMap = {
-      'dashboard': 'dashboard',
-      'users': 'users',
-      'students': 'students',
-      'courses': 'courses',
-      'content': 'content',
-      'classes': 'classes',
-      'analytics': 'analytics',
-      'attendance': 'attendance',
-      'exercises': 'exercises',
-      'setup': 'setup',
-      'liveGame': 'liveGame',
-      'whiteboardSessions': 'whiteboardSessions',
-      'excalidrawSessions': 'excalidrawSessions',
-      'liveClasses': 'liveClasses'
-    };
-
-    const screen = actionMap[action] || action;
-    setCurrentScreen(screen);
-    setSelectedExerciseId(null);
-    setSelectedWhiteboardSession(null);
-  }, []);
-
-  const handleBackToDashboard = useCallback(() => {
-    setCurrentScreen('dashboard');
-    setSelectedExerciseId(null);
-    setShowUserProfile(false);
-    setSelectedUserProfile(null);
-    setOpenCourseModal(false);
-    setOpenContentModal(false);
-    setOpenClassModal(false);
   }, []);
 
   const showSuccess = (message) => {
@@ -470,180 +298,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     setTimeout(() => setErrorMessage(''), 3000);
   };
 
-  // Resource assignment functions
-  const handleOpenResourceModal = useCallback(async (student, initialTab = 'courses') => {
-    setSelectedStudent(student);
-    setActiveResourceTab(initialTab);
-    setShowResourceModal(true);
-    setLoadingResources(true);
-
-    try {
-      const enrollments = await getStudentEnrollments(student.id);
-      setStudentEnrollments(enrollments);
-
-      const assignments = await getStudentAssignments(student.id);
-      const assignedContent = assignments.filter(a => a.itemType === 'content');
-      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
-
-      setStudentContent(assignedContent);
-      setStudentExercises(assignedExercises);
-
-      const teacherContent = await getContentByTeacher(user.uid);
-      const teacherExercises = await getExercisesByTeacher(user.uid);
-
-      setAllContent(teacherContent);
-      setAllExercises(teacherExercises);
-    } catch (error) {
-      logger.error('Error loading resources:', error);
-      showError('Error loading student resources');
-    }
-
-    setLoadingResources(false);
-  }, [user.uid]);
-
-  const handleCloseResourceModal = useCallback(() => {
-    setShowResourceModal(false);
-    setSelectedStudent(null);
-    setStudentEnrollments([]);
-    setStudentContent([]);
-    setStudentExercises([]);
-    setActiveResourceTab('courses');
-  }, []);
-
-  const handleEnrollCourse = useCallback(async (courseId) => {
-    if (!selectedStudent) return;
-
-    try {
-      const enrollmentId = await enrollStudentInCourse(selectedStudent.id, courseId);
-      if (enrollmentId) {
-        showSuccess('Course assigned successfully');
-        const enrollments = await getStudentEnrollments(selectedStudent.id);
-        setStudentEnrollments(enrollments);
-        loadEnrollmentCounts();
-      } else {
-        showError('Error assigning course');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error assigning course');
-    }
-  }, [selectedStudent]);
-
-  const handleUnenrollCourse = useCallback(async (courseId) => {
-    if (!selectedStudent) return;
-
-    const confirmed = window.confirm('Are you sure you want to unassign this course?');
-    if (!confirmed) return;
-
-    try {
-      const success = await unenrollStudentFromCourse(selectedStudent.id, courseId);
-      if (success) {
-        showSuccess('Course unassigned successfully');
-        const enrollments = await getStudentEnrollments(selectedStudent.id);
-        setStudentEnrollments(enrollments);
-        loadEnrollmentCounts();
-      } else {
-        showError('Error unassigning course');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error unassigning course');
-    }
-  }, [selectedStudent]);
-
-  // OPTIMIZED: Batch query instead of N+1 (100 queries → 1 query)
-  const loadEnrollmentCounts = async () => {
-    try {
-      const studentIds = users.map(u => u.id);
-      const counts = await getBatchEnrollmentCounts(studentIds);
-      setEnrollmentCounts(counts);
-    } catch (error) {
-      logger.error('Error loading enrollment counts:', error);
-    }
-  };
-
-  const isEnrolled = (courseId) => {
-    return studentEnrollments.some(enrollment => enrollment.course.id === courseId);
-  };
-
-  const handleAssignContent = useCallback(async (contentId) => {
-    if (!selectedStudent) return;
-
-    try {
-      await assignToStudent(selectedStudent.id, 'content', contentId, user.uid);
-      showSuccess('Content assigned successfully');
-
-      const assignments = await getStudentAssignments(selectedStudent.id);
-      const assignedContent = assignments.filter(a => a.itemType === 'content');
-      setStudentContent(assignedContent);
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error assigning content');
-    }
-  }, [selectedStudent, user.uid]);
-
-  const handleRemoveContent = useCallback(async (contentId) => {
-    if (!selectedStudent) return;
-
-    const confirmed = window.confirm('Are you sure you want to unassign this content?');
-    if (!confirmed) return;
-
-    try {
-      await removeFromStudent(selectedStudent.id, 'content', contentId);
-      showSuccess('Content unassigned successfully');
-
-      const assignments = await getStudentAssignments(selectedStudent.id);
-      const assignedContent = assignments.filter(a => a.itemType === 'content');
-      setStudentContent(assignedContent);
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error unassigning content');
-    }
-  }, [selectedStudent]);
-
-  const isContentAssigned = (contentId) => {
-    return studentContent.some(sc => sc.itemId === contentId);
-  };
-
-  const handleAssignExercise = useCallback(async (exerciseId) => {
-    if (!selectedStudent) return;
-
-    try {
-      await assignToStudent(selectedStudent.id, 'exercise', exerciseId, user.uid);
-      showSuccess('Exercise assigned successfully');
-
-      const assignments = await getStudentAssignments(selectedStudent.id);
-      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
-      setStudentExercises(assignedExercises);
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error assigning exercise');
-    }
-  }, [selectedStudent, user.uid]);
-
-  const handleRemoveExercise = useCallback(async (exerciseId) => {
-    if (!selectedStudent) return;
-
-    const confirmed = window.confirm('Are you sure you want to unassign this exercise?');
-    if (!confirmed) return;
-
-    try {
-      await removeFromStudent(selectedStudent.id, 'exercise', exerciseId);
-      showSuccess('Exercise unassigned successfully');
-
-      const assignments = await getStudentAssignments(selectedStudent.id);
-      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
-      setStudentExercises(assignedExercises);
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error unassigning exercise');
-    }
-  }, [selectedStudent]);
-
-  const isExerciseAssigned = (exerciseId) => {
-    return studentExercises.some(se => se.itemId === exerciseId);
-  };
-
+  // Delete user
   const handleDeleteUser = useCallback(async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user? This action will mark the user as inactive.')) {
       return;
@@ -652,7 +307,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     try {
       const result = await deleteUser(userId);
       if (result.success) {
-        await loadUsers();
+        await userManagement.loadUsers();
         logger.debug('User deleted successfully');
       } else {
         logger.error('Error deleting user:', result.error);
@@ -666,63 +321,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
   // Load enrollment counts when users change
   useEffect(() => {
-    if (users.length > 0) {
-      loadEnrollmentCounts();
+    if (userManagement.users.length > 0) {
+      const studentIds = userManagement.users.map(u => u.id);
+      resourceAssignment.loadEnrollmentCounts(studentIds);
     }
-  }, [users]);
-
-  // Filter and sort users - MEMOIZED for performance
-  const filteredUsers = useMemo(() => {
-    return users
-      .filter(userItem => {
-        const matchesSearch =
-          userItem.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          userItem.email?.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesRole = filterRole === 'all' || userItem.role === filterRole;
-        const matchesStatus = filterStatus === 'all' || userItem.status === filterStatus;
-
-        return matchesSearch && matchesRole && matchesStatus;
-      })
-      .sort((a, b) => {
-        let aVal, bVal;
-
-        switch(sortField) {
-          case 'name':
-            aVal = a.name?.toLowerCase() || '';
-            bVal = b.name?.toLowerCase() || '';
-            break;
-          case 'email':
-            aVal = a.email?.toLowerCase() || '';
-            bVal = b.email?.toLowerCase() || '';
-            break;
-          case 'credits':
-            aVal = a.credits || 0;
-            bVal = b.credits || 0;
-            break;
-          case 'role':
-            aVal = a.role || '';
-            bVal = b.role || '';
-            break;
-          case 'status':
-            aVal = a.status || '';
-            bVal = b.status || '';
-            break;
-          case 'createdAt':
-            aVal = a.createdAt?.seconds || 0;
-            bVal = b.createdAt?.seconds || 0;
-            break;
-          default:
-            return 0;
-        }
-
-        if (sortDirection === 'asc') {
-          return aVal > bVal ? 1 : -1;
-        } else {
-          return aVal < bVal ? 1 : -1;
-        }
-      });
-  }, [users, searchTerm, filterRole, filterStatus, sortField, sortDirection]);
+  }, [userManagement.users]);
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
@@ -734,10 +337,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
     });
   };
 
+  // Combined stats for display
+  const stats = {
+    ...userManagement.stats,
+    ...adminStats
+  };
+
   // Loading state
   if (loading) {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
           <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
           <p>Loading admin panel...</p>
@@ -751,30 +360,30 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // ==========================================
 
   // GameContainer (Game Setup) - NO Layout (has its own navigation)
-  if (currentScreen === 'setup') {
-    return <GameContainer onBack={handleBackToDashboard} />;
+  if (navigation.currentScreen === 'setup') {
+    return <GameContainer onBack={navigation.handleBackToDashboard} />;
   }
 
   // Live Game Projection - NO Layout (fullscreen)
-  if (currentScreen === 'liveGameProjection' && liveGameSessionId) {
+  if (navigation.currentScreen === 'liveGameProjection' && navigation.liveGameSessionId) {
     return (
       <LiveGameProjection
-        sessionId={liveGameSessionId}
+        sessionId={navigation.liveGameSessionId}
         onBack={() => {
-          setLiveGameSessionId(null);
-          setCurrentScreen('liveGame');
+          navigation.setLiveGameSessionId(null);
+          navigation.setCurrentScreen('liveGame');
         }}
       />
     );
   }
 
   // ExercisePlayer - NO Layout (fullscreen)
-  if (currentScreen === 'playExercise' && selectedExerciseId) {
+  if (navigation.currentScreen === 'playExercise' && navigation.selectedExerciseId) {
     return (
       <ExercisePlayer
-        exerciseId={selectedExerciseId}
+        exerciseId={navigation.selectedExerciseId}
         user={user}
-        onBack={handleBackToDashboard}
+        onBack={navigation.handleBackToDashboard}
         onComplete={(results) => {
           logger.debug('Exercise completed:', results);
         }}
@@ -783,17 +392,17 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // Whiteboard - NO Layout (fullscreen)
-  if (currentScreen === 'whiteboard') {
-    const isLive = selectedWhiteboardSession?.isLive;
-    const liveSessionId = selectedWhiteboardSession?.liveSessionId;
+  if (navigation.currentScreen === 'whiteboard') {
+    const isLive = navigation.selectedWhiteboardSession?.isLive;
+    const liveSessionId = navigation.selectedWhiteboardSession?.liveSessionId;
 
     return (
       <Whiteboard
         onBack={() => {
-          setWhiteboardManagerKey(prev => prev + 1);
-          setCurrentScreen('whiteboardSessions');
+          navigation.setWhiteboardManagerKey(prev => prev + 1);
+          navigation.setCurrentScreen('whiteboardSessions');
         }}
-        initialSession={selectedWhiteboardSession}
+        initialSession={navigation.selectedWhiteboardSession}
         isCollaborative={isLive}
         collaborativeSessionId={liveSessionId}
       />
@@ -801,24 +410,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // Excalidraw Whiteboard - NO Layout (fullscreen)
-  if (currentScreen === 'excalidrawWhiteboard') {
+  if (navigation.currentScreen === 'excalidrawWhiteboard') {
     return (
       <ExcalidrawWhiteboard
         onBack={() => {
-          setExcalidrawManagerKey(prev => prev + 1);
-          setCurrentScreen('excalidrawSessions');
+          navigation.setExcalidrawManagerKey(prev => prev + 1);
+          navigation.setCurrentScreen('excalidrawSessions');
         }}
-        initialSession={selectedExcalidrawSession}
+        initialSession={navigation.selectedExcalidrawSession}
       />
     );
   }
 
   // Test Collaborative Whiteboard - NO Layout (fullscreen)
-  if (currentScreen === 'testCollab') {
+  if (navigation.currentScreen === 'testCollab') {
     const sessionId = `collab_${user.uid}_${Date.now()}`;
     return (
       <Whiteboard
-        onBack={handleBackToDashboard}
+        onBack={navigation.handleBackToDashboard}
         isCollaborative={true}
         collaborativeSessionId={sessionId}
       />
@@ -826,15 +435,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // Live Class Room - NO Layout (fullscreen)
-  if (currentScreen === 'liveClassRoom' && selectedLiveClass) {
+  if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
     return (
       <LiveClassRoom
-        liveClass={selectedLiveClass}
+        liveClass={navigation.selectedLiveClass}
         user={user}
         userRole={userRole}
         onLeave={() => {
-          setSelectedLiveClass(null);
-          setCurrentScreen('liveClasses');
+          navigation.setSelectedLiveClass(null);
+          navigation.setCurrentScreen('liveClasses');
         }}
       />
     );
@@ -845,63 +454,63 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // ==========================================
 
   // Live Game Setup - WITH Layout
-  if (currentScreen === 'liveGame') {
+  if (navigation.currentScreen === 'liveGame') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <LiveGameSetup
           user={user}
           onSessionCreated={(sessionId) => {
-            setLiveGameSessionId(sessionId);
-            setCurrentScreen('liveGameProjection');
+            navigation.setLiveGameSessionId(sessionId);
+            navigation.setCurrentScreen('liveGameProjection');
           }}
-          onBack={handleBackToDashboard}
+          onBack={navigation.handleBackToDashboard}
         />
       </DashboardLayout>
     );
   }
 
   // Courses Screen - WITH Layout
-  if (currentScreen === 'courses') {
+  if (navigation.currentScreen === 'courses') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <CoursesScreen onBack={handleBackToDashboard} user={user} openCreateModal={openCourseModal} />
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <CoursesScreen onBack={navigation.handleBackToDashboard} user={user} openCreateModal={navigation.openCourseModal} />
       </DashboardLayout>
     );
   }
 
   // Content Manager - WITH Layout
-  if (currentScreen === 'content') {
+  if (navigation.currentScreen === 'content') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <ContentManager user={user} courses={courses} onBack={handleBackToDashboard} openCreateModal={openContentModal} />
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ContentManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openContentModal} />
       </DashboardLayout>
     );
   }
 
   // Class Manager - WITH Layout
-  if (currentScreen === 'classes') {
+  if (navigation.currentScreen === 'classes') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <ClassManager user={user} courses={courses} onBack={handleBackToDashboard} openCreateModal={openClassModal} />
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
       </DashboardLayout>
     );
   }
 
   // Exercise Manager - WITH Layout
-  if (currentScreen === 'exercises') {
+  if (navigation.currentScreen === 'exercises') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <ExerciseManager user={user} onBack={handleBackToDashboard} />
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ExerciseManager user={user} onBack={navigation.handleBackToDashboard} />
       </DashboardLayout>
     );
   }
 
   // Analytics Dashboard - WITH Layout
-  if (currentScreen === 'analytics') {
+  if (navigation.currentScreen === 'analytics') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
           <AnalyticsDashboard user={user} />
@@ -911,11 +520,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // Attendance View - WITH Layout
-  if (currentScreen === 'attendance') {
+  if (navigation.currentScreen === 'attendance') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
           <AttendanceView teacher={user} />
@@ -925,27 +534,27 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // Whiteboard Manager - WITH Layout
-  if (currentScreen === 'whiteboardSessions') {
+  if (navigation.currentScreen === 'whiteboardSessions') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <WhiteboardManager
-          key={whiteboardManagerKey}
-          onBack={handleBackToDashboard}
+          key={navigation.whiteboardManagerKey}
+          onBack={navigation.handleBackToDashboard}
           onOpenWhiteboard={() => {
-            setSelectedWhiteboardSession(null);
-            setCurrentScreen('whiteboard');
+            navigation.setSelectedWhiteboardSession(null);
+            navigation.setCurrentScreen('whiteboard');
           }}
           onLoadSession={(session) => {
-            setSelectedWhiteboardSession(session);
-            setCurrentScreen('whiteboard');
+            navigation.setSelectedWhiteboardSession(session);
+            navigation.setCurrentScreen('whiteboard');
           }}
           onGoLive={(session, liveSessionId) => {
-            setSelectedWhiteboardSession({
+            navigation.setSelectedWhiteboardSession({
               ...session,
               isLive: true,
               liveSessionId: liveSessionId
             });
-            setCurrentScreen('whiteboard');
+            navigation.setCurrentScreen('whiteboard');
           }}
         />
       </DashboardLayout>
@@ -953,27 +562,27 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // Excalidraw Manager - WITH Layout
-  if (currentScreen === 'excalidrawSessions') {
+  if (navigation.currentScreen === 'excalidrawSessions') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ExcalidrawManager
-          key={excalidrawManagerKey}
-          onBack={handleBackToDashboard}
+          key={navigation.excalidrawManagerKey}
+          onBack={navigation.handleBackToDashboard}
           onOpenSession={(session) => {
-            setSelectedExcalidrawSession(session);
-            setCurrentScreen('excalidrawWhiteboard');
+            navigation.setSelectedExcalidrawSession(session);
+            navigation.setCurrentScreen('excalidrawWhiteboard');
           }}
           onCreateNew={async () => {
             try {
               const sessionId = await createExcalidrawSession('Untitled Whiteboard');
-              setSelectedExcalidrawSession({
+              navigation.setSelectedExcalidrawSession({
                 id: sessionId,
                 title: 'Untitled Whiteboard',
                 elements: [],
                 appState: {},
                 files: {}
               });
-              setCurrentScreen('excalidrawWhiteboard');
+              navigation.setCurrentScreen('excalidrawWhiteboard');
             } catch (error) {
               logger.error('Error creating whiteboard:', error);
               alert('Error creating whiteboard');
@@ -985,15 +594,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // Live Class Manager - WITH Layout
-  if (currentScreen === 'liveClasses') {
+  if (navigation.currentScreen === 'liveClasses') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <LiveClassManager
           user={user}
-          onBack={handleBackToDashboard}
+          onBack={navigation.handleBackToDashboard}
           onStartClass={(liveClass) => {
-            setSelectedLiveClass(liveClass);
-            setCurrentScreen('liveClassRoom');
+            navigation.setSelectedLiveClass(liveClass);
+            navigation.setCurrentScreen('liveClassRoom');
           }}
         />
       </DashboardLayout>
@@ -1001,19 +610,19 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // Students Panel (Cards View) - WITH Layout
-  if (currentScreen === 'students') {
-    const students = users.filter(u => ['student', 'listener', 'trial'].includes(u.role));
+  if (navigation.currentScreen === 'students') {
+    const students = userManagement.users.filter(u => ['student', 'listener', 'trial'].includes(u.role));
 
     const filteredStudents = students.filter(student =>
-      student.name?.toLowerCase().includes(studentsSearchTerm.toLowerCase()) ||
-      student.email?.toLowerCase().includes(studentsSearchTerm.toLowerCase())
+      student.name?.toLowerCase().includes(navigation.studentsSearchTerm.toLowerCase()) ||
+      student.email?.toLowerCase().includes(navigation.studentsSearchTerm.toLowerCase())
     );
 
     return (
       <>
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
 
@@ -1026,18 +635,18 @@ function AdminDashboard({ user, userRole, onLogout }) {
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
                 <Plus size={18} strokeWidth={2} /> Add Student
               </button>
-              <button onClick={loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Refresh list">
+              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Refresh list">
                 <RefreshCw size={18} strokeWidth={2} /> Refresh
               </button>
             </div>
           </div>
 
           <SearchBar
-            value={studentsSearchTerm}
-            onChange={setStudentsSearchTerm}
+            value={navigation.studentsSearchTerm}
+            onChange={navigation.setStudentsSearchTerm}
             placeholder="Search students..."
-            viewMode={studentsViewMode}
-            onViewModeChange={setStudentsViewMode}
+            viewMode={navigation.studentsViewMode}
+            onViewModeChange={navigation.setStudentsViewMode}
             className="mb-6"
           />
 
@@ -1057,15 +666,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
               <p>No students found</p>
             </div>
           ) : (
-            <div className={studentsViewMode === 'grid' ? 'students-grid' : 'students-list'}>
+            <div className={navigation.studentsViewMode === 'grid' ? 'students-grid' : 'students-list'}>
               {filteredStudents.map(student => (
                 <StudentCard
                   key={student.id}
                   student={student}
-                  enrollmentCount={enrollmentCounts[student.id] || 0}
+                  enrollmentCount={resourceAssignment.enrollmentCounts[student.id] || 0}
                   onView={(student) => {
-                    setSelectedUserProfile(student);
-                    setShowUserProfile(true);
+                    navigation.setSelectedUserProfile(student);
+                    navigation.setShowUserProfile(true);
                   }}
                   onDelete={(student) => handleDeleteUser(student.id)}
                   isAdmin={isAdmin}
@@ -1076,14 +685,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
         </div>
       </DashboardLayout>
 
-      {showUserProfile && selectedUserProfile && (
+      {navigation.showUserProfile && navigation.selectedUserProfile && (
         <div className="modal-overlay" onClick={handleCloseUserProfile}>
           <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
             <UserProfile
-              selectedUser={selectedUserProfile}
+              selectedUser={navigation.selectedUserProfile}
               currentUser={user}
               onBack={handleCloseUserProfile}
-              onUpdate={loadUsers}
+              onUpdate={userManagement.loadUsers}
               isAdmin={isAdmin}
             />
           </div>
@@ -1094,10 +703,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
   }
 
   // User Management - WITH Layout
-  if (currentScreen === 'users') {
-    if (sessionStorage.getItem('viewAsReturning') === 'true' && !hasProcessedReturn) {
+  if (navigation.currentScreen === 'users') {
+    if (sessionStorage.getItem('viewAsReturning') === 'true' && !navigation.hasProcessedReturn) {
       return (
-        <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
           <div className="min-h-[60vh] flex flex-col justify-center items-center">
             <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin"></div>
             <p>Returning...</p>
@@ -1108,9 +717,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
     return (
       <>
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
 
@@ -1123,15 +732,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary w-full sm:w-auto">
                 <Plus size={18} strokeWidth={2} /> New User
               </button>
-              <button onClick={loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full sm:w-auto" title="Refresh user list">
+              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full sm:w-auto" title="Refresh user list">
                 <RefreshCw size={18} strokeWidth={2} /> Refresh
               </button>
             </div>
           </div>
 
           <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
+            value={userManagement.searchTerm}
+            onChange={userManagement.setSearchTerm}
             placeholder="Search users..."
             className="mb-6"
           />
@@ -1148,12 +757,12 @@ function AdminDashboard({ user, userRole, onLogout }) {
           )}
 
           <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl overflow-hidden">
-            {sessionStorage.getItem('viewAsReturnUserId') && !hasProcessedReturn && users.length === 0 ? (
+            {sessionStorage.getItem('viewAsReturnUserId') && !navigation.hasProcessedReturn && userManagement.users.length === 0 ? (
               <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
                 <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
                 <p>Loading...</p>
               </div>
-            ) : filteredUsers.length === 0 ? (
+            ) : userManagement.filteredUsers.length === 0 ? (
               <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
                 <p>No users found with selected filters</p>
               </div>
@@ -1164,16 +773,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
                     <tr>
                       <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide min-w-[200px]">
                         <div
-                          onClick={() => handleSort('name')}
+                          onClick={() => userManagement.handleSort('name')}
                           className={`flex items-center gap-2 cursor-pointer select-none ${
-                            sortField === 'name'
+                            userManagement.sortField === 'name'
                               ? 'text-accent-600 dark:text-accent-400'
                               : 'hover:text-accent-600 dark:hover:text-accent-400'
                           }`}
                         >
                           <span>User</span>
-                          {sortField === 'name' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'name' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="opacity-30" />
                           )}
@@ -1181,16 +790,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
                       </th>
                       <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
                         <div
-                          onClick={() => handleSort('credits')}
+                          onClick={() => userManagement.handleSort('credits')}
                           className={`flex items-center gap-2 cursor-pointer select-none ${
-                            sortField === 'credits'
+                            userManagement.sortField === 'credits'
                               ? 'text-accent-600 dark:text-accent-400'
                               : 'hover:text-accent-600 dark:hover:text-accent-400'
                           }`}
                         >
                           <span>Credits</span>
-                          {sortField === 'credits' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'credits' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="opacity-30" />
                           )}
@@ -1198,16 +807,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
                       </th>
                       <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
                         <div
-                          onClick={() => handleSort('role')}
+                          onClick={() => userManagement.handleSort('role')}
                           className={`flex items-center gap-2 cursor-pointer select-none ${
-                            sortField === 'role'
+                            userManagement.sortField === 'role'
                               ? 'text-accent-600 dark:text-accent-400'
                               : 'hover:text-accent-600 dark:hover:text-accent-400'
                           }`}
                         >
                           <span>Role</span>
-                          {sortField === 'role' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'role' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="opacity-30" />
                           )}
@@ -1215,16 +824,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
                       </th>
                       <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
                         <div
-                          onClick={() => handleSort('status')}
+                          onClick={() => userManagement.handleSort('status')}
                           className={`flex items-center gap-2 cursor-pointer select-none ${
-                            sortField === 'status'
+                            userManagement.sortField === 'status'
                               ? 'text-accent-600 dark:text-accent-400'
                               : 'hover:text-accent-600 dark:hover:text-accent-400'
                           }`}
                         >
                           <span>Status</span>
-                          {sortField === 'status' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'status' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="opacity-30" />
                           )}
@@ -1232,16 +841,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
                       </th>
                       <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
                         <div
-                          onClick={() => handleSort('createdAt')}
+                          onClick={() => userManagement.handleSort('createdAt')}
                           className={`flex items-center gap-2 cursor-pointer select-none ${
-                            sortField === 'createdAt'
+                            userManagement.sortField === 'createdAt'
                               ? 'text-accent-600 dark:text-accent-400'
                               : 'hover:text-accent-600 dark:hover:text-accent-400'
                           }`}
                         >
                           <span>Registration</span>
-                          {sortField === 'createdAt' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'createdAt' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="opacity-30" />
                           )}
@@ -1249,16 +858,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
                       </th>
                       <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
                         <div
-                          onClick={() => handleSort('email')}
+                          onClick={() => userManagement.handleSort('email')}
                           className={`flex items-center gap-2 cursor-pointer select-none ${
-                            sortField === 'email'
+                            userManagement.sortField === 'email'
                               ? 'text-accent-600 dark:text-accent-400'
                               : 'hover:text-accent-600 dark:hover:text-accent-400'
                           }`}
                         >
                           <span>Email</span>
-                          {sortField === 'email' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'email' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="opacity-30" />
                           )}
@@ -1267,7 +876,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredUsers.map(userItem => (
+                    {userManagement.filteredUsers.map(userItem => (
                       <tr
                         key={userItem.id}
                         className={`border-b border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors ${
@@ -1355,14 +964,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
         />
       )}
 
-      {showUserProfile && selectedUserProfile && (
+      {navigation.showUserProfile && navigation.selectedUserProfile && (
         <div className="modal-overlay" onClick={handleCloseUserProfile}>
           <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
             <UserProfile
-              selectedUser={selectedUserProfile}
+              selectedUser={navigation.selectedUserProfile}
               currentUser={user}
               onBack={handleCloseUserProfile}
-              onUpdate={loadUsers}
+              onUpdate={userManagement.loadUsers}
               isAdmin={isAdmin}
             />
           </div>
@@ -1382,9 +991,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       id: 'users',
       icon: Shield,
       title: "Users",
-      count: users.length,
-      countLabel: users.length === 1 ? "user" : "users",
-      onClick: () => setCurrentScreen('users'),
+      count: userManagement.users.length,
+      countLabel: userManagement.users.length === 1 ? "user" : "users",
+      onClick: () => navigation.setCurrentScreen('users'),
       createLabel: "New User",
       onCreateClick: () => setShowAddUserModal(true)
     },
@@ -1394,7 +1003,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       title: "Students",
       count: stats.students,
       countLabel: stats.students === 1 ? "student" : "students",
-      onClick: () => setCurrentScreen('students'),
+      onClick: () => navigation.setCurrentScreen('students'),
       createLabel: "Add Student",
       onCreateClick: () => setShowAddUserModal(true)
     },
@@ -1404,11 +1013,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
       title: "Courses",
       count: courses.length,
       countLabel: courses.length === 1 ? "course" : "courses",
-      onClick: () => setCurrentScreen('courses'),
+      onClick: () => navigation.setCurrentScreen('courses'),
       createLabel: "New Course",
       onCreateClick: () => {
-        setOpenCourseModal(true);
-        setCurrentScreen('courses');
+        navigation.setOpenCourseModal(true);
+        navigation.setCurrentScreen('courses');
       }
     },
     {
@@ -1417,11 +1026,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
       title: "Content",
       count: allContent.length,
       countLabel: allContent.length === 1 ? "item" : "items",
-      onClick: () => setCurrentScreen('content'),
+      onClick: () => navigation.setCurrentScreen('content'),
       createLabel: "New Content",
       onCreateClick: () => {
-        setOpenContentModal(true);
-        setCurrentScreen('content');
+        navigation.setOpenContentModal(true);
+        navigation.setCurrentScreen('content');
       }
     },
     {
@@ -1430,11 +1039,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
       title: "Classes",
       count: allClasses.length,
       countLabel: allClasses.length === 1 ? "class" : "classes",
-      onClick: () => setCurrentScreen('classes'),
+      onClick: () => navigation.setCurrentScreen('classes'),
       createLabel: "New Class",
       onCreateClick: () => {
-        setOpenClassModal(true);
-        setCurrentScreen('classes');
+        navigation.setOpenClassModal(true);
+        navigation.setCurrentScreen('classes');
       }
     },
     {
@@ -1443,9 +1052,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       title: "Question Game",
       count: stats.totalGames,
       countLabel: stats.totalGames === 1 ? "game" : "games",
-      onClick: () => setCurrentScreen('setup'),
+      onClick: () => navigation.setCurrentScreen('setup'),
       createLabel: "Play Game",
-      onCreateClick: () => setCurrentScreen('setup')
+      onCreateClick: () => navigation.setCurrentScreen('setup')
     },
     {
       id: 'analytics',
@@ -1453,19 +1062,19 @@ function AdminDashboard({ user, userRole, onLogout }) {
       title: "Analytics",
       count: 0,
       countLabel: "insights",
-      onClick: () => setCurrentScreen('analytics'),
+      onClick: () => navigation.setCurrentScreen('analytics'),
       createLabel: "View Analytics",
-      onCreateClick: () => setCurrentScreen('analytics')
+      onCreateClick: () => navigation.setCurrentScreen('analytics')
     }
   ];
 
   const filteredDashboardCards = dashboardCards.filter(card =>
-    card.title.toLowerCase().includes(dashboardSearchTerm.toLowerCase())
+    card.title.toLowerCase().includes(navigation.dashboardSearchTerm.toLowerCase())
   );
 
   return (
     <>
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
           <div className="mb-12 text-center">
             <div className="flex items-center gap-3 mb-2 justify-center">
@@ -1538,15 +1147,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
           </div>
 
           <SearchBar
-            value={dashboardSearchTerm}
-            onChange={setDashboardSearchTerm}
+            value={navigation.dashboardSearchTerm}
+            onChange={navigation.setDashboardSearchTerm}
             placeholder="Search sections..."
-            viewMode={dashboardViewMode}
-            onViewModeChange={setDashboardViewMode}
+            viewMode={navigation.dashboardViewMode}
+            onViewModeChange={navigation.setDashboardViewMode}
             className="mb-6"
           />
 
-          <div className={dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
+          <div className={navigation.dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
             {filteredDashboardCards.map(card => (
               <QuickAccessCard
                 key={card.id}
@@ -1572,14 +1181,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
         />
       )}
 
-      {showUserProfile && selectedUserProfile && (
+      {navigation.showUserProfile && navigation.selectedUserProfile && (
         <div className="modal-overlay" onClick={handleCloseUserProfile}>
           <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
             <UserProfile
-              selectedUser={selectedUserProfile}
+              selectedUser={navigation.selectedUserProfile}
               currentUser={user}
               onBack={handleCloseUserProfile}
-              onUpdate={loadUsers}
+              onUpdate={userManagement.loadUsers}
               isAdmin={isAdmin}
             />
           </div>
