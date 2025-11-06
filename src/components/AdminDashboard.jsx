@@ -1260,17 +1260,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
             isAdmin={isAdmin}
           />
         )}
-
-        {showUserProfile && selectedUserProfile && (
-          <UserProfile
-            user={selectedUserProfile}
-            currentUser={user}
-            onClose={handleCloseUserProfile}
-            onRoleChange={handleRoleChange}
-            onStatusChange={handleStatusChange}
-            isAdmin={isAdmin}
-          />
-        )}
       </DashboardLayout>
     );
   }
