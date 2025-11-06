@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Play, Users, Timer, RotateCcw, Shuffle } from 'lucide-react';
 import { createGameSession } from '../firebase/gameSession';
-import { loadCategories, loadQuestionsByCategory } from '../firebase/firestore';
+import { loadCategories } from '../firebase/firestore';
 import './LiveGameSetup.css';
 
 /**
  * Formulario para crear una nueva sesión de juego en vivo
  */
 function LiveGameSetup({ user, onSessionCreated, onBack }) {
-  const [categories, setCategories] = useState([]);
+  const [categoriesData, setCategoriesData] = useState({}); // { categoryName: text }
   const [selectedCategory, setSelectedCategory] = useState('');
   const [questions, setQuestions] = useState([]);
   const [studentNames, setStudentNames] = useState('');
@@ -18,14 +18,57 @@ function LiveGameSetup({ user, onSessionCreated, onBack }) {
   const [repeatMode, setRepeatMode] = useState('noRepeat'); // noRepeat, allowRepeat
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [loadingQuestions, setLoadingQuestions] = useState(false);
+
+  // Función para parsear preguntas desde texto (igual que GameContainer)
+  const parseQuestions = (text, category) => {
+    const parsedQuestions = [];
+    const allLines = text.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    for (let i = 0; i < allLines.length; i += 5) {
+      if (i + 4 < allLines.length) {
+        const questionText = allLines[i];
+        const options = [
+          allLines[i + 1],
+          allLines[i + 2],
+          allLines[i + 3],
+          allLines[i + 4]
+        ];
+
+        const correctAnswerText = options.find((opt) =>
+          opt.startsWith('*') || opt.includes('(correcta)')
+        );
+
+        if (correctAnswerText) {
+          const cleanOptions = options.map((opt) =>
+            opt.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim()
+          );
+
+          const correctAnswerCleaned = correctAnswerText.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
+          const correctIndex = cleanOptions.findIndex(opt => opt === correctAnswerCleaned);
+
+          if (correctIndex !== -1) {
+            parsedQuestions.push({
+              question: questionText,
+              options: cleanOptions,
+              correct: correctIndex,
+              category: category
+            });
+          }
+        }
+      }
+    }
+
+    return parsedQuestions;
+  };
 
   // Cargar categorías al montar
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const cats = await loadCategories();
-        setCategories(cats);
+        setCategoriesData(cats);
       } catch (err) {
         console.error('Error cargando categorías:', err);
         setError('Error al cargar categorías');
@@ -34,28 +77,17 @@ function LiveGameSetup({ user, onSessionCreated, onBack }) {
     fetchCategories();
   }, []);
 
-  // Cargar preguntas cuando se selecciona una categoría
+  // Parsear preguntas cuando se selecciona una categoría
   useEffect(() => {
-    if (!selectedCategory) {
+    if (!selectedCategory || !categoriesData[selectedCategory]) {
       setQuestions([]);
       return;
     }
 
-    const fetchQuestions = async () => {
-      setLoadingQuestions(true);
-      try {
-        const qs = await loadQuestionsByCategory(selectedCategory);
-        setQuestions(qs);
-      } catch (err) {
-        console.error('Error cargando preguntas:', err);
-        setError('Error al cargar preguntas');
-      } finally {
-        setLoadingQuestions(false);
-      }
-    };
-
-    fetchQuestions();
-  }, [selectedCategory]);
+    const categoryText = categoriesData[selectedCategory];
+    const parsed = parseQuestions(categoryText, selectedCategory);
+    setQuestions(parsed);
+  }, [selectedCategory, categoriesData]);
 
   const handleCreateSession = async (e) => {
     e.preventDefault();
@@ -139,18 +171,14 @@ function LiveGameSetup({ user, onSessionCreated, onBack }) {
             required
           >
             <option value="">Selecciona una categoría</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
+            {Object.keys(categoriesData).map((categoryName) => (
+              <option key={categoryName} value={categoryName}>
+                {categoryName}
               </option>
             ))}
           </select>
 
-          {loadingQuestions && (
-            <p className="loading-text">Cargando preguntas...</p>
-          )}
-
-          {selectedCategory && !loadingQuestions && (
+          {selectedCategory && (
             <div className="questions-info">
               <p>
                 <strong>{questions.length}</strong> preguntas disponibles
