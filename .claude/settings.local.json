@@ -48,7 +48,8 @@
       "Bash(npm uninstall:*)",
       "Bash(del \"src\\components\\AdminDashboard.css\")",
       "Bash(node replace-console-with-logger.js:*)",
-      "Bash(node replace-console-with-logger.cjs:*)"
+      "Bash(node replace-console-with-logger.cjs:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

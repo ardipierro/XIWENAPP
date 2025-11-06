@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import './BaseModal.css';
 
 /**
- * BaseModal - Componente modal base reutilizable
+ * BaseModal - Componente modal base reutilizable (100% Tailwind CSS)
  *
  * Casos de uso:
  * 1. Modal simple con contenido custom
@@ -46,37 +45,79 @@ function BaseModal({
     }
   };
 
+  // Tailwind size classes
   const sizeClasses = {
-    'sm': 'modal-box-sm',
-    'md': 'modal-box-md',
-    'lg': 'modal-box-lg',
-    'xl': 'modal-box-xl',
-    'fullscreen': 'modal-box-fullscreen'
+    'sm': 'max-w-sm',
+    'md': 'max-w-lg',
+    'lg': 'max-w-3xl',
+    'xl': 'max-w-5xl',
+    'fullscreen': 'w-screen h-screen max-w-none rounded-none'
   };
 
   return (
+    // Overlay con backdrop blur
     <div
-      className={`modal-overlay ${isDanger ? 'modal-overlay-danger' : ''}`}
+      className={`
+        fixed inset-0 z-[9999] flex items-center justify-center p-4
+        bg-black/50 dark:bg-black/70 backdrop-blur-sm
+        animate-in fade-in duration-200
+        ${isDanger ? 'bg-red-500/10' : ''}
+      `}
       onClick={handleOverlayClick}
     >
+      {/* Modal box */}
       <div
-        className={`modal-box ${sizeClasses[size]} ${className} ${loading ? 'modal-loading' : ''}`}
+        className={`
+          relative w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
+          bg-white dark:bg-gray-800
+          rounded-xl shadow-2xl
+          flex flex-col
+          animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
+          ${loading ? 'pointer-events-none opacity-70' : ''}
+          ${className}
+        `}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Loading spinner overlay */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="w-10 h-10 border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 rounded-full animate-spin" />
+          </div>
+        )}
+
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="modal-header">
-            <div className="modal-header-content">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 dark:border-gray-700 shrink-0">
+            <div className="flex items-center gap-3 flex-1">
+              {/* Icon */}
               {Icon && (
-                <div className={`modal-icon ${isDanger ? 'modal-icon-danger' : ''}`}>
+                <div className={`
+                  flex items-center justify-center w-10 h-10 rounded-lg shrink-0
+                  ${isDanger
+                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}
+                `}>
                   <Icon size={24} strokeWidth={2} />
                 </div>
               )}
-              {title && <h3 className="modal-title">{title}</h3>}
+              {/* Title */}
+              {title && (
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {title}
+                </h3>
+              )}
             </div>
+            {/* Close button */}
             {showCloseButton && (
               <button
-                className="modal-close-btn"
+                className="
+                  flex items-center justify-center w-8 h-8 rounded-lg shrink-0
+                  text-gray-500 dark:text-gray-400
+                  hover:bg-gray-100 dark:hover:bg-gray-700
+                  hover:text-gray-900 dark:hover:text-white
+                  active:scale-95 transition-all
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
                 onClick={onClose}
                 aria-label="Cerrar"
                 disabled={loading}
@@ -87,14 +128,14 @@ function BaseModal({
           </div>
         )}
 
-        {/* Body */}
-        <div className="modal-body">
+        {/* Body - scrollable */}
+        <div className="flex-1 px-6 py-6 overflow-y-auto text-gray-900 dark:text-white">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="modal-footer">
+          <div className="flex items-center justify-end gap-3 px-6 py-5 border-t border-gray-200 dark:border-gray-700 shrink-0">
             {footer}
           </div>
         )}
