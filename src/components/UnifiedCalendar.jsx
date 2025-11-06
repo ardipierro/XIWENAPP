@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import logger from '../utils/logger';
 import { useCalendar, useCalendarNavigation } from '../hooks/useCalendar';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Plus } from 'lucide-react';
 
@@ -15,7 +16,7 @@ export default function UnifiedCalendar({ userId, userRole }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+        <Spinner size="md" />
       </div>
     );
   }

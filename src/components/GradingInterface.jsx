@@ -34,7 +34,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+        <Spinner size="md" />
       </div>
     );
   }

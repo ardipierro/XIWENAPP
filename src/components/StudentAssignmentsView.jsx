@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import logger from '../utils/logger';
 import { useAssignments, useSubmission } from '../hooks/useAssignments';
 import {
   Calendar,
@@ -15,6 +16,7 @@ import {
   Send,
   X
 } from 'lucide-react';
+import { Spinner } from './common';
 
 export default function StudentAssignmentsView({ studentId }) {
   const { assignments, loading } = useAssignments(studentId, 'student');
@@ -35,7 +37,7 @@ export default function StudentAssignmentsView({ studentId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+        <Spinner size="md" />
       </div>
     );
   }

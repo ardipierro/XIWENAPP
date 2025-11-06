@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import logger from '../utils/logger';
 import { useGamification, useLeaderboard, useBadges } from '../hooks/useGamification';
 import { Trophy, Award, Zap, TrendingUp, Star, Medal, Crown, Target } from 'lucide-react';
 
@@ -16,7 +17,7 @@ export default function GamificationPanel({ userId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+        <Spinner size="md" />
       </div>
     );
   }
