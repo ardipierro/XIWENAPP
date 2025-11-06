@@ -1,37 +1,39 @@
+/**
+ * @fileoverview Firebase Credits Repository
+ * Gestión de créditos de usuarios y transacciones
+ * @module firebase/credits
+ */
+
 import {
   collection,
-  addDoc,
   doc,
-  getDoc,
   getDocs,
-  updateDoc,
   query,
   where,
-  orderBy,
   serverTimestamp,
   increment,
   writeBatch
 } from 'firebase/firestore';
 import { db } from './config';
+import { BaseRepository } from './BaseRepository';
 
 // ============================================
-// CRÉDITOS DE USUARIO
+// REPOSITORIES
 // ============================================
 
-/**
- * Obtener créditos de un usuario
- * @param {string} userId - ID del usuario
- * @returns {Promise<Object|null>} - Objeto de créditos o null
- */
-export async function getUserCredits(userId) {
-  try {
-    const creditsRef = collection(db, 'user_credits');
-    const q = query(creditsRef, where('userId', '==', userId));
-    const snapshot = await getDocs(q);
+class UserCreditsRepository extends BaseRepository {
+  constructor() {
+    super('user_credits');
+  }
 
-    if (!snapshot.empty) {
-      const doc = snapshot.docs[0];
-      return { id: doc.id, ...doc.data() };
+  /**
+   * Obtener créditos de un usuario (crear si no existe)
+   */
+  async getUserCredits(userId) {
+    const existing = await this.findOne([['userId', '==', userId]]);
+
+    if (existing) {
+      return existing;
     }
 
     // Si no existe, crear registro inicial
@@ -42,26 +44,96 @@ export async function getUserCredits(userId) {
       totalUsed: 0,
       lastPurchaseDate: null,
       lastUsedDate: null,
-      notes: '',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      notes: ''
     };
 
-    const docRef = await addDoc(creditsRef, newCredits);
-    return { id: docRef.id, ...newCredits };
-  } catch (error) {
-    console.error('Error al obtener créditos:', error);
-    return null;
+    const result = await this.create(newCredits);
+    return { id: result.id, ...newCredits };
+  }
+
+  /**
+   * Actualizar notas de créditos
+   */
+  async updateNotes(userId, notes) {
+    const credits = await this.getUserCredits(userId);
+    if (!credits) {
+      return { success: false, error: 'No se pudo obtener el registro de créditos' };
+    }
+
+    return this.update(credits.id, { notes });
+  }
+
+  /**
+   * Obtener estadísticas de créditos
+   */
+  async getStats(userId) {
+    const credits = await this.getUserCredits(userId);
+    if (!credits) {
+      return {
+        availableCredits: 0,
+        totalPurchased: 0,
+        totalUsed: 0,
+        usagePercentage: 0
+      };
+    }
+
+    const usagePercentage = credits.totalPurchased > 0
+      ? Math.round((credits.totalUsed / credits.totalPurchased) * 100)
+      : 0;
+
+    return {
+      availableCredits: credits.availableCredits || 0,
+      totalPurchased: credits.totalPurchased || 0,
+      totalUsed: credits.totalUsed || 0,
+      usagePercentage,
+      lastPurchaseDate: credits.lastPurchaseDate,
+      lastUsedDate: credits.lastUsedDate
+    };
   }
 }
 
+class CreditTransactionsRepository extends BaseRepository {
+  constructor() {
+    super('credit_transactions');
+  }
+
+  /**
+   * Obtener transacciones de un usuario
+   */
+  async getUserTransactions(userId, limit = 50) {
+    const transactions = await this.findWhere([['userId', '==', userId]]);
+
+    // Ordenar por fecha descendente y limitar
+    return transactions
+      .sort((a, b) => {
+        const dateA = a.createdAt?.toMillis?.() || 0;
+        const dateB = b.createdAt?.toMillis?.() || 0;
+        return dateB - dateA;
+      })
+      .slice(0, limit);
+  }
+
+  /**
+   * Crear transacción
+   */
+  async createTransaction(transactionData) {
+    return this.create(transactionData);
+  }
+}
+
+// ============================================
+// INSTANCIAS SINGLETON
+// ============================================
+
+const userCreditsRepo = new UserCreditsRepository();
+const transactionsRepo = new CreditTransactionsRepository();
+
+// ============================================
+// BUSINESS LOGIC (Lógica compleja con batches)
+// ============================================
+
 /**
  * Agregar créditos a un usuario
- * @param {string} userId - ID del usuario
- * @param {number} amount - Cantidad de créditos a agregar
- * @param {string} reason - Razón de la compra/adición
- * @param {string} addedBy - UID del usuario que agregó los créditos
- * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function addCredits(userId, amount, reason, addedBy) {
   try {
@@ -69,7 +141,7 @@ export async function addCredits(userId, amount, reason, addedBy) {
       return { success: false, error: 'La cantidad debe ser mayor a 0' };
     }
 
-    const credits = await getUserCredits(userId);
+    const credits = await userCreditsRepo.getUserCredits(userId);
     if (!credits) {
       return { success: false, error: 'No se pudo obtener el registro de créditos' };
     }
@@ -112,11 +184,6 @@ export async function addCredits(userId, amount, reason, addedBy) {
 
 /**
  * Quitar créditos a un usuario
- * @param {string} userId - ID del usuario
- * @param {number} amount - Cantidad de créditos a quitar
- * @param {string} reason - Razón de la deducción
- * @param {string} deductedBy - UID del usuario que quitó los créditos
- * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function deductCredits(userId, amount, reason, deductedBy) {
   try {
@@ -124,7 +191,7 @@ export async function deductCredits(userId, amount, reason, deductedBy) {
       return { success: false, error: 'La cantidad debe ser mayor a 0' };
     }
 
-    const credits = await getUserCredits(userId);
+    const credits = await userCreditsRepo.getUserCredits(userId);
     if (!credits) {
       return { success: false, error: 'No se pudo obtener el registro de créditos' };
     }
@@ -171,11 +238,6 @@ export async function deductCredits(userId, amount, reason, deductedBy) {
 
 /**
  * Usar créditos (para clases)
- * @param {string} userId - ID del usuario
- * @param {number} amount - Cantidad de créditos a usar
- * @param {string} classId - ID de la clase
- * @param {string} className - Nombre de la clase
- * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function useCreditsForClass(userId, amount, classId, className) {
   try {
@@ -183,7 +245,7 @@ export async function useCreditsForClass(userId, amount, classId, className) {
       return { success: false, error: 'La cantidad debe ser mayor a 0' };
     }
 
-    const credits = await getUserCredits(userId);
+    const credits = await userCreditsRepo.getUserCredits(userId);
     if (!credits) {
       return { success: false, error: 'No se pudo obtener el registro de créditos' };
     }
@@ -229,106 +291,11 @@ export async function useCreditsForClass(userId, amount, classId, className) {
   }
 }
 
-/**
- * Obtener historial de transacciones de un usuario
- * @param {string} userId - ID del usuario
- * @param {number} limit - Límite de resultados (por defecto 50)
- * @returns {Promise<Array>} - Lista de transacciones
- */
-export async function getCreditTransactions(userId, limit = 50) {
-  try {
-    const transactionsRef = collection(db, 'credit_transactions');
-    // Query simple sin orderBy para evitar necesitar índice compuesto
-    const q = query(
-      transactionsRef,
-      where('userId', '==', userId)
-    );
+// ============================================
+// EXPORTED FUNCTIONS (Mantener API compatible)
+// ============================================
 
-    const snapshot = await getDocs(q);
-
-    // Ordenar en el cliente en lugar del servidor
-    const transactions = snapshot.docs
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
-      .sort((a, b) => {
-        // Ordenar por createdAt descendente (más reciente primero)
-        const dateA = a.createdAt?.toMillis?.() || 0;
-        const dateB = b.createdAt?.toMillis?.() || 0;
-        return dateB - dateA;
-      })
-      .slice(0, limit);
-
-    return transactions;
-  } catch (error) {
-    console.error('Error al obtener transacciones:', error);
-    return [];
-  }
-}
-
-/**
- * Actualizar notas de créditos
- * @param {string} userId - ID del usuario
- * @param {string} notes - Notas a guardar
- * @returns {Promise<Object>} - {success: boolean, error?: string}
- */
-export async function updateCreditNotes(userId, notes) {
-  try {
-    const credits = await getUserCredits(userId);
-    if (!credits) {
-      return { success: false, error: 'No se pudo obtener el registro de créditos' };
-    }
-
-    const creditsRef = doc(db, 'user_credits', credits.id);
-    await updateDoc(creditsRef, {
-      notes,
-      updatedAt: serverTimestamp()
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error al actualizar notas:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-/**
- * Obtener estadísticas de créditos
- * @param {string} userId - ID del usuario
- * @returns {Promise<Object>} - Estadísticas
- */
-export async function getCreditStats(userId) {
-  try {
-    const credits = await getUserCredits(userId);
-    if (!credits) {
-      return {
-        availableCredits: 0,
-        totalPurchased: 0,
-        totalUsed: 0,
-        usagePercentage: 0
-      };
-    }
-
-    const usagePercentage = credits.totalPurchased > 0
-      ? Math.round((credits.totalUsed / credits.totalPurchased) * 100)
-      : 0;
-
-    return {
-      availableCredits: credits.availableCredits || 0,
-      totalPurchased: credits.totalPurchased || 0,
-      totalUsed: credits.totalUsed || 0,
-      usagePercentage,
-      lastPurchaseDate: credits.lastPurchaseDate,
-      lastUsedDate: credits.lastUsedDate
-    };
-  } catch (error) {
-    console.error('Error al obtener estadísticas:', error);
-    return {
-      availableCredits: 0,
-      totalPurchased: 0,
-      totalUsed: 0,
-      usagePercentage: 0
-    };
-  }
-}
+export const getUserCredits = (userId) => userCreditsRepo.getUserCredits(userId);
+export const getCreditTransactions = (userId, limit) => transactionsRepo.getUserTransactions(userId, limit);
+export const updateCreditNotes = (userId, notes) => userCreditsRepo.updateNotes(userId, notes);
+export const getCreditStats = (userId) => userCreditsRepo.getStats(userId);
