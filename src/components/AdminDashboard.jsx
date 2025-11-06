@@ -1061,6 +1061,17 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
           )}
         </div>
+
+        {showUserProfile && selectedUserProfile && (
+          <UserProfile
+            user={selectedUserProfile}
+            currentUser={user}
+            onClose={handleCloseUserProfile}
+            onRoleChange={handleRoleChange}
+            onStatusChange={handleStatusChange}
+            isAdmin={isAdmin}
+          />
+        )}
       </DashboardLayout>
     );
   }
@@ -1257,6 +1268,17 @@ function AdminDashboard({ user, userRole, onLogout }) {
             onClose={() => setShowAddUserModal(false)}
             onUserCreated={handleUserCreated}
             currentUser={user}
+            isAdmin={isAdmin}
+          />
+        )}
+
+        {showUserProfile && selectedUserProfile && (
+          <UserProfile
+            user={selectedUserProfile}
+            currentUser={user}
+            onClose={handleCloseUserProfile}
+            onRoleChange={handleRoleChange}
+            onStatusChange={handleStatusChange}
             isAdmin={isAdmin}
           />
         )}
