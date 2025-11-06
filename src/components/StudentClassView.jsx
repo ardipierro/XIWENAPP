@@ -348,19 +348,19 @@ function StudentClassView({ student }) {
         </h4>
         <ul className="space-y-2 text-sm">
           <li className="flex items-start gap-2">
-            <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+            <span className="text-primary dark:text-primary mt-0.5">•</span>
             <span>El link de la clase se activa <strong>15 minutos antes</strong></span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+            <span className="text-primary dark:text-primary mt-0.5">•</span>
             <span>Al unirte, se deduce <strong>1 crédito</strong> automáticamente</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+            <span className="text-primary dark:text-primary mt-0.5">•</span>
             <span>Tienes hasta <strong>15 minutos después</strong> del inicio para unirte</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+            <span className="text-primary dark:text-primary mt-0.5">•</span>
             <span>Si no tienes créditos, no podrás unirte a la clase</span>
           </li>
         </ul>
