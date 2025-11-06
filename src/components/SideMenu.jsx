@@ -20,7 +20,8 @@ import {
   Gamepad2,
   Shield,
   Settings,
-  MessageCircle
+  MessageCircle,
+  Lightbulb
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -58,6 +59,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       return [
         { icon: Shield, label: 'Panel Admin', path: '/admin', action: 'dashboard' },
         { icon: Users, label: 'Gestión de Usuarios', path: '/admin', action: 'users' },
+        { icon: Lightbulb, label: 'Configuración IA', path: '/admin', action: 'ai-config' },
         { icon: Settings, label: 'Configuración', path: '/admin', action: 'settings' },
       ];
     }

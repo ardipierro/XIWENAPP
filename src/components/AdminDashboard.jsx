@@ -19,6 +19,7 @@ import logger from '../utils/logger';
 import DashboardLayout from './DashboardLayout';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
+import AIConfigPanel from './AIConfigPanel';
 import './AdminDashboard.css';
 
 // Icon mapping for roles
@@ -235,6 +236,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       case 'users':
         setCurrentScreen('users');
         break;
+      case 'ai-config':
+        setCurrentScreen('ai-config');
+        break;
       case 'analytics':
         setCurrentScreen('analytics');
         break;
@@ -283,6 +287,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
             stats={stats}
             onNavigate={setCurrentScreen}
           />
+        )}
+
+        {currentScreen === 'ai-config' && (
+          <AIConfigPanel />
         )}
 
         {currentScreen === 'users' && (
