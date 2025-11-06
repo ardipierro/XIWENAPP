@@ -8,7 +8,7 @@ import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStud
 import { getInstancesForStudent } from '../firebase/classInstances';
 import { getStudentAvailableLiveClasses } from '../firebase/liveClasses';
 import { getAssignedWhiteboards, subscribeToLiveWhiteboards } from '../firebase/whiteboard';
-import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation } from 'lucide-react';
+import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import MyCourses from './student/MyCourses';
 import MyAssignments from './student/MyAssignments';
@@ -18,6 +18,15 @@ import StudentClassView from './StudentClassView';
 import LiveClassRoom from './LiveClassRoom';
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
+
+// Base Components
+import {
+  BaseButton,
+  BaseCard,
+  BaseLoading,
+  BaseEmptyState,
+  BaseBadge
+} from './common';
 
 function StudentDashboard({ user, userRole, student: studentProp, onLogout, onStartGame }) {
   const navigate = useNavigate();
@@ -331,33 +340,43 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   // Mostrar loading mientras se carga el perfil
   if (loading) {
     return (
-      <div className="dashboard-container">
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Cargando...</p>
-        </div>
-      </div>
+      <BaseLoading
+        variant="fullscreen"
+        text="Cargando tu perfil..."
+      />
     );
   }
 
   // Solo mostrar error si terminó de cargar Y no hay perfil
   if (!student || !student.id) {
     return (
-      <div className="dashboard-container">
-        <div className="error-state">
-          <span className="text-4xl mb-4">⚠️</span>
-          <h3>Error de Configuración</h3>
-          <p>No se pudo cargar tu perfil de estudiante.</p>
-          <p style={{ marginTop: '12px', fontSize: '14px', opacity: 0.8 }}>
-            Contacta al administrador si el problema persiste.
-          </p>
-          <button
-            onClick={handleBackToLogin}
-            className="btn btn-primary"
-            style={{ marginTop: '24px', padding: '12px 24px', fontSize: '16px' }}
-          >
-            ← Volver al Login
-          </button>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="max-w-md w-full">
+          <BaseCard className="text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <AlertTriangle size={32} className="text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Error de Configuración
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-2">
+                  No se pudo cargar tu perfil de estudiante.
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-500">
+                  Contacta al administrador si el problema persiste.
+                </p>
+              </div>
+              <BaseButton
+                variant="primary"
+                onClick={handleBackToLogin}
+                className="mt-2"
+              >
+                ← Volver al Login
+              </BaseButton>
+            </div>
+          </BaseCard>
         </div>
       </div>
     );
@@ -410,9 +429,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="student-dashboard">
           <div className="dashboard-content">
-            <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
               ← Volver a Inicio
-            </button>
+            </BaseButton>
             <MyCourses user={user} onSelectCourse={handleSelectCourse} />
           </div>
         </div>
@@ -426,9 +445,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="student-dashboard">
           <div className="dashboard-content">
-            <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
               ← Volver a Inicio
-            </button>
+            </BaseButton>
             <MyAssignments
               user={user}
               onPlayContent={handlePlayAssignmentContent}
@@ -458,9 +477,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
         <div className="student-dashboard">
           <div className="dashboard-content">
-            <button className="btn btn-ghost mb-4" onClick={handleBackToDashboard}>
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
               ← Volver a Inicio
-            </button>
+            </BaseButton>
             <StudentClassView student={student} />
           </div>
         </div>
@@ -484,15 +503,12 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             </div>
 
             {liveClasses.length === 0 ? (
-              <div className="empty-state">
-                <Video size={64} className="text-gray-400 dark:text-gray-600 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  No hay clases en vivo disponibles
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Cuando tu profesor inicie una clase, aparecerá aquí
-                </p>
-              </div>
+              <BaseEmptyState
+                icon={Video}
+                title="No hay clases en vivo disponibles"
+                description="Cuando tu profesor inicie una clase, aparecerá aquí"
+                size="md"
+              />
             ) : (
               <div className="live-classes-grid">
                 {liveClasses.map((liveClass) => (
@@ -526,13 +542,15 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                       )}
                     </div>
 
-                    <button
+                    <BaseButton
+                      variant="primary"
+                      icon={Video}
                       onClick={() => handleJoinLiveClass(liveClass)}
-                      className="btn btn-primary w-full mt-4"
+                      fullWidth
+                      className="mt-4"
                     >
-                      <Video size={18} />
-                      <span>Unirse a la clase</span>
-                    </button>
+                      Unirse a la clase
+                    </BaseButton>
                   </div>
                 ))}
               </div>
@@ -618,20 +636,14 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                           <span>Iniciada {formatRelativeTime(whiteboard.liveStartedAt)}</span>
                         </div>
                       </div>
-                      <button
+                      <BaseButton
+                        variant="secondary"
+                        size="sm"
                         onClick={() => handleJoinLiveWhiteboard(whiteboard)}
-                        className="btn"
-                        style={{
-                          background: 'white',
-                          color: '#10b981',
-                          border: 'none',
-                          fontWeight: 600,
-                          padding: '8px 20px',
-                          whiteSpace: 'nowrap'
-                        }}
+                        className="bg-white text-green-600 hover:bg-green-50 border-none font-semibold"
                       >
                         Unirse →
-                      </button>
+                      </BaseButton>
                     </div>
                   </div>
                 ))}
@@ -647,9 +659,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 Próxima Clase
               </h3>
               {upcomingClasses.length > 0 && (
-                <button className="btn btn-text" onClick={() => setCurrentView('classes')}>
+                <BaseButton variant="ghost" size="sm" onClick={() => setCurrentView('classes')}>
                   Ver todas →
-                </button>
+                </BaseButton>
               )}
             </div>
             {upcomingClasses.length > 0 ? (
@@ -696,9 +708,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             ) : (
               <div className="empty-classes-preview">
                 <p>No tienes clases programadas próximamente</p>
-                <button className="btn btn-outline" onClick={() => setCurrentView('classes')}>
+                <BaseButton variant="outline" onClick={() => setCurrentView('classes')}>
                   Ver calendario de clases
-                </button>
+                </BaseButton>
               </div>
             )}
           </div>
@@ -726,45 +738,65 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
           {/* Stats Grid */}
           <div className="stats-grid">
-            <div className="stat-card card">
-              <div className="stat-icon">
-                <Target size={40} strokeWidth={2} />
+            <BaseCard
+              variant="elevated"
+              icon={Gamepad2}
+              className="stat-card"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                  {stats.totalGames}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Ejercicios completados
+                </div>
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.totalGames}</div>
-                <div className="stat-label">Ejercicios completados</div>
-              </div>
-            </div>
+            </BaseCard>
 
-            <div className="stat-card card">
-              <div className="stat-icon">
-                <Target size={40} strokeWidth={2} />
+            <BaseCard
+              variant="elevated"
+              icon={Target}
+              className="stat-card"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                  {stats.averageScore}%
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Promedio
+                </div>
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.averageScore}%</div>
-                <div className="stat-label">Promedio</div>
-              </div>
-            </div>
+            </BaseCard>
 
-            <div className="stat-card card">
-              <div className="stat-icon">
-                <Target size={40} strokeWidth={2} />
+            <BaseCard
+              variant="elevated"
+              icon={Target}
+              className="stat-card"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                  {stats.bestScore}%
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Mejor puntaje
+                </div>
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.bestScore}%</div>
-                <div className="stat-label">Mejor puntaje</div>
-              </div>
-            </div>
+            </BaseCard>
 
-            <div className="stat-card card">
-              <div className="stat-icon">
-                <Target size={40} strokeWidth={2} />
+            <BaseCard
+              variant="elevated"
+              icon={Target}
+              className="stat-card"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                  {stats.totalCorrect}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Respuestas correctas
+                </div>
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.totalCorrect}</div>
-                <div className="stat-label">Respuestas correctas</div>
-              </div>
-            </div>
+            </BaseCard>
           </div>
 
           {/* Mis Cursos - Quick Access */}
@@ -775,9 +807,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 Mis Cursos
               </h3>
               {enrolledCourses.length > 0 && (
-                <button className="btn btn-text" onClick={handleViewMyCourses}>
+                <BaseButton variant="ghost" size="sm" onClick={handleViewMyCourses}>
                   Ver todos →
-                </button>
+                </BaseButton>
               )}
             </div>
             {enrolledCourses.length > 0 ? (
@@ -787,7 +819,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                     <div className="course-header">
                       <div className="course-name">{enrollment.course.name}</div>
                       {enrollment.course.level && (
-                        <span className="course-level">Nivel {enrollment.course.level}</span>
+                        <BaseBadge variant="primary" size="sm">
+                          Nivel {enrollment.course.level}
+                        </BaseBadge>
                       )}
                     </div>
                     <div className="course-progress-mini">
@@ -802,17 +836,17 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                   </div>
                 ))}
                 {enrolledCourses.length > 3 && (
-                  <button className="btn btn-outline" onClick={handleViewMyCourses}>
+                  <BaseButton variant="outline" onClick={handleViewMyCourses}>
                     Ver todos mis cursos ({enrolledCourses.length})
-                  </button>
+                  </BaseButton>
                 )}
               </div>
             ) : (
               <div className="empty-courses">
                 <p>No tienes cursos asignados aún</p>
-                <button className="btn btn-primary" onClick={handleViewMyCourses}>
+                <BaseButton variant="primary" onClick={handleViewMyCourses}>
                   Explorar Cursos
-                </button>
+                </BaseButton>
               </div>
             )}
           </div>
@@ -824,17 +858,17 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 <ClipboardList size={20} strokeWidth={2} />
                 Asignado a Mí
               </h3>
-              <button className="btn btn-text" onClick={handleViewMyAssignments}>
+              <BaseButton variant="ghost" size="sm" onClick={handleViewMyAssignments}>
                 Ver todos →
-              </button>
+              </BaseButton>
             </div>
             <div className="assignments-info">
               <p className="assignments-description">
                 Contenidos y ejercicios asignados directamente por tu profesor para práctica adicional
               </p>
-              <button className="btn btn-primary" onClick={handleViewMyAssignments}>
+              <BaseButton variant="primary" onClick={handleViewMyAssignments}>
                 Ver mis asignaciones
-              </button>
+              </BaseButton>
             </div>
           </div>
 
@@ -866,15 +900,18 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               </div>
             </div>
           ) : (
-            <div className="empty-state card">
-              <div className="empty-icon">
-                <Target size={64} strokeWidth={2} />
-              </div>
-              <h3>¡Aún no has completado ejercicios!</h3>
-              <p>Comienza tu primer ejercicio y empieza a ganar puntos</p>
-              <button className="btn btn-primary" onClick={onStartGame}>
-                Comenzar ejercicios
-              </button>
+            <div className="card">
+              <BaseEmptyState
+                icon={Target}
+                title="¡Aún no has completado ejercicios!"
+                description="Comienza tu primer ejercicio y empieza a ganar puntos"
+                action={
+                  <BaseButton variant="primary" icon={Gamepad2} onClick={onStartGame}>
+                    Comenzar ejercicios
+                  </BaseButton>
+                }
+                size="md"
+              />
             </div>
           )}
         </div>
