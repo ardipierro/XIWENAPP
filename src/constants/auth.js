@@ -15,7 +15,8 @@ export const USER_ROLES = {
   TRIAL_TEACHER: 'trial_teacher',
   STUDENT: 'student',
   LISTENER: 'listener',
-  TRIAL: 'trial'
+  TRIAL: 'trial',
+  GUARDIAN: 'guardian'
 };
 
 // Roles que tienen permisos de administrador
@@ -35,6 +36,11 @@ export const STUDENT_ROLES = [
   USER_ROLES.STUDENT,
   USER_ROLES.LISTENER,
   USER_ROLES.TRIAL
+];
+
+// Roles que tienen permisos de tutor/encargado
+export const GUARDIAN_ROLES = [
+  USER_ROLES.GUARDIAN
 ];
 
 // Estados de usuario

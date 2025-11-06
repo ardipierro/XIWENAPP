@@ -16,6 +16,7 @@ export const ROLES = {
   ADMIN: 'admin',
   TEACHER: 'teacher',
   STUDENT: 'student',
+  GUARDIAN: 'guardian',      // Padre/Tutor/Encargado
   LISTENER: 'listener',
   TRIAL: 'trial',
   TRIAL_TEACHER: 'trial_teacher'
@@ -43,6 +44,12 @@ export const ROLE_INFO = {
     description: 'Acceso completo a juegos y progreso personal',
     icon: 'GraduationCap',
     color: '#71717a' // gris oscuro
+  },
+  [ROLES.GUARDIAN]: {
+    name: 'Padre/Tutor',
+    description: 'Puede ver el desempeño de estudiantes vinculados',
+    icon: 'Users',
+    color: '#10b981' // verde
   },
   [ROLES.LISTENER]: {
     name: 'Oyente',
@@ -73,6 +80,11 @@ export const TEACHER_ROLES = [ROLES.ADMIN, ROLES.TEACHER, ROLES.TRIAL_TEACHER];
  * Roles que tienen acceso al dashboard de alumno
  */
 export const STUDENT_ROLES = [ROLES.STUDENT, ROLES.LISTENER, ROLES.TRIAL];
+
+/**
+ * Roles que tienen acceso al dashboard de tutor/encargado
+ */
+export const GUARDIAN_ROLES = [ROLES.GUARDIAN];
 
 /**
  * Verificar si un email es el administrador principal
