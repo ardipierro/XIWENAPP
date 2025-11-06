@@ -40,25 +40,12 @@ import {
   loadStudents,
   loadGameHistory,
   loadCategories,
-  loadCourses,
-  updateUserRole,
-  updateUserStatus,
-  enrollStudentInCourse,
-  unenrollStudentFromCourse,
-  getStudentEnrollments,
-  getStudentEnrolledCoursesCount
+  loadCourses
 } from '../firebase/firestore';
-import { getAllUsers, deleteUser } from '../firebase/users';
-import {
-  assignToStudent,
-  removeFromStudent,
-  getStudentAssignments
-} from '../firebase/relationships';
+import { getAllUsers, deleteUser, createUser } from '../firebase/users';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
 import { getClassesByTeacher } from '../firebase/classes';
-import { createUser } from '../firebase/users';
-import { getUserCredits } from '../firebase/credits';
 import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
@@ -67,7 +54,6 @@ import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
 import ContentManager from './ContentManager';
 import ClassManager from './ClassManager';
-import ClassManagement from './ClassManagement';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
@@ -85,6 +71,11 @@ import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 
+// Custom hooks
+import { useUserManagement } from '../hooks/useUserManagement';
+import { useResourceAssignment } from '../hooks/useResourceAssignment';
+import { useScreenNavigation } from '../hooks/useScreenNavigation';
+
 // Icon mapping for role icons from roleConfig
 const ICON_MAP = {
   'Crown': Crown,
@@ -99,285 +90,122 @@ const ICON_MAP = {
 function TeacherDashboard({ user, userRole, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, students, playExercise, whiteboard, whiteboardSessions, excalidrawWhiteboard, excalidrawSessions, liveClasses, liveClassRoom, testCollab
-  const [selectedExerciseId, setSelectedExerciseId] = useState(null);
-  const [selectedWhiteboardSession, setSelectedWhiteboardSession] = useState(null);
-  const [whiteboardManagerKey, setWhiteboardManagerKey] = useState(0);
-  const [selectedExcalidrawSession, setSelectedExcalidrawSession] = useState(null);
-  const [excalidrawManagerKey, setExcalidrawManagerKey] = useState(0);
-  const [selectedLiveClass, setSelectedLiveClass] = useState(null);
-  const [liveGameSessionId, setLiveGameSessionId] = useState(null);
+
+  // Teacher permissions (students only, no role management)
+  const permissions = { canViewAll: false, canManageRoles: false };
+
+  // CUSTOM HOOKS
+  const userManagement = useUserManagement(user, permissions);
+  const resourceAssignment = useResourceAssignment();
+  const navigation = useScreenNavigation();
+
+  // Local states (teacher-specific)
+  const [loading, setLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+
+  // Teacher-specific stats (simpler than admin)
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalGames: 0,
     totalCategories: 0,
     totalCourses: 0
   });
+
+  // Teacher functionality states
+  const [courses, setCourses] = useState([]);
   const [recentGames, setRecentGames] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Estados para gestión de usuarios (solo Admin)
-  const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [sortField, setSortField] = useState('name'); // 'name', 'credits', 'email', 'role', 'status', 'createdAt'
-  const [sortDirection, setSortDirection] = useState('asc'); // 'asc' or 'desc'
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [selectedUserProfile, setSelectedUserProfile] = useState(null);
-  const [showUserProfile, setShowUserProfile] = useState(false);
-
-  // Estados para asignación de recursos (cursos, contenido, ejercicios)
-  const [showResourceModal, setShowResourceModal] = useState(false);
-  const [activeResourceTab, setActiveResourceTab] = useState('courses'); // 'courses', 'content', 'exercises'
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [studentEnrollments, setStudentEnrollments] = useState([]);
-  const [studentContent, setStudentContent] = useState([]);
-  const [studentExercises, setStudentExercises] = useState([]);
   const [allContent, setAllContent] = useState([]);
   const [allExercises, setAllExercises] = useState([]);
   const [allClasses, setAllClasses] = useState([]);
-  const [enrollmentCounts, setEnrollmentCounts] = useState({});
-  const [loadingResources, setLoadingResources] = useState(false);
 
-  // Estados para controlar apertura de modales desde quick access
-  const [openCourseModal, setOpenCourseModal] = useState(false);
-  const [openContentModal, setOpenContentModal] = useState(false);
-  const [openClassModal, setOpenClassModal] = useState(false);
-
-  // Flag para evitar doble ejecución del useEffect de retorno
-  const [hasProcessedReturn, setHasProcessedReturn] = useState(false);
-
-  // Estados para búsqueda y vista en dashboard principal
-  const [dashboardSearchTerm, setDashboardSearchTerm] = useState('');
-  const [dashboardViewMode, setDashboardViewMode] = useState('grid'); // 'grid' or 'list'
-
-  // Estados para panel de alumnos (cards)
-  const [studentsSearchTerm, setStudentsSearchTerm] = useState('');
-  const [studentsViewMode, setStudentsViewMode] = useState('grid'); // 'grid' or 'list'
-
-  // Determinar si el usuario es admin (verificar tanto email como rol en Firestore)
+  // Determinar si el usuario es admin (aunque esté en TeacherDashboard)
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
 
+  // Load dashboard data on mount
   useEffect(() => {
     loadDashboardData();
   }, []);
 
-  // Detectar cambios de ruta para abrir sección correspondiente
+  // Detect return from ViewAs
   useEffect(() => {
-    // Verificar si hay un userId pendiente de procesar (retorno de "Ver como")
-    const pendingUserId = sessionStorage.getItem('viewAsReturnUserId');
+    const returnUserId = sessionStorage.getItem('viewAsReturnUserId');
+    if (returnUserId && userManagement.users.length > 0 && !navigation.hasProcessedReturn) {
+      logger.debug('🔄 [TeacherDashboard] Detected return from ViewAs, userId:', returnUserId);
+      navigation.setHasProcessedReturn(true);
+      sessionStorage.removeItem('viewAsReturning');
+      sessionStorage.removeItem('viewAsReturnUserId');
 
+      const targetUser = userManagement.users.find(u => u.id === returnUserId);
+      if (targetUser) {
+        handleViewUserProfile(targetUser);
+      }
+
+      navigation.setCurrentScreen('users');
+    }
+  }, [userManagement.users, navigation.hasProcessedReturn]);
+
+  // Handle route changes
+  useEffect(() => {
+    const pendingUserId = sessionStorage.getItem('viewAsReturnUserId');
     if (pendingUserId) {
-      // Forzar pantalla de usuarios y resetear flag de procesamiento
-      setCurrentScreen('users');
-      setHasProcessedReturn(false);
-      return; // No procesar otras rutas
+      navigation.setCurrentScreen('users');
+      navigation.setHasProcessedReturn(false);
+      return;
     }
 
-    // Manejar rutas normales
     if (location.pathname === '/teacher/users') {
-      setCurrentScreen('users');
+      navigation.setCurrentScreen('users');
     } else if (location.pathname === '/teacher') {
-      setCurrentScreen('dashboard');
+      navigation.setCurrentScreen('dashboard');
     }
   }, [location.pathname]);
 
-  // Detectar si se debe reabrir UserProfile al volver de "Ver como"
+  // Load users when screen changes to 'users'
   useEffect(() => {
-    // Solo ejecutar si estamos en la pantalla de usuarios
-    if (currentScreen !== 'users') {
-      return;
-    }
-
-    // Si ya procesamos el retorno, no hacer nada
-    if (hasProcessedReturn) {
-      return;
-    }
-
-    const userId = sessionStorage.getItem('viewAsReturnUserId');
-
-    // Solo procesar si hay userId pendiente
-    if (!userId) {
-      return;
-    }
-
-    // Esperar a que se carguen los usuarios
-    if (users.length === 0) {
-      return;
-    }
-
-    // Buscar y abrir el perfil
-    const userToOpen = users.find(u => u.id === userId);
-
-    if (userToOpen) {
-      // Marcar como procesado y limpiar sessionStorage
-      setHasProcessedReturn(true);
-      sessionStorage.removeItem('viewAsReturnUserId');
-      sessionStorage.removeItem('viewAsReturning');
-
-      // Abrir el perfil del usuario
-      setSelectedUserProfile(userToOpen);
-      setShowUserProfile(true);
-    }
-    // Si no se encuentra el usuario, reintentar cuando se carguen más usuarios
-  }, [currentScreen, hasProcessedReturn, users.length]);
-
-  // Handlers de navegación
-  const handleStartGame = () => {
-    setCurrentScreen('setup');
-  };
-
-  const handleManageExercises = () => {
-    setCurrentScreen('exercises');
-  };
-
-  const handleManageContent = () => {
-    setCurrentScreen('content');
-  };
-
-  const handleManageGroups = () => {
-    setCurrentScreen('groups');
-  };
-
-  const handleViewAnalytics = () => {
-    setCurrentScreen('analytics');
-  };
-
-  const handleManageCategories = () => {
-    alert('Funcionalidad "Gestionar Categorías" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
-  };
-
-  const handleViewHistory = () => {
-    alert('Funcionalidad "Ver Historial" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
-  };
-
-  const handleManageCourses = () => {
-    setCurrentScreen('courses');
-  };
-
-  const handleBackToDashboard = () => {
-    setCurrentScreen('dashboard');
-    setSelectedExerciseId(null);
-    setShowUserProfile(false);
-    setSelectedUserProfile(null);
-    // Reset modal flags
-    setOpenCourseModal(false);
-    setOpenContentModal(false);
-    setOpenClassModal(false);
-    // No recargar datos - ya están en caché y son actuales
-  };
-
-  const handlePlayExercise = (exerciseId) => {
-    setSelectedExerciseId(exerciseId);
-    setCurrentScreen('playExercise');
-  };
-
-  const handleViewUserProfile = (userItem) => {
-    setSelectedUserProfile(userItem);
-    setShowUserProfile(true);
-  };
-
-  const handleBackFromProfile = () => {
-    setShowUserProfile(false);
-    setSelectedUserProfile(null);
-  };
-
-  const handleProfileUpdate = async () => {
-    // Recargar usuarios después de actualizar el perfil
-    await loadUsers();
-  };
-
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción marcará al usuario como inactivo.')) {
-      return;
-    }
-
-    try {
-      const result = await deleteUser(userId);
-      if (result.success) {
-        // Recargar la lista de usuarios
-        await loadUsers();
-        // Mostrar mensaje de éxito (puedes agregar un toast/notification)
-        logger.debug('Usuario eliminado exitosamente');
-      } else {
-        logger.error('Error al eliminar usuario:', result.error);
-        alert('Error al eliminar el usuario. Por favor intenta nuevamente.');
+    if (navigation.currentScreen === 'users') {
+      const pendingReturn = sessionStorage.getItem('viewAsReturnUserId');
+      if (pendingReturn && !isAdminEmail(user?.email) && !userRole) {
+        return; // Wait for userRole to sync
       }
-    } catch (error) {
-      logger.error('Error al eliminar usuario:', error);
-      alert('Error al eliminar el usuario. Por favor intenta nuevamente.');
+      userManagement.loadUsers();
     }
-  };
+  }, [navigation.currentScreen, isAdmin, userRole]);
 
-  const handleMenuAction = (action) => {
-    // Mapear las acciones del menú lateral a las vistas del dashboard
-    const actionMap = {
-      'dashboard': 'dashboard',
-      'exercises': 'exercises',
-      'content': 'content',
-      'courses': 'courses',
-      'groups': 'groups',
-      'classes': 'classes',
-      'attendance': 'attendance',
-      'setup': 'setup',
-      'analytics': 'analytics',
-      'users': 'users',
-      'students': 'students',
-      'whiteboardSessions': 'whiteboardSessions',
-      'excalidrawWhiteboard': 'excalidrawSessions',
-      'liveClasses': 'liveClasses',
-      'liveGame': 'liveGame'
-    };
-
-    const screen = actionMap[action];
-
-    if (screen) {
-      setCurrentScreen(screen);
-      setSelectedExerciseId(null);
-      setSelectedWhiteboardSession(null);
+  // Load enrollment counts when users are loaded
+  useEffect(() => {
+    if (userManagement.users.length > 0) {
+      const studentIds = userManagement.users.map(u => u.id);
+      resourceAssignment.loadEnrollmentCounts(studentIds);
     }
-  };
+  }, [userManagement.users]);
 
   const loadDashboardData = async () => {
     setLoading(true);
     try {
       const startTime = performance.now();
 
-      // Cargar datos en paralelo
-      const [allUsers, students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
-        getAllUsers({ activeOnly: true }),
+      // Load all data in parallel
+      const [students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
         loadStudents(),
         loadGameHistory(),
         loadCategories(),
         loadCourses(),
         getContentByTeacher(user.uid),
-        getClassesByTeacher(user.uid)
+        getClassesByTeacher(user.uid),
+        userManagement.loadUsers() // Load users (students only) with credits via hook
       ]);
 
-      logger.debug(`⏱️ [TeacherDashboard] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [TeacherDashboard] Parallel queries: ${(performance.now() - startTime).toFixed(0)}ms`);
 
-      // Filtrar usuarios según rol
-      if (isAdmin) {
-        setUsers(allUsers);
-      } else {
-        const filteredStudents = allUsers.filter(u =>
-          ['student', 'listener', 'trial'].includes(u.role)
-        );
-        setUsers(filteredStudents);
-      }
-
-      const activeStudents = students.filter(s => s.active !== false);
       const activeCourses = allCourses.filter(c => c.active !== false);
       setCourses(activeCourses);
       setAllContent(teacherContent);
       setAllClasses(teacherClasses);
 
-      // Calcular top students
+      // Calculate top students
       const processingStart = performance.now();
       const studentGameCounts = {};
       games.forEach(game => {
@@ -403,10 +231,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         .sort((a, b) => b.gamesPlayed - a.gamesPlayed)
         .slice(0, 5);
 
-      logger.debug(`⏱️ [TeacherDashboard] Procesamiento datos: ${(performance.now() - processingStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [TeacherDashboard] Processing data: ${(performance.now() - processingStart).toFixed(0)}ms`);
 
       setStats({
-        totalStudents: activeStudents.length,
+        totalStudents: students.filter(s => s.active !== false).length,
         totalGames: games.length,
         totalCategories: Object.keys(categories).length,
         totalCourses: activeCourses.length
@@ -422,94 +250,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     setLoading(false);
   };
 
-  // Funciones para gestión de usuarios/alumnos
-  const loadUsers = async () => {
-    try {
-      let usersToLoad;
-      if (isAdmin) {
-        // Admin ve todos los usuarios activos
-        usersToLoad = await getAllUsers({ activeOnly: true });
-      } else {
-        // Profesores solo ven alumnos activos
-        const allUsers = await getAllUsers({ activeOnly: true });
-        usersToLoad = allUsers.filter(u =>
-          ['student', 'listener', 'trial'].includes(u.role)
-        );
-      }
-
-      // Cargar créditos para cada usuario
-      const usersWithCredits = await Promise.all(
-        usersToLoad.map(async (userItem) => {
-          try {
-            const creditsData = await getUserCredits(userItem.id);
-            return {
-              ...userItem,
-              credits: creditsData?.availableCredits || 0
-            };
-          } catch (error) {
-            logger.error(`Error cargando créditos para ${userItem.id}:`, error);
-            return {
-              ...userItem,
-              credits: 0
-            };
-          }
-        })
-      );
-
-      setUsers(usersWithCredits);
-      logger.debug('Usuarios cargados:', usersWithCredits.length);
-    } catch (error) {
-      logger.error('Error cargando usuarios:', error);
-      showError('Error al cargar usuarios');
-    }
-  };
-
-  const handleRoleChange = async (userId, newRole) => {
-    const targetUser = users.find(u => u.id === userId);
-    if (targetUser && isAdminEmail(targetUser.email) && user.email === targetUser.email) {
-      showError('No puedes cambiar tu propio rol de admin');
-      return;
-    }
-
-    try {
-      const success = await updateUserRole(userId, newRole);
-      if (success) {
-        setUsers(users.map(u =>
-          u.id === userId ? { ...u, role: newRole } : u
-        ));
-        showSuccess(`Rol actualizado a ${ROLE_INFO[newRole].name}`);
-      } else {
-        showError('Error al actualizar rol');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error al actualizar rol');
-    }
-  };
-
-  const handleStatusChange = async (userId, newStatus) => {
-    const targetUser = users.find(u => u.id === userId);
-    if (targetUser && isAdminEmail(targetUser.email) && newStatus === 'suspended') {
-      showError('No puedes suspender al admin principal');
-      return;
-    }
-
-    try {
-      const success = await updateUserStatus(userId, newStatus);
-      if (success) {
-        setUsers(users.map(u =>
-          u.id === userId ? { ...u, status: newStatus } : u
-        ));
-        showSuccess(`Estado actualizado a ${newStatus}`);
-      } else {
-        showError('Error al actualizar estado');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error al actualizar estado');
-    }
-  };
-
+  // Helper functions
   const showSuccess = (message) => {
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(''), 3000);
@@ -519,284 +260,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     setErrorMessage(message);
     setTimeout(() => setErrorMessage(''), 3000);
   };
-
-  // Función para crear un nuevo usuario
-  const handleCreateUser = async (userData) => {
-    try {
-      const result = await createUser({
-        ...userData,
-        createdBy: user.uid
-      });
-
-      if (result.success) {
-        showSuccess(`Usuario ${userData.email} creado exitosamente`);
-        // Recargar la lista de usuarios
-        await loadUsers();
-        return {
-          success: true,
-          password: result.password // Pasar la contraseña generada
-        };
-      } else {
-        return { success: false, error: result.error };
-      }
-    } catch (error) {
-      logger.error('Error al crear usuario:', error);
-      return { success: false, error: 'Error inesperado al crear usuario' };
-    }
-  };
-
-  // Funciones para asignación de recursos
-  const handleOpenResourceModal = async (student, initialTab = 'courses') => {
-    setSelectedStudent(student);
-    setActiveResourceTab(initialTab);
-    setShowResourceModal(true);
-    setLoadingResources(true);
-
-    try {
-      // Cargar inscripciones de cursos (método legacy)
-      const enrollments = await getStudentEnrollments(student.id);
-      setStudentEnrollments(enrollments);
-
-      // Cargar asignaciones directas (contenido y ejercicios)
-      const assignments = await getStudentAssignments(student.id);
-
-      // Filtrar contenido y ejercicios asignados
-      const assignedContent = assignments.filter(a => a.itemType === 'content');
-      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
-
-      setStudentContent(assignedContent);
-      setStudentExercises(assignedExercises);
-
-      // Cargar todo el contenido y ejercicios disponibles del profesor
-      const teacherContent = await getContentByTeacher(user.uid);
-      const teacherExercises = await getExercisesByTeacher(user.uid);
-
-      setAllContent(teacherContent);
-      setAllExercises(teacherExercises);
-
-    } catch (error) {
-      logger.error('Error cargando recursos:', error);
-      showError('Error al cargar recursos del alumno');
-    }
-
-    setLoadingResources(false);
-  };
-
-  const handleCloseResourceModal = () => {
-    setShowResourceModal(false);
-    setSelectedStudent(null);
-    setStudentEnrollments([]);
-    setStudentContent([]);
-    setStudentExercises([]);
-    setActiveResourceTab('courses');
-  };
-
-  const handleEnrollCourse = async (courseId) => {
-    if (!selectedStudent) return;
-
-    try {
-      const enrollmentId = await enrollStudentInCourse(selectedStudent.id, courseId);
-      if (enrollmentId) {
-        showSuccess('Curso asignado exitosamente');
-        // Recargar inscripciones
-        const enrollments = await getStudentEnrollments(selectedStudent.id);
-        setStudentEnrollments(enrollments);
-        // Actualizar contador
-        loadEnrollmentCounts();
-      } else {
-        showError('Error al asignar curso');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error al asignar curso');
-    }
-  };
-
-  const handleUnenrollCourse = async (courseId) => {
-    if (!selectedStudent) return;
-
-    const confirmed = window.confirm('¿Estás seguro de que deseas desasignar este curso?');
-    if (!confirmed) return;
-
-    try {
-      const success = await unenrollStudentFromCourse(selectedStudent.id, courseId);
-      if (success) {
-        showSuccess('Curso desasignado exitosamente');
-        // Recargar inscripciones
-        const enrollments = await getStudentEnrollments(selectedStudent.id);
-        setStudentEnrollments(enrollments);
-        // Actualizar contador
-        loadEnrollmentCounts();
-      } else {
-        showError('Error al desasignar curso');
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error al desasignar curso');
-    }
-  };
-
-  const loadEnrollmentCounts = async () => {
-    try {
-      const counts = {};
-      for (const user of users) {
-        const count = await getStudentEnrolledCoursesCount(user.id);
-        counts[user.id] = count;
-      }
-      setEnrollmentCounts(counts);
-    } catch (error) {
-      logger.error('Error cargando contadores de inscripciones:', error);
-    }
-  };
-
-  const isEnrolled = (courseId) => {
-    return studentEnrollments.some(enrollment => enrollment.course.id === courseId);
-  };
-
-  // Funciones para asignación de contenido
-  const handleAssignContent = async (contentId) => {
-    if (!selectedStudent) return;
-
-    try {
-      await assignToStudent(selectedStudent.id, 'content', contentId, user.uid);
-      showSuccess('Contenido asignado exitosamente');
-
-      // Recargar asignaciones
-      const assignments = await getStudentAssignments(selectedStudent.id);
-      const assignedContent = assignments.filter(a => a.itemType === 'content');
-      setStudentContent(assignedContent);
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error al asignar contenido');
-    }
-  };
-
-  const handleRemoveContent = async (contentId) => {
-    if (!selectedStudent) return;
-
-    const confirmed = window.confirm('¿Estás seguro de que deseas desasignar este contenido?');
-    if (!confirmed) return;
-
-    try {
-      await removeFromStudent(selectedStudent.id, 'content', contentId);
-      showSuccess('Contenido desasignado exitosamente');
-
-      // Recargar asignaciones
-      const assignments = await getStudentAssignments(selectedStudent.id);
-      const assignedContent = assignments.filter(a => a.itemType === 'content');
-      setStudentContent(assignedContent);
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error al desasignar contenido');
-    }
-  };
-
-  const isContentAssigned = (contentId) => {
-    return studentContent.some(sc => sc.itemId === contentId);
-  };
-
-  // Funciones para asignación de ejercicios
-  const handleAssignExercise = async (exerciseId) => {
-    if (!selectedStudent) return;
-
-    try {
-      await assignToStudent(selectedStudent.id, 'exercise', exerciseId, user.uid);
-      showSuccess('Ejercicio asignado exitosamente');
-
-      // Recargar asignaciones
-      const assignments = await getStudentAssignments(selectedStudent.id);
-      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
-      setStudentExercises(assignedExercises);
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error al asignar ejercicio');
-    }
-  };
-
-  const handleRemoveExercise = async (exerciseId) => {
-    if (!selectedStudent) return;
-
-    const confirmed = window.confirm('¿Estás seguro de que deseas desasignar este ejercicio?');
-    if (!confirmed) return;
-
-    try {
-      await removeFromStudent(selectedStudent.id, 'exercise', exerciseId);
-      showSuccess('Ejercicio desasignado exitosamente');
-
-      // Recargar asignaciones
-      const assignments = await getStudentAssignments(selectedStudent.id);
-      const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
-      setStudentExercises(assignedExercises);
-    } catch (error) {
-      logger.error('Error:', error);
-      showError('Error al desasignar ejercicio');
-    }
-  };
-
-  const isExerciseAssigned = (exerciseId) => {
-    return studentExercises.some(se => se.itemId === exerciseId);
-  };
-
-  // Filtrar usuarios por término de búsqueda
-  // Función para manejar el click en las cabeceras de la tabla
-  const handleSort = (field) => {
-    if (sortField === field) {
-      // Si ya está ordenando por este campo, invertir dirección
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      // Nuevo campo, empezar con ascendente
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  const filteredUsers = users
-    .filter(userItem => {
-      if (!searchTerm) return true;
-
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        userItem.name?.toLowerCase().includes(searchLower) ||
-        userItem.email?.toLowerCase().includes(searchLower) ||
-        ROLE_INFO[userItem.role]?.name?.toLowerCase().includes(searchLower)
-      );
-    })
-    .sort((a, b) => {
-      let aValue, bValue;
-
-      switch (sortField) {
-        case 'name':
-          aValue = a.name?.toLowerCase() || '';
-          bValue = b.name?.toLowerCase() || '';
-          break;
-        case 'credits':
-          aValue = a.credits || 0;
-          bValue = b.credits || 0;
-          break;
-        case 'email':
-          aValue = a.email?.toLowerCase() || '';
-          bValue = b.email?.toLowerCase() || '';
-          break;
-        case 'role':
-          aValue = ROLE_INFO[a.role]?.name || '';
-          bValue = ROLE_INFO[b.role]?.name || '';
-          break;
-        case 'status':
-          aValue = a.status || 'active';
-          bValue = b.status || 'active';
-          break;
-        case 'createdAt':
-          aValue = a.createdAt?.toMillis?.() || 0;
-          bValue = b.createdAt?.toMillis?.() || 0;
-          break;
-        default:
-          return 0;
-      }
-
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
@@ -808,36 +271,236 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     });
   };
 
-  // Cargar usuarios cuando cambia a pantalla de usuarios O cuando cambia isAdmin
-  useEffect(() => {
-    if (currentScreen === 'users') {
-      // Si estamos procesando un retorno de "Ver como", esperar a que el rol esté sincronizado
-      const pendingReturn = sessionStorage.getItem('viewAsReturnUserId');
-      if (pendingReturn && !isAdminEmail(user?.email) && !userRole) {
-        // Esperar a que userRole se actualice para cargar con permisos correctos
-        return;
-      }
-
-      loadUsers();
-    }
-  }, [currentScreen, isAdmin, userRole]);
-
-  // Cargar contadores de inscripciones cuando se cargan usuarios
-  useEffect(() => {
-    if (users.length > 0) {
-      loadEnrollmentCounts();
-    }
-  }, [users]);
-
-  // Obtener iniciales para el avatar
   const getUserInitials = () => {
     if (!user.email) return '?';
     return user.email.charAt(0).toUpperCase();
   };
 
+  // Navigation handlers (using hook functions)
+  const handleStartGame = () => navigation.setCurrentScreen('setup');
+  const handleManageExercises = () => navigation.setCurrentScreen('exercises');
+  const handleManageContent = () => navigation.setCurrentScreen('content');
+  const handleManageGroups = () => navigation.setCurrentScreen('groups');
+  const handleViewAnalytics = () => navigation.setCurrentScreen('analytics');
+  const handleManageCourses = () => navigation.setCurrentScreen('courses');
+
+  const handleManageCategories = () => {
+    alert('Funcionalidad "Gestionar Categorías" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
+  };
+
+  const handleViewHistory = () => {
+    alert('Funcionalidad "Ver Historial" próximamente.\n\nEsta característica estará disponible en una futura actualización.');
+  };
+
+  const handlePlayExercise = (exerciseId) => {
+    navigation.setSelectedExerciseId(exerciseId);
+    navigation.setCurrentScreen('playExercise');
+  };
+
+  const handleViewUserProfile = (userItem) => {
+    navigation.setSelectedUserProfile(userItem);
+    navigation.setShowUserProfile(true);
+  };
+
+  const handleBackFromProfile = () => {
+    navigation.setShowUserProfile(false);
+    navigation.setSelectedUserProfile(null);
+  };
+
+  const handleProfileUpdate = async () => {
+    await userManagement.loadUsers();
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción marcará al usuario como inactivo.')) {
+      return;
+    }
+
+    try {
+      const result = await deleteUser(userId);
+      if (result.success) {
+        await userManagement.loadUsers();
+        logger.debug('Usuario eliminado exitosamente');
+      } else {
+        logger.error('Error al eliminar usuario:', result.error);
+        alert('Error al eliminar el usuario. Por favor intenta nuevamente.');
+      }
+    } catch (error) {
+      logger.error('Error al eliminar usuario:', error);
+      alert('Error al eliminar el usuario. Por favor intenta nuevamente.');
+    }
+  };
+
+  const handleCreateUser = async (userData) => {
+    try {
+      const result = await createUser({
+        ...userData,
+        createdBy: user.uid
+      });
+
+      if (result.success) {
+        showSuccess(`Usuario ${userData.email} creado exitosamente`);
+        await userManagement.loadUsers();
+        return {
+          success: true,
+          password: result.password
+        };
+      } else {
+        return { success: false, error: result.error };
+      }
+    } catch (error) {
+      logger.error('Error al crear usuario:', error);
+      return { success: false, error: 'Error inesperado al crear usuario' };
+    }
+  };
+
+  // Role and status change handlers (using hook functions)
+  const handleRoleChange = async (userId, newRole) => {
+    const targetUser = userManagement.users.find(u => u.id === userId);
+    if (targetUser && isAdminEmail(targetUser.email) && user.email === targetUser.email) {
+      showError('No puedes cambiar tu propio rol de admin');
+      return;
+    }
+
+    const result = await userManagement.handleRoleChange(userId, newRole);
+    if (result.success) {
+      showSuccess(`Rol actualizado a ${ROLE_INFO[newRole].name}`);
+    } else {
+      showError('Error al actualizar rol');
+    }
+  };
+
+  const handleStatusChange = async (userId, newStatus) => {
+    const targetUser = userManagement.users.find(u => u.id === userId);
+    if (targetUser && isAdminEmail(targetUser.email) && newStatus === 'suspended') {
+      showError('No puedes suspender al admin principal');
+      return;
+    }
+
+    const result = await userManagement.handleStatusChange(userId, newStatus);
+    if (result.success) {
+      showSuccess(`Estado actualizado a ${newStatus}`);
+    } else {
+      showError('Error al actualizar estado');
+    }
+  };
+
+  // Resource assignment handlers (using hook functions)
+  const handleOpenResourceModal = async (student, initialTab = 'courses') => {
+    await resourceAssignment.handleOpenResourceModal(student, allContent, allExercises);
+    resourceAssignment.setActiveResourceTab(initialTab);
+  };
+
+  const handleEnrollCourse = async (courseId) => {
+    if (!resourceAssignment.selectedStudent) return;
+
+    const result = await resourceAssignment.handleEnrollCourse(
+      resourceAssignment.selectedStudent.id,
+      courseId,
+      courses.find(c => c.id === courseId)?.name || ''
+    );
+
+    if (result.success) {
+      showSuccess('Curso asignado exitosamente');
+      const studentIds = userManagement.users.map(u => u.id);
+      resourceAssignment.loadEnrollmentCounts(studentIds);
+    } else {
+      showError('Error al asignar curso');
+    }
+  };
+
+  const handleUnenrollCourse = async (courseId) => {
+    if (!resourceAssignment.selectedStudent) return;
+
+    const confirmed = window.confirm('¿Estás seguro de que deseas desasignar este curso?');
+    if (!confirmed) return;
+
+    const result = await resourceAssignment.handleUnenrollCourse(
+      resourceAssignment.selectedStudent.id,
+      courseId
+    );
+
+    if (result.success) {
+      showSuccess('Curso desasignado exitosamente');
+      const studentIds = userManagement.users.map(u => u.id);
+      resourceAssignment.loadEnrollmentCounts(studentIds);
+    } else {
+      showError('Error al desasignar curso');
+    }
+  };
+
+  const handleAssignContent = async (contentId) => {
+    if (!resourceAssignment.selectedStudent) return;
+
+    const content = allContent.find(c => c.id === contentId);
+    const result = await resourceAssignment.handleAssignContent(
+      resourceAssignment.selectedStudent.id,
+      contentId,
+      content?.title || ''
+    );
+
+    if (result.success) {
+      showSuccess('Contenido asignado exitosamente');
+    } else {
+      showError('Error al asignar contenido');
+    }
+  };
+
+  const handleRemoveContent = async (contentId) => {
+    if (!resourceAssignment.selectedStudent) return;
+
+    const confirmed = window.confirm('¿Estás seguro de que deseas desasignar este contenido?');
+    if (!confirmed) return;
+
+    const result = await resourceAssignment.handleRemoveContent(
+      resourceAssignment.selectedStudent.id,
+      contentId
+    );
+
+    if (result.success) {
+      showSuccess('Contenido desasignado exitosamente');
+    } else {
+      showError('Error al desasignar contenido');
+    }
+  };
+
+  const handleAssignExercise = async (exerciseId) => {
+    if (!resourceAssignment.selectedStudent) return;
+
+    const exercise = allExercises.find(e => e.id === exerciseId);
+    const result = await resourceAssignment.handleAssignExercise(
+      resourceAssignment.selectedStudent.id,
+      exerciseId,
+      exercise?.title || ''
+    );
+
+    if (result.success) {
+      showSuccess('Ejercicio asignado exitosamente');
+    } else {
+      showError('Error al asignar ejercicio');
+    }
+  };
+
+  const handleRemoveExercise = async (exerciseId) => {
+    if (!resourceAssignment.selectedStudent) return;
+
+    const confirmed = window.confirm('¿Estás seguro de que deseas desasignar este ejercicio?');
+    if (!confirmed) return;
+
+    const result = await resourceAssignment.handleRemoveExercise(
+      resourceAssignment.selectedStudent.id,
+      exerciseId
+    );
+
+    if (result.success) {
+      showSuccess('Ejercicio desasignado exitosamente');
+    } else {
+      showError('Error al desasignar ejercicio');
+    }
+  };
+
   // Renderizar pantalla de carga
   if (loading) {
-    // Si estamos procesando un retorno de ViewAs, mostrar mensaje específico
     const isReturningFromViewAs = sessionStorage.getItem('viewAsReturning') === 'true';
 
     return (
@@ -851,88 +514,86 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar GameContainer (Crear Juego) - SIN Layout porque tiene su propia navegación
-  if (currentScreen === 'setup') {
-    return <GameContainer onBack={handleBackToDashboard} />;
+  if (navigation.currentScreen === 'setup') {
+    return <GameContainer onBack={navigation.handleBackToDashboard} />;
   }
 
   // Renderizar Live Game Projection - SIN Layout, pantalla completa
-  if (currentScreen === 'liveGameProjection' && liveGameSessionId) {
+  if (navigation.currentScreen === 'liveGameProjection' && navigation.liveGameSessionId) {
     return (
       <LiveGameProjection
-        sessionId={liveGameSessionId}
+        sessionId={navigation.liveGameSessionId}
         onBack={() => {
-          setLiveGameSessionId(null);
-          setCurrentScreen('liveGame');
+          navigation.setLiveGameSessionId(null);
+          navigation.setCurrentScreen('liveGame');
         }}
       />
     );
   }
 
   // Renderizar Live Game Setup - CON Layout
-  if (currentScreen === 'liveGame') {
+  if (navigation.currentScreen === 'liveGame') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <LiveGameSetup
           user={user}
           onSessionCreated={(sessionId) => {
-            setLiveGameSessionId(sessionId);
-            setCurrentScreen('liveGameProjection');
+            navigation.setLiveGameSessionId(sessionId);
+            navigation.setCurrentScreen('liveGameProjection');
           }}
-          onBack={handleBackToDashboard}
+          onBack={navigation.handleBackToDashboard}
         />
       </DashboardLayout>
     );
   }
 
   // Renderizar CoursesScreen (Gestionar Cursos) - CON Layout
-  if (currentScreen === 'courses') {
+  if (navigation.currentScreen === 'courses') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <CoursesScreen onBack={handleBackToDashboard} user={user} openCreateModal={openCourseModal} />
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <CoursesScreen onBack={navigation.handleBackToDashboard} user={user} openCreateModal={navigation.openCourseModal} />
       </DashboardLayout>
     );
   }
 
   // Renderizar ExercisePlayer (Jugar Ejercicio) - SIN Layout, pantalla completa
-  if (currentScreen === 'playExercise' && selectedExerciseId) {
+  if (navigation.currentScreen === 'playExercise' && navigation.selectedExerciseId) {
     return (
       <ExercisePlayer
-        exerciseId={selectedExerciseId}
+        exerciseId={navigation.selectedExerciseId}
         user={user}
-        onBack={handleBackToDashboard}
+        onBack={navigation.handleBackToDashboard}
         onComplete={(results) => {
           logger.debug('Ejercicio completado:', results);
-          // Aquí podrías guardar resultados en Firebase
         }}
       />
     );
   }
 
-
   // Renderizar Gestión de Contenido - CON Layout
-  if (currentScreen === 'content') {
+  if (navigation.currentScreen === 'content') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <ContentManager user={user} courses={courses} onBack={handleBackToDashboard} openCreateModal={openContentModal} />
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ContentManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openContentModal} />
       </DashboardLayout>
     );
   }
 
   // Renderizar Class Manager (Clases Recurrentes) - CON Layout
-  if (currentScreen === 'classes') {
+  if (navigation.currentScreen === 'classes') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <ClassManager user={user} courses={courses} onBack={handleBackToDashboard} openCreateModal={openClassModal} />
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
       </DashboardLayout>
     );
   }
 
   // Renderizar Analytics Dashboard - CON Layout
-  if (currentScreen === 'analytics') {
+  if (navigation.currentScreen === 'analytics') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="analytics-section">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver a Inicio
           </button>
           <AnalyticsDashboard user={user} />
@@ -942,11 +603,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar Vista de Asistencia - CON Layout
-  if (currentScreen === 'attendance') {
+  if (navigation.currentScreen === 'attendance') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="attendance-section">
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver a Inicio
           </button>
           <AttendanceView teacher={user} />
@@ -956,12 +617,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar Pizarra Colaborativa (TEST)
-  if (currentScreen === 'testCollab') {
-    // Generate unique session ID based on user ID and timestamp to ensure user is always host
+  if (navigation.currentScreen === 'testCollab') {
     const sessionId = `collab_${user.uid}_${Date.now()}`;
     return (
       <Whiteboard
-        onBack={handleBackToDashboard}
+        onBack={navigation.handleBackToDashboard}
         isCollaborative={true}
         collaborativeSessionId={sessionId}
       />
@@ -969,17 +629,17 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar Pizarra Interactiva - SIN Layout, pantalla completa
-  if (currentScreen === 'whiteboard') {
-    const isLive = selectedWhiteboardSession?.isLive;
-    const liveSessionId = selectedWhiteboardSession?.liveSessionId;
+  if (navigation.currentScreen === 'whiteboard') {
+    const isLive = navigation.selectedWhiteboardSession?.isLive;
+    const liveSessionId = navigation.selectedWhiteboardSession?.liveSessionId;
 
     return (
       <Whiteboard
         onBack={() => {
-          setWhiteboardManagerKey(prev => prev + 1); // Forzar recarga del manager
-          setCurrentScreen('whiteboardSessions'); // Volver al panel de pizarras, no al dashboard
+          navigation.setWhiteboardManagerKey(prev => prev + 1);
+          navigation.setCurrentScreen('whiteboardSessions');
         }}
-        initialSession={selectedWhiteboardSession}
+        initialSession={navigation.selectedWhiteboardSession}
         isCollaborative={isLive}
         collaborativeSessionId={liveSessionId}
       />
@@ -987,40 +647,40 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar Excalidraw Whiteboard - SIN Layout, pantalla completa
-  if (currentScreen === 'excalidrawWhiteboard') {
+  if (navigation.currentScreen === 'excalidrawWhiteboard') {
     return (
       <ExcalidrawWhiteboard
         onBack={() => {
-          setExcalidrawManagerKey(prev => prev + 1); // Incrementar key para forzar recarga
-          setCurrentScreen('excalidrawSessions');
+          navigation.setExcalidrawManagerKey(prev => prev + 1);
+          navigation.setCurrentScreen('excalidrawSessions');
         }}
-        initialSession={selectedExcalidrawSession}
+        initialSession={navigation.selectedExcalidrawSession}
       />
     );
   }
 
   // Renderizar Gestión de Pizarras Excalidraw - CON Layout
-  if (currentScreen === 'excalidrawSessions') {
+  if (navigation.currentScreen === 'excalidrawSessions') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ExcalidrawManager
-          key={excalidrawManagerKey} // Cambia cada vez que vuelves de la pizarra
-          onBack={handleBackToDashboard}
+          key={navigation.excalidrawManagerKey}
+          onBack={navigation.handleBackToDashboard}
           onOpenSession={(session) => {
-            setSelectedExcalidrawSession(session);
-            setCurrentScreen('excalidrawWhiteboard');
+            navigation.setSelectedExcalidrawSession(session);
+            navigation.setCurrentScreen('excalidrawWhiteboard');
           }}
           onCreateNew={async () => {
             try {
               const sessionId = await createExcalidrawSession('Pizarra sin título');
-              setSelectedExcalidrawSession({
+              navigation.setSelectedExcalidrawSession({
                 id: sessionId,
                 title: 'Pizarra sin título',
                 elements: [],
                 appState: {},
                 files: {}
               });
-              setCurrentScreen('excalidrawWhiteboard');
+              navigation.setCurrentScreen('excalidrawWhiteboard');
             } catch (error) {
               logger.error('Error creando pizarra:', error);
               alert('Error al crear la pizarra');
@@ -1032,28 +692,27 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar Gestión de Pizarras Guardadas - CON Layout
-  if (currentScreen === 'whiteboardSessions') {
+  if (navigation.currentScreen === 'whiteboardSessions') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <WhiteboardManager
-          key={whiteboardManagerKey} // Cambia cada vez que vuelves de la pizarra
-          onBack={handleBackToDashboard}
+          key={navigation.whiteboardManagerKey}
+          onBack={navigation.handleBackToDashboard}
           onOpenWhiteboard={() => {
-            setSelectedWhiteboardSession(null);
-            setCurrentScreen('whiteboard');
+            navigation.setSelectedWhiteboardSession(null);
+            navigation.setCurrentScreen('whiteboard');
           }}
           onLoadSession={(session) => {
-            setSelectedWhiteboardSession(session);
-            setCurrentScreen('whiteboard');
+            navigation.setSelectedWhiteboardSession(session);
+            navigation.setCurrentScreen('whiteboard');
           }}
           onGoLive={(session, liveSessionId) => {
-            // Open whiteboard in collaborative mode
-            setSelectedWhiteboardSession({
+            navigation.setSelectedWhiteboardSession({
               ...session,
               isLive: true,
               liveSessionId: liveSessionId
             });
-            setCurrentScreen('whiteboard');
+            navigation.setCurrentScreen('whiteboard');
           }}
         />
       </DashboardLayout>
@@ -1061,15 +720,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar Live Class Manager - CON Layout
-  if (currentScreen === 'liveClasses') {
+  if (navigation.currentScreen === 'liveClasses') {
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <LiveClassManager
           user={user}
-          onBack={handleBackToDashboard}
+          onBack={navigation.handleBackToDashboard}
           onStartClass={(liveClass) => {
-            setSelectedLiveClass(liveClass);
-            setCurrentScreen('liveClassRoom');
+            navigation.setSelectedLiveClass(liveClass);
+            navigation.setCurrentScreen('liveClassRoom');
           }}
         />
       </DashboardLayout>
@@ -1077,40 +736,36 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar Live Class Room (Sala de video) - SIN Layout (pantalla completa)
-  if (currentScreen === 'liveClassRoom' && selectedLiveClass) {
+  if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
     return (
       <LiveClassRoom
-        liveClass={selectedLiveClass}
+        liveClass={navigation.selectedLiveClass}
         user={user}
         userRole={userRole}
         onLeave={() => {
-          setSelectedLiveClass(null);
-          setCurrentScreen('liveClasses');
+          navigation.setSelectedLiveClass(null);
+          navigation.setCurrentScreen('liveClasses');
         }}
       />
     );
   }
 
   // Renderizar Panel de Alumnos (Vista Cards) - CON Layout
-  if (currentScreen === 'students') {
-    // Filtrar solo estudiantes
-    const students = users.filter(u => ['student', 'listener', 'trial'].includes(u.role));
+  if (navigation.currentScreen === 'students') {
+    const students = userManagement.users.filter(u => ['student', 'listener', 'trial'].includes(u.role));
 
-    // Filtrar por búsqueda
     const filteredStudents = students.filter(student =>
-      student.name?.toLowerCase().includes(studentsSearchTerm.toLowerCase()) ||
-      student.email?.toLowerCase().includes(studentsSearchTerm.toLowerCase())
+      student.name?.toLowerCase().includes(navigation.studentsSearchTerm.toLowerCase()) ||
+      student.email?.toLowerCase().includes(navigation.studentsSearchTerm.toLowerCase())
     );
 
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-0">
-          {/* Botón Volver */}
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver a Inicio
           </button>
 
-          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
               <GraduationCap size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
@@ -1120,23 +775,21 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
                 <Plus size={18} strokeWidth={2} /> Agregar Alumno
               </button>
-              <button onClick={loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Actualizar lista">
+              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Actualizar lista">
                 <RefreshCw size={18} strokeWidth={2} /> Actualizar
               </button>
             </div>
           </div>
 
-          {/* SearchBar con selector de vista */}
           <SearchBar
-            value={studentsSearchTerm}
-            onChange={setStudentsSearchTerm}
+            value={navigation.studentsSearchTerm}
+            onChange={navigation.setStudentsSearchTerm}
             placeholder="Buscar alumnos..."
-            viewMode={studentsViewMode}
-            onViewModeChange={setStudentsViewMode}
+            viewMode={navigation.studentsViewMode}
+            onViewModeChange={navigation.setStudentsViewMode}
             className="mb-6"
           />
 
-          {/* Mensajes */}
           {successMessage && (
             <div className="bg-success-500/10 text-success-600 border border-success-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
@@ -1148,21 +801,20 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             </div>
           )}
 
-          {/* Cards Grid o List */}
           {filteredStudents.length === 0 ? (
             <div className="text-center py-15 px-5 text-secondary-600 dark:text-secondary-400 text-base">
               <p>No se encontraron alumnos</p>
             </div>
           ) : (
-            <div className={studentsViewMode === 'grid' ? 'students-grid' : 'students-list'}>
+            <div className={navigation.studentsViewMode === 'grid' ? 'students-grid' : 'students-list'}>
               {filteredStudents.map(student => (
                 <StudentCard
                   key={student.id}
                   student={student}
-                  enrollmentCount={enrollmentCounts[student.id] || 0}
+                  enrollmentCount={resourceAssignment.enrollmentCounts[student.id] || 0}
                   onView={(student) => {
-                    setSelectedUserProfile(student);
-                    setShowUserProfile(true);
+                    navigation.setSelectedUserProfile(student);
+                    navigation.setShowUserProfile(true);
                   }}
                   onDelete={(student) => handleDeleteUser(student.id)}
                   isAdmin={isAdmin}
@@ -1176,11 +828,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
-  if (currentScreen === 'users') {
-    // Mostrar loading fullscreen si estamos procesando retorno de Ver Como
-    if (sessionStorage.getItem('viewAsReturning') === 'true' && !hasProcessedReturn) {
+  if (navigation.currentScreen === 'users') {
+    if (sessionStorage.getItem('viewAsReturning') === 'true' && !navigation.hasProcessedReturn) {
       return (
-        <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
           <div className="loading-state" style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
             <div className="spinner"></div>
             <p>Volviendo...</p>
@@ -1190,14 +841,12 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     }
 
     return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-0">
-          {/* Botón Volver */}
-          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver a Inicio
           </button>
 
-          {/* Header unificado */}
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
               {isAdmin ? (
@@ -1216,21 +865,19 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary w-full sm:w-auto">
                 <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
               </button>
-              <button onClick={loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full sm:w-auto" title="Actualizar lista de usuarios">
+              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full sm:w-auto" title="Actualizar lista de usuarios">
                 <RefreshCw size={18} strokeWidth={2} /> Actualizar
               </button>
             </div>
           </div>
 
-          {/* Search Bar */}
           <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
+            value={userManagement.searchTerm}
+            onChange={userManagement.setSearchTerm}
             placeholder={isAdmin ? "Buscar usuarios..." : "Buscar alumnos..."}
             className="mb-6"
           />
 
-          {/* Mensajes */}
           {successMessage && (
             <div className="bg-success-500/10 text-success-600 border border-success-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
@@ -1242,16 +889,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             </div>
           )}
 
-          {/* Tabla de usuarios */}
           <div className="users-section">
-
-            {/* Mostrar loading si estamos esperando userRole para procesar retorno */}
-            {sessionStorage.getItem('viewAsReturnUserId') && !hasProcessedReturn && users.length === 0 ? (
+            {sessionStorage.getItem('viewAsReturnUserId') && !navigation.hasProcessedReturn && userManagement.users.length === 0 ? (
               <div className="loading-state">
                 <div className="spinner"></div>
                 <p>Cargando...</p>
               </div>
-            ) : filteredUsers.length === 0 ? (
+            ) : userManagement.filteredUsers.length === 0 ? (
               <div className="no-users">
                 <p>No se encontraron usuarios con los filtros seleccionados</p>
               </div>
@@ -1261,20 +905,20 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   <thead>
                     <tr>
                       <th>
-                        <div onClick={() => handleSort('name')} className={`sortable-header ${sortField === 'name' ? 'active' : ''}`}>
+                        <div onClick={() => userManagement.handleSort('name')} className={`sortable-header ${userManagement.sortField === 'name' ? 'active' : ''}`}>
                           <span>Usuario</span>
-                          {sortField === 'name' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'name' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="sort-icon-inactive" />
                           )}
                         </div>
                       </th>
                       <th>
-                        <div onClick={() => handleSort('credits')} className={`sortable-header ${sortField === 'credits' ? 'active' : ''}`}>
+                        <div onClick={() => userManagement.handleSort('credits')} className={`sortable-header ${userManagement.sortField === 'credits' ? 'active' : ''}`}>
                           <span>Créditos</span>
-                          {sortField === 'credits' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'credits' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="sort-icon-inactive" />
                           )}
@@ -1282,10 +926,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                       </th>
                       {isAdmin && (
                         <th>
-                          <div onClick={() => handleSort('role')} className={`sortable-header ${sortField === 'role' ? 'active' : ''}`}>
+                          <div onClick={() => userManagement.handleSort('role')} className={`sortable-header ${userManagement.sortField === 'role' ? 'active' : ''}`}>
                             <span>Rol</span>
-                            {sortField === 'role' ? (
-                              sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                            {userManagement.sortField === 'role' ? (
+                              userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                             ) : (
                               <ArrowUpDown size={14} className="sort-icon-inactive" />
                             )}
@@ -1293,10 +937,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                         </th>
                       )}
                       <th>
-                        <div onClick={() => handleSort('status')} className={`sortable-header ${sortField === 'status' ? 'active' : ''}`}>
+                        <div onClick={() => userManagement.handleSort('status')} className={`sortable-header ${userManagement.sortField === 'status' ? 'active' : ''}`}>
                           <span>Estado</span>
-                          {sortField === 'status' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'status' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="sort-icon-inactive" />
                           )}
@@ -1304,10 +948,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                       </th>
                       {isAdmin && (
                         <th>
-                          <div onClick={() => handleSort('createdAt')} className={`sortable-header ${sortField === 'createdAt' ? 'active' : ''}`}>
+                          <div onClick={() => userManagement.handleSort('createdAt')} className={`sortable-header ${userManagement.sortField === 'createdAt' ? 'active' : ''}`}>
                             <span>Registro</span>
-                            {sortField === 'createdAt' ? (
-                              sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                            {userManagement.sortField === 'createdAt' ? (
+                              userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                             ) : (
                               <ArrowUpDown size={14} className="sort-icon-inactive" />
                             )}
@@ -1315,10 +959,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                         </th>
                       )}
                       <th>
-                        <div onClick={() => handleSort('email')} className={`sortable-header ${sortField === 'email' ? 'active' : ''}`}>
+                        <div onClick={() => userManagement.handleSort('email')} className={`sortable-header ${userManagement.sortField === 'email' ? 'active' : ''}`}>
                           <span>Email</span>
-                          {sortField === 'email' ? (
-                            sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                          {userManagement.sortField === 'email' ? (
+                            userManagement.sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
                             <ArrowUpDown size={14} className="sort-icon-inactive" />
                           )}
@@ -1327,7 +971,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredUsers.map(userItem => (
+                    {userManagement.filteredUsers.map(userItem => (
                       <tr key={userItem.id} className={userItem.status !== 'active' ? 'suspended-row' : ''}>
                         <td>
                           <div
@@ -1400,60 +1044,59 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           </div>
 
           {/* Modal de Asignación de Recursos */}
-          {showResourceModal && selectedStudent && (
-            <div className="modal-overlay" onClick={handleCloseResourceModal}>
+          {resourceAssignment.showResourceModal && resourceAssignment.selectedStudent && (
+            <div className="modal-overlay" onClick={resourceAssignment.handleCloseResourceModal}>
               <div className="modal-box enrollment-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                   <h2 className="modal-title flex items-center gap-2">
                     <Folder size={22} strokeWidth={2} />
-                    Asignar Recursos a {selectedStudent.name}
+                    Asignar Recursos a {resourceAssignment.selectedStudent.name}
                   </h2>
-                  <button className="modal-close-btn" onClick={handleCloseResourceModal}>
+                  <button className="modal-close-btn" onClick={resourceAssignment.handleCloseResourceModal}>
                     ✕
                   </button>
                 </div>
 
-                {/* Tabs Navigation */}
                 <div className="border-b border-gray-200 dark:border-gray-700 px-6">
                   <div className="flex gap-4">
                     <button
-                      onClick={() => setActiveResourceTab('courses')}
+                      onClick={() => resourceAssignment.setActiveResourceTab('courses')}
                       className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                        activeResourceTab === 'courses'
+                        resourceAssignment.activeResourceTab === 'courses'
                           ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
                       <BookOpen size={18} strokeWidth={2} />
-                      Cursos ({studentEnrollments.length})
+                      Cursos ({resourceAssignment.studentEnrollments.length})
                     </button>
                     <button
-                      onClick={() => setActiveResourceTab('content')}
+                      onClick={() => resourceAssignment.setActiveResourceTab('content')}
                       className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                        activeResourceTab === 'content'
+                        resourceAssignment.activeResourceTab === 'content'
                           ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
                       <FileText size={18} strokeWidth={2} />
-                      Contenidos ({studentContent.length})
+                      Contenidos ({resourceAssignment.studentContent.length})
                     </button>
                     <button
-                      onClick={() => setActiveResourceTab('exercises')}
+                      onClick={() => resourceAssignment.setActiveResourceTab('exercises')}
                       className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                        activeResourceTab === 'exercises'
+                        resourceAssignment.activeResourceTab === 'exercises'
                           ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
                       <Gamepad2 size={18} strokeWidth={2} />
-                      Ejercicios ({studentExercises.length})
+                      Ejercicios ({resourceAssignment.studentExercises.length})
                     </button>
                   </div>
                 </div>
 
                 <div className="modal-body">
-                  {loadingResources ? (
+                  {resourceAssignment.loadingResources ? (
                     <div className="loading-spinner">
                       <div className="spinner"></div>
                       <p>Cargando...</p>
@@ -1461,17 +1104,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   ) : (
                     <>
                       {/* Tab: Cursos */}
-                      {activeResourceTab === 'courses' && (
+                      {resourceAssignment.activeResourceTab === 'courses' && (
                         <>
-                          {/* Cursos Asignados */}
-                          {studentEnrollments.length > 0 && (
+                          {resourceAssignment.studentEnrollments.length > 0 && (
                             <div className="enrolled-courses-section">
                               <h3 className="section-subtitle flex items-center gap-2">
                                 <CheckCircle size={18} strokeWidth={2} />
-                                Cursos Asignados ({studentEnrollments.length})
+                                Cursos Asignados ({resourceAssignment.studentEnrollments.length})
                               </h3>
                               <div className="courses-list">
-                                {studentEnrollments.map(enrollment => (
+                                {resourceAssignment.studentEnrollments.map(enrollment => (
                                   <div key={enrollment.enrollmentId} className="course-item enrolled">
                                     <div className="course-info">
                                       <div className="course-name">{enrollment.course.name}</div>
@@ -1497,7 +1139,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             </div>
                           )}
 
-                          {/* Cursos Disponibles */}
                           <div className="available-courses-section">
                             <h3 className="section-subtitle flex items-center gap-2">
                               <BookOpen size={18} strokeWidth={2} />
@@ -1511,7 +1152,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             ) : (
                               <div className="courses-list">
                                 {courses
-                                  .filter(course => !isEnrolled(course.id))
+                                  .filter(course => !resourceAssignment.isEnrolled(course.id))
                                   .map(course => (
                                     <div key={course.id} className="course-item available">
                                       <div className="course-info">
@@ -1536,7 +1177,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                       </button>
                                     </div>
                                   ))}
-                                {courses.filter(course => !isEnrolled(course.id)).length === 0 && (
+                                {courses.filter(course => !resourceAssignment.isEnrolled(course.id)).length === 0 && (
                                   <div className="all-enrolled">
                                     <p className="flex items-center gap-2">
                                       <CheckCircle size={16} strokeWidth={2} />
@@ -1551,17 +1192,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                       )}
 
                       {/* Tab: Contenidos */}
-                      {activeResourceTab === 'content' && (
+                      {resourceAssignment.activeResourceTab === 'content' && (
                         <>
-                          {/* Contenidos Asignados */}
-                          {studentContent.length > 0 && (
+                          {resourceAssignment.studentContent.length > 0 && (
                             <div className="enrolled-courses-section">
                               <h3 className="section-subtitle flex items-center gap-2">
                                 <CheckCircle size={18} strokeWidth={2} />
-                                Contenidos Asignados ({studentContent.length})
+                                Contenidos Asignados ({resourceAssignment.studentContent.length})
                               </h3>
                               <div className="courses-list">
-                                {studentContent.map(assignment => {
+                                {resourceAssignment.studentContent.map(assignment => {
                                   const content = allContent.find(c => c.id === assignment.itemId);
                                   if (!content) return null;
                                   return (
@@ -1593,7 +1233,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             </div>
                           )}
 
-                          {/* Contenidos Disponibles */}
                           <div className="available-courses-section">
                             <h3 className="section-subtitle flex items-center gap-2">
                               <FileText size={18} strokeWidth={2} />
@@ -1607,7 +1246,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             ) : (
                               <div className="courses-list">
                                 {allContent
-                                  .filter(content => !isContentAssigned(content.id))
+                                  .filter(content => !resourceAssignment.isContentAssigned(content.id))
                                   .map(content => (
                                     <div key={content.id} className="course-item available">
                                       <div className="course-info">
@@ -1632,7 +1271,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                       </button>
                                     </div>
                                   ))}
-                                {allContent.filter(c => !isContentAssigned(c.id)).length === 0 && (
+                                {allContent.filter(c => !resourceAssignment.isContentAssigned(c.id)).length === 0 && (
                                   <div className="all-enrolled">
                                     <p className="flex items-center gap-2">
                                       <CheckCircle size={16} strokeWidth={2} />
@@ -1647,17 +1286,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                       )}
 
                       {/* Tab: Ejercicios */}
-                      {activeResourceTab === 'exercises' && (
+                      {resourceAssignment.activeResourceTab === 'exercises' && (
                         <>
-                          {/* Ejercicios Asignados */}
-                          {studentExercises.length > 0 && (
+                          {resourceAssignment.studentExercises.length > 0 && (
                             <div className="enrolled-courses-section">
                               <h3 className="section-subtitle flex items-center gap-2">
                                 <CheckCircle size={18} strokeWidth={2} />
-                                Ejercicios Asignados ({studentExercises.length})
+                                Ejercicios Asignados ({resourceAssignment.studentExercises.length})
                               </h3>
                               <div className="courses-list">
-                                {studentExercises.map(assignment => {
+                                {resourceAssignment.studentExercises.map(assignment => {
                                   const exercise = allExercises.find(e => e.id === assignment.itemId);
                                   if (!exercise) return null;
                                   return (
@@ -1687,7 +1325,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             </div>
                           )}
 
-                          {/* Ejercicios Disponibles */}
                           <div className="available-courses-section">
                             <h3 className="section-subtitle flex items-center gap-2">
                               <Gamepad2 size={18} strokeWidth={2} />
@@ -1701,7 +1338,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                             ) : (
                               <div className="courses-list">
                                 {allExercises
-                                  .filter(exercise => !isExerciseAssigned(exercise.id))
+                                  .filter(exercise => !resourceAssignment.isExerciseAssigned(exercise.id))
                                   .map(exercise => (
                                     <div key={exercise.id} className="course-item available">
                                       <div className="course-info">
@@ -1724,7 +1361,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                       </button>
                                     </div>
                                   ))}
-                                {allExercises.filter(e => !isExerciseAssigned(e.id)).length === 0 && (
+                                {allExercises.filter(e => !resourceAssignment.isExerciseAssigned(e.id)).length === 0 && (
                                   <div className="all-enrolled">
                                     <p className="flex items-center gap-2">
                                       <CheckCircle size={16} strokeWidth={2} />
@@ -1742,7 +1379,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 </div>
 
                 <div className="modal-footer">
-                  <button className="btn btn-ghost" onClick={handleCloseResourceModal}>
+                  <button className="btn btn-ghost" onClick={resourceAssignment.handleCloseResourceModal}>
                     Cerrar
                   </button>
                 </div>
@@ -1761,11 +1398,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         />
 
         {/* Modal de User Profile */}
-        {showUserProfile && selectedUserProfile && (
+        {navigation.showUserProfile && navigation.selectedUserProfile && (
           <div className="modal-overlay" onClick={handleBackFromProfile}>
             <div className="modal-box" onClick={(e) => e.stopPropagation()}>
               <UserProfile
-                selectedUser={selectedUserProfile}
+                selectedUser={navigation.selectedUserProfile}
                 currentUser={user}
                 isAdmin={isAdmin}
                 onBack={handleBackFromProfile}
@@ -1784,9 +1421,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       id: 'users',
       icon: isAdmin ? Crown : Users,
       title: isAdmin ? "Usuarios" : "Alumnos",
-      count: users.length,
-      countLabel: users.length === 1 ? "usuario" : "usuarios",
-      onClick: () => setCurrentScreen('users'),
+      count: userManagement.users.length,
+      countLabel: userManagement.users.length === 1 ? "usuario" : "usuarios",
+      onClick: () => navigation.setCurrentScreen('users'),
       createLabel: isAdmin ? "Nuevo Usuario" : "Nuevo Alumno",
       onCreateClick: () => setShowAddUserModal(true)
     },
@@ -1796,11 +1433,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       title: "Cursos",
       count: courses.length,
       countLabel: courses.length === 1 ? "curso" : "cursos",
-      onClick: () => setCurrentScreen('courses'),
+      onClick: () => navigation.setCurrentScreen('courses'),
       createLabel: "Nuevo Curso",
       onCreateClick: () => {
-        setOpenCourseModal(true);
-        setCurrentScreen('courses');
+        navigation.setOpenCourseModal(true);
+        navigation.setCurrentScreen('courses');
       }
     },
     {
@@ -1809,11 +1446,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       title: "Contenidos",
       count: allContent.length,
       countLabel: allContent.length === 1 ? "contenido" : "contenidos",
-      onClick: () => setCurrentScreen('content'),
+      onClick: () => navigation.setCurrentScreen('content'),
       createLabel: "Nuevo Contenido",
       onCreateClick: () => {
-        setOpenContentModal(true);
-        setCurrentScreen('content');
+        navigation.setOpenContentModal(true);
+        navigation.setCurrentScreen('content');
       }
     },
     {
@@ -1822,11 +1459,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       title: "Clases",
       count: allClasses.length,
       countLabel: allClasses.length === 1 ? "clase" : "clases",
-      onClick: () => setCurrentScreen('classes'),
+      onClick: () => navigation.setCurrentScreen('classes'),
       createLabel: "Nueva Clase",
       onCreateClick: () => {
-        setOpenClassModal(true);
-        setCurrentScreen('classes');
+        navigation.setOpenClassModal(true);
+        navigation.setCurrentScreen('classes');
       }
     },
     {
@@ -1835,34 +1472,33 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       title: "🧪 Pizarra Colaborativa",
       count: 0,
       countLabel: "prueba",
-      onClick: () => setCurrentScreen('testCollab'),
+      onClick: () => navigation.setCurrentScreen('testCollab'),
       createLabel: "Abrir Pizarra",
-      onCreateClick: () => setCurrentScreen('testCollab')
+      onCreateClick: () => navigation.setCurrentScreen('testCollab')
     }
   ];
 
   const filteredDashboardCards = dashboardCards.filter(card =>
-    card.title.toLowerCase().includes(dashboardSearchTerm.toLowerCase())
+    card.title.toLowerCase().includes(navigation.dashboardSearchTerm.toLowerCase())
   );
 
   // Renderizar Dashboard Principal con el nuevo layout
   return (
     <>
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="teacher-dashboard">
           <div className="dashboard-content mt-6">
-            {/* Barra de búsqueda con selector de vista integrado */}
             <SearchBar
-              value={dashboardSearchTerm}
-              onChange={setDashboardSearchTerm}
+              value={navigation.dashboardSearchTerm}
+              onChange={navigation.setDashboardSearchTerm}
               placeholder="Buscar secciones..."
-              viewMode={dashboardViewMode}
-              onViewModeChange={setDashboardViewMode}
+              viewMode={navigation.dashboardViewMode}
+              onViewModeChange={navigation.setDashboardViewMode}
               className="mb-6"
             />
 
             {/* Quick Access Cards */}
-            <div className={dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
+            <div className={navigation.dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
               {filteredDashboardCards.map(card => (
                 <QuickAccessCard
                   key={card.id}
