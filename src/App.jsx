@@ -8,11 +8,12 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth.js';
 import { useViewAs } from './contexts/ViewAsContext.jsx';
-import { TEACHER_ROLES, STUDENT_ROLES } from './constants/auth.js';
+import { ADMIN_ROLES, TEACHER_ROLES, STUDENT_ROLES } from './constants/auth.js';
 
 // Components
 import LandingPage from './LandingPage';
 import Login from './components/Login.jsx';
+import AdminDashboard from './components/AdminDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
 import JoinGamePage from './components/JoinGamePage.jsx';
@@ -93,6 +94,15 @@ function App() {
         />
 
         {/* Protected Routes - requieren autenticación */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={ADMIN_ROLES}>
+              <AdminDashboard user={effectiveUser} userRole={effectiveRole} />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/student/*"
           element={
@@ -238,7 +248,11 @@ function DashboardRedirect({ user, userRole }) {
     );
   }
 
-  // Redirigir según rol
+  // Redirigir según rol (admin primero)
+  if (ADMIN_ROLES.includes(userRole)) {
+    return <Navigate to="/admin" replace />;
+  }
+
   if (STUDENT_ROLES.includes(userRole)) {
     return <Navigate to="/student" replace />;
   }
