@@ -56,6 +56,11 @@ export function useScreenNavigation() {
     'excalidrawSessions': 'excalidrawSessions',
     'liveClasses': 'liveClasses',
     'setup': 'setup', // Game Setup (GameContainer)
+    'assignments': 'assignments', // Assignment Manager (Teacher)
+    'grading': 'grading', // Grading Interface (Teacher)
+    'calendar': 'calendar', // Unified Calendar (Teacher/Student)
+    'assignmentsView': 'assignmentsView', // Student Assignments View
+    'gamification': 'gamification', // Gamification Panel (Student)
   };
 
   /**
