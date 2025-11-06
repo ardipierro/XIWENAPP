@@ -18,6 +18,11 @@ export const USER_ROLES = {
   TRIAL: 'trial'
 };
 
+// Roles que tienen permisos de administrador
+export const ADMIN_ROLES = [
+  USER_ROLES.ADMIN
+];
+
 // Roles que tienen permisos de profesor
 export const TEACHER_ROLES = [
   USER_ROLES.TEACHER,

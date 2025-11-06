@@ -65,6 +65,11 @@ export const ROLE_INFO = {
 };
 
 /**
+ * Roles que tienen acceso al dashboard de administrador
+ */
+export const ADMIN_ROLES = [ROLES.ADMIN];
+
+/**
  * Roles que tienen acceso al dashboard de profesor
  */
 export const TEACHER_ROLES = [ROLES.ADMIN, ROLES.TEACHER, ROLES.TRIAL_TEACHER];

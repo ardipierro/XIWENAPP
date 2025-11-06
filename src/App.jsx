@@ -8,11 +8,12 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth.js';
 import { useViewAs } from './contexts/ViewAsContext.jsx';
-import { TEACHER_ROLES, STUDENT_ROLES } from './constants/auth.js';
+import { ADMIN_ROLES, TEACHER_ROLES, STUDENT_ROLES } from './constants/auth.js';
 
 // Components
 import LandingPage from './LandingPage';
 import Login from './components/Login.jsx';
+import AdminDashboard from './components/AdminDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
 import JoinGamePage from './components/JoinGamePage.jsx';
@@ -94,10 +95,10 @@ function App() {
 
         {/* Protected Routes - requieren autenticación */}
         <Route
-          path="/student/*"
+          path="/admin/*"
           element={
-            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={STUDENT_ROLES}>
-              <StudentDashboard user={effectiveUser} userRole={effectiveRole} />
+            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={ADMIN_ROLES}>
+              <AdminDashboard user={effectiveUser} userRole={effectiveRole} />
             </ProtectedRoute>
           }
         />
@@ -107,6 +108,15 @@ function App() {
           element={
             <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={TEACHER_ROLES}>
               <TeacherDashboard user={effectiveUser} userRole={effectiveRole} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/*"
+          element={
+            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={STUDENT_ROLES}>
+              <StudentDashboard user={effectiveUser} userRole={effectiveRole} />
             </ProtectedRoute>
           }
         />
@@ -238,13 +248,17 @@ function DashboardRedirect({ user, userRole }) {
     );
   }
 
-  // Redirigir según rol
-  if (STUDENT_ROLES.includes(userRole)) {
-    return <Navigate to="/student" replace />;
+  // Redirigir según rol (orden de prioridad: admin > teacher > student)
+  if (ADMIN_ROLES.includes(userRole)) {
+    return <Navigate to="/admin" replace />;
   }
 
   if (TEACHER_ROLES.includes(userRole)) {
     return <Navigate to="/teacher" replace />;
+  }
+
+  if (STUDENT_ROLES.includes(userRole)) {
+    return <Navigate to="/student" replace />;
   }
 
   // Rol desconocido - redirigir a login

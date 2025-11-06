@@ -111,6 +111,15 @@
   background: var(--color-bg-tertiary);
 }
 
+.icon-button.admin-panel-button.active {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+}
+
+.icon-button.admin-panel-button.active:hover {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+}
+
 .icon-button .icon {
   font-size: 20px;
 }
