@@ -417,6 +417,76 @@ export async function searchUsers(searchTerm, currentUserId) {
   }
 }
 
+/**
+ * Add reaction to a message
+ * @param {string} messageId - Message ID
+ * @param {string} userId - User ID
+ * @param {string} emoji - Emoji to add
+ * @returns {Promise<void>}
+ */
+export async function addReaction(messageId, userId, emoji) {
+  try {
+    const messageRef = doc(db, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const reactions = messageDoc.data().reactions || {};
+
+    // If emoji already exists, add user to it
+    if (reactions[emoji]) {
+      if (!reactions[emoji].includes(userId)) {
+        reactions[emoji].push(userId);
+      }
+    } else {
+      reactions[emoji] = [userId];
+    }
+
+    await updateDoc(messageRef, { reactions });
+    logger.info('Reaction added', 'Messages');
+  } catch (error) {
+    logger.error('Error adding reaction', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
+ * Remove reaction from a message
+ * @param {string} messageId - Message ID
+ * @param {string} userId - User ID
+ * @param {string} emoji - Emoji to remove
+ * @returns {Promise<void>}
+ */
+export async function removeReaction(messageId, userId, emoji) {
+  try {
+    const messageRef = doc(db, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const reactions = messageDoc.data().reactions || {};
+
+    if (reactions[emoji]) {
+      reactions[emoji] = reactions[emoji].filter(id => id !== userId);
+
+      // Remove emoji if no users have reacted with it
+      if (reactions[emoji].length === 0) {
+        delete reactions[emoji];
+      }
+    }
+
+    await updateDoc(messageRef, { reactions });
+    logger.info('Reaction removed', 'Messages');
+  } catch (error) {
+    logger.error('Error removing reaction', error, 'Messages');
+    throw error;
+  }
+}
+
 export default {
   getOrCreateConversation,
   sendMessage,
@@ -429,5 +499,7 @@ export default {
   archiveConversation,
   searchUsers,
   setTyping,
-  clearTyping
+  clearTyping,
+  addReaction,
+  removeReaction
 };

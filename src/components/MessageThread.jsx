@@ -12,7 +12,9 @@ import {
   markMessagesAsRead,
   archiveConversation,
   setTyping,
-  clearTyping
+  clearTyping,
+  addReaction,
+  removeReaction
 } from '../firebase/messages';
 import {
   uploadMessageAttachment,
@@ -23,6 +25,7 @@ import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
 import EmojiPicker from './EmojiPicker';
 import VoiceRecorder from './VoiceRecorder';
+import ReactionPicker from './ReactionPicker';
 
 /**
  * Message Thread Component
@@ -234,6 +237,26 @@ function MessageThread({ conversation, currentUser, onClose }) {
       const newPos = start + emoji.length;
       textarea.setSelectionRange(newPos, newPos);
     }, 0);
+  };
+
+  /**
+   * Handle add reaction
+   */
+  const handleAddReaction = async (messageId, emoji) => {
+    await safeAsync(
+      () => addReaction(messageId, currentUser.uid, emoji),
+      { context: 'MessageThread' }
+    );
+  };
+
+  /**
+   * Handle remove reaction
+   */
+  const handleRemoveReaction = async (messageId, emoji) => {
+    await safeAsync(
+      () => removeReaction(messageId, currentUser.uid, emoji),
+      { context: 'MessageThread' }
+    );
   };
 
   /**
@@ -541,6 +564,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
               <MessageBubble
                 key={message.id}
                 message={message}
+                currentUserId={currentUser.uid}
                 isOwn={message.senderId === currentUser.uid}
                 showAvatar={
                   index === 0 ||
@@ -549,6 +573,8 @@ function MessageThread({ conversation, currentUser, onClose }) {
                 isSearchResult={isSearchResult}
                 isCurrentSearchResult={isCurrentSearchResult}
                 searchTerm={searchTerm}
+                onAddReaction={handleAddReaction}
+                onRemoveReaction={handleRemoveReaction}
                 ref={(el) => {
                   if (el) searchResultRefs.current[message.id] = el;
                 }}
@@ -699,12 +725,16 @@ function MessageThread({ conversation, currentUser, onClose }) {
  */
 const MessageBubble = forwardRef(({
   message,
+  currentUserId,
   isOwn,
   showAvatar,
   isSearchResult,
   isCurrentSearchResult,
-  searchTerm
+  searchTerm,
+  onAddReaction,
+  onRemoveReaction
 }, ref) => {
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
   const formatTime = (date) => {
     if (!date) return '';
     const d = date instanceof Date ? date : new Date(date);
@@ -736,6 +766,28 @@ const MessageBubble = forwardRef(({
       part.toLowerCase() === term.toLowerCase() ?
         <mark key={i} className="search-highlight">{part}</mark> : part
     );
+  };
+
+  /**
+   * Handle reaction click
+   */
+  const handleReactionClick = (emoji) => {
+    const reactions = message.reactions || {};
+    const userReacted = reactions[emoji]?.includes(currentUserId);
+
+    if (userReacted) {
+      onRemoveReaction(message.id, emoji);
+    } else {
+      onAddReaction(message.id, emoji);
+    }
+  };
+
+  /**
+   * Handle reaction picker select
+   */
+  const handleReactionSelect = (emoji) => {
+    onAddReaction(message.id, emoji);
+    setShowReactionPicker(false);
   };
 
   const containerClasses = [
@@ -807,6 +859,43 @@ const MessageBubble = forwardRef(({
         )}
 
         <div className="message-time">{formatTime(message.createdAt)}</div>
+
+        {/* Reactions Display */}
+        {message.reactions && Object.keys(message.reactions).length > 0 && (
+          <div className="message-reactions">
+            {Object.entries(message.reactions).map(([emoji, userIds]) => {
+              const userReacted = userIds.includes(currentUserId);
+              return (
+                <button
+                  key={emoji}
+                  className={`reaction-item ${userReacted ? 'reacted' : ''}`}
+                  onClick={() => handleReactionClick(emoji)}
+                  title={`${userIds.length} reacción(es)`}
+                >
+                  <span className="reaction-emoji">{emoji}</span>
+                  {userIds.length > 1 && (
+                    <span className="reaction-count">{userIds.length}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Reaction Button */}
+        <div className="reaction-button-container" style={{ position: 'relative' }}>
+          <button
+            className="add-reaction-btn"
+            onClick={() => setShowReactionPicker(!showReactionPicker)}
+            title="Añadir reacción"
+          >
+            +
+          </button>
+
+          {showReactionPicker && (
+            <ReactionPicker onSelect={handleReactionSelect} />
+          )}
+        </div>
       </div>
 
       {isOwn && showAvatar && (
