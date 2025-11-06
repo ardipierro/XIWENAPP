@@ -1,0 +1,408 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+
+    /**
+     * Verifica si el usuario está autenticado
+     */
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    /**
+     * Verifica si el usuario es admin
+     */
+    function isAdmin() {
+      return isAuth() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    /**
+     * Verifica si el usuario es profesor (teacher o admin)
+     */
+    function isTeacher() {
+      let role = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return isAuth() && role in ['admin', 'teacher', 'trial_teacher'];
+    }
+
+    /**
+     * Verifica si el usuario es estudiante
+     */
+    function isStudent() {
+      let role = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return isAuth() && role in ['student', 'listener', 'trial'];
+    }
+
+    /**
+     * Verifica si es el propio usuario
+     */
+    function isOwnUser(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+
+    /**
+     * Verifica si es el profesor del curso
+     */
+    function isTeacherOfCourse(courseId) {
+      let course = get(/databases/$(database)/documents/courses/$(courseId)).data;
+      return isAuth() && course.teacherId == request.auth.uid;
+    }
+
+    /**
+     * Verifica si es el creador del contenido
+     */
+    function isContentCreator() {
+      return isAuth() && request.auth.uid == resource.data.teacherId;
+    }
+
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+
+    match /users/{userId} {
+      // Leer: Solo el propio usuario, profesores y admins
+      allow read: if isOwnUser(userId) || isTeacher() || isAdmin();
+
+      // Crear: Solo admins y profesores pueden crear usuarios
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Solo el propio usuario puede actualizar su perfil
+      // Excepto el rol que solo lo pueden cambiar admins
+      allow update: if isOwnUser(userId) &&
+                       (request.resource.data.role == resource.data.role || isAdmin());
+
+      // Eliminar: Solo admins
+      allow delete: if isAdmin();
+    }
+
+    // ============================================
+    // STUDENTS COLLECTION
+    // ============================================
+
+    match /students/{studentId} {
+      // Leer: El propio estudiante, sus profesores o admins
+      allow read: if isOwnUser(studentId) || isTeacher() || isAdmin();
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Profesores y admins
+      allow update: if isTeacher() || isAdmin();
+
+      // Eliminar: Solo admins
+      allow delete: if isAdmin();
+    }
+
+    // ============================================
+    // COURSES COLLECTION
+    // ============================================
+
+    match /courses/{courseId} {
+      // Leer: Todos los usuarios autenticados
+      allow read: if isAuth();
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Solo el profesor del curso o admin
+      allow update: if isTeacherOfCourse(courseId) || isAdmin();
+
+      // Eliminar: Solo el profesor del curso o admin
+      allow delete: if isTeacherOfCourse(courseId) || isAdmin();
+    }
+
+    // ============================================
+    // CONTENT COLLECTION
+    // ============================================
+
+    match /content/{contentId} {
+      // Leer: Todos los usuarios autenticados
+      allow read: if isAuth();
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Solo el creador o admin
+      allow update: if isContentCreator() || isAdmin();
+
+      // Eliminar: Solo el creador o admin
+      allow delete: if isContentCreator() || isAdmin();
+    }
+
+    // ============================================
+    // EXERCISES COLLECTION
+    // ============================================
+
+    match /exercises/{exerciseId} {
+      // Leer: Todos los usuarios autenticados
+      allow read: if isAuth();
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Solo el creador o admin
+      allow update: if isAuth() &&
+                       (request.auth.uid == resource.data.teacherId || isAdmin());
+
+      // Eliminar: Solo el creador o admin
+      allow delete: if isAuth() &&
+                       (request.auth.uid == resource.data.teacherId || isAdmin());
+    }
+
+    // ============================================
+    // GAME SESSIONS COLLECTION
+    // ============================================
+
+    match /game_sessions/{sessionId} {
+      // Leer: Participantes del juego
+      allow read: if isAuth() &&
+                     (request.auth.uid in resource.data.participantIds || isTeacher());
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Participantes pueden actualizar su progreso
+      allow update: if isAuth() &&
+                       (request.auth.uid in resource.data.participantIds || isTeacher());
+
+      // Eliminar: Solo el creador o admin
+      allow delete: if isTeacher() || isAdmin();
+    }
+
+    // ============================================
+    // ENROLLMENTS COLLECTION (Inscripciones)
+    // ============================================
+
+    match /enrollments/{enrollmentId} {
+      // Leer: El estudiante inscrito, profesores y admins
+      allow read: if isAuth() &&
+                     (request.auth.uid == resource.data.studentId || isTeacher());
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Profesores y admins
+      allow update: if isTeacher() || isAdmin();
+
+      // Eliminar: Profesores y admins
+      allow delete: if isTeacher() || isAdmin();
+    }
+
+    // ============================================
+    // ASSIGNMENTS COLLECTION (Tareas asignadas)
+    // ============================================
+
+    match /assignments/{assignmentId} {
+      // Leer: El estudiante asignado, profesores y admins
+      allow read: if isAuth() &&
+                     (request.auth.uid == resource.data.studentId || isTeacher());
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Profesores para cambiar estado, estudiantes no pueden modificar
+      allow update: if isTeacher() || isAdmin();
+
+      // Eliminar: Profesores y admins
+      allow delete: if isTeacher() || isAdmin();
+    }
+
+    // ============================================
+    // WHITEBOARD SESSIONS COLLECTION
+    // ============================================
+
+    match /whiteboard_sessions/{sessionId} {
+      // Leer: Todos los usuarios autenticados
+      allow read: if isAuth();
+
+      // Crear: Todos los usuarios autenticados
+      allow create: if isAuth();
+
+      // Actualizar: Solo el creador o admin
+      allow update: if isAuth() &&
+                       (request.auth.uid == resource.data.userId || isAdmin());
+
+      // Eliminar: Solo el creador o admin
+      allow delete: if isAuth() &&
+                       (request.auth.uid == resource.data.userId || isAdmin());
+    }
+
+    // Subcollección de strokes dentro de whiteboard_sessions
+    match /whiteboard_sessions/{sessionId}/strokes/{strokeId} {
+      allow read: if isAuth();
+      allow write: if isAuth();
+    }
+
+    // ============================================
+    // CLASSES COLLECTION (Clases programadas)
+    // ============================================
+
+    match /classes/{classId} {
+      // Leer: Todos los usuarios autenticados
+      allow read: if isAuth();
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Solo el profesor de la clase o admin
+      allow update: if isAuth() &&
+                       (request.auth.uid == resource.data.teacherId || isAdmin());
+
+      // Eliminar: Solo el profesor de la clase o admin
+      allow delete: if isAuth() &&
+                       (request.auth.uid == resource.data.teacherId || isAdmin());
+    }
+
+    // ============================================
+    // CLASS INSTANCES COLLECTION (Instancias de clases)
+    // ============================================
+
+    match /class_instances/{instanceId} {
+      // Leer: Todos los usuarios autenticados
+      allow read: if isAuth();
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Profesores y admins
+      allow update: if isTeacher() || isAdmin();
+
+      // Eliminar: Profesores y admins
+      allow delete: if isTeacher() || isAdmin();
+    }
+
+    // ============================================
+    // ATTENDANCE COLLECTION (Asistencia)
+    // ============================================
+
+    match /attendance/{attendanceId} {
+      // Leer: El estudiante, profesores y admins
+      allow read: if isAuth() &&
+                     (request.auth.uid == resource.data.studentId || isTeacher());
+
+      // Crear: Profesores y admins (marcar asistencia)
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Profesores y admins
+      allow update: if isTeacher() || isAdmin();
+
+      // Eliminar: Solo admins
+      allow delete: if isAdmin();
+    }
+
+    // ============================================
+    // CREDITS COLLECTION (Sistema de créditos)
+    // ============================================
+
+    match /credits/{creditId} {
+      // Leer: El propio usuario, profesores y admins
+      allow read: if isAuth() &&
+                     (request.auth.uid == resource.data.userId || isTeacher());
+
+      // Crear: Solo admins y profesores
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Solo admins (evitar fraude)
+      allow update: if isAdmin();
+
+      // Eliminar: Solo admins
+      allow delete: if isAdmin();
+    }
+
+    // Subcollección de transacciones de créditos
+    match /credits/{creditId}/transactions/{transactionId} {
+      allow read: if isAuth() &&
+                     (request.auth.uid == get(/databases/$(database)/documents/credits/$(creditId)).data.userId
+                      || isTeacher());
+      allow create: if isTeacher() || isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ============================================
+    // GROUPS COLLECTION (Grupos de estudiantes)
+    // ============================================
+
+    match /groups/{groupId} {
+      // Leer: Todos los usuarios autenticados
+      allow read: if isAuth();
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Solo el profesor del grupo o admin
+      allow update: if isAuth() &&
+                       (request.auth.uid == resource.data.teacherId || isAdmin());
+
+      // Eliminar: Solo el profesor del grupo o admin
+      allow delete: if isAuth() &&
+                       (request.auth.uid == resource.data.teacherId || isAdmin());
+    }
+
+    // ============================================
+    // GROUP MEMBERS COLLECTION
+    // ============================================
+
+    match /group_members/{memberId} {
+      // Leer: Miembros del grupo, profesores y admins
+      allow read: if isAuth();
+
+      // Crear: Profesores y admins
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Profesores y admins
+      allow update: if isTeacher() || isAdmin();
+
+      // Eliminar: Profesores y admins
+      allow delete: if isTeacher() || isAdmin();
+    }
+
+    // ============================================
+    // STUDENT PROGRESS COLLECTION (Progreso de estudiantes)
+    // ============================================
+
+    match /student_progress/{progressId} {
+      // Leer: El estudiante, profesores y admins
+      allow read: if isAuth() &&
+                     (request.auth.uid == resource.data.studentId || isTeacher());
+
+      // Crear: Sistema automático (estudiantes al completar) y profesores
+      allow create: if isAuth() &&
+                       (request.auth.uid == request.resource.data.studentId || isTeacher());
+
+      // Actualizar: Solo el estudiante para actualizar su progreso
+      allow update: if isAuth() &&
+                       (request.auth.uid == resource.data.studentId || isTeacher());
+
+      // Eliminar: Solo admins
+      allow delete: if isAdmin();
+    }
+
+    // ============================================
+    // ANALYTICS COLLECTION
+    // ============================================
+
+    match /analytics/{analyticsId} {
+      // Leer: Profesores y admins
+      allow read: if isTeacher() || isAdmin();
+
+      // Crear: Sistema automático
+      allow create: if isTeacher() || isAdmin();
+
+      // Actualizar: Solo admins
+      allow update: if isAdmin();
+
+      // Eliminar: Solo admins
+      allow delete: if isAdmin();
+    }
+
+    // ============================================
+    // DENY ALL - Cualquier otra colección está bloqueada
+    // ============================================
+    // Esto asegura que colecciones no explícitamente permitidas sean inaccesibles
+  }
+}
