@@ -3,8 +3,8 @@
  * @module components/MessageThread
  */
 
-import { useState, useEffect, useRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download } from 'lucide-react';
+import { useState, useEffect, useRef, forwardRef } from 'react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -37,10 +37,15 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const searchResultRefs = useRef({});
 
   // Subscribe to messages in real-time
   useEffect(() => {
@@ -129,11 +134,78 @@ function MessageThread({ conversation, currentUser, onClose }) {
     };
   }, [conversation?.id, currentUser.uid]);
 
+  // Search messages
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      setCurrentSearchIndex(-1);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase();
+    const results = messages
+      .map((msg, index) => ({ ...msg, originalIndex: index }))
+      .filter(msg =>
+        msg.content?.toLowerCase().includes(term) ||
+        msg.attachment?.filename?.toLowerCase().includes(term)
+      );
+
+    setSearchResults(results);
+    setCurrentSearchIndex(results.length > 0 ? 0 : -1);
+
+    // Scroll to first result
+    if (results.length > 0) {
+      scrollToSearchResult(results[0].id);
+    }
+  }, [searchTerm, messages]);
+
   /**
    * Scroll to bottom of messages
    */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  /**
+   * Scroll to search result
+   */
+  const scrollToSearchResult = (messageId) => {
+    const element = searchResultRefs.current[messageId];
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  /**
+   * Navigate to next search result
+   */
+  const nextSearchResult = () => {
+    if (searchResults.length === 0) return;
+    const nextIndex = (currentSearchIndex + 1) % searchResults.length;
+    setCurrentSearchIndex(nextIndex);
+    scrollToSearchResult(searchResults[nextIndex].id);
+  };
+
+  /**
+   * Navigate to previous search result
+   */
+  const prevSearchResult = () => {
+    if (searchResults.length === 0) return;
+    const prevIndex = currentSearchIndex === 0
+      ? searchResults.length - 1
+      : currentSearchIndex - 1;
+    setCurrentSearchIndex(prevIndex);
+    scrollToSearchResult(searchResults[prevIndex].id);
+  };
+
+  /**
+   * Clear search
+   */
+  const clearSearch = () => {
+    setSearchTerm('');
+    setSearchResults([]);
+    setCurrentSearchIndex(-1);
+    setShowSearch(false);
   };
 
   /**
@@ -286,6 +358,14 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
         <div className="thread-actions">
           <button
+            className="thread-action-btn"
+            onClick={() => setShowSearch(!showSearch)}
+            title="Buscar mensajes"
+          >
+            <Search size={20} />
+          </button>
+
+          <button
             className="thread-menu-btn"
             onClick={() => setShowMenu(!showMenu)}
           >
@@ -309,6 +389,55 @@ function MessageThread({ conversation, currentUser, onClose }) {
         </div>
       </div>
 
+      {/* Search Bar */}
+      {showSearch && (
+        <div className="thread-search-bar">
+          <div className="search-input-container">
+            <Search size={16} />
+            <input
+              type="text"
+              placeholder="Buscar en esta conversación..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
+            />
+            {searchTerm && (
+              <button className="clear-search-btn" onClick={clearSearch}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {searchResults.length > 0 && (
+            <div className="search-navigation">
+              <span className="search-count">
+                {currentSearchIndex + 1} / {searchResults.length}
+              </span>
+              <button
+                className="search-nav-btn"
+                onClick={prevSearchResult}
+                title="Resultado anterior"
+              >
+                ↑
+              </button>
+              <button
+                className="search-nav-btn"
+                onClick={nextSearchResult}
+                title="Siguiente resultado"
+              >
+                ↓
+              </button>
+            </div>
+          )}
+
+          {searchTerm && searchResults.length === 0 && (
+            <div className="search-no-results">
+              No se encontraron mensajes
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Messages List */}
       <div className="messages-list">
         {messages.length === 0 ? (
@@ -316,17 +445,28 @@ function MessageThread({ conversation, currentUser, onClose }) {
             <p>No hay mensajes aún. ¡Inicia la conversación!</p>
           </div>
         ) : (
-          messages.map((message, index) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              isOwn={message.senderId === currentUser.uid}
-              showAvatar={
-                index === 0 ||
-                messages[index - 1].senderId !== message.senderId
-              }
-            />
-          ))
+          messages.map((message, index) => {
+            const isSearchResult = searchResults.some(r => r.id === message.id);
+            const isCurrentSearchResult = searchResults[currentSearchIndex]?.id === message.id;
+
+            return (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                isOwn={message.senderId === currentUser.uid}
+                showAvatar={
+                  index === 0 ||
+                  messages[index - 1].senderId !== message.senderId
+                }
+                isSearchResult={isSearchResult}
+                isCurrentSearchResult={isCurrentSearchResult}
+                searchTerm={searchTerm}
+                ref={(el) => {
+                  if (el) searchResultRefs.current[message.id] = el;
+                }}
+              />
+            );
+          })
         )}
         {isOtherUserTyping && (
           <div className="typing-indicator">
@@ -432,7 +572,14 @@ function MessageThread({ conversation, currentUser, onClose }) {
 /**
  * Message Bubble Component
  */
-function MessageBubble({ message, isOwn, showAvatar }) {
+const MessageBubble = forwardRef(({
+  message,
+  isOwn,
+  showAvatar,
+  isSearchResult,
+  isCurrentSearchResult,
+  searchTerm
+}, ref) => {
   const formatTime = (date) => {
     if (!date) return '';
     const d = date instanceof Date ? date : new Date(date);
@@ -449,8 +596,28 @@ function MessageBubble({ message, isOwn, showAvatar }) {
     return type?.startsWith('image/');
   };
 
+  /**
+   * Highlight search term in text
+   */
+  const highlightText = (text, term) => {
+    if (!term || !text) return text;
+
+    const parts = text.split(new RegExp(`(${term})`, 'gi'));
+    return parts.map((part, i) =>
+      part.toLowerCase() === term.toLowerCase() ?
+        <mark key={i} className="search-highlight">{part}</mark> : part
+    );
+  };
+
+  const containerClasses = [
+    'message-bubble-container',
+    isOwn ? 'own' : 'other',
+    isSearchResult ? 'search-result' : '',
+    isCurrentSearchResult ? 'current-search-result' : ''
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`message-bubble-container ${isOwn ? 'own' : 'other'}`}>
+    <div className={containerClasses} ref={ref}>
       {!isOwn && showAvatar && (
         <div className="message-avatar">
           {message.senderName?.charAt(0).toUpperCase() || '?'}
@@ -497,7 +664,9 @@ function MessageBubble({ message, isOwn, showAvatar }) {
 
         {/* Text Content */}
         {message.content && (
-          <div className="message-content">{message.content}</div>
+          <div className="message-content">
+            {highlightText(message.content, searchTerm)}
+          </div>
         )}
 
         <div className="message-time">{formatTime(message.createdAt)}</div>
@@ -510,6 +679,8 @@ function MessageBubble({ message, isOwn, showAvatar }) {
       )}
     </div>
   );
-}
+});
+
+MessageBubble.displayName = 'MessageBubble';
 
 export default MessageThread;
