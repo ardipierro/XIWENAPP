@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import useAuth from './hooks/useAuth.js';
 import { useViewAs } from './contexts/ViewAsContext.jsx';
 import { ADMIN_ROLES, TEACHER_ROLES, STUDENT_ROLES } from './constants/auth.js';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 // Lazy loaded components for better performance
 const LandingPage = lazy(() => import('./LandingPage'));
@@ -73,8 +74,9 @@ function App() {
   }
 
   return (
-    <Router>
-      <Suspense fallback={<LoadingFallback />}>
+    <ErrorBoundary context="App">
+      <Router>
+        <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Public Routes - solo accesibles sin autenticación */}
           <Route
@@ -144,7 +146,8 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-    </Router>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
