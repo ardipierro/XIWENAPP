@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -16,11 +16,13 @@ import {
 } from '../firebase/messages';
 import {
   uploadMessageAttachment,
-  validateMessageFile
+  validateMessageFile,
+  uploadAudioMessage
 } from '../firebase/storage';
 import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
 import EmojiPicker from './EmojiPicker';
+import VoiceRecorder from './VoiceRecorder';
 
 /**
  * Message Thread Component
@@ -43,6 +45,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [searchResults, setSearchResults] = useState([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -231,6 +234,66 @@ function MessageThread({ conversation, currentUser, onClose }) {
       const newPos = start + emoji.length;
       textarea.setSelectionRange(newPos, newPos);
     }, 0);
+  };
+
+  /**
+   * Handle voice message send
+   */
+  const handleVoiceSend = async (audioBlob, duration) => {
+    setShowVoiceRecorder(false);
+    setSending(true);
+    setUploading(true);
+
+    // Upload audio
+    const uploadResult = await safeAsync(
+      () => uploadAudioMessage(audioBlob, conversation.id, currentUser.uid),
+      {
+        context: 'MessageThread',
+        onError: (error) => {
+          logger.error('Failed to upload audio', error);
+          alert('Error al subir el audio. Por favor, intenta de nuevo.');
+        }
+      }
+    );
+
+    setUploading(false);
+
+    if (!uploadResult || !uploadResult.success) {
+      setSending(false);
+      return;
+    }
+
+    // Send message with audio attachment
+    const audioAttachment = {
+      url: uploadResult.url,
+      filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
+      size: audioBlob.size,
+      type: 'audio/webm',
+      duration
+    };
+
+    const result = await safeAsync(
+      () => sendMessage({
+        conversationId: conversation.id,
+        senderId: currentUser.uid,
+        senderName: currentUser.displayName || currentUser.email,
+        receiverId: conversation.otherUser.id,
+        content: '',
+        attachment: audioAttachment
+      }),
+      {
+        context: 'MessageThread',
+        onError: (error) => {
+          logger.error('Failed to send voice message', error);
+        }
+      }
+    );
+
+    setSending(false);
+
+    if (result) {
+      inputRef.current?.focus();
+    }
   };
 
   /**
@@ -508,6 +571,14 @@ function MessageThread({ conversation, currentUser, onClose }) {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Voice Recorder */}
+      {showVoiceRecorder && (
+        <VoiceRecorder
+          onSend={handleVoiceSend}
+          onCancel={() => setShowVoiceRecorder(false)}
+        />
+      )}
+
       {/* Message Input */}
       <form className="message-input-container" onSubmit={handleSendMessage}>
         {/* File Preview */}
@@ -570,7 +641,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
               type="button"
               className="emoji-button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              disabled={sending || uploading}
+              disabled={sending || uploading || showVoiceRecorder}
               title="Emojis"
             >
               <Smile size={20} />
@@ -583,6 +654,16 @@ function MessageThread({ conversation, currentUser, onClose }) {
               />
             )}
           </div>
+
+          <button
+            type="button"
+            className="voice-button"
+            onClick={() => setShowVoiceRecorder(true)}
+            disabled={sending || uploading || showVoiceRecorder}
+            title="Mensaje de voz"
+          >
+            <Mic size={20} />
+          </button>
 
           <textarea
             ref={inputRef}
@@ -640,6 +721,10 @@ const MessageBubble = forwardRef(({
     return type?.startsWith('image/');
   };
 
+  const isAudio = (type) => {
+    return type?.startsWith('audio/');
+  };
+
   /**
    * Highlight search term in text
    */
@@ -683,6 +768,14 @@ const MessageBubble = forwardRef(({
                   alt={message.attachment.filename}
                   onClick={() => window.open(message.attachment.url, '_blank')}
                 />
+              </div>
+            ) : isAudio(message.attachment.type) ? (
+              <div className="attachment-audio">
+                <Mic size={20} className="audio-icon" />
+                <audio controls className="audio-player">
+                  <source src={message.attachment.url} type={message.attachment.type} />
+                  Tu navegador no soporta el elemento de audio.
+                </audio>
               </div>
             ) : (
               <a

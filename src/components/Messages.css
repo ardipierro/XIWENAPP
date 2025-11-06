@@ -935,6 +935,32 @@
   cursor: not-allowed;
 }
 
+.voice-button {
+  padding: 10px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.voice-button:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  transform: scale(1.05);
+}
+
+.voice-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Message Attachments Display */
 .message-attachment {
   margin-bottom: 8px;
@@ -998,6 +1024,44 @@
 .attachment-size {
   font-size: 12px;
   color: var(--color-text-secondary);
+}
+
+/* Audio Attachment */
+.attachment-audio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  max-width: 300px;
+}
+
+.audio-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.audio-player {
+  flex: 1;
+  height: 32px;
+  min-width: 0;
+}
+
+.audio-player::-webkit-media-controls-panel {
+  background: var(--color-bg-secondary);
+}
+
+.audio-player::-webkit-media-controls-play-button,
+.audio-player::-webkit-media-controls-mute-button {
+  background-color: var(--color-primary, #6366f1);
+  border-radius: 50%;
+}
+
+.audio-player::-webkit-media-controls-timeline {
+  background: var(--color-border);
+  border-radius: 2px;
 }
 
 /* Dark Mode Adjustments */
