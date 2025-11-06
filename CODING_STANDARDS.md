@@ -154,9 +154,428 @@ const modal = useModal(); // { isOpen, open, close, toggle }
 
 ---
 
+## 🧩 Componentes Base (Base Components)
+
+### ✅ REGLA #3: SIEMPRE usar componentes base - NUNCA crear desde cero
+
+**Todos los componentes base están en `src/components/common/` y DEBEN usarse.**
+
+#### 📍 Ubicación:
+```
+src/components/common/
+├── BaseButton.jsx      - Botones
+├── BaseInput.jsx       - Inputs de texto
+├── BaseSelect.jsx      - Selectores
+├── BaseTextarea.jsx    - Áreas de texto
+├── BaseCard.jsx        - Cards/tarjetas
+├── BaseModal.jsx       - Modales
+├── BaseBadge.jsx       - Badges/tags
+├── BaseLoading.jsx     - Estados de carga
+├── BaseAlert.jsx       - Alertas/notificaciones
+├── BaseDropdown.jsx    - Menús desplegables
+└── BaseEmptyState.jsx  - Estados vacíos
+```
+
+#### 🎨 Design Tokens:
+```
+src/config/designTokens.js  - Fuente única de verdad para colores, espaciados, etc.
+```
+
+---
+
+### 1️⃣ BaseButton - Botones
+
+**❌ Incorrecto:**
+```jsx
+<button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+  Click me
+</button>
+```
+
+**✅ Correcto:**
+```jsx
+import BaseButton from './common/BaseButton';
+import { Plus, Save } from 'lucide-react';
+
+// Variantes disponibles: primary, secondary, success, danger, warning, ghost, outline
+<BaseButton variant="primary" size="md">
+  Click me
+</BaseButton>
+
+// Con icono
+<BaseButton variant="success" icon={Plus}>
+  Crear Nuevo
+</BaseButton>
+
+// Con loading
+<BaseButton variant="primary" loading={isSaving}>
+  Guardando...
+</BaseButton>
+
+// Ancho completo
+<BaseButton variant="primary" fullWidth>
+  Confirmar
+</BaseButton>
+```
+
+**Props disponibles:**
+```typescript
+{
+  variant: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'ghost' | 'outline',
+  size: 'sm' | 'md' | 'lg' | 'xl',
+  loading: boolean,
+  disabled: boolean,
+  fullWidth: boolean,
+  icon: LucideIcon,        // Icono izquierdo
+  iconRight: LucideIcon,   // Icono derecho
+  onClick: function,
+  type: 'button' | 'submit' | 'reset',
+  className: string,
+}
+```
+
+---
+
+### 2️⃣ BaseInput, BaseSelect, BaseTextarea - Formularios
+
+**❌ Incorrecto:**
+```jsx
+<input
+  type="text"
+  className="w-full px-4 py-2 border rounded"
+  placeholder="Nombre"
+/>
+```
+
+**✅ Correcto:**
+```jsx
+import BaseInput from './common/BaseInput';
+import BaseSelect from './common/BaseSelect';
+import BaseTextarea from './common/BaseTextarea';
+import { Mail, Lock, User } from 'lucide-react';
+
+// Input básico
+<BaseInput
+  label="Nombre"
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  placeholder="Ingresa tu nombre"
+  required
+/>
+
+// Input con icono y error
+<BaseInput
+  type="email"
+  label="Email"
+  icon={Mail}
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  error={emailError}
+  helperText="Usaremos este email para contactarte"
+/>
+
+// Password (auto toggle)
+<BaseInput
+  type="password"
+  label="Contraseña"
+  icon={Lock}
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+/>
+
+// Select
+<BaseSelect
+  label="Rol"
+  value={role}
+  onChange={(e) => setRole(e.target.value)}
+  options={[
+    { value: 'student', label: 'Estudiante' },
+    { value: 'teacher', label: 'Profesor' },
+    { value: 'admin', label: 'Administrador' },
+  ]}
+  required
+/>
+
+// Textarea con contador
+<BaseTextarea
+  label="Descripción"
+  value={description}
+  onChange={(e) => setDescription(e.target.value)}
+  maxLength={500}
+  rows={4}
+  helperText="Describe brevemente el curso"
+/>
+```
+
+---
+
+### 3️⃣ BaseCard - Cards/Tarjetas
+
+**✅ Ejemplos de uso:**
+```jsx
+import BaseCard from './common/BaseCard';
+import BaseBadge from './common/BaseBadge';
+import BaseButton from './common/BaseButton';
+import { BookOpen, Users, Clock } from 'lucide-react';
+
+// Card simple
+<BaseCard
+  title="Mi Curso"
+  subtitle="Descripción del curso"
+>
+  <p>Contenido aquí...</p>
+</BaseCard>
+
+// Card con imagen
+<BaseCard
+  image="https://example.com/image.jpg"
+  title="Curso de React"
+  badges={[
+    <BaseBadge variant="primary">Programación</BaseBadge>,
+    <BaseBadge variant="success">Activo</BaseBadge>
+  ]}
+>
+  <p>Aprende React desde cero</p>
+</BaseCard>
+
+// Card con icono y acciones
+<BaseCard
+  icon={BookOpen}
+  title="Ejercicio #1"
+  subtitle="Matemáticas básicas"
+  stats={
+    <>
+      <span><Users size={14} /> 24 estudiantes</span>
+      <span><Clock size={14} /> 30 min</span>
+    </>
+  }
+  actions={
+    <>
+      <BaseButton variant="ghost" size="sm">Ver</BaseButton>
+      <BaseButton variant="primary" size="sm">Iniciar</BaseButton>
+    </>
+  }
+>
+  <p>Ejercicios de suma y resta</p>
+</BaseCard>
+
+// Card clickable
+<BaseCard
+  title="Curso Clickable"
+  onClick={() => navigate('/curso/123')}
+  hover
+>
+  <p>Click en todo el card para navegar</p>
+</BaseCard>
+```
+
+---
+
+### 4️⃣ BaseModal - Modales
+
+**Ver REGLA #2 arriba** (ya documentado)
+
+---
+
+### 5️⃣ BaseBadge - Badges/Tags
+
+**✅ Ejemplos de uso:**
+```jsx
+import BaseBadge from './common/BaseBadge';
+import { CheckCircle } from 'lucide-react';
+
+// Variantes: default, primary, success, warning, danger, info
+<BaseBadge variant="success">Activo</BaseBadge>
+<BaseBadge variant="warning">Pendiente</BaseBadge>
+<BaseBadge variant="danger">Inactivo</BaseBadge>
+
+// Con icono
+<BaseBadge variant="success" icon={CheckCircle}>
+  Completado
+</BaseBadge>
+
+// Con dot indicator
+<BaseBadge variant="primary" dot>
+  En progreso
+</BaseBadge>
+
+// Con botón de cerrar
+<BaseBadge
+  variant="primary"
+  onRemove={() => removeTag(tag)}
+>
+  React
+</BaseBadge>
+
+// Tamaños
+<BaseBadge size="sm">Pequeño</BaseBadge>
+<BaseBadge size="md">Mediano</BaseBadge>
+<BaseBadge size="lg">Grande</BaseBadge>
+```
+
+---
+
+### 6️⃣ BaseLoading - Estados de carga
+
+**✅ Ejemplos de uso:**
+```jsx
+import BaseLoading from './common/BaseLoading';
+
+// Spinner (default)
+<BaseLoading variant="spinner" size="md" text="Cargando..." />
+
+// Dots animados
+<BaseLoading variant="dots" size="md" />
+
+// Pulse
+<BaseLoading variant="pulse" size="lg" />
+
+// Bars
+<BaseLoading variant="bars" size="md" text="Procesando..." />
+
+// Fullscreen overlay
+<BaseLoading variant="fullscreen" text="Guardando cambios..." />
+
+// Tamaños: sm, md, lg, xl
+<BaseLoading variant="spinner" size="xl" />
+```
+
+---
+
+### 7️⃣ BaseAlert - Alertas/Notificaciones
+
+**✅ Ejemplos de uso:**
+```jsx
+import BaseAlert from './common/BaseAlert';
+
+// Variantes: success, danger, warning, info
+<BaseAlert variant="success" title="Éxito!">
+  El curso se creó correctamente.
+</BaseAlert>
+
+<BaseAlert variant="danger" title="Error">
+  No se pudo guardar. Intenta nuevamente.
+</BaseAlert>
+
+<BaseAlert variant="warning">
+  Esta acción no se puede deshacer.
+</BaseAlert>
+
+// Con dismiss
+<BaseAlert
+  variant="info"
+  dismissible
+  onDismiss={() => setShowAlert(false)}
+>
+  Nueva actualización disponible
+</BaseAlert>
+
+// Sin borde
+<BaseAlert variant="success" border={false}>
+  Mensaje sin borde izquierdo
+</BaseAlert>
+```
+
+---
+
+### 8️⃣ BaseDropdown - Menús desplegables
+
+**✅ Ejemplos de uso:**
+```jsx
+import BaseDropdown from './common/BaseDropdown';
+import BaseButton from './common/BaseButton';
+import { MoreVertical, Edit, Trash, Download } from 'lucide-react';
+
+<BaseDropdown
+  trigger={
+    <BaseButton variant="ghost" icon={MoreVertical} />
+  }
+  items={[
+    {
+      label: 'Editar',
+      icon: Edit,
+      onClick: () => handleEdit()
+    },
+    {
+      label: 'Descargar',
+      icon: Download,
+      onClick: () => handleDownload()
+    },
+    { divider: true },
+    {
+      label: 'Eliminar',
+      icon: Trash,
+      variant: 'danger',
+      onClick: () => handleDelete()
+    }
+  ]}
+  align="right"
+/>
+```
+
+---
+
+### 9️⃣ BaseEmptyState - Estados vacíos
+
+**✅ Ejemplos de uso:**
+```jsx
+import BaseEmptyState from './common/BaseEmptyState';
+import BaseButton from './common/BaseButton';
+import { FileText, Plus } from 'lucide-react';
+
+<BaseEmptyState
+  icon={FileText}
+  title="No hay cursos"
+  description="Comienza creando tu primer curso"
+  action={
+    <BaseButton variant="primary" icon={Plus}>
+      Crear Curso
+    </BaseButton>
+  }
+  size="md"
+/>
+
+// Sin acción
+<BaseEmptyState
+  title="No se encontraron resultados"
+  description="Intenta con otra búsqueda"
+  size="sm"
+/>
+```
+
+---
+
+### 🎨 Design Tokens - Fuente única de verdad
+
+**SIEMPRE importar desde `src/config/designTokens.js`**
+
+```jsx
+import { colors, spacing, tw } from '../config/designTokens';
+
+// Acceso a colores
+const primaryColor = colors.primary[600];
+
+// Acceso a helpers de Tailwind
+<div className={tw.bg.primary}>
+  <p className={tw.text.primary}>Texto</p>
+</div>
+```
+
+**Tokens disponibles:**
+- `colors` - Paleta completa de colores
+- `spacing` - Espaciados estándar
+- `borderRadius` - Radios de borde
+- `fontSize` - Tamaños de fuente
+- `fontWeight` - Pesos de fuente
+- `shadows` - Sombras predefinidas
+- `transitions` - Duraciones de transición
+- `tw` - Helpers de clases Tailwind
+
+---
+
 ## 🎯 Custom Hooks
 
-### ✅ REGLA #3: Extraer lógica compartida en Custom Hooks
+### ✅ REGLA #4: Extraer lógica compartida en Custom Hooks
 
 **Cuando la misma lógica aparece en 2+ componentes, extraerla a un custom hook.**
 
@@ -240,7 +659,7 @@ const {
 
 ## 🏗️ Arquitectura de Componentes
 
-### ✅ REGLA #4: Componentes DRY (Don't Repeat Yourself)
+### ✅ REGLA #5: Componentes DRY (Don't Repeat Yourself)
 
 **Identificar y consolidar código duplicado.**
 
@@ -306,7 +725,7 @@ src/
 
 ## 🔥 Firebase & Data
 
-### ✅ REGLA #5: NUNCA usar console.* - Usar logger
+### ✅ REGLA #6: NUNCA usar console.* - Usar logger
 
 **SIEMPRE usar `logger` en lugar de `console`.**
 
@@ -339,7 +758,7 @@ logger.error('Error', err);  // Production
 
 ---
 
-### ✅ REGLA #6: Usar async/await con try-catch
+### ✅ REGLA #7: Usar async/await con try-catch
 
 **SIEMPRE manejar errores en operaciones Firebase.**
 
@@ -365,7 +784,7 @@ try {
 
 ## 🎨 Dark Mode
 
-### ✅ REGLA #7: Siempre soportar Dark Mode
+### ✅ REGLA #8: Siempre soportar Dark Mode
 
 **TODO componente nuevo debe funcionar en light y dark mode.**
 
@@ -424,7 +843,16 @@ try {
 Antes de hacer commit, verificar:
 
 - [ ] ¿Usa 100% Tailwind CSS? (sin archivos .css custom)
-- [ ] ¿Usa `BaseModal` si es un modal?
+- [ ] ¿Usa componentes base en lugar de HTML nativo?
+  - [ ] `BaseButton` en lugar de `<button>`
+  - [ ] `BaseInput/Select/Textarea` en lugar de `<input>/<select>/<textarea>`
+  - [ ] `BaseCard` para tarjetas
+  - [ ] `BaseModal` para modales
+  - [ ] `BaseBadge` para tags/badges
+  - [ ] `BaseLoading` para estados de carga
+  - [ ] `BaseAlert` para notificaciones
+  - [ ] `BaseDropdown` para menús desplegables
+  - [ ] `BaseEmptyState` para estados vacíos
 - [ ] ¿Usa `logger` en lugar de `console.*`?
 - [ ] ¿Funciona en dark mode?
 - [ ] ¿Tiene manejo de errores (try-catch)?
@@ -467,7 +895,14 @@ npm run build:css
 
 ## 🔄 Changelog de este documento
 
-### 2025-11-06
+### 2025-11-06 (v2.0)
+- ✅ Sistema completo de componentes base
+- ✅ Design Tokens centralizados
+- ✅ 11 componentes base documentados
+- ✅ Ejemplos de uso completos
+- ✅ Checklist actualizado
+
+### 2025-11-06 (v1.0)
 - Versión inicial
 - Agregadas reglas de Tailwind CSS 100%
 - Agregadas reglas de BaseModal
