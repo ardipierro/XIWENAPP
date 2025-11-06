@@ -1424,7 +1424,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'assignments') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <AssignmentManager teacherId={teacher?.id} />
+        <AssignmentManager teacherId={user?.id} />
       </DashboardLayout>
     );
   }
@@ -1433,7 +1433,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'grading') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <GradingInterface teacherId={teacher?.id} />
+        <GradingInterface teacherId={user?.id} />
       </DashboardLayout>
     );
   }
@@ -1442,7 +1442,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'calendar') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <UnifiedCalendar userId={teacher?.id} userRole="teacher" />
+        <UnifiedCalendar userId={user?.id} userRole="teacher" />
       </DashboardLayout>
     );
   }
