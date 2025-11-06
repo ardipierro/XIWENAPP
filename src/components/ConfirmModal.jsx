@@ -1,9 +1,10 @@
 import { AlertTriangle } from 'lucide-react';
+import BaseModal from './common/BaseModal';
 import './ConfirmModal.css';
 
 /**
  * Modal de confirmación personalizado
- * Sigue el diseño consistente de la app
+ * Ahora usa BaseModal como base
  */
 function ConfirmModal({
   isOpen,
@@ -15,54 +16,38 @@ function ConfirmModal({
   onCancel,
   isDanger = false
 }) {
-  if (!isOpen) return null;
+  const footer = (
+    <>
+      <button
+        type="button"
+        className="btn btn-outline"
+        onClick={onCancel}
+      >
+        {cancelText}
+      </button>
+      <button
+        type="button"
+        className={`btn ${isDanger ? 'btn-danger' : 'btn-primary'}`}
+        onClick={onConfirm}
+      >
+        {confirmText}
+      </button>
+    </>
+  );
 
   return (
-    <div className="modal-overlay confirm-modal-overlay" onClick={onCancel}>
-      <div className="modal-box confirm-modal-box" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="modal-header">
-          <div className="flex items-center gap-3">
-            {isDanger && (
-              <div className="confirm-icon danger">
-                <AlertTriangle size={24} strokeWidth={2} />
-              </div>
-            )}
-            <h3 className="modal-title">{title}</h3>
-          </div>
-          <button
-            className="modal-close-btn"
-            onClick={onCancel}
-            aria-label="Cerrar"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="modal-body">
-          <p className="confirm-message">{message}</p>
-        </div>
-
-        {/* Footer */}
-        <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-outline"
-            onClick={onCancel}
-          >
-            {cancelText}
-          </button>
-          <button
-            type="button"
-            className={`btn ${isDanger ? 'btn-danger' : 'btn-primary'}`}
-            onClick={onConfirm}
-          >
-            {confirmText}
-          </button>
-        </div>
-      </div>
-    </div>
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onCancel}
+      title={title}
+      icon={isDanger ? AlertTriangle : null}
+      footer={footer}
+      size="sm"
+      isDanger={isDanger}
+      closeOnOverlayClick={true}
+    >
+      <p className="confirm-message">{message}</p>
+    </BaseModal>
   );
 }
 
