@@ -75,9 +75,10 @@ export async function getOrCreateConversation(userId1, userId2) {
  * @param {string} messageData.senderName - Sender name
  * @param {string} messageData.receiverId - Receiver user ID
  * @param {string} messageData.content - Message content
+ * @param {Object} [messageData.attachment] - Optional attachment data
  * @returns {Promise<string>} Message ID
  */
-export async function sendMessage({ conversationId, senderId, senderName, receiverId, content }) {
+export async function sendMessage({ conversationId, senderId, senderName, receiverId, content, attachment }) {
   try {
     const batch = writeBatch(db);
 
@@ -85,19 +86,33 @@ export async function sendMessage({ conversationId, senderId, senderName, receiv
     const messagesRef = collection(db, 'messages');
     const messageRef = doc(messagesRef);
 
-    batch.set(messageRef, {
+    const messageData = {
       conversationId,
       senderId,
       senderName,
-      content,
+      content: content || '',
       createdAt: serverTimestamp(),
       read: false
-    });
+    };
 
-    // Update conversation
+    // Add attachment if present
+    if (attachment) {
+      messageData.attachment = attachment;
+    }
+
+    batch.set(messageRef, messageData);
+
+    // Update conversation with last message preview
+    let lastMessagePreview = content || '';
+    if (attachment && !content) {
+      lastMessagePreview = attachment.type?.startsWith('image/')
+        ? '📷 Imagen'
+        : `📎 ${attachment.filename}`;
+    }
+
     const conversationRef = doc(db, 'conversations', conversationId);
     batch.update(conversationRef, {
-      lastMessage: content.substring(0, 100),
+      lastMessage: lastMessagePreview.substring(0, 100),
       lastMessageAt: serverTimestamp(),
       [`unreadCount.${receiverId}`]: arrayUnion(messageRef.id)
     });

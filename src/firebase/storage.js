@@ -156,3 +156,119 @@ export function validateImageFile(file) {
 
   return { valid: true };
 }
+
+/**
+ * Upload message attachment (image or file)
+ * @param {File} file - File to upload
+ * @param {string} conversationId - Conversation ID
+ * @param {string} userId - User ID uploading
+ * @returns {Promise<object>} Result with URL and metadata
+ */
+export async function uploadMessageAttachment(file, conversationId, userId) {
+  try {
+    const timestamp = Date.now();
+    const extension = file.name.split('.').pop();
+    const filename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const path = `messages/${conversationId}/${userId}_${timestamp}_${filename}`;
+
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, file, {
+      contentType: file.type,
+      customMetadata: {
+        originalName: file.name,
+        uploadedBy: userId,
+        uploadedAt: timestamp.toString()
+      }
+    });
+
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    return {
+      success: true,
+      url: downloadURL,
+      filename: file.name,
+      size: file.size,
+      type: file.type
+    };
+  } catch (error) {
+    console.error('Error uploading message attachment:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Upload audio message
+ * @param {Blob} audioBlob - Audio blob to upload
+ * @param {string} conversationId - Conversation ID
+ * @param {string} userId - User ID uploading
+ * @returns {Promise<object>} Result with URL and metadata
+ */
+export async function uploadAudioMessage(audioBlob, conversationId, userId) {
+  try {
+    const timestamp = Date.now();
+    const path = `messages/${conversationId}/audio_${userId}_${timestamp}.webm`;
+
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, audioBlob, {
+      contentType: 'audio/webm',
+      customMetadata: {
+        type: 'voice-message',
+        uploadedBy: userId,
+        uploadedAt: timestamp.toString()
+      }
+    });
+
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    return {
+      success: true,
+      url: downloadURL,
+      duration: 0, // Will be set by recorder
+      type: 'audio/webm'
+    };
+  } catch (error) {
+    console.error('Error uploading audio message:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Validate file for messages
+ * @param {File} file - File to validate
+ * @returns {object} Validation result
+ */
+export function validateMessageFile(file) {
+  const maxSize = 10 * 1024 * 1024; // 10MB for regular files
+  const maxImageSize = 5 * 1024 * 1024; // 5MB for images
+
+  const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  const allowedTypes = [
+    ...imageTypes,
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain',
+    'application/zip'
+  ];
+
+  if (!allowedTypes.includes(file.type) && !file.type.startsWith('image/')) {
+    return {
+      valid: false,
+      error: 'Tipo de archivo no permitido. Use imágenes, PDF, documentos de Office o archivos de texto.'
+    };
+  }
+
+  const sizeLimit = imageTypes.includes(file.type) ? maxImageSize : maxSize;
+
+  if (file.size > sizeLimit) {
+    const limitMB = sizeLimit / (1024 * 1024);
+    return {
+      valid: false,
+      error: `El archivo es demasiado grande. Máximo ${limitMB}MB.`
+    };
+  }
+
+  return { valid: true };
+}

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, X, MoreVertical, Archive } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -14,6 +14,10 @@ import {
   setTyping,
   clearTyping
 } from '../firebase/messages';
+import {
+  uploadMessageAttachment,
+  validateMessageFile
+} from '../firebase/storage';
 import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
 
@@ -30,8 +34,12 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [sending, setSending] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
   // Subscribe to messages in real-time
@@ -129,16 +137,89 @@ function MessageThread({ conversation, currentUser, onClose }) {
   };
 
   /**
+   * Handle file selection
+   */
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    const validation = validateMessageFile(file);
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFilePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFilePreview(null);
+    }
+  };
+
+  /**
+   * Remove selected file
+   */
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  /**
    * Handle send message
    */
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
-    if (!newMessage.trim() || sending) return;
+    // Require either text or file
+    if ((!newMessage.trim() && !selectedFile) || sending || uploading) return;
 
-    const messageContent = newMessage.trim();
-    setNewMessage('');
+    const messageContent = newMessage.trim() || '';
+    let attachmentData = null;
+
     setSending(true);
+
+    // Upload file if selected
+    if (selectedFile) {
+      setUploading(true);
+      const uploadResult = await safeAsync(
+        () => uploadMessageAttachment(selectedFile, conversation.id, currentUser.uid),
+        {
+          context: 'MessageThread',
+          onError: (error) => {
+            logger.error('Failed to upload attachment', error);
+            alert('Error al subir el archivo. Por favor, intenta de nuevo.');
+          }
+        }
+      );
+      setUploading(false);
+
+      if (!uploadResult || !uploadResult.success) {
+        setSending(false);
+        return;
+      }
+
+      attachmentData = {
+        url: uploadResult.url,
+        filename: uploadResult.filename,
+        size: uploadResult.size,
+        type: uploadResult.type
+      };
+    }
+
+    // Send message
+    setNewMessage('');
+    handleRemoveFile();
 
     const result = await safeAsync(
       () => sendMessage({
@@ -146,7 +227,8 @@ function MessageThread({ conversation, currentUser, onClose }) {
         senderId: currentUser.uid,
         senderName: currentUser.displayName || currentUser.email,
         receiverId: conversation.otherUser.id,
-        content: messageContent
+        content: messageContent,
+        attachment: attachmentData
       }),
       {
         context: 'MessageThread',
@@ -263,23 +345,85 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
       {/* Message Input */}
       <form className="message-input-container" onSubmit={handleSendMessage}>
-        <textarea
-          ref={inputRef}
-          className="message-input"
-          placeholder="Escribe un mensaje..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          rows={1}
-          disabled={sending}
-        />
-        <button
-          type="submit"
-          className="send-button"
-          disabled={!newMessage.trim() || sending}
-        >
-          <Send size={20} />
-        </button>
+        {/* File Preview */}
+        {selectedFile && (
+          <div className="file-preview-container">
+            {filePreview ? (
+              <div className="image-preview">
+                <img src={filePreview} alt="Preview" />
+                <button
+                  type="button"
+                  className="remove-preview-btn"
+                  onClick={handleRemoveFile}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="file-preview">
+                <File size={24} />
+                <div className="file-info">
+                  <span className="file-name">{selectedFile.name}</span>
+                  <span className="file-size">
+                    {(selectedFile.size / 1024).toFixed(1)} KB
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="remove-preview-btn"
+                  onClick={handleRemoveFile}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Input Row */}
+        <div className="input-row">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+
+          <button
+            type="button"
+            className="attach-button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={sending || uploading}
+            title="Adjuntar archivo"
+          >
+            <Paperclip size={20} />
+          </button>
+
+          <textarea
+            ref={inputRef}
+            className="message-input"
+            placeholder="Escribe un mensaje..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            rows={1}
+            disabled={sending || uploading}
+          />
+
+          <button
+            type="submit"
+            className="send-button"
+            disabled={(!newMessage.trim() && !selectedFile) || sending || uploading}
+            title={uploading ? 'Subiendo...' : 'Enviar'}
+          >
+            {uploading ? (
+              <div className="spinner-small"></div>
+            ) : (
+              <Send size={20} />
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -295,6 +439,16 @@ function MessageBubble({ message, isOwn, showAvatar }) {
     return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const isImage = (type) => {
+    return type?.startsWith('image/');
+  };
+
   return (
     <div className={`message-bubble-container ${isOwn ? 'own' : 'other'}`}>
       {!isOwn && showAvatar && (
@@ -307,7 +461,45 @@ function MessageBubble({ message, isOwn, showAvatar }) {
         {!isOwn && showAvatar && (
           <div className="message-sender">{message.senderName}</div>
         )}
-        <div className="message-content">{message.content}</div>
+
+        {/* Attachment Display */}
+        {message.attachment && (
+          <div className="message-attachment">
+            {isImage(message.attachment.type) ? (
+              <div className="attachment-image">
+                <img
+                  src={message.attachment.url}
+                  alt={message.attachment.filename}
+                  onClick={() => window.open(message.attachment.url, '_blank')}
+                />
+              </div>
+            ) : (
+              <a
+                href={message.attachment.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="attachment-file"
+              >
+                <File size={24} />
+                <div className="attachment-info">
+                  <span className="attachment-name">
+                    {message.attachment.filename}
+                  </span>
+                  <span className="attachment-size">
+                    {formatFileSize(message.attachment.size)}
+                  </span>
+                </div>
+                <Download size={16} />
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Text Content */}
+        {message.content && (
+          <div className="message-content">{message.content}</div>
+        )}
+
         <div className="message-time">{formatTime(message.createdAt)}</div>
       </div>
 
