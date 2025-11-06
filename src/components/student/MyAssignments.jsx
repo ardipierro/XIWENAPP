@@ -3,11 +3,20 @@ import logger from '../../utils/logger';
 import { useState, useEffect } from 'react';
 import {
   BookOpen, Video, BookMarked, Link, FileText, CheckCircle, ListChecks,
-  Edit3, RefreshCw, Hash, Sparkles, Table, Gamepad2, AlertTriangle, Clock, Play
+  Edit3, RefreshCw, Hash, Sparkles, Table, Gamepad2, Clock, Play
 } from 'lucide-react';
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { getStudentAssignments } from '../../firebase/relationships';
-import './MyAssignments.css';
+
+// Base Components
+import {
+  BaseButton,
+  BaseCard,
+  BaseLoading,
+  BaseEmptyState,
+  BaseBadge,
+  BaseAlert
+} from '../common';
 
 function MyAssignments({ user, onPlayContent, onPlayExercise }) {
   const [assignments, setAssignments] = useState([]);
@@ -82,39 +91,41 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
     }
   };
 
-  const getContentIcon = (type) => {
-    const iconProps = { size: 32, strokeWidth: 2 };
+  const getContentIconComponent = (type) => {
     switch (type) {
-      case 'lesson': return <BookOpen {...iconProps} />;
-      case 'video': return <Video {...iconProps} />;
-      case 'reading': return <BookMarked {...iconProps} />;
-      case 'link': return <Link {...iconProps} />;
-      default: return <FileText {...iconProps} />;
+      case 'lesson': return BookOpen;
+      case 'video': return Video;
+      case 'reading': return BookMarked;
+      case 'link': return Link;
+      default: return FileText;
     }
   };
 
-  const getExerciseIcon = (type) => {
-    const iconProps = { size: 32, strokeWidth: 2 };
+  const getExerciseIconComponent = (type) => {
     switch (type) {
-      case 'multiple_choice': return <CheckCircle {...iconProps} />;
-      case 'true_false': return <ListChecks {...iconProps} />;
-      case 'fill_blank': return <Edit3 {...iconProps} />;
-      case 'drag_drop': return <RefreshCw {...iconProps} />;
-      case 'order_sentence': return <Hash {...iconProps} />;
-      case 'matching': return <Link {...iconProps} />;
-      case 'highlight': return <Sparkles {...iconProps} />;
-      case 'table': return <Table {...iconProps} />;
-      default: return <Gamepad2 {...iconProps} />;
+      case 'multiple_choice': return CheckCircle;
+      case 'true_false': return ListChecks;
+      case 'fill_blank': return Edit3;
+      case 'drag_drop': return RefreshCw;
+      case 'order_sentence': return Hash;
+      case 'matching': return Link;
+      case 'highlight': return Sparkles;
+      case 'table': return Table;
+      default: return Gamepad2;
     }
   };
 
   const getDifficultyBadge = (difficulty) => {
-    const badges = {
-      easy: { label: 'Fácil', class: 'difficulty-easy' },
-      medium: { label: 'Medio', class: 'difficulty-medium' },
-      hard: { label: 'Difícil', class: 'difficulty-hard' }
-    };
-    return badges[difficulty] || badges.medium;
+    switch (difficulty) {
+      case 'easy':
+        return <BaseBadge variant="success" size="sm">Fácil</BaseBadge>;
+      case 'medium':
+        return <BaseBadge variant="warning" size="sm">Medio</BaseBadge>;
+      case 'hard':
+        return <BaseBadge variant="danger" size="sm">Difícil</BaseBadge>;
+      default:
+        return <BaseBadge variant="default" size="sm">Medio</BaseBadge>;
+    }
   };
 
   const contentAssignments = getContentAssignments();
@@ -122,165 +133,171 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
 
   if (loading) {
     return (
-      <div className="my-assignments">
-        <div className="assignments-header">
+      <div className="p-6">
+        <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Asignado a Mí</h1>
-          <p className="section-subtitle">Contenidos y ejercicios asignados directamente por tu profesor</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Contenidos y ejercicios asignados directamente por tu profesor
+          </p>
         </div>
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Cargando asignaciones...</p>
-        </div>
+        <BaseLoading variant="spinner" size="lg" text="Cargando asignaciones..." />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="my-assignments">
-        <div className="assignments-header">
+      <div className="p-6">
+        <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Asignado a Mí</h1>
         </div>
-        <div className="error-state">
-          <div className="error-icon">
-            <AlertTriangle size={48} strokeWidth={2} className="text-red-500" />
-          </div>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={loadAssignments}>
+        <BaseAlert
+          variant="danger"
+          title="Error al cargar asignaciones"
+          dismissible={false}
+        >
+          <p className="mb-4">{error}</p>
+          <BaseButton variant="primary" onClick={loadAssignments}>
             Reintentar
-          </button>
-        </div>
+          </BaseButton>
+        </BaseAlert>
       </div>
     );
   }
 
   return (
-    <div className="my-assignments">
+    <div className="p-6">
       {/* Header */}
-      <div className="assignments-header">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Asignado a Mí</h1>
-        <p className="section-subtitle">Contenidos y ejercicios asignados directamente por tu profesor</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          Contenidos y ejercicios asignados directamente por tu profesor
+        </p>
       </div>
 
       {/* Tabs */}
-      <div className="assignments-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
+      <div className="flex gap-2 mb-6">
+        <BaseButton
+          variant={activeTab === 'content' ? 'primary' : 'ghost'}
+          size="md"
+          icon={FileText}
           onClick={() => setActiveTab('content')}
         >
-          <FileText size={18} strokeWidth={2} className="inline-icon" /> Contenidos ({contentAssignments.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'exercises' ? 'active' : ''}`}
+          Contenidos ({contentAssignments.length})
+        </BaseButton>
+        <BaseButton
+          variant={activeTab === 'exercises' ? 'primary' : 'ghost'}
+          size="md"
+          icon={Gamepad2}
           onClick={() => setActiveTab('exercises')}
         >
-          <Gamepad2 size={18} strokeWidth={2} className="inline-icon" /> Ejercicios ({exerciseAssignments.length})
-        </button>
+          Ejercicios ({exerciseAssignments.length})
+        </BaseButton>
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Content - Contenidos */}
       {activeTab === 'content' && (
-        <div className="assignments-content">
+        <div>
           {contentAssignments.length === 0 ? (
-            <div className="empty-state-large">
-              <div className="empty-icon">
-                <FileText size={64} strokeWidth={2} className="text-gray-400" />
-              </div>
-              <h3>No hay contenidos asignados</h3>
-              <p>Tu profesor aún no te ha asignado contenidos directamente.</p>
-              <p style={{ marginTop: '8px', fontSize: '14px', opacity: 0.8 }}>
-                Los contenidos asignados a través de cursos se encuentran en "Mis Cursos"
-              </p>
-            </div>
+            <BaseEmptyState
+              icon={FileText}
+              title="No hay contenidos asignados"
+              description="Tu profesor aún no te ha asignado contenidos directamente. Los contenidos asignados a través de cursos se encuentran en 'Mis Cursos'."
+              size="lg"
+            />
           ) : (
-            <div className="assignments-grid">
-              {contentAssignments.map(assignment => (
-                <div
-                  key={assignment.id}
-                  className="assignment-card"
-                  onClick={() => onPlayContent && onPlayContent(assignment.itemId)}
-                >
-                  <div className="assignment-icon-large">
-                    {getContentIcon(assignment.itemDetails?.type)}
-                  </div>
-                  <div className="assignment-info">
-                    <h3 className="assignment-title">
-                      {assignment.itemDetails?.title || 'Contenido sin título'}
-                    </h3>
-                    <div className="assignment-meta">
-                      <span className="meta-badge type-badge">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {contentAssignments.map(assignment => {
+                const ContentIcon = getContentIconComponent(assignment.itemDetails?.type);
+                return (
+                  <BaseCard
+                    key={assignment.id}
+                    icon={ContentIcon}
+                    title={assignment.itemDetails?.title || 'Contenido sin título'}
+                    badges={[
+                      <BaseBadge key="type" variant="primary" size="sm">
                         {assignment.itemDetails?.type || 'contenido'}
-                      </span>
-                      {assignment.itemDetails?.duration && (
-                        <span className="meta-badge duration-badge">
-                          <Clock size={14} strokeWidth={2} className="inline-icon" /> {assignment.itemDetails.duration} min
-                        </span>
-                      )}
-                    </div>
-                    <div className="assignment-footer">
-                      <span className="assigned-date">
-                        Asignado {formatDate(assignment.assignedAt)}
-                      </span>
-                    </div>
-                  </div>
-                  <button className="btn-play-assignment">
-                    <Play size={16} strokeWidth={2} className="inline-icon" /> Iniciar
-                  </button>
-                </div>
-              ))}
+                      </BaseBadge>,
+                      assignment.itemDetails?.duration && (
+                        <BaseBadge key="duration" variant="default" size="sm" icon={Clock}>
+                          {assignment.itemDetails.duration} min
+                        </BaseBadge>
+                      )
+                    ].filter(Boolean)}
+                    onClick={() => onPlayContent && onPlayContent(assignment.itemId)}
+                    actions={
+                      <BaseButton
+                        variant="primary"
+                        size="sm"
+                        icon={Play}
+                        fullWidth
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPlayContent && onPlayContent(assignment.itemId);
+                        }}
+                      >
+                        Iniciar
+                      </BaseButton>
+                    }
+                    hover
+                  >
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Asignado {formatDate(assignment.assignedAt)}
+                    </p>
+                  </BaseCard>
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
+      {/* Tab Content - Ejercicios */}
       {activeTab === 'exercises' && (
-        <div className="assignments-content">
+        <div>
           {exerciseAssignments.length === 0 ? (
-            <div className="empty-state-large">
-              <div className="empty-icon">
-                <Gamepad2 size={64} strokeWidth={2} className="text-gray-400" />
-              </div>
-              <h3>No hay ejercicios asignados</h3>
-              <p>Tu profesor aún no te ha asignado ejercicios directamente.</p>
-              <p style={{ marginTop: '8px', fontSize: '14px', opacity: 0.8 }}>
-                Los ejercicios asignados a través de cursos se encuentran en "Mis Cursos"
-              </p>
-            </div>
+            <BaseEmptyState
+              icon={Gamepad2}
+              title="No hay ejercicios asignados"
+              description="Tu profesor aún no te ha asignado ejercicios directamente. Los ejercicios asignados a través de cursos se encuentran en 'Mis Cursos'."
+              size="lg"
+            />
           ) : (
-            <div className="assignments-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {exerciseAssignments.map(assignment => {
-                const difficulty = getDifficultyBadge(assignment.itemDetails?.difficulty);
+                const ExerciseIcon = getExerciseIconComponent(assignment.itemDetails?.type);
                 return (
-                  <div
+                  <BaseCard
                     key={assignment.id}
-                    className="assignment-card"
+                    icon={ExerciseIcon}
+                    title={assignment.itemDetails?.title || 'Ejercicio sin título'}
+                    badges={[
+                      <BaseBadge key="type" variant="info" size="sm">
+                        {assignment.itemDetails?.type || 'ejercicio'}
+                      </BaseBadge>,
+                      getDifficultyBadge(assignment.itemDetails?.difficulty)
+                    ]}
                     onClick={() => onPlayExercise && onPlayExercise(assignment.itemId)}
+                    actions={
+                      <BaseButton
+                        variant="success"
+                        size="sm"
+                        icon={Gamepad2}
+                        fullWidth
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPlayExercise && onPlayExercise(assignment.itemId);
+                        }}
+                      >
+                        Jugar
+                      </BaseButton>
+                    }
+                    hover
                   >
-                    <div className="assignment-icon-large">
-                      {getExerciseIcon(assignment.itemDetails?.type)}
-                    </div>
-                    <div className="assignment-info">
-                      <h3 className="assignment-title">
-                        {assignment.itemDetails?.title || 'Ejercicio sin título'}
-                      </h3>
-                      <div className="assignment-meta">
-                        <span className="meta-badge type-badge">
-                          {assignment.itemDetails?.type || 'ejercicio'}
-                        </span>
-                        <span className={`meta-badge ${difficulty.class}`}>
-                          {difficulty.label}
-                        </span>
-                      </div>
-                      <div className="assignment-footer">
-                        <span className="assigned-date">
-                          Asignado {formatDate(assignment.assignedAt)}
-                        </span>
-                      </div>
-                    </div>
-                    <button className="btn-play-assignment">
-                      <Gamepad2 size={16} strokeWidth={2} className="inline-icon" /> Jugar
-                    </button>
-                  </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Asignado {formatDate(assignment.assignedAt)}
+                    </p>
+                  </BaseCard>
                 );
               })}
             </div>

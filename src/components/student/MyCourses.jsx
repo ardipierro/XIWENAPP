@@ -1,9 +1,18 @@
 import logger from '../../utils/logger';
 
 import { useState, useEffect } from 'react';
-import { Check, Play, AlertTriangle, BookMarked, Calendar } from 'lucide-react';
+import { Check, Play, BookMarked, Calendar } from 'lucide-react';
 import { getStudentEnrollments, ensureStudentProfile } from '../../firebase/firestore';
-import './MyCourses.css';
+
+// Base Components
+import {
+  BaseButton,
+  BaseCard,
+  BaseLoading,
+  BaseEmptyState,
+  BaseBadge,
+  BaseAlert
+} from '../common';
 
 function MyCourses({ user, onSelectCourse }) {
   const [courses, setCourses] = useState([]);
@@ -85,18 +94,22 @@ function MyCourses({ user, onSelectCourse }) {
     switch (status) {
       case 'completed':
         return (
-          <span className="status-badge completed">
-            <Check size={14} strokeWidth={2} className="inline-icon" /> Completado
-          </span>
+          <BaseBadge variant="success" icon={Check} size="sm">
+            Completado
+          </BaseBadge>
         );
       case 'in_progress':
         return (
-          <span className="status-badge in-progress">
-            <Play size={14} strokeWidth={2} className="inline-icon" /> En Progreso
-          </span>
+          <BaseBadge variant="primary" icon={Play} size="sm">
+            En Progreso
+          </BaseBadge>
         );
       default:
-        return <span className="status-badge not-started">○ No Iniciado</span>;
+        return (
+          <BaseBadge variant="default" size="sm">
+            No Iniciado
+          </BaseBadge>
+        );
     }
   };
 
@@ -104,42 +117,40 @@ function MyCourses({ user, onSelectCourse }) {
 
   if (loading) {
     return (
-      <div className="my-courses">
-        <div className="courses-header">
+      <div className="p-6">
+        <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
         </div>
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Cargando tus cursos...</p>
-        </div>
+        <BaseLoading variant="spinner" size="lg" text="Cargando tus cursos..." />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="my-courses">
-        <div className="courses-header">
+      <div className="p-6">
+        <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
         </div>
-        <div className="error-state">
-          <div className="error-icon">
-            <AlertTriangle size={48} strokeWidth={2} className="text-red-500" />
-          </div>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={loadCourses}>
+        <BaseAlert
+          variant="danger"
+          title="Error al cargar cursos"
+          dismissible={false}
+        >
+          <p className="mb-4">{error}</p>
+          <BaseButton variant="primary" onClick={loadCourses}>
             Reintentar
-          </button>
-        </div>
+          </BaseButton>
+        </BaseAlert>
       </div>
     );
   }
 
   return (
-    <div className="my-courses">
-      <div className="courses-header">
+    <div className="p-6">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
-        <p className="section-subtitle">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {courses.length === 0
             ? 'Aún no tienes cursos asignados'
             : `${courses.length} curso${courses.length !== 1 ? 's' : ''} disponible${courses.length !== 1 ? 's' : ''}`
@@ -150,100 +161,95 @@ function MyCourses({ user, onSelectCourse }) {
       {courses.length > 0 && (
         <>
           {/* Filters */}
-          <div className="courses-filters">
-            <button
-              className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+          <div className="flex gap-2 mb-6 flex-wrap">
+            <BaseButton
+              variant={filter === 'all' ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setFilter('all')}
             >
               Todos ({courses.length})
-            </button>
-            <button
-              className={`filter-btn ${filter === 'in_progress' ? 'active' : ''}`}
+            </BaseButton>
+            <BaseButton
+              variant={filter === 'in_progress' ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setFilter('in_progress')}
             >
               En Progreso ({courses.filter(c => c.status === 'in_progress').length})
-            </button>
-            <button
-              className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
+            </BaseButton>
+            <BaseButton
+              variant={filter === 'completed' ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setFilter('completed')}
             >
               Completados ({courses.filter(c => c.status === 'completed').length})
-            </button>
+            </BaseButton>
           </div>
 
           {/* Courses Grid */}
           {filteredCourses.length === 0 ? (
-            <div className="empty-state">
-              <p>No hay cursos en esta categoría</p>
-            </div>
+            <BaseEmptyState
+              icon={BookMarked}
+              title="No hay cursos en esta categoría"
+              description="Prueba con otro filtro"
+              size="sm"
+            />
           ) : (
-            <div className="courses-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCourses.map(enrollment => {
                 const progressPercent = enrollment.progress?.percentComplete || 0;
+                const courseImage = enrollment.course?.imageUrl || null;
+
                 return (
-                  <div
+                  <BaseCard
                     key={enrollment.enrollmentId}
-                    className="course-card"
+                    image={courseImage}
+                    title={enrollment.course?.name || 'Curso sin nombre'}
+                    badges={[getStatusBadge(enrollment.status)]}
                     onClick={() => onSelectCourse(enrollment.course?.id, enrollment.course)}
+                    hover
                   >
-                    {/* Course Image - Mitad superior sin bordes */}
-                    {enrollment.course?.imageUrl ? (
-                      <div className="w-full h-48 overflow-hidden bg-gray-800 flex-shrink-0 relative">
-                        <img
-                          src={enrollment.course.imageUrl}
-                          alt={enrollment.course?.name || 'Curso'}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-3 right-3">
-                          {getStatusBadge(enrollment.status)}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="w-full h-48 bg-gray-800 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 relative">
-                        <BookMarked size={64} strokeWidth={2} className="text-gray-600 dark:text-gray-500" />
-                        <div className="absolute top-3 right-3">
-                          {getStatusBadge(enrollment.status)}
-                        </div>
-                      </div>
-                    )}
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+                      {enrollment.course?.description || 'Sin descripción'}
+                    </p>
 
-                    {/* Course Info */}
-                    <div className="course-info" style={{ padding: '16px' }}>
-                      <h3 className="course-name">{enrollment.course?.name || 'Curso sin nombre'}</h3>
-                      <p className="course-description">
-                        {enrollment.course?.description || 'Sin descripción'}
-                      </p>
-
-                      {/* Progress Bar */}
-                      <div className="progress-section">
-                        <div className="progress-header">
-                          <span className="progress-label">Progreso</span>
-                          <span className="progress-percentage">{progressPercent}%</span>
-                        </div>
-                        <div className="progress-bar">
-                          <div
-                            className="progress-fill"
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Enrolled Date */}
-                      <div className="course-meta">
-                        <span className="meta-item">
-                          <Calendar size={14} strokeWidth={2} className="inline-icon" /> Inscrito: {formatDate(enrollment.enrolledAt)}
+                    {/* Progress Bar */}
+                    <div className="mb-3">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                          Progreso
+                        </span>
+                        <span className="text-xs font-bold text-gray-900 dark:text-white">
+                          {progressPercent}%
                         </span>
                       </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Enrolled Date */}
+                    <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-4">
+                      <Calendar size={12} strokeWidth={2} />
+                      <span>Inscrito: {formatDate(enrollment.enrolledAt)}</span>
                     </div>
 
                     {/* Action Button */}
-                    <div className="course-actions">
-                      <button className="btn-continue">
-                        {progressPercent === 0 ? 'Comenzar' : progressPercent === 100 ? 'Revisar' : 'Continuar'}
-                        →
-                      </button>
-                    </div>
-                  </div>
+                    <BaseButton
+                      variant={progressPercent === 0 ? 'primary' : progressPercent === 100 ? 'secondary' : 'success'}
+                      size="sm"
+                      fullWidth
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectCourse(enrollment.course?.id, enrollment.course);
+                      }}
+                    >
+                      {progressPercent === 0 ? 'Comenzar' : progressPercent === 100 ? 'Revisar' : 'Continuar'} →
+                    </BaseButton>
+                  </BaseCard>
                 );
               })}
             </div>
@@ -252,13 +258,12 @@ function MyCourses({ user, onSelectCourse }) {
       )}
 
       {courses.length === 0 && (
-        <div className="empty-state-large">
-          <div className="empty-icon">
-            <BookMarked size={64} strokeWidth={2} className="text-gray-400" />
-          </div>
-          <h3>No tienes cursos asignados</h3>
-          <p>Cuando tu profesor te asigne cursos, aparecerán aquí.</p>
-        </div>
+        <BaseEmptyState
+          icon={BookMarked}
+          title="No tienes cursos asignados"
+          description="Cuando tu profesor te asigne cursos, aparecerán aquí."
+          size="lg"
+        />
       )}
     </div>
   );
