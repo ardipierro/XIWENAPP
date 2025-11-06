@@ -47,11 +47,17 @@
 
   .sidemenu-item-label,
   .sidemenu-version,
-  .sidemenu-divider {
+  .sidemenu-divider,
+  .sidemenu-section-label {
     display: none;
   }
 
   .sidemenu-item {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .sidemenu-section-header {
     justify-content: center;
     padding: 12px;
   }
@@ -160,6 +166,91 @@
   height: 1px;
   background: var(--color-bg-tertiary);
   margin: 8px 0;
+}
+
+/* ===============================================
+   COLLAPSIBLE SECTIONS FOR ADMIN MENU
+   =============================================== */
+
+.sidemenu-section {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0;
+}
+
+/* Section Header - Collapsible Button */
+.sidemenu-section-header {
+  position: relative;
+  width: calc(100% - 16px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 4px 8px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-align: left;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidemenu-section-header:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.sidemenu-section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.sidemenu-section-header:hover .sidemenu-section-icon {
+  color: var(--color-text-primary);
+}
+
+.sidemenu-section-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Section Items Container - Collapsible */
+.sidemenu-section-items {
+  display: flex;
+  flex-direction: column;
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+  opacity: 1;
+}
+
+.sidemenu-section-items.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.sidemenu-section-items.expanded {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+/* Nested section items have less indentation */
+.sidemenu-section-items .sidemenu-item {
+  margin-left: 12px;
+  width: calc(100% - 12px - 16px);
 }
 
 /* Footer */
