@@ -57,6 +57,7 @@ import { getExercisesByTeacher } from '../firebase/exercises';
 import { getClassesByTeacher } from '../firebase/classes';
 import { createUser } from '../firebase/users';
 import { getUserCredits } from '../firebase/credits';
+import { createExcalidrawSession } from '../firebase/excalidraw';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
@@ -73,6 +74,8 @@ import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
+import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
+import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
@@ -92,10 +95,12 @@ const ICON_MAP = {
 function TeacherDashboard({ user, userRole, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, students, playExercise, whiteboard, whiteboardSessions, liveClasses, liveClassRoom, testCollab
+  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, students, playExercise, whiteboard, whiteboardSessions, excalidrawWhiteboard, excalidrawSessions, liveClasses, liveClassRoom, testCollab
   const [selectedExerciseId, setSelectedExerciseId] = useState(null);
   const [selectedWhiteboardSession, setSelectedWhiteboardSession] = useState(null);
   const [whiteboardManagerKey, setWhiteboardManagerKey] = useState(0);
+  const [selectedExcalidrawSession, setSelectedExcalidrawSession] = useState(null);
+  const [excalidrawManagerKey, setExcalidrawManagerKey] = useState(0);
   const [selectedLiveClass, setSelectedLiveClass] = useState(null);
   const [stats, setStats] = useState({
     totalStudents: 0,
@@ -319,6 +324,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       'users': 'users',
       'students': 'students',
       'whiteboardSessions': 'whiteboardSessions',
+      'excalidrawWhiteboard': 'excalidrawSessions',
       'liveClasses': 'liveClasses'
     };
 
@@ -942,6 +948,51 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         isCollaborative={isLive}
         collaborativeSessionId={liveSessionId}
       />
+    );
+  }
+
+  // Renderizar Excalidraw Whiteboard - SIN Layout, pantalla completa
+  if (currentScreen === 'excalidrawWhiteboard') {
+    return (
+      <ExcalidrawWhiteboard
+        onBack={() => {
+          setExcalidrawManagerKey(prev => prev + 1); // Incrementar key para forzar recarga
+          setCurrentScreen('excalidrawSessions');
+        }}
+        initialSession={selectedExcalidrawSession}
+      />
+    );
+  }
+
+  // Renderizar Gestión de Pizarras Excalidraw - CON Layout
+  if (currentScreen === 'excalidrawSessions') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <ExcalidrawManager
+          key={excalidrawManagerKey} // Cambia cada vez que vuelves de la pizarra
+          onBack={handleBackToDashboard}
+          onOpenSession={(session) => {
+            setSelectedExcalidrawSession(session);
+            setCurrentScreen('excalidrawWhiteboard');
+          }}
+          onCreateNew={async () => {
+            try {
+              const sessionId = await createExcalidrawSession('Pizarra sin título');
+              setSelectedExcalidrawSession({
+                id: sessionId,
+                title: 'Pizarra sin título',
+                elements: [],
+                appState: {},
+                files: {}
+              });
+              setCurrentScreen('excalidrawWhiteboard');
+            } catch (error) {
+              console.error('Error creando pizarra:', error);
+              alert('Error al crear la pizarra');
+            }
+          }}
+        />
+      </DashboardLayout>
     );
   }
 
