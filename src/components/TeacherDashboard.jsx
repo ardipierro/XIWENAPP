@@ -329,7 +329,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       'students': 'students',
       'whiteboardSessions': 'whiteboardSessions',
       'excalidrawWhiteboard': 'excalidrawSessions',
-      'liveClasses': 'liveClasses'
+      'liveClasses': 'liveClasses',
+      'liveGame': 'liveGame'
     };
 
     const screen = actionMap[action];
