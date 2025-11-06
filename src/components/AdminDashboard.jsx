@@ -1067,13 +1067,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
       {showUserProfile && selectedUserProfile && (
         <div className="modal-overlay" onClick={handleCloseUserProfile}>
           <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close-btn"
-              onClick={handleCloseUserProfile}
-              aria-label="Close profile"
-            >
-              ×
-            </button>
             <UserProfile
               selectedUser={selectedUserProfile}
               currentUser={user}
@@ -1290,13 +1283,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
       {showUserProfile && selectedUserProfile && (
         <div className="modal-overlay" onClick={handleCloseUserProfile}>
           <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close-btn"
-              onClick={handleCloseUserProfile}
-              aria-label="Close profile"
-            >
-              ×
-            </button>
             <UserProfile
               selectedUser={selectedUserProfile}
               currentUser={user}
@@ -1504,13 +1490,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
       {showUserProfile && selectedUserProfile && (
         <div className="modal-overlay" onClick={handleCloseUserProfile}>
           <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close-btn"
-              onClick={handleCloseUserProfile}
-              aria-label="Close profile"
-            >
-              ×
-            </button>
             <UserProfile
               selectedUser={selectedUserProfile}
               currentUser={user}
