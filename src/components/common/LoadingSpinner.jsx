@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -20,10 +19,5 @@ function LoadingSpinner({ message = 'Cargando...', size = 24 }) {
     </div>
   );
 }
-
-LoadingSpinner.propTypes = {
-  message: PropTypes.string,
-  size: PropTypes.number
-};
 
 export default LoadingSpinner;

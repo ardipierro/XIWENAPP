@@ -36,7 +36,7 @@ export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as PageHeader } from './PageHeader';
 export { default as ErrorBoundary } from './ErrorBoundary';
 
-// Componentes base reutilizables
+// Componentes base reutilizables (Components.jsx legacy)
 export {
   Button,
   Card,
@@ -47,6 +47,5 @@ export {
   Spinner,
   Container,
   Avatar,
-  StatCard,
-  EmptyState as BaseEmptyState
+  StatCard
 } from './Components';

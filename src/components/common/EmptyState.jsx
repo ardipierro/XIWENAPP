@@ -1,5 +1,3 @@
-import PropTypes from 'prop-types';
-
 /**
  * EmptyState - Estado vacío reutilizable
  * Muestra un ícono, título, descripción y opcionalmente un botón de acción
@@ -42,14 +40,5 @@ function EmptyState({
     </div>
   );
 }
-
-EmptyState.propTypes = {
-  icon: PropTypes.elementType,
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string,
-  actionLabel: PropTypes.string,
-  onAction: PropTypes.func,
-  iconSize: PropTypes.number
-};
 
 export default EmptyState;
