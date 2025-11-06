@@ -1064,11 +1064,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
         {showUserProfile && selectedUserProfile && (
           <UserProfile
-            user={selectedUserProfile}
+            selectedUser={selectedUserProfile}
             currentUser={user}
-            onClose={handleCloseUserProfile}
-            onRoleChange={handleRoleChange}
-            onStatusChange={handleStatusChange}
+            onBack={handleCloseUserProfile}
+            onUpdate={loadUsers}
             isAdmin={isAdmin}
           />
         )}
@@ -1274,11 +1273,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
         {showUserProfile && selectedUserProfile && (
           <UserProfile
-            user={selectedUserProfile}
+            selectedUser={selectedUserProfile}
             currentUser={user}
-            onClose={handleCloseUserProfile}
-            onRoleChange={handleRoleChange}
-            onStatusChange={handleStatusChange}
+            onBack={handleCloseUserProfile}
+            onUpdate={loadUsers}
             isAdmin={isAdmin}
           />
         )}
@@ -1478,11 +1476,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
       {showUserProfile && selectedUserProfile && (
         <UserProfile
-          user={selectedUserProfile}
+          selectedUser={selectedUserProfile}
           currentUser={user}
-          onClose={handleCloseUserProfile}
-          onRoleChange={handleRoleChange}
-          onStatusChange={handleStatusChange}
+          onBack={handleCloseUserProfile}
+          onUpdate={loadUsers}
           isAdmin={isAdmin}
         />
       )}
