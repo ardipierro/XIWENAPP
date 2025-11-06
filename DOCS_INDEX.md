@@ -6,8 +6,9 @@
 
 | Archivo | Ruta | Estado | Descripción |
 |---------|------|--------|-------------|
-| **CODING_STANDARDS.md** | `CODING_STANDARDS.md` | ✅ Existe | Estándares de código y arquitectura |
-| **DESIGN_SYSTEM.md** | `DESIGN_SYSTEM.md` | ✅ Existe | Sistema de diseño y colores |
+| **CODING_STANDARDS.md** | `CODING_STANDARDS.md` | ✅ Existe | Estándares de código y arquitectura (22KB) |
+| **CODING_STANDARDS_QUICK.md** | `CODING_STANDARDS_QUICK.md` | ✅ Existe | **Quick Reference - USAR ESTE SI EL PRINCIPAL FALLA** (6KB) |
+| **DESIGN_SYSTEM.md** | `DESIGN_SYSTEM.md` | ✅ Existe | Sistema de diseño y colores (11KB) |
 | **README.md** | `README.md` | ✅ Existe | Descripción del proyecto |
 
 ### 🔍 Cómo Acceder a CODING_STANDARDS.md:
@@ -76,18 +77,26 @@
 
 Si **CODING_STANDARDS.md** no se encuentra:
 
-1. **Verifica con Glob primero:**
+1. **USA CODING_STANDARDS_QUICK.md en su lugar:**
    ```javascript
-   Glob tool → pattern: "*.md"
+   { "file_path": "CODING_STANDARDS_QUICK.md" }
    ```
-   Esto mostrará todos los archivos .md disponibles
+   Este archivo es más pequeño (6KB vs 22KB) y contiene las 8 reglas principales con ejemplos
 
-2. **Usa el path exacto que aparezca** en los resultados
+2. **Verifica con Glob primero:**
+   ```javascript
+   Glob tool → pattern: "CODING*.md"
+   ```
+   Esto mostrará todos los archivos CODING_STANDARDS disponibles
 
-3. **Si persiste el error:**
+3. **Si ambos fallan:**
    - Puede ser problema de caché del navegador
    - Intenta refrescar la página de Claude Code Web
    - Usa DESIGN_SYSTEM.md como alternativa (contiene info similar)
+
+**Razón del problema detectada:**
+- CODING_STANDARDS.md (22KB) es detectado como "JavaScript source" por los bloques JSX
+- CODING_STANDARDS_QUICK.md (6KB) es markdown puro sin código extenso
 
 ### 📝 Verificación Rápida:
 

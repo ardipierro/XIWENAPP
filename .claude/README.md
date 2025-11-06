@@ -5,11 +5,16 @@
 ### Archivos Importantes del Proyecto:
 
 **Documentación de Estándares:**
-- `CODING_STANDARDS.md` - 📘 Documento maestro de estándares y mejores prácticas
+- `CODING_STANDARDS.md` - 📘 Documento maestro de estándares y mejores prácticas (22KB)
   - **Ruta para leer:** `CODING_STANDARDS.md`
   - Incluye: Reglas de Tailwind, BaseModal, Custom Hooks, Logger, Dark Mode
 
-- `DESIGN_SYSTEM.md` - 🎨 Sistema de diseño y componentes
+- `CODING_STANDARDS_QUICK.md` - 📘 Quick Reference (6KB)
+  - **Ruta para leer:** `CODING_STANDARDS_QUICK.md`
+  - **⚡ USAR ESTE SI EL PRINCIPAL NO CARGA** - Contiene las 8 reglas core con ejemplos
+  - Más ligero, sin bloques de código extensos
+
+- `DESIGN_SYSTEM.md` - 🎨 Sistema de diseño y componentes (11KB)
   - **Ruta para leer:** `DESIGN_SYSTEM.md`
   - Incluye: Colores, tipografía, espaciado, componentes UI
 
