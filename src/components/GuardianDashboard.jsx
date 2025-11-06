@@ -85,7 +85,7 @@ export default function GuardianDashboard({ user }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <BaseCard>
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary bg-opacity-10 rounded-lg">
+              <div className="p-3 bg-primary/10 rounded-lg">
                 <Users size={32} strokeWidth={2} className="text-primary" />
               </div>
               <div>
@@ -101,7 +101,7 @@ export default function GuardianDashboard({ user }) {
 
           <BaseCard>
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-secondary bg-opacity-10 rounded-lg">
+              <div className="p-3 bg-secondary/10 rounded-lg">
                 <TrendingUp size={32} strokeWidth={2} className="text-secondary" />
               </div>
               <div>
@@ -117,7 +117,7 @@ export default function GuardianDashboard({ user }) {
 
           <BaseCard>
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-warning bg-opacity-10 rounded-lg">
+              <div className="p-3 bg-warning/10 rounded-lg">
                 <Clock size={32} strokeWidth={2} className="text-warning" />
               </div>
               <div>
@@ -432,8 +432,8 @@ function StudentDetailsModal({ student, onClose }) {
 function MetricCard({ label, value, icon, variant = 'default' }) {
   const bgColors = {
     default: 'bg-gray-50 dark:bg-gray-800',
-    warning: 'bg-warning bg-opacity-10',
-    danger: 'bg-error bg-opacity-10'
+    warning: 'bg-warning/10',
+    danger: 'bg-error/10'
   };
 
   return (

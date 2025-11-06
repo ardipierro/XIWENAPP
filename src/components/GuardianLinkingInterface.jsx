@@ -32,7 +32,9 @@ import {
   BaseBadge,
   BaseLoading,
   BaseEmptyState,
-  BaseAlert
+  BaseAlert,
+  BaseInput,
+  BaseSelect
 } from './common';
 import {
   createGuardian,
@@ -143,20 +145,13 @@ export default function GuardianLinkingInterface({ adminId }) {
 
         {/* Search */}
         <div className="mb-6">
-          <div className="relative">
-            <Search
-              size={20}
-              strokeWidth={2}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              type="text"
-              placeholder="Buscar tutor por nombre o email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
+          <BaseInput
+            type="text"
+            placeholder="Buscar tutor por nombre o email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon={Search}
+          />
         </div>
 
         {/* Guardians List */}
@@ -376,60 +371,38 @@ function CreateGuardianModal({ onClose, onSuccess, setError }) {
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Nombre completo *
-          </label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-            required
-          />
-        </div>
+        <BaseInput
+          type="text"
+          label="Nombre completo *"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Email *
-          </label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-            required
-          />
-        </div>
+        <BaseInput
+          type="email"
+          label="Email *"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Teléfono
-          </label>
-          <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-        </div>
+        <BaseInput
+          type="tel"
+          label="Teléfono"
+          value={formData.phone}
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Tipo de relación
-          </label>
-          <select
-            value={formData.relationship}
-            onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-          >
-            {Object.entries(RELATIONSHIP_TYPES).map(([key, value]) => (
-              <option key={value} value={value}>
-                {key.charAt(0) + key.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </select>
-        </div>
+        <BaseSelect
+          label="Tipo de relación"
+          value={formData.relationship}
+          onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
+          options={Object.entries(RELATIONSHIP_TYPES).map(([key, value]) => ({
+            value: value,
+            label: key.charAt(0) + key.slice(1).toLowerCase()
+          }))}
+        />
 
         <div className="flex gap-3 pt-4">
           <BaseButton
@@ -518,60 +491,43 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Seleccionar Tutor *
-          </label>
-          <select
-            value={selectedGuardian}
-            onChange={(e) => setSelectedGuardian(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-            required
-          >
-            <option value="">-- Seleccionar --</option>
-            {guardians.map(guardian => (
-              <option key={guardian.id} value={guardian.id}>
-                {guardian.name} ({guardian.email})
-              </option>
-            ))}
-          </select>
-        </div>
+        <BaseSelect
+          label="Seleccionar Tutor *"
+          value={selectedGuardian}
+          onChange={(e) => setSelectedGuardian(e.target.value)}
+          options={[
+            { value: '', label: '-- Seleccionar --' },
+            ...guardians.map(guardian => ({
+              value: guardian.id,
+              label: `${guardian.name} (${guardian.email})`
+            }))
+          ]}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Seleccionar Estudiante *
-          </label>
-          <select
-            value={selectedStudent}
-            onChange={(e) => setSelectedStudent(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-            required
-          >
-            <option value="">-- Seleccionar --</option>
-            {students.map(student => (
-              <option key={student.id} value={student.id}>
-                {student.name} ({student.email})
-              </option>
-            ))}
-          </select>
-        </div>
+        <BaseSelect
+          label="Seleccionar Estudiante *"
+          value={selectedStudent}
+          onChange={(e) => setSelectedStudent(e.target.value)}
+          options={[
+            { value: '', label: '-- Seleccionar --' },
+            ...students.map(student => ({
+              value: student.id,
+              label: `${student.name} (${student.email})`
+            }))
+          ]}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Tipo de relación
-          </label>
-          <select
-            value={relationship}
-            onChange={(e) => setRelationship(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-          >
-            {Object.entries(RELATIONSHIP_TYPES).map(([key, value]) => (
-              <option key={value} value={value}>
-                {key.charAt(0) + key.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </select>
-        </div>
+        <BaseSelect
+          label="Tipo de relación"
+          value={relationship}
+          onChange={(e) => setRelationship(e.target.value)}
+          options={Object.entries(RELATIONSHIP_TYPES).map(([key, value]) => ({
+            value: value,
+            label: key.charAt(0) + key.slice(1).toLowerCase()
+          }))}
+        />
 
         {/* Permissions */}
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
