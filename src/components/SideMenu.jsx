@@ -13,7 +13,9 @@ import {
   Dice3,
   Home,
   ClipboardList,
-  Presentation
+  Presentation,
+  Shield,
+  Settings
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -44,9 +46,19 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     }
   };
 
-  // Determinar menú items según el rol
+  // Determinar menú items según el rol y la ruta actual
   const getMenuItems = () => {
-    if (userRole === 'admin') {
+    // Si estamos en /admin/*, mostrar menú de administración
+    if (location.pathname.startsWith('/admin')) {
+      return [
+        { icon: Shield, label: 'Panel Admin', path: '/admin', action: 'dashboard' },
+        { icon: Users, label: 'Gestión de Usuarios', path: '/admin', action: 'users' },
+        { icon: Settings, label: 'Configuración', path: '/admin', action: 'settings' },
+      ];
+    }
+
+    // Menú de admin cuando está en /teacher (tiene acceso completo)
+    if (userRole === 'admin' && location.pathname.startsWith('/teacher')) {
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
         { icon: Users, label: 'Usuarios', path: '/teacher', action: 'users' },
@@ -57,6 +69,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       ];
     }
 
+    // Menú de profesor
     if (['teacher', 'trial_teacher'].includes(userRole)) {
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
@@ -69,6 +82,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       ];
     }
 
+    // Menú de estudiante
     if (['student', 'listener', 'trial'].includes(userRole)) {
       return [
         { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },

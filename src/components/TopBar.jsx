@@ -4,13 +4,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Bell, MessageCircle } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Bell, MessageCircle, Shield } from 'lucide-react';
 import UserMenu from './UserMenu.jsx';
 import AvatarSelector, { AVATARS } from './AvatarSelector.jsx';
 import ProfilePanel from './ProfilePanel.jsx';
 import ThemeSwitcher from './ThemeSwitcher.jsx';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
+import { isAdminEmail } from '../firebase/roleConfig.js';
 import './TopBar.css';
 
 /**
@@ -25,12 +26,16 @@ import './TopBar.css';
  */
 function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [userAvatar, setUserAvatar] = useState('default');
   const [notificationCount] = useState(0); // Placeholder para futuro
   const [messageCount] = useState(0); // Placeholder para futuro
+
+  // Verificar si es admin
+  const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
 
   // Cargar avatar del usuario al montar
   useEffect(() => {
@@ -107,10 +112,22 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
           </div>
         </div>
 
-        {/* Sección Derecha: Theme Switcher + Notificaciones + Mensajes + Avatar */}
+        {/* Sección Derecha: Theme Switcher + Admin Panel + Notificaciones + Mensajes + Avatar */}
         <div className="topbar-right">
           {/* Theme Switcher */}
           <ThemeSwitcher />
+
+          {/* Admin Panel Button (solo para admins) */}
+          {isAdmin && (
+            <button
+              className={`icon-button admin-panel-button ${location.pathname.startsWith('/admin') ? 'active' : ''}`}
+              onClick={() => handleNavigate('/admin')}
+              aria-label="Panel de Administración"
+              title="Panel de Administración"
+            >
+              <Shield size={20} strokeWidth={2} />
+            </button>
+          )}
 
           {/* Notificaciones */}
           <button className="icon-button" aria-label="Notificaciones">
