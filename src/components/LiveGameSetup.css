@@ -1,0 +1,314 @@
+/* LiveGameSetup.css - Formulario para crear sesiones de juego en vivo */
+
+.live-game-setup {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.setup-header {
+  margin-bottom: 40px;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.setup-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.setup-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.form-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--input-bg);
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.form-select:focus,
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 150px;
+  line-height: 1.6;
+}
+
+.loading-text {
+  margin-top: 10px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.questions-info {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  border-radius: 8px;
+  color: var(--success-text);
+  font-weight: 600;
+}
+
+.input-hint {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkbox-option label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.time-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.time-input input {
+  width: 120px;
+}
+
+.time-input span {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radio-option:hover {
+  border-color: var(--primary-color);
+  background: var(--hover-bg);
+}
+
+.radio-option input[type="radio"] {
+  margin-top: 3px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.radio-option input[type="radio"]:checked {
+  accent-color: var(--primary-color);
+}
+
+.radio-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.radio-content strong {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.radio-content span {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.error-message {
+  background: var(--error-bg);
+  border: 2px solid var(--error-border);
+  color: var(--error-text);
+  padding: 15px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.btn-create-session {
+  padding: 16px 32px;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-create-session:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-create-session:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-create-session:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .live-game-setup {
+    padding: 20px 15px;
+  }
+
+  .setup-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .form-section {
+    padding: 20px;
+  }
+
+  .radio-option {
+    padding: 12px;
+  }
+}
+
+/* Dark mode */
+:root {
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --input-bg: #ffffff;
+  --hover-bg: rgba(102, 126, 234, 0.05);
+  --text-primary: #2d3748;
+  --text-secondary: #718096;
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --primary-color-alpha: rgba(102, 126, 234, 0.1);
+  --success-bg: rgba(72, 187, 120, 0.1);
+  --success-border: rgba(72, 187, 120, 0.3);
+  --success-text: #2f855a;
+  --error-bg: rgba(245, 101, 101, 0.1);
+  --error-border: rgba(245, 101, 101, 0.3);
+  --error-text: #c53030;
+}
+
+.dark {
+  --card-bg: #1a202c;
+  --border-color: #2d3748;
+  --input-bg: #2d3748;
+  --hover-bg: rgba(102, 126, 234, 0.1);
+  --text-primary: #f7fafc;
+  --text-secondary: #cbd5e0;
+  --success-bg: rgba(72, 187, 120, 0.15);
+  --success-border: rgba(72, 187, 120, 0.4);
+  --success-text: #68d391;
+  --error-bg: rgba(245, 101, 101, 0.15);
+  --error-border: rgba(245, 101, 101, 0.4);
+  --error-text: #fc8181;
+}

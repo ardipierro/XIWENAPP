@@ -16,7 +16,8 @@ import {
   Presentation,
   GraduationCap,
   Video,
-  PenTool
+  PenTool,
+  Gamepad2
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -60,6 +61,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: Video, label: 'Clases en Vivo', path: '/teacher', action: 'liveClasses' },
         { icon: Presentation, label: 'Pizarras', path: '/teacher', action: 'whiteboardSessions' },
         { icon: PenTool, label: 'Excalidraw', path: '/teacher', action: 'excalidrawWhiteboard' },
+        { icon: Gamepad2, label: 'Juego en Vivo', path: '/teacher', action: 'liveGame' },
       ];
     }
 
@@ -74,6 +76,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: Presentation, label: 'Pizarras', path: '/teacher', action: 'whiteboardSessions' },
         { icon: PenTool, label: 'Excalidraw', path: '/teacher', action: 'excalidrawWhiteboard' },
         { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
+        { icon: Gamepad2, label: 'Juego en Vivo', path: '/teacher', action: 'liveGame' },
       ];
     }
 

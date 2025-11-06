@@ -15,6 +15,7 @@ import LandingPage from './LandingPage';
 import Login from './components/Login.jsx';
 import StudentDashboard from './components/StudentDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
+import JoinGamePage from './components/JoinGamePage.jsx';
 
 import './App.css';
 
@@ -85,6 +86,10 @@ function App() {
               <Register />
             </PublicRoute>
           }
+        />
+        <Route
+          path="/join"
+          element={<JoinGamePage />}
         />
 
         {/* Protected Routes - requieren autenticación */}

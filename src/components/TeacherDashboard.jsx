@@ -58,6 +58,7 @@ import { getClassesByTeacher } from '../firebase/classes';
 import { createUser } from '../firebase/users';
 import { getUserCredits } from '../firebase/credits';
 import { createExcalidrawSession } from '../firebase/excalidraw';
+import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
@@ -79,6 +80,8 @@ import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
+import LiveGameProjection from './LiveGameProjection';
+import LiveGameSetup from './LiveGameSetup';
 import './TeacherDashboard.css';
 
 // Icon mapping for role icons from roleConfig
@@ -102,6 +105,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   const [selectedExcalidrawSession, setSelectedExcalidrawSession] = useState(null);
   const [excalidrawManagerKey, setExcalidrawManagerKey] = useState(0);
   const [selectedLiveClass, setSelectedLiveClass] = useState(null);
+  const [liveGameSessionId, setLiveGameSessionId] = useState(null);
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalGames: 0,
@@ -847,6 +851,35 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar GameContainer (Crear Juego) - SIN Layout porque tiene su propia navegación
   if (currentScreen === 'setup') {
     return <GameContainer onBack={handleBackToDashboard} />;
+  }
+
+  // Renderizar Live Game Projection - SIN Layout, pantalla completa
+  if (currentScreen === 'liveGameProjection' && liveGameSessionId) {
+    return (
+      <LiveGameProjection
+        sessionId={liveGameSessionId}
+        onBack={() => {
+          setLiveGameSessionId(null);
+          setCurrentScreen('liveGame');
+        }}
+      />
+    );
+  }
+
+  // Renderizar Live Game Setup - CON Layout
+  if (currentScreen === 'liveGame') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <LiveGameSetup
+          user={user}
+          onSessionCreated={(sessionId) => {
+            setLiveGameSessionId(sessionId);
+            setCurrentScreen('liveGameProjection');
+          }}
+          onBack={handleBackToDashboard}
+        />
+      </DashboardLayout>
+    );
   }
 
   // Renderizar CoursesScreen (Gestionar Cursos) - CON Layout
