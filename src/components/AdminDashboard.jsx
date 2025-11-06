@@ -1438,6 +1438,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
       }
     },
     {
+      id: 'game',
+      icon: Gamepad2,
+      title: "Question Game",
+      count: stats.totalGames,
+      countLabel: stats.totalGames === 1 ? "game" : "games",
+      onClick: () => setCurrentScreen('setup'),
+      createLabel: "Play Game",
+      onCreateClick: () => setCurrentScreen('setup')
+    },
+    {
       id: 'analytics',
       icon: BarChart3,
       title: "Analytics",
