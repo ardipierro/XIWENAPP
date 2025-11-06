@@ -359,13 +359,19 @@
   font-weight: 600;
   color: var(--color-text-primary) !important;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
+  min-width: 120px;
 }
 
-/* Asegurar contraste en modo oscuro */
+/* Asegurar contraste en modo oscuro y claro */
 .dark .user-name {
   color: #f4f4f5 !important;
+}
+
+.light .user-name,
+html:not(.dark) .user-name {
+  color: #18181b !important;
 }
 
 /* Badges */
@@ -523,30 +529,26 @@
     grid-template-columns: 1fr;
   }
 
+  /* Tabla con scroll horizontal en móvil */
+  .users-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .users-table {
+    min-width: 800px;
     font-size: 13px;
   }
 
   .users-table th,
   .users-table td {
-    padding: 8px 6px;
+    padding: 8px 12px;
+    white-space: nowrap;
   }
 
   .user-avatar-small {
     width: 32px;
     height: 32px;
-  }
-
-  /* Hide less important columns on tablet */
-  .users-table th:nth-child(5),
-  .users-table td:nth-child(5),
-  .users-table th:nth-child(6),
-  .users-table td:nth-child(6) {
-    display: none;
-  }
-
-  .user-name {
-    font-size: 14px;
   }
 }
 
@@ -559,28 +561,21 @@
     grid-template-columns: 1fr;
   }
 
-  /* On mobile, show only User, Role, and Status columns */
-  .users-table th:nth-child(2),
-  .users-table td:nth-child(2) {
-    display: none;
-  }
-
+  /* Tabla completa con scroll en móvil pequeño */
   .users-table {
+    min-width: 800px;
     font-size: 12px;
   }
 
   .users-table th,
   .users-table td {
-    padding: 6px 4px;
+    padding: 8px 10px;
+    white-space: nowrap;
   }
 
   .user-avatar-small {
     width: 28px;
     height: 28px;
-  }
-
-  .user-name {
-    font-size: 13px;
   }
 
   .role-badge,
