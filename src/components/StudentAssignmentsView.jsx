@@ -212,20 +212,31 @@ function SubmissionModal({ assignment, studentId, onClose }) {
   const isGraded = submission?.status === 'graded';
 
   const handleSaveDraft = async () => {
-    setIsSaving(true);
-    await save({
-      assignmentId: assignment.id,
-      studentId,
-      text,
-      files,
-      status: 'draft'
-    });
-    setIsSaving(false);
+    try {
+      setIsSaving(true);
+      logger.info('Saving assignment draft', { assignmentId: assignment.id, studentId });
+
+      await save({
+        assignmentId: assignment.id,
+        studentId,
+        text,
+        files,
+        status: 'draft'
+      });
+
+      logger.info('Assignment draft saved successfully', { assignmentId: assignment.id });
+    } catch (err) {
+      logger.error('Error saving draft', err);
+      alert('Error al guardar el borrador. Intenta de nuevo.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSubmit = async () => {
     if (!text.trim() && files.length === 0) {
       alert('Debes agregar contenido o archivos antes de entregar');
+      logger.warn('Attempted to submit empty assignment', { assignmentId: assignment.id });
       return;
     }
 
@@ -233,24 +244,35 @@ function SubmissionModal({ assignment, studentId, onClose }) {
       return;
     }
 
-    setIsSaving(true);
+    try {
+      setIsSaving(true);
+      logger.info('Submitting assignment', { assignmentId: assignment.id, studentId });
 
-    // Save first
-    const result = await save({
-      assignmentId: assignment.id,
-      studentId,
-      text,
-      files,
-      status: 'draft'
-    });
+      // Save first
+      const result = await save({
+        assignmentId: assignment.id,
+        studentId,
+        text,
+        files,
+        status: 'draft'
+      });
 
-    if (result.success) {
-      // Then submit
-      await submitForGrading(result.id || submission.id, assignment);
+      if (result.success) {
+        // Then submit
+        await submitForGrading(result.id || submission.id, assignment);
+        logger.info('Assignment submitted successfully', {
+          assignmentId: assignment.id,
+          submissionId: result.id || submission.id
+        });
+      }
+
+      onClose();
+    } catch (err) {
+      logger.error('Error submitting assignment', err);
+      alert('Error al entregar la tarea. Intenta de nuevo.');
+    } finally {
+      setIsSaving(false);
     }
-
-    setIsSaving(false);
-    onClose();
   };
 
   return (
