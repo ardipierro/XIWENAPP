@@ -1065,13 +1065,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
       </DashboardLayout>
 
       {showUserProfile && selectedUserProfile && (
-        <UserProfile
-          selectedUser={selectedUserProfile}
-          currentUser={user}
-          onBack={handleCloseUserProfile}
-          onUpdate={loadUsers}
-          isAdmin={isAdmin}
-        />
+        <div className="modal-overlay" onClick={handleCloseUserProfile}>
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close-btn"
+              onClick={handleCloseUserProfile}
+              aria-label="Close profile"
+            >
+              ×
+            </button>
+            <UserProfile
+              selectedUser={selectedUserProfile}
+              currentUser={user}
+              onBack={handleCloseUserProfile}
+              onUpdate={loadUsers}
+              isAdmin={isAdmin}
+            />
+          </div>
+        </div>
       )}
     </>
     );
@@ -1277,13 +1288,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
       )}
 
       {showUserProfile && selectedUserProfile && (
-        <UserProfile
-          selectedUser={selectedUserProfile}
-          currentUser={user}
-          onBack={handleCloseUserProfile}
-          onUpdate={loadUsers}
-          isAdmin={isAdmin}
-        />
+        <div className="modal-overlay" onClick={handleCloseUserProfile}>
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close-btn"
+              onClick={handleCloseUserProfile}
+              aria-label="Close profile"
+            >
+              ×
+            </button>
+            <UserProfile
+              selectedUser={selectedUserProfile}
+              currentUser={user}
+              onBack={handleCloseUserProfile}
+              onUpdate={loadUsers}
+              isAdmin={isAdmin}
+            />
+          </div>
+        </div>
       )}
     </>
     );
@@ -1480,13 +1502,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
       )}
 
       {showUserProfile && selectedUserProfile && (
-        <UserProfile
-          selectedUser={selectedUserProfile}
-          currentUser={user}
-          onBack={handleCloseUserProfile}
-          onUpdate={loadUsers}
-          isAdmin={isAdmin}
-        />
+        <div className="modal-overlay" onClick={handleCloseUserProfile}>
+          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close-btn"
+              onClick={handleCloseUserProfile}
+              aria-label="Close profile"
+            >
+              ×
+            </button>
+            <UserProfile
+              selectedUser={selectedUserProfile}
+              currentUser={user}
+              onBack={handleCloseUserProfile}
+              onUpdate={loadUsers}
+              isAdmin={isAdmin}
+            />
+          </div>
+        </div>
       )}
     </>
   );
