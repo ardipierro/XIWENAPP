@@ -1,148 +1,70 @@
-import {
-  collection,
-  addDoc,
-  doc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  serverTimestamp
-} from 'firebase/firestore';
-import { db } from './config';
+/**
+ * @fileoverview Firebase Content Repository
+ * Gestión de contenido educativo del sistema
+ * @module firebase/content
+ */
 
-// Crear nuevo contenido
-export async function createContent(contentData) {
-  try {
-    const contentRef = collection(db, 'content');
-    const docRef = await addDoc(contentRef, {
-      ...contentData,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    return { success: true, id: docRef.id };
-  } catch (error) {
-    console.error('Error al crear contenido:', error);
-    return { success: false, error: error.message };
+import { BaseRepository } from './BaseRepository';
+
+// ============================================
+// REPOSITORY
+// ============================================
+
+class ContentRepository extends BaseRepository {
+  constructor() {
+    super('content');
   }
-}
 
-// Obtener todo el contenido
-export async function getAllContent() {
-  try {
-    const contentRef = collection(db, 'content');
-    const q = query(contentRef, orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
-
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-  } catch (error) {
-    console.error('Error al obtener contenido:', error);
-    return [];
+  /**
+   * Obtener todo el contenido ordenado por fecha
+   */
+  async getAllContent() {
+    const content = await this.getAll();
+    return this.sortByCreatedAtDesc(content);
   }
-}
 
-// Obtener contenido por profesor
-export async function getContentByTeacher(teacherId) {
-  try {
-    const contentRef = collection(db, 'content');
-    // Query simple sin orderBy para evitar índice compuesto
-    const q = query(
-      contentRef,
-      where('createdBy', '==', teacherId)
-    );
-    const snapshot = await getDocs(q);
+  /**
+   * Obtener contenido por profesor
+   */
+  async getContentByTeacher(teacherId) {
+    const content = await this.findWhere([['createdBy', '==', teacherId]]);
+    return this.sortByCreatedAtDesc(content);
+  }
 
-    // Ordenar en el cliente
-    const contents = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+  /**
+   * Obtener contenido por curso (ordenado por order ascendente)
+   */
+  async getContentByCourse(courseId) {
+    const content = await this.findWhere([['courseId', '==', courseId]]);
+    return content.sort((a, b) => (a.order || 0) - (b.order || 0));
+  }
 
-    // Ordenar por createdAt descendente
-    contents.sort((a, b) => {
+  /**
+   * Utility: Ordenar por fecha descendente
+   */
+  sortByCreatedAtDesc(items) {
+    return items.sort((a, b) => {
       const dateA = a.createdAt?.toMillis?.() || 0;
       const dateB = b.createdAt?.toMillis?.() || 0;
       return dateB - dateA;
     });
-
-    return contents;
-  } catch (error) {
-    console.error('Error al obtener contenido del profesor:', error);
-    return [];
   }
 }
 
-// Obtener contenido por curso
-export async function getContentByCourse(courseId) {
-  try {
-    const contentRef = collection(db, 'content');
-    // Query simple sin orderBy para evitar índice compuesto
-    const q = query(
-      contentRef,
-      where('courseId', '==', courseId)
-    );
-    const snapshot = await getDocs(q);
+// ============================================
+// INSTANCIA SINGLETON
+// ============================================
 
-    // Ordenar en el cliente
-    const contents = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+const contentRepo = new ContentRepository();
 
-    // Ordenar por order ascendente
-    contents.sort((a, b) => (a.order || 0) - (b.order || 0));
+// ============================================
+// EXPORTED FUNCTIONS (Mantener API compatible)
+// ============================================
 
-    return contents;
-  } catch (error) {
-    console.error('Error al obtener contenido del curso:', error);
-    return [];
-  }
-}
-
-// Obtener un contenido por ID
-export async function getContentById(contentId) {
-  try {
-    const docRef = doc(db, 'content', contentId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error al obtener contenido:', error);
-    return null;
-  }
-}
-
-// Actualizar contenido
-export async function updateContent(contentId, updates) {
-  try {
-    const docRef = doc(db, 'content', contentId);
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: serverTimestamp()
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error al actualizar contenido:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-// Eliminar contenido
-export async function deleteContent(contentId) {
-  try {
-    const docRef = doc(db, 'content', contentId);
-    await deleteDoc(docRef);
-    return { success: true };
-  } catch (error) {
-    console.error('Error al eliminar contenido:', error);
-    return { success: false, error: error.message };
-  }
-}
+export const createContent = (contentData) => contentRepo.create(contentData);
+export const getAllContent = () => contentRepo.getAllContent();
+export const getContentByTeacher = (teacherId) => contentRepo.getContentByTeacher(teacherId);
+export const getContentByCourse = (courseId) => contentRepo.getContentByCourse(courseId);
+export const getContentById = (contentId) => contentRepo.getById(contentId);
+export const updateContent = (contentId, updates) => contentRepo.update(contentId, updates);
+export const deleteContent = (contentId) => contentRepo.hardDelete(contentId);

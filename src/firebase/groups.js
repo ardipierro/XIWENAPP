@@ -1,279 +1,261 @@
+/**
+ * @fileoverview Firebase Groups Repository
+ * Gestión de grupos de estudiantes y sus relaciones
+ * @module firebase/groups
+ */
+
 import {
   collection,
   addDoc,
-  doc,
-  getDoc,
   getDocs,
-  updateDoc,
   deleteDoc,
   query,
   where,
-  orderBy,
   serverTimestamp,
-  increment
+  increment,
+  updateDoc,
+  doc
 } from 'firebase/firestore';
 import { db } from './config';
+import { BaseRepository } from './BaseRepository';
 
 // ============================================
-// GRUPOS
+// REPOSITORIES
 // ============================================
 
-export async function createGroup(groupData) {
-  try {
-    const groupsRef = collection(db, 'groups');
-    const docRef = await addDoc(groupsRef, {
+class GroupsRepository extends BaseRepository {
+  constructor() {
+    super('groups');
+  }
+
+  /**
+   * Crear grupo con contador de estudiantes en 0
+   */
+  async createGroup(groupData) {
+    return this.create({
       ...groupData,
-      studentCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      studentCount: 0
     });
-    return { success: true, id: docRef.id };
-  } catch (error) {
-    console.error('Error al crear grupo:', error);
-    return { success: false, error: error.message };
   }
-}
 
-export async function getAllGroups() {
-  try {
-    const groupsRef = collection(db, 'groups');
-    const q = query(groupsRef, orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
-
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-  } catch (error) {
-    console.error('Error al obtener grupos:', error);
-    return [];
-  }
-}
-
-export async function getGroupsByTeacher(teacherId) {
-  try {
-    const groupsRef = collection(db, 'groups');
-    // Query simple sin orderBy para evitar índice compuesto
-    const q = query(
-      groupsRef,
-      where('teacherId', '==', teacherId)
-    );
-    const snapshot = await getDocs(q);
-
-    // Ordenar en el cliente
-    const groups = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    // Ordenar por createdAt descendente
-    groups.sort((a, b) => {
+  /**
+   * Obtener todos los grupos ordenados por fecha
+   */
+  async getAllGroups() {
+    const groups = await this.getAll();
+    // Ordenar por fecha en el cliente (más recientes primero)
+    return groups.sort((a, b) => {
       const dateA = a.createdAt?.toMillis?.() || 0;
       const dateB = b.createdAt?.toMillis?.() || 0;
       return dateB - dateA;
     });
-
-    return groups;
-  } catch (error) {
-    console.error('Error al obtener grupos del profesor:', error);
-    return [];
   }
-}
 
-export async function getGroupById(groupId) {
-  try {
-    const docRef = doc(db, 'groups', groupId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error al obtener grupo:', error);
-    return null;
-  }
-}
-
-export async function updateGroup(groupId, updates) {
-  try {
-    const docRef = doc(db, 'groups', groupId);
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: serverTimestamp()
+  /**
+   * Obtener grupos de un profesor específico
+   */
+  async getGroupsByTeacher(teacherId) {
+    const groups = await this.findWhere([['teacherId', '==', teacherId]]);
+    // Ordenar por fecha en el cliente
+    return groups.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
     });
-    return { success: true };
-  } catch (error) {
-    console.error('Error al actualizar grupo:', error);
-    return { success: false, error: error.message };
+  }
+
+  /**
+   * Eliminar grupo y todos sus miembros
+   */
+  async deleteGroup(groupId) {
+    try {
+      // Primero eliminar todos los miembros del grupo
+      const membersRef = collection(db, 'group_members');
+      const q = query(membersRef, where('groupId', '==', groupId));
+      const snapshot = await getDocs(q);
+
+      const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+
+      // Luego eliminar el grupo
+      return await this.hardDelete(groupId);
+    } catch (error) {
+      console.error('Error al eliminar grupo:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Incrementar/decrementar contador de estudiantes
+   */
+  async updateStudentCount(groupId, increment_value) {
+    try {
+      const groupRef = this.getDocRef(groupId);
+      await updateDoc(groupRef, {
+        studentCount: increment(increment_value),
+        updatedAt: serverTimestamp()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error actualizando contador:', error);
+      return { success: false, error: error.message };
+    }
   }
 }
 
-export async function deleteGroup(groupId) {
-  try {
-    // Primero eliminar todos los miembros del grupo
-    const membersRef = collection(db, 'group_members');
-    const q = query(membersRef, where('groupId', '==', groupId));
-    const snapshot = await getDocs(q);
-
-    const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
-    await Promise.all(deletePromises);
-
-    // Luego eliminar el grupo
-    const docRef = doc(db, 'groups', groupId);
-    await deleteDoc(docRef);
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error al eliminar grupo:', error);
-    return { success: false, error: error.message };
+class GroupMembersRepository extends BaseRepository {
+  constructor() {
+    super('group_members');
   }
-}
 
-// ============================================
-// MIEMBROS DE GRUPOS
-// ============================================
-
-export async function addStudentToGroup(groupId, studentId, studentName) {
-  try {
-    const membersRef = collection(db, 'group_members');
-    await addDoc(membersRef, {
+  /**
+   * Agregar estudiante a grupo
+   */
+  async addStudentToGroup(groupId, studentId, studentName) {
+    return this.create({
       groupId,
       studentId,
       studentName,
       joinedAt: serverTimestamp()
-    });
-
-    // Incrementar contador del grupo
-    const groupRef = doc(db, 'groups', groupId);
-    await updateDoc(groupRef, {
-      studentCount: increment(1),
-      updatedAt: serverTimestamp()
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error al agregar estudiante al grupo:', error);
-    return { success: false, error: error.message };
+    }, { addTimestamps: false });
   }
-}
 
-export async function removeStudentFromGroup(groupId, studentId) {
-  try {
-    const membersRef = collection(db, 'group_members');
-    const q = query(
-      membersRef,
-      where('groupId', '==', groupId),
-      where('studentId', '==', studentId)
-    );
-    const snapshot = await getDocs(q);
+  /**
+   * Remover estudiante de grupo
+   */
+  async removeStudentFromGroup(groupId, studentId) {
+    try {
+      const members = await this.findWhere([
+        ['groupId', '==', groupId],
+        ['studentId', '==', studentId]
+      ]);
 
-    if (!snapshot.empty) {
-      await deleteDoc(snapshot.docs[0].ref);
+      if (members.length > 0) {
+        return await this.hardDelete(members[0].id);
+      }
 
-      // Decrementar contador del grupo
-      const groupRef = doc(db, 'groups', groupId);
-      await updateDoc(groupRef, {
-        studentCount: increment(-1),
-        updatedAt: serverTimestamp()
-      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error al remover estudiante del grupo:', error);
+      return { success: false, error: error.message };
     }
+  }
 
-    return { success: true };
-  } catch (error) {
-    console.error('Error al remover estudiante del grupo:', error);
-    return { success: false, error: error.message };
+  /**
+   * Obtener miembros de un grupo
+   */
+  async getGroupMembers(groupId) {
+    return this.findWhere([['groupId', '==', groupId]]);
+  }
+
+  /**
+   * Obtener grupos de un estudiante
+   */
+  async getStudentGroups(studentId) {
+    try {
+      const members = await this.findWhere([['studentId', '==', studentId]]);
+      const groupIds = members.map(m => m.groupId);
+
+      if (groupIds.length === 0) return [];
+
+      // Obtener detalles de cada grupo
+      const groupsRepo = new GroupsRepository();
+      const groups = await groupsRepo.getBatch(groupIds);
+
+      return groups;
+    } catch (error) {
+      console.error('Error al obtener grupos del estudiante:', error);
+      return [];
+    }
   }
 }
 
-export async function getGroupMembers(groupId) {
-  try {
-    const membersRef = collection(db, 'group_members');
-    const q = query(membersRef, where('groupId', '==', groupId));
-    const snapshot = await getDocs(q);
-
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-  } catch (error) {
-    console.error('Error al obtener miembros del grupo:', error);
-    return [];
+class GroupCoursesRepository extends BaseRepository {
+  constructor() {
+    super('group_courses');
   }
-}
 
-export async function getStudentGroups(studentId) {
-  try {
-    const membersRef = collection(db, 'group_members');
-    const q = query(membersRef, where('studentId', '==', studentId));
-    const snapshot = await getDocs(q);
-
-    const groupIds = snapshot.docs.map(doc => doc.data().groupId);
-
-    // Obtener detalles de cada grupo
-    const groupPromises = groupIds.map(groupId => getGroupById(groupId));
-    const groups = await Promise.all(groupPromises);
-
-    return groups.filter(g => g !== null);
-  } catch (error) {
-    console.error('Error al obtener grupos del estudiante:', error);
-    return [];
-  }
-}
-
-// ============================================
-// CURSOS DE GRUPOS
-// ============================================
-
-export async function assignCourseToGroup(groupId, courseId, courseName) {
-  try {
-    const groupCoursesRef = collection(db, 'group_courses');
-    await addDoc(groupCoursesRef, {
+  /**
+   * Asignar curso a grupo
+   */
+  async assignCourseToGroup(groupId, courseId, courseName) {
+    return this.create({
       groupId,
       courseId,
       courseName,
       assignedAt: serverTimestamp()
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error al asignar curso al grupo:', error);
-    return { success: false, error: error.message };
+    }, { addTimestamps: false });
   }
-}
 
-export async function unassignCourseFromGroup(groupId, courseId) {
-  try {
-    const groupCoursesRef = collection(db, 'group_courses');
-    const q = query(
-      groupCoursesRef,
-      where('groupId', '==', groupId),
-      where('courseId', '==', courseId)
-    );
-    const snapshot = await getDocs(q);
+  /**
+   * Desasignar curso de grupo
+   */
+  async unassignCourseFromGroup(groupId, courseId) {
+    try {
+      const assignments = await this.findWhere([
+        ['groupId', '==', groupId],
+        ['courseId', '==', courseId]
+      ]);
 
-    if (!snapshot.empty) {
-      await deleteDoc(snapshot.docs[0].ref);
+      if (assignments.length > 0) {
+        return await this.hardDelete(assignments[0].id);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error al desasignar curso del grupo:', error);
+      return { success: false, error: error.message };
     }
+  }
 
-    return { success: true };
-  } catch (error) {
-    console.error('Error al desasignar curso del grupo:', error);
-    return { success: false, error: error.message };
+  /**
+   * Obtener cursos de un grupo
+   */
+  async getGroupCourses(groupId) {
+    return this.findWhere([['groupId', '==', groupId]]);
   }
 }
 
-export async function getGroupCourses(groupId) {
-  try {
-    const groupCoursesRef = collection(db, 'group_courses');
-    const q = query(groupCoursesRef, where('groupId', '==', groupId));
-    const snapshot = await getDocs(q);
+// ============================================
+// INSTANCIAS SINGLETON
+// ============================================
 
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-  } catch (error) {
-    console.error('Error al obtener cursos del grupo:', error);
-    return [];
+const groupsRepo = new GroupsRepository();
+const groupMembersRepo = new GroupMembersRepository();
+const groupCoursesRepo = new GroupCoursesRepository();
+
+// ============================================
+// EXPORTED FUNCTIONS (Mantener API compatible)
+// ============================================
+
+export const createGroup = (groupData) => groupsRepo.createGroup(groupData);
+export const getAllGroups = () => groupsRepo.getAllGroups();
+export const getGroupsByTeacher = (teacherId) => groupsRepo.getGroupsByTeacher(teacherId);
+export const getGroupById = (groupId) => groupsRepo.getById(groupId);
+export const updateGroup = (groupId, updates) => groupsRepo.update(groupId, updates);
+export const deleteGroup = (groupId) => groupsRepo.deleteGroup(groupId);
+
+export const addStudentToGroup = async (groupId, studentId, studentName) => {
+  const result = await groupMembersRepo.addStudentToGroup(groupId, studentId, studentName);
+  if (result.success) {
+    await groupsRepo.updateStudentCount(groupId, 1);
   }
-}
+  return result;
+};
+
+export const removeStudentFromGroup = async (groupId, studentId) => {
+  const result = await groupMembersRepo.removeStudentFromGroup(groupId, studentId);
+  if (result.success) {
+    await groupsRepo.updateStudentCount(groupId, -1);
+  }
+  return result;
+};
+
+export const getGroupMembers = (groupId) => groupMembersRepo.getGroupMembers(groupId);
+export const getStudentGroups = (studentId) => groupMembersRepo.getStudentGroups(studentId);
+
+export const assignCourseToGroup = (groupId, courseId, courseName) =>
+  groupCoursesRepo.assignCourseToGroup(groupId, courseId, courseName);
+export const unassignCourseFromGroup = (groupId, courseId) =>
+  groupCoursesRepo.unassignCourseFromGroup(groupId, courseId);
+export const getGroupCourses = (groupId) => groupCoursesRepo.getGroupCourses(groupId);

@@ -1,22 +1,108 @@
+/**
+ * @fileoverview Firebase Users Repository
+ * Gestión de usuarios y autenticación
+ * @module firebase/users
+ */
+
 import {
   collection,
-  addDoc,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  deleteDoc,
   query,
   where,
-  orderBy,
+  getDocs,
   serverTimestamp
 } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { db, auth } from './config';
+import { BaseRepository } from './BaseRepository';
 
 // ============================================
-// UTILIDADES
+// REPOSITORY
+// ============================================
+
+class UsersRepository extends BaseRepository {
+  constructor() {
+    super('users');
+  }
+
+  /**
+   * Obtener todos los usuarios ordenados por fecha
+   */
+  async getAllUsers(filters = {}) {
+    let users = [];
+
+    // Si hay filtro por rol, aplicarlo en la query
+    if (filters.role) {
+      users = await this.findWhere([['role', '==', filters.role]]);
+    } else {
+      users = await this.getAll();
+    }
+
+    // Filtrar usuarios activos en memoria (incluye usuarios sin campo 'active')
+    if (filters.activeOnly) {
+      users = users.filter(user => user.active !== false);
+    }
+
+    // Ordenar por createdAt descendente (más recientes primero)
+    return users.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
+  }
+
+  /**
+   * Obtener usuarios por rol
+   */
+  async getUsersByRole(role) {
+    return this.getAllUsers({ role, activeOnly: true });
+  }
+
+  /**
+   * Obtener usuario por email
+   */
+  async getUserByEmail(email) {
+    return this.findOne([['email', '==', email]]);
+  }
+
+  /**
+   * Buscar usuarios por nombre o email
+   */
+  async searchUsers(searchTerm) {
+    const users = await this.getAllUsers({ activeOnly: true });
+    const term = searchTerm.toLowerCase();
+    return users.filter(user =>
+      user.email?.toLowerCase().includes(term) ||
+      user.name?.toLowerCase().includes(term)
+    );
+  }
+
+  /**
+   * Soft delete de usuario
+   */
+  async deleteUser(userId) {
+    return this.update(userId, {
+      active: false,
+      status: 'deleted',
+      deletedAt: serverTimestamp()
+    });
+  }
+
+  /**
+   * Hard delete de usuario
+   */
+  async permanentlyDeleteUser(userId) {
+    return this.hardDelete(userId);
+  }
+}
+
+// ============================================
+// INSTANCIA SINGLETON
+// ============================================
+
+const usersRepo = new UsersRepository();
+
+// ============================================
+// UTILIDADES AUTH
 // ============================================
 
 /**
@@ -35,16 +121,12 @@ function generateTemporaryPassword() {
 }
 
 // ============================================
-// USUARIOS - CRUD
+// FUNCIONES ESPECIALES (Auth + Firestore)
 // ============================================
 
 /**
  * Crear un nuevo usuario en Firestore y Firebase Authentication
  * @param {Object} userData - Datos del usuario
- * @param {string} userData.email - Email del usuario
- * @param {string} userData.name - Nombre del usuario
- * @param {string} userData.role - Rol del usuario
- * @param {string} userData.createdBy - UID del usuario que lo creó
  * @returns {Promise<Object>} - {success: boolean, id?: string, password?: string, error?: string}
  */
 export async function createUser(userData) {
@@ -63,7 +145,6 @@ export async function createUser(userData) {
 
     try {
       // IMPORTANTE: Intentar crear usuario en Firebase Authentication
-      // Esto automáticamente inicia sesión con el nuevo usuario
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         userData.email,
@@ -81,51 +162,39 @@ export async function createUser(userData) {
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          // Usuario existe en Firestore, usar su UID
           const existingDoc = snapshot.docs[0];
           newAuthUser = { uid: existingDoc.id };
           console.log('✅ Encontrado usuario existente, se actualizará su documento');
         } else {
-          // No existe en Firestore pero sí en Auth - no podemos obtener el UID sin login
           return {
             success: false,
             error: 'El email ya está registrado pero no se puede acceder al usuario. Contacta al administrador.'
           };
         }
       } else {
-        // Otro error de autenticación
         throw authError;
       }
     }
 
-    // Crear o actualizar el documento en Firestore con el mismo UID de Auth
-    const userDocRef = doc(db, 'users', newAuthUser.uid);
-    await setDoc(userDocRef, {
+    // Crear o actualizar el documento en Firestore usando BaseRepository
+    await usersRepo.set(newAuthUser.uid, {
       email: userData.email,
       name: userData.name || '',
       role: userData.role || 'student',
       status: 'active',
       active: true,
       createdBy: userData.createdBy,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
       lastLogin: null,
       avatar: userData.avatar || '🎓',
-      temporaryPassword: isGenerated, // Marca para indicar que debe cambiar contraseña
-      // Campos opcionales
+      temporaryPassword: isGenerated,
       phone: userData.phone || '',
       notes: userData.notes || ''
-    }, { merge: true }); // merge: true para actualizar si ya existe
+    }, { merge: true, addTimestamps: true });
 
     // CRÍTICO: Cerrar sesión del nuevo usuario si se creó uno nuevo
-    // Firebase Auth automáticamente inició sesión con el nuevo usuario
     if (!emailAlreadyExisted) {
       await signOut(auth);
     }
-
-    // Nota: No podemos restaurar la sesión aquí porque no tenemos la contraseña del admin
-    // La aplicación manejará el re-login automáticamente a través de onAuthStateChanged
-    // O el admin tendrá que hacer login de nuevo
 
     return {
       success: true,
@@ -139,188 +208,19 @@ export async function createUser(userData) {
     };
   } catch (error) {
     console.error('Error al crear usuario:', error);
-
     return { success: false, error: error.message };
   }
 }
 
-/**
- * Obtener un usuario por su ID
- * @param {string} userId - ID del usuario
- * @returns {Promise<Object|null>} - Usuario o null si no existe
- */
-export async function getUserById(userId) {
-  try {
-    const docRef = doc(db, 'users', userId);
-    const docSnap = await getDoc(docRef);
+// ============================================
+// EXPORTED FUNCTIONS (Mantener API compatible)
+// ============================================
 
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error al obtener usuario:', error);
-    return null;
-  }
-}
-
-/**
- * Obtener un usuario por su email
- * @param {string} email - Email del usuario
- * @returns {Promise<Object|null>} - Usuario o null si no existe
- */
-export async function getUserByEmail(email) {
-  try {
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('email', '==', email));
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      const doc = snapshot.docs[0];
-      return { id: doc.id, ...doc.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error al obtener usuario por email:', error);
-    return null;
-  }
-}
-
-/**
- * Actualizar datos de un usuario
- * @param {string} userId - ID del usuario
- * @param {Object} updates - Campos a actualizar
- * @returns {Promise<Object>} - {success: boolean, error?: string}
- */
-export async function updateUser(userId, updates) {
-  try {
-    const docRef = doc(db, 'users', userId);
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: serverTimestamp()
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error al actualizar usuario:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-/**
- * Eliminar un usuario (soft delete - marca como inactivo)
- * @param {string} userId - ID del usuario
- * @returns {Promise<Object>} - {success: boolean, error?: string}
- */
-export async function deleteUser(userId) {
-  try {
-    const docRef = doc(db, 'users', userId);
-    await updateDoc(docRef, {
-      active: false,
-      status: 'deleted',
-      deletedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error al eliminar usuario:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-/**
- * Eliminar permanentemente un usuario
- * ADVERTENCIA: Esta acción es irreversible
- * @param {string} userId - ID del usuario
- * @returns {Promise<Object>} - {success: boolean, error?: string}
- */
-export async function permanentlyDeleteUser(userId) {
-  try {
-    const docRef = doc(db, 'users', userId);
-    await deleteDoc(docRef);
-    return { success: true };
-  } catch (error) {
-    console.error('Error al eliminar permanentemente usuario:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-/**
- * Obtener todos los usuarios
- * @param {Object} filters - Filtros opcionales
- * @param {string} filters.role - Filtrar por rol
- * @param {boolean} filters.activeOnly - Solo usuarios activos
- * @returns {Promise<Array>} - Lista de usuarios
- */
-export async function getAllUsers(filters = {}) {
-  try {
-    const usersRef = collection(db, 'users');
-
-    // Construir array de condiciones
-    const conditions = [];
-
-    if (filters.role) {
-      conditions.push(where('role', '==', filters.role));
-    }
-
-    // No aplicar filtro activeOnly en la query de Firestore
-    // Lo haremos en memoria para incluir usuarios sin el campo 'active'
-
-    // Crear query con las condiciones de Firestore
-    const q = conditions.length > 0
-      ? query(usersRef, ...conditions)
-      : query(usersRef);
-
-    const snapshot = await getDocs(q);
-
-    let users = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    // Filtrar usuarios activos en memoria (incluye usuarios sin campo 'active')
-    if (filters.activeOnly) {
-      users = users.filter(user => user.active !== false);
-    }
-
-    // Ordenar por createdAt descendente (más recientes primero)
-    users.sort((a, b) => {
-      const dateA = a.createdAt?.toMillis?.() || 0;
-      const dateB = b.createdAt?.toMillis?.() || 0;
-      return dateB - dateA;
-    });
-
-    return users;
-  } catch (error) {
-    console.error('Error al obtener usuarios:', error);
-    return [];
-  }
-}
-
-/**
- * Obtener usuarios por rol
- * @param {string} role - Rol a filtrar
- * @returns {Promise<Array>} - Lista de usuarios con ese rol
- */
-export async function getUsersByRole(role) {
-  return getAllUsers({ role, activeOnly: true });
-}
-
-/**
- * Buscar usuarios por nombre o email
- * @param {string} searchTerm - Término de búsqueda
- * @returns {Promise<Array>} - Lista de usuarios que coinciden
- */
-export async function searchUsers(searchTerm) {
-  try {
-    const users = await getAllUsers({ activeOnly: true });
-
-    const term = searchTerm.toLowerCase();
-    return users.filter(user =>
-      user.email?.toLowerCase().includes(term) ||
-      user.name?.toLowerCase().includes(term)
-    );
-  } catch (error) {
-    console.error('Error al buscar usuarios:', error);
-    return [];
-  }
-}
+export const getUserById = (userId) => usersRepo.getById(userId);
+export const getUserByEmail = (email) => usersRepo.getUserByEmail(email);
+export const updateUser = (userId, updates) => usersRepo.update(userId, updates);
+export const deleteUser = (userId) => usersRepo.deleteUser(userId);
+export const permanentlyDeleteUser = (userId) => usersRepo.permanentlyDeleteUser(userId);
+export const getAllUsers = (filters) => usersRepo.getAllUsers(filters);
+export const getUsersByRole = (role) => usersRepo.getUsersByRole(role);
+export const searchUsers = (searchTerm) => usersRepo.searchUsers(searchTerm);
