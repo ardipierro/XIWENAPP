@@ -1238,6 +1238,38 @@ export const getStudentEnrolledCoursesCount = async (studentId) => {
   }
 };
 
+/**
+ * BATCH: Obtener conteos de enrollments para múltiples estudiantes de una vez
+ * Soluciona el problema N+1 - de 100 queries a 1 query
+ * @param {string[]} studentIds - Array de IDs de estudiantes
+ * @returns {Object} Objeto con studentId como key y count como value
+ */
+export const getBatchEnrollmentCounts = async (studentIds = []) => {
+  try {
+    if (studentIds.length === 0) return {};
+
+    // Una sola query que trae TODOS los enrollments
+    const enrollmentsRef = collection(db, 'enrollments');
+    const querySnapshot = await getDocs(enrollmentsRef);
+
+    // Agrupar por studentId en el cliente
+    const counts = {};
+    studentIds.forEach(id => counts[id] = 0); // Inicializar en 0
+
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.studentId && studentIds.includes(data.studentId)) {
+        counts[data.studentId] = (counts[data.studentId] || 0) + 1;
+      }
+    });
+
+    return counts;
+  } catch (error) {
+    console.error('❌ Error obteniendo enrollments batch:', error);
+    return {};
+  }
+};
+
 // ============================================
 // MIGRACIÓN DESDE LOCALSTORAGE
 // ============================================

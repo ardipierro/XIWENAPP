@@ -134,6 +134,10 @@ export default {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(0)' },
         },
+        slideDown: {
+          '0%': { opacity: '0', transform: 'translateY(-20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         spin: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
@@ -146,6 +150,7 @@ export default {
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
         'slide-in': 'slideIn 0.3s ease-out',
+        'slide-down': 'slideDown 0.3s ease-out',
         'spin': 'spin 0.8s linear infinite',
         'bounce': 'bounce 1s infinite',
       },

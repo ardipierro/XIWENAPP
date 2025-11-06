@@ -4,21 +4,38 @@
  * @module App
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth.js';
 import { useViewAs } from './contexts/ViewAsContext.jsx';
 import { ADMIN_ROLES, TEACHER_ROLES, STUDENT_ROLES } from './constants/auth.js';
 
-// Components
+// Static imports for public routes (always needed)
 import LandingPage from './LandingPage';
 import Login from './components/Login.jsx';
-import AdminDashboard from './components/AdminDashboard';
-import StudentDashboard from './components/StudentDashboard';
-import TeacherDashboard from './components/TeacherDashboard';
 import JoinGamePage from './components/JoinGamePage.jsx';
 
+// Lazy imports for dashboards (code splitting)
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const TeacherDashboard = lazy(() => import('./components/TeacherDashboard'));
+const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
+
 import './App.css';
+
+/**
+ * Loading Fallback for lazy-loaded routes
+ * 100% Tailwind, zero custom CSS
+ */
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-primary-50 dark:bg-primary-950">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin"></div>
+        <p className="text-sm font-medium text-primary-600 dark:text-primary-400">Cargando...</p>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Componente principal de la aplicación
@@ -62,74 +79,76 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* Public Routes - solo accesibles sin autenticación */}
-        <Route
-          path="/"
-          element={
-            <PublicRoute user={user}>
-              <Landing />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute user={user}>
-              <Login />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute user={user}>
-              <Register />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/join"
-          element={<JoinGamePage />}
-        />
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Public Routes - solo accesibles sin autenticación */}
+          <Route
+            path="/"
+            element={
+              <PublicRoute user={user}>
+                <Landing />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute user={user}>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute user={user}>
+                <Register />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/join"
+            element={<JoinGamePage />}
+          />
 
-        {/* Protected Routes - requieren autenticación */}
-        <Route
-          path="/admin/*"
-          element={
-            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={ADMIN_ROLES}>
-              <AdminDashboard user={effectiveUser} userRole={effectiveRole} />
-            </ProtectedRoute>
-          }
-        />
+          {/* Protected Routes - requieren autenticación */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={ADMIN_ROLES}>
+                <AdminDashboard user={effectiveUser} userRole={effectiveRole} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/student/*"
-          element={
-            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={STUDENT_ROLES}>
-              <StudentDashboard user={effectiveUser} userRole={effectiveRole} />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/student/*"
+            element={
+              <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={STUDENT_ROLES}>
+                <StudentDashboard user={effectiveUser} userRole={effectiveRole} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/teacher/*"
-          element={
-            <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={TEACHER_ROLES}>
-              <TeacherDashboard user={effectiveUser} userRole={effectiveRole} />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/teacher/*"
+            element={
+              <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={TEACHER_ROLES}>
+                <TeacherDashboard user={effectiveUser} userRole={effectiveRole} />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Dashboard redirect - redirige según rol */}
-        <Route
-          path="/dashboard"
-          element={<DashboardRedirect user={user} userRole={effectiveRole} />}
-        />
+          {/* Dashboard redirect - redirige según rol */}
+          <Route
+            path="/dashboard"
+            element={<DashboardRedirect user={user} userRole={effectiveRole} />}
+          />
 
-        {/* 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

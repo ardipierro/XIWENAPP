@@ -82,7 +82,6 @@ import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
-import './TeacherDashboard.css';
 
 // Icon mapping for role icons from roleConfig
 const ICON_MAP = {
@@ -840,10 +839,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     const isReturningFromViewAs = sessionStorage.getItem('viewAsReturning') === 'true';
 
     return (
-      <div className="dashboard-container">
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>{isReturningFromViewAs ? 'Volviendo...' : 'Cargando...'}</p>
+      <div className="min-h-screen bg-primary-50 dark:bg-primary-900">
+        <div className="flex flex-col items-center justify-center py-15 px-5">
+          <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-primary-900 dark:text-primary-100">{isReturningFromViewAs ? 'Volviendo...' : 'Cargando...'}</p>
         </div>
       </div>
     );
@@ -1103,7 +1102,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="students-panel">
+        <div className="p-0">
           {/* Botón Volver */}
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver a Inicio
@@ -1137,19 +1136,19 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
           {/* Mensajes */}
           {successMessage && (
-            <div className="message success-msg">
+            <div className="bg-success-500/10 text-success-600 border border-success-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
             </div>
           )}
           {errorMessage && (
-            <div className="message error-msg">
+            <div className="bg-error-500/10 text-error-600 border border-error-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
               <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
             </div>
           )}
 
           {/* Cards Grid o List */}
           {filteredStudents.length === 0 ? (
-            <div className="no-users">
+            <div className="text-center py-15 px-5 text-secondary-600 dark:text-secondary-400 text-base">
               <p>No se encontraron alumnos</p>
             </div>
           ) : (
@@ -1190,7 +1189,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="user-management">
+        <div className="p-0">
           {/* Botón Volver */}
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Volver a Inicio
@@ -1231,12 +1230,12 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
           {/* Mensajes */}
           {successMessage && (
-            <div className="message success-msg">
+            <div className="bg-success-500/10 text-success-600 border border-success-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
             </div>
           )}
           {errorMessage && (
-            <div className="message error-msg">
+            <div className="bg-error-500/10 text-error-600 border border-error-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
               <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
             </div>
           )}

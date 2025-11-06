@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Crown,
@@ -47,7 +47,8 @@ import {
   enrollStudentInCourse,
   unenrollStudentFromCourse,
   getStudentEnrollments,
-  getStudentEnrolledCoursesCount
+  getStudentEnrolledCoursesCount,
+  getBatchEnrollmentCounts
 } from '../firebase/firestore';
 import { getAllUsers, createUser, deleteUser } from '../firebase/users';
 import {
@@ -83,7 +84,6 @@ import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
-import './AdminDashboard.css';
 
 // Icon mapping for role icons from roleConfig
 const ICON_MAP = {
@@ -347,7 +347,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     }));
   };
 
-  const handleRoleChange = async (userId, newRole) => {
+  const handleRoleChange = useCallback(async (userId, newRole) => {
     const targetUser = users.find(u => u.id === userId);
     if (targetUser && isAdminEmail(targetUser.email) && user.email === targetUser.email) {
       showError('Cannot change your own admin role');
@@ -370,9 +370,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error:', error);
       showError('Error updating role');
     }
-  };
+  }, [users, user.email]);
 
-  const handleStatusChange = async (userId, newStatus) => {
+  const handleStatusChange = useCallback(async (userId, newStatus) => {
     const targetUser = users.find(u => u.id === userId);
     if (targetUser && isAdminEmail(targetUser.email) && newStatus === 'suspended') {
       showError('Cannot suspend main admin');
@@ -395,35 +395,35 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error:', error);
       showError('Error updating status');
     }
-  };
+  }, [users]);
 
-  const handleSort = (field) => {
+  const handleSort = useCallback((field) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('asc');
     }
-  };
+  }, [sortField, sortDirection]);
 
-  const handleViewUserProfile = (userItem) => {
+  const handleViewUserProfile = useCallback((userItem) => {
     setSelectedUserProfile(userItem);
     setShowUserProfile(true);
-  };
+  }, []);
 
-  const handleCloseUserProfile = () => {
+  const handleCloseUserProfile = useCallback(() => {
     setShowUserProfile(false);
     setSelectedUserProfile(null);
     loadUsers();
-  };
+  }, []);
 
-  const handleUserCreated = () => {
+  const handleUserCreated = useCallback(() => {
     setShowAddUserModal(false);
     loadUsers();
     showSuccess('User created successfully');
-  };
+  }, []);
 
-  const handleMenuAction = (action) => {
+  const handleMenuAction = useCallback((action) => {
     const actionMap = {
       'dashboard': 'dashboard',
       'users': 'users',
@@ -445,9 +445,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     setCurrentScreen(screen);
     setSelectedExerciseId(null);
     setSelectedWhiteboardSession(null);
-  };
+  }, []);
 
-  const handleBackToDashboard = () => {
+  const handleBackToDashboard = useCallback(() => {
     setCurrentScreen('dashboard');
     setSelectedExerciseId(null);
     setShowUserProfile(false);
@@ -455,7 +455,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     setOpenCourseModal(false);
     setOpenContentModal(false);
     setOpenClassModal(false);
-  };
+  }, []);
 
   const showSuccess = (message) => {
     setSuccessMessage(message);
@@ -468,7 +468,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   };
 
   // Resource assignment functions
-  const handleOpenResourceModal = async (student, initialTab = 'courses') => {
+  const handleOpenResourceModal = useCallback(async (student, initialTab = 'courses') => {
     setSelectedStudent(student);
     setActiveResourceTab(initialTab);
     setShowResourceModal(true);
@@ -496,18 +496,18 @@ function AdminDashboard({ user, userRole, onLogout }) {
     }
 
     setLoadingResources(false);
-  };
+  }, [user.uid]);
 
-  const handleCloseResourceModal = () => {
+  const handleCloseResourceModal = useCallback(() => {
     setShowResourceModal(false);
     setSelectedStudent(null);
     setStudentEnrollments([]);
     setStudentContent([]);
     setStudentExercises([]);
     setActiveResourceTab('courses');
-  };
+  }, []);
 
-  const handleEnrollCourse = async (courseId) => {
+  const handleEnrollCourse = useCallback(async (courseId) => {
     if (!selectedStudent) return;
 
     try {
@@ -524,9 +524,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error:', error);
       showError('Error assigning course');
     }
-  };
+  }, [selectedStudent]);
 
-  const handleUnenrollCourse = async (courseId) => {
+  const handleUnenrollCourse = useCallback(async (courseId) => {
     if (!selectedStudent) return;
 
     const confirmed = window.confirm('Are you sure you want to unassign this course?');
@@ -546,15 +546,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error:', error);
       showError('Error unassigning course');
     }
-  };
+  }, [selectedStudent]);
 
+  // OPTIMIZED: Batch query instead of N+1 (100 queries → 1 query)
   const loadEnrollmentCounts = async () => {
     try {
-      const counts = {};
-      for (const userItem of users) {
-        const count = await getStudentEnrolledCoursesCount(userItem.id);
-        counts[userItem.id] = count;
-      }
+      const studentIds = users.map(u => u.id);
+      const counts = await getBatchEnrollmentCounts(studentIds);
       setEnrollmentCounts(counts);
     } catch (error) {
       console.error('Error loading enrollment counts:', error);
@@ -565,7 +563,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return studentEnrollments.some(enrollment => enrollment.course.id === courseId);
   };
 
-  const handleAssignContent = async (contentId) => {
+  const handleAssignContent = useCallback(async (contentId) => {
     if (!selectedStudent) return;
 
     try {
@@ -579,9 +577,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error:', error);
       showError('Error assigning content');
     }
-  };
+  }, [selectedStudent, user.uid]);
 
-  const handleRemoveContent = async (contentId) => {
+  const handleRemoveContent = useCallback(async (contentId) => {
     if (!selectedStudent) return;
 
     const confirmed = window.confirm('Are you sure you want to unassign this content?');
@@ -598,13 +596,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error:', error);
       showError('Error unassigning content');
     }
-  };
+  }, [selectedStudent]);
 
   const isContentAssigned = (contentId) => {
     return studentContent.some(sc => sc.itemId === contentId);
   };
 
-  const handleAssignExercise = async (exerciseId) => {
+  const handleAssignExercise = useCallback(async (exerciseId) => {
     if (!selectedStudent) return;
 
     try {
@@ -618,9 +616,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error:', error);
       showError('Error assigning exercise');
     }
-  };
+  }, [selectedStudent, user.uid]);
 
-  const handleRemoveExercise = async (exerciseId) => {
+  const handleRemoveExercise = useCallback(async (exerciseId) => {
     if (!selectedStudent) return;
 
     const confirmed = window.confirm('Are you sure you want to unassign this exercise?');
@@ -637,13 +635,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error:', error);
       showError('Error unassigning exercise');
     }
-  };
+  }, [selectedStudent]);
 
   const isExerciseAssigned = (exerciseId) => {
     return studentExercises.some(se => se.itemId === exerciseId);
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = useCallback(async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user? This action will mark the user as inactive.')) {
       return;
     }
@@ -661,7 +659,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       console.error('Error deleting user:', error);
       alert('Error deleting user. Please try again.');
     }
-  };
+  }, []);
 
   // Load enrollment counts when users change
   useEffect(() => {
@@ -670,56 +668,58 @@ function AdminDashboard({ user, userRole, onLogout }) {
     }
   }, [users]);
 
-  // Filter and sort users
-  const filteredUsers = users
-    .filter(userItem => {
-      const matchesSearch =
-        userItem.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        userItem.email?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter and sort users - MEMOIZED for performance
+  const filteredUsers = useMemo(() => {
+    return users
+      .filter(userItem => {
+        const matchesSearch =
+          userItem.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          userItem.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesRole = filterRole === 'all' || userItem.role === filterRole;
-      const matchesStatus = filterStatus === 'all' || userItem.status === filterStatus;
+        const matchesRole = filterRole === 'all' || userItem.role === filterRole;
+        const matchesStatus = filterStatus === 'all' || userItem.status === filterStatus;
 
-      return matchesSearch && matchesRole && matchesStatus;
-    })
-    .sort((a, b) => {
-      let aVal, bVal;
+        return matchesSearch && matchesRole && matchesStatus;
+      })
+      .sort((a, b) => {
+        let aVal, bVal;
 
-      switch(sortField) {
-        case 'name':
-          aVal = a.name?.toLowerCase() || '';
-          bVal = b.name?.toLowerCase() || '';
-          break;
-        case 'email':
-          aVal = a.email?.toLowerCase() || '';
-          bVal = b.email?.toLowerCase() || '';
-          break;
-        case 'credits':
-          aVal = a.credits || 0;
-          bVal = b.credits || 0;
-          break;
-        case 'role':
-          aVal = a.role || '';
-          bVal = b.role || '';
-          break;
-        case 'status':
-          aVal = a.status || '';
-          bVal = b.status || '';
-          break;
-        case 'createdAt':
-          aVal = a.createdAt?.seconds || 0;
-          bVal = b.createdAt?.seconds || 0;
-          break;
-        default:
-          return 0;
-      }
+        switch(sortField) {
+          case 'name':
+            aVal = a.name?.toLowerCase() || '';
+            bVal = b.name?.toLowerCase() || '';
+            break;
+          case 'email':
+            aVal = a.email?.toLowerCase() || '';
+            bVal = b.email?.toLowerCase() || '';
+            break;
+          case 'credits':
+            aVal = a.credits || 0;
+            bVal = b.credits || 0;
+            break;
+          case 'role':
+            aVal = a.role || '';
+            bVal = b.role || '';
+            break;
+          case 'status':
+            aVal = a.status || '';
+            bVal = b.status || '';
+            break;
+          case 'createdAt':
+            aVal = a.createdAt?.seconds || 0;
+            bVal = b.createdAt?.seconds || 0;
+            break;
+          default:
+            return 0;
+        }
 
-      if (sortDirection === 'asc') {
-        return aVal > bVal ? 1 : -1;
-      } else {
-        return aVal < bVal ? 1 : -1;
-      }
-    });
+        if (sortDirection === 'asc') {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
+  }, [users, searchTerm, filterRole, filterStatus, sortField, sortDirection]);
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
@@ -735,8 +735,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (loading) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="loading-state">
-          <div className="spinner"></div>
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
+          <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
           <p>Loading admin panel...</p>
         </div>
       </DashboardLayout>
@@ -888,7 +888,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (currentScreen === 'analytics') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="analytics-section">
+        <div className="p-6 md:p-8">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
@@ -902,7 +902,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (currentScreen === 'attendance') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="attendance-section">
+        <div className="p-6 md:p-8">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
@@ -1000,7 +1000,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="students-panel">
+        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
@@ -1030,18 +1030,18 @@ function AdminDashboard({ user, userRole, onLogout }) {
           />
 
           {successMessage && (
-            <div className="message success-msg">
+            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-success-500 text-white animate-slide-down">
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
             </div>
           )}
           {errorMessage && (
-            <div className="message error-msg">
+            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-error-500 text-white animate-slide-down">
               <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
             </div>
           )}
 
           {filteredStudents.length === 0 ? (
-            <div className="no-users">
+            <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
               <p>No students found</p>
             </div>
           ) : (
@@ -1086,8 +1086,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
     if (sessionStorage.getItem('viewAsReturning') === 'true' && !hasProcessedReturn) {
       return (
         <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-          <div className="loading-state" style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="spinner"></div>
+          <div className="min-h-[60vh] flex flex-col justify-center items-center">
+            <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin"></div>
             <p>Returning...</p>
           </div>
         </DashboardLayout>
@@ -1097,7 +1097,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="admin-users-section">
+        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
@@ -1125,88 +1125,130 @@ function AdminDashboard({ user, userRole, onLogout }) {
           />
 
           {successMessage && (
-            <div className="message success-msg">
+            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-success-500 text-white animate-slide-down">
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
             </div>
           )}
           {errorMessage && (
-            <div className="message error-msg">
+            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-error-500 text-white animate-slide-down">
               <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
             </div>
           )}
 
-          <div className="users-section">
+          <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl overflow-hidden">
             {sessionStorage.getItem('viewAsReturnUserId') && !hasProcessedReturn && users.length === 0 ? (
-              <div className="loading-state">
-                <div className="spinner"></div>
+              <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
+                <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
                 <p>Loading...</p>
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="no-users">
+              <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
                 <p>No users found with selected filters</p>
               </div>
             ) : (
-              <div className="users-table-container">
-                <table className="users-table">
-                  <thead>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead className="bg-tertiary-50 dark:bg-tertiary-900 border-b-2 border-primary-200 dark:border-primary-800">
                     <tr>
-                      <th>
-                        <div onClick={() => handleSort('name')} className={`sortable-header ${sortField === 'name' ? 'active' : ''}`}>
+                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide min-w-[200px]">
+                        <div
+                          onClick={() => handleSort('name')}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${
+                            sortField === 'name'
+                              ? 'text-accent-600 dark:text-accent-400'
+                              : 'hover:text-accent-600 dark:hover:text-accent-400'
+                          }`}
+                        >
                           <span>User</span>
                           {sortField === 'name' ? (
                             sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
-                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                            <ArrowUpDown size={14} className="opacity-30" />
                           )}
                         </div>
                       </th>
-                      <th>
-                        <div onClick={() => handleSort('credits')} className={`sortable-header ${sortField === 'credits' ? 'active' : ''}`}>
+                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                        <div
+                          onClick={() => handleSort('credits')}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${
+                            sortField === 'credits'
+                              ? 'text-accent-600 dark:text-accent-400'
+                              : 'hover:text-accent-600 dark:hover:text-accent-400'
+                          }`}
+                        >
                           <span>Credits</span>
                           {sortField === 'credits' ? (
                             sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
-                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                            <ArrowUpDown size={14} className="opacity-30" />
                           )}
                         </div>
                       </th>
-                      <th>
-                        <div onClick={() => handleSort('role')} className={`sortable-header ${sortField === 'role' ? 'active' : ''}`}>
+                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                        <div
+                          onClick={() => handleSort('role')}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${
+                            sortField === 'role'
+                              ? 'text-accent-600 dark:text-accent-400'
+                              : 'hover:text-accent-600 dark:hover:text-accent-400'
+                          }`}
+                        >
                           <span>Role</span>
                           {sortField === 'role' ? (
                             sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
-                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                            <ArrowUpDown size={14} className="opacity-30" />
                           )}
                         </div>
                       </th>
-                      <th>
-                        <div onClick={() => handleSort('status')} className={`sortable-header ${sortField === 'status' ? 'active' : ''}`}>
+                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                        <div
+                          onClick={() => handleSort('status')}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${
+                            sortField === 'status'
+                              ? 'text-accent-600 dark:text-accent-400'
+                              : 'hover:text-accent-600 dark:hover:text-accent-400'
+                          }`}
+                        >
                           <span>Status</span>
                           {sortField === 'status' ? (
                             sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
-                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                            <ArrowUpDown size={14} className="opacity-30" />
                           )}
                         </div>
                       </th>
-                      <th>
-                        <div onClick={() => handleSort('createdAt')} className={`sortable-header ${sortField === 'createdAt' ? 'active' : ''}`}>
+                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                        <div
+                          onClick={() => handleSort('createdAt')}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${
+                            sortField === 'createdAt'
+                              ? 'text-accent-600 dark:text-accent-400'
+                              : 'hover:text-accent-600 dark:hover:text-accent-400'
+                          }`}
+                        >
                           <span>Registration</span>
                           {sortField === 'createdAt' ? (
                             sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
-                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                            <ArrowUpDown size={14} className="opacity-30" />
                           )}
                         </div>
                       </th>
-                      <th>
-                        <div onClick={() => handleSort('email')} className={`sortable-header ${sortField === 'email' ? 'active' : ''}`}>
+                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                        <div
+                          onClick={() => handleSort('email')}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${
+                            sortField === 'email'
+                              ? 'text-accent-600 dark:text-accent-400'
+                              : 'hover:text-accent-600 dark:hover:text-accent-400'
+                          }`}
+                        >
                           <span>Email</span>
                           {sortField === 'email' ? (
                             sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
                           ) : (
-                            <ArrowUpDown size={14} className="sort-icon-inactive" />
+                            <ArrowUpDown size={14} className="opacity-30" />
                           )}
                         </div>
                       </th>
@@ -1214,48 +1256,69 @@ function AdminDashboard({ user, userRole, onLogout }) {
                   </thead>
                   <tbody>
                     {filteredUsers.map(userItem => (
-                      <tr key={userItem.id} className={userItem.status !== 'active' ? 'suspended-row' : ''}>
-                        <td>
+                      <tr
+                        key={userItem.id}
+                        className={`border-b border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors ${
+                          userItem.status !== 'active'
+                            ? 'opacity-60 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(239,68,68,0.05)_10px,rgba(239,68,68,0.05)_20px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(239,68,68,0.1)_10px,rgba(239,68,68,0.1)_20px)]'
+                            : ''
+                        }`}
+                      >
+                        <td className="p-4 text-primary-900 dark:text-primary-100">
                           <div
-                            className="user-cell clickable"
+                            className="flex items-center gap-3 cursor-pointer"
                             onClick={() => handleViewUserProfile(userItem)}
                             title="View full profile"
                           >
-                            <div className="user-avatar-small">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center text-white flex-shrink-0">
                               {(() => {
                                 const iconName = ROLE_INFO[userItem.role]?.icon || 'User';
                                 const IconComponent = ICON_MAP[iconName] || User;
                                 return <IconComponent size={18} strokeWidth={2} />;
                               })()}
                             </div>
-                            <div className="user-info">
-                              <div className="user-name">{userItem.name || 'No name'}</div>
+                            <div className="flex-1 min-w-[150px]">
+                              <div className="font-semibold text-primary-900 dark:text-primary-100 whitespace-nowrap hover:text-accent-600 hover:underline">
+                                {userItem.name || 'No name'}
+                              </div>
                             </div>
                           </div>
                         </td>
-                        <td>
-                          <div className="credits-badge">
+                        <td className="p-4 text-primary-900 dark:text-primary-100">
+                          <div className="inline-block px-3 py-1 rounded-xl bg-gradient-to-r from-warning-500 to-warning-700 text-white font-semibold text-[13px]">
                             {userItem.credits || 0}
                           </div>
                         </td>
-                        <td>
-                          <span className={`role-badge role-${userItem.role}`}>
+                        <td className="p-4 text-primary-900 dark:text-primary-100">
+                          <span className={`inline-block px-3 py-1 rounded-xl font-semibold text-xs uppercase tracking-wide text-white ${
+                            userItem.role === 'admin'
+                              ? 'bg-gradient-to-r from-warning-500 to-warning-700'
+                              : userItem.role === 'teacher' || userItem.role === 'trial_teacher'
+                              ? 'bg-gradient-to-r from-purple-500 to-purple-700'
+                              : 'bg-gradient-to-r from-blue-500 to-blue-700'
+                          }`}>
                             {ROLE_INFO[userItem.role]?.name || userItem.role}
                           </span>
                         </td>
-                        <td>
-                          <span className={`status-badge status-${userItem.status || 'active'}`}>
+                        <td className="p-4 text-primary-900 dark:text-primary-100">
+                          <span className={`inline-block px-3 py-1 rounded-xl font-semibold text-xs text-white ${
+                            userItem.status === 'active'
+                              ? 'bg-success-500'
+                              : userItem.status === 'suspended'
+                              ? 'bg-error-500'
+                              : 'bg-warning-500'
+                          }`}>
                             {userItem.status === 'active' ? 'Active' :
                              userItem.status === 'suspended' ? 'Suspended' :
                              'Pending'}
                           </span>
                         </td>
-                        <td>
+                        <td className="p-4 text-primary-900 dark:text-primary-100">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
                             {formatDate(userItem.createdAt)}
                           </span>
                         </td>
-                        <td>
+                        <td className="p-4 text-primary-900 dark:text-primary-100">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
                             {userItem.email}
                           </span>
@@ -1381,8 +1444,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
   return (
     <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="admin-dashboard-container">
-          <div className="admin-header">
+        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
+          <div className="mb-12 text-center">
             <div className="flex items-center gap-3 mb-2 justify-center">
               <Crown size={40} strokeWidth={2} className="text-indigo-600 dark:text-indigo-400" />
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
@@ -1390,64 +1453,64 @@ function AdminDashboard({ user, userRole, onLogout }) {
             <p className="section-subtitle">Complete XIWEN system management</p>
           </div>
 
-          <div className="stats-grid">
-            <div className="admin-stat-card stat-total">
-              <div className="stat-icon">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 mb-12">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-accent-500 to-accent-700">
                 <Users size={36} strokeWidth={2} />
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.total}</div>
-                <div className="stat-label">Total Users</div>
+              <div className="flex-1">
+                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.total}</div>
+                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Total Users</div>
               </div>
             </div>
 
-            <div className="admin-stat-card stat-admins">
-              <div className="stat-icon">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-warning-500 to-warning-700">
                 <Crown size={36} strokeWidth={2} />
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.admins}</div>
-                <div className="stat-label">Administrators</div>
+              <div className="flex-1">
+                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.admins}</div>
+                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Administrators</div>
               </div>
             </div>
 
-            <div className="admin-stat-card stat-teachers">
-              <div className="stat-icon">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-purple-500 to-purple-700">
                 <UserCog size={36} strokeWidth={2} />
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.teachers}</div>
-                <div className="stat-label">Teachers</div>
+              <div className="flex-1">
+                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.teachers}</div>
+                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Teachers</div>
               </div>
             </div>
 
-            <div className="admin-stat-card stat-students">
-              <div className="stat-icon">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-blue-500 to-blue-700">
                 <GraduationCap size={36} strokeWidth={2} />
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.students}</div>
-                <div className="stat-label">Students</div>
+              <div className="flex-1">
+                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.students}</div>
+                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Students</div>
               </div>
             </div>
 
-            <div className="admin-stat-card stat-active">
-              <div className="stat-icon">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-success-500 to-success-700">
                 <CheckCircle size={36} strokeWidth={2} />
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.active}</div>
-                <div className="stat-label">Active</div>
+              <div className="flex-1">
+                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.active}</div>
+                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Active</div>
               </div>
             </div>
 
-            <div className="admin-stat-card stat-suspended">
-              <div className="stat-icon">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-error-500 to-error-700">
                 <Ban size={36} strokeWidth={2} />
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{stats.suspended}</div>
-                <div className="stat-label">Suspended</div>
+              <div className="flex-1">
+                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.suspended}</div>
+                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Suspended</div>
               </div>
             </div>
           </div>

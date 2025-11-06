@@ -16,7 +16,6 @@ import StudentClassView from './StudentClassView';
 import LiveClassRoom from './LiveClassRoom';
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
-import './StudentDashboard.css';
 
 function StudentDashboard({ user, userRole, student: studentProp, onLogout, onStartGame }) {
   const navigate = useNavigate();

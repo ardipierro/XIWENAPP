@@ -33,7 +33,20 @@
       "Bash(cmd /c taskkill /F /PID 70936)",
       "Bash(git log:*)",
       "WebSearch",
-      "Bash(del nul)"
+      "Bash(del nul)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.excalidraw.com)",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(git push:*)",
+      "Bash(C:UsersardipOneDriveXIWEN\" \"2025XIWENAPPAdminDashboard_temp.jsx)",
+      "Bash(\"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\AdminDashboard_temp.jsx\")",
+      "Bash(\"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\AdminDashboard_temp.css\")",
+      "Bash(timeout 10 bash:*)",
+      "Bash(del \"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\AdminDashboard_temp.jsx\" \"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\AdminDashboard_temp.css\")",
+      "Bash(find:*)",
+      "Bash(npx depcheck:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(del \"src\\components\\AdminDashboard.css\")"
     ],
     "deny": [],
     "ask": []
