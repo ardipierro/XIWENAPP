@@ -17,6 +17,11 @@ import AdminDashboard from './components/AdminDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
 import JoinGamePage from './components/JoinGamePage.jsx';
+import OfflineIndicator from './components/OfflineIndicator.jsx';
+
+// Offline utilities
+import { setupAutoSync } from './utils/syncQueue.js';
+import { syncOperation } from './utils/offlineFirestore.js';
 
 import './App.css';
 
@@ -55,6 +60,14 @@ function App() {
     }
   }, [isViewingAs, viewAsUser, user, userRole]);
 
+  /**
+   * Setup auto-sync for offline operations
+   */
+  useEffect(() => {
+    const cleanup = setupAutoSync(syncOperation);
+    return cleanup;
+  }, []);
+
   // No mostrar nada mientras se inicializa autenticación (carga instantánea)
   if (loading) {
     return null;
@@ -62,6 +75,7 @@ function App() {
 
   return (
     <Router>
+      <OfflineIndicator />
       <Routes>
         {/* Public Routes - solo accesibles sin autenticación */}
         <Route
