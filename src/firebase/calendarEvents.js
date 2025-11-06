@@ -117,107 +117,150 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
     const startTimestamp = Timestamp.fromDate(startDate);
     const endTimestamp = Timestamp.fromDate(endDate);
 
-    // 1. Get scheduled classes
+    // 1. Get scheduled classes - SIMPLIFIED to avoid complex indexes
     const classesRef = collection(db, 'scheduledClasses');
-    let classesQuery;
 
     if (userRole === 'teacher') {
-      classesQuery = query(
+      // Teacher: get their classes and filter by date in memory
+      const classesQuery = query(
         classesRef,
-        where('teacherId', '==', userId),
-        where('date', '>=', startTimestamp),
-        where('date', '<=', endTimestamp)
+        where('teacherId', '==', userId)
       );
-    } else {
-      // For students, get classes they're enrolled in
-      const enrollmentsRef = collection(db, 'enrollments');
-      const enrollmentsQuery = query(enrollmentsRef, where('studentId', '==', userId));
-      const enrollmentsSnap = await getDocs(enrollmentsQuery);
-      const courseIds = enrollmentsSnap.docs.map(doc => doc.data().courseId);
-
-      if (courseIds.length > 0) {
-        classesQuery = query(
-          classesRef,
-          where('courseId', 'in', courseIds.slice(0, 10)),
-          where('date', '>=', startTimestamp),
-          where('date', '<=', endTimestamp)
-        );
-      }
-    }
-
-    if (classesQuery) {
       const classesSnap = await getDocs(classesQuery);
       classesSnap.docs.forEach(doc => {
         const data = doc.data();
-        events.push({
-          id: doc.id,
-          title: data.title || 'Clase',
-          type: 'class',
-          startDate: data.date,
-          endDate: data.endDate || data.date,
-          description: data.description,
-          courseId: data.courseId,
-          location: data.location || 'Online',
-          color: 'blue'
-        });
+        const classDate = data.date;
+        // Filter by date range in memory
+        if (classDate && classDate >= startTimestamp && classDate <= endTimestamp) {
+          events.push({
+            id: doc.id,
+            title: data.title || 'Clase',
+            type: 'class',
+            startDate: data.date,
+            endDate: data.endDate || data.date,
+            description: data.description,
+            courseId: data.courseId,
+            location: data.location || 'Online',
+            color: 'blue'
+          });
+        }
       });
-    }
-
-    // 2. Get assignment deadlines
-    const assignmentsRef = collection(db, 'assignments');
-    let assignmentsQuery;
-
-    if (userRole === 'teacher') {
-      assignmentsQuery = query(
-        assignmentsRef,
-        where('teacherId', '==', userId),
-        where('deadline', '>=', startTimestamp),
-        where('deadline', '<=', endTimestamp)
-      );
     } else {
-      // For students, get assignments from enrolled courses
+      // Students: get all classes and filter by enrollment + date in memory
       const enrollmentsRef = collection(db, 'enrollments');
       const enrollmentsQuery = query(enrollmentsRef, where('studentId', '==', userId));
       const enrollmentsSnap = await getDocs(enrollmentsQuery);
       const courseIds = enrollmentsSnap.docs.map(doc => doc.data().courseId);
 
       if (courseIds.length > 0) {
-        assignmentsQuery = query(
-          assignmentsRef,
-          where('courseId', 'in', courseIds.slice(0, 10)),
-          where('deadline', '>=', startTimestamp),
-          where('deadline', '<=', endTimestamp)
-        );
+        // Get all classes for enrolled courses
+        for (const courseId of courseIds.slice(0, 10)) {
+          const coursClassesQuery = query(
+            classesRef,
+            where('courseId', '==', courseId)
+          );
+          const classesSnap = await getDocs(coursClassesQuery);
+          classesSnap.docs.forEach(doc => {
+            const data = doc.data();
+            const classDate = data.date;
+            // Filter by date range in memory
+            if (classDate && classDate >= startTimestamp && classDate <= endTimestamp) {
+              events.push({
+                id: doc.id,
+                title: data.title || 'Clase',
+                type: 'class',
+                startDate: data.date,
+                endDate: data.endDate || data.date,
+                description: data.description,
+                courseId: data.courseId,
+                location: data.location || 'Online',
+                color: 'blue'
+              });
+            }
+          });
+        }
       }
     }
 
-    if (assignmentsQuery) {
+    // 2. Get assignment deadlines - SIMPLIFIED
+    const assignmentsRef = collection(db, 'assignments');
+
+    if (userRole === 'teacher') {
+      // Teacher: get their assignments and filter by date in memory
+      const assignmentsQuery = query(
+        assignmentsRef,
+        where('teacherId', '==', userId)
+      );
       const assignmentsSnap = await getDocs(assignmentsQuery);
       assignmentsSnap.docs.forEach(doc => {
         const data = doc.data();
-        events.push({
-          id: doc.id,
-          title: data.title,
-          type: 'assignment',
-          startDate: data.deadline,
-          endDate: data.deadline,
-          description: data.description,
-          courseId: data.courseId,
-          points: data.points,
-          color: 'red'
-        });
+        const deadline = data.deadline;
+        // Filter by date range in memory
+        if (deadline && deadline >= startTimestamp && deadline <= endTimestamp) {
+          events.push({
+            id: doc.id,
+            title: data.title,
+            type: 'assignment',
+            startDate: data.deadline,
+            endDate: data.deadline,
+            description: data.description,
+            courseId: data.courseId,
+            points: data.points,
+            color: 'red'
+          });
+        }
       });
+    } else {
+      // Students: get assignments from enrolled courses
+      const enrollmentsRef = collection(db, 'enrollments');
+      const enrollmentsQuery = query(enrollmentsRef, where('studentId', '==', userId));
+      const enrollmentsSnap = await getDocs(enrollmentsQuery);
+      const courseIds = enrollmentsSnap.docs.map(doc => doc.data().courseId);
+
+      if (courseIds.length > 0) {
+        // Get assignments for each enrolled course
+        for (const courseId of courseIds.slice(0, 10)) {
+          const courseAssignmentsQuery = query(
+            assignmentsRef,
+            where('courseId', '==', courseId)
+          );
+          const assignmentsSnap = await getDocs(courseAssignmentsQuery);
+          assignmentsSnap.docs.forEach(doc => {
+            const data = doc.data();
+            const deadline = data.deadline;
+            // Filter by date range in memory
+            if (deadline && deadline >= startTimestamp && deadline <= endTimestamp) {
+              events.push({
+                id: doc.id,
+                title: data.title,
+                type: 'assignment',
+                startDate: data.deadline,
+                endDate: data.deadline,
+                description: data.description,
+                courseId: data.courseId,
+                points: data.points,
+                color: 'red'
+              });
+            }
+          });
+        }
+      }
     }
 
-    // 3. Get custom calendar events
-    const customEvents = await getCalendarEventsForUser(userId, startDate, endDate);
-    customEvents.forEach(event => {
-      events.push({
-        ...event,
-        type: event.type || 'event',
-        color: event.color || 'green'
+    // 3. Get custom calendar events - Keep as is but handle errors
+    try {
+      const customEvents = await getCalendarEventsForUser(userId, startDate, endDate);
+      customEvents.forEach(event => {
+        events.push({
+          ...event,
+          type: event.type || 'event',
+          color: event.color || 'green'
+        });
       });
-    });
+    } catch (customEventsError) {
+      // If custom events fail, just log and continue with classes/assignments
+      logger.warn('Could not load custom calendar events, continuing without them', 'Calendar', customEventsError);
+    }
 
     // Sort all events by start date
     events.sort((a, b) => {
@@ -226,10 +269,11 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
       return dateA - dateB;
     });
 
+    logger.info(`Loaded ${events.length} calendar events for ${userRole}`, 'Calendar');
     return events;
   } catch (error) {
     logger.error('Error getting unified calendar', 'Calendar', error);
-    return [];
+    throw error; // Re-throw so the hook can catch it
   }
 }
 

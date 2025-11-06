@@ -12,12 +12,26 @@ import { BaseLoading } from './common';
 export default function UnifiedCalendar({ userId, userRole }) {
   const { currentDate, view, setView, goToToday, goToNext, goToPrevious, getDateRange, getDisplayText } = useCalendarNavigation();
   const { start, end } = getDateRange();
-  const { events, loading, createEvent } = useCalendar(userId, userRole, start, end);
+  const { events, loading, error, createEvent } = useCalendar(userId, userRole, start, end);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <BaseLoading variant="spinner" size="lg" text="Cargando calendario..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Error al cargar calendario</h3>
+          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+          <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+            Puede que falten índices de Firestore. Revisa la consola del navegador para más detalles.
+          </p>
+        </div>
       </div>
     );
   }
