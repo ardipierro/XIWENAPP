@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from './config';
 
@@ -14,7 +16,7 @@ export async function uploadImage(file, path) {
     const downloadURL = await getDownloadURL(snapshot.ref);
     return { success: true, url: downloadURL };
   } catch (error) {
-    console.error('Error al subir imagen:', error);
+    logger.error('Error al subir imagen:', error);
     return { success: false, error: error.message };
   }
 }
@@ -34,7 +36,7 @@ export async function deleteImage(url) {
     await deleteObject(storageRef);
     return { success: true };
   } catch (error) {
-    console.error('Error al eliminar imagen:', error);
+    logger.error('Error al eliminar imagen:', error);
     return { success: false, error: error.message };
   }
 }
@@ -52,7 +54,7 @@ function extractPathFromUrl(url) {
     }
     return null;
   } catch (error) {
-    console.error('Error al extraer path:', error);
+    logger.error('Error al extraer path:', error);
     return null;
   }
 }
@@ -132,7 +134,7 @@ export async function deleteAvatarImage(userId) {
     // En una implementación más completa, buscaríamos en Storage
     return { success: true };
   } catch (error) {
-    console.error('Error al eliminar avatar:', error);
+    logger.error('Error al eliminar avatar:', error);
     return { success: false, error: error.message };
   }
 }

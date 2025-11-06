@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Firebase Credits Repository
  * Gestión de créditos de usuarios y transacciones
@@ -177,7 +179,7 @@ export async function addCredits(userId, amount, reason, addedBy) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error al agregar créditos:', error);
+    logger.error('Error al agregar créditos:', error);
     return { success: false, error: error.message };
   }
 }
@@ -231,7 +233,7 @@ export async function deductCredits(userId, amount, reason, deductedBy) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error al deducir créditos:', error);
+    logger.error('Error al deducir créditos:', error);
     return { success: false, error: error.message };
   }
 }
@@ -286,7 +288,7 @@ export async function useCreditsForClass(userId, amount, classId, className) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error al usar créditos:', error);
+    logger.error('Error al usar créditos:', error);
     return { success: false, error: error.message };
   }
 }

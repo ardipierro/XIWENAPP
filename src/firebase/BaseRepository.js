@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview BaseRepository - Patrón Repository para operaciones CRUD en Firestore
  * Elimina duplicación de código entre los 19 archivos Firebase
@@ -65,7 +67,7 @@ export class BaseRepository {
       const docRef = await addDoc(this.collectionRef, docData);
       return { success: true, id: docRef.id };
     } catch (error) {
-      console.error(`❌ Error creando documento en ${this.collectionName}:`, error);
+      logger.error(`❌ Error creando documento en ${this.collectionName}:`, error);
       return { success: false, error: error.message };
     }
   }
@@ -93,7 +95,7 @@ export class BaseRepository {
       await setDoc(docRef, docData, { merge: options.merge });
       return { success: true };
     } catch (error) {
-      console.error(`❌ Error seteando documento en ${this.collectionName}:`, error);
+      logger.error(`❌ Error seteando documento en ${this.collectionName}:`, error);
       return { success: false, error: error.message };
     }
   }
@@ -117,7 +119,7 @@ export class BaseRepository {
       }
       return null;
     } catch (error) {
-      console.error(`❌ Error obteniendo documento de ${this.collectionName}:`, error);
+      logger.error(`❌ Error obteniendo documento de ${this.collectionName}:`, error);
       return null;
     }
   }
@@ -163,7 +165,7 @@ export class BaseRepository {
 
       return docs;
     } catch (error) {
-      console.error(`❌ Error obteniendo documentos de ${this.collectionName}:`, error);
+      logger.error(`❌ Error obteniendo documentos de ${this.collectionName}:`, error);
       return [];
     }
   }
@@ -209,7 +211,7 @@ export class BaseRepository {
       await updateDoc(docRef, data);
       return { success: true };
     } catch (error) {
-      console.error(`❌ Error actualizando documento en ${this.collectionName}:`, error);
+      logger.error(`❌ Error actualizando documento en ${this.collectionName}:`, error);
       return { success: false, error: error.message };
     }
   }
@@ -232,7 +234,7 @@ export class BaseRepository {
       });
       return { success: true };
     } catch (error) {
-      console.error(`❌ Error eliminando (soft) documento en ${this.collectionName}:`, error);
+      logger.error(`❌ Error eliminando (soft) documento en ${this.collectionName}:`, error);
       return { success: false, error: error.message };
     }
   }
@@ -249,7 +251,7 @@ export class BaseRepository {
       await deleteDoc(docRef);
       return { success: true };
     } catch (error) {
-      console.error(`❌ Error eliminando (hard) documento en ${this.collectionName}:`, error);
+      logger.error(`❌ Error eliminando (hard) documento en ${this.collectionName}:`, error);
       return { success: false, error: error.message };
     }
   }
@@ -273,7 +275,7 @@ export class BaseRepository {
       // Filtrar nulls
       return results.filter(doc => doc !== null);
     } catch (error) {
-      console.error(`❌ Error obteniendo batch de ${this.collectionName}:`, error);
+      logger.error(`❌ Error obteniendo batch de ${this.collectionName}:`, error);
       return [];
     }
   }
@@ -291,7 +293,7 @@ export class BaseRepository {
       await Promise.all(promises);
       return { success: true };
     } catch (error) {
-      console.error(`❌ Error actualizando batch en ${this.collectionName}:`, error);
+      logger.error(`❌ Error actualizando batch en ${this.collectionName}:`, error);
       return { success: false, error: error.message };
     }
   }

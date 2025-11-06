@@ -82,7 +82,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       coursesMap[id] = courses;
     });
 
-    console.log(`⏱️ [ExerciseManager] Cargar cursos de ejercicios: ${(performance.now() - startTime).toFixed(0)}ms - ${exercises.length} ejercicios`);
+    logger.debug(`⏱️ [ExerciseManager] Cargar cursos de ejercicios: ${(performance.now() - startTime).toFixed(0)}ms - ${exercises.length} ejercicios`);
 
     setExerciseCourses(coursesMap);
   };

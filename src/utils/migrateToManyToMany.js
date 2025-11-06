@@ -1,3 +1,5 @@
+import logger from 'logger';
+
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import {
@@ -12,8 +14,8 @@ import {
  * Los mantiene como backup y para compatibilidad durante la transición.
  */
 export async function migrateToManyToMany() {
-  console.log('🔄 INICIANDO MIGRACIÓN A SISTEMA MANY-TO-MANY');
-  console.log('='.repeat(60));
+  logger.debug('🔄 INICIANDO MIGRACIÓN A SISTEMA MANY-TO-MANY');
+  logger.debug('='.repeat(60));
 
   const stats = {
     contentTotal: 0,
@@ -30,13 +32,13 @@ export async function migrateToManyToMany() {
     // ==========================================
     // FASE 1: MIGRAR CONTENIDOS
     // ==========================================
-    console.log('\n📄 FASE 1: Migrando contenidos...\n');
+    logger.debug('\n📄 FASE 1: Migrando contenidos...\n');
 
     const contentRef = collection(db, 'content');
     const contentSnapshot = await getDocs(contentRef);
     stats.contentTotal = contentSnapshot.size;
 
-    console.log(`Encontrados ${stats.contentTotal} contenidos`);
+    logger.debug(`Encontrados ${stats.contentTotal} contenidos`);
 
     for (const contentDoc of contentSnapshot.docs) {
       const contentData = contentDoc.data();
@@ -45,7 +47,7 @@ export async function migrateToManyToMany() {
 
       // Skip si no tiene courseId
       if (!courseId || courseId === '') {
-        console.log(`⏭️  "${contentData.title}" - Sin curso asignado, omitiendo`);
+        logger.debug(`⏭️  "${contentData.title}" - Sin curso asignado, omitiendo`);
         stats.contentSkipped++;
         continue;
       }
@@ -54,7 +56,7 @@ export async function migrateToManyToMany() {
         // Verificar que el curso existe
         const courseDoc = await getDoc(doc(db, 'courses', courseId));
         if (!courseDoc.exists()) {
-          console.warn(`⚠️  "${contentData.title}" - Curso ${courseId} no existe, omitiendo`);
+          logger.warn(`⚠️  "${contentData.title}" - Curso ${courseId} no existe, omitiendo`);
           stats.contentSkipped++;
           continue;
         }
@@ -63,14 +65,14 @@ export async function migrateToManyToMany() {
         const result = await addContentToCourse(courseId, contentId, contentData.order || 0);
 
         if (result.success) {
-          console.log(`✅ "${contentData.title}" → Curso: ${courseDoc.data().name}`);
+          logger.debug(`✅ "${contentData.title}" → Curso: ${courseDoc.data().name}`);
           stats.contentMigrated++;
         } else {
-          console.error(`❌ Error migrando "${contentData.title}":`, result.error);
+          logger.error(`❌ Error migrando "${contentData.title}":`, result.error);
           stats.contentErrors++;
         }
       } catch (error) {
-        console.error(`❌ Error procesando "${contentData.title}":`, error.message);
+        logger.error(`❌ Error procesando "${contentData.title}":`, error.message);
         stats.contentErrors++;
       }
     }
@@ -78,13 +80,13 @@ export async function migrateToManyToMany() {
     // ==========================================
     // FASE 2: MIGRAR EJERCICIOS
     // ==========================================
-    console.log('\n🎮 FASE 2: Migrando ejercicios...\n');
+    logger.debug('\n🎮 FASE 2: Migrando ejercicios...\n');
 
     const exercisesRef = collection(db, 'exercises');
     const exercisesSnapshot = await getDocs(exercisesRef);
     stats.exercisesTotal = exercisesSnapshot.size;
 
-    console.log(`Encontrados ${stats.exercisesTotal} ejercicios`);
+    logger.debug(`Encontrados ${stats.exercisesTotal} ejercicios`);
 
     for (const exerciseDoc of exercisesSnapshot.docs) {
       const exerciseData = exerciseDoc.data();
@@ -93,7 +95,7 @@ export async function migrateToManyToMany() {
 
       // Skip si no tiene courseId
       if (!courseId || courseId === '') {
-        console.log(`⏭️  "${exerciseData.title}" - Sin curso asignado, omitiendo`);
+        logger.debug(`⏭️  "${exerciseData.title}" - Sin curso asignado, omitiendo`);
         stats.exercisesSkipped++;
         continue;
       }
@@ -102,7 +104,7 @@ export async function migrateToManyToMany() {
         // Verificar que el curso existe
         const courseDoc = await getDoc(doc(db, 'courses', courseId));
         if (!courseDoc.exists()) {
-          console.warn(`⚠️  "${exerciseData.title}" - Curso ${courseId} no existe, omitiendo`);
+          logger.warn(`⚠️  "${exerciseData.title}" - Curso ${courseId} no existe, omitiendo`);
           stats.exercisesSkipped++;
           continue;
         }
@@ -111,14 +113,14 @@ export async function migrateToManyToMany() {
         const result = await addExerciseToCourse(courseId, exerciseId, exerciseData.order || 0);
 
         if (result.success) {
-          console.log(`✅ "${exerciseData.title}" → Curso: ${courseDoc.data().name}`);
+          logger.debug(`✅ "${exerciseData.title}" → Curso: ${courseDoc.data().name}`);
           stats.exercisesMigrated++;
         } else {
-          console.error(`❌ Error migrando "${exerciseData.title}":`, result.error);
+          logger.error(`❌ Error migrando "${exerciseData.title}":`, result.error);
           stats.exercisesErrors++;
         }
       } catch (error) {
-        console.error(`❌ Error procesando "${exerciseData.title}":`, error.message);
+        logger.error(`❌ Error procesando "${exerciseData.title}":`, error.message);
         stats.exercisesErrors++;
       }
     }
@@ -126,8 +128,8 @@ export async function migrateToManyToMany() {
     // ==========================================
     // RESUMEN FINAL
     // ==========================================
-    console.log('\n' + '='.repeat(60));
-    console.log('📊 RESUMEN DE MIGRACIÓN\n');
+    logger.debug('\n' + '='.repeat(60));
+    logger.debug('📊 RESUMEN DE MIGRACIÓN\n');
 
     console.table({
       'Contenidos totales': stats.contentTotal,
@@ -141,15 +143,15 @@ export async function migrateToManyToMany() {
       'Ejercicios con error': stats.exercisesErrors
     });
 
-    console.log('\n✅ MIGRACIÓN COMPLETADA');
-    console.log('\n⚠️  IMPORTANTE: Los campos courseId originales se mantienen como backup.');
-    console.log('    Una vez verificada la migración, se pueden actualizar las UIs.');
-    console.log('='.repeat(60));
+    logger.debug('\n✅ MIGRACIÓN COMPLETADA');
+    logger.debug('\n⚠️  IMPORTANTE: Los campos courseId originales se mantienen como backup.');
+    logger.debug('    Una vez verificada la migración, se pueden actualizar las UIs.');
+    logger.debug('='.repeat(60));
 
     return { success: true, stats };
 
   } catch (error) {
-    console.error('\n❌ ERROR CRÍTICO EN MIGRACIÓN:', error);
+    logger.error('\n❌ ERROR CRÍTICO EN MIGRACIÓN:', error);
     return { success: false, error: error.message, stats };
   }
 }
@@ -159,7 +161,7 @@ export async function migrateToManyToMany() {
  * Compara cuántos items tienen courseId vs cuántos tienen relaciones
  */
 export async function checkMigrationStatus() {
-  console.log('\n🔍 VERIFICANDO ESTADO DE MIGRACIÓN\n');
+  logger.debug('\n🔍 VERIFICANDO ESTADO DE MIGRACIÓN\n');
 
   try {
     // Contenidos con courseId
@@ -197,16 +199,16 @@ export async function checkMigrationStatus() {
       courseExercisesSnapshot.size >= exercisesWithCourseId.length;
 
     if (allMigrated) {
-      console.log('\n✅ Migración completada correctamente');
+      logger.debug('\n✅ Migración completada correctamente');
     } else {
-      console.log('\n⚠️  Aún hay datos pendientes de migrar');
-      console.log('   Ejecuta migrateToManyToMany() para completar la migración');
+      logger.debug('\n⚠️  Aún hay datos pendientes de migrar');
+      logger.debug('   Ejecuta migrateToManyToMany() para completar la migración');
     }
 
     return status;
 
   } catch (error) {
-    console.error('❌ Error verificando estado:', error);
+    logger.error('❌ Error verificando estado:', error);
     return null;
   }
 }
@@ -215,7 +217,7 @@ export async function checkMigrationStatus() {
  * Limpiar relaciones duplicadas (útil si se ejecutó la migración varias veces)
  */
 export async function cleanDuplicateRelationships() {
-  console.log('\n🧹 LIMPIANDO RELACIONES DUPLICADAS...\n');
+  logger.debug('\n🧹 LIMPIANDO RELACIONES DUPLICADAS...\n');
 
   try {
     // Limpiar course_content duplicados
@@ -234,7 +236,7 @@ export async function cleanDuplicateRelationships() {
       }
     });
 
-    console.log(`Encontrados ${duplicates.length} duplicados en course_content`);
+    logger.debug(`Encontrados ${duplicates.length} duplicados en course_content`);
 
     // Similar para course_exercises
     const courseExercisesSnapshot = await getDocs(collection(db, 'course_exercises'));
@@ -252,10 +254,10 @@ export async function cleanDuplicateRelationships() {
       }
     });
 
-    console.log(`Encontrados ${exerciseDuplicates.length} duplicados en course_exercises`);
+    logger.debug(`Encontrados ${exerciseDuplicates.length} duplicados en course_exercises`);
 
-    console.log('\n⚠️  Para eliminar duplicados, ejecuta esta función con parámetro confirmDelete=true');
-    console.log('   cleanDuplicateRelationships(true)');
+    logger.debug('\n⚠️  Para eliminar duplicados, ejecuta esta función con parámetro confirmDelete=true');
+    logger.debug('   cleanDuplicateRelationships(true)');
 
     return {
       contentDuplicates: duplicates,
@@ -263,7 +265,7 @@ export async function cleanDuplicateRelationships() {
     };
 
   } catch (error) {
-    console.error('❌ Error limpiando duplicados:', error);
+    logger.error('❌ Error limpiando duplicados:', error);
     return null;
   }
 }

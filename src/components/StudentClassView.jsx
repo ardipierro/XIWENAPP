@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   Calendar, CreditCard, CheckCircle, AlertTriangle, Users, BookOpen,
@@ -52,7 +54,7 @@ function StudentClassView({ student }) {
       // Obtener grupos del estudiante
       const groups = await getStudentGroups(student.id);
       setStudentGroups(groups);
-      console.log('📚 Grupos del estudiante:', {
+      logger.debug('📚 Grupos del estudiante:', {
         studentId: student.id,
         studentName: student.name,
         groupCount: groups.length,
@@ -62,7 +64,7 @@ function StudentClassView({ student }) {
       // Obtener instancias del estudiante
       const studentInstances = await getInstancesForStudent(student.id, 50);
 
-      console.log('📊 Total de instancias:', studentInstances.length);
+      logger.debug('📊 Total de instancias:', studentInstances.length);
 
       // Filtrar solo futuras y ordenar por fecha
       const now = new Date();
@@ -95,10 +97,10 @@ function StudentClassView({ student }) {
         attendanceStatusMap[instanceId] = attendance;
       });
 
-      console.log(`⏱️ Verificación de asistencia: ${(performance.now() - attendanceStart).toFixed(0)}ms - ${futureInstances.length} instancias`);
+      logger.debug(`⏱️ Verificación de asistencia: ${(performance.now() - attendanceStart).toFixed(0)}ms - ${futureInstances.length} instancias`);
       setAttendanceStatus(attendanceStatusMap);
     } catch (error) {
-      console.error('Error al cargar datos:', error);
+      logger.error('Error al cargar datos:', error);
       showMessage('error', 'Error al cargar clases');
     } finally {
       setLoading(false);
@@ -147,7 +149,7 @@ function StudentClassView({ student }) {
         showMessage('error', result.error || 'Error al registrar asistencia');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error inesperado');
     } finally {
       setProcessingInstance(null);

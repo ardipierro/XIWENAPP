@@ -1,3 +1,5 @@
+import logger from '../../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { Check, Play, AlertTriangle, BookMarked, Calendar } from 'lucide-react';
 import { getStudentEnrollments, ensureStudentProfile } from '../../firebase/firestore';
@@ -19,31 +21,31 @@ function MyCourses({ user, onSelectCourse }) {
       setError(null);
 
       // Primero asegurar que el estudiante tenga un perfil
-      console.log('🔍 Buscando perfil de estudiante para user.uid:', user.uid);
+      logger.debug('🔍 Buscando perfil de estudiante para user.uid:', user.uid);
       const studentProfile = await ensureStudentProfile(user.uid);
 
       if (!studentProfile) {
-        console.error('❌ No se pudo obtener/crear perfil de estudiante');
+        logger.error('❌ No se pudo obtener/crear perfil de estudiante');
         setError('No se pudo cargar tu perfil de estudiante');
         setCourses([]);
         setLoading(false);
         return;
       }
 
-      console.log('✅ Perfil de estudiante obtenido:', studentProfile.id);
+      logger.debug('✅ Perfil de estudiante obtenido:', studentProfile.id);
 
       // Ahora buscar enrollments usando el studentId
       const data = await getStudentEnrollments(studentProfile.id);
 
       if (!data || data.length === 0) {
-        console.log('📚 No hay cursos asignados para este estudiante');
+        logger.debug('📚 No hay cursos asignados para este estudiante');
         setCourses([]);
       } else {
-        console.log('✅ Cursos encontrados:', data.length);
+        logger.debug('✅ Cursos encontrados:', data.length);
         setCourses(data);
       }
     } catch (err) {
-      console.error('❌ Error cargando cursos:', err);
+      logger.error('❌ Error cargando cursos:', err);
       setError('Error al cargar tus cursos. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);

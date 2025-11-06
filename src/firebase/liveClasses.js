@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { db } from './config';
 import {
   collection,
@@ -89,7 +91,7 @@ export async function createLiveClass({
       roomName
     };
   } catch (error) {
-    console.error('Error creating live class:', error);
+    logger.error('Error creating live class:', error);
     throw error;
   }
 }
@@ -112,7 +114,7 @@ export async function getLiveClass(classId) {
       ...classDoc.data()
     };
   } catch (error) {
-    console.error('Error getting live class:', error);
+    logger.error('Error getting live class:', error);
     throw error;
   }
 }
@@ -142,7 +144,7 @@ export async function getTeacherLiveClasses(teacherId) {
 
     return classes;
   } catch (error) {
-    console.error('Error getting teacher live classes:', error);
+    logger.error('Error getting teacher live classes:', error);
     throw error;
   }
 }
@@ -190,7 +192,7 @@ export async function getStudentAvailableLiveClasses(studentId) {
 
     return classes;
   } catch (error) {
-    console.error('Error getting student available classes:', error);
+    logger.error('Error getting student available classes:', error);
     throw error;
   }
 }
@@ -209,7 +211,7 @@ export async function startLiveClass(classId) {
       startedAt: serverTimestamp()
     });
   } catch (error) {
-    console.error('Error starting live class:', error);
+    logger.error('Error starting live class:', error);
     throw error;
   }
 }
@@ -228,7 +230,7 @@ export async function endLiveClass(classId) {
       endedAt: serverTimestamp()
     });
   } catch (error) {
-    console.error('Error ending live class:', error);
+    logger.error('Error ending live class:', error);
     throw error;
   }
 }
@@ -246,7 +248,7 @@ export async function cancelLiveClass(classId) {
       status: 'cancelled'
     });
   } catch (error) {
-    console.error('Error cancelling live class:', error);
+    logger.error('Error cancelling live class:', error);
     throw error;
   }
 }
@@ -260,7 +262,7 @@ export async function deleteLiveClass(classId) {
   try {
     await deleteDoc(doc(db, 'live_classes', classId));
   } catch (error) {
-    console.error('Error deleting live class:', error);
+    logger.error('Error deleting live class:', error);
     throw error;
   }
 }
@@ -305,7 +307,7 @@ export async function joinLiveClass(classId, userId, userName) {
       ]
     });
   } catch (error) {
-    console.error('Error joining live class:', error);
+    logger.error('Error joining live class:', error);
     throw error;
   }
 }
@@ -334,7 +336,7 @@ export async function leaveLiveClass(classId, userId) {
       participants: updatedParticipants
     });
   } catch (error) {
-    console.error('Error leaving live class:', error);
+    logger.error('Error leaving live class:', error);
     throw error;
   }
 }
@@ -354,7 +356,7 @@ export async function updateClassRecording(classId, recordingUrl) {
       recordingEnabled: true
     });
   } catch (error) {
-    console.error('Error updating class recording:', error);
+    logger.error('Error updating class recording:', error);
     throw error;
   }
 }

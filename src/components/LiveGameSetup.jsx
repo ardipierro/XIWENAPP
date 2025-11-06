@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Play, Users, Timer, RotateCcw, Shuffle } from 'lucide-react';
 import { createGameSession } from '../firebase/gameSession';
@@ -70,7 +72,7 @@ function LiveGameSetup({ user, onSessionCreated, onBack }) {
         const cats = await loadCategories();
         setCategoriesData(cats);
       } catch (err) {
-        console.error('Error cargando categorías:', err);
+        logger.error('Error cargando categorías:', err);
         setError('Error al cargar categorías');
       }
     };
@@ -135,10 +137,10 @@ function LiveGameSetup({ user, onSessionCreated, onBack }) {
       };
 
       const { sessionId, joinCode } = await createGameSession(gameData);
-      console.log('Sesión creada:', sessionId, 'Código:', joinCode);
+      logger.debug('Sesión creada:', sessionId, 'Código:', joinCode);
       onSessionCreated(sessionId);
     } catch (err) {
-      console.error('Error creando sesión:', err);
+      logger.error('Error creando sesión:', err);
       setError(err.message || 'Error al crear la sesión');
       setLoading(false);
     }

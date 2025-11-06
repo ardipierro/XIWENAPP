@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import {
   collection,
   addDoc,
@@ -89,7 +91,7 @@ export async function markAttendance(attendanceData) {
       creditDeducted: creditResult.success
     };
   } catch (error) {
-    console.error('Error al marcar asistencia:', error);
+    logger.error('Error al marcar asistencia:', error);
     return { success: false, error: error.message };
   }
 }
@@ -127,7 +129,7 @@ export async function markAttendanceByLink(sessionId, studentId, studentName, cr
 
     return result;
   } catch (error) {
-    console.error('Error al marcar asistencia por link:', error);
+    logger.error('Error al marcar asistencia por link:', error);
     return { success: false, error: error.message };
   }
 }
@@ -177,7 +179,7 @@ async function deductCreditsForAttendance(attendanceId, studentId, creditCost, s
 
     return result;
   } catch (error) {
-    console.error('Error al deducir créditos:', error);
+    logger.error('Error al deducir créditos:', error);
     return { success: false, error: error.message };
   }
 }
@@ -205,7 +207,7 @@ export async function getStudentAttendance(sessionId, studentId) {
 
     return null;
   } catch (error) {
-    console.error('Error al obtener asistencia:', error);
+    logger.error('Error al obtener asistencia:', error);
     return null;
   }
 }
@@ -234,7 +236,7 @@ export async function getSessionAttendance(sessionId) {
         return dateA - dateB; // ascendente
       });
   } catch (error) {
-    console.error('Error al obtener asistencias de sesión:', error);
+    logger.error('Error al obtener asistencias de sesión:', error);
     return [];
   }
 }
@@ -266,7 +268,7 @@ export async function getStudentAttendanceHistory(studentId, limit = 50) {
 
     return attendances.slice(0, limit);
   } catch (error) {
-    console.error('Error al obtener historial de asistencias:', error);
+    logger.error('Error al obtener historial de asistencias:', error);
     return [];
   }
 }
@@ -294,7 +296,7 @@ export async function updateAttendanceStatus(attendanceId, status, updatedBy = '
 
     return { success: true };
   } catch (error) {
-    console.error('Error al actualizar estado de asistencia:', error);
+    logger.error('Error al actualizar estado de asistencia:', error);
     return { success: false, error: error.message };
   }
 }
@@ -348,7 +350,7 @@ export async function getStudentAttendanceStats(studentId) {
 
     return stats;
   } catch (error) {
-    console.error('Error al obtener estadísticas de asistencia:', error);
+    logger.error('Error al obtener estadísticas de asistencia:', error);
     return {
       total: 0,
       present: 0,
@@ -390,7 +392,7 @@ export async function markBulkAttendance(sessionId, students, status = 'present'
 
     return { success: true, marked };
   } catch (error) {
-    console.error('Error al marcar asistencia masiva:', error);
+    logger.error('Error al marcar asistencia masiva:', error);
     return { success: false, marked: 0, error: error.message };
   }
 }

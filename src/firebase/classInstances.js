@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import {
   collection,
   addDoc,
@@ -89,7 +91,7 @@ export async function generateInstances(classId, weeksAhead = 4, startDate = nul
         // Verificar si ya existe una instancia para esta fecha/hora
         const existingInstance = await getInstanceByDateAndClass(classId, instanceDate, startTime);
         if (existingInstance) {
-          console.log(`⏭️ Instancia ya existe: ${name} - ${instanceDate.toLocaleDateString()}`);
+          logger.debug(`⏭️ Instancia ya existe: ${name} - ${instanceDate.toLocaleDateString()}`);
           continue;
         }
 
@@ -125,10 +127,10 @@ export async function generateInstances(classId, weeksAhead = 4, startDate = nul
 
     await batch.commit();
 
-    console.log(`✅ ${instances.length} instancias generadas para clase: ${name}`);
+    logger.debug(`✅ ${instances.length} instancias generadas para clase: ${name}`);
     return { success: true, count: instances.length };
   } catch (error) {
-    console.error('❌ Error generando instancias:', error);
+    logger.error('❌ Error generando instancias:', error);
     return { success: false, error: error.message, count: 0 };
   }
 }
@@ -160,7 +162,7 @@ async function getInstanceByDateAndClass(classId, date, startTime) {
 
     return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
   } catch (error) {
-    console.error('Error verificando instancia existente:', error);
+    logger.error('Error verificando instancia existente:', error);
     return null;
   }
 }
@@ -187,7 +189,7 @@ export async function getInstancesByClass(classId, limit = 50) {
 
     return instances.slice(0, limit);
   } catch (error) {
-    console.error('❌ Error obteniendo instancias:', error);
+    logger.error('❌ Error obteniendo instancias:', error);
     return [];
   }
 }
@@ -216,7 +218,7 @@ export async function getUpcomingInstances(limit = 20) {
 
     return instances.slice(0, limit);
   } catch (error) {
-    console.error('❌ Error obteniendo próximas instancias:', error);
+    logger.error('❌ Error obteniendo próximas instancias:', error);
     return [];
   }
 }
@@ -233,14 +235,14 @@ export async function getInstancesForStudent(studentId, limit = 50) {
 
     // 1. Obtener clases asignadas al estudiante (ya filtra por activas y asignación)
     const assignedClasses = await getClassesForStudent(studentId);
-    console.log(`⏱️ getClassesForStudent: ${(performance.now() - startTime).toFixed(0)}ms`);
+    logger.debug(`⏱️ getClassesForStudent: ${(performance.now() - startTime).toFixed(0)}ms`);
 
     if (!assignedClasses || assignedClasses.length === 0) {
       return [];
     }
 
     const relevantClassIds = assignedClasses.map(cls => cls.id);
-    console.log(`📚 Clases encontradas: ${relevantClassIds.length}`);
+    logger.debug(`📚 Clases encontradas: ${relevantClassIds.length}`);
 
     // 2. Obtener instancias en paralelo
     const queryStart = performance.now();
@@ -263,7 +265,7 @@ export async function getInstancesForStudent(studentId, limit = 50) {
 
     // Esperar todas las queries en paralelo
     const snapshots = await Promise.all(batchPromises);
-    console.log(`⏱️ Queries de instancias: ${(performance.now() - queryStart).toFixed(0)}ms`);
+    logger.debug(`⏱️ Queries de instancias: ${(performance.now() - queryStart).toFixed(0)}ms`);
 
     // Procesar resultados
     const yesterday = new Date();
@@ -293,10 +295,10 @@ export async function getInstancesForStudent(studentId, limit = 50) {
 
     // Limitar al número solicitado
     const result = futureInstances.slice(0, limit);
-    console.log(`⏱️ TOTAL getInstancesForStudent: ${(performance.now() - startTime).toFixed(0)}ms - ${result.length} instancias`);
+    logger.debug(`⏱️ TOTAL getInstancesForStudent: ${(performance.now() - startTime).toFixed(0)}ms - ${result.length} instancias`);
     return result;
   } catch (error) {
-    console.error('❌ Error obteniendo instancias del estudiante:', error);
+    logger.error('❌ Error obteniendo instancias del estudiante:', error);
     return [];
   }
 }
@@ -324,7 +326,7 @@ export async function getInstancesByDateRange(startDate, endDate) {
 
     return instances;
   } catch (error) {
-    console.error('❌ Error obteniendo instancias por rango:', error);
+    logger.error('❌ Error obteniendo instancias por rango:', error);
     return [];
   }
 }
@@ -348,10 +350,10 @@ export async function updateInstanceStatus(instanceId, status) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ Estado de instancia actualizado:', instanceId, '->', status);
+    logger.debug('✅ Estado de instancia actualizado:', instanceId, '->', status);
     return { success: true };
   } catch (error) {
-    console.error('❌ Error actualizando estado de instancia:', error);
+    logger.error('❌ Error actualizando estado de instancia:', error);
     return { success: false, error: error.message };
   }
 }
@@ -371,10 +373,10 @@ export async function cancelInstance(instanceId, reason = '') {
       cancelledAt: serverTimestamp()
     });
 
-    console.log('✅ Instancia cancelada:', instanceId);
+    logger.debug('✅ Instancia cancelada:', instanceId);
     return { success: true };
   } catch (error) {
-    console.error('❌ Error cancelando instancia:', error);
+    logger.error('❌ Error cancelando instancia:', error);
     return { success: false, error: error.message };
   }
 }
@@ -389,10 +391,10 @@ export async function deleteInstance(instanceId) {
     const docRef = doc(db, 'class_instances', instanceId);
     await deleteDoc(docRef);
 
-    console.log('✅ Instancia eliminada:', instanceId);
+    logger.debug('✅ Instancia eliminada:', instanceId);
     return { success: true };
   } catch (error) {
-    console.error('❌ Error eliminando instancia:', error);
+    logger.error('❌ Error eliminando instancia:', error);
     return { success: false, error: error.message };
   }
 }
@@ -412,7 +414,7 @@ export async function getInstanceById(instanceId) {
     }
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo instancia:', error);
+    logger.error('❌ Error obteniendo instancia:', error);
     return null;
   }
 }

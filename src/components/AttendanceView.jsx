@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   Calendar, BarChart3, CheckCircle, AlertTriangle, XCircle,
@@ -56,7 +58,7 @@ function AttendanceView({ teacher }) {
         setSelectedSession(sessionsData[0]);
       }
     } catch (error) {
-      console.error('Error al cargar sesiones:', error);
+      logger.error('Error al cargar sesiones:', error);
       showMessage('error', 'Error al cargar sesiones');
     } finally {
       setLoading(false);
@@ -75,7 +77,7 @@ function AttendanceView({ teacher }) {
       const members = await getGroupMembers(selectedSession.groupId);
       setGroupMembers(members);
     } catch (error) {
-      console.error('Error al cargar detalles:', error);
+      logger.error('Error al cargar detalles:', error);
       showMessage('error', 'Error al cargar detalles de la sesión');
     }
   };
@@ -117,7 +119,7 @@ function AttendanceView({ teacher }) {
         showMessage('error', 'Error al marcar asistencias');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error inesperado');
     }
   };

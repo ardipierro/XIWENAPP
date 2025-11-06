@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   BookOpen, ClipboardList, Calendar, CheckCircle, XCircle,
@@ -110,15 +112,15 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
         getUpcomingInstances(100)
       ]);
 
-      console.log(`⏱️ [ClassManager] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
-      console.log(`⏱️ [ClassManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${classesData.length} clases, ${instancesData.length} instancias`);
+      logger.debug(`⏱️ [ClassManager] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [ClassManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${classesData.length} clases, ${instancesData.length} instancias`);
 
       setClasses(classesData);
       setGroups(groupsData);
       setStudents(usersData.filter(u => ['student', 'trial'].includes(u.role)));
       setInstances(instancesData);
     } catch (error) {
-      console.error('Error cargando datos:', error);
+      logger.error('Error cargando datos:', error);
     } finally {
       setLoading(false);
     }
@@ -273,7 +275,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
   };
 
   const handleSaveClass = async () => {
-    console.log('handleSaveClass called');
+    logger.debug('handleSaveClass called');
     try {
       if (!formData.name.trim()) {
         alert('El nombre de la clase es requerido');
@@ -293,7 +295,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
         teacherId: user.uid
       };
 
-      console.log('Creating/updating class with data:', classData);
+      logger.debug('Creating/updating class with data:', classData);
 
       let result;
       if (editingClass) {
@@ -302,7 +304,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
         result = await createClass(classData);
       }
 
-      console.log('Result:', result);
+      logger.debug('Result:', result);
 
       if (result.success) {
         alert(editingClass ? 'Clase actualizada' : 'Clase creada exitosamente');
@@ -320,7 +322,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
         alert('Error: ' + result.error);
       }
     } catch (error) {
-      console.error('Error in handleSaveClass:', error);
+      logger.error('Error in handleSaveClass:', error);
       alert('Error inesperado: ' + error.message);
     }
   };
@@ -586,7 +588,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                       alt={cls.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        console.error('Error cargando imagen de clase:', cls.name, cls.imageUrl);
+                        logger.error('Error cargando imagen de clase:', cls.name, cls.imageUrl);
                         e.target.style.display = 'none';
                       }}
                     />
@@ -652,7 +654,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                       alt={cls.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        console.error('Error cargando imagen de clase:', cls.name, cls.imageUrl);
+                        logger.error('Error cargando imagen de clase:', cls.name, cls.imageUrl);
                         e.target.style.display = 'none';
                       }}
                     />

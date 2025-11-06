@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   BookOpen, FileText, Gamepad2, Trash2, Clock,
@@ -69,7 +71,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       const startTime = performance.now();
 
       const loadedCourses = await loadCourses();
-      console.log(`⏱️ [CoursesScreen] loadCourses: ${(performance.now() - startTime).toFixed(0)}ms - ${loadedCourses.length} cursos`);
+      logger.debug(`⏱️ [CoursesScreen] loadCourses: ${(performance.now() - startTime).toFixed(0)}ms - ${loadedCourses.length} cursos`);
 
       const activeCourses = loadedCourses.filter(c => c.active !== false);
 
@@ -90,12 +92,12 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
         })
       );
 
-      console.log(`⏱️ [CoursesScreen] Cargar conteos (solo count): ${(performance.now() - countsStart).toFixed(0)}ms`);
-      console.log(`⏱️ [CoursesScreen] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${coursesWithCounts.length} cursos activos`);
+      logger.debug(`⏱️ [CoursesScreen] Cargar conteos (solo count): ${(performance.now() - countsStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [CoursesScreen] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${coursesWithCounts.length} cursos activos`);
 
       setCourses(coursesWithCounts);
     } catch (error) {
-      console.error('Error cargando cursos:', error);
+      logger.error('Error cargando cursos:', error);
     } finally {
       setLoading(false);
     }
@@ -121,7 +123,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
         )
       );
     } catch (error) {
-      console.error('Error refrescando curso:', error);
+      logger.error('Error refrescando curso:', error);
     }
   };
 
@@ -149,7 +151,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
         loadStudents()
       ]);
 
-      console.log(`⏱️ [CourseModal] Datos paralelos: ${(performance.now() - modalStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [CourseModal] Datos paralelos: ${(performance.now() - modalStart).toFixed(0)}ms`);
 
       setCourseContents(contents);
       setCourseExercises(exercises);
@@ -170,11 +172,11 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       const studentsInCourse = students.filter(student => assignedStudentIds.has(student.id));
       setCourseStudents(studentsInCourse);
 
-      console.log(`⏱️ [CourseModal] Query asignaciones: ${(performance.now() - assignmentsStart).toFixed(0)}ms`);
-      console.log(`⏱️ [CourseModal] TOTAL: ${(performance.now() - modalStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [CourseModal] Query asignaciones: ${(performance.now() - assignmentsStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [CourseModal] TOTAL: ${(performance.now() - modalStart).toFixed(0)}ms`);
 
     } catch (error) {
-      console.error('Error loading course data:', error);
+      logger.error('Error loading course data:', error);
       alert('Error al cargar datos del curso');
     } finally {
       setLoadingModalData(false);
@@ -191,7 +193,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       setSelectedContentToAdd(''); // Reset dropdown
       refreshSingleCourse(selectedCourse.id); // Refresh counts (sin recargar toda la lista)
     } catch (error) {
-      console.error('Error adding content:', error);
+      logger.error('Error adding content:', error);
       alert('Error al agregar contenido');
     }
   };
@@ -204,7 +206,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       setCourseContents(contents);
       refreshSingleCourse(selectedCourse.id);
     } catch (error) {
-      console.error('Error removing content:', error);
+      logger.error('Error removing content:', error);
       alert('Error al eliminar contenido');
     }
   };
@@ -218,7 +220,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       setSelectedExerciseToAdd(''); // Reset dropdown
       refreshSingleCourse(selectedCourse.id);
     } catch (error) {
-      console.error('Error adding exercise:', error);
+      logger.error('Error adding exercise:', error);
       alert('Error al agregar ejercicio');
     }
   };
@@ -231,7 +233,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       setCourseExercises(exercises);
       refreshSingleCourse(selectedCourse.id);
     } catch (error) {
-      console.error('Error removing exercise:', error);
+      logger.error('Error removing exercise:', error);
       alert('Error al eliminar ejercicio');
     }
   };
@@ -247,7 +249,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       }
       setSelectedStudentToAdd(''); // Reset dropdown
     } catch (error) {
-      console.error('Error adding student:', error);
+      logger.error('Error adding student:', error);
       alert('Error al asignar estudiante');
     }
   };
@@ -258,7 +260,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       await removeFromStudent(studentId, 'course', selectedCourse.id);
       setCourseStudents(courseStudents.filter(s => s.id !== studentId));
     } catch (error) {
-      console.error('Error removing student:', error);
+      logger.error('Error removing student:', error);
       alert('Error al desasignar estudiante');
     }
   };
@@ -351,7 +353,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
         throw new Error(result.error || 'Error desconocido al subir imagen');
       }
     } catch (error) {
-      console.error('Error subiendo imagen:', error);
+      logger.error('Error subiendo imagen:', error);
       alert('Error al subir imagen: ' + error.message);
     } finally {
       setUploadingImage(false);
@@ -369,7 +371,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
       setFormData({ ...formData, imageUrl: '' });
       alert('✅ Imagen eliminada');
     } catch (error) {
-      console.error('Error eliminando imagen:', error);
+      logger.error('Error eliminando imagen:', error);
       // Incluso si falla, limpiar la URL del formulario
       setFormData({ ...formData, imageUrl: '' });
       alert('Imagen removida del formulario');
@@ -454,7 +456,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                     alt={course.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      console.error('Error cargando imagen del curso:', course.name, course.imageUrl);
+                      logger.error('Error cargando imagen del curso:', course.name, course.imageUrl);
                       e.target.style.display = 'none';
                     }}
                   />
@@ -510,7 +512,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                     alt={course.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      console.error('Error cargando imagen del curso:', course.name, course.imageUrl);
+                      logger.error('Error cargando imagen del curso:', course.name, course.imageUrl);
                       e.target.style.display = 'none';
                     }}
                   />

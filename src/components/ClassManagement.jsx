@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   Calendar, ClipboardList, Bell, CheckCircle, AlertTriangle,
@@ -60,7 +62,7 @@ function ClassManagement({ user }) {
       setSessions(sessionsData);
       setGroups(groupsData);
     } catch (error) {
-      console.error('Error al cargar datos:', error);
+      logger.error('Error al cargar datos:', error);
       showMessage('error', 'Error al cargar las clases');
     } finally {
       setLoading(false);

@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Firebase Realtime Database functions for live game sessions
  * @module firebase/gameSession
@@ -102,10 +104,10 @@ export async function createGameSession(gameData) {
 
     await set(newSessionRef, sessionData);
 
-    console.log('✅ Sesión de juego creada:', sessionId, 'Código:', joinCode);
+    logger.debug('✅ Sesión de juego creada:', sessionId, 'Código:', joinCode);
     return { sessionId, joinCode };
   } catch (error) {
-    console.error('❌ Error creando sesión de juego:', error);
+    logger.error('❌ Error creando sesión de juego:', error);
     throw error;
   }
 }
@@ -133,7 +135,7 @@ export async function getGameSessionByCode(joinCode) {
 
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo sesión por código:', error);
+    logger.error('❌ Error obteniendo sesión por código:', error);
     throw error;
   }
 }
@@ -168,9 +170,9 @@ export async function updateGameSession(sessionId, updates) {
   try {
     const sessionRef = ref(realtimeDb, `game_sessions/${sessionId}`);
     await update(sessionRef, updates);
-    console.log('✅ Sesión actualizada:', sessionId);
+    logger.debug('✅ Sesión actualizada:', sessionId);
   } catch (error) {
-    console.error('❌ Error actualizando sesión:', error);
+    logger.error('❌ Error actualizando sesión:', error);
     throw error;
   }
 }
@@ -187,9 +189,9 @@ export async function markStudentConnected(sessionId, studentName) {
       connected: true,
       lastSeen: serverTimestamp()
     });
-    console.log('✅ Estudiante conectado:', studentName);
+    logger.debug('✅ Estudiante conectado:', studentName);
   } catch (error) {
-    console.error('❌ Error marcando estudiante conectado:', error);
+    logger.error('❌ Error marcando estudiante conectado:', error);
     throw error;
   }
 }
@@ -228,9 +230,9 @@ export async function submitStudentAnswer(sessionId, studentName, answerIndex) {
       answerSubmittedAt: serverTimestamp()
     });
 
-    console.log('✅ Respuesta enviada:', studentName, answerIndex);
+    logger.debug('✅ Respuesta enviada:', studentName, answerIndex);
   } catch (error) {
-    console.error('❌ Error enviando respuesta:', error);
+    logger.error('❌ Error enviando respuesta:', error);
     throw error;
   }
 }
@@ -246,9 +248,9 @@ export async function startGame(sessionId) {
       turnStartTime: serverTimestamp(),
       questionStartTime: serverTimestamp()
     });
-    console.log('✅ Juego iniciado:', sessionId);
+    logger.debug('✅ Juego iniciado:', sessionId);
   } catch (error) {
-    console.error('❌ Error iniciando juego:', error);
+    logger.error('❌ Error iniciando juego:', error);
     throw error;
   }
 }
@@ -263,9 +265,9 @@ export async function pauseGame(sessionId) {
       status: 'paused',
       pausedAt: serverTimestamp()
     });
-    console.log('✅ Juego pausado:', sessionId);
+    logger.debug('✅ Juego pausado:', sessionId);
   } catch (error) {
-    console.error('❌ Error pausando juego:', error);
+    logger.error('❌ Error pausando juego:', error);
     throw error;
   }
 }
@@ -280,9 +282,9 @@ export async function resumeGame(sessionId) {
       status: 'playing',
       resumedAt: serverTimestamp()
     });
-    console.log('✅ Juego reanudado:', sessionId);
+    logger.debug('✅ Juego reanudado:', sessionId);
   } catch (error) {
-    console.error('❌ Error reanudando juego:', error);
+    logger.error('❌ Error reanudando juego:', error);
     throw error;
   }
 }
@@ -297,9 +299,9 @@ export async function finishGame(sessionId) {
       status: 'finished',
       finishedAt: serverTimestamp()
     });
-    console.log('✅ Juego finalizado:', sessionId);
+    logger.debug('✅ Juego finalizado:', sessionId);
   } catch (error) {
-    console.error('❌ Error finalizando juego:', error);
+    logger.error('❌ Error finalizando juego:', error);
     throw error;
   }
 }
@@ -318,9 +320,9 @@ export async function moveToNextQuestion(sessionId, updates) {
       turnStartTime: serverTimestamp(),
       questionStartTime: serverTimestamp()
     });
-    console.log('✅ Avanzado a siguiente pregunta');
+    logger.debug('✅ Avanzado a siguiente pregunta');
   } catch (error) {
-    console.error('❌ Error avanzando pregunta:', error);
+    logger.error('❌ Error avanzando pregunta:', error);
     throw error;
   }
 }

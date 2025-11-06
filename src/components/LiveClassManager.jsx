@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   Video,
@@ -59,7 +61,7 @@ function LiveClassManager({ user, onStartClass, onBack }) {
       setClasses(liveClasses);
       setCourses(allCourses);
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -99,7 +101,7 @@ function LiveClassManager({ user, onStartClass, onBack }) {
       setShowCreateModal(false);
       await loadData();
     } catch (error) {
-      console.error('Error creating class:', error);
+      logger.error('Error creating class:', error);
       alert('Error al crear la clase: ' + error.message);
     }
   };
@@ -111,7 +113,7 @@ function LiveClassManager({ user, onStartClass, onBack }) {
       await deleteLiveClass(classId);
       await loadData();
     } catch (error) {
-      console.error('Error deleting class:', error);
+      logger.error('Error deleting class:', error);
       alert('Error al eliminar la clase');
     }
   };
@@ -123,7 +125,7 @@ function LiveClassManager({ user, onStartClass, onBack }) {
       await cancelLiveClass(classId);
       await loadData();
     } catch (error) {
-      console.error('Error cancelling class:', error);
+      logger.error('Error cancelling class:', error);
       alert('Error al cancelar la clase');
     }
   };

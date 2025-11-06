@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getGameSessionByCode } from '../firebase/gameSession';
@@ -47,7 +49,7 @@ function JoinGamePage() {
       setStep('enter-name');
       setLoading(false);
     } catch (err) {
-      console.error('Error buscando sesión:', err);
+      logger.error('Error buscando sesión:', err);
       setError('Error al buscar la sesión');
       setLoading(false);
     }

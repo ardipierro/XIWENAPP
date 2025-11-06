@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   CreditCard, ShoppingCart, Minus, Calendar, CheckCircle, AlertTriangle,
@@ -56,7 +58,7 @@ function CreditManager({ userId, currentUser, onUpdate }) {
         setNotes(creditsData.notes || '');
       }
     } catch (error) {
-      console.error('Error al cargar datos:', error);
+      logger.error('Error al cargar datos:', error);
       showMessage('error', 'Error al cargar información de créditos');
     } finally {
       setLoading(false);
@@ -113,7 +115,7 @@ function CreditManager({ userId, currentUser, onUpdate }) {
         showMessage('error', result.error || 'Error al procesar la operación');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error inesperado al procesar créditos');
     } finally {
       setProcessing(false);
@@ -130,7 +132,7 @@ function CreditManager({ userId, currentUser, onUpdate }) {
         showMessage('error', 'Error al guardar notas');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error al guardar notas');
     }
   };

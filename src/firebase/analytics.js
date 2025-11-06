@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import {
   collection,
   getDocs,
@@ -35,7 +37,7 @@ export async function getActivityByDay(teacherId) {
       games: count
     }));
   } catch (error) {
-    console.error('Error getting activity:', error);
+    logger.error('Error getting activity:', error);
     return [];
   }
 }
@@ -61,7 +63,7 @@ export async function getTopStudents() {
         level: s.profile?.level || 1
       }));
   } catch (error) {
-    console.error('Error getting top students:', error);
+    logger.error('Error getting top students:', error);
     return [];
   }
 }
@@ -94,7 +96,7 @@ export async function getCourseStats() {
       games: stats.games
     }));
   } catch (error) {
-    console.error('Error getting course stats:', error);
+    logger.error('Error getting course stats:', error);
     return [];
   }
 }
@@ -117,7 +119,7 @@ export async function getPopularExercises() {
       .sort((a, b) => b.plays - a.plays)
       .slice(0, 10);
   } catch (error) {
-    console.error('Error getting popular exercises:', error);
+    logger.error('Error getting popular exercises:', error);
     return [];
   }
 }

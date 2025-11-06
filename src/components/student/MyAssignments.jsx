@@ -1,3 +1,5 @@
+import logger from '../../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   BookOpen, Video, BookMarked, Link, FileText, CheckCircle, ListChecks,
@@ -23,31 +25,31 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
       setError(null);
 
       // Obtener perfil del estudiante
-      console.log('🔍 Buscando perfil de estudiante para user.uid:', user.uid);
+      logger.debug('🔍 Buscando perfil de estudiante para user.uid:', user.uid);
       const studentProfile = await ensureStudentProfile(user.uid);
 
       if (!studentProfile) {
-        console.error('❌ No se pudo obtener/crear perfil de estudiante');
+        logger.error('❌ No se pudo obtener/crear perfil de estudiante');
         setError('No se pudo cargar tu perfil de estudiante');
         setAssignments([]);
         setLoading(false);
         return;
       }
 
-      console.log('✅ Perfil de estudiante obtenido:', studentProfile.id);
+      logger.debug('✅ Perfil de estudiante obtenido:', studentProfile.id);
 
       // Cargar asignaciones directas
       const data = await getStudentAssignments(studentProfile.id);
 
       if (!data || data.length === 0) {
-        console.log('📋 No hay asignaciones directas para este estudiante');
+        logger.debug('📋 No hay asignaciones directas para este estudiante');
         setAssignments([]);
       } else {
-        console.log('✅ Asignaciones encontradas:', data.length);
+        logger.debug('✅ Asignaciones encontradas:', data.length);
         setAssignments(data);
       }
     } catch (err) {
-      console.error('❌ Error cargando asignaciones:', err);
+      logger.error('❌ Error cargando asignaciones:', err);
       setError('Error al cargar tus asignaciones. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);

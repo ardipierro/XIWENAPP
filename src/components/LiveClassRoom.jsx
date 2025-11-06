@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { LiveKitRoom, VideoConference, RoomAudioRenderer, useToken } from '@livekit/components-react';
 import '@livekit/components-styles';
@@ -53,7 +55,7 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
 
         setIsConnected(true);
       } catch (err) {
-        console.error('Error initializing live class:', err);
+        logger.error('Error initializing live class:', err);
         setError(err.message);
       }
     };
@@ -63,7 +65,7 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
     // Cleanup al desmontar
     return () => {
       if (user && liveClass) {
-        leaveLiveClass(liveClass.id, user.uid).catch(console.error);
+        leaveLiveClass(liveClass.id, user.uid).catch(logger.error);
       }
     };
   }, [liveClass, user, userRole]);
@@ -80,7 +82,7 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
 
       onLeave();
     } catch (err) {
-      console.error('Error leaving class:', err);
+      logger.error('Error leaving class:', err);
       onLeave();
     }
   };

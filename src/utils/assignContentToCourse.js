@@ -1,3 +1,5 @@
+import logger from 'logger';
+
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -7,7 +9,7 @@ import { db } from '../firebase/config';
  */
 export async function assignUnassignedContentToCourse(courseId, teacherId) {
   try {
-    console.log('🔍 Buscando contenidos sin asignar del profesor:', teacherId);
+    logger.debug('🔍 Buscando contenidos sin asignar del profesor:', teacherId);
 
     const contentRef = collection(db, 'content');
     const q = query(
@@ -30,10 +32,10 @@ export async function assignUnassignedContentToCourse(courseId, teacherId) {
       }
     });
 
-    console.log(`📚 Encontrados ${unassignedContent.length} contenidos sin asignar`);
+    logger.debug(`📚 Encontrados ${unassignedContent.length} contenidos sin asignar`);
 
     if (unassignedContent.length === 0) {
-      console.log('✅ No hay contenidos sin asignar');
+      logger.debug('✅ No hay contenidos sin asignar');
       return { success: true, updated: 0 };
     }
 
@@ -44,7 +46,7 @@ export async function assignUnassignedContentToCourse(courseId, teacherId) {
     );
 
     if (!confirmed) {
-      console.log('❌ Operación cancelada');
+      logger.debug('❌ Operación cancelada');
       return { success: false, updated: 0 };
     }
 
@@ -55,16 +57,16 @@ export async function assignUnassignedContentToCourse(courseId, teacherId) {
       await updateDoc(contentDoc, {
         courseId: courseId
       });
-      console.log(`✅ Asignado: ${content.title}`);
+      logger.debug(`✅ Asignado: ${content.title}`);
       updated++;
     }
 
-    console.log(`🎉 Total actualizado: ${updated} contenidos`);
+    logger.debug(`🎉 Total actualizado: ${updated} contenidos`);
     alert(`✅ ${updated} contenido(s) asignado(s) al curso exitosamente`);
 
     return { success: true, updated };
   } catch (error) {
-    console.error('❌ Error asignando contenidos:', error);
+    logger.error('❌ Error asignando contenidos:', error);
     alert('Error: ' + error.message);
     return { success: false, error: error.message };
   }
@@ -94,15 +96,15 @@ export async function listContentAssignments(teacherId) {
     });
 
     if (unassigned.length > 0) {
-      console.log('\n📋 Contenidos sin asignar:');
+      logger.debug('\n📋 Contenidos sin asignar:');
       unassigned.forEach(c => {
-        console.log(`  - ${c.title} (${c.type})`);
+        logger.debug(`  - ${c.title} (${c.type})`);
       });
     }
 
     return { total: contents.length, assigned: assigned.length, unassigned: unassigned.length };
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error:', error);
     return null;
   }
 }

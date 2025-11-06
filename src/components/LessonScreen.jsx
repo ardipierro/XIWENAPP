@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   createLesson,
@@ -36,10 +38,10 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
     setLoading(true);
     try {
       const courseLessons = await getCourseLessons(course.id);
-      console.log('✅ Lecciones cargadas:', courseLessons);
+      logger.debug('✅ Lecciones cargadas:', courseLessons);
       setLessons(courseLessons);
     } catch (error) {
-      console.error('❌ Error cargando lecciones:', error);
+      logger.error('❌ Error cargando lecciones:', error);
     }
     setLoading(false);
   };
@@ -58,9 +60,9 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
         order: lessons.length
       };
 
-      console.log('Creando lección:', lessonData);
+      logger.debug('Creando lección:', lessonData);
       const id = await createLesson(course.id, lessonData);
-      console.log('Lección creada con ID:', id);
+      logger.debug('Lección creada con ID:', id);
 
       if (id) {
         alert('✅ Lección creada exitosamente');
@@ -71,7 +73,7 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
         alert('❌ Error: No se pudo crear la lección. Verifica los permisos de Firestore.');
       }
     } catch (error) {
-      console.error('Error creando lección:', error);
+      logger.error('Error creando lección:', error);
       alert(`❌ Error: ${error.message}`);
     }
   };

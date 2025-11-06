@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   Users, FileText, BookOpen, Check, Trash2, X, Settings
@@ -53,7 +55,7 @@ function GroupManager({ user, courses }) {
       loadStudents()
     ]);
 
-    console.log(`⏱️ [GroupManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${groupsData.length} grupos`);
+    logger.debug(`⏱️ [GroupManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${groupsData.length} grupos`);
 
     setGroups(groupsData);
     setStudents(studentsData);

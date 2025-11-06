@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -104,7 +106,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
             setUserCredits(creditsData.availableCredits || 0);
           }
         } catch (error) {
-          console.error('Error al cargar créditos:', error);
+          logger.error('Error al cargar créditos:', error);
         }
       }
     };
@@ -123,7 +125,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       const activeCourses = allCourses.filter(c => c.active !== false);
       setAvailableCourses(activeCourses);
     } catch (error) {
-      console.error('Error al cargar cursos:', error);
+      logger.error('Error al cargar cursos:', error);
       showMessage('error', 'Error al cargar cursos');
     } finally {
       setLoadingCourses(false);
@@ -171,7 +173,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         showMessage('error', result.error || 'Error al guardar cambios');
       }
     } catch (error) {
-      console.error('Error al guardar:', error);
+      logger.error('Error al guardar:', error);
       showMessage('error', 'Error inesperado al guardar');
     } finally {
       setSaving(false);
@@ -213,7 +215,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         showMessage('error', result.error || 'Error al eliminar usuario');
       }
     } catch (error) {
-      console.error('Error al eliminar:', error);
+      logger.error('Error al eliminar:', error);
       showMessage('error', 'Error inesperado al eliminar usuario');
     } finally {
       setSaving(false);
@@ -228,7 +230,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         await loadCoursesData();
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error al asignar curso');
     }
   };
@@ -241,7 +243,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         await loadCoursesData();
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error al desasignar curso');
     }
   };

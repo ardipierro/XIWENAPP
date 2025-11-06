@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useRef, useEffect } from 'react';
 import {
   Pencil,
@@ -144,7 +146,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
 
     const joinSession = async () => {
       if (!auth.currentUser) {
-        console.log('⚠️ No user logged in');
+        logger.debug('⚠️ No user logged in');
         return;
       }
 
@@ -154,7 +156,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
           displayName: auth.currentUser.displayName || auth.currentUser.email || 'Usuario'
         };
 
-        console.log('🟢 Joining collaborative session:', collaborativeSessionId);
+        logger.debug('🟢 Joining collaborative session:', collaborativeSessionId);
 
         // Try to create session (will work if it doesn't exist)
         try {
@@ -172,13 +174,13 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
         // Subscribe to updates
         const unsubscribe = subscribeToActiveWhiteboardSession(collaborativeSessionId, (sessionData) => {
           if (sessionData) {
-            console.log('📡 Session update received:', sessionData);
+            logger.debug('📡 Session update received:', sessionData);
             setParticipants(sessionData.participants || []);
 
             // Set if current user is host
             if (auth.currentUser) {
               const isUserHost = sessionData.createdBy === auth.currentUser.uid;
-              console.log('🎯 isHost check:', {
+              logger.debug('🎯 isHost check:', {
                 createdBy: sessionData.createdBy,
                 currentUserId: auth.currentUser.uid,
                 isHost: isUserHost
@@ -215,7 +217,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
                   // If there are new strokes, draw only the new ones
                   if (newStrokesCount > prevStrokesCount) {
                     const newStrokes = currentSlideData.strokes.slice(prevStrokesCount);
-                    console.log('🎨 Drawing', newStrokes.length, 'new strokes');
+                    logger.debug('🎨 Drawing', newStrokes.length, 'new strokes');
                     drawNewStrokesOnCanvas(newStrokes);
                   }
 
@@ -234,7 +236,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
         unsubscribeRef.current = unsubscribe;
 
       } catch (error) {
-        console.error('❌ Error joining session:', error);
+        logger.error('❌ Error joining session:', error);
       }
     };
 
@@ -553,16 +555,16 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
   const drawNewStrokesOnCanvas = (strokes) => {
     const canvas = canvasRef.current;
     if (!canvas) {
-      console.warn('⚠️ No canvas ref when trying to draw strokes');
+      logger.warn('⚠️ No canvas ref when trying to draw strokes');
       return;
     }
 
     const ctx = canvas.getContext('2d');
 
-    console.log('🖌️ Drawing', strokes.length, 'new strokes on canvas');
+    logger.debug('🖌️ Drawing', strokes.length, 'new strokes on canvas');
     // Draw each new stroke on top of existing canvas
     strokes.forEach((stroke, index) => {
-      console.log(`  Drawing stroke ${index}:`, stroke.type, stroke);
+      logger.debug(`  Drawing stroke ${index}:`, stroke.type, stroke);
       drawSingleStroke(stroke, ctx);
     });
   };
@@ -658,7 +660,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
       const width = window.innerWidth;
       const height = window.innerHeight;
 
-      console.log('🎨 Resizing canvas to:', width, 'x', height);
+      logger.debug('🎨 Resizing canvas to:', width, 'x', height);
 
       // Guardar contenido actual antes de cambiar el tamaño
       let imageData = null;
@@ -666,7 +668,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
         try {
           imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         } catch (e) {
-          console.warn('No se pudo guardar el contenido del canvas');
+          logger.warn('No se pudo guardar el contenido del canvas');
         }
       }
 
@@ -680,7 +682,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
 
       // En modo colaborativo, redibujar todos los strokes del slide actual
       if (isCollaborative && slides[currentSlide]?.strokes?.length > 0) {
-        console.log('🔄 Redrawing', slides[currentSlide].strokes.length, 'collaborative strokes after resize');
+        logger.debug('🔄 Redrawing', slides[currentSlide].strokes.length, 'collaborative strokes after resize');
         slides[currentSlide].strokes.forEach(stroke => {
           drawSingleStroke(stroke, ctx);
         });
@@ -1106,7 +1108,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
 
     // Collaborative mode: Sync stroke to Firebase
     if (isCollaborative && collaborativeSessionId && newStroke) {
-      console.log('🔵 Publishing stroke to Firebase:', newStroke.type, newStroke);
+      logger.debug('🔵 Publishing stroke to Firebase:', newStroke.type, newStroke);
       const updatedSlides = [...slides];
       if (!updatedSlides[currentSlide].strokes) {
         updatedSlides[currentSlide].strokes = [];
@@ -1114,10 +1116,10 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
       updatedSlides[currentSlide].strokes.push(newStroke);
 
       addStrokeToActiveSession(collaborativeSessionId, currentSlide, newStroke)
-        .then(() => console.log('✅ Stroke published successfully'))
-        .catch(err => console.error('❌ Error syncing stroke:', err));
+        .then(() => logger.debug('✅ Stroke published successfully'))
+        .catch(err => logger.error('❌ Error syncing stroke:', err));
     } else {
-      console.log('⚠️ Not syncing:', { isCollaborative, collaborativeSessionId, hasStroke: !!newStroke });
+      logger.debug('⚠️ Not syncing:', { isCollaborative, collaborativeSessionId, hasStroke: !!newStroke });
     }
 
     setIsDrawing(false);
@@ -1182,9 +1184,9 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
     if (isCollaborative && collaborativeSessionId) {
       try {
         await clearSlideInActiveSession(collaborativeSessionId, currentSlide);
-        console.log('✅ Canvas cleared in collaborative mode');
+        logger.debug('✅ Canvas cleared in collaborative mode');
       } catch (error) {
-        console.error('❌ Error clearing canvas:', error);
+        logger.error('❌ Error clearing canvas:', error);
       }
     }
 
@@ -1430,8 +1432,8 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
       return;
     }
 
-    console.log('🔵 [Whiteboard] Iniciando guardado...');
-    console.log('🔵 [Whiteboard] Usuario:', auth.currentUser.uid);
+    logger.debug('🔵 [Whiteboard] Iniciando guardado...');
+    logger.debug('🔵 [Whiteboard] Usuario:', auth.currentUser.uid);
 
     // Guardar slide actual y obtener los slides actualizados sincrónicamente
     const canvas = canvasRef.current;
@@ -1440,32 +1442,32 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
     const updatedSlides = [...slides];
     updatedSlides[currentSlide] = { ...updatedSlides[currentSlide], data, thumbnail };
 
-    console.log('🔵 [Whiteboard] Slides a guardar:', updatedSlides.length);
+    logger.debug('🔵 [Whiteboard] Slides a guardar:', updatedSlides.length);
 
     const title = sessionTitle.trim() || `Pizarra ${new Date().toLocaleDateString()}`;
-    console.log('🔵 [Whiteboard] Título:', title);
+    logger.debug('🔵 [Whiteboard] Título:', title);
 
     try {
       if (currentSessionId) {
         // Update existing session
-        console.log('🔵 [Whiteboard] Actualizando sesión existente:', currentSessionId);
+        logger.debug('🔵 [Whiteboard] Actualizando sesión existente:', currentSessionId);
         await updateWhiteboardSession(currentSessionId, {
           title,
           slides: updatedSlides
         });
         setSlides(updatedSlides); // Actualizar estado después de guardar
-        console.log('✅ [Whiteboard] Sesión actualizada');
+        logger.debug('✅ [Whiteboard] Sesión actualizada');
         alert('Sesión actualizada correctamente');
       } else {
         // Create new session
-        console.log('🔵 [Whiteboard] Creando nueva sesión...');
+        logger.debug('🔵 [Whiteboard] Creando nueva sesión...');
         const sessionId = await createWhiteboardSession({
           title,
           slides: updatedSlides,
           userId: auth.currentUser.uid,
           userName: auth.currentUser.displayName || auth.currentUser.email
         });
-        console.log('✅ [Whiteboard] Sesión creada con ID:', sessionId);
+        logger.debug('✅ [Whiteboard] Sesión creada con ID:', sessionId);
         setCurrentSessionId(sessionId);
         setSlides(updatedSlides); // Actualizar estado después de guardar
         alert('Sesión guardada correctamente');
@@ -1473,7 +1475,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
       setShowSaveModal(false);
       setSessionTitle('');
     } catch (error) {
-      console.error('❌ [Whiteboard] Error saving session:', error);
+      logger.error('❌ [Whiteboard] Error saving session:', error);
       alert('Error al guardar la sesión');
     }
   };
@@ -1491,7 +1493,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
       setSavedSessions(sessions);
       setShowLoadModal(true);
     } catch (error) {
-      console.error('Error loading sessions:', error);
+      logger.error('Error loading sessions:', error);
       alert('Error al cargar las sesiones');
     } finally {
       setIsLoadingSessions(false);
@@ -1535,7 +1537,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
       setShareContentUrl('');
       alert('Contenido compartido exitosamente');
     } catch (error) {
-      console.error('Error sharing content:', error);
+      logger.error('Error sharing content:', error);
       alert('Error al compartir contenido');
     }
   };
@@ -1904,7 +1906,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
 
             {/* Share Content (only in collaborative mode and only for host) */}
             {(() => {
-              console.log('🔍 Share button render check:', { isCollaborative, isHost, shouldShow: isCollaborative && isHost });
+              logger.debug('🔍 Share button render check:', { isCollaborative, isHost, shouldShow: isCollaborative && isHost });
               return null;
             })()}
             {isCollaborative && isHost && (

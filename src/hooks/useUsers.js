@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useCallback } from 'react';
 import { getAllUsers, updateUserRole, updateUserStatus } from '../firebase/firestore';
 import { createUser } from '../firebase/users';
@@ -22,7 +24,7 @@ export function useUsers() {
       setUsers(allUsers);
       return allUsers;
     } catch (err) {
-      console.error('Error cargando usuarios:', err);
+      logger.error('Error cargando usuarios:', err);
       setError(err.message);
       throw err;
     } finally {
@@ -41,7 +43,7 @@ export function useUsers() {
       setUsers(prev => [...prev, newUser]);
       return newUser;
     } catch (err) {
-      console.error('Error creando usuario:', err);
+      logger.error('Error creando usuario:', err);
       setError(err.message);
       throw err;
     } finally {
@@ -63,7 +65,7 @@ export function useUsers() {
         )
       );
     } catch (err) {
-      console.error('Error actualizando rol:', err);
+      logger.error('Error actualizando rol:', err);
       setError(err.message);
       throw err;
     } finally {
@@ -85,7 +87,7 @@ export function useUsers() {
         )
       );
     } catch (err) {
-      console.error('Error actualizando estado:', err);
+      logger.error('Error actualizando estado:', err);
       setError(err.message);
       throw err;
     } finally {

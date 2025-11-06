@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect, useRef } from 'react';
 import { X, Play, Pause, ChevronLeft, ChevronRight, FileText, Video, Image as ImageIcon } from 'lucide-react';
 import { updateVideoPlayback, updatePDFPage } from '../firebase/whiteboard';
@@ -27,7 +29,7 @@ function SharedContentViewer({ sharedContent, sessionId, onClose, isHost }) {
       }
 
       if (remotePlaying && videoRef.current.paused) {
-        videoRef.current.play().catch(console.error);
+        videoRef.current.play().catch(logger.error);
       } else if (!remotePlaying && !videoRef.current.paused) {
         videoRef.current.pause();
       }

@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
@@ -64,11 +66,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       const startTime = performance.now();
 
       if (!studentProp && user) {
-        console.log('Cargando perfil de estudiante para:', user.uid);
+        logger.debug('Cargando perfil de estudiante para:', user.uid);
         const profile = await ensureStudentProfile(user.uid);
 
         if (profile) {
-          console.log('Perfil de estudiante cargado/creado:', profile);
+          logger.debug('Perfil de estudiante cargado/creado:', profile);
           setStudent(profile);
 
           // Cargar datos en paralelo
@@ -79,7 +81,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             getInstancesForStudent(profile.id, 10)
           ]);
 
-          console.log(`⏱️ [StudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
+          logger.debug(`⏱️ [StudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
 
           setGameHistory(history);
           calculateStats(history);
@@ -92,7 +94,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           });
           setUpcomingClasses(futureInstances.slice(0, 1));
         } else {
-          console.warn('No se pudo cargar ni crear perfil de estudiante para:', user.uid);
+          logger.warn('No se pudo cargar ni crear perfil de estudiante para:', user.uid);
         }
       } else if (studentProp) {
         setStudent(studentProp);
@@ -105,7 +107,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           getInstancesForStudent(studentProp.id, 10)
         ]);
 
-        console.log(`⏱️ [StudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
+        logger.debug(`⏱️ [StudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
 
         setGameHistory(history);
         calculateStats(history);
@@ -119,7 +121,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         setUpcomingClasses(futureInstances.slice(0, 1));
       }
 
-      console.log(`⏱️ [StudentDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [StudentDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
       setLoading(false);
     };
 
@@ -156,10 +158,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   const handleBackToLogin = async () => {
     try {
       await signOut(auth);
-      console.log('✅ Sesión cerrada');
+      logger.debug('✅ Sesión cerrada');
       navigate('/login');
     } catch (error) {
-      console.error('❌ Error al cerrar sesión:', error);
+      logger.error('❌ Error al cerrar sesión:', error);
     }
   };
 
@@ -192,7 +194,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
   const handlePlayExercise = (exerciseId) => {
     // TODO: Implementar - abrir ExercisePlayer
-    console.log('Jugar ejercicio:', exerciseId);
+    logger.debug('Jugar ejercicio:', exerciseId);
     alert('Funcionalidad de ejercicios próximamente');
   };
 
@@ -203,7 +205,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
   const handleContentComplete = () => {
     // Recargar datos del curso para actualizar progreso
-    console.log('Contenido completado');
+    logger.debug('Contenido completado');
   };
 
   const handleViewMyAssignments = () => {
@@ -225,7 +227,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   const handlePlayAssignmentExercise = (exerciseId) => {
     // TODO: Implementar - abrir ExercisePlayer
     setSelectedExerciseId(exerciseId);
-    console.log('Jugar ejercicio asignado:', exerciseId);
+    logger.debug('Jugar ejercicio asignado:', exerciseId);
     alert('Funcionalidad de ejercicios próximamente');
   };
 
@@ -267,8 +269,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   };
 
   const handleLoadWhiteboardSession = (session) => {
-    console.log('📋 [StudentDashboard] Loading whiteboard session:', session);
-    console.log('📋 [StudentDashboard] Session slides:', session?.slides);
+    logger.debug('📋 [StudentDashboard] Loading whiteboard session:', session);
+    logger.debug('📋 [StudentDashboard] Session slides:', session?.slides);
     setSelectedWhiteboardSession(session);
     setCurrentView('whiteboard');
   };
@@ -279,7 +281,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   };
 
   const handleJoinLiveWhiteboard = (whiteboard) => {
-    console.log('📋 [StudentDashboard] Joining live whiteboard:', whiteboard);
+    logger.debug('📋 [StudentDashboard] Joining live whiteboard:', whiteboard);
     setSelectedWhiteboardSession({
       ...whiteboard,
       isCollaborative: true,
@@ -299,7 +301,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         const liveOnly = classes.filter(c => c.status === 'live');
         setLiveClasses(liveOnly);
       } catch (error) {
-        console.error('Error loading live classes:', error);
+        logger.error('Error loading live classes:', error);
       }
     };
 
@@ -314,14 +316,14 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   useEffect(() => {
     if (!student?.id) return;
 
-    console.log('🟢 [StudentDashboard] Subscribing to live whiteboards for student:', student.id);
+    logger.debug('🟢 [StudentDashboard] Subscribing to live whiteboards for student:', student.id);
     const unsubscribe = subscribeToLiveWhiteboards(student.id, (whiteboards) => {
-      console.log('🟢 [StudentDashboard] Live whiteboards updated:', whiteboards);
+      logger.debug('🟢 [StudentDashboard] Live whiteboards updated:', whiteboards);
       setLiveWhiteboards(whiteboards);
     });
 
     return () => {
-      console.log('🟡 [StudentDashboard] Unsubscribing from live whiteboards');
+      logger.debug('🟡 [StudentDashboard] Unsubscribing from live whiteboards');
       unsubscribe();
     };
   }, [student?.id]);

@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -189,7 +191,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   useEffect(() => {
     const returnUserId = sessionStorage.getItem('viewAsReturnUserId');
     if (returnUserId && users.length > 0 && !hasProcessedReturn) {
-      console.log('🔄 [AdminDashboard] Detected return from ViewAs, userId:', returnUserId);
+      logger.debug('🔄 [AdminDashboard] Detected return from ViewAs, userId:', returnUserId);
       setHasProcessedReturn(true);
       sessionStorage.removeItem('viewAsReturning');
       sessionStorage.removeItem('viewAsReturnUserId');
@@ -235,7 +237,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
         getClassesByTeacher(user.uid)
       ]);
 
-      console.log(`⏱️ [AdminDashboard] Parallel queries: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [AdminDashboard] Parallel queries: ${(performance.now() - startTime).toFixed(0)}ms`);
 
       // Load credits for each user
       const creditsStart = performance.now();
@@ -249,7 +251,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
         })
       );
 
-      console.log(`⏱️ [AdminDashboard] Load credits: ${(performance.now() - creditsStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [AdminDashboard] Load credits: ${(performance.now() - creditsStart).toFixed(0)}ms`);
 
       setUsers(usersWithCredits);
 
@@ -299,9 +301,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       setRecentGames(games.slice(0, 5));
       setTopStudents(topStudentsArray);
 
-      console.log(`⏱️ [AdminDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [AdminDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      logger.error('Error loading dashboard data:', error);
       showError('Error loading dashboard data');
     }
     setLoading(false);
@@ -311,7 +313,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     try {
       const startTime = performance.now();
       const allUsers = await getAllUsers({ activeOnly: true });
-      console.log(`⏱️ [AdminDashboard] getAllUsers: ${(performance.now() - startTime).toFixed(0)}ms - ${allUsers.length} users`);
+      logger.debug(`⏱️ [AdminDashboard] getAllUsers: ${(performance.now() - startTime).toFixed(0)}ms - ${allUsers.length} users`);
 
       const creditsStart = performance.now();
       const usersWithCredits = await Promise.all(
@@ -324,13 +326,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
         })
       );
 
-      console.log(`⏱️ [AdminDashboard] Load credits: ${(performance.now() - creditsStart).toFixed(0)}ms`);
-      console.log(`⏱️ [AdminDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [AdminDashboard] Load credits: ${(performance.now() - creditsStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [AdminDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
 
       setUsers(usersWithCredits);
       calculateStats(usersWithCredits);
     } catch (error) {
-      console.error('❌ Error loading users:', error);
+      logger.error('❌ Error loading users:', error);
       showError('Error loading users');
     }
   };
@@ -367,7 +369,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
         showError('Error updating role');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error updating role');
     }
   }, [users, user.email]);
@@ -392,7 +394,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
         showError('Error updating status');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error updating status');
     }
   }, [users]);
@@ -491,7 +493,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       setAllContent(teacherContent);
       setAllExercises(teacherExercises);
     } catch (error) {
-      console.error('Error loading resources:', error);
+      logger.error('Error loading resources:', error);
       showError('Error loading student resources');
     }
 
@@ -521,7 +523,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
         showError('Error assigning course');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error assigning course');
     }
   }, [selectedStudent]);
@@ -543,7 +545,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
         showError('Error unassigning course');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error unassigning course');
     }
   }, [selectedStudent]);
@@ -555,7 +557,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const counts = await getBatchEnrollmentCounts(studentIds);
       setEnrollmentCounts(counts);
     } catch (error) {
-      console.error('Error loading enrollment counts:', error);
+      logger.error('Error loading enrollment counts:', error);
     }
   };
 
@@ -574,7 +576,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const assignedContent = assignments.filter(a => a.itemType === 'content');
       setStudentContent(assignedContent);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error assigning content');
     }
   }, [selectedStudent, user.uid]);
@@ -593,7 +595,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const assignedContent = assignments.filter(a => a.itemType === 'content');
       setStudentContent(assignedContent);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error unassigning content');
     }
   }, [selectedStudent]);
@@ -613,7 +615,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
       setStudentExercises(assignedExercises);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error assigning exercise');
     }
   }, [selectedStudent, user.uid]);
@@ -632,7 +634,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
       setStudentExercises(assignedExercises);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error unassigning exercise');
     }
   }, [selectedStudent]);
@@ -650,13 +652,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const result = await deleteUser(userId);
       if (result.success) {
         await loadUsers();
-        console.log('User deleted successfully');
+        logger.debug('User deleted successfully');
       } else {
-        console.error('Error deleting user:', result.error);
+        logger.error('Error deleting user:', result.error);
         alert('Error deleting user. Please try again.');
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
+      logger.error('Error deleting user:', error);
       alert('Error deleting user. Please try again.');
     }
   }, []);
@@ -773,7 +775,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
         user={user}
         onBack={handleBackToDashboard}
         onComplete={(results) => {
-          console.log('Exercise completed:', results);
+          logger.debug('Exercise completed:', results);
         }}
       />
     );
@@ -963,7 +965,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
               });
               setCurrentScreen('excalidrawWhiteboard');
             } catch (error) {
-              console.error('Error creating whiteboard:', error);
+              logger.error('Error creating whiteboard:', error);
               alert('Error creating whiteboard');
             }
           }}

@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Custom hook para manejar errores de Firebase de forma consistente
  * @module hooks/useFirebaseError
@@ -81,7 +83,7 @@ export function useFirebaseError() {
     const message = getErrorMessage(error);
     const code = error?.code || 'unknown';
 
-    console.error(`[Firebase Error ${code}]:`, error);
+    logger.error(`[Firebase Error ${code}]:`, error);
 
     return {
       code,

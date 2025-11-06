@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Custom hook para formatear fechas de forma consistente
  * @module hooks/useDateFormatter
@@ -26,7 +28,7 @@ export function useDateFormatter() {
         day: 'numeric'
       });
     } catch (error) {
-      console.error('Error formateando fecha:', error);
+      logger.error('Error formateando fecha:', error);
       return 'Fecha inválida';
     }
   }, []);
@@ -47,7 +49,7 @@ export function useDateFormatter() {
         year: 'numeric'
       });
     } catch (error) {
-      console.error('Error formateando fecha:', error);
+      logger.error('Error formateando fecha:', error);
       return 'N/A';
     }
   }, []);
@@ -70,7 +72,7 @@ export function useDateFormatter() {
         minute: '2-digit'
       });
     } catch (error) {
-      console.error('Error formateando fecha y hora:', error);
+      logger.error('Error formateando fecha y hora:', error);
       return 'Fecha inválida';
     }
   }, []);
@@ -109,7 +111,7 @@ export function useDateFormatter() {
       // Si es más de un mes, mostrar fecha normal
       return formatDate(timestamp);
     } catch (error) {
-      console.error('Error formateando tiempo relativo:', error);
+      logger.error('Error formateando tiempo relativo:', error);
       return 'Hace tiempo';
     }
   }, [formatDate]);

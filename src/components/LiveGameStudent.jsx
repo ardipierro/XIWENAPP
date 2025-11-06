@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { subscribeToGameSession, markStudentConnected, submitStudentAnswer } from '../firebase/gameSession';
 import './LiveGameStudent.css';
@@ -26,7 +28,7 @@ function LiveGameStudent({ sessionId, studentName, onExit }) {
 
     // Marcar como conectado
     markStudentConnected(sessionId, studentName).catch(err => {
-      console.error('Error marcando como conectado:', err);
+      logger.error('Error marcando como conectado:', err);
     });
 
     return () => unsubscribe();
@@ -41,7 +43,7 @@ function LiveGameStudent({ sessionId, studentName, onExit }) {
     try {
       await submitStudentAnswer(sessionId, studentName, answerIndex);
     } catch (err) {
-      console.error('Error enviando respuesta:', err);
+      logger.error('Error enviando respuesta:', err);
       setError(err.message || 'Error al enviar respuesta');
       setSubmitting(false);
     }

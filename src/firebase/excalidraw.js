@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import {
   collection,
   addDoc,
@@ -36,11 +38,11 @@ export async function createExcalidrawSession(title, elements = [], appState = {
     };
 
     const docRef = await addDoc(collection(db, COLLECTION_NAME), sessionData);
-    console.log('✅ Sesión de Excalidraw creada:', docRef.id);
+    logger.debug('✅ Sesión de Excalidraw creada:', docRef.id);
 
     return docRef.id;
   } catch (error) {
-    console.error('❌ Error creando sesión de Excalidraw:', error);
+    logger.error('❌ Error creando sesión de Excalidraw:', error);
     throw error;
   }
 }
@@ -71,10 +73,10 @@ export async function getExcalidrawSessionsByTeacher(teacherId) {
     // Ordenar en cliente por updatedAt desc
     sessions.sort((a, b) => b.updatedAt - a.updatedAt);
 
-    console.log(`✅ ${sessions.length} sesiones de Excalidraw cargadas`);
+    logger.debug(`✅ ${sessions.length} sesiones de Excalidraw cargadas`);
     return sessions;
   } catch (error) {
-    console.error('❌ Error obteniendo sesiones de Excalidraw:', error);
+    logger.error('❌ Error obteniendo sesiones de Excalidraw:', error);
     throw error;
   }
 }
@@ -98,7 +100,7 @@ export async function getExcalidrawSessionById(sessionId) {
       updatedAt: docSnap.data().updatedAt?.toDate?.() || new Date(),
     };
   } catch (error) {
-    console.error('❌ Error obteniendo sesión de Excalidraw:', error);
+    logger.error('❌ Error obteniendo sesión de Excalidraw:', error);
     throw error;
   }
 }
@@ -116,9 +118,9 @@ export async function updateExcalidrawSession(sessionId, updates) {
     };
 
     await updateDoc(docRef, updateData);
-    console.log('✅ Sesión de Excalidraw actualizada:', sessionId);
+    logger.debug('✅ Sesión de Excalidraw actualizada:', sessionId);
   } catch (error) {
-    console.error('❌ Error actualizando sesión de Excalidraw:', error);
+    logger.error('❌ Error actualizando sesión de Excalidraw:', error);
     throw error;
   }
 }
@@ -133,9 +135,9 @@ export async function saveExcalidrawContent(sessionId, elements, appState, files
       appState,
       files,
     });
-    console.log('✅ Contenido de Excalidraw guardado');
+    logger.debug('✅ Contenido de Excalidraw guardado');
   } catch (error) {
-    console.error('❌ Error guardando contenido de Excalidraw:', error);
+    logger.error('❌ Error guardando contenido de Excalidraw:', error);
     throw error;
   }
 }
@@ -147,9 +149,9 @@ export async function deleteExcalidrawSession(sessionId) {
   try {
     const docRef = doc(db, COLLECTION_NAME, sessionId);
     await deleteDoc(docRef);
-    console.log('✅ Sesión de Excalidraw eliminada:', sessionId);
+    logger.debug('✅ Sesión de Excalidraw eliminada:', sessionId);
   } catch (error) {
-    console.error('❌ Error eliminando sesión de Excalidraw:', error);
+    logger.error('❌ Error eliminando sesión de Excalidraw:', error);
     throw error;
   }
 }
@@ -168,10 +170,10 @@ export async function duplicateExcalidrawSession(sessionId) {
       session.appState
     );
 
-    console.log('✅ Sesión de Excalidraw duplicada');
+    logger.debug('✅ Sesión de Excalidraw duplicada');
     return newSessionId;
   } catch (error) {
-    console.error('❌ Error duplicando sesión de Excalidraw:', error);
+    logger.error('❌ Error duplicando sesión de Excalidraw:', error);
     throw error;
   }
 }

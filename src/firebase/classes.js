@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import {
   collection,
   addDoc,
@@ -71,10 +73,10 @@ export async function createClass(classData) {
 
     const docRef = await addDoc(collection(db, 'classes'), newClass);
 
-    console.log('✅ Clase creada:', docRef.id);
+    logger.debug('✅ Clase creada:', docRef.id);
     return { success: true, classId: docRef.id };
   } catch (error) {
-    console.error('❌ Error creando clase:', error);
+    logger.error('❌ Error creando clase:', error);
     return { success: false, error: error.message };
   }
 }
@@ -93,10 +95,10 @@ export async function updateClass(classId, updates) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ Clase actualizada:', classId);
+    logger.debug('✅ Clase actualizada:', classId);
     return { success: true };
   } catch (error) {
-    console.error('❌ Error actualizando clase:', error);
+    logger.error('❌ Error actualizando clase:', error);
     return { success: false, error: error.message };
   }
 }
@@ -114,10 +116,10 @@ export async function deleteClass(classId) {
       deletedAt: serverTimestamp()
     });
 
-    console.log('✅ Clase eliminada:', classId);
+    logger.debug('✅ Clase eliminada:', classId);
     return { success: true };
   } catch (error) {
-    console.error('❌ Error eliminando clase:', error);
+    logger.error('❌ Error eliminando clase:', error);
     return { success: false, error: error.message };
   }
 }
@@ -151,7 +153,7 @@ export async function getClassesByTeacher(teacherId) {
 
     return classes;
   } catch (error) {
-    console.error('❌ Error obteniendo clases:', error);
+    logger.error('❌ Error obteniendo clases:', error);
     return [];
   }
 }
@@ -176,7 +178,7 @@ export async function getAllClasses() {
 
     return classes;
   } catch (error) {
-    console.error('❌ Error obteniendo todas las clases:', error);
+    logger.error('❌ Error obteniendo todas las clases:', error);
     return [];
   }
 }
@@ -196,7 +198,7 @@ export async function getClassById(classId) {
     }
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo clase:', error);
+    logger.error('❌ Error obteniendo clase:', error);
     return null;
   }
 }
@@ -225,7 +227,7 @@ export async function assignGroupToClass(classId, groupId) {
 
     return { success: true };
   } catch (error) {
-    console.error('❌ Error asignando grupo:', error);
+    logger.error('❌ Error asignando grupo:', error);
     return { success: false, error: error.message };
   }
 }
@@ -252,7 +254,7 @@ export async function unassignGroupFromClass(classId, groupId) {
 
     return { success: true };
   } catch (error) {
-    console.error('❌ Error desasignando grupo:', error);
+    logger.error('❌ Error desasignando grupo:', error);
     return { success: false, error: error.message };
   }
 }
@@ -281,7 +283,7 @@ export async function assignStudentToClass(classId, studentId) {
 
     return { success: true };
   } catch (error) {
-    console.error('❌ Error asignando estudiante:', error);
+    logger.error('❌ Error asignando estudiante:', error);
     return { success: false, error: error.message };
   }
 }
@@ -308,7 +310,7 @@ export async function unassignStudentFromClass(classId, studentId) {
 
     return { success: true };
   } catch (error) {
-    console.error('❌ Error desasignando estudiante:', error);
+    logger.error('❌ Error desasignando estudiante:', error);
     return { success: false, error: error.message };
   }
 }
@@ -327,7 +329,7 @@ export async function getClassesForStudent(studentId) {
     const studentGroups = await getStudentGroups(studentId);
     const groupIds = studentGroups.map(g => g.id);
 
-    console.log(`⏱️ [getClassesForStudent] getStudentGroups: ${(performance.now() - startTime).toFixed(0)}ms - ${groupIds.length} grupos`);
+    logger.debug(`⏱️ [getClassesForStudent] getStudentGroups: ${(performance.now() - startTime).toFixed(0)}ms - ${groupIds.length} grupos`);
 
     // 2. Buscar clases asignadas directamente O a los grupos del estudiante
     const classesMap = new Map();
@@ -348,7 +350,7 @@ export async function getClassesForStudent(studentId) {
         assignmentType: 'individual'
       });
     });
-    console.log(`⏱️ [getClassesForStudent] Query directa: ${(performance.now() - queryStart1).toFixed(0)}ms - ${snapshot1.size} clases`);
+    logger.debug(`⏱️ [getClassesForStudent] Query directa: ${(performance.now() - queryStart1).toFixed(0)}ms - ${snapshot1.size} clases`);
 
     // 2b. Clases asignadas a grupos (solo si el estudiante tiene grupos)
     if (groupIds.length > 0) {
@@ -382,15 +384,15 @@ export async function getClassesForStudent(studentId) {
         });
       });
 
-      console.log(`⏱️ [getClassesForStudent] Query grupos: ${(performance.now() - queryStart2).toFixed(0)}ms - ${classesMap.size} clases totales`);
+      logger.debug(`⏱️ [getClassesForStudent] Query grupos: ${(performance.now() - queryStart2).toFixed(0)}ms - ${classesMap.size} clases totales`);
     }
 
     const allClasses = Array.from(classesMap.values());
-    console.log(`⏱️ [getClassesForStudent] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${allClasses.length} clases`);
+    logger.debug(`⏱️ [getClassesForStudent] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${allClasses.length} clases`);
 
     return allClasses;
   } catch (error) {
-    console.error('❌ Error obteniendo clases del estudiante:', error);
+    logger.error('❌ Error obteniendo clases del estudiante:', error);
     return [];
   }
 }

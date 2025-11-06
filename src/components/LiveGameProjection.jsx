@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { subscribeToGameSession, startGame, pauseGame, resumeGame, finishGame, moveToNextQuestion } from '../firebase/gameSession';
 import './LiveGameProjection.css';
@@ -22,7 +24,7 @@ function LiveGameProjection({ sessionId, onBack }) {
         setGameData(data);
         setLoading(false);
       } else {
-        console.log('Sesión no encontrada');
+        logger.debug('Sesión no encontrada');
         setLoading(false);
       }
     });
@@ -49,7 +51,7 @@ function LiveGameProjection({ sessionId, onBack }) {
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.1);
     } catch (e) {
-      console.log('Audio not supported');
+      logger.debug('Audio not supported');
     }
   }, []);
 
@@ -86,7 +88,7 @@ function LiveGameProjection({ sessionId, onBack }) {
       oscillator2.start(audioContext.currentTime + 0.1);
       oscillator2.stop(audioContext.currentTime + 0.3);
     } catch (e) {
-      console.log('Audio not supported');
+      logger.debug('Audio not supported');
     }
   }, []);
 
@@ -108,7 +110,7 @@ function LiveGameProjection({ sessionId, onBack }) {
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
     } catch (e) {
-      console.log('Audio not supported');
+      logger.debug('Audio not supported');
     }
   }, []);
 

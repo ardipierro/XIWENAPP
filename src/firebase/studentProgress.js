@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import {
   collection,
   doc,
@@ -47,7 +49,7 @@ export async function getStudentCourses(studentId) {
 
     return enrollments;
   } catch (error) {
-    console.error('Error al obtener cursos del estudiante:', error);
+    logger.error('Error al obtener cursos del estudiante:', error);
     throw error;
   }
 }
@@ -69,7 +71,7 @@ export async function getCourseProgress(studentId, courseId) {
 
     return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
   } catch (error) {
-    console.error('Error al obtener progreso del curso:', error);
+    logger.error('Error al obtener progreso del curso:', error);
     throw error;
   }
 }
@@ -109,7 +111,7 @@ export async function enrollStudentInCourse(studentId, courseId) {
 
     return { id: newDoc.id, ...enrollmentData };
   } catch (error) {
-    console.error('Error al inscribir estudiante:', error);
+    logger.error('Error al inscribir estudiante:', error);
     throw error;
   }
 }
@@ -157,7 +159,7 @@ export async function markContentCompleted(studentId, contentId, courseId, timeS
 
     return progressData;
   } catch (error) {
-    console.error('Error al marcar contenido completado:', error);
+    logger.error('Error al marcar contenido completado:', error);
     throw error;
   }
 }
@@ -191,7 +193,7 @@ export async function getNextContent(studentId, courseId) {
 
     return nextContent || null;
   } catch (error) {
-    console.error('Error al obtener siguiente contenido:', error);
+    logger.error('Error al obtener siguiente contenido:', error);
     throw error;
   }
 }
@@ -210,7 +212,7 @@ export async function updateStudyTime(studentId, courseId, timeSpent) {
       });
     }
   } catch (error) {
-    console.error('Error al actualizar tiempo estudiado:', error);
+    logger.error('Error al actualizar tiempo estudiado:', error);
     throw error;
   }
 }
@@ -260,7 +262,7 @@ export async function calculateCourseProgress(studentId, courseId) {
 
     return progress;
   } catch (error) {
-    console.error('Error al calcular progreso:', error);
+    logger.error('Error al calcular progreso:', error);
     throw error;
   }
 }
@@ -304,7 +306,7 @@ export async function saveExerciseResult(studentId, exerciseId, courseId, result
 
     return data;
   } catch (error) {
-    console.error('Error al guardar resultado de ejercicio:', error);
+    logger.error('Error al guardar resultado de ejercicio:', error);
     throw error;
   }
 }
@@ -354,7 +356,7 @@ export async function getStudentStats(studentId) {
       averageScore
     };
   } catch (error) {
-    console.error('Error al obtener estadísticas:', error);
+    logger.error('Error al obtener estadísticas:', error);
     throw error;
   }
 }

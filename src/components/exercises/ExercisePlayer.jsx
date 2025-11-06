@@ -1,3 +1,5 @@
+import logger from '../../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { AlertTriangle, PartyPopper, Smile, Zap, Check, X, RotateCcw } from 'lucide-react';
 import { getExerciseById } from '../../firebase/exercises';
@@ -33,7 +35,7 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
       setExercise(data);
       setError(null);
     } catch (err) {
-      console.error('Error cargando ejercicio:', err);
+      logger.error('Error cargando ejercicio:', err);
       setError('Error al cargar el ejercicio');
     } finally {
       setLoading(false);

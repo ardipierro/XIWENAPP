@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { PenTool, Edit, Trash2, Copy, Calendar, Download } from 'lucide-react';
 import { auth } from '../firebase/config';
@@ -35,19 +37,19 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
 
   const loadSessions = async () => {
     if (!auth.currentUser) {
-      console.log('🟡 [ExcalidrawManager] No hay usuario autenticado');
+      logger.debug('🟡 [ExcalidrawManager] No hay usuario autenticado');
       return;
     }
 
-    console.log('🟢 [ExcalidrawManager] Cargando sesiones para usuario:', auth.currentUser.uid);
+    logger.debug('🟢 [ExcalidrawManager] Cargando sesiones para usuario:', auth.currentUser.uid);
     setLoading(true);
     try {
       const data = await getExcalidrawSessionsByTeacher(auth.currentUser.uid);
-      console.log('🟢 [ExcalidrawManager] Sesiones cargadas:', data.length);
-      console.log('🟢 [ExcalidrawManager] Datos completos:', data);
+      logger.debug('🟢 [ExcalidrawManager] Sesiones cargadas:', data.length);
+      logger.debug('🟢 [ExcalidrawManager] Datos completos:', data);
       setSessions(data);
     } catch (error) {
-      console.error('❌ [ExcalidrawManager] Error loading sessions:', error);
+      logger.error('❌ [ExcalidrawManager] Error loading sessions:', error);
     } finally {
       setLoading(false);
     }
@@ -70,7 +72,7 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
       setShowConfirmDelete(false);
       setSelectedSession(null);
     } catch (error) {
-      console.error('Error deleting session:', error);
+      logger.error('Error deleting session:', error);
       alert('Error al eliminar la sesión');
     }
   };
@@ -96,7 +98,7 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
       setNewTitle('');
       await loadSessions();
     } catch (error) {
-      console.error('Error actualizando título:', error);
+      logger.error('Error actualizando título:', error);
       alert('Error al actualizar el título');
     }
   };
@@ -107,7 +109,7 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
       await duplicateExcalidrawSession(sessionId);
       await loadSessions();
     } catch (error) {
-      console.error('Error duplicando sesión:', error);
+      logger.error('Error duplicando sesión:', error);
       alert('Error al duplicar la sesión');
     }
   };
@@ -144,7 +146,7 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
     session.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  console.log('🔵 [ExcalidrawManager] Renderizando con:', {
+  logger.debug('🔵 [ExcalidrawManager] Renderizando con:', {
     sessionsCount: sessions.length,
     filteredCount: filteredSessions.length,
     loading
@@ -218,7 +220,7 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
                 ? JSON.parse(session.elements)
                 : (session.elements || []);
             } catch (e) {
-              console.error('Error parseando elements:', e);
+              logger.error('Error parseando elements:', e);
               elements = [];
             }
             const elementCount = elements.length || 0;
@@ -316,7 +318,7 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
                 ? JSON.parse(session.elements)
                 : (session.elements || []);
             } catch (e) {
-              console.error('Error parseando elements:', e);
+              logger.error('Error parseando elements:', e);
               elements = [];
             }
             const elementCount = elements.length || 0;

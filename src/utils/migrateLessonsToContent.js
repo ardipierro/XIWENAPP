@@ -1,3 +1,5 @@
+import logger from 'logger';
+
 import { collection, getDocs, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -6,18 +8,18 @@ import { db } from '../firebase/config';
  */
 export async function migrateLessonsToContent() {
   try {
-    console.log('🔄 Iniciando migración de lecciones a contenido...');
+    logger.debug('🔄 Iniciando migración de lecciones a contenido...');
 
     // 1. Obtener todas las lecciones
     const lessonsRef = collection(db, 'lessons');
     const lessonsSnapshot = await getDocs(lessonsRef);
 
     if (lessonsSnapshot.empty) {
-      console.log('✅ No hay lecciones para migrar');
+      logger.debug('✅ No hay lecciones para migrar');
       return { success: true, migrated: 0, skipped: 0 };
     }
 
-    console.log(`📚 Encontradas ${lessonsSnapshot.size} lecciones`);
+    logger.debug(`📚 Encontradas ${lessonsSnapshot.size} lecciones`);
 
     // 2. Verificar si ya existen en content
     const contentRef = collection(db, 'content');
@@ -40,8 +42,8 @@ export async function migrateLessonsToContent() {
       }
     });
 
-    console.log(`✅ Para migrar: ${lessonsToMigrate.length}`);
-    console.log(`⏭️ Ya existen: ${skippedLessons.length}`);
+    logger.debug(`✅ Para migrar: ${lessonsToMigrate.length}`);
+    logger.debug(`⏭️ Ya existen: ${skippedLessons.length}`);
 
     if (lessonsToMigrate.length === 0) {
       alert('No hay lecciones nuevas para migrar. Todas ya existen en la colección de contenido.');
@@ -58,7 +60,7 @@ export async function migrateLessonsToContent() {
     );
 
     if (!confirmed) {
-      console.log('❌ Migración cancelada');
+      logger.debug('❌ Migración cancelada');
       return { success: false, migrated: 0 };
     }
 
@@ -95,7 +97,7 @@ export async function migrateLessonsToContent() {
         };
 
         await addDoc(contentRef, contentData);
-        console.log(`✅ Migrado: ${lesson.title}`);
+        logger.debug(`✅ Migrado: ${lesson.title}`);
         migrated++;
 
         // Marcar lección original como migrada (no eliminar)
@@ -106,17 +108,17 @@ export async function migrateLessonsToContent() {
         });
 
       } catch (error) {
-        console.error(`❌ Error migrando "${lesson.title}":`, error);
+        logger.error(`❌ Error migrando "${lesson.title}":`, error);
       }
     }
 
-    console.log(`🎉 Migración completada: ${migrated}/${lessonsToMigrate.length}`);
+    logger.debug(`🎉 Migración completada: ${migrated}/${lessonsToMigrate.length}`);
     alert(`✅ Migración exitosa!\n\n${migrated} lección(es) migradas a la nueva colección de contenido.\n${skippedLessons.length} ya existían previamente.`);
 
     return { success: true, migrated, skipped: skippedLessons.length };
 
   } catch (error) {
-    console.error('❌ Error en migración:', error);
+    logger.error('❌ Error en migración:', error);
     alert('Error durante la migración: ' + error.message);
     return { success: false, error: error.message };
   }
@@ -144,7 +146,7 @@ export async function checkMigrationStatus() {
 
     return { total: totalLessons, migrated: migratedLessons, pending: pendingLessons };
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error:', error);
     return null;
   }
 }

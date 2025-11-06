@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Firebase Groups Repository
  * Gestión de grupos de estudiantes y sus relaciones
@@ -80,7 +82,7 @@ class GroupsRepository extends BaseRepository {
       // Luego eliminar el grupo
       return await this.hardDelete(groupId);
     } catch (error) {
-      console.error('Error al eliminar grupo:', error);
+      logger.error('Error al eliminar grupo:', error);
       return { success: false, error: error.message };
     }
   }
@@ -97,7 +99,7 @@ class GroupsRepository extends BaseRepository {
       });
       return { success: true };
     } catch (error) {
-      console.error('Error actualizando contador:', error);
+      logger.error('Error actualizando contador:', error);
       return { success: false, error: error.message };
     }
   }
@@ -136,7 +138,7 @@ class GroupMembersRepository extends BaseRepository {
 
       return { success: true };
     } catch (error) {
-      console.error('Error al remover estudiante del grupo:', error);
+      logger.error('Error al remover estudiante del grupo:', error);
       return { success: false, error: error.message };
     }
   }
@@ -164,7 +166,7 @@ class GroupMembersRepository extends BaseRepository {
 
       return groups;
     } catch (error) {
-      console.error('Error al obtener grupos del estudiante:', error);
+      logger.error('Error al obtener grupos del estudiante:', error);
       return [];
     }
   }
@@ -203,7 +205,7 @@ class GroupCoursesRepository extends BaseRepository {
 
       return { success: true };
     } catch (error) {
-      console.error('Error al desasignar curso del grupo:', error);
+      logger.error('Error al desasignar curso del grupo:', error);
       return { success: false, error: error.message };
     }
   }

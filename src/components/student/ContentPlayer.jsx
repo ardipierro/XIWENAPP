@@ -1,3 +1,5 @@
+import logger from '../../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   PartyPopper, Link, AlertTriangle, BookOpen, Video, BookMarked, Clock, Check
@@ -69,7 +71,7 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
       setIsCompleted(completed);
 
     } catch (err) {
-      console.error('Error cargando contenido:', err);
+      logger.error('Error cargando contenido:', err);
       setError('Error al cargar el contenido');
     } finally {
       setLoading(false);
@@ -92,7 +94,7 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
 
       alert('¡Lección completada!');
     } catch (error) {
-      console.error('Error marcando como completado:', error);
+      logger.error('Error marcando como completado:', error);
       alert('Error al marcar como completado');
     }
   };

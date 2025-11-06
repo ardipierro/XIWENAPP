@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Gestor de pizarras guardadas
  * @module components/WhiteboardManager
@@ -45,19 +47,19 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
 
   const loadSessions = async () => {
     if (!auth.currentUser) {
-      console.log('🟡 [WhiteboardManager] No hay usuario autenticado');
+      logger.debug('🟡 [WhiteboardManager] No hay usuario autenticado');
       return;
     }
 
-    console.log('🟢 [WhiteboardManager] Cargando sesiones para usuario:', auth.currentUser.uid);
+    logger.debug('🟢 [WhiteboardManager] Cargando sesiones para usuario:', auth.currentUser.uid);
     setLoading(true);
     try {
       const data = await getUserWhiteboardSessions(auth.currentUser.uid);
-      console.log('🟢 [WhiteboardManager] Sesiones cargadas:', data.length);
-      console.log('🟢 [WhiteboardManager] Datos:', data);
+      logger.debug('🟢 [WhiteboardManager] Sesiones cargadas:', data.length);
+      logger.debug('🟢 [WhiteboardManager] Datos:', data);
       setSessions(data);
     } catch (error) {
-      console.error('❌ [WhiteboardManager] Error loading sessions:', error);
+      logger.error('❌ [WhiteboardManager] Error loading sessions:', error);
     } finally {
       setLoading(false);
     }
@@ -84,7 +86,7 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
       setShowConfirmDelete(false);
       setSelectedSession(null);
     } catch (error) {
-      console.error('Error deleting session:', error);
+      logger.error('Error deleting session:', error);
       alert('Error al eliminar la sesión');
     }
   };

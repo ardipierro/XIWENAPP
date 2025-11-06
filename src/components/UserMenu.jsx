@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
@@ -36,11 +38,11 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      console.log('Sesión cerrada');
+      logger.debug('Sesión cerrada');
       navigate('/');
       onClose();
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      logger.error('Error al cerrar sesión:', error);
     }
   };
 

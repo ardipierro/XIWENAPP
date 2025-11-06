@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState } from 'react';
 import { z } from 'zod';
 import { ROLES, ROLE_INFO } from '../firebase/roleConfig';
@@ -103,7 +105,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
       }
     } catch (err) {
       setError('Error inesperado al crear usuario');
-      console.error('Error:', err);
+      logger.error('Error:', err);
     } finally {
       setLoading(false);
     }

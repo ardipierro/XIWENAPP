@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Tests de ejemplo para la sección de autenticación
  * Para ejecutar estos tests, necesitas instalar Jest y React Testing Library:
@@ -489,7 +491,7 @@ describe('useAuth Hook', () => {
 });
 */
 
-console.log(`
+logger.debug(`
 ==============================================
 TESTS DE AUTENTICACIÓN - EJEMPLO
 ==============================================

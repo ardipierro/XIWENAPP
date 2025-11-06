@@ -1,3 +1,5 @@
+import logger from '../../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   BookOpen, Video, BookMarked, Link, FileText, CheckCircle, ListChecks,
@@ -29,7 +31,7 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
       // Obtener perfil del estudiante
       const profile = await ensureStudentProfile(user.uid);
       if (!profile) {
-        console.error('No se pudo obtener perfil del estudiante');
+        logger.error('No se pudo obtener perfil del estudiante');
         return;
       }
       setStudentId(profile.id);
@@ -39,14 +41,14 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
       setProgress(progressData);
 
       // Cargar contenido del curso usando relaciones
-      console.log('🔍 Buscando contenido para courseId:', courseId);
+      logger.debug('🔍 Buscando contenido para courseId:', courseId);
       const contents = await getCourseContents(courseId);
-      console.log('✅ Total contenidos cargados:', contents.length);
+      logger.debug('✅ Total contenidos cargados:', contents.length);
       setCourseContent(contents); // Already sorted by order
 
       // Cargar ejercicios del curso usando relaciones
       const exercises = await getCourseExercises(courseId);
-      console.log('✅ Total ejercicios cargados:', exercises.length);
+      logger.debug('✅ Total ejercicios cargados:', exercises.length);
       setCourseExercises(exercises); // Already sorted by order
 
       // Obtener siguiente contenido
@@ -56,7 +58,7 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
       }
 
     } catch (error) {
-      console.error('Error cargando datos del curso:', error);
+      logger.error('Error cargando datos del curso:', error);
     } finally {
       setLoading(false);
     }

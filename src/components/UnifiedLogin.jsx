@@ -9,6 +9,7 @@ import { LogIn, UserPlus, Mail, Lock, User, AlertCircle, CheckCircle, Loader, Gr
 import { auth } from '../firebase/config';
 import { createUserProfile, getUserRole } from '../firebase/firestore';
 import { isAdminEmail, getDefaultRole, ROLE_INFO } from '../firebase/roleConfig';
+import logger from '../utils/logger';
 import './UnifiedLogin.css';
 
 function UnifiedLogin() {
@@ -31,14 +32,14 @@ function UnifiedLogin() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      console.log('✅ Login exitoso en Firebase Auth');
+      logger.debug('✅ Login exitoso en Firebase Auth');
 
       // Validar que el usuario existe en Firestore
       const userRole = await getUserRole(user.uid);
 
       if (!userRole) {
         // Usuario existe en Auth pero NO en Firestore
-        console.warn('⚠️ Usuario no configurado en Firestore');
+        logger.warn('⚠️ Usuario no configurado en Firestore');
 
         // Cerrar sesión inmediatamente
         await signOut(auth);
@@ -52,11 +53,11 @@ function UnifiedLogin() {
         return;
       }
 
-      console.log('✅ Usuario validado en Firestore con rol:', userRole);
+      logger.debug('✅ Usuario validado en Firestore con rol:', userRole);
       // App.jsx se encargará de redirigir según el rol
       setLoading(false);
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
+      logger.error('Error al iniciar sesión:', error);
 
       // Mensajes de error en español
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
@@ -110,16 +111,16 @@ function UnifiedLogin() {
         role: role
       });
       
-      console.log(`✅ Usuario registrado con rol: ${role}`);
+      logger.debug(`✅ Usuario registrado con rol: ${role}`);
       
       // Mostrar mensaje especial si es admin
       if (isAdminEmail(email)) {
-        console.log('👑 ¡Bienvenido Administrador!');
+        logger.debug('👑 ¡Bienvenido Administrador!');
       }
       
       // App.jsx se encargará de redirigir según el rol
     } catch (error) {
-      console.error('Error al registrarse:', error);
+      logger.error('Error al registrarse:', error);
       
       if (error.code === 'auth/email-already-in-use') {
         setError('Ya existe una cuenta con este email');
@@ -149,7 +150,7 @@ function UnifiedLogin() {
       setResetEmailSent(true);
       setTimeout(() => setResetEmailSent(false), 5000);
     } catch (error) {
-      console.error('Error al enviar email:', error);
+      logger.error('Error al enviar email:', error);
       
       if (error.code === 'auth/user-not-found') {
         setError('No existe una cuenta con este email');

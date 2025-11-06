@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Firebase Users Repository
  * Gestión de usuarios y autenticación
@@ -155,7 +157,7 @@ export async function createUser(userData) {
       // Si el email ya existe en Auth, buscar el usuario existente
       if (authError.code === 'auth/email-already-in-use') {
         emailAlreadyExisted = true;
-        console.log('⚠️ Email ya registrado en Auth, buscando UID existente...');
+        logger.debug('⚠️ Email ya registrado en Auth, buscando UID existente...');
 
         // Buscar el UID del usuario con ese email en Firestore
         const q = query(usersRef, where('email', '==', userData.email));
@@ -164,7 +166,7 @@ export async function createUser(userData) {
         if (!snapshot.empty) {
           const existingDoc = snapshot.docs[0];
           newAuthUser = { uid: existingDoc.id };
-          console.log('✅ Encontrado usuario existente, se actualizará su documento');
+          logger.debug('✅ Encontrado usuario existente, se actualizará su documento');
         } else {
           return {
             success: false,
@@ -207,7 +209,7 @@ export async function createUser(userData) {
       emailAlreadyExisted: emailAlreadyExisted
     };
   } catch (error) {
-    console.error('Error al crear usuario:', error);
+    logger.error('Error al crear usuario:', error);
     return { success: false, error: error.message };
   }
 }

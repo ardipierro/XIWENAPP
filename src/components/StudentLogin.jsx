@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
@@ -22,13 +24,13 @@ function StudentLogin({ onLoginSuccess }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const profile = await getStudentProfile(userCredential.user.uid);
       if (profile) {
-        console.log('Profile found:', profile);
+        logger.debug('Profile found:', profile);
         onLoginSuccess(profile);
       } else {
         setError('Perfil no encontrado. Contacta al administrador.');
       }
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
+      logger.error('Error al iniciar sesión:', error);
       setError('Email o contraseña incorrectos');
     } finally {
       setLoading(false);
@@ -60,7 +62,7 @@ function StudentLogin({ onLoginSuccess }) {
           level: 1
         }
       });
-      console.log('Profile created for uid:', userCredential.user.uid);
+      logger.debug('Profile created for uid:', userCredential.user.uid);
 
       // Small delay for Firestore sync if needed (test)
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -72,7 +74,7 @@ function StudentLogin({ onLoginSuccess }) {
         setError('Error al crear perfil. Intenta de nuevo.');
       }
     } catch (error) {
-      console.error('Error al registrarse:', error);
+      logger.error('Error al registrarse:', error);
       setError('Error al crear cuenta');
     } finally {
       setLoading(false);

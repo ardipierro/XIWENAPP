@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { User, Mail, Shield, Upload, X } from 'lucide-react';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore';
@@ -61,7 +63,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
 
       if (onUpdate) onUpdate();
     } catch (err) {
-      console.error('Error uploading avatar:', err);
+      logger.error('Error uploading avatar:', err);
       setError('Error al subir la imagen. Intenta de nuevo.');
     } finally {
       setUploading(false);
@@ -83,7 +85,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
 
       if (onUpdate) onUpdate();
     } catch (err) {
-      console.error('Error updating avatar:', err);
+      logger.error('Error updating avatar:', err);
       setError('Error al actualizar el avatar');
     }
   };

@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { X, Users, UserPlus, Radio, Edit } from 'lucide-react';
 import { getUsersByRole } from '../firebase/users';
@@ -46,7 +48,7 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
         setGroups(groupsData);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -88,7 +90,7 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
       alert('Cambios guardados exitosamente');
       onClose();
     } catch (error) {
-      console.error('Error saving changes:', error);
+      logger.error('Error saving changes:', error);
       alert('Error al guardar cambios');
     } finally {
       setSaving(false);
@@ -130,7 +132,7 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
 
       onClose();
     } catch (error) {
-      console.error('Error starting live session:', error);
+      logger.error('Error starting live session:', error);
       alert('Error al iniciar sesión en vivo');
     } finally {
       setSaving(false);

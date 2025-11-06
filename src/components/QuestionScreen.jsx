@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react'
 
 function QuestionScreen({
@@ -52,7 +54,7 @@ function QuestionScreen({
       oscillator.start(audioContext.currentTime)
       oscillator.stop(audioContext.currentTime + 0.1)
     } catch (e) {
-      console.log('Audio not supported')
+      logger.debug('Audio not supported')
     }
   }
 
@@ -89,7 +91,7 @@ function QuestionScreen({
       oscillator2.start(audioContext.currentTime + 0.1)
       oscillator2.stop(audioContext.currentTime + 0.3)
     } catch (e) {
-      console.log('Audio not supported')
+      logger.debug('Audio not supported')
     }
   }
 
@@ -127,7 +129,7 @@ function QuestionScreen({
       oscillator2.start(audioContext.currentTime + 0.05)
       oscillator2.stop(audioContext.currentTime + 0.35)
     } catch (e) {
-      console.log('Audio not supported')
+      logger.debug('Audio not supported')
     }
   }
 

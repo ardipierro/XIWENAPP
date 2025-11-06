@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Firebase operations for whiteboard sessions
  * @module firebase/whiteboard
@@ -36,8 +38,8 @@ const ACTIVE_SESSIONS_COLLECTION = 'active_whiteboard_sessions';
  */
 export async function createWhiteboardSession(sessionData) {
   try {
-    console.log('🔷 [Firebase/whiteboard] createWhiteboardSession llamado');
-    console.log('🔷 [Firebase/whiteboard] sessionData:', {
+    logger.debug('🔷 [Firebase/whiteboard] createWhiteboardSession llamado');
+    logger.debug('🔷 [Firebase/whiteboard] sessionData:', {
       title: sessionData.title,
       slidesCount: sessionData.slides?.length,
       userId: sessionData.userId
@@ -52,10 +54,10 @@ export async function createWhiteboardSession(sessionData) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ [Firebase/whiteboard] Documento creado con ID:', docRef.id);
+    logger.debug('✅ [Firebase/whiteboard] Documento creado con ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error creating whiteboard session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error creating whiteboard session:', error);
     throw error;
   }
 }
@@ -75,7 +77,7 @@ export async function getWhiteboardSession(sessionId) {
     }
     return null;
   } catch (error) {
-    console.error('Error getting whiteboard session:', error);
+    logger.error('Error getting whiteboard session:', error);
     throw error;
   }
 }
@@ -94,7 +96,7 @@ export async function updateWhiteboardSession(sessionId, updates) {
       updatedAt: serverTimestamp()
     });
   } catch (error) {
-    console.error('Error updating whiteboard session:', error);
+    logger.error('Error updating whiteboard session:', error);
     throw error;
   }
 }
@@ -122,9 +124,9 @@ export async function shareWhiteboardSession(sessionId, userIds) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ [Firebase/whiteboard] Session shared with:', userIds);
+    logger.debug('✅ [Firebase/whiteboard] Session shared with:', userIds);
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error sharing session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error sharing session:', error);
     throw error;
   }
 }
@@ -152,9 +154,9 @@ export async function unshareWhiteboardSession(sessionId, userIds) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ [Firebase/whiteboard] Session unshared from:', userIds);
+    logger.debug('✅ [Firebase/whiteboard] Session unshared from:', userIds);
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error unsharing session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error unsharing session:', error);
     throw error;
   }
 }
@@ -169,7 +171,7 @@ export async function deleteWhiteboardSession(sessionId) {
     const docRef = doc(db, COLLECTION, sessionId);
     await deleteDoc(docRef);
   } catch (error) {
-    console.error('Error deleting whiteboard session:', error);
+    logger.error('Error deleting whiteboard session:', error);
     throw error;
   }
 }
@@ -182,7 +184,7 @@ export async function deleteWhiteboardSession(sessionId) {
  */
 export async function getUserWhiteboardSessions(userId) {
   try {
-    console.log('🔷 [Firebase/whiteboard] getUserWhiteboardSessions llamado para userId:', userId);
+    logger.debug('🔷 [Firebase/whiteboard] getUserWhiteboardSessions llamado para userId:', userId);
 
     // Query 1: Pizarras creadas por el usuario
     const q1 = query(
@@ -221,7 +223,7 @@ export async function getUserWhiteboardSessions(userId) {
     // TEMPORAL: Si no hay pizarras compartidas, mostrar todas las pizarras existentes
     // (Para pizarras creadas antes de implementar el sistema de compartir)
     if (sessions.length === 0) {
-      console.log('⚠️ No hay pizarras propias/compartidas. Mostrando todas las pizarras...');
+      logger.debug('⚠️ No hay pizarras propias/compartidas. Mostrando todas las pizarras...');
       const allQuery = query(collection(db, COLLECTION));
       const allSnapshot = await getDocs(allQuery);
 
@@ -241,10 +243,10 @@ export async function getUserWhiteboardSessions(userId) {
       return timeB - timeA; // descendente (más reciente primero)
     });
 
-    console.log('✅ [Firebase/whiteboard] Sesiones encontradas:', sessions.length);
+    logger.debug('✅ [Firebase/whiteboard] Sesiones encontradas:', sessions.length);
     return sessions;
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error getting user whiteboard sessions:', error);
+    logger.error('❌ [Firebase/whiteboard] Error getting user whiteboard sessions:', error);
     throw error;
   }
 }
@@ -269,7 +271,7 @@ export async function getAllWhiteboardSessions() {
 
     return sessions;
   } catch (error) {
-    console.error('Error getting all whiteboard sessions:', error);
+    logger.error('Error getting all whiteboard sessions:', error);
     throw error;
   }
 }
@@ -287,7 +289,7 @@ export async function getAllWhiteboardSessions() {
  */
 export async function createActiveWhiteboardSession(sessionId, user, initialData = {}) {
   try {
-    console.log('🟢 [Firebase/whiteboard] Creating active session:', sessionId);
+    logger.debug('🟢 [Firebase/whiteboard] Creating active session:', sessionId);
 
     const activeSessionRef = doc(db, ACTIVE_SESSIONS_COLLECTION, sessionId);
 
@@ -295,7 +297,7 @@ export async function createActiveWhiteboardSession(sessionId, user, initialData
     const existingDoc = await getDoc(activeSessionRef);
 
     if (existingDoc.exists()) {
-      console.log('⚠️ Session already exists, joining instead');
+      logger.debug('⚠️ Session already exists, joining instead');
       await joinActiveWhiteboardSession(sessionId, user);
       return sessionId;
     }
@@ -322,10 +324,10 @@ export async function createActiveWhiteboardSession(sessionId, user, initialData
       isActive: true
     });
 
-    console.log('✅ [Firebase/whiteboard] Active session created');
+    logger.debug('✅ [Firebase/whiteboard] Active session created');
     return sessionId;
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error creating active session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error creating active session:', error);
     throw error;
   }
 }
@@ -338,7 +340,7 @@ export async function createActiveWhiteboardSession(sessionId, user, initialData
  */
 export async function joinActiveWhiteboardSession(sessionId, user) {
   try {
-    console.log('🟢 [Firebase/whiteboard] User joining session:', sessionId, user.uid);
+    logger.debug('🟢 [Firebase/whiteboard] User joining session:', sessionId, user.uid);
 
     const activeSessionRef = doc(db, ACTIVE_SESSIONS_COLLECTION, sessionId);
 
@@ -352,9 +354,9 @@ export async function joinActiveWhiteboardSession(sessionId, user) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ [Firebase/whiteboard] User joined session');
+    logger.debug('✅ [Firebase/whiteboard] User joined session');
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error joining session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error joining session:', error);
     throw error;
   }
 }
@@ -367,13 +369,13 @@ export async function joinActiveWhiteboardSession(sessionId, user) {
  */
 export async function leaveActiveWhiteboardSession(sessionId, userId) {
   try {
-    console.log('🟡 [Firebase/whiteboard] User leaving session:', sessionId, userId);
+    logger.debug('🟡 [Firebase/whiteboard] User leaving session:', sessionId, userId);
 
     const activeSessionRef = doc(db, ACTIVE_SESSIONS_COLLECTION, sessionId);
     const sessionDoc = await getDoc(activeSessionRef);
 
     if (!sessionDoc.exists()) {
-      console.log('⚠️ Session does not exist');
+      logger.debug('⚠️ Session does not exist');
       return;
     }
 
@@ -387,16 +389,16 @@ export async function leaveActiveWhiteboardSession(sessionId, userId) {
         isActive: false,
         updatedAt: serverTimestamp()
       });
-      console.log('✅ Session marked as inactive (no participants)');
+      logger.debug('✅ Session marked as inactive (no participants)');
     } else {
       await updateDoc(activeSessionRef, {
         participants: updatedParticipants,
         updatedAt: serverTimestamp()
       });
-      console.log('✅ User left session');
+      logger.debug('✅ User left session');
     }
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error leaving session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error leaving session:', error);
     throw error;
   }
 }
@@ -414,7 +416,7 @@ export async function addStrokeToActiveSession(sessionId, slideIndex, stroke) {
     const sessionDoc = await getDoc(activeSessionRef);
 
     if (!sessionDoc.exists()) {
-      console.warn('⚠️ Active session not found, cannot add stroke. Session might have ended.');
+      logger.warn('⚠️ Active session not found, cannot add stroke. Session might have ended.');
       return; // Silently fail instead of throwing
     }
 
@@ -437,7 +439,7 @@ export async function addStrokeToActiveSession(sessionId, slideIndex, stroke) {
       updatedAt: serverTimestamp()
     });
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error adding stroke:', error);
+    logger.error('❌ [Firebase/whiteboard] Error adding stroke:', error);
     // Don't throw - just log, to avoid breaking the UI
   }
 }
@@ -470,7 +472,7 @@ export async function clearSlideInActiveSession(sessionId, slideIndex) {
       updatedAt: serverTimestamp()
     });
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error clearing slide:', error);
+    logger.error('❌ [Firebase/whiteboard] Error clearing slide:', error);
     throw error;
   }
 }
@@ -488,7 +490,7 @@ export async function addObjectToActiveSession(sessionId, slideIndex, object) {
     const sessionDoc = await getDoc(activeSessionRef);
 
     if (!sessionDoc.exists()) {
-      console.warn('⚠️ Active session not found, cannot add object.');
+      logger.warn('⚠️ Active session not found, cannot add object.');
       return;
     }
 
@@ -511,9 +513,9 @@ export async function addObjectToActiveSession(sessionId, slideIndex, object) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ [Firebase/whiteboard] Object added to slide', slideIndex);
+    logger.debug('✅ [Firebase/whiteboard] Object added to slide', slideIndex);
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error adding object:', error);
+    logger.error('❌ [Firebase/whiteboard] Error adding object:', error);
   }
 }
 
@@ -531,7 +533,7 @@ export async function updateObjectInActiveSession(sessionId, slideIndex, objectI
     const sessionDoc = await getDoc(activeSessionRef);
 
     if (!sessionDoc.exists()) {
-      console.warn('⚠️ Active session not found, cannot update object.');
+      logger.warn('⚠️ Active session not found, cannot update object.');
       return;
     }
 
@@ -551,11 +553,11 @@ export async function updateObjectInActiveSession(sessionId, slideIndex, objectI
           updatedAt: serverTimestamp()
         });
 
-        console.log('✅ [Firebase/whiteboard] Object updated');
+        logger.debug('✅ [Firebase/whiteboard] Object updated');
       }
     }
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error updating object:', error);
+    logger.error('❌ [Firebase/whiteboard] Error updating object:', error);
   }
 }
 
@@ -572,7 +574,7 @@ export async function deleteObjectFromActiveSession(sessionId, slideIndex, objec
     const sessionDoc = await getDoc(activeSessionRef);
 
     if (!sessionDoc.exists()) {
-      console.warn('⚠️ Active session not found, cannot delete object.');
+      logger.warn('⚠️ Active session not found, cannot delete object.');
       return;
     }
 
@@ -587,10 +589,10 @@ export async function deleteObjectFromActiveSession(sessionId, slideIndex, objec
         updatedAt: serverTimestamp()
       });
 
-      console.log('✅ [Firebase/whiteboard] Object deleted');
+      logger.debug('✅ [Firebase/whiteboard] Object deleted');
     }
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error deleting object:', error);
+    logger.error('❌ [Firebase/whiteboard] Error deleting object:', error);
   }
 }
 
@@ -610,7 +612,7 @@ export function subscribeToActiveWhiteboardSession(sessionId, callback) {
       callback(null);
     }
   }, (error) => {
-    console.error('❌ [Firebase/whiteboard] Error in snapshot listener:', error);
+    logger.error('❌ [Firebase/whiteboard] Error in snapshot listener:', error);
     callback(null);
   });
 }
@@ -630,7 +632,7 @@ export async function getActiveWhiteboardSession(sessionId) {
     }
     return null;
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error getting active session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error getting active session:', error);
     throw error;
   }
 }
@@ -650,9 +652,9 @@ export async function endActiveWhiteboardSession(sessionId) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ [Firebase/whiteboard] Session ended');
+    logger.debug('✅ [Firebase/whiteboard] Session ended');
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error ending session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error ending session:', error);
     throw error;
   }
 }
@@ -669,7 +671,7 @@ export async function endActiveWhiteboardSession(sessionId) {
  */
 export async function shareContentInSession(sessionId, content) {
   try {
-    console.log('📤 [Firebase/whiteboard] Sharing content:', content.type);
+    logger.debug('📤 [Firebase/whiteboard] Sharing content:', content.type);
 
     const activeSessionRef = doc(db, ACTIVE_SESSIONS_COLLECTION, sessionId);
 
@@ -684,9 +686,9 @@ export async function shareContentInSession(sessionId, content) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ [Firebase/whiteboard] Content shared successfully');
+    logger.debug('✅ [Firebase/whiteboard] Content shared successfully');
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error sharing content:', error);
+    logger.error('❌ [Firebase/whiteboard] Error sharing content:', error);
     throw error;
   }
 }
@@ -705,9 +707,9 @@ export async function clearSharedContent(sessionId) {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ [Firebase/whiteboard] Shared content cleared');
+    logger.debug('✅ [Firebase/whiteboard] Shared content cleared');
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error clearing shared content:', error);
+    logger.error('❌ [Firebase/whiteboard] Error clearing shared content:', error);
     throw error;
   }
 }
@@ -736,7 +738,7 @@ export async function updateVideoPlayback(sessionId, playbackState) {
       updatedAt: serverTimestamp()
     });
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error updating video playback:', error);
+    logger.error('❌ [Firebase/whiteboard] Error updating video playback:', error);
     // Don't throw - playback sync failures shouldn't break the app
   }
 }
@@ -761,7 +763,7 @@ export async function updatePDFPage(sessionId, pageNumber) {
       updatedAt: serverTimestamp()
     });
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error updating PDF page:', error);
+    logger.error('❌ [Firebase/whiteboard] Error updating PDF page:', error);
   }
 }
 
@@ -797,7 +799,7 @@ export async function updateActiveSelection(sessionId, userId, userName, objectI
       });
     }
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error updating active selection:', error);
+    logger.error('❌ [Firebase/whiteboard] Error updating active selection:', error);
     // Don't throw - selection updates are not critical
   }
 }
@@ -819,9 +821,9 @@ export async function assignStudentsToWhiteboard(sessionId, studentIds) {
       assignedStudents: studentIds,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ [Firebase/whiteboard] Students assigned to whiteboard:', sessionId);
+    logger.debug('✅ [Firebase/whiteboard] Students assigned to whiteboard:', sessionId);
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error assigning students:', error);
+    logger.error('❌ [Firebase/whiteboard] Error assigning students:', error);
     throw error;
   }
 }
@@ -839,9 +841,9 @@ export async function assignGroupsToWhiteboard(sessionId, groupIds) {
       assignedGroups: groupIds,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ [Firebase/whiteboard] Groups assigned to whiteboard:', sessionId);
+    logger.debug('✅ [Firebase/whiteboard] Groups assigned to whiteboard:', sessionId);
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error assigning groups:', error);
+    logger.error('❌ [Firebase/whiteboard] Error assigning groups:', error);
     throw error;
   }
 }
@@ -861,9 +863,9 @@ export async function startLiveSession(sessionId, liveSessionId) {
       liveStartedAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    console.log('✅ [Firebase/whiteboard] Live session started:', liveSessionId);
+    logger.debug('✅ [Firebase/whiteboard] Live session started:', liveSessionId);
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error starting live session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error starting live session:', error);
     throw error;
   }
 }
@@ -882,9 +884,9 @@ export async function endLiveSession(sessionId) {
       liveEndedAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    console.log('✅ [Firebase/whiteboard] Live session ended');
+    logger.debug('✅ [Firebase/whiteboard] Live session ended');
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error ending live session:', error);
+    logger.error('❌ [Firebase/whiteboard] Error ending live session:', error);
     throw error;
   }
 }
@@ -909,10 +911,10 @@ export async function getAssignedWhiteboards(studentId) {
       ...doc.data()
     }));
 
-    console.log('✅ [Firebase/whiteboard] Found', whiteboards.length, 'assigned whiteboards for student');
+    logger.debug('✅ [Firebase/whiteboard] Found', whiteboards.length, 'assigned whiteboards for student');
     return whiteboards;
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error getting assigned whiteboards:', error);
+    logger.error('❌ [Firebase/whiteboard] Error getting assigned whiteboards:', error);
     return [];
   }
 }
@@ -942,7 +944,7 @@ export function subscribeToLiveWhiteboards(studentId, callback) {
 
     return unsubscribe;
   } catch (error) {
-    console.error('❌ [Firebase/whiteboard] Error subscribing to live whiteboards:', error);
+    logger.error('❌ [Firebase/whiteboard] Error subscribing to live whiteboards:', error);
     return () => {};
   }
 }

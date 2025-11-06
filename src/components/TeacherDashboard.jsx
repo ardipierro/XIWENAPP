@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -301,13 +303,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         // Recargar la lista de usuarios
         await loadUsers();
         // Mostrar mensaje de éxito (puedes agregar un toast/notification)
-        console.log('Usuario eliminado exitosamente');
+        logger.debug('Usuario eliminado exitosamente');
       } else {
-        console.error('Error al eliminar usuario:', result.error);
+        logger.error('Error al eliminar usuario:', result.error);
         alert('Error al eliminar el usuario. Por favor intenta nuevamente.');
       }
     } catch (error) {
-      console.error('Error al eliminar usuario:', error);
+      logger.error('Error al eliminar usuario:', error);
       alert('Error al eliminar el usuario. Por favor intenta nuevamente.');
     }
   };
@@ -357,7 +359,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         getClassesByTeacher(user.uid)
       ]);
 
-      console.log(`⏱️ [TeacherDashboard] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [TeacherDashboard] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
 
       // Filtrar usuarios según rol
       if (isAdmin) {
@@ -401,7 +403,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         .sort((a, b) => b.gamesPlayed - a.gamesPlayed)
         .slice(0, 5);
 
-      console.log(`⏱️ [TeacherDashboard] Procesamiento datos: ${(performance.now() - processingStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [TeacherDashboard] Procesamiento datos: ${(performance.now() - processingStart).toFixed(0)}ms`);
 
       setStats({
         totalStudents: activeStudents.length,
@@ -413,9 +415,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       setRecentGames(games.slice(0, 5));
       setTopStudents(topStudentsArray);
 
-      console.log(`⏱️ [TeacherDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [TeacherDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
     } catch (error) {
-      console.error('Error cargando datos del dashboard:', error);
+      logger.error('Error cargando datos del dashboard:', error);
     }
     setLoading(false);
   };
@@ -445,7 +447,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               credits: creditsData?.availableCredits || 0
             };
           } catch (error) {
-            console.error(`Error cargando créditos para ${userItem.id}:`, error);
+            logger.error(`Error cargando créditos para ${userItem.id}:`, error);
             return {
               ...userItem,
               credits: 0
@@ -455,9 +457,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       );
 
       setUsers(usersWithCredits);
-      console.log('Usuarios cargados:', usersWithCredits.length);
+      logger.debug('Usuarios cargados:', usersWithCredits.length);
     } catch (error) {
-      console.error('Error cargando usuarios:', error);
+      logger.error('Error cargando usuarios:', error);
       showError('Error al cargar usuarios');
     }
   };
@@ -480,7 +482,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         showError('Error al actualizar rol');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al actualizar rol');
     }
   };
@@ -503,7 +505,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         showError('Error al actualizar estado');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al actualizar estado');
     }
   };
@@ -538,7 +540,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         return { success: false, error: result.error };
       }
     } catch (error) {
-      console.error('Error al crear usuario:', error);
+      logger.error('Error al crear usuario:', error);
       return { success: false, error: 'Error inesperado al crear usuario' };
     }
   };
@@ -573,7 +575,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       setAllExercises(teacherExercises);
 
     } catch (error) {
-      console.error('Error cargando recursos:', error);
+      logger.error('Error cargando recursos:', error);
       showError('Error al cargar recursos del alumno');
     }
 
@@ -605,7 +607,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         showError('Error al asignar curso');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al asignar curso');
     }
   };
@@ -629,7 +631,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         showError('Error al desasignar curso');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al desasignar curso');
     }
   };
@@ -643,7 +645,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       }
       setEnrollmentCounts(counts);
     } catch (error) {
-      console.error('Error cargando contadores de inscripciones:', error);
+      logger.error('Error cargando contadores de inscripciones:', error);
     }
   };
 
@@ -664,7 +666,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       const assignedContent = assignments.filter(a => a.itemType === 'content');
       setStudentContent(assignedContent);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al asignar contenido');
     }
   };
@@ -684,7 +686,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       const assignedContent = assignments.filter(a => a.itemType === 'content');
       setStudentContent(assignedContent);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al desasignar contenido');
     }
   };
@@ -706,7 +708,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
       setStudentExercises(assignedExercises);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al asignar ejercicio');
     }
   };
@@ -726,7 +728,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       const assignedExercises = assignments.filter(a => a.itemType === 'exercise');
       setStudentExercises(assignedExercises);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al desasignar ejercicio');
     }
   };
@@ -899,7 +901,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         user={user}
         onBack={handleBackToDashboard}
         onComplete={(results) => {
-          console.log('Ejercicio completado:', results);
+          logger.debug('Ejercicio completado:', results);
           // Aquí podrías guardar resultados en Firebase
         }}
       />
@@ -1020,7 +1022,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               });
               setCurrentScreen('excalidrawWhiteboard');
             } catch (error) {
-              console.error('Error creando pizarra:', error);
+              logger.error('Error creando pizarra:', error);
               alert('Error al crear la pizarra');
             }
           }}

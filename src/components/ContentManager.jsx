@@ -85,7 +85,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       coursesMap[id] = courses;
     });
 
-    console.log(`⏱️ [ContentManager] Cargar cursos de contenidos: ${(performance.now() - startTime).toFixed(0)}ms - ${content.length} contenidos`);
+    logger.debug(`⏱️ [ContentManager] Cargar cursos de contenidos: ${(performance.now() - startTime).toFixed(0)}ms - ${content.length} contenidos`);
 
     setContentCourses(coursesMap);
   };
@@ -230,7 +230,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
         throw new Error(result.error || 'Error desconocido al subir imagen');
       }
     } catch (error) {
-      console.error('Error subiendo imagen:', error);
+      logger.error('Error subiendo imagen:', error);
       alert('Error al subir imagen: ' + error.message);
     } finally {
       setUploadingImage(false);
@@ -251,7 +251,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       setFormData({ ...formData, imageUrl: '' });
       alert('✅ Imagen eliminada');
     } catch (error) {
-      console.error('Error eliminando imagen:', error);
+      logger.error('Error eliminando imagen:', error);
       // Incluso si falla, limpiar la URL del formulario
       setFormData({ ...formData, imageUrl: '' });
       alert('Imagen removida del formulario');

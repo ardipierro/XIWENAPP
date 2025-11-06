@@ -46,7 +46,9 @@
       "Bash(find:*)",
       "Bash(npx depcheck:*)",
       "Bash(npm uninstall:*)",
-      "Bash(del \"src\\components\\AdminDashboard.css\")"
+      "Bash(del \"src\\components\\AdminDashboard.css\")",
+      "Bash(node replace-console-with-logger.js:*)",
+      "Bash(node replace-console-with-logger.cjs:*)"
     ],
     "deny": [],
     "ask": []

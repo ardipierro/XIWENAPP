@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import {
   collection,
   addDoc,
@@ -42,7 +44,7 @@ export async function createScheduledClassMultipleDays(classData) {
       if (result.success) {
         createdIds.push(result.id);
       } else {
-        console.error(`Error al crear horario para día ${dayOfWeek}:`, result.error);
+        logger.error(`Error al crear horario para día ${dayOfWeek}:`, result.error);
       }
     }
 
@@ -56,7 +58,7 @@ export async function createScheduledClassMultipleDays(classData) {
       count: createdIds.length
     };
   } catch (error) {
-    console.error('Error al crear horarios múltiples:', error);
+    logger.error('Error al crear horarios múltiples:', error);
     return { success: false, error: error.message };
   }
 }
@@ -115,7 +117,7 @@ export async function createScheduledClass(classData) {
 
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error al crear clase programada:', error);
+    logger.error('Error al crear clase programada:', error);
     return { success: false, error: error.message };
   }
 }
@@ -135,7 +137,7 @@ export async function getScheduledClass(classId) {
     }
     return null;
   } catch (error) {
-    console.error('Error al obtener clase programada:', error);
+    logger.error('Error al obtener clase programada:', error);
     return null;
   }
 }
@@ -161,7 +163,7 @@ export async function getGroupScheduledClasses(groupId) {
       .map(doc => ({ id: doc.id, ...doc.data() }))
       .sort((a, b) => (a.dayOfWeek || 0) - (b.dayOfWeek || 0));
   } catch (error) {
-    console.error('Error al obtener clases del grupo:', error);
+    logger.error('Error al obtener clases del grupo:', error);
     return [];
   }
 }
@@ -187,7 +189,7 @@ export async function getTeacherScheduledClasses(teacherId) {
       .map(doc => ({ id: doc.id, ...doc.data() }))
       .sort((a, b) => (a.dayOfWeek || 0) - (b.dayOfWeek || 0));
   } catch (error) {
-    console.error('Error al obtener clases del profesor:', error);
+    logger.error('Error al obtener clases del profesor:', error);
     return [];
   }
 }
@@ -208,7 +210,7 @@ export async function updateScheduledClass(classId, updates) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error al actualizar clase programada:', error);
+    logger.error('Error al actualizar clase programada:', error);
     return { success: false, error: error.message };
   }
 }
@@ -229,7 +231,7 @@ export async function deleteScheduledClass(classId) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error al eliminar clase programada:', error);
+    logger.error('Error al eliminar clase programada:', error);
     return { success: false, error: error.message };
   }
 }
@@ -255,7 +257,7 @@ export async function getClassesByDay(dayOfWeek) {
       .map(doc => ({ id: doc.id, ...doc.data() }))
       .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
   } catch (error) {
-    console.error('Error al obtener clases por día:', error);
+    logger.error('Error al obtener clases por día:', error);
     return [];
   }
 }
@@ -326,7 +328,7 @@ export async function checkAndAutoRenewSessions(groupId = null) {
             weeksGenerated: weeksToGenerate
           });
 
-          console.log(`✅ Auto-renovado: ${schedule.groupName} - ${getDayName(schedule.dayOfWeek)} (${result.created} sesiones)`);
+          logger.debug(`✅ Auto-renovado: ${schedule.groupName} - ${getDayName(schedule.dayOfWeek)} (${result.created} sesiones)`);
         }
       }
     }
@@ -337,7 +339,7 @@ export async function checkAndAutoRenewSessions(groupId = null) {
       details
     };
   } catch (error) {
-    console.error('Error al auto-renovar sesiones:', error);
+    logger.error('Error al auto-renovar sesiones:', error);
     return {
       success: false,
       renewed: 0,

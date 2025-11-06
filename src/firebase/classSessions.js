@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import {
   collection,
   addDoc,
@@ -65,7 +67,7 @@ export async function createClassSession(sessionData) {
 
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error al crear sesión:', error);
+    logger.error('Error al crear sesión:', error);
     return { success: false, error: error.message };
   }
 }
@@ -120,7 +122,7 @@ export async function generateSessionsForScheduledClass(scheduledClassId, classD
 
     return { success: true, created };
   } catch (error) {
-    console.error('Error al generar sesiones:', error);
+    logger.error('Error al generar sesiones:', error);
     return { success: false, created: 0, error: error.message };
   }
 }
@@ -149,7 +151,7 @@ async function sessionExistsForDate(scheduledClassId, date) {
     const snapshot = await getDocs(q);
     return !snapshot.empty;
   } catch (error) {
-    console.error('Error al verificar sesión:', error);
+    logger.error('Error al verificar sesión:', error);
     return false;
   }
 }
@@ -169,7 +171,7 @@ export async function getClassSession(sessionId) {
     }
     return null;
   } catch (error) {
-    console.error('Error al obtener sesión:', error);
+    logger.error('Error al obtener sesión:', error);
     return null;
   }
 }
@@ -204,7 +206,7 @@ export async function getGroupSessions(groupId, startDate = null, endDate = null
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error('Error al obtener sesiones del grupo:', error);
+    logger.error('Error al obtener sesiones del grupo:', error);
     return [];
   }
 }
@@ -239,7 +241,7 @@ export async function getTeacherSessions(teacherId, startDate = null, endDate = 
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error('Error al obtener sesiones del profesor:', error);
+    logger.error('Error al obtener sesiones del profesor:', error);
     return [];
   }
 }
@@ -277,7 +279,7 @@ export async function getUpcomingSessions(groupId = null, limit = 10) {
 
     return sessions.slice(0, limit);
   } catch (error) {
-    console.error('Error al obtener sesiones próximas:', error);
+    logger.error('Error al obtener sesiones próximas:', error);
     return [];
   }
 }
@@ -303,7 +305,7 @@ export async function updateSessionStatus(sessionId, status) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error al actualizar estado de sesión:', error);
+    logger.error('Error al actualizar estado de sesión:', error);
     return { success: false, error: error.message };
   }
 }
@@ -323,7 +325,7 @@ export async function activateSessionLink(sessionId) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error al activar link:', error);
+    logger.error('Error al activar link:', error);
     return { success: false, error: error.message };
   }
 }
@@ -370,7 +372,7 @@ export async function cancelSession(sessionId, reason = '') {
 
     return { success: true };
   } catch (error) {
-    console.error('Error al cancelar sesión:', error);
+    logger.error('Error al cancelar sesión:', error);
     return { success: false, error: error.message };
   }
 }
@@ -431,7 +433,7 @@ export async function getScheduledClassStats(scheduledClassId) {
       })
     };
   } catch (error) {
-    console.error('Error al obtener estadísticas de sesiones:', error);
+    logger.error('Error al obtener estadísticas de sesiones:', error);
     return {
       total: 0,
       completed: 0,

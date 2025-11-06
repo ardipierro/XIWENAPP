@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Excalidraw } from '@excalidraw/excalidraw';
 import '@excalidraw/excalidraw/index.css';
@@ -72,9 +74,9 @@ function ExcalidrawWhiteboard({ onBack, initialSession }) {
 
       setLastSaved(new Date());
       setHasChanges(false);
-      console.log('✅ Pizarra guardada');
+      logger.debug('✅ Pizarra guardada');
     } catch (error) {
-      console.error('Error guardando pizarra:', error);
+      logger.error('Error guardando pizarra:', error);
       alert('Error al guardar la pizarra');
     } finally {
       setSaving(false);

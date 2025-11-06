@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @fileoverview Custom hook para manejar localStorage con React state
  * @module hooks/useLocalStorage
@@ -23,7 +25,7 @@ export function useLocalStorage(key, initialValue) {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.warn(`Error leyendo localStorage key "${key}":`, error);
+      logger.warn(`Error leyendo localStorage key "${key}":`, error);
       return initialValue;
     }
   }, [initialValue, key]);
@@ -48,7 +50,7 @@ export function useLocalStorage(key, initialValue) {
         window.dispatchEvent(new Event('local-storage'));
       }
     } catch (error) {
-      console.warn(`Error guardando en localStorage key "${key}":`, error);
+      logger.warn(`Error guardando en localStorage key "${key}":`, error);
     }
   }, [key, storedValue]);
 
@@ -64,7 +66,7 @@ export function useLocalStorage(key, initialValue) {
         window.dispatchEvent(new Event('local-storage'));
       }
     } catch (error) {
-      console.warn(`Error eliminando localStorage key "${key}":`, error);
+      logger.warn(`Error eliminando localStorage key "${key}":`, error);
     }
   }, [initialValue, key]);
 

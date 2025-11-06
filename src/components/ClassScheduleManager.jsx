@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import {
   Calendar, CalendarDays, CheckCircle, AlertTriangle, RefreshCw,
@@ -64,7 +66,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
       // Verificar y auto-renovar sesiones si es necesario
       const autoRenewResult = await checkAndAutoRenewSessions(group.id);
       if (autoRenewResult.renewed > 0) {
-        console.log(`Auto-renovadas ${autoRenewResult.renewed} sesiones`);
+        logger.debug(`Auto-renovadas ${autoRenewResult.renewed} sesiones`);
         showMessage('success', `${autoRenewResult.renewed} sesiones auto-generadas`);
       }
 
@@ -79,7 +81,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
       }
       setScheduleStats(stats);
     } catch (error) {
-      console.error('Error al cargar horarios:', error);
+      logger.error('Error al cargar horarios:', error);
       showMessage('error', 'Error al cargar horarios');
     } finally {
       setLoading(false);
@@ -172,7 +174,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
         showMessage('error', result.error || 'Error al crear horario');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error inesperado');
     } finally {
       setProcessing(false);
@@ -194,7 +196,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
         showMessage('error', 'Error al eliminar horario');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error inesperado');
     }
   };
@@ -213,7 +215,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
         showMessage('error', 'Error al generar sesiones');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showMessage('error', 'Error inesperado');
     }
   };

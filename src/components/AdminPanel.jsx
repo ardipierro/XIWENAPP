@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -47,7 +49,7 @@ function AdminPanel({ user, userRole, onBack }) {
       const startTime = performance.now();
 
       const allUsers = await getAllUsers();
-      console.log(`⏱️ [AdminPanel] getAllUsers: ${(performance.now() - startTime).toFixed(0)}ms - ${allUsers.length} usuarios`);
+      logger.debug(`⏱️ [AdminPanel] getAllUsers: ${(performance.now() - startTime).toFixed(0)}ms - ${allUsers.length} usuarios`);
 
       // Cargar créditos para cada usuario en paralelo
       const creditsStart = performance.now();
@@ -61,12 +63,12 @@ function AdminPanel({ user, userRole, onBack }) {
         })
       );
 
-      console.log(`⏱️ [AdminPanel] Cargar créditos: ${(performance.now() - creditsStart).toFixed(0)}ms`);
-      console.log(`⏱️ [AdminPanel] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
+      logger.debug(`⏱️ [AdminPanel] Cargar créditos: ${(performance.now() - creditsStart).toFixed(0)}ms`);
+      logger.debug(`⏱️ [AdminPanel] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
 
       setUsers(usersWithCredits);
     } catch (error) {
-      console.error('❌ Error cargando usuarios:', error);
+      logger.error('❌ Error cargando usuarios:', error);
       showError('Error al cargar usuarios');
     } finally {
       setLoading(false);
@@ -105,7 +107,7 @@ function AdminPanel({ user, userRole, onBack }) {
         showError('Error al actualizar rol');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al actualizar rol');
     }
   };
@@ -130,7 +132,7 @@ function AdminPanel({ user, userRole, onBack }) {
         showError('Error al actualizar estado');
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       showError('Error al actualizar estado');
     }
   };
