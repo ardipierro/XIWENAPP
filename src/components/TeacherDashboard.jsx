@@ -82,6 +82,7 @@ import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
+import MessagesPanel from './MessagesPanel';
 import './TeacherDashboard.css';
 
 // Icon mapping for role icons from roleConfig
@@ -330,7 +331,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       'whiteboardSessions': 'whiteboardSessions',
       'excalidrawWhiteboard': 'excalidrawSessions',
       'liveClasses': 'liveClasses',
-      'liveGame': 'liveGame'
+      'liveGame': 'liveGame',
+      'messages': 'messages'
     };
 
     const screen = actionMap[action];
@@ -1087,6 +1089,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           setCurrentScreen('liveClasses');
         }}
       />
+    );
+  }
+
+  // Renderizar Messages Panel - CON Layout
+  if (currentScreen === 'messages') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <MessagesPanel user={user} />
+      </DashboardLayout>
     );
   }
 

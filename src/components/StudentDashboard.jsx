@@ -16,6 +16,7 @@ import StudentClassView from './StudentClassView';
 import LiveClassRoom from './LiveClassRoom';
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
+import MessagesPanel from './MessagesPanel';
 import './StudentDashboard.css';
 
 function StudentDashboard({ user, userRole, student: studentProp, onLogout, onStartGame }) {
@@ -238,7 +239,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       'assignments': 'assignments',
       'classes': 'classes',
       'liveClasses': 'liveClasses',
-      'whiteboardSessions': 'whiteboardSessions'
+      'whiteboardSessions': 'whiteboardSessions',
+      'messages': 'messages'
     };
 
     const view = actionMap[action];
@@ -435,6 +437,15 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             />
           </div>
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render Messages view
+  if (currentView === 'messages') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <MessagesPanel user={user} />
       </DashboardLayout>
     );
   }

@@ -19,7 +19,8 @@ import {
   PenTool,
   Gamepad2,
   Shield,
-  Settings
+  Settings,
+  MessageCircle
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -65,6 +66,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     if (userRole === 'admin' && location.pathname.startsWith('/teacher')) {
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
+        { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
         { icon: Users, label: 'Usuarios', path: '/teacher', action: 'users' },
         { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
@@ -81,6 +83,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     if (['teacher', 'trial_teacher'].includes(userRole)) {
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
+        { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
         { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
@@ -97,6 +100,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     if (['student', 'listener', 'trial'].includes(userRole)) {
       return [
         { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },
+        { icon: MessageCircle, label: 'Mensajes', path: '/student', action: 'messages' },
         { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
         { icon: ClipboardList, label: 'Asignado a Mí', path: '/student', action: 'assignments' },
         { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classes' },
