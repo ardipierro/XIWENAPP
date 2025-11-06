@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { subscribeToGameSession, startGame, pauseGame, resumeGame, finishGame, moveToNextQuestion } from '../firebase/gameSession';
 import './LiveGameProjection.css';
 
@@ -12,6 +12,8 @@ function LiveGameProjection({ sessionId, onBack }) {
   const [loading, setLoading] = useState(true);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackData, setFeedbackData] = useState(null);
+  const processingRef = useRef(false); // Prevenir procesamiento múltiple
+  const timeoutRef = useRef(null); // Referencia al timeout
 
   // Suscribirse a cambios en tiempo real
   useEffect(() => {
@@ -112,7 +114,10 @@ function LiveGameProjection({ sessionId, onBack }) {
 
   // Procesar respuesta cuando se envía
   useEffect(() => {
-    if (!gameData || !gameData.answerSubmitted || showFeedback) return;
+    if (!gameData || !gameData.answerSubmitted || showFeedback || processingRef.current) return;
+
+    // Marcar como procesando
+    processingRef.current = true;
 
     const currentQuestion = gameData.questions[gameData.currentQuestionIndex];
     const studentAnswer = gameData.currentAnswers[gameData.currentTurn];
@@ -134,11 +139,26 @@ function LiveGameProjection({ sessionId, onBack }) {
     });
     setShowFeedback(true);
 
+    // Limpiar timeout anterior si existe
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     // Después de 3 segundos, avanzar a la siguiente pregunta
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       handleMoveNext(isCorrect, studentAnswer);
+      processingRef.current = false; // Resetear después de procesar
+      timeoutRef.current = null;
     }, 3000);
-  }, [gameData?.answerSubmitted, gameData?.currentTurn]);
+
+    // Cleanup: limpiar timeout si el componente se desmonta
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [gameData?.answerSubmitted, gameData?.currentQuestionIndex, gameData?.currentTurn]);
 
   const handleMoveNext = async (wasCorrect, answerIndex) => {
     if (!gameData) return;
