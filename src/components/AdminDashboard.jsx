@@ -70,6 +70,7 @@ import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
 import ContentManager from './ContentManager';
 import ClassManager from './ClassManager';
+import ExerciseManager from './ExerciseManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
@@ -439,7 +440,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       'setup': 'setup',
       'liveGame': 'liveGame',
       'whiteboardSessions': 'whiteboardSessions',
-      'excalidrawWhiteboard': 'excalidrawSessions',
+      'excalidrawSessions': 'excalidrawSessions',
       'liveClasses': 'liveClasses'
     };
 
@@ -750,7 +751,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // ==========================================
 
   // GameContainer (Game Setup) - NO Layout (has its own navigation)
-  if (currentScreen === 'setup' || currentScreen === 'exercises') {
+  if (currentScreen === 'setup') {
     return <GameContainer onBack={handleBackToDashboard} />;
   }
 
@@ -882,6 +883,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <ClassManager user={user} courses={courses} onBack={handleBackToDashboard} openCreateModal={openClassModal} />
+      </DashboardLayout>
+    );
+  }
+
+  // Exercise Manager - WITH Layout
+  if (currentScreen === 'exercises') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <ExerciseManager user={user} onBack={handleBackToDashboard} />
       </DashboardLayout>
     );
   }
