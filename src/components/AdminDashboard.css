@@ -356,22 +356,15 @@
 }
 
 .user-name {
-  font-weight: 600;
+  font-weight: 600 !important;
   color: var(--color-text-primary) !important;
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
-  min-width: 120px;
-}
-
-/* Asegurar contraste en modo oscuro y claro */
-.dark .user-name {
-  color: #f4f4f5 !important;
-}
-
-.light .user-name,
-html:not(.dark) .user-name {
-  color: #18181b !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  min-width: 120px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
 }
 
 /* Badges */
