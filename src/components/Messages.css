@@ -909,6 +909,32 @@
   cursor: not-allowed;
 }
 
+.emoji-button {
+  padding: 10px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.emoji-button:hover:not(:disabled) {
+  background: var(--color-primary, #6366f1);
+  color: white;
+  border-color: var(--color-primary, #6366f1);
+  transform: scale(1.05);
+}
+
+.emoji-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Message Attachments Display */
 .message-attachment {
   margin-bottom: 8px;

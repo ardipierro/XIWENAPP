@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -20,6 +20,7 @@ import {
 } from '../firebase/storage';
 import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
+import EmojiPicker from './EmojiPicker';
 
 /**
  * Message Thread Component
@@ -41,6 +42,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -206,6 +208,29 @@ function MessageThread({ conversation, currentUser, onClose }) {
     setSearchResults([]);
     setCurrentSearchIndex(-1);
     setShowSearch(false);
+  };
+
+  /**
+   * Handle emoji selection
+   */
+  const handleEmojiSelect = (emoji) => {
+    const textarea = inputRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = newMessage;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+
+    setNewMessage(before + emoji + after);
+
+    // Set cursor position after emoji
+    setTimeout(() => {
+      textarea.focus();
+      const newPos = start + emoji.length;
+      textarea.setSelectionRange(newPos, newPos);
+    }, 0);
   };
 
   /**
@@ -539,6 +564,25 @@ function MessageThread({ conversation, currentUser, onClose }) {
           >
             <Paperclip size={20} />
           </button>
+
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className="emoji-button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              disabled={sending || uploading}
+              title="Emojis"
+            >
+              <Smile size={20} />
+            </button>
+
+            {showEmojiPicker && (
+              <EmojiPicker
+                onSelect={handleEmojiSelect}
+                onClose={() => setShowEmojiPicker(false)}
+              />
+            )}
+          </div>
 
           <textarea
             ref={inputRef}
