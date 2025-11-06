@@ -34,7 +34,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="spinner"></div>
       </div>
     );
   }
@@ -72,10 +72,10 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                     setGradeValue(submission.grade || '');
                     setFeedback(submission.feedback || '');
                   }}
-                  className={`w-full text-left p-3 rounded-lg border transition-all ${
+                  className={`w-full text-left p-3 rounded-lg border ${
                     selectedSubmission?.id === submission.id
-                      ? 'border-blue-500 bg-gray-100 dark:bg-gray-800'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      ? 'border-primary bg-gray-100 dark:bg-gray-800'
+                      : 'border-gray-200 dark:border-gray-700'
                   }`}
                 >
                   <div className="flex items-start gap-2">
@@ -185,9 +185,9 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                     <button
                       onClick={handleGrade}
                       disabled={isGrading || !gradeValue}
-                      className="w-full px-4 py-2 bg-primary  text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="btn btn-primary w-full disabled:opacity-50"
                     >
-                      <Send size={18} />
+                      <Send size={18} strokeWidth={2} />
                       {isGrading ? 'Guardando...' : 'Guardar Calificación'}
                     </button>
                   </div>
@@ -228,7 +228,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="btn btn-ghost w-full"
           >
             Cerrar
           </button>

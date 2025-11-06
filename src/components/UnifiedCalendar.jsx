@@ -15,7 +15,7 @@ export default function UnifiedCalendar({ userId, userRole }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="spinner"></div>
       </div>
     );
   }
@@ -154,7 +154,7 @@ function MonthView({ currentDate, events }) {
             return (
               <div
                 key={dayIndex}
-                className={`p-2 border-r border-gray-200 dark:border-gray-700 last:border-r-0 min-h-[100px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors ${
+                className={`p-2 border-r border-gray-200 dark:border-gray-700 last:border-r-0 min-h-[100px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 ${
                   isToday(day) ? 'bg-gray-100 dark:bg-gray-800' : ''
                 }`}
                 onClick={() => setSelectedDate(day)}
@@ -172,7 +172,7 @@ function MonthView({ currentDate, events }) {
                       key={index}
                       className={`text-xs px-1 py-0.5 rounded truncate ${
                         event.type === 'class'
-                          ? 'bg-blue-100 dark:bg-gray-800 text-blue-700 dark:text-blue-300'
+                          ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                           : event.type === 'assignment'
                           ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
                           : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
@@ -276,7 +276,7 @@ function DayView({ currentDate, events }) {
 
 function EventCard({ event, compact = false }) {
   const typeColors = {
-    class: 'bg-blue-100 dark:bg-gray-800 border-blue-500 text-blue-900 dark:text-blue-100',
+    class: 'bg-gray-100 dark:bg-gray-800 border-gray-400 text-gray-900 dark:text-gray-100',
     assignment: 'bg-red-100 dark:bg-red-900 border-red-500 text-red-900 dark:text-red-100',
     event: 'bg-green-100 dark:bg-green-900 border-green-500 text-green-900 dark:text-green-100'
   };

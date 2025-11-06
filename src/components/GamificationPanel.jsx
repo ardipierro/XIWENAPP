@@ -16,7 +16,7 @@ export default function GamificationPanel({ userId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="spinner"></div>
       </div>
     );
   }
@@ -28,7 +28,7 @@ export default function GamificationPanel({ userId }) {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-3xl font-bold">Nivel {profile?.level || 1}</h2>
-            <p className="text-blue-100">{profile?.xp || 0} XP</p>
+            <p className="text-gray-200">{profile?.xp || 0} XP</p>
           </div>
           <div className="p-4 bg-white bg-opacity-20 rounded-lg">
             <Trophy size={32} />
@@ -44,11 +44,11 @@ export default function GamificationPanel({ userId }) {
             </div>
             <div className="w-full bg-white bg-opacity-20 rounded-full h-3">
               <div
-                className="bg-white h-3 rounded-full transition-all duration-500"
+                className="bg-white h-3 rounded-full"
                 style={{ width: `${levelProgress.progressPercent}%` }}
               />
             </div>
-            <p className="text-sm text-blue-100 mt-2">
+            <p className="text-sm text-gray-200 mt-2">
               {levelProgress.xpToNextLevel} XP para el próximo nivel
             </p>
           </div>
@@ -87,8 +87,8 @@ export default function GamificationPanel({ userId }) {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <Target className="text-accent dark:text-purple-400" size={24} />
+            <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+              <Target className="text-gray-400 dark:text-gray-500" size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Actividades</p>
@@ -111,13 +111,13 @@ export default function GamificationPanel({ userId }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium ${
                 activeTab === tab.id
-                  ? 'border-blue-600 text-primary dark:text-primary'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  ? 'border-primary text-gray-900 dark:text-gray-100'
+                  : 'border-transparent text-gray-600 dark:text-gray-400'
               }`}
             >
-              <tab.icon size={18} />
+              <tab.icon size={18} strokeWidth={2} />
               {tab.label}
             </button>
           ))}
@@ -157,8 +157,8 @@ function OverviewTab({ profile, badges, getBadgeById }) {
               if (!badge) return null;
               return (
                 <div key={index} className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-3xl">
-                    {badge.icon}
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-3xl">
+                    <Award size={32} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
                   </div>
                   <p className="text-xs text-center text-gray-700 dark:text-gray-300 mt-2 font-medium">
                     {badge.name}
@@ -217,7 +217,7 @@ function BadgesTab({ profile, badges, getBadgeById }) {
                 return (
                   <div
                     key={badge.id}
-                    className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${
+                    className={`flex flex-col items-center p-4 rounded-lg border-2 ${
                       unlocked
                         ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900'
                         : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 opacity-50'
@@ -258,9 +258,9 @@ function LeaderboardTab({ leaderboard, currentUserId }) {
         return (
           <div
             key={user.userId}
-            className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
+            className={`flex items-center gap-4 p-4 rounded-lg border ${
               isCurrentUser
-                ? 'border-blue-500 bg-gray-100 dark:bg-gray-800'
+                ? 'border-primary bg-gray-100 dark:bg-gray-800'
                 : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
             }`}
           >
@@ -270,7 +270,9 @@ function LeaderboardTab({ leaderboard, currentUserId }) {
 
             {index < 3 && (
               <div className="text-2xl">
-                
+                {index === 0 && <Crown size={24} strokeWidth={2} className="text-yellow-500" />}
+                {index === 1 && <Medal size={24} strokeWidth={2} className="text-gray-400" />}
+                {index === 2 && <Medal size={24} strokeWidth={2} className="text-orange-600" />}
               </div>
             )}
 
