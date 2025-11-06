@@ -1,4 +1,4 @@
-import logger from 'logger';
+import logger from './logger';
 
 import { checkMigrationStatus as checkLessonsStatus } from './migrateLessonsToContent';
 import { checkMigrationStatus as checkManyToManyStatus } from './migrateToManyToMany';

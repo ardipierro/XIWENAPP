@@ -1,4 +1,4 @@
-import logger from 'logger';
+import logger from './logger';
 
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
