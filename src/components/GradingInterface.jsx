@@ -74,7 +74,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                   }}
                   className={`w-full text-left p-3 rounded-lg border transition-all ${
                     selectedSubmission?.id === submission.id
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900'
+                      ? 'border-blue-500 bg-gray-100 dark:bg-gray-800'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
@@ -185,7 +185,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                     <button
                       onClick={handleGrade}
                       disabled={isGrading || !gradeValue}
-                      className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="w-full px-4 py-2 bg-primary  text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       <Send size={18} />
                       {isGrading ? 'Guardando...' : 'Guardar Calificación'}

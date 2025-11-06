@@ -73,7 +73,7 @@ export default function StudentAssignmentsView({ studentId }) {
             onClick={() => setFilter(tab.value)}
             className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
               filter === tab.value
-                ? 'bg-blue-600 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
@@ -132,7 +132,7 @@ function AssignmentCard({ assignment, onClick }) {
         <div className={`p-3 rounded-lg ${
           isOverdue ? 'bg-red-100 dark:bg-red-900' :
           isGraded ? 'bg-green-100 dark:bg-green-900' :
-          isSubmitted ? 'bg-blue-100 dark:bg-blue-900' :
+          isSubmitted ? 'bg-blue-100 dark:bg-gray-800' :
           'bg-orange-100 dark:bg-orange-900'
         }`}>
           {isGraded ? (
@@ -142,7 +142,7 @@ function AssignmentCard({ assignment, onClick }) {
           ) : (
             <FileText className={`${
               isSubmitted
-                ? 'text-blue-600 dark:text-blue-400'
+                ? 'text-primary dark:text-primary'
                 : 'text-orange-600 dark:text-orange-400'
             }`} size={24} />
           )}
@@ -182,7 +182,7 @@ function AssignmentCard({ assignment, onClick }) {
             )}
 
             {isSubmitted && !isGraded && (
-              <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
+              <div className="px-2 py-1 bg-blue-100 dark:bg-gray-800 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
                 Entregada
               </div>
             )}
@@ -362,7 +362,7 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                   type="button"
                   onClick={handleSaveDraft}
                   disabled={isSaving}
-                  className="flex-1 px-4 py-2 border border-blue-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2 border border-blue-600 text-primary dark:text-primary rounded-lg   transition-colors disabled:opacity-50"
                 >
                   {isSaving ? 'Guardando...' : 'Guardar borrador'}
                 </button>
@@ -370,7 +370,7 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSaving}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-primary  text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Send size={18} />
                   {isSaving ? 'Entregando...' : 'Entregar tarea'}
@@ -379,7 +379,7 @@ function SubmissionModal({ assignment, studentId, onClose }) {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="p-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
+              <div className="p-4 bg-gray-100 dark:bg-gray-800 border border-blue-200 dark:border-blue-700 rounded-lg">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   ✓ Tarea entregada el {submission.submittedAt?.toDate().toLocaleString('es-ES')}
                 </p>

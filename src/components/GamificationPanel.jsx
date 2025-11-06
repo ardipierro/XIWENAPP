@@ -24,7 +24,7 @@ export default function GamificationPanel({ userId }) {
   return (
     <div className="p-6 space-y-6">
       {/* Header with Level and XP */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+      <div className="bg-primary rounded-lg p-6 text-white">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-3xl font-bold">Nivel {profile?.level || 1}</h2>
@@ -88,7 +88,7 @@ export default function GamificationPanel({ userId }) {
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <Target className="text-purple-600 dark:text-purple-400" size={24} />
+              <Target className="text-accent dark:text-purple-400" size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Actividades</p>
@@ -113,7 +113,7 @@ export default function GamificationPanel({ userId }) {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  ? 'border-blue-600 text-primary dark:text-primary'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
@@ -260,7 +260,7 @@ function LeaderboardTab({ leaderboard, currentUserId }) {
             key={user.userId}
             className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
               isCurrentUser
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900'
+                ? 'border-blue-500 bg-gray-100 dark:bg-gray-800'
                 : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
             }`}
           >
@@ -270,14 +270,14 @@ function LeaderboardTab({ leaderboard, currentUserId }) {
 
             {index < 3 && (
               <div className="text-2xl">
-                {index === 0 ? '👑' : index === 1 ? '🥈' : '🥉'}
+                
               </div>
             )}
 
             <div className="flex-1">
               <p className="font-semibold text-gray-900 dark:text-white">
                 {user.name}
-                {isCurrentUser && <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">(Tú)</span>}
+                {isCurrentUser && <span className="ml-2 text-sm text-primary dark:text-primary">(Tú)</span>}
               </p>
               <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                 <span>Nivel {user.level}</span>
