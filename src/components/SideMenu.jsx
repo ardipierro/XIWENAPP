@@ -22,7 +22,10 @@ import {
   ChevronDown,
   ChevronRight,
   Zap,
-  TrendingUp
+  TrendingUp,
+  Trophy,
+  CalendarDays,
+  CheckSquare
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -123,6 +126,9 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },
           { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
           { icon: ClipboardList, label: 'Asignado a Mí', path: '/student', action: 'assignments' },
+          { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'assignmentsView' },
+          { icon: Trophy, label: 'Gamificación', path: '/student', action: 'gamification' },
+          { icon: CalendarDays, label: 'Calendario', path: '/student', action: 'calendar' },
           { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classes' },
           { icon: Video, label: 'Clases en Vivo', path: '/student', action: 'liveClasses' },
           { icon: Presentation, label: 'Pizarras', path: '/student', action: 'whiteboardSessions' },

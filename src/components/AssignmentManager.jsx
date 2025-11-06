@@ -27,7 +27,7 @@ import {
   Modal,
   Input,
   Badge,
-  Spinner,
+  BaseLoading,
   StatCard,
   BaseEmptyState
 } from './common';
@@ -74,7 +74,7 @@ export default function AssignmentManager({ teacherId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Spinner size="lg" />
+        <BaseLoading variant="spinner" size="lg" />
       </div>
     );
   }
@@ -302,7 +302,7 @@ function AssignmentStats({ assignmentId }) {
   if (!stats) {
     return (
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <Spinner size="md" />
+        <BaseLoading variant="spinner" size="md" />
       </div>
     );
   }

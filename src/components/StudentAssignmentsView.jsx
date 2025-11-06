@@ -16,7 +16,7 @@ import {
   Send,
   X
 } from 'lucide-react';
-import { Spinner } from './common';
+import { BaseLoading } from './common';
 
 export default function StudentAssignmentsView({ studentId }) {
   const { assignments, loading } = useAssignments(studentId, 'student');
@@ -37,7 +37,7 @@ export default function StudentAssignmentsView({ studentId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Spinner size="md" />
+        <BaseLoading variant="spinner" size="lg" text="Cargando tareas..." />
       </div>
     );
   }

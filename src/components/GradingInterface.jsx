@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import logger from '../utils/logger';
 import { useSubmission } from '../hooks/useAssignments';
 import { CheckCircle, XCircle, Clock, User, Calendar, FileText, Send } from 'lucide-react';
-import { Button, Modal, Spinner, Alert, Badge } from './common';
+import { Button, Modal, BaseLoading, Alert, Badge } from './common';
 
 export default function GradingInterface({ assignment, teacherId, onClose }) {
   const { submissions, grade: gradeSubmission, loading } = useSubmission(assignment.id);
@@ -64,7 +64,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
     return (
       <Modal isOpen={true} onClose={onClose} title="Cargando...">
         <div className="flex items-center justify-center h-64">
-          <Spinner size="lg" />
+          <BaseLoading variant="spinner" size="lg" />
         </div>
       </Modal>
     );

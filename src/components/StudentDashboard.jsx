@@ -8,7 +8,7 @@ import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStud
 import { getInstancesForStudent } from '../firebase/classInstances';
 import { getStudentAvailableLiveClasses } from '../firebase/liveClasses';
 import { getAssignedWhiteboards, subscribeToLiveWhiteboards } from '../firebase/whiteboard';
-import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle } from 'lucide-react';
+import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle, Trophy, CalendarDays } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import MyCourses from './student/MyCourses';
 import MyAssignments from './student/MyAssignments';
@@ -18,6 +18,9 @@ import StudentClassView from './StudentClassView';
 import LiveClassRoom from './LiveClassRoom';
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
+import StudentAssignmentsView from './StudentAssignmentsView';
+import GamificationPanel from './GamificationPanel';
+import UnifiedCalendar from './UnifiedCalendar';
 
 // Base Components
 import {
@@ -54,7 +57,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   const [liveWhiteboards, setLiveWhiteboards] = useState([]);
   const [selectedLiveClass, setSelectedLiveClass] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'classes', 'liveClasses', 'liveClass', 'whiteboardSessions', 'whiteboard', 'courseView', 'contentPlayer'
+  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'assignmentsView', 'gamification', 'calendar', 'classes', 'liveClasses', 'liveClass', 'whiteboardSessions', 'whiteboard', 'courseView', 'contentPlayer'
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [selectedCourseData, setSelectedCourseData] = useState(null);
   const [selectedContentId, setSelectedContentId] = useState(null);
@@ -246,6 +249,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       'dashboard': 'dashboard',
       'courses': 'courses',
       'assignments': 'assignments',
+      'assignmentsView': 'assignmentsView',
+      'gamification': 'gamification',
+      'calendar': 'calendar',
       'classes': 'classes',
       'liveClasses': 'liveClasses',
       'whiteboardSessions': 'whiteboardSessions'
@@ -453,6 +459,54 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               onPlayContent={handlePlayAssignmentContent}
               onPlayExercise={handlePlayAssignmentExercise}
             />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render StudentAssignmentsView (new component from parallel-work)
+  if (currentView === 'assignmentsView') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+              ← Volver a Inicio
+            </BaseButton>
+            <StudentAssignmentsView studentId={student?.id} />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render GamificationPanel view
+  if (currentView === 'gamification') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+              ← Volver a Inicio
+            </BaseButton>
+            <GamificationPanel userId={student?.id} />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render UnifiedCalendar view
+  if (currentView === 'calendar') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+              ← Volver a Inicio
+            </BaseButton>
+            <UnifiedCalendar userId={student?.id} userRole="student" />
           </div>
         </div>
       </DashboardLayout>

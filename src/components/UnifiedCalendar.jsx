@@ -7,6 +7,7 @@ import { useState } from 'react';
 import logger from '../utils/logger';
 import { useCalendar, useCalendarNavigation } from '../hooks/useCalendar';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Plus } from 'lucide-react';
+import { BaseLoading } from './common';
 
 export default function UnifiedCalendar({ userId, userRole }) {
   const { currentDate, view, setView, goToToday, goToNext, goToPrevious, getDateRange, getDisplayText } = useCalendarNavigation();
@@ -16,7 +17,7 @@ export default function UnifiedCalendar({ userId, userRole }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Spinner size="md" />
+        <BaseLoading variant="spinner" size="lg" text="Cargando calendario..." />
       </div>
     );
   }

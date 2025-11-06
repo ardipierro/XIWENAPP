@@ -7,6 +7,7 @@ import { useState } from 'react';
 import logger from '../utils/logger';
 import { useGamification, useLeaderboard, useBadges } from '../hooks/useGamification';
 import { Trophy, Award, Zap, TrendingUp, Star, Medal, Crown, Target } from 'lucide-react';
+import { BaseLoading } from './common';
 
 export default function GamificationPanel({ userId }) {
   const { profile, levelProgress, loading } = useGamification(userId);
@@ -17,7 +18,7 @@ export default function GamificationPanel({ userId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Spinner size="md" />
+        <BaseLoading variant="spinner" size="lg" text="Cargando gamificación..." />
       </div>
     );
   }
