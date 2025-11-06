@@ -998,6 +998,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
 
     return (
+      <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="students-panel">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
@@ -1061,17 +1062,18 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
           )}
         </div>
-
-        {showUserProfile && selectedUserProfile && (
-          <UserProfile
-            selectedUser={selectedUserProfile}
-            currentUser={user}
-            onBack={handleCloseUserProfile}
-            onUpdate={loadUsers}
-            isAdmin={isAdmin}
-          />
-        )}
       </DashboardLayout>
+
+      {showUserProfile && selectedUserProfile && (
+        <UserProfile
+          selectedUser={selectedUserProfile}
+          currentUser={user}
+          onBack={handleCloseUserProfile}
+          onUpdate={loadUsers}
+          isAdmin={isAdmin}
+        />
+      )}
+    </>
     );
   }
 
@@ -1089,6 +1091,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     }
 
     return (
+      <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="admin-users-section">
           <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
@@ -1262,25 +1265,27 @@ function AdminDashboard({ user, userRole, onLogout }) {
           </div>
         </div>
 
-        {showAddUserModal && (
-          <AddUserModal
-            onClose={() => setShowAddUserModal(false)}
-            onUserCreated={handleUserCreated}
-            currentUser={user}
-            isAdmin={isAdmin}
-          />
-        )}
-
-        {showUserProfile && selectedUserProfile && (
-          <UserProfile
-            selectedUser={selectedUserProfile}
-            currentUser={user}
-            onBack={handleCloseUserProfile}
-            onUpdate={loadUsers}
-            isAdmin={isAdmin}
-          />
-        )}
       </DashboardLayout>
+
+      {showAddUserModal && (
+        <AddUserModal
+          onClose={() => setShowAddUserModal(false)}
+          onUserCreated={handleUserCreated}
+          currentUser={user}
+          isAdmin={isAdmin}
+        />
+      )}
+
+      {showUserProfile && selectedUserProfile && (
+        <UserProfile
+          selectedUser={selectedUserProfile}
+          currentUser={user}
+          onBack={handleCloseUserProfile}
+          onUpdate={loadUsers}
+          isAdmin={isAdmin}
+        />
+      )}
+    </>
     );
   }
 
