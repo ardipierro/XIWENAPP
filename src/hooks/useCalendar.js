@@ -27,68 +27,100 @@ export function useCalendar(userId, userRole, startDate = null, endDate = null) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Default to current month if no dates provided
-  const getDefaultDates = useCallback(() => {
-    const now = new Date();
-    const start = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    return { start, end };
-  }, [startDate, endDate]);
+  // Convert dates to timestamps to avoid object reference issues
+  const startTime = startDate?.getTime() || null;
+  const endTime = endDate?.getTime() || null;
 
-  const fetchEvents = useCallback(async () => {
-    if (!userId || !userRole) {
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    let isMounted = true;
 
-    setLoading(true);
-    setError(null);
+    const fetchEvents = async () => {
+      if (!userId || !userRole) {
+        setLoading(false);
+        return;
+      }
 
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Reconstruct dates from timestamps
+        const now = new Date();
+        const start = startTime ? new Date(startTime) : new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = endTime ? new Date(endTime) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+        const data = await getUnifiedCalendar(userId, userRole, start, end);
+
+        if (isMounted) {
+          setEvents(data);
+        }
+      } catch (err) {
+        logger.error('Error fetching calendar events', 'useCalendar', err);
+        if (isMounted) {
+          setError(err.message);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchEvents();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId, userRole, startTime, endTime]);
+
+  const refresh = useCallback(async () => {
     try {
-      const { start, end } = getDefaultDates();
+      setLoading(true);
+      setError(null);
+
+      const now = new Date();
+      const start = startTime ? new Date(startTime) : new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = endTime ? new Date(endTime) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
       const data = await getUnifiedCalendar(userId, userRole, start, end);
       setEvents(data);
     } catch (err) {
-      logger.error('Error fetching calendar events', 'useCalendar', err);
+      logger.error('Error refreshing calendar events', 'useCalendar', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [userId, userRole, getDefaultDates]);
-
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  }, [userId, userRole, startTime, endTime]);
 
   const createEvent = useCallback(async (eventData) => {
     const result = await createCalendarEvent(eventData);
     if (result.success) {
-      await fetchEvents();
+      await refresh();
     }
     return result;
-  }, [fetchEvents]);
+  }, [refresh]);
 
   const updateEvent = useCallback(async (eventId, updates) => {
     const result = await updateCalendarEvent(eventId, updates);
     if (result.success) {
-      await fetchEvents();
+      await refresh();
     }
     return result;
-  }, [fetchEvents]);
+  }, [refresh]);
 
   const deleteEvent = useCallback(async (eventId) => {
     const result = await deleteCalendarEvent(eventId);
     if (result.success) {
-      await fetchEvents();
+      await refresh();
     }
     return result;
-  }, [fetchEvents]);
+  }, [refresh]);
 
   return {
     events,
     loading,
     error,
-    refresh: fetchEvents,
+    refresh,
     createEvent,
     updateEvent,
     deleteEvent
@@ -106,35 +138,61 @@ export function useTodayEvents(userId, userRole) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchTodayEvents = useCallback(async () => {
-    if (!userId || !userRole) {
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    let isMounted = true;
 
-    setLoading(true);
-    setError(null);
+    const fetchTodayEvents = async () => {
+      if (!userId || !userRole) {
+        setLoading(false);
+        return;
+      }
 
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getTodayEvents(userId, userRole);
+        if (isMounted) {
+          setEvents(data);
+        }
+      } catch (err) {
+        logger.error('Error fetching today events', 'useTodayEvents', err);
+        if (isMounted) {
+          setError(err.message);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTodayEvents();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId, userRole]);
+
+  const refresh = useCallback(async () => {
     try {
+      setLoading(true);
+      setError(null);
       const data = await getTodayEvents(userId, userRole);
       setEvents(data);
     } catch (err) {
-      logger.error('Error fetching today events', 'useTodayEvents', err);
+      logger.error('Error refreshing today events', 'useTodayEvents', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   }, [userId, userRole]);
 
-  useEffect(() => {
-    fetchTodayEvents();
-  }, [fetchTodayEvents]);
-
   return {
     events,
     loading,
     error,
-    refresh: fetchTodayEvents
+    refresh
   };
 }
 
@@ -149,35 +207,61 @@ export function useUpcomingEvents(userId, userRole) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchUpcomingEvents = useCallback(async () => {
-    if (!userId || !userRole) {
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    let isMounted = true;
 
-    setLoading(true);
-    setError(null);
+    const fetchUpcomingEvents = async () => {
+      if (!userId || !userRole) {
+        setLoading(false);
+        return;
+      }
 
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getUpcomingEvents(userId, userRole);
+        if (isMounted) {
+          setEvents(data);
+        }
+      } catch (err) {
+        logger.error('Error fetching upcoming events', 'useUpcomingEvents', err);
+        if (isMounted) {
+          setError(err.message);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUpcomingEvents();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId, userRole]);
+
+  const refresh = useCallback(async () => {
     try {
+      setLoading(true);
+      setError(null);
       const data = await getUpcomingEvents(userId, userRole);
       setEvents(data);
     } catch (err) {
-      logger.error('Error fetching upcoming events', 'useUpcomingEvents', err);
+      logger.error('Error refreshing upcoming events', 'useUpcomingEvents', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   }, [userId, userRole]);
 
-  useEffect(() => {
-    fetchUpcomingEvents();
-  }, [fetchUpcomingEvents]);
-
   return {
     events,
     loading,
     error,
-    refresh: fetchUpcomingEvents
+    refresh
   };
 }
 
