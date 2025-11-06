@@ -5,10 +5,15 @@
 ### Archivos Importantes del Proyecto:
 
 **Documentación de Estándares:**
-- `CODING_STANDARDS.md` - Documento maestro de estándares y mejores prácticas
-  - **Ruta relativa desde raíz:** `./CODING_STANDARDS.md`
-  - **Ruta absoluta:** `/CODING_STANDARDS.md`
-  - **Comando para leer:** Usa el tool Read con path `CODING_STANDARDS.md`
+- `CODING_STANDARDS.md` - 📘 Documento maestro de estándares y mejores prácticas
+  - **Ruta para leer:** `CODING_STANDARDS.md`
+  - Incluye: Reglas de Tailwind, BaseModal, Custom Hooks, Logger, Dark Mode
+
+- `DESIGN_SYSTEM.md` - 🎨 Sistema de diseño y componentes
+  - **Ruta para leer:** `DESIGN_SYSTEM.md`
+  - Incluye: Colores, tipografía, espaciado, componentes UI
+
+**IMPORTANTE:** Ambos documentos están en la raíz del proyecto. NO uses rutas absolutas de Windows.
 
 **Componentes Base:**
 - `src/components/common/` - Todos los componentes base reutilizables
@@ -120,6 +125,45 @@ XIWENAPP/
 - ⏭️ StudentClassView.jsx
 - ⏭️ TeacherDashboard (ya parcialmente refactorizado)
 - ⏭️ AdminDashboard (ya parcialmente refactorizado)
+
+---
+
+## 📚 Todos los Documentos Disponibles:
+
+**Documentos Principales (LEER ESTOS PRIMERO):**
+1. `CODING_STANDARDS.md` - 📘 Estándares de código (PRINCIPAL)
+2. `DESIGN_SYSTEM.md` - 🎨 Sistema de diseño y colores
+3. `README.md` - Descripción del proyecto
+
+**Documentos de Configuración:**
+4. `STYLE_CONFIG.md` - Configuración de estilos
+5. `STYLE_GUIDE_SUMMARY.md` - Resumen de guía de estilos
+6. `TAILWIND_CENTRALIZATION.md` - Centralización de Tailwind
+
+**Documentos de Refactoring (Histórico):**
+7. `REFACTORING_COMPLETE.md` - Refactoring completo
+8. `REFACTORING_SECTION1.md` - Sección 1
+9. `REFACTORING_SECTIONS2-4.md` - Secciones 2-4
+10. `REFACTORING_SECTIONS5-7.md` - Secciones 5-7
+11. `UNIFICACION_MASTER.md` - Unificación master
+12. `UNIFIED_CARD_SYSTEM.md` - Sistema de cards unificado
+
+**Documentos de Mejoras:**
+13. `IMPROVEMENTS_COMPLETED.md` - Mejoras completadas
+14. `AUDIT_REPORT.md` - Reporte de auditoría
+15. `CHANGELOG_NOCTURNO.md` - Changelog nocturno
+
+**Documentos de Features:**
+16. `PLAN_CURSOS_ESTUDIANTES.md` - Plan de cursos
+17. `EXERCISE_FORMATS.md` - Formatos de ejercicios
+18. `LIVEKIT_SETUP.md` - Setup de LiveKit
+19. `REALTIME_DATABASE_SETUP.md` - Setup de Realtime DB
+
+**⚠️ NOTA IMPORTANTE para Claude Code Web:**
+- Usa **solo el nombre del archivo** sin rutas absolutas
+- Ejemplo: `CODING_STANDARDS.md` (✅) NO `C:\Users\...\CODING_STANDARDS.md` (❌)
+- Los archivos están en la raíz del proyecto
+- Para subdirectorios usa rutas relativas: `src/components/common/BaseButton.jsx`
 
 ---
 
