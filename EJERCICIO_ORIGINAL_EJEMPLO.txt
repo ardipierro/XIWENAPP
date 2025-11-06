@@ -1,0 +1,151 @@
+===============================================
+EJERCICIO ORIGINAL - FORMATO XIWEN APP
+===============================================
+
+Este es el formato original que dio origen a la aplicación.
+Cada ejercicio tiene 5 líneas:
+1. La pregunta
+2-5. Cuatro opciones (la correcta lleva asterisco *)
+
+IMPORTANTE: No debe haber líneas en blanco entre preguntas.
+
+===============================================
+EJEMPLO: Matemáticas Básicas
+===============================================
+
+¿Cuánto es 2 + 2?
+3
+*4
+5
+6
+
+¿Cuál es el resultado de 10 - 3?
+5
+6
+*7
+8
+
+¿Cuánto es 5 × 3?
+10
+12
+*15
+18
+
+¿Cuál es el resultado de 20 ÷ 4?
+3
+4
+*5
+6
+
+===============================================
+EJEMPLO: Geografía
+===============================================
+
+¿Cuál es la capital de Argentina?
+Córdoba
+Rosario
+*Buenos Aires
+Mendoza
+
+¿En qué continente está China?
+Europa
+África
+América
+*Asia
+
+¿Cuál es el océano más grande?
+Atlántico
+Índico
+Ártico
+*Pacífico
+
+¿Qué país tiene forma de bota?
+España
+Grecia
+*Italia
+Portugal
+
+===============================================
+EJEMPLO: Historia
+===============================================
+
+¿En qué año fue la Revolución de Mayo en Argentina?
+1808
+1809
+*1810
+1811
+
+¿Quién pintó la Mona Lisa?
+Miguel Ángel
+*Leonardo da Vinci
+Rafael
+Donatello
+
+¿En qué año llegó Colón a América?
+1490
+1491
+*1492
+1493
+
+===============================================
+EJEMPLO: Ciencias
+===============================================
+
+¿Cuál es el planeta más cercano al Sol?
+Venus
+Tierra
+*Mercurio
+Marte
+
+¿Cuántos huesos tiene el cuerpo humano adulto?
+198
+*206
+214
+220
+
+¿Qué gas respiramos principalmente?
+Oxígeno
+Dióxido de carbono
+*Nitrógeno
+Hidrógeno
+
+¿Cuál es el metal más abundante en la corteza terrestre?
+Hierro
+Cobre
+*Aluminio
+Oro
+
+===============================================
+NOTAS IMPORTANTES:
+===============================================
+
+1. FORMATO ESTRICTO: Cada pregunta debe tener exactamente 5 líneas
+2. ASTERISCO: La respuesta correcta SIEMPRE lleva asterisco (*) al inicio
+3. SIN LÍNEAS EN BLANCO: No debe haber líneas vacías entre preguntas
+4. ORDEN: Pregunta, luego 4 opciones (una con asterisco)
+
+===============================================
+EVOLUCIÓN DE LA APP:
+===============================================
+
+1. VERSIÓN ORIGINAL (Octubre 2025):
+   - Juego de preguntas por turnos
+   - Múltiples alumnos compitiendo
+   - Temporizador por pregunta
+   - Sistema de puntos
+   - Historial de partidas
+   - Categorías de preguntas
+
+2. NUEVAS FUNCIONALIDADES (Actualidad):
+   - Sistema de autenticación (Firebase)
+   - Roles: Admin, Profesor, Estudiante
+   - Gestión de cursos y contenidos
+   - Sistema de clases en vivo (LiveKit)
+   - Pizarra colaborativa en tiempo real
+   - Sistema de grupos
+   - Analytics y reportes
+   - PWA con modo oscuro
+   - Asignación de ejercicios/contenidos
+   - Gestión de créditos
+
+===============================================

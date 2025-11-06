@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   BookOpen, ClipboardList, Calendar, CheckCircle, XCircle,
   CreditCard, Users, Settings, Lightbulb, Trash2, X,
-  FileText, Repeat, BarChart3, AlertTriangle, Save, GraduationCap, Clock, Plus, Grid, List
+  FileText, Repeat, BarChart3, AlertTriangle, Save, GraduationCap, Clock, Plus
 } from 'lucide-react';
 import {
   createClass,
@@ -273,45 +273,55 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
   };
 
   const handleSaveClass = async () => {
-    if (!formData.name.trim()) {
-      alert('El nombre de la clase es requerido');
-      return;
-    }
-
-    if (formData.schedules.length === 0) {
-      alert('Debes agregar al menos un horario');
-      return;
-    }
-
-    const courseData = courses.find(c => c.id === formData.courseId);
-
-    const classData = {
-      ...formData,
-      courseName: courseData?.name || '',
-      teacherId: user.uid
-    };
-
-    let result;
-    if (editingClass) {
-      result = await updateClass(editingClass.id, classData);
-    } else {
-      result = await createClass(classData);
-    }
-
-    if (result.success) {
-      alert(editingClass ? 'Clase actualizada' : 'Clase creada exitosamente');
-      setShowModal(false);
-      loadData();
-
-      // Si es nueva clase, generar instancias automáticamente
-      if (!editingClass && result.classId) {
-        const genResult = await generateInstances(result.classId, 4);
-        if (genResult.success) {
-          alert(`${genResult.count} instancias generadas para las próximas 4 semanas`);
-        }
+    console.log('handleSaveClass called');
+    try {
+      if (!formData.name.trim()) {
+        alert('El nombre de la clase es requerido');
+        return;
       }
-    } else {
-      alert('Error: ' + result.error);
+
+      if (formData.schedules.length === 0) {
+        alert('Debes agregar al menos un horario');
+        return;
+      }
+
+      const courseData = courses.find(c => c.id === formData.courseId);
+
+      const classData = {
+        ...formData,
+        courseName: courseData?.name || '',
+        teacherId: user.uid
+      };
+
+      console.log('Creating/updating class with data:', classData);
+
+      let result;
+      if (editingClass) {
+        result = await updateClass(editingClass.id, classData);
+      } else {
+        result = await createClass(classData);
+      }
+
+      console.log('Result:', result);
+
+      if (result.success) {
+        alert(editingClass ? 'Clase actualizada' : 'Clase creada exitosamente');
+        setShowModal(false);
+        loadData();
+
+        // Si es nueva clase, generar instancias automáticamente
+        if (!editingClass && result.classId) {
+          const genResult = await generateInstances(result.classId, 4);
+          if (genResult.success) {
+            alert(`${genResult.count} instancias generadas para las próximas 4 semanas`);
+          }
+        }
+      } else {
+        alert('Error: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error in handleSaveClass:', error);
+      alert('Error inesperado: ' + error.message);
     }
   };
 
@@ -533,32 +543,15 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
           onAction={handleCreateClass}
         />
 
-        {/* Search Bar + Toggle de Vista */}
-        <div className="flex gap-3 items-center mb-6">
-          <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Buscar clases..."
-            className="flex-1"
-          />
-
-          <div className="view-toggle">
-            <button
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Vista en cuadrícula"
-            >
-              <Grid size={18} />
-            </button>
-            <button
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-              title="Vista en lista"
-            >
-              <List size={18} />
-            </button>
-          </div>
-        </div>
+        {/* Search Bar con Toggle de Vista integrado */}
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar clases..."
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          className="mb-6"
+        />
 
         {message.text && (
           <div className={`cm-message ${message.type}`}>

@@ -46,7 +46,7 @@ import {
   getStudentEnrollments,
   getStudentEnrolledCoursesCount
 } from '../firebase/firestore';
-import { getAllUsers } from '../firebase/users';
+import { getAllUsers, deleteUser } from '../firebase/users';
 import {
   assignToStudent,
   removeFromStudent,
@@ -72,6 +72,10 @@ import QuickAccessCard from './QuickAccessCard';
 import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
+import WhiteboardManager from './WhiteboardManager';
+import StudentCard from './StudentCard';
+import LiveClassManager from './LiveClassManager';
+import LiveClassRoom from './LiveClassRoom';
 import './TeacherDashboard.css';
 
 // Icon mapping for role icons from roleConfig
@@ -88,8 +92,11 @@ const ICON_MAP = {
 function TeacherDashboard({ user, userRole, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, playExercise, whiteboard
+  const [currentScreen, setCurrentScreen] = useState('dashboard'); // dashboard, setup, courses, categories, history, users, students, playExercise, whiteboard, whiteboardSessions, liveClasses, liveClassRoom, testCollab
   const [selectedExerciseId, setSelectedExerciseId] = useState(null);
+  const [selectedWhiteboardSession, setSelectedWhiteboardSession] = useState(null);
+  const [whiteboardManagerKey, setWhiteboardManagerKey] = useState(0);
+  const [selectedLiveClass, setSelectedLiveClass] = useState(null);
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalGames: 0,
@@ -138,6 +145,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Estados para búsqueda y vista en dashboard principal
   const [dashboardSearchTerm, setDashboardSearchTerm] = useState('');
   const [dashboardViewMode, setDashboardViewMode] = useState('grid'); // 'grid' or 'list'
+
+  // Estados para panel de alumnos (cards)
+  const [studentsSearchTerm, setStudentsSearchTerm] = useState('');
+  const [studentsViewMode, setStudentsViewMode] = useState('grid'); // 'grid' or 'list'
 
   // Determinar si el usuario es admin (verificar tanto email como rol en Firestore)
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
@@ -271,6 +282,28 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     await loadUsers();
   };
 
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción marcará al usuario como inactivo.')) {
+      return;
+    }
+
+    try {
+      const result = await deleteUser(userId);
+      if (result.success) {
+        // Recargar la lista de usuarios
+        await loadUsers();
+        // Mostrar mensaje de éxito (puedes agregar un toast/notification)
+        console.log('Usuario eliminado exitosamente');
+      } else {
+        console.error('Error al eliminar usuario:', result.error);
+        alert('Error al eliminar el usuario. Por favor intenta nuevamente.');
+      }
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error);
+      alert('Error al eliminar el usuario. Por favor intenta nuevamente.');
+    }
+  };
+
   const handleMenuAction = (action) => {
     // Mapear las acciones del menú lateral a las vistas del dashboard
     const actionMap = {
@@ -284,7 +317,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       'setup': 'setup',
       'analytics': 'analytics',
       'users': 'users',
-      'whiteboard': 'whiteboard'
+      'students': 'students',
+      'whiteboardSessions': 'whiteboardSessions',
+      'liveClasses': 'liveClasses'
     };
 
     const screen = actionMap[action];
@@ -292,6 +327,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     if (screen) {
       setCurrentScreen(screen);
       setSelectedExerciseId(null);
+      setSelectedWhiteboardSession(null);
     }
   };
 
@@ -878,9 +914,179 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
+  // Renderizar Pizarra Colaborativa (TEST)
+  if (currentScreen === 'testCollab') {
+    // Generate unique session ID based on user ID and timestamp to ensure user is always host
+    const sessionId = `collab_${user.uid}_${Date.now()}`;
+    return (
+      <Whiteboard
+        onBack={handleBackToDashboard}
+        isCollaborative={true}
+        collaborativeSessionId={sessionId}
+      />
+    );
+  }
+
   // Renderizar Pizarra Interactiva - SIN Layout, pantalla completa
   if (currentScreen === 'whiteboard') {
-    return <Whiteboard onBack={handleBackToDashboard} />;
+    const isLive = selectedWhiteboardSession?.isLive;
+    const liveSessionId = selectedWhiteboardSession?.liveSessionId;
+
+    return (
+      <Whiteboard
+        onBack={() => {
+          setWhiteboardManagerKey(prev => prev + 1); // Forzar recarga del manager
+          setCurrentScreen('whiteboardSessions'); // Volver al panel de pizarras, no al dashboard
+        }}
+        initialSession={selectedWhiteboardSession}
+        isCollaborative={isLive}
+        collaborativeSessionId={liveSessionId}
+      />
+    );
+  }
+
+  // Renderizar Gestión de Pizarras Guardadas - CON Layout
+  if (currentScreen === 'whiteboardSessions') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <WhiteboardManager
+          key={whiteboardManagerKey} // Cambia cada vez que vuelves de la pizarra
+          onBack={handleBackToDashboard}
+          onOpenWhiteboard={() => {
+            setSelectedWhiteboardSession(null);
+            setCurrentScreen('whiteboard');
+          }}
+          onLoadSession={(session) => {
+            setSelectedWhiteboardSession(session);
+            setCurrentScreen('whiteboard');
+          }}
+          onGoLive={(session, liveSessionId) => {
+            // Open whiteboard in collaborative mode
+            setSelectedWhiteboardSession({
+              ...session,
+              isLive: true,
+              liveSessionId: liveSessionId
+            });
+            setCurrentScreen('whiteboard');
+          }}
+        />
+      </DashboardLayout>
+    );
+  }
+
+  // Renderizar Live Class Manager - CON Layout
+  if (currentScreen === 'liveClasses') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <LiveClassManager
+          user={user}
+          onBack={handleBackToDashboard}
+          onStartClass={(liveClass) => {
+            setSelectedLiveClass(liveClass);
+            setCurrentScreen('liveClassRoom');
+          }}
+        />
+      </DashboardLayout>
+    );
+  }
+
+  // Renderizar Live Class Room (Sala de video) - SIN Layout (pantalla completa)
+  if (currentScreen === 'liveClassRoom' && selectedLiveClass) {
+    return (
+      <LiveClassRoom
+        liveClass={selectedLiveClass}
+        user={user}
+        userRole={userRole}
+        onLeave={() => {
+          setSelectedLiveClass(null);
+          setCurrentScreen('liveClasses');
+        }}
+      />
+    );
+  }
+
+  // Renderizar Panel de Alumnos (Vista Cards) - CON Layout
+  if (currentScreen === 'students') {
+    // Filtrar solo estudiantes
+    const students = users.filter(u => ['student', 'listener', 'trial'].includes(u.role));
+
+    // Filtrar por búsqueda
+    const filteredStudents = students.filter(student =>
+      student.name?.toLowerCase().includes(studentsSearchTerm.toLowerCase()) ||
+      student.email?.toLowerCase().includes(studentsSearchTerm.toLowerCase())
+    );
+
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
+        <div className="students-panel">
+          {/* Botón Volver */}
+          <button onClick={handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver a Inicio
+          </button>
+
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <GraduationCap size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Alumnos</h1>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
+                <Plus size={18} strokeWidth={2} /> Agregar Alumno
+              </button>
+              <button onClick={loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Actualizar lista">
+                <RefreshCw size={18} strokeWidth={2} /> Actualizar
+              </button>
+            </div>
+          </div>
+
+          {/* SearchBar con selector de vista */}
+          <SearchBar
+            value={studentsSearchTerm}
+            onChange={setStudentsSearchTerm}
+            placeholder="Buscar alumnos..."
+            viewMode={studentsViewMode}
+            onViewModeChange={setStudentsViewMode}
+            className="mb-6"
+          />
+
+          {/* Mensajes */}
+          {successMessage && (
+            <div className="message success-msg">
+              <CheckCircle size={18} strokeWidth={2} /> {successMessage}
+            </div>
+          )}
+          {errorMessage && (
+            <div className="message error-msg">
+              <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
+            </div>
+          )}
+
+          {/* Cards Grid o List */}
+          {filteredStudents.length === 0 ? (
+            <div className="no-users">
+              <p>No se encontraron alumnos</p>
+            </div>
+          ) : (
+            <div className={studentsViewMode === 'grid' ? 'students-grid' : 'students-list'}>
+              {filteredStudents.map(student => (
+                <StudentCard
+                  key={student.id}
+                  student={student}
+                  enrollmentCount={enrollmentCounts[student.id] || 0}
+                  onView={(student) => {
+                    setSelectedUserProfile(student);
+                    setShowUserProfile(true);
+                  }}
+                  onDelete={(student) => handleDeleteUser(student.id)}
+                  isAdmin={isAdmin}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </DashboardLayout>
+    );
   }
 
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
@@ -1536,6 +1742,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         setOpenClassModal(true);
         setCurrentScreen('classes');
       }
+    },
+    {
+      id: 'testCollab',
+      icon: Users,
+      title: "🧪 Pizarra Colaborativa",
+      count: 0,
+      countLabel: "prueba",
+      onClick: () => setCurrentScreen('testCollab'),
+      createLabel: "Abrir Pizarra",
+      onCreateClick: () => setCurrentScreen('testCollab')
     }
   ];
 
@@ -1549,31 +1765,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
         <div className="teacher-dashboard">
           <div className="dashboard-content mt-6">
-            {/* Barra de búsqueda y selector de vista */}
-            <div className="flex gap-3 items-center mb-6">
-              <SearchBar
-                value={dashboardSearchTerm}
-                onChange={setDashboardSearchTerm}
-                placeholder="Buscar secciones..."
-                className="flex-1"
-              />
-              <div className="view-toggle">
-                <button
-                  onClick={() => setDashboardViewMode('grid')}
-                  className={`view-toggle-btn ${dashboardViewMode === 'grid' ? 'active' : ''}`}
-                  title="Vista grilla"
-                >
-                  <Grid3x3 size={18} strokeWidth={2} />
-                </button>
-                <button
-                  onClick={() => setDashboardViewMode('list')}
-                  className={`view-toggle-btn ${dashboardViewMode === 'list' ? 'active' : ''}`}
-                  title="Vista lista"
-                >
-                  <List size={18} strokeWidth={2} />
-                </button>
-              </div>
-            </div>
+            {/* Barra de búsqueda con selector de vista integrado */}
+            <SearchBar
+              value={dashboardSearchTerm}
+              onChange={setDashboardSearchTerm}
+              placeholder="Buscar secciones..."
+              viewMode={dashboardViewMode}
+              onViewModeChange={setDashboardViewMode}
+              className="mb-6"
+            />
 
             {/* Quick Access Cards */}
             <div className={dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>

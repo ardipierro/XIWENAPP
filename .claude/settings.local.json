@@ -23,7 +23,17 @@
       "Bash(printf:*)",
       "Bash(git checkout:*)",
       "Bash(nul)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(tree:*)",
+      "Bash(echo:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c taskkill /F /PID 62644)",
+      "Bash(cmd /c taskkill /F /PID 70936)",
+      "Bash(git log:*)",
+      "WebSearch",
+      "Bash(del nul)"
     ],
     "deny": [],
     "ask": []

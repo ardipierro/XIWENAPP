@@ -13,7 +13,9 @@ import {
   Dice3,
   Home,
   ClipboardList,
-  Presentation
+  Presentation,
+  GraduationCap,
+  Video
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -50,22 +52,25 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
         { icon: Users, label: 'Usuarios', path: '/teacher', action: 'users' },
+        { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
-        { icon: Presentation, label: 'Pizarra', path: '/teacher', action: 'whiteboard' },
+        { icon: Video, label: 'Clases en Vivo', path: '/teacher', action: 'liveClasses' },
+        { icon: Presentation, label: 'Pizarras', path: '/teacher', action: 'whiteboardSessions' },
       ];
     }
 
     if (['teacher', 'trial_teacher'].includes(userRole)) {
       return [
         { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
+        { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
         { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
         { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
         { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
-        { icon: Presentation, label: 'Pizarra', path: '/teacher', action: 'whiteboard' },
+        { icon: Video, label: 'Clases en Vivo', path: '/teacher', action: 'liveClasses' },
+        { icon: Presentation, label: 'Pizarras', path: '/teacher', action: 'whiteboardSessions' },
         { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
-        { icon: Users, label: 'Alumnos', path: '/teacher', action: 'users' },
       ];
     }
 
@@ -75,6 +80,8 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
         { icon: ClipboardList, label: 'Asignado a Mí', path: '/student', action: 'assignments' },
         { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classes' },
+        { icon: Video, label: 'Clases en Vivo', path: '/student', action: 'liveClasses' },
+        { icon: Presentation, label: 'Pizarras', path: '/student', action: 'whiteboardSessions' },
       ];
     }
 

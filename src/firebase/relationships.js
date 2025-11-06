@@ -74,6 +74,23 @@ export async function removeContentFromCourse(courseId, contentId) {
 }
 
 /**
+ * Contar contenidos de un curso (sin cargar detalles - rápido)
+ */
+export async function getCourseContentsCount(courseId) {
+  try {
+    const q = query(
+      collection(db, 'course_content'),
+      where('courseId', '==', courseId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error contando contenidos del curso:', error);
+    return 0;
+  }
+}
+
+/**
  * Obtener todos los contenidos de un curso
  */
 export async function getCourseContents(courseId) {
@@ -90,19 +107,25 @@ export async function getCourseContents(courseId) {
       order: doc.data().order || 0
     }));
 
-    // Obtener detalles de cada contenido
-    const contents = [];
-    for (const item of contentIds) {
-      const contentDoc = await getDoc(doc(db, 'content', item.contentId));
-      if (contentDoc.exists()) {
-        contents.push({
-          id: contentDoc.id,
-          ...contentDoc.data(),
-          relationId: item.relationId,
-          order: item.order
-        });
-      }
-    }
+    // Obtener detalles de cada contenido (en paralelo)
+    const contentPromises = contentIds.map(item =>
+      getDoc(doc(db, 'content', item.contentId))
+        .then(contentDoc => {
+          if (contentDoc.exists()) {
+            return {
+              id: contentDoc.id,
+              ...contentDoc.data(),
+              relationId: item.relationId,
+              order: item.order
+            };
+          }
+          return null;
+        })
+        .catch(() => null)
+    );
+
+    const contentResults = await Promise.all(contentPromises);
+    const contents = contentResults.filter(c => c !== null);
 
     // Ordenar por order
     contents.sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -206,6 +229,23 @@ export async function removeExerciseFromCourse(courseId, exerciseId) {
 }
 
 /**
+ * Contar ejercicios de un curso (sin cargar detalles - rápido)
+ */
+export async function getCourseExercisesCount(courseId) {
+  try {
+    const q = query(
+      collection(db, 'course_exercises'),
+      where('courseId', '==', courseId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error contando ejercicios del curso:', error);
+    return 0;
+  }
+}
+
+/**
  * Obtener todos los ejercicios de un curso
  */
 export async function getCourseExercises(courseId) {
@@ -222,19 +262,25 @@ export async function getCourseExercises(courseId) {
       order: doc.data().order || 0
     }));
 
-    // Obtener detalles de cada ejercicio
-    const exercises = [];
-    for (const item of exerciseIds) {
-      const exerciseDoc = await getDoc(doc(db, 'exercises', item.exerciseId));
-      if (exerciseDoc.exists()) {
-        exercises.push({
-          id: exerciseDoc.id,
-          ...exerciseDoc.data(),
-          relationId: item.relationId,
-          order: item.order
-        });
-      }
-    }
+    // Obtener detalles de cada ejercicio (en paralelo)
+    const exercisePromises = exerciseIds.map(item =>
+      getDoc(doc(db, 'exercises', item.exerciseId))
+        .then(exerciseDoc => {
+          if (exerciseDoc.exists()) {
+            return {
+              id: exerciseDoc.id,
+              ...exerciseDoc.data(),
+              relationId: item.relationId,
+              order: item.order
+            };
+          }
+          return null;
+        })
+        .catch(() => null)
+    );
+
+    const exerciseResults = await Promise.all(exercisePromises);
+    const exercises = exerciseResults.filter(e => e !== null);
 
     // Ordenar por order
     exercises.sort((a, b) => (a.order || 0) - (b.order || 0));

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock, Grid, List } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock } from 'lucide-react';
 import { useContent } from '../hooks/useContent.js';
 import ContentRepository from '../services/ContentRepository.js';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse.js';
@@ -393,31 +393,15 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
 
       {/* Search Bar */}
       {/* Search Bar + Toggle de Vista */}
-      <div className="flex gap-3 items-center mb-6">
-        <SearchBar
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Buscar contenido..."
-          className="flex-1"
-        />
-
-        <div className="view-toggle">
-          <button
-            className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-            onClick={() => setViewMode('grid')}
-            title="Vista en cuadrícula"
-          >
-            <Grid size={18} />
-          </button>
-          <button
-            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-            onClick={() => setViewMode('list')}
-            title="Vista en lista"
-          >
-            <List size={18} />
-          </button>
-        </div>
-      </div>
+      {/* Search Bar con Toggle de Vista integrado */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar contenido..."
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        className="mb-6"
+      />
 
       {/* Lista de Contenido */}
       {filteredContents.length === 0 ? (

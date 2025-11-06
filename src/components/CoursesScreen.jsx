@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
-  Search, BookOpen, FileText, Gamepad2, List, Trash2, Clock,
-  Plus, Users, Image as ImageIcon, Settings, Info, Grid
+  BookOpen, FileText, Gamepad2, Trash2, Clock,
+  Plus, Users, Image as ImageIcon, Settings, Info
 } from 'lucide-react';
 import { loadCourses, createCourse, updateCourse, deleteCourse, loadStudents } from '../firebase/firestore';
 import { getContentByTeacher } from '../firebase/content';
@@ -14,6 +14,8 @@ import SearchBar from './common/SearchBar';
 import {
   getCourseContents,
   getCourseExercises,
+  getCourseContentsCount,
+  getCourseExercisesCount,
   addContentToCourse,
   addExerciseToCourse,
   removeContentFromCourse,
@@ -71,22 +73,24 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
 
       const activeCourses = loadedCourses.filter(c => c.active !== false);
 
-      // Cargar cantidad de contenidos y ejercicios para cada curso usando relaciones
+      // Cargar cantidad de contenidos y ejercicios para cada curso usando contadores (rápido)
       const countsStart = performance.now();
       const coursesWithCounts = await Promise.all(
         activeCourses.map(async (course) => {
-          const contents = await getCourseContents(course.id);
-          const exercises = await getCourseExercises(course.id);
+          const [contentCount, exercisesCount] = await Promise.all([
+            getCourseContentsCount(course.id),
+            getCourseExercisesCount(course.id)
+          ]);
 
           return {
             ...course,
-            contentCount: contents.length,
-            exercisesCount: exercises.length
+            contentCount,
+            exercisesCount
           };
         })
       );
 
-      console.log(`⏱️ [CoursesScreen] Cargar conteos: ${(performance.now() - countsStart).toFixed(0)}ms`);
+      console.log(`⏱️ [CoursesScreen] Cargar conteos (solo count): ${(performance.now() - countsStart).toFixed(0)}ms`);
       console.log(`⏱️ [CoursesScreen] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${coursesWithCounts.length} cursos activos`);
 
       setCourses(coursesWithCounts);
@@ -100,16 +104,18 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
   // Función para actualizar solo un curso específico (sin recargar toda la lista)
   const refreshSingleCourse = async (courseId) => {
     try {
-      const contents = await getCourseContents(courseId);
-      const exercises = await getCourseExercises(courseId);
+      const [contentCount, exercisesCount] = await Promise.all([
+        getCourseContentsCount(courseId),
+        getCourseExercisesCount(courseId)
+      ]);
 
       setCourses(prevCourses =>
         prevCourses.map(course =>
           course.id === courseId
             ? {
                 ...course,
-                contentCount: contents.length,
-                exercisesCount: exercises.length
+                contentCount,
+                exercisesCount
               }
             : course
         )
@@ -401,32 +407,15 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
         onAction={() => setShowCreateModal(true)}
       />
 
-      {/* Search Bar + Toggle de Vista */}
-      <div className="flex gap-3 items-center mb-6">
-        <SearchBar
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Buscar cursos..."
-          className="flex-1"
-        />
-
-        <div className="view-toggle">
-          <button
-            className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-            onClick={() => setViewMode('grid')}
-            title="Vista en cuadrícula"
-          >
-            <Grid size={18} />
-          </button>
-          <button
-            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-            onClick={() => setViewMode('list')}
-            title="Vista en lista"
-          >
-            <List size={18} />
-          </button>
-        </div>
-      </div>
+      {/* Search Bar con Toggle de Vista integrado */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar cursos..."
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        className="mb-6"
+      />
 
       {/* Courses Display */}
       {filteredCourses.length === 0 ? (
