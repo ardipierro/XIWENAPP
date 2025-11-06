@@ -19,6 +19,7 @@ import JoinGamePage from './components/JoinGamePage.jsx';
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const TeacherDashboard = lazy(() => import('./components/TeacherDashboard'));
 const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
+const TestPage = lazy(() => import('./TestPage'));
 
 import './App.css';
 
@@ -109,6 +110,12 @@ function App() {
           <Route
             path="/join"
             element={<JoinGamePage />}
+          />
+
+          {/* Test Page - Componentes nuevos (Assignments, Gamification, Calendar) */}
+          <Route
+            path="/test"
+            element={<TestPage />}
           />
 
           {/* Protected Routes - requieren autenticación */}
