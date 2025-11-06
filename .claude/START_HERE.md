@@ -6,22 +6,37 @@
 
 ## 📚 Archivos de Documentación Disponibles
 
-### 1️⃣ **CODING_STANDARDS_QUICK.md** (LEER PRIMERO)
-**Ruta:** `.claude/CODING_STANDARDS_QUICK.md`
+### 1️⃣ **MASTER_STANDARDS.md** (DOCUMENTO MAESTRO - LEER PRIMERO)
+**Ruta:** `.claude/MASTER_STANDARDS.md`
 
-**Contiene:**
-- 🎯 Las 8 reglas core del proyecto
-- 🎨 100% Tailwind CSS (NO custom CSS)
-- 🧩 Componentes base obligatorios
+**⭐ Este es el archivo MAESTRO que unifica TODO:**
+- 🎯 Las 8 reglas core de código
+- 🎨 Sistema de diseño visual completo
+- 🧩 Los 11 componentes base con ejemplos
 - 🌙 Dark mode obligatorio
 - 📝 Logger en lugar de console.*
-- ✅ Checklist para PRs
+- ✅ Checklist completo para PRs
+- 💡 Ejemplo de componente completo
+
+**Fuentes:** CODING_STANDARDS.md + DESIGN_SYSTEM.md + designTokens.js
 
 **Cuándo leer:** SIEMPRE antes de escribir código
 
 ---
 
-### 2️⃣ **BASE_COMPONENTS.md** (Referencia Rápida)
+### 2️⃣ **CODING_STANDARDS_QUICK.md** (Quick Reference)
+**Ruta:** `.claude/CODING_STANDARDS_QUICK.md`
+
+**Contiene:**
+- 🎯 Las 8 reglas core (versión corta)
+- Ejemplos rápidos
+- Imports básicos
+
+**Cuándo leer:** Si solo necesitas un recordatorio rápido
+
+---
+
+### 3️⃣ **BASE_COMPONENTS.md** (Referencia de Componentes)
 **Ruta:** `.claude/BASE_COMPONENTS.md`
 
 **Contiene:**
@@ -32,9 +47,11 @@
 
 **Cuándo leer:** Cuando necesites usar botones, cards, modales, inputs, etc.
 
+**Nota:** Toda esta info también está en MASTER_STANDARDS.md
+
 ---
 
-### 3️⃣ **README.md** (Estructura del Proyecto)
+### 4️⃣ **README.md** (Estructura del Proyecto)
 **Ruta:** `.claude/README.md`
 
 **Contiene:**

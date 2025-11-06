@@ -4,22 +4,30 @@
 
 ### 🚀 EMPIEZA AQUÍ
 
-**Primera vez usando el proyecto? Lee este archivo primero:**
-
+**⭐ ARCHIVO MAESTRO (LEER PRIMERO):**
 ```
-.claude/START_HERE.md  ← GUÍA COMPLETA PARA COMENZAR
-```
-
-### ⚡ Archivos Clave
-
-**Para coding standards:**
-```
-.claude/CODING_STANDARDS_QUICK.md  ← 8 REGLAS CORE
+.claude/MASTER_STANDARDS.md  ← TODO EN UN SOLO ARCHIVO
 ```
 
-**Para componentes:**
+Este archivo unifica:
+- ✅ 8 reglas de código (CODING_STANDARDS.md)
+- ✅ Sistema de diseño (DESIGN_SYSTEM.md)
+- ✅ 11 componentes base con ejemplos completos
+- ✅ Paleta de colores monocromática
+- ✅ Checklist completo
+- ✅ Ejemplo de componente Manager completo
+
+---
+
+**Guía de inicio:**
 ```
-.claude/BASE_COMPONENTS.md  ← 11 COMPONENTES BASE
+.claude/START_HERE.md  ← GUÍA PASO A PASO
+```
+
+**Referencias rápidas:**
+```
+.claude/CODING_STANDARDS_QUICK.md  ← 8 REGLAS CORE (versión corta)
+.claude/BASE_COMPONENTS.md         ← 11 COMPONENTES (versión corta)
 ```
 
 ### Archivos Importantes del Proyecto:
