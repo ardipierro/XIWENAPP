@@ -7,9 +7,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Send, X, MoreVertical, Archive } from 'lucide-react';
 import {
   subscribeToMessages,
+  subscribeToConversation,
   sendMessage,
   markMessagesAsRead,
-  archiveConversation
+  archiveConversation,
+  setTyping,
+  clearTyping
 } from '../firebase/messages';
 import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
@@ -26,8 +29,10 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   // Subscribe to messages in real-time
   useEffect(() => {
@@ -48,6 +53,73 @@ function MessageThread({ conversation, currentUser, onClose }) {
   useEffect(() => {
     inputRef.current?.focus();
   }, [conversation?.id]);
+
+  // Subscribe to conversation for typing indicators
+  useEffect(() => {
+    if (!conversation?.id) return;
+
+    const unsubscribe = subscribeToConversation(conversation.id, (convData) => {
+      // Check if other user is typing
+      const typing = convData.typing || {};
+      const otherUserId = conversation.otherUser?.id;
+
+      if (otherUserId && typing[otherUserId]) {
+        const typingData = typing[otherUserId];
+        // Check if typing timestamp is recent (within last 5 seconds)
+        const isRecent = typingData.timestamp &&
+          (Date.now() - typingData.timestamp.toMillis()) < 5000;
+        setIsOtherUserTyping(isRecent);
+      } else {
+        setIsOtherUserTyping(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [conversation?.id, conversation?.otherUser?.id]);
+
+  // Handle typing indicator when user types
+  useEffect(() => {
+    if (!newMessage.trim() || !conversation?.id) {
+      // Clear typing when message is empty
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+      clearTyping(conversation?.id, currentUser.uid);
+      return;
+    }
+
+    // Set typing indicator
+    setTyping(
+      conversation.id,
+      currentUser.uid,
+      currentUser.displayName || currentUser.email
+    );
+
+    // Clear typing after 3 seconds of inactivity
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      clearTyping(conversation.id, currentUser.uid);
+    }, 3000);
+
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [newMessage, conversation?.id, currentUser.uid, currentUser.displayName, currentUser.email]);
+
+  // Cleanup typing on unmount
+  useEffect(() => {
+    return () => {
+      if (conversation?.id) {
+        clearTyping(conversation.id, currentUser.uid);
+      }
+    };
+  }, [conversation?.id, currentUser.uid]);
 
   /**
    * Scroll to bottom of messages
@@ -173,6 +245,18 @@ function MessageThread({ conversation, currentUser, onClose }) {
               }
             />
           ))
+        )}
+        {isOtherUserTyping && (
+          <div className="typing-indicator">
+            <div className="typing-avatar">
+              {conversation.otherUser.name?.charAt(0).toUpperCase() || '?'}
+            </div>
+            <div className="typing-bubble">
+              <span className="typing-dot"></span>
+              <span className="typing-dot"></span>
+              <span className="typing-dot"></span>
+            </div>
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>

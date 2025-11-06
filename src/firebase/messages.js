@@ -319,6 +319,24 @@ export async function archiveConversation(conversationId, userId) {
 }
 
 /**
+ * Subscribe to a single conversation (for typing indicators)
+ * @param {string} conversationId - Conversation ID
+ * @param {Function} callback - Callback with conversation data
+ * @returns {Function} Unsubscribe function
+ */
+export function subscribeToConversation(conversationId, callback) {
+  const conversationRef = doc(db, 'conversations', conversationId);
+
+  return onSnapshot(conversationRef, (snapshot) => {
+    if (snapshot.exists()) {
+      callback({ id: snapshot.id, ...snapshot.data() });
+    }
+  }, (error) => {
+    logger.error('Error in conversation subscription', error, 'Messages');
+  });
+}
+
+/**
  * Set typing indicator
  * @param {string} conversationId - Conversation ID
  * @param {string} userId - User ID who is typing
@@ -392,6 +410,7 @@ export default {
   markMessagesAsRead,
   subscribeToMessages,
   subscribeToConversations,
+  subscribeToConversation,
   archiveConversation,
   searchUsers,
   setTyping,
