@@ -34,7 +34,9 @@ import {
   ArrowUp,
   ArrowDown,
   Grid3x3,
-  List
+  List,
+  CalendarDays,
+  CheckSquare
 } from 'lucide-react';
 import {
   loadStudents,
@@ -70,6 +72,9 @@ import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
+import AssignmentManager from './AssignmentManager';
+import GradingInterface from './GradingInterface';
+import UnifiedCalendar from './UnifiedCalendar';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -1411,6 +1416,33 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             </div>
           </div>
         )}
+      </DashboardLayout>
+    );
+  }
+
+  // Assignment Manager Screen
+  if (navigation.currentScreen === 'assignments') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <AssignmentManager teacherId={teacher?.id} />
+      </DashboardLayout>
+    );
+  }
+
+  // Grading Interface Screen
+  if (navigation.currentScreen === 'grading') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <GradingInterface teacherId={teacher?.id} />
+      </DashboardLayout>
+    );
+  }
+
+  // Unified Calendar Screen
+  if (navigation.currentScreen === 'calendar') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <UnifiedCalendar userId={teacher?.id} userRole="teacher" />
       </DashboardLayout>
     );
   }

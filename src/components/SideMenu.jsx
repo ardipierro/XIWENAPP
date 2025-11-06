@@ -25,7 +25,8 @@ import {
   TrendingUp,
   Trophy,
   CalendarDays,
-  CheckSquare
+  CheckSquare,
+  FileCheck
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -111,6 +112,9 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
           { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
           { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
+          { icon: CheckSquare, label: 'Tareas', path: '/teacher', action: 'assignments' },
+          { icon: FileCheck, label: 'Calificar', path: '/teacher', action: 'grading' },
+          { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: Video, label: 'Clases en Vivo', path: '/teacher', action: 'liveClasses' },
           { icon: Presentation, label: 'Pizarras', path: '/teacher', action: 'whiteboardSessions' },
           { icon: PenTool, label: 'Excalidraw', path: '/teacher', action: 'excalidrawWhiteboard' },
