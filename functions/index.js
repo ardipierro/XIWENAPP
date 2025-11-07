@@ -1,19 +1,28 @@
 /**
- * Cloud Functions for Firebase - LiveKit Token Generation
+ * @fileoverview Firebase Cloud Functions - Main Entry Point
+ * @module functions/index
  *
- * IMPORTANTE: El API secret de LiveKit NUNCA debe estar en el cliente.
- * Esta función genera tokens de forma segura en el backend.
+ * XIWEN App Cloud Functions
+ * - LiveKit Token Generation (Video Classes)
+ * - Student Payment System (MercadoPago integration)
+ * - Cron jobs for monthly fee generation
+ * - Webhooks for payment notifications
  */
 
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { AccessToken } = require('livekit-server-sdk');
 const admin = require('firebase-admin');
 
-// Inicializar Firebase Admin
+// Initialize Firebase Admin (singleton)
 admin.initializeApp();
+
+// ============================================================================
+// LIVEKIT VIDEO CLASSES
+// ============================================================================
 
 /**
  * Genera un token JWT para unirse a una sala de LiveKit
+ * IMPORTANTE: El API secret de LiveKit NUNCA debe estar en el cliente.
  *
  * @param {object} request - Request data
  * @param {string} request.data.roomName - Nombre de la sala
@@ -92,3 +101,33 @@ exports.generateLiveKitToken = onCall({
     throw new HttpsError('internal', 'Error generando token de LiveKit');
   }
 });
+
+// ============================================================================
+// STUDENT PAYMENT SYSTEM
+// ============================================================================
+
+// Export student payment functions
+const {
+  generateMonthlyFees,
+  checkOverdueFees,
+  createMatriculaPayment,
+  createMonthlyFeePayment,
+  createCoursePayment,
+  applyFamilyDiscount,
+  applyScholarship,
+  mercadopagoWebhook,
+  checkSubscriptionStatus,
+  getPaymentHistory
+} = require('./studentPayments');
+
+// Student Payment Functions
+exports.generateMonthlyFees = generateMonthlyFees;
+exports.checkOverdueFees = checkOverdueFees;
+exports.createMatriculaPayment = createMatriculaPayment;
+exports.createMonthlyFeePayment = createMonthlyFeePayment;
+exports.createCoursePayment = createCoursePayment;
+exports.applyFamilyDiscount = applyFamilyDiscount;
+exports.applyScholarship = applyScholarship;
+exports.mercadopagoWebhook = mercadopagoWebhook;
+exports.checkSubscriptionStatus = checkSubscriptionStatus;
+exports.getPaymentHistory = getPaymentHistory;

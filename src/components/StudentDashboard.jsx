@@ -8,7 +8,7 @@ import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStud
 import { getInstancesForStudent } from '../firebase/classInstances';
 import { getStudentAvailableLiveClasses } from '../firebase/liveClasses';
 import { getAssignedWhiteboards, subscribeToLiveWhiteboards } from '../firebase/whiteboard';
-import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle, Trophy, CalendarDays } from 'lucide-react';
+import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle, Trophy, CalendarDays, DollarSign, MessageCircle } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import MyCourses from './student/MyCourses';
 import MyAssignments from './student/MyAssignments';
@@ -22,6 +22,7 @@ import StudentAssignmentsView from './StudentAssignmentsView';
 import GamificationPanel from './GamificationPanel';
 import UnifiedCalendar from './UnifiedCalendar';
 import MessagesPanel from './MessagesPanel';
+import StudentFeesPanel from './StudentFeesPanel';
 
 // Base Components
 import {
@@ -58,7 +59,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   const [liveWhiteboards, setLiveWhiteboards] = useState([]);
   const [selectedLiveClass, setSelectedLiveClass] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'assignmentsView', 'gamification', 'calendar', 'classes', 'liveClasses', 'liveClass', 'whiteboardSessions', 'whiteboard', 'courseView', 'contentPlayer'
+  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'assignmentsView', 'gamification', 'calendar', 'messages', 'payments', 'classes', 'liveClasses', 'liveClass', 'whiteboardSessions', 'whiteboard', 'courseView', 'contentPlayer'
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [selectedCourseData, setSelectedCourseData] = useState(null);
   const [selectedContentId, setSelectedContentId] = useState(null);
@@ -253,10 +254,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       'assignmentsView': 'assignmentsView',
       'gamification': 'gamification',
       'calendar': 'calendar',
+      'messages': 'messages',
+      'payments': 'payments',
       'classes': 'classes',
       'liveClasses': 'liveClasses',
-      'whiteboardSessions': 'whiteboardSessions',
-      'messages': 'messages'
+      'whiteboardSessions': 'whiteboardSessions'
     };
 
     const view = actionMap[action];
@@ -525,6 +527,22 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               ← Volver a Inicio
             </BaseButton>
             <MessagesPanel user={user} />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render Payments view
+  if (currentView === 'payments') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+              ← Volver a Inicio
+            </BaseButton>
+            <StudentFeesPanel user={user} />
           </div>
         </div>
       </DashboardLayout>

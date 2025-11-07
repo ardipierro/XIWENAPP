@@ -27,7 +27,8 @@ import {
   CalendarDays,
   CheckSquare,
   FileCheck,
-  MessageCircle
+  MessageCircle,
+  DollarSign
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -87,6 +88,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: FileText, label: 'Contenidos', path: '/admin', action: 'content' },
               { icon: Calendar, label: 'Clases', path: '/admin', action: 'classes' },
               { icon: MessageCircle, label: 'Mensajes', path: '/admin', action: 'messages' },
+              { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
               { icon: ClipboardList, label: 'Asistencias', path: '/admin', action: 'attendance' },
             ]
@@ -140,6 +142,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classes' },
           { icon: Video, label: 'Clases en Vivo', path: '/student', action: 'liveClasses' },
           { icon: Presentation, label: 'Pizarras', path: '/student', action: 'whiteboardSessions' },
+          { icon: DollarSign, label: 'Mis Pagos', path: '/student', action: 'payments' },
         ]
       };
     }

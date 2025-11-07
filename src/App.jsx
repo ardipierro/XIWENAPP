@@ -21,6 +21,7 @@ const TeacherDashboard = lazy(() => import('./components/TeacherDashboard'));
 const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
 const GuardianDashboard = lazy(() => import('./components/GuardianDashboard'));
 const TestPage = lazy(() => import('./TestPage'));
+const PaymentResult = lazy(() => import('./components/PaymentResult'));
 
 import './App.css';
 
@@ -111,6 +112,12 @@ function App() {
           <Route
             path="/join"
             element={<JoinGamePage />}
+          />
+
+          {/* Payment Result - MercadoPago redirect page */}
+          <Route
+            path="/payment-result"
+            element={<PaymentResult />}
           />
 
           {/* Test Page - Componentes nuevos (Assignments, Gamification, Calendar) */}
