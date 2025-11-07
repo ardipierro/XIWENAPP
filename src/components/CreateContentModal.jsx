@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, FileText } from 'lucide-react';
+import { Save, FileText, Sparkles, Edit3 } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
@@ -14,6 +14,7 @@ import {
   BaseAlert
 } from './common';
 import { CONTENT_TYPES, EXERCISE_TYPES, DIFFICULTY_LEVELS } from '../firebase/content';
+import ExerciseMakerESL from './ExerciseMakerESL';
 import logger from '../utils/logger';
 
 const TYPE_OPTIONS = [
@@ -64,6 +65,8 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('manual'); // 'manual' | 'ai'
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
 
   // Cargar datos iniciales si es edición
   useEffect(() => {
@@ -193,6 +196,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
   };
 
   return (
+    <>
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
@@ -281,27 +285,94 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         )}
 
         {formData.type === CONTENT_TYPES.EXERCISE && (
-          <>
-            <BaseSelect
-              label="Tipo de Ejercicio"
-              value={formData.contentType}
-              onChange={(e) => handleChange('contentType', e.target.value)}
-              options={EXERCISE_TYPE_OPTIONS}
-              required
-            />
-            <BaseTextarea
-              label="Instrucciones"
-              value={formData.body}
-              onChange={(e) => handleChange('body', e.target.value)}
-              placeholder="Instrucciones para el ejercicio..."
-              rows={4}
-            />
-            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-              <p className="text-sm text-amber-800 dark:text-amber-200">
-                💡 Las preguntas del ejercicio se agregarán después de crear el contenido.
-              </p>
+          <div className="space-y-4">
+            {/* Tabs para Ejercicios */}
+            <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-700">
+              <button
+                type="button"
+                onClick={() => setActiveTab('manual')}
+                className={`
+                  px-4 py-2 font-medium text-sm transition-colors relative
+                  ${activeTab === 'manual'
+                    ? 'text-zinc-900 dark:text-white'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-2">
+                  <Edit3 className="w-4 h-4" strokeWidth={2} />
+                  <span>Manual</span>
+                </div>
+                {activeTab === 'manual' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('ai')}
+                className={`
+                  px-4 py-2 font-medium text-sm transition-colors relative
+                  ${activeTab === 'ai'
+                    ? 'text-zinc-900 dark:text-white'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" strokeWidth={2} />
+                  <span>Generar con IA</span>
+                </div>
+                {activeTab === 'ai' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
+                )}
+              </button>
             </div>
-          </>
+
+            {/* Tab Content - Manual */}
+            {activeTab === 'manual' && (
+              <>
+                <BaseSelect
+                  label="Tipo de Ejercicio"
+                  value={formData.contentType}
+                  onChange={(e) => handleChange('contentType', e.target.value)}
+                  options={EXERCISE_TYPE_OPTIONS}
+                  required
+                />
+                <BaseTextarea
+                  label="Instrucciones"
+                  value={formData.body}
+                  onChange={(e) => handleChange('body', e.target.value)}
+                  placeholder="Instrucciones para el ejercicio..."
+                  rows={4}
+                />
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    💡 Las preguntas del ejercicio se agregarán después de crear el contenido.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Tab Content - AI */}
+            {activeTab === 'ai' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+                  <p className="text-sm text-zinc-800 dark:text-zinc-200">
+                    <Sparkles className="w-4 h-4 inline mr-2" strokeWidth={2} />
+                    Usa la IA para generar ejercicios automáticamente basados en un tema o texto.
+                  </p>
+                </div>
+                <BaseButton
+                  variant="primary"
+                  icon={Sparkles}
+                  onClick={() => setShowAIGenerator(true)}
+                  fullWidth
+                >
+                  Abrir Generador de Ejercicios IA
+                </BaseButton>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Metadata */}
@@ -354,6 +425,15 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         </div>
       </form>
     </BaseModal>
+
+      {/* AI Exercise Generator Modal */}
+      {formData.type === CONTENT_TYPES.EXERCISE && (
+        <ExerciseMakerESL
+          isOpen={showAIGenerator}
+          onClose={() => setShowAIGenerator(false)}
+        />
+      )}
+    </>
   );
 }
 
