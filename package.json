@@ -6,7 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "emulators": "firebase emulators:start",
+    "test:seed": "node test/seed-test-data.js",
+    "test:functions": "node test/test-functions.js",
+    "test:local": "npm run test:seed && npm run test:functions",
+    "functions:install": "cd functions && npm install",
+    "functions:deploy": "firebase deploy --only functions"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0",
