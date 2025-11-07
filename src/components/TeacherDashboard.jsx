@@ -77,6 +77,8 @@ import AssignmentManager from './AssignmentManager';
 import GradingInterface from './GradingInterface';
 import UnifiedCalendar from './UnifiedCalendar';
 import MessagesPanel from './MessagesPanel';
+import ClassSessionManager from './ClassSessionManager';
+import ClassSessionRoom from './ClassSessionRoom';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -761,6 +763,36 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         onLeave={() => {
           navigation.setSelectedLiveClass(null);
           navigation.setCurrentScreen('liveClasses');
+        }}
+      />
+    );
+  }
+
+  // Renderizar Class Session Manager (Sistema Unificado) - CON Layout
+  if (navigation.currentScreen === 'classSessions') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ClassSessionManager
+          user={user}
+          onJoinSession={(session) => {
+            navigation.setSelectedLiveClass(session);
+            navigation.setCurrentScreen('classSessionRoom');
+          }}
+        />
+      </DashboardLayout>
+    );
+  }
+
+  // Renderizar Class Session Room (Sala unificada) - SIN Layout (pantalla completa)
+  if (navigation.currentScreen === 'classSessionRoom' && navigation.selectedLiveClass) {
+    return (
+      <ClassSessionRoom
+        session={navigation.selectedLiveClass}
+        user={user}
+        userRole={userRole}
+        onLeave={() => {
+          navigation.setSelectedLiveClass(null);
+          navigation.setCurrentScreen('classSessions');
         }}
       />
     );

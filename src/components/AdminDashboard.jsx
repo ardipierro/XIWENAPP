@@ -79,6 +79,8 @@ import LiveGameSetup from './LiveGameSetup';
 import MessagesPanel from './MessagesPanel';
 import AdminPaymentsPanel from './AdminPaymentsPanel';
 import AIConfigPanel from './AIConfigPanel';
+import ClassSessionManager from './ClassSessionManager';
+import ClassSessionRoom from './ClassSessionRoom';
 import './AdminDashboard.css';
 
 // Custom hooks
@@ -450,6 +452,36 @@ function AdminDashboard({ user, userRole, onLogout }) {
         onLeave={() => {
           navigation.setSelectedLiveClass(null);
           navigation.setCurrentScreen('liveClasses');
+        }}
+      />
+    );
+  }
+
+  // Class Session Manager (Sistema Unificado) - WITH Layout
+  if (navigation.currentScreen === 'classSessions') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ClassSessionManager
+          user={user}
+          onJoinSession={(session) => {
+            navigation.setSelectedLiveClass(session);
+            navigation.setCurrentScreen('classSessionRoom');
+          }}
+        />
+      </DashboardLayout>
+    );
+  }
+
+  // Class Session Room (Sala unificada) - NO Layout (fullscreen)
+  if (navigation.currentScreen === 'classSessionRoom' && navigation.selectedLiveClass) {
+    return (
+      <ClassSessionRoom
+        session={navigation.selectedLiveClass}
+        user={user}
+        userRole={userRole}
+        onLeave={() => {
+          navigation.setSelectedLiveClass(null);
+          navigation.setCurrentScreen('classSessions');
         }}
       />
     );

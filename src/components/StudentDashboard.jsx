@@ -23,6 +23,8 @@ import GamificationPanel from './GamificationPanel';
 import UnifiedCalendar from './UnifiedCalendar';
 import MessagesPanel from './MessagesPanel';
 import StudentFeesPanel from './StudentFeesPanel';
+import ClassSessionManager from './ClassSessionManager';
+import ClassSessionRoom from './ClassSessionRoom';
 
 // Base Components
 import {
@@ -557,6 +559,43 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         user={user}
         isTeacher={false}
         onLeave={handleLeaveLiveClass}
+      />
+    );
+  }
+
+  // Render Class Session Manager (Sistema Unificado) - WITH Layout
+  if (currentView === 'classSessions') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+              ← Volver a Inicio
+            </BaseButton>
+            <ClassSessionManager
+              user={user}
+              onJoinSession={(session) => {
+                setSelectedLiveClass(session);
+                setCurrentView('classSessionRoom');
+              }}
+            />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render Class Session Room (Sala unificada) - NO Layout (fullscreen)
+  if (currentView === 'classSessionRoom' && selectedLiveClass) {
+    return (
+      <ClassSessionRoom
+        session={selectedLiveClass}
+        user={user}
+        userRole={userRole}
+        onLeave={() => {
+          setSelectedLiveClass(null);
+          setCurrentView('classSessions');
+        }}
       />
     );
   }

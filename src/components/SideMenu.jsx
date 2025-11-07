@@ -72,8 +72,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: Users, label: 'Usuarios', path: '/admin', action: 'users' },
               { icon: GraduationCap, label: 'Estudiantes', path: '/admin', action: 'students' },
               { icon: BookOpen, label: 'Contenidos', path: '/admin', action: 'unifiedContent' },
-              { icon: Calendar, label: 'Clases', path: '/admin', action: 'classes' },
-              { icon: Video, label: 'Clases en Vivo', path: '/admin', action: 'liveClasses' },
+              { icon: Calendar, label: 'Clases', path: '/admin', action: 'classSessions' },
               { icon: MessageCircle, label: 'Mensajes', path: '/admin', action: 'messages' },
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
@@ -87,8 +86,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             label: 'Herramientas de Enseñanza',
             items: [
               { icon: Gamepad2, label: 'Juego en Vivo', path: '/admin', action: 'liveGame' },
-              { icon: Presentation, label: 'Pizarras', path: '/admin', action: 'whiteboardSessions' },
-              { icon: PenTool, label: 'Excalidraw', path: '/admin', action: 'excalidrawSessions' },
             ]
           }
         ]
@@ -101,14 +98,11 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
           { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
           { icon: BookOpen, label: 'Contenidos', path: '/teacher', action: 'unifiedContent' },
-          { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
+          { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classSessions' },
           { icon: CheckSquare, label: 'Tareas', path: '/teacher', action: 'assignments' },
           { icon: FileCheck, label: 'Calificar', path: '/teacher', action: 'grading' },
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
-          { icon: Video, label: 'Clases en Vivo', path: '/teacher', action: 'liveClasses' },
-          { icon: Presentation, label: 'Pizarras', path: '/teacher', action: 'whiteboardSessions' },
-          { icon: PenTool, label: 'Excalidraw', path: '/teacher', action: 'excalidrawWhiteboard' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
           { icon: Gamepad2, label: 'Juego en Vivo', path: '/teacher', action: 'liveGame' },
         ]
@@ -125,9 +119,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: Trophy, label: 'Gamificación', path: '/student', action: 'gamification' },
           { icon: CalendarDays, label: 'Calendario', path: '/student', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/student', action: 'messages' },
-          { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classes' },
-          { icon: Video, label: 'Clases en Vivo', path: '/student', action: 'liveClasses' },
-          { icon: Presentation, label: 'Pizarras', path: '/student', action: 'whiteboardSessions' },
+          { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classSessions' },
           { icon: DollarSign, label: 'Mis Pagos', path: '/student', action: 'payments' },
         ]
       };
