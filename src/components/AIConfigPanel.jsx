@@ -36,6 +36,12 @@ const AI_PROVIDERS = [
     name: 'Google',
     icon: '🔍',
     description: 'Gemini - Multimodal y potente'
+  },
+  {
+    id: 'claude',
+    name: 'Claude',
+    icon: '🧠',
+    description: 'Anthropic - Razonamiento avanzado'
   }
 ];
 
@@ -200,7 +206,7 @@ function AIConfigPanel() {
       </div>
 
       {/* Provider Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {AI_PROVIDERS.map((provider) => (
           <BaseCard
             key={provider.id}

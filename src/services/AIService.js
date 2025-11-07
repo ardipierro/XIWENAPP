@@ -1,12 +1,13 @@
 /**
  * AIService - Multi-provider AI service for exercise generation
- * Supports: OpenAI, Google Gemini, xAI Grok
+ * Supports: OpenAI, Google Gemini, xAI Grok, Anthropic Claude
  * Uses factory pattern for provider selection
  */
 
 import OpenAIProvider from './providers/OpenAIProvider.js';
 import GeminiProvider from './providers/GeminiProvider.js';
 import GrokProvider from './providers/GrokProvider.js';
+import ClaudeProvider from './providers/ClaudeProvider.js';
 import logger from '../utils/logger';
 
 class AIService {
@@ -28,7 +29,7 @@ class AIService {
   /**
    * Create a provider instance
    * @private
-   * @param {string} providerName - Provider name (openai, gemini, grok)
+   * @param {string} providerName - Provider name (openai, gemini, grok, claude)
    * @returns {BaseAIProvider} Provider instance
    */
   _createProvider(providerName) {
@@ -45,6 +46,12 @@ class AIService {
           import.meta.env.VITE_GROK_MODEL || 'grok-2-latest'
         );
 
+      case 'claude':
+        return new ClaudeProvider(
+          import.meta.env.VITE_CLAUDE_API_KEY,
+          import.meta.env.VITE_CLAUDE_MODEL || 'claude-3-5-sonnet-20241022'
+        );
+
       case 'openai':
       default:
         return new OpenAIProvider(
@@ -56,7 +63,7 @@ class AIService {
 
   /**
    * Set the active AI provider
-   * @param {string} providerName - Provider name (openai, gemini, grok)
+   * @param {string} providerName - Provider name (openai, gemini, grok, claude)
    */
   setProvider(providerName) {
     this.currentProviderName = providerName.toLowerCase();
@@ -106,6 +113,13 @@ class AIService {
         icon: '🚀',
         model: import.meta.env.VITE_GROK_MODEL || 'grok-2-latest',
         apiKey: import.meta.env.VITE_GROK_API_KEY
+      },
+      {
+        name: 'claude',
+        label: 'Anthropic Claude',
+        icon: '🧠',
+        model: import.meta.env.VITE_CLAUDE_MODEL || 'claude-3-5-sonnet-20241022',
+        apiKey: import.meta.env.VITE_CLAUDE_API_KEY
       }
     ];
 
@@ -179,7 +193,7 @@ class AIService {
    * @returns {Promise<Array<{provider: string, success: boolean, error?: string}>>}
    */
   async testAllProviders() {
-    const providers = ['openai', 'gemini', 'grok'];
+    const providers = ['openai', 'gemini', 'grok', 'claude'];
     const results = [];
 
     for (const providerName of providers) {
