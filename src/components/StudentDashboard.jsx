@@ -259,6 +259,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       'messages': 'messages',
       'payments': 'payments',
       'classes': 'classes',
+      'classSessions': 'classSessions', // Unified Class Sessions (LiveKit + Whiteboards)
       'liveClasses': 'liveClasses',
       'whiteboardSessions': 'whiteboardSessions'
     };

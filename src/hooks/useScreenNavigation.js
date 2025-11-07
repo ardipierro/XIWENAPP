@@ -50,6 +50,7 @@ export function useScreenNavigation() {
     'content': 'content',
     'unifiedContent': 'unifiedContent', // Unified Content Manager (NEW)
     'classes': 'classes',
+    'classSessions': 'classSessions', // Unified Class Sessions (LiveKit + Whiteboards)
     'exercises': 'exercises',
     'analytics': 'analytics',
     'attendance': 'attendance',
