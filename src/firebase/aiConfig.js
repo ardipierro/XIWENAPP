@@ -73,13 +73,20 @@ export async function getAIConfig() {
 }
 
 /**
- * Get active AI provider
+ * Get active AI provider (legacy support)
  * @returns {Promise<string|null>}
  */
 export async function getActiveAIProvider() {
   try {
     const config = await getAIConfig();
 
+    // New structure - check functions
+    if (config.functions) {
+      const enabledFunction = Object.values(config.functions).find(f => f.enabled);
+      return enabledFunction?.provider || null;
+    }
+
+    // Legacy structure - check providers
     if (config.openai?.enabled) return 'openai';
     if (config.grok?.enabled) return 'grok';
     if (config.google?.enabled) return 'google';
@@ -93,25 +100,76 @@ export async function getActiveAIProvider() {
 }
 
 /**
+ * Get configuration for a specific AI function
+ * @param {string} functionId - Function ID (e.g., 'exercise_generator', 'chat_assistant')
+ * @returns {Promise<Object|null>} Function configuration or null if not found
+ */
+export async function getAIFunctionConfig(functionId) {
+  try {
+    const config = await getAIConfig();
+
+    if (config.functions && config.functions[functionId]) {
+      return config.functions[functionId];
+    }
+
+    return null;
+  } catch (error) {
+    logger.error(`Error getting AI function config for ${functionId}`, error, 'AIConfig');
+    return null;
+  }
+}
+
+/**
+ * Call AI for a specific function
+ * @param {string} functionId - Function ID
+ * @param {string} prompt - User prompt
+ * @returns {Promise<string>}
+ */
+export async function callAIFunction(functionId, prompt) {
+  try {
+    const functionConfig = await getAIFunctionConfig(functionId);
+
+    if (!functionConfig) {
+      throw new Error(`Function ${functionId} not configured`);
+    }
+
+    if (!functionConfig.enabled) {
+      throw new Error(`Function ${functionId} is disabled`);
+    }
+
+    if (!functionConfig.apiKey) {
+      throw new Error(`Function ${functionId} has no API key`);
+    }
+
+    return await callAI(functionConfig.provider, prompt, functionConfig);
+  } catch (error) {
+    logger.error(`Error calling AI function ${functionId}`, error, 'AIConfig');
+    throw error;
+  }
+}
+
+/**
  * Call AI provider
  * @param {string} provider - Provider name (openai, grok, google, claude)
  * @param {string} prompt - User prompt
- * @param {Object} config - Provider config
+ * @param {Object} config - Provider config with systemPrompt, apiKey, model, parameters
  * @returns {Promise<string>}
  */
 export async function callAI(provider, prompt, config) {
   try {
-    const fullPrompt = `${config.basePrompt}\n\nTono: ${getToneName(config.tone)}\n\n${prompt}`;
+    // Use systemPrompt if available, otherwise use legacy basePrompt
+    const systemPrompt = config.systemPrompt || config.basePrompt || '';
+    const fullPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
 
     switch (provider) {
       case 'openai':
-        return await callOpenAI(fullPrompt, config.apiKey);
+        return await callOpenAI(fullPrompt, config.apiKey, config.model, config.parameters);
       case 'grok':
-        return await callGrok(fullPrompt, config.apiKey);
+        return await callGrok(fullPrompt, config.apiKey, config.model, config.parameters);
       case 'google':
-        return await callGoogle(fullPrompt, config.apiKey);
+        return await callGoogle(fullPrompt, config.apiKey, config.model, config.parameters);
       case 'claude':
-        return await callClaude(fullPrompt, config.apiKey);
+        return await callClaude(fullPrompt, config.apiKey, config.model, config.parameters);
       default:
         throw new Error('Invalid provider');
     }
@@ -124,7 +182,7 @@ export async function callAI(provider, prompt, config) {
 /**
  * Call OpenAI API
  */
-async function callOpenAI(prompt, apiKey) {
+async function callOpenAI(prompt, apiKey, model = 'gpt-4', parameters = {}) {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -132,9 +190,11 @@ async function callOpenAI(prompt, apiKey) {
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-4',
+      model: model || 'gpt-4',
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7
+      temperature: parameters.temperature || 0.7,
+      max_tokens: parameters.maxTokens || 2000,
+      top_p: parameters.topP || 1
     })
   });
 
@@ -149,7 +209,7 @@ async function callOpenAI(prompt, apiKey) {
 /**
  * Call Grok API
  */
-async function callGrok(prompt, apiKey) {
+async function callGrok(prompt, apiKey, model = 'grok-beta', parameters = {}) {
   const response = await fetch('https://api.x.ai/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -157,9 +217,11 @@ async function callGrok(prompt, apiKey) {
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'grok-beta',
+      model: model || 'grok-beta',
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7
+      temperature: parameters.temperature || 0.7,
+      max_tokens: parameters.maxTokens || 2000,
+      top_p: parameters.topP || 1
     })
   });
 
@@ -174,9 +236,9 @@ async function callGrok(prompt, apiKey) {
 /**
  * Call Google Gemini API
  */
-async function callGoogle(prompt, apiKey) {
+async function callGoogle(prompt, apiKey, model = 'gemini-pro', parameters = {}) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-pro'}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: {
@@ -185,7 +247,12 @@ async function callGoogle(prompt, apiKey) {
       body: JSON.stringify({
         contents: [{
           parts: [{ text: prompt }]
-        }]
+        }],
+        generationConfig: {
+          temperature: parameters.temperature || 0.7,
+          maxOutputTokens: parameters.maxTokens || 2000,
+          topP: parameters.topP || 1
+        }
       })
     }
   );
@@ -201,7 +268,7 @@ async function callGoogle(prompt, apiKey) {
 /**
  * Call Anthropic Claude API
  */
-async function callClaude(prompt, apiKey) {
+async function callClaude(prompt, apiKey, model = 'claude-3-5-sonnet-20241022', parameters = {}) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -210,10 +277,11 @@ async function callClaude(prompt, apiKey) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2000,
+      model: model || 'claude-3-5-sonnet-20241022',
+      max_tokens: parameters.maxTokens || 2000,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7
+      temperature: parameters.temperature || 0.7,
+      top_p: parameters.topP || 1
     })
   });
 
