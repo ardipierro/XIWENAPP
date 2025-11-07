@@ -141,7 +141,7 @@ export default function AssignmentManager({ teacherId }) {
       {/* Assignments List */}
       {filteredAssignments.length === 0 ? (
         <BaseEmptyState
-          icon={<FileText size={64} strokeWidth={2} />}
+          icon={FileText}
           title="No hay tareas"
           description="Crea tu primera tarea para comenzar"
           action={
