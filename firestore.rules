@@ -267,6 +267,18 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
 
+    // Game history (alternative collection name)
+    match /gameHistory/{gameId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Categories - single document with all categories data
+    match /categories/{categoryId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
     // ============================================
     // CREDIT SYSTEM COLLECTIONS
     // ============================================
