@@ -65,7 +65,9 @@
       "Bash(firebase functions:list:*)",
       "Bash(firebase functions:log:*)",
       "Bash(git stash show:*)",
-      "Bash(npm run migrate:unified-content:*)"
+      "Bash(npm run migrate:unified-content:*)",
+      "Bash(del nul 2)",
+      "Bash(git fetch:*)"
     ],
     "deny": [],
     "ask": []

@@ -71,10 +71,57 @@ function AIConfigPanel() {
       if (result) {
         setConfig(result);
         logger.info('AI config loaded successfully');
+      } else {
+        // Initialize with default config if none exists
+        const defaultConfig = {
+          openai: {
+            enabled: false,
+            apiKey: '',
+            basePrompt: 'Eres un asistente educativo amigable y paciente.',
+            tone: 'friendly'
+          },
+          grok: {
+            enabled: false,
+            apiKey: '',
+            basePrompt: 'Eres un asistente educativo directo y eficiente.',
+            tone: 'professional'
+          },
+          google: {
+            enabled: false,
+            apiKey: '',
+            basePrompt: 'Eres un asistente educativo versátil y conocedor.',
+            tone: 'professional'
+          }
+        };
+        setConfig(defaultConfig);
+        logger.info('Initialized with default AI config');
       }
     } catch (err) {
       logger.error('Failed to load AI config:', err);
-      setError('Error al cargar la configuración');
+      setError('Error al cargar la configuración. Usando configuración predeterminada.');
+
+      // Initialize with default config on error
+      const defaultConfig = {
+        openai: {
+          enabled: false,
+          apiKey: '',
+          basePrompt: 'Eres un asistente educativo amigable y paciente.',
+          tone: 'friendly'
+        },
+        grok: {
+          enabled: false,
+          apiKey: '',
+          basePrompt: 'Eres un asistente educativo directo y eficiente.',
+          tone: 'professional'
+        },
+        google: {
+          enabled: false,
+          apiKey: '',
+          basePrompt: 'Eres un asistente educativo versátil y conocedor.',
+          tone: 'professional'
+        }
+      };
+      setConfig(defaultConfig);
     } finally {
       setLoading(false);
     }
@@ -145,6 +192,16 @@ function AIConfigPanel() {
 
   if (loading) {
     return <BaseLoading variant="fullscreen" text="Cargando configuración..." />;
+  }
+
+  if (!config) {
+    return (
+      <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
+        <BaseAlert variant="danger" title="Error">
+          No se pudo cargar la configuración de IA. Por favor, recarga la página.
+        </BaseAlert>
+      </div>
+    );
   }
 
   return (

@@ -322,6 +322,16 @@ service cloud.firestore {
       allow write: if isTeacher() || isAdmin();
     }
 
+    // ============================================
+    // AI CONFIGURATION
+    // ============================================
+
+    // AI configuration - only admins can read/write
+    match /ai_config/{configId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;
