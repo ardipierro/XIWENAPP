@@ -43,6 +43,16 @@ const TeacherAssignments = lazy(() => import('./screens/teacher/AssignmentsScree
 const TeacherAnalytics = lazy(() => import('./screens/teacher/AnalyticsScreen'));
 const TeacherCalendar = lazy(() => import('./screens/teacher/CalendarScreen'));
 
+// Admin screens
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboard = lazy(() => import('./screens/admin/DashboardScreen'));
+const AdminUsers = lazy(() => import('./screens/admin/UsersScreen'));
+const AdminCourses = lazy(() => import('./screens/admin/CoursesScreen'));
+const AdminContent = lazy(() => import('./screens/admin/ContentScreen'));
+const AdminAnalytics = lazy(() => import('./screens/admin/AnalyticsScreen'));
+const AdminPayments = lazy(() => import('./screens/admin/PaymentsScreen'));
+const AdminSettings = lazy(() => import('./screens/admin/SettingsScreen'));
+
 // Loading fallback component
 function LoadingFallback() {
   return (
@@ -83,8 +93,16 @@ function App() {
                 <Route path="calendar" element={<TeacherCalendar />} />
               </Route>
 
-              {/* Admin routes - TODO: Phase 4 */}
-              <Route path="/admin" element={<div>Admin Dashboard (Coming in Phase 4)</div>} />
+              {/* Admin routes */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="courses" element={<AdminCourses />} />
+                <Route path="content" element={<AdminContent />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="payments" element={<AdminPayments />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
 
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/student" replace />} />
