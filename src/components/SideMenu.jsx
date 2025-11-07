@@ -3,7 +3,6 @@
  * @module components/SideMenu
  */
 
-import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   BarChart3,
@@ -19,8 +18,6 @@ import {
   Video,
   PenTool,
   Gamepad2,
-  ChevronDown,
-  ChevronRight,
   Zap,
   TrendingUp,
   Trophy,
@@ -50,12 +47,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Estado para secciones colapsables del admin
-  const [expandedSections, setExpandedSections] = useState({
-    administracion: true,
-    ensenanza: true
-  });
-
   const handleNavigation = (path, action) => {
     if (action && onMenuAction) {
       onMenuAction(action);
@@ -66,13 +57,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     if (window.innerWidth < 768 && onNavigate) {
       onNavigate();
     }
-  };
-
-  const toggleSection = (sectionId) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [sectionId]: !prev[sectionId]
-    }));
   };
 
   // Determinar menú items según el rol
@@ -180,27 +164,8 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       <nav className="sidemenu-nav">
         {menuData.sections?.map((section) => (
           <div key={section.id} className="sidemenu-section">
-            {/* Section Header - Collapsible */}
-            <button
-              className="sidemenu-section-header"
-              onClick={() => toggleSection(section.id)}
-            >
-              <span className="sidemenu-section-icon">
-                {expandedSections[section.id] ? (
-                  <ChevronDown size={16} strokeWidth={2} />
-                ) : (
-                  <ChevronRight size={16} strokeWidth={2} />
-                )}
-              </span>
-              <span className="sidemenu-section-label">{section.label}</span>
-            </button>
-
-            {/* Section Items - Collapsible */}
-            <div
-              className={`sidemenu-section-items ${
-                expandedSections[section.id] ? 'expanded' : 'collapsed'
-              }`}
-            >
+            {/* Section Items - Sin header, siempre expandido */}
+            <div className="sidemenu-section-items expanded">
               {section.items.map((item, index) => renderMenuItem(item, index))}
             </div>
           </div>
