@@ -4,10 +4,10 @@
  */
 
 import { Settings, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
-import { BaseCard, BaseButton, BaseBadge } from './common';
+import { BaseButton, BaseBadge } from './common';
 import { getProviderById } from '../constants/aiFunctions';
 
-function AIFunctionCard({ aiFunction, config, onConfigure }) {
+function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) {
   const isConfigured = config?.apiKey && config?.apiKey.length > 0;
   const isEnabled = config?.enabled || false;
   const provider = config?.provider ? getProviderById(config.provider) : null;
@@ -41,51 +41,117 @@ function AIFunctionCard({ aiFunction, config, onConfigure }) {
     );
   };
 
-  return (
-    <BaseCard hover>
-      <div className="space-y-4">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            {FunctionIcon && <FunctionIcon size={32} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />}
-            <div>
-              <h3 className="font-semibold text-zinc-900 dark:text-white">
-                {aiFunction.name}
-              </h3>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-                {aiFunction.description}
-              </p>
-            </div>
-          </div>
-          {getStatusBadge()}
+  // Grid View
+  if (viewMode === 'grid') {
+    return (
+      <div
+        className="card card-grid-item flex flex-col cursor-pointer transition-all duration-300 overflow-hidden"
+        style={{ padding: 0 }}
+        onClick={onConfigure}
+        title="Click para configurar función"
+      >
+        {/* Image Placeholder - Top half */}
+        <div className="card-image-large-placeholder">
+          {FunctionIcon && <FunctionIcon size={64} strokeWidth={1.5} className="text-zinc-400 dark:text-zinc-500" />}
         </div>
 
-        {/* Provider Info */}
-        {isConfigured && provider && (
-          <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-            {ProviderIcon && <ProviderIcon size={24} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />}
-            <div className="flex-1">
-              <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                {provider.name}
-              </p>
-              <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                {config.model}
-              </p>
-            </div>
+        {/* Content */}
+        <div className="flex-1 flex flex-col p-4">
+          {/* Header with badge */}
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="card-title flex-1">{aiFunction.name}</h3>
+            {getStatusBadge()}
           </div>
-        )}
 
-        {/* Configure Button */}
-        <BaseButton
-          variant={isConfigured ? "secondary" : "primary"}
-          icon={Settings}
-          onClick={onConfigure}
-          fullWidth
-        >
-          {isConfigured ? 'Configurar' : 'Configurar función'}
-        </BaseButton>
+          {/* Description */}
+          <p className="card-description mb-3">
+            {aiFunction.description}
+          </p>
+
+          {/* Provider Info */}
+          {isConfigured && provider && (
+            <div className="flex items-center gap-2 p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg mb-3">
+              {ProviderIcon && <ProviderIcon size={18} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-zinc-900 dark:text-white truncate">
+                  {provider.name}
+                </p>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 truncate">
+                  {config.model}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Spacer */}
+          <div className="flex-1"></div>
+
+          {/* Configure Button */}
+          <BaseButton
+            variant={isConfigured ? "secondary" : "primary"}
+            icon={Settings}
+            onClick={(e) => {
+              e.stopPropagation();
+              onConfigure();
+            }}
+            fullWidth
+            size="sm"
+          >
+            {isConfigured ? 'Configurar' : 'Configurar función'}
+          </BaseButton>
+        </div>
       </div>
-    </BaseCard>
+    );
+  }
+
+  // List View
+  return (
+    <div
+      className="card card-list cursor-pointer transition-all duration-300"
+      onClick={onConfigure}
+      title="Click para configurar función"
+    >
+      {/* Icon pequeño */}
+      <div className="card-image-placeholder-sm">
+        {FunctionIcon && <FunctionIcon size={32} strokeWidth={2} className="text-zinc-400 dark:text-zinc-500" />}
+      </div>
+
+      {/* Content principal */}
+      <div className="flex-1 min-w-0 p-4">
+        <div className="flex gap-4 items-start">
+          <div className="flex-1 min-w-0">
+            <h3 className="card-title">{aiFunction.name}</h3>
+            <p className="card-description">{aiFunction.description}</p>
+
+            {/* Provider info inline */}
+            {isConfigured && provider && (
+              <div className="flex items-center gap-2 mt-2">
+                {ProviderIcon && <ProviderIcon size={14} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />}
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">
+                  {provider.name} · {config.model}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Badge and button */}
+          <div className="flex flex-col items-end gap-2">
+            {getStatusBadge()}
+            <BaseButton
+              variant={isConfigured ? "secondary" : "primary"}
+              icon={Settings}
+              onClick={(e) => {
+                e.stopPropagation();
+                onConfigure();
+              }}
+              size="sm"
+            >
+              Configurar
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

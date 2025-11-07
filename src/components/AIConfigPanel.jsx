@@ -14,6 +14,7 @@ import {
   BaseEmptyState
 } from './common';
 import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
 import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
@@ -24,6 +25,8 @@ function AIConfigPanel() {
   const [selectedFunction, setSelectedFunction] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
@@ -106,10 +109,23 @@ function AIConfigPanel() {
 
 
   const getFilteredFunctions = () => {
-    if (!selectedCategory) {
-      return AI_FUNCTIONS;
+    let filtered = AI_FUNCTIONS;
+
+    // Filter by category
+    if (selectedCategory) {
+      filtered = filtered.filter(f => f.category === selectedCategory);
     }
-    return AI_FUNCTIONS.filter(f => f.category === selectedCategory);
+
+    // Filter by search term
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(f =>
+        f.name.toLowerCase().includes(search) ||
+        f.description.toLowerCase().includes(search)
+      );
+    }
+
+    return filtered;
   };
 
   const getEnabledCount = () => {
@@ -192,6 +208,16 @@ function AIConfigPanel() {
         </BaseAlert>
       )}
 
+      {/* Search Bar */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar funciones de IA..."
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        className="mb-6"
+      />
+
       {/* Category Filter */}
       <div className="mb-6 flex flex-wrap gap-2 items-center">
         <Filter className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
@@ -219,15 +245,16 @@ function AIConfigPanel() {
         })}
       </div>
 
-      {/* Functions Grid or Empty State */}
+      {/* Functions Grid/List or Empty State */}
       {filteredFunctions.length === 0 ? (
         <BaseEmptyState
           icon={Settings}
-          title="No hay funciones en esta categoría"
-          description="Selecciona otra categoría para ver las funciones disponibles"
+          title={searchTerm ? "No se encontraron funciones" : "No hay funciones en esta categoría"}
+          description={searchTerm ? "Intenta con otros términos de búsqueda" : "Selecciona otra categoría para ver las funciones disponibles"}
           size="lg"
         />
-      ) : (
+      ) : viewMode === 'grid' ? (
+        /* Vista Grilla */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
           {filteredFunctions.map(func => (
             <AIFunctionCard
@@ -235,6 +262,20 @@ function AIConfigPanel() {
               aiFunction={func}
               config={config.functions[func.id]}
               onConfigure={() => handleConfigureFunction(func.id)}
+              viewMode="grid"
+            />
+          ))}
+        </div>
+      ) : (
+        /* Vista Lista */
+        <div className="flex flex-col gap-3 mb-6">
+          {filteredFunctions.map(func => (
+            <AIFunctionCard
+              key={func.id}
+              aiFunction={func}
+              config={config.functions[func.id]}
+              onConfigure={() => handleConfigureFunction(func.id)}
+              viewMode="list"
             />
           ))}
         </div>
