@@ -14,7 +14,6 @@
     "@livekit/components-styles": "^1.1.6",
     "firebase": "^12.4.0",
     "livekit-client": "^2.15.14",
-    "livekit-server-sdk": "^2.14.0",
     "lucide-react": "^0.552.0",
     "perfect-freehand": "^1.2.2",
     "prop-types": "^15.8.1",

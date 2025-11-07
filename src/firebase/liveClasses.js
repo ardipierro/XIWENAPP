@@ -15,36 +15,40 @@ import {
   serverTimestamp,
   Timestamp
 } from 'firebase/firestore';
-import { AccessToken } from 'livekit-server-sdk';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 // Configuración de LiveKit
-// NOTA: Estos valores deben estar en variables de entorno en producción
-const LIVEKIT_API_KEY = import.meta.env.VITE_LIVEKIT_API_KEY || 'devkey';
-const LIVEKIT_API_SECRET = import.meta.env.VITE_LIVEKIT_API_SECRET || 'secret';
 export const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL || 'ws://localhost:7880';
 
 /**
  * Genera un token JWT para unirse a una sala de LiveKit
+ * IMPORTANTE: Ahora usa Firebase Cloud Function para generar tokens de forma segura
+ *
  * @param {string} roomName - Nombre de la sala
  * @param {string} participantName - Nombre del participante
  * @param {object} metadata - Metadata adicional del participante
- * @returns {string} Token JWT
+ * @returns {Promise<string>} Token JWT
  */
-export function generateLiveKitToken(roomName, participantName, metadata = {}) {
-  const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
-    identity: participantName,
-    metadata: JSON.stringify(metadata)
-  });
+export async function generateLiveKitToken(roomName, participantName, metadata = {}) {
+  try {
+    const functions = getFunctions();
+    const generateToken = httpsCallable(functions, 'generateLiveKitToken');
 
-  at.addGrant({
-    room: roomName,
-    roomJoin: true,
-    canPublish: true,
-    canSubscribe: true,
-    canPublishData: true
-  });
+    const result = await generateToken({
+      roomName,
+      participantName,
+      metadata
+    });
 
-  return at.toJwt();
+    if (!result.data || !result.data.token) {
+      throw new Error('No se recibió token de la Cloud Function');
+    }
+
+    return result.data.token;
+  } catch (error) {
+    logger.error('Error calling generateLiveKitToken Cloud Function:', error);
+    throw new Error(`Error generando token: ${error.message}`);
+  }
 }
 
 /**
@@ -126,10 +130,10 @@ export async function getLiveClass(classId) {
  */
 export async function getTeacherLiveClasses(teacherId) {
   try {
+    // Query sin orderBy para evitar índice compuesto (ordenamos en memoria)
     const q = query(
       collection(db, 'live_classes'),
-      where('teacherId', '==', teacherId),
-      orderBy('scheduledStart', 'desc')
+      where('teacherId', '==', teacherId)
     );
 
     const snapshot = await getDocs(q);
@@ -140,6 +144,13 @@ export async function getTeacherLiveClasses(teacherId) {
         id: doc.id,
         ...doc.data()
       });
+    });
+
+    // Ordenar en memoria por scheduledStart descendente
+    classes.sort((a, b) => {
+      const aTime = a.scheduledStart?.toMillis?.() || 0;
+      const bTime = b.scheduledStart?.toMillis?.() || 0;
+      return bTime - aTime; // desc
     });
 
     return classes;
@@ -295,14 +306,14 @@ export async function joinLiveClass(classId, userId, userName) {
       throw new Error('Clase llena');
     }
 
-    // Agregar participante
+    // Agregar participante (usar Timestamp.now() en lugar de serverTimestamp() porque no se permite en arrays)
     await updateDoc(classRef, {
       participants: [
         ...data.participants,
         {
           userId,
           userName,
-          joinedAt: serverTimestamp()
+          joinedAt: Timestamp.now()
         }
       ]
     });

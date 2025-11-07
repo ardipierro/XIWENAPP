@@ -37,7 +37,7 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
           isTeacher: teacherCheck
         };
 
-        const jwtToken = generateLiveKitToken(
+        const jwtToken = await generateLiveKitToken(
           liveClass.roomName,
           user.displayName || user.email || user.uid,
           participantMetadata

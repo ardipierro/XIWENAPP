@@ -115,6 +115,19 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true
 }
 
 /**
+ * Conectar solo Functions al emulador para testing de LiveKit
+ * Esto permite probar la Cloud Function sin afectar Auth/Firestore de producción
+ */
+if (import.meta.env.DEV && import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
+  try {
+    connectFunctionsEmulator(functions, 'localhost', 5001);
+    logger.info('Conectado a emulador de Functions', 'FirebaseConfig');
+  } catch (error) {
+    logger.warn('Error al conectar con emulador de Functions', 'FirebaseConfig');
+  }
+}
+
+/**
  * Configuración exportada (solo para debugging, no incluye secrets)
  */
 export const config = {

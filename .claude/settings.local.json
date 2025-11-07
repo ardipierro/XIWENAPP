@@ -52,7 +52,19 @@
       "Bash(python3:*)",
       "Bash(timeout 5 bash:*)",
       "Bash(git merge:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(node -c:*)",
+      "Bash(cmd /c taskkill /F /PID 68080)",
+      "Bash(node:*)",
+      "Bash(firebase functions:config:set:*)",
+      "Bash(firebase emulators:start:*)",
+      "Bash(cmd /c:*)",
+      "Bash(firebase projects:list:*)",
+      "Bash(firebase functions:secrets:set:*)",
+      "Bash(firebase functions:secrets:access:*)",
+      "Bash(firebase functions:list:*)",
+      "Bash(firebase functions:log:*)",
+      "Bash(git stash show:*)"
     ],
     "deny": [],
     "ask": []

@@ -60,6 +60,7 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
         onToggleSidebar={toggleSidebar}
         sidebarOpen={sidebarOpen}
         isAdmin={isAdmin}
+        onMenuAction={onMenuAction}
       />
 
       {/* Menú Lateral */}

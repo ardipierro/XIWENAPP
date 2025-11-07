@@ -10,7 +10,6 @@ import {
   getOrCreateConversation,
   sendMessage
 } from '../firebase/messages';
-import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
 
 /**
@@ -38,16 +37,13 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
 
       setSearching(true);
 
-      const results = await safeAsync(
-        () => searchUsers(searchTerm, currentUser.uid),
-        {
-          context: 'NewMessageModal',
-          onError: (error) => logger.error('Search failed', error)
+      try {
+        const results = await searchUsers(searchTerm, currentUser.uid);
+        if (results) {
+          setSearchResults(results);
         }
-      );
-
-      if (results) {
-        setSearchResults(results);
+      } catch (error) {
+        logger.error('Search failed', error, 'NewMessageModal');
       }
 
       setSearching(false);
@@ -75,34 +71,32 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
 
     setSending(true);
 
-    // Get or create conversation
-    const conversationId = await safeAsync(
-      () => getOrCreateConversation(currentUser.uid, selectedUser.id),
-      { context: 'NewMessageModal' }
-    );
+    try {
+      // Get or create conversation
+      const conversationId = await getOrCreateConversation(currentUser.uid, selectedUser.id);
 
-    if (!conversationId) {
-      setSending(false);
-      return;
-    }
+      if (!conversationId) {
+        setSending(false);
+        return;
+      }
 
-    // Send first message
-    const result = await safeAsync(
-      () => sendMessage({
+      // Send first message
+      const result = await sendMessage({
         conversationId,
         senderId: currentUser.uid,
         senderName: currentUser.displayName || currentUser.email,
         receiverId: selectedUser.id,
         content: message.trim()
-      }),
-      { context: 'NewMessageModal' }
-    );
+      });
+
+      if (result) {
+        onConversationCreated(conversationId);
+      }
+    } catch (error) {
+      logger.error('Failed to send message', error, 'NewMessageModal');
+    }
 
     setSending(false);
-
-    if (result) {
-      onConversationCreated(conversationId);
-    }
   };
 
   /**

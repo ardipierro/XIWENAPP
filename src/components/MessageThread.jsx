@@ -21,11 +21,26 @@ import {
   validateMessageFile,
   uploadAudioMessage
 } from '../firebase/storage';
-import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
 import EmojiPicker from './EmojiPicker';
 import VoiceRecorder from './VoiceRecorder';
 import ReactionPicker from './ReactionPicker';
+
+/**
+ * Simple async error handler
+ */
+const safeAsync = async (fn, options = {}) => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (options.onError) {
+      options.onError(error);
+    } else {
+      logger.error('Async operation failed', error, options.context || 'MessageThread');
+    }
+    return null;
+  }
+};
 
 /**
  * Message Thread Component

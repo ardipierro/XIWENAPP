@@ -74,6 +74,7 @@ import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
+import MessagesPanel from './MessagesPanel';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -515,6 +516,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
           </button>
           <AnalyticsDashboard user={user} />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Messages Panel - WITH Layout
+  if (navigation.currentScreen === 'messages') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <MessagesPanel user={user} />
       </DashboardLayout>
     );
   }

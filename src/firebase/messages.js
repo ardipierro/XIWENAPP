@@ -276,10 +276,10 @@ export function subscribeToMessages(conversationId, callback) {
  */
 export function subscribeToConversations(userId, callback) {
   const conversationsRef = collection(db, 'conversations');
+  // Query sin orderBy para evitar índice compuesto (ordenamos en memoria)
   const q = query(
     conversationsRef,
-    where('participants', 'array-contains', userId),
-    orderBy('lastMessageAt', 'desc')
+    where('participants', 'array-contains', userId)
   );
 
   return onSnapshot(q, async (snapshot) => {
@@ -307,6 +307,13 @@ export function subscribeToConversations(userId, callback) {
           : 0
       });
     }
+
+    // Ordenar en memoria por lastMessageAt descendente
+    conversations.sort((a, b) => {
+      const aTime = a.lastMessageAt?.toMillis?.() || 0;
+      const bTime = b.lastMessageAt?.toMillis?.() || 0;
+      return bTime - aTime;
+    });
 
     callback(conversations);
   }, (error) => {

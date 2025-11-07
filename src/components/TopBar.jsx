@@ -24,8 +24,9 @@ import './TopBar.css';
  * @param {string} props.userRole - Rol del usuario
  * @param {Function} props.onToggleSidebar - Callback para toggle del sidebar
  * @param {boolean} props.sidebarOpen - Si el sidebar está abierto
+ * @param {Function} props.onMenuAction - Callback para acciones del menú
  */
-function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
+function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -139,7 +140,12 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen }) {
           </button>
 
           {/* Mensajes */}
-          <button className="icon-button" aria-label="Mensajes">
+          <button
+            className="icon-button"
+            aria-label="Mensajes"
+            onClick={() => onMenuAction?.('messages')}
+            title="Mensajes"
+          >
             <MessageCircle size={20} strokeWidth={2} />
             {messageCount > 0 && (
               <span className="badge">{messageCount}</span>

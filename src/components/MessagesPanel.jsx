@@ -9,9 +9,9 @@ import {
   getUserConversations,
   subscribeToConversations
 } from '../firebase/messages';
-import { safeAsync } from '../utils/errorHandler';
 import MessageThread from './MessageThread';
 import NewMessageModal from './NewMessageModal';
+import BaseButton from './common/BaseButton';
 import './Messages.css';
 
 /**
@@ -79,13 +79,13 @@ function MessagesPanel({ user }) {
               <span className="unread-badge">{totalUnread}</span>
             )}
           </div>
-          <button
-            className="btn-new-message"
+          <BaseButton
+            variant="primary"
+            icon={Plus}
             onClick={() => setShowNewMessage(true)}
             title="Nuevo mensaje"
-          >
-            <Plus size={20} />
-          </button>
+            className="btn-new-message"
+          />
         </div>
 
         <div className="messages-search">
@@ -97,12 +97,12 @@ function MessagesPanel({ user }) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           {searchTerm && (
-            <button
-              className="clear-search"
+            <BaseButton
+              variant="ghost"
+              icon={X}
               onClick={() => setSearchTerm('')}
-            >
-              <X size={16} />
-            </button>
+              className="clear-search"
+            />
           )}
         </div>
 
@@ -120,12 +120,12 @@ function MessagesPanel({ user }) {
                   ? 'No se encontraron conversaciones'
                   : 'No tienes conversaciones aún'}
               </p>
-              <button
-                className="btn-primary"
+              <BaseButton
+                variant="primary"
                 onClick={() => setShowNewMessage(true)}
               >
                 Iniciar conversación
-              </button>
+              </BaseButton>
             </div>
           ) : (
             filteredConversations.map(conversation => (
@@ -153,13 +153,13 @@ function MessagesPanel({ user }) {
             <MessageCircle size={64} />
             <h3>Selecciona una conversación</h3>
             <p>Elige una conversación de la lista o inicia una nueva</p>
-            <button
-              className="btn-primary"
+            <BaseButton
+              variant="primary"
+              icon={Plus}
               onClick={() => setShowNewMessage(true)}
             >
-              <Plus size={16} />
               Nuevo mensaje
-            </button>
+            </BaseButton>
           </div>
         )}
       </div>
