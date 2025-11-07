@@ -14,7 +14,7 @@ import logger from '../utils/logger';
  */
 export async function saveAIConfig(config) {
   try {
-    const configRef = doc(db, 'config', 'ai');
+    const configRef = doc(db, 'ai_config', 'global');
     await setDoc(configRef, {
       ...config,
       updatedAt: new Date().toISOString()
@@ -32,7 +32,7 @@ export async function saveAIConfig(config) {
  */
 export async function getAIConfig() {
   try {
-    const configRef = doc(db, 'config', 'ai');
+    const configRef = doc(db, 'ai_config', 'global');
     const configDoc = await getDoc(configRef);
 
     if (configDoc.exists()) {
