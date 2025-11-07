@@ -236,101 +236,101 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
           </BaseAlert>
         )}
 
-        {/* Tipo de contenido */}
-        <BaseSelect
-          label="Tipo de Contenido"
-          value={formData.type}
-          onChange={(e) => handleChange('type', e.target.value)}
-          options={TYPE_OPTIONS}
-          required
-        />
-
-        {/* Título */}
-        <BaseInput
-          label="Título"
-          value={formData.title}
-          onChange={(e) => handleChange('title', e.target.value)}
-          placeholder="Ej: Introducción a los verbos"
-          required
-        />
-
-        {/* Descripción */}
-        <BaseTextarea
-          label="Descripción"
-          value={formData.description}
-          onChange={(e) => handleChange('description', e.target.value)}
-          placeholder="Descripción breve del contenido..."
-          rows={3}
-        />
-
-        {/* Campos específicos según tipo */}
-        {(formData.type === CONTENT_TYPES.VIDEO || formData.type === CONTENT_TYPES.LINK) && (
-          <BaseInput
-            label={formData.type === CONTENT_TYPES.VIDEO ? "URL del Video" : "URL del Link"}
-            value={formData.url}
-            onChange={(e) => handleChange('url', e.target.value)}
-            placeholder="https://..."
-            required
-          />
-        )}
-
-        {(formData.type === CONTENT_TYPES.LESSON || formData.type === CONTENT_TYPES.READING) && (
-          <BaseTextarea
-            label="Contenido"
-            value={formData.body}
-            onChange={(e) => handleChange('body', e.target.value)}
-            placeholder="Escribe el contenido aquí..."
-            rows={8}
-          />
-        )}
-
-        {formData.type === CONTENT_TYPES.EXERCISE && (
-          <div className="space-y-4">
-            {/* Tabs para Ejercicios */}
-            <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-700">
-              <button
-                type="button"
-                onClick={() => setActiveTab('manual')}
-                className={`
-                  px-4 py-2 font-medium text-sm transition-colors relative
-                  ${activeTab === 'manual'
-                    ? 'text-zinc-900 dark:text-white'
-                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-                  }
-                `}
-              >
-                <div className="flex items-center gap-2">
-                  <Edit3 className="w-4 h-4" strokeWidth={2} />
-                  <span>Manual</span>
-                </div>
-                {activeTab === 'manual' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('ai')}
-                className={`
-                  px-4 py-2 font-medium text-sm transition-colors relative
-                  ${activeTab === 'ai'
-                    ? 'text-zinc-900 dark:text-white'
-                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-                  }
-                `}
-              >
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" strokeWidth={2} />
-                  <span>Generar con IA</span>
-                </div>
-                {activeTab === 'ai' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
-                )}
-              </button>
+        {/* Tabs: Manual vs IA - Nivel Superior */}
+        <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-700">
+          <button
+            type="button"
+            onClick={() => setActiveTab('manual')}
+            className={`
+              px-4 py-2 font-medium text-sm transition-colors relative
+              ${activeTab === 'manual'
+                ? 'text-zinc-900 dark:text-white'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }
+            `}
+          >
+            <div className="flex items-center gap-2">
+              <Edit3 className="w-4 h-4" strokeWidth={2} />
+              <span>Manual</span>
             </div>
-
-            {/* Tab Content - Manual */}
             {activeTab === 'manual' && (
-              <>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('ai')}
+            className={`
+              px-4 py-2 font-medium text-sm transition-colors relative
+              ${activeTab === 'ai'
+                ? 'text-zinc-900 dark:text-white'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }
+            `}
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" strokeWidth={2} />
+              <span>Generar con IA</span>
+            </div>
+            {activeTab === 'ai' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
+            )}
+          </button>
+        </div>
+
+        {/* Contenido Tab Manual */}
+        {activeTab === 'manual' && (
+          <>
+            {/* Tipo de contenido */}
+            <BaseSelect
+              label="Tipo de Contenido"
+              value={formData.type}
+              onChange={(e) => handleChange('type', e.target.value)}
+              options={TYPE_OPTIONS}
+              required
+            />
+
+            {/* Título */}
+            <BaseInput
+              label="Título"
+              value={formData.title}
+              onChange={(e) => handleChange('title', e.target.value)}
+              placeholder="Ej: Introducción a los verbos"
+              required
+            />
+
+            {/* Descripción */}
+            <BaseTextarea
+              label="Descripción"
+              value={formData.description}
+              onChange={(e) => handleChange('description', e.target.value)}
+              placeholder="Descripción breve del contenido..."
+              rows={3}
+            />
+
+            {/* Campos específicos según tipo */}
+            {(formData.type === CONTENT_TYPES.VIDEO || formData.type === CONTENT_TYPES.LINK) && (
+              <BaseInput
+                label={formData.type === CONTENT_TYPES.VIDEO ? "URL del Video" : "URL del Link"}
+                value={formData.url}
+                onChange={(e) => handleChange('url', e.target.value)}
+                placeholder="https://..."
+                required
+              />
+            )}
+
+            {(formData.type === CONTENT_TYPES.LESSON || formData.type === CONTENT_TYPES.READING) && (
+              <BaseTextarea
+                label="Contenido"
+                value={formData.body}
+                onChange={(e) => handleChange('body', e.target.value)}
+                placeholder="Escribe el contenido aquí..."
+                rows={8}
+              />
+            )}
+
+            {formData.type === CONTENT_TYPES.EXERCISE && (
+              <div className="space-y-4">
                 <BaseSelect
                   label="Tipo de Ejercicio"
                   value={formData.contentType}
@@ -350,89 +350,96 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
                     💡 Las preguntas del ejercicio se agregarán después de crear el contenido.
                   </p>
                 </div>
-              </>
-            )}
-
-            {/* Tab Content - AI */}
-            {activeTab === 'ai' && (
-              <div className="space-y-4">
-                <div className="p-4 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
-                  <p className="text-sm text-zinc-800 dark:text-zinc-200">
-                    <Sparkles className="w-4 h-4 inline mr-2" strokeWidth={2} />
-                    Usa la IA para generar ejercicios automáticamente basados en un tema o texto.
-                  </p>
-                </div>
-                <BaseButton
-                  variant="primary"
-                  icon={Sparkles}
-                  onClick={() => setShowAIGenerator(true)}
-                  fullWidth
-                >
-                  Abrir Generador de Ejercicios IA
-                </BaseButton>
               </div>
             )}
-          </div>
+
+            {/* Metadata */}
+            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
+                Información Adicional
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <BaseSelect
+                  label="Dificultad"
+                  value={formData.metadata.difficulty}
+                  onChange={(e) => handleMetadataChange('difficulty', e.target.value)}
+                  options={DIFFICULTY_OPTIONS}
+                />
+
+                <BaseInput
+                  label="Duración (minutos)"
+                  type="number"
+                  value={formData.metadata.duration}
+                  onChange={(e) => handleMetadataChange('duration', e.target.value)}
+                  placeholder="15"
+                  min="0"
+                />
+
+                <BaseInput
+                  label="Puntos"
+                  type="number"
+                  value={formData.metadata.points}
+                  onChange={(e) => handleMetadataChange('points', e.target.value)}
+                  placeholder="100"
+                  min="0"
+                />
+
+                <BaseInput
+                  label="Nivel"
+                  value={formData.metadata.level}
+                  onChange={(e) => handleMetadataChange('level', e.target.value)}
+                  placeholder="A1, B1, HSK1, etc."
+                />
+              </div>
+
+              <BaseInput
+                label="Tags (separados por comas)"
+                value={formData.metadata.tags}
+                onChange={(e) => handleMetadataChange('tags', e.target.value)}
+                placeholder="gramática, verbos, presente"
+                className="mt-4"
+              />
+            </div>
+          </>
         )}
 
-        {/* Metadata */}
-        <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
-            Información Adicional
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <BaseSelect
-              label="Dificultad"
-              value={formData.metadata.difficulty}
-              onChange={(e) => handleMetadataChange('difficulty', e.target.value)}
-              options={DIFFICULTY_OPTIONS}
-            />
-
-            <BaseInput
-              label="Duración (minutos)"
-              type="number"
-              value={formData.metadata.duration}
-              onChange={(e) => handleMetadataChange('duration', e.target.value)}
-              placeholder="15"
-              min="0"
-            />
-
-            <BaseInput
-              label="Puntos"
-              type="number"
-              value={formData.metadata.points}
-              onChange={(e) => handleMetadataChange('points', e.target.value)}
-              placeholder="100"
-              min="0"
-            />
-
-            <BaseInput
-              label="Nivel"
-              value={formData.metadata.level}
-              onChange={(e) => handleMetadataChange('level', e.target.value)}
-              placeholder="A1, B1, HSK1, etc."
-            />
+        {/* Contenido Tab IA */}
+        {activeTab === 'ai' && (
+          <div className="space-y-4">
+            <div className="p-4 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+              <p className="text-sm text-zinc-800 dark:text-zinc-200 mb-2">
+                <Sparkles className="w-4 h-4 inline mr-2" strokeWidth={2} />
+                <strong>Generador Universal de Contenido con IA</strong>
+              </p>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                Usa la inteligencia artificial para crear automáticamente:
+              </p>
+              <ul className="text-xs text-zinc-600 dark:text-zinc-400 mt-2 ml-4 list-disc space-y-1">
+                <li>Lecciones completas con explicaciones detalladas</li>
+                <li>Lecturas adaptadas a diferentes niveles</li>
+                <li>Ejercicios de múltiple tipo (opción múltiple, completar, etc.)</li>
+                <li>Contenido educativo basado en temas específicos</li>
+              </ul>
+            </div>
+            <BaseButton
+              variant="primary"
+              icon={Sparkles}
+              onClick={() => setShowAIGenerator(true)}
+              fullWidth
+            >
+              Abrir Generador de Contenido IA
+            </BaseButton>
           </div>
-
-          <BaseInput
-            label="Tags (separados por comas)"
-            value={formData.metadata.tags}
-            onChange={(e) => handleMetadataChange('tags', e.target.value)}
-            placeholder="gramática, verbos, presente"
-            className="mt-4"
-          />
-        </div>
+        )}
       </form>
     </BaseModal>
 
-      {/* AI Exercise Generator Modal */}
-      {formData.type === CONTENT_TYPES.EXERCISE && (
-        <ExerciseMakerESL
-          isOpen={showAIGenerator}
-          onClose={() => setShowAIGenerator(false)}
-        />
-      )}
+      {/* AI Content Generator Modal */}
+      <ExerciseMakerESL
+        isOpen={showAIGenerator}
+        onClose={() => setShowAIGenerator(false)}
+      />
     </>
   );
 }
