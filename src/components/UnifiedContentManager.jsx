@@ -59,43 +59,43 @@ const CONTENT_TYPE_CONFIG = {
   [CONTENT_TYPES.COURSE]: {
     icon: BookOpen,
     label: 'Curso',
-    color: 'blue',
+    color: 'zinc', // Gris principal
     description: 'Contenedor de lecciones y ejercicios'
   },
   [CONTENT_TYPES.LESSON]: {
     icon: FileText,
     label: 'Lección',
-    color: 'green',
+    color: 'green', // Verde permitido
     description: 'Contenido teórico en HTML/texto'
   },
   [CONTENT_TYPES.READING]: {
     icon: BookMarked,
     label: 'Lectura',
-    color: 'purple',
+    color: 'zinc', // Gris (reemplaza purple)
     description: 'Documento o artículo de lectura'
   },
   [CONTENT_TYPES.VIDEO]: {
     icon: Video,
     label: 'Video',
-    color: 'red',
+    color: 'red', // Rojo permitido
     description: 'Contenido multimedia educativo'
   },
   [CONTENT_TYPES.LINK]: {
     icon: LinkIcon,
     label: 'Link',
-    color: 'cyan',
+    color: 'zinc', // Gris (reemplaza cyan)
     description: 'Enlace a recurso externo'
   },
   [CONTENT_TYPES.EXERCISE]: {
     icon: PenTool,
     label: 'Ejercicio',
-    color: 'amber',
+    color: 'amber', // Amarillo permitido
     description: 'Práctica con preguntas'
   },
   [CONTENT_TYPES.LIVE_GAME]: {
     icon: Gamepad2,
     label: 'Juego en Vivo',
-    color: 'pink',
+    color: 'zinc', // Gris (reemplaza pink)
     description: 'Sesión interactiva sincrónica'
   }
 };
@@ -281,7 +281,7 @@ function UnifiedContentManager({ user, onBack }) {
           </div>
           <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Cursos</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.courses}</p>
+            <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{stats.courses}</p>
           </div>
           <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Lecciones</p>
@@ -293,7 +293,7 @@ function UnifiedContentManager({ user, onBack }) {
           </div>
           <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Juegos</p>
-            <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">{stats.games}</p>
+            <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{stats.games}</p>
           </div>
         </div>
 
