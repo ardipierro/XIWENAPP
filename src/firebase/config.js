@@ -68,6 +68,12 @@ try {
 }
 
 /**
+ * Exportar la instancia de Firebase App para uso directo
+ * @type {import('firebase/app').FirebaseApp}
+ */
+export { app };
+
+/**
  * Instancia de Firestore Database
  * @type {import('firebase/firestore').Firestore}
  */
