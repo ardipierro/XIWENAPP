@@ -9,6 +9,7 @@ import {
   DollarSign,
   Shield,
   FileText,
+  Lightbulb,
   Menu,
   X,
   LogOut,
@@ -33,6 +34,7 @@ function AdminLayout() {
     { path: '/admin/content', icon: FileText, label: 'Content' },
     { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/admin/payments', icon: DollarSign, label: 'Payments' },
+    { path: '/admin/ai-config', icon: Lightbulb, label: 'AI Config' },
     { path: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 

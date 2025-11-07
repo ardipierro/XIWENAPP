@@ -56,6 +56,7 @@ const AdminContent = lazy(() => import('./screens/admin/ContentScreen'));
 const AdminAnalytics = lazy(() => import('./screens/admin/AnalyticsScreen'));
 const AdminPayments = lazy(() => import('./screens/admin/PaymentsScreen'));
 const AdminSettings = lazy(() => import('./screens/admin/SettingsScreen'));
+const AdminAIConfig = lazy(() => import('./screens/admin/AIConfigScreen'));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -109,6 +110,7 @@ function App() {
                 <Route path="content" element={<AdminContent />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
                 <Route path="payments" element={<AdminPayments />} />
+                <Route path="ai-config" element={<AdminAIConfig />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
 
