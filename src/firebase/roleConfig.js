@@ -5,8 +5,9 @@
 /**
  * Email del administrador principal
  * Este email siempre tendrá acceso de admin automáticamente
+ * Se configura a través de la variable de entorno VITE_ADMIN_EMAIL
  */
-export const ADMIN_EMAIL = 'ardipierro@gmail.com';
+export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'ardipierro@gmail.com';
 
 /**
  * Roles disponibles en el sistema
@@ -16,6 +17,7 @@ export const ROLES = {
   ADMIN: 'admin',
   TEACHER: 'teacher',
   STUDENT: 'student',
+  GUARDIAN: 'guardian',      // Padre/Tutor/Encargado
   LISTENER: 'listener',
   TRIAL: 'trial',
   TRIAL_TEACHER: 'trial_teacher'
@@ -44,6 +46,12 @@ export const ROLE_INFO = {
     icon: 'GraduationCap',
     color: '#71717a' // gris oscuro
   },
+  [ROLES.GUARDIAN]: {
+    name: 'Padre/Tutor',
+    description: 'Puede ver el desempeño de estudiantes vinculados',
+    icon: 'Users',
+    color: '#10b981' // verde
+  },
   [ROLES.LISTENER]: {
     name: 'Oyente',
     description: 'Solo lectura, no puede participar en juegos',
@@ -65,6 +73,11 @@ export const ROLE_INFO = {
 };
 
 /**
+ * Roles que tienen acceso al dashboard de administrador
+ */
+export const ADMIN_ROLES = [ROLES.ADMIN];
+
+/**
  * Roles que tienen acceso al dashboard de profesor
  */
 export const TEACHER_ROLES = [ROLES.ADMIN, ROLES.TEACHER, ROLES.TRIAL_TEACHER];
@@ -73,6 +86,11 @@ export const TEACHER_ROLES = [ROLES.ADMIN, ROLES.TEACHER, ROLES.TRIAL_TEACHER];
  * Roles que tienen acceso al dashboard de alumno
  */
 export const STUDENT_ROLES = [ROLES.STUDENT, ROLES.LISTENER, ROLES.TRIAL];
+
+/**
+ * Roles que tienen acceso al dashboard de tutor/encargado
+ */
+export const GUARDIAN_ROLES = [ROLES.GUARDIAN];
 
 /**
  * Verificar si un email es el administrador principal

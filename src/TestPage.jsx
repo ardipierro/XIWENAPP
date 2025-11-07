@@ -4,6 +4,8 @@ import StudentAssignmentsView from './components/StudentAssignmentsView';
 import GradingInterface from './components/GradingInterface';
 import GamificationPanel from './components/GamificationPanel';
 import UnifiedCalendar from './components/UnifiedCalendar';
+import GuardianLinkingInterface from './components/GuardianLinkingInterface';
+import GuardianDashboard from './components/GuardianDashboard';
 import { Button } from './components/common';
 
 /**
@@ -14,6 +16,7 @@ export default function TestPage() {
   const [currentView, setCurrentView] = useState('menu');
   const [testUserId] = useState('test-user-123');
   const [testTeacherId] = useState('test-teacher-456');
+  const [testAdminId] = useState('test-admin-789');
 
   // Mock assignment for grading
   const mockAssignment = {
@@ -21,6 +24,13 @@ export default function TestPage() {
     title: 'Tarea de Prueba - Matemáticas',
     points: 100,
     deadline: new Date()
+  };
+
+  // Mock user for guardian dashboard
+  const mockGuardianUser = {
+    uid: 'test-guardian-001',
+    email: 'guardian@test.com',
+    displayName: 'Tutor de Prueba'
   };
 
   return (
@@ -99,6 +109,30 @@ export default function TestPage() {
               </Button>
             </div>
 
+            <div className="card p-6">
+              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+                👨‍👩‍👧 Guardian Dashboard
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Dashboard para tutores/padres
+              </p>
+              <Button variant="primary" onClick={() => setCurrentView('guardian')}>
+                Probar
+              </Button>
+            </div>
+
+            <div className="card p-6">
+              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+                🔗 Guardian Linking
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Vincular tutores a estudiantes (admin)
+              </p>
+              <Button variant="primary" onClick={() => setCurrentView('guardian-linking')}>
+                Probar
+              </Button>
+            </div>
+
             <div className="card p-6 bg-gray-100 dark:bg-gray-800">
               <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
                 ℹ️ Información
@@ -153,6 +187,14 @@ export default function TestPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
             <UnifiedCalendar userId={testUserId} userRole="student" />
           </div>
+        )}
+
+        {currentView === 'guardian' && (
+          <GuardianDashboard user={mockGuardianUser} />
+        )}
+
+        {currentView === 'guardian-linking' && (
+          <GuardianLinkingInterface adminId={testAdminId} />
         )}
       </div>
     </div>

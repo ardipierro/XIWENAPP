@@ -8,7 +8,7 @@ import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import useAuth from './hooks/useAuth.js';
 import { useViewAs } from './contexts/ViewAsContext.jsx';
-import { ADMIN_ROLES, TEACHER_ROLES, STUDENT_ROLES } from './constants/auth.js';
+import { ADMIN_ROLES, TEACHER_ROLES, STUDENT_ROLES, GUARDIAN_ROLES } from './constants/auth.js';
 
 // Static imports for public routes (always needed)
 import LandingPage from './LandingPage';
@@ -19,6 +19,7 @@ import JoinGamePage from './components/JoinGamePage.jsx';
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const TeacherDashboard = lazy(() => import('./components/TeacherDashboard'));
 const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
+const GuardianDashboard = lazy(() => import('./components/GuardianDashboard'));
 const TestPage = lazy(() => import('./TestPage'));
 
 import './App.css';
@@ -133,6 +134,15 @@ function App() {
             element={
               <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={STUDENT_ROLES}>
                 <StudentDashboard user={effectiveUser} userRole={effectiveRole} />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/guardian/*"
+            element={
+              <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={GUARDIAN_ROLES}>
+                <GuardianDashboard user={effectiveUser} userRole={effectiveRole} />
               </ProtectedRoute>
             }
           />
@@ -281,6 +291,10 @@ function DashboardRedirect({ user, userRole }) {
 
   if (STUDENT_ROLES.includes(userRole)) {
     return <Navigate to="/student" replace />;
+  }
+
+  if (GUARDIAN_ROLES.includes(userRole)) {
+    return <Navigate to="/guardian" replace />;
   }
 
   if (TEACHER_ROLES.includes(userRole)) {

@@ -1,0 +1,59 @@
+/**
+ * Reaction Picker Styles
+ */
+
+.reaction-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: reactionPickerPop 0.2s ease;
+  z-index: 100;
+  margin-bottom: 8px;
+}
+
+@keyframes reactionPickerPop {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reaction-btn-quick {
+  padding: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.reaction-btn-quick:hover {
+  background: var(--color-bg-tertiary);
+  transform: scale(1.2);
+}
+
+.reaction-btn-quick:active {
+  transform: scale(1.1);
+}
+
+/* Dark Mode */
+.dark .reaction-picker {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
