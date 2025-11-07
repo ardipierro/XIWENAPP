@@ -11,6 +11,8 @@ function AIFunctionCard({ aiFunction, config, onConfigure }) {
   const isConfigured = config?.apiKey && config?.apiKey.length > 0;
   const isEnabled = config?.enabled || false;
   const provider = config?.provider ? getProviderById(config.provider) : null;
+  const FunctionIcon = aiFunction.icon;
+  const ProviderIcon = provider?.icon;
 
   const getStatusBadge = () => {
     if (!isConfigured) {
@@ -45,7 +47,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure }) {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <div className="text-3xl">{aiFunction.icon}</div>
+            {FunctionIcon && <FunctionIcon size={32} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />}
             <div>
               <h3 className="font-semibold text-zinc-900 dark:text-white">
                 {aiFunction.name}
@@ -61,7 +63,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure }) {
         {/* Provider Info */}
         {isConfigured && provider && (
           <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-            <span className="text-xl">{provider.icon}</span>
+            {ProviderIcon && <ProviderIcon size={24} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />}
             <div className="flex-1">
               <p className="text-sm font-medium text-zinc-900 dark:text-white">
                 {provider.name}

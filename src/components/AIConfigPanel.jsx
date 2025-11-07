@@ -222,14 +222,16 @@ function AIConfigPanel() {
         </BaseButton>
         {AI_CATEGORIES.map(category => {
           const count = AI_FUNCTIONS.filter(f => f.category === category.id).length;
+          const CategoryIcon = category.icon;
           return (
             <BaseButton
               key={category.id}
               variant={selectedCategory === category.id ? 'primary' : 'secondary'}
               size="sm"
+              icon={CategoryIcon}
               onClick={() => setSelectedCategory(category.id)}
             >
-              {category.icon} {category.label} ({count})
+              {category.label} ({count})
             </BaseButton>
           );
         })}

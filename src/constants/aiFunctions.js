@@ -3,6 +3,26 @@
  * @module constants/aiFunctions
  */
 
+import {
+  Bot,
+  Brain,
+  Rocket,
+  Search,
+  PenTool,
+  MessageCircle,
+  Target,
+  BookOpen,
+  Languages,
+  MessageSquare,
+  Calendar,
+  Mic,
+  FileText,
+  GraduationCap,
+  BarChart3,
+  Wrench,
+  ClipboardList
+} from 'lucide-react';
+
 /**
  * Available AI providers
  */
@@ -10,7 +30,7 @@ export const AI_PROVIDERS = [
   {
     id: 'openai',
     name: 'OpenAI',
-    icon: '🤖',
+    icon: Bot,
     models: [
       { value: 'gpt-4', label: 'GPT-4' },
       { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
@@ -20,7 +40,7 @@ export const AI_PROVIDERS = [
   {
     id: 'claude',
     name: 'Claude',
-    icon: '🧠',
+    icon: Brain,
     models: [
       { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
       { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' },
@@ -30,7 +50,7 @@ export const AI_PROVIDERS = [
   {
     id: 'grok',
     name: 'Grok',
-    icon: '🚀',
+    icon: Rocket,
     models: [
       { value: 'grok-beta', label: 'Grok Beta' },
       { value: 'grok-2', label: 'Grok 2' }
@@ -39,7 +59,7 @@ export const AI_PROVIDERS = [
   {
     id: 'google',
     name: 'Google',
-    icon: '🔍',
+    icon: Search,
     models: [
       { value: 'gemini-pro', label: 'Gemini Pro' },
       { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
@@ -56,7 +76,7 @@ export const AI_FUNCTIONS = [
     id: 'exercise_generator',
     name: 'Generador de Ejercicios',
     description: 'Crea ejercicios ESL/ELE de múltiples tipos',
-    icon: '✏️',
+    icon: PenTool,
     category: 'content',
     defaultConfig: {
       enabled: false,
@@ -75,7 +95,7 @@ export const AI_FUNCTIONS = [
     id: 'chat_assistant',
     name: 'Asistente de Chat',
     description: 'Responde preguntas de estudiantes en tiempo real',
-    icon: '💬',
+    icon: MessageCircle,
     category: 'teaching',
     defaultConfig: {
       enabled: false,
@@ -94,7 +114,7 @@ export const AI_FUNCTIONS = [
     id: 'auto_grader',
     name: 'Evaluador Automático',
     description: 'Corrige ensayos y respuestas abiertas',
-    icon: '🎯',
+    icon: Target,
     category: 'grading',
     defaultConfig: {
       enabled: false,
@@ -113,7 +133,7 @@ export const AI_FUNCTIONS = [
     id: 'content_creator',
     name: 'Creador de Contenido',
     description: 'Genera lecciones, lecturas y material educativo',
-    icon: '📚',
+    icon: BookOpen,
     category: 'content',
     defaultConfig: {
       enabled: false,
@@ -132,7 +152,7 @@ export const AI_FUNCTIONS = [
     id: 'translator',
     name: 'Traductor Educativo',
     description: 'Traduce con contexto pedagógico y explicaciones',
-    icon: '🌐',
+    icon: Languages,
     category: 'tools',
     defaultConfig: {
       enabled: false,
@@ -151,7 +171,7 @@ export const AI_FUNCTIONS = [
     id: 'feedback_generator',
     name: 'Generador de Feedback',
     description: 'Crea comentarios personalizados para estudiantes',
-    icon: '📝',
+    icon: MessageSquare,
     category: 'teaching',
     defaultConfig: {
       enabled: false,
@@ -170,7 +190,7 @@ export const AI_FUNCTIONS = [
     id: 'lesson_planner',
     name: 'Planificador de Clases',
     description: 'Crea planes de lección y actividades',
-    icon: '📅',
+    icon: Calendar,
     category: 'planning',
     defaultConfig: {
       enabled: false,
@@ -189,7 +209,7 @@ export const AI_FUNCTIONS = [
     id: 'pronunciation_coach',
     name: 'Coach de Pronunciación',
     description: 'Analiza y da feedback sobre pronunciación',
-    icon: '🗣️',
+    icon: Mic,
     category: 'teaching',
     defaultConfig: {
       enabled: false,
@@ -210,11 +230,11 @@ export const AI_FUNCTIONS = [
  * Categories for grouping functions
  */
 export const AI_CATEGORIES = [
-  { id: 'content', label: 'Creación de Contenido', icon: '📝' },
-  { id: 'teaching', label: 'Enseñanza', icon: '👨‍🏫' },
-  { id: 'grading', label: 'Evaluación', icon: '📊' },
-  { id: 'tools', label: 'Herramientas', icon: '🛠️' },
-  { id: 'planning', label: 'Planificación', icon: '📋' }
+  { id: 'content', label: 'Creación de Contenido', icon: FileText },
+  { id: 'teaching', label: 'Enseñanza', icon: GraduationCap },
+  { id: 'grading', label: 'Evaluación', icon: BarChart3 },
+  { id: 'tools', label: 'Herramientas', icon: Wrench },
+  { id: 'planning', label: 'Planificación', icon: ClipboardList }
 ];
 
 /**
