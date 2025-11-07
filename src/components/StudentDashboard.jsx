@@ -21,6 +21,7 @@ import Whiteboard from './Whiteboard';
 import StudentAssignmentsView from './StudentAssignmentsView';
 import GamificationPanel from './GamificationPanel';
 import UnifiedCalendar from './UnifiedCalendar';
+import MessagesPanel from './MessagesPanel';
 
 // Base Components
 import {
@@ -254,7 +255,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       'calendar': 'calendar',
       'classes': 'classes',
       'liveClasses': 'liveClasses',
-      'whiteboardSessions': 'whiteboardSessions'
+      'whiteboardSessions': 'whiteboardSessions',
+      'messages': 'messages'
     };
 
     const view = actionMap[action];
@@ -507,6 +509,22 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               ← Volver a Inicio
             </BaseButton>
             <UnifiedCalendar userId={student?.id} userRole="student" />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render Messages view
+  if (currentView === 'messages') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+              ← Volver a Inicio
+            </BaseButton>
+            <MessagesPanel user={user} />
           </div>
         </div>
       </DashboardLayout>

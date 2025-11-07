@@ -50,7 +50,9 @@
       "Bash(node replace-console-with-logger.js:*)",
       "Bash(node replace-console-with-logger.cjs:*)",
       "Bash(python3:*)",
-      "Bash(timeout 5 bash:*)"
+      "Bash(timeout 5 bash:*)",
+      "Bash(git merge:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [],
     "ask": []

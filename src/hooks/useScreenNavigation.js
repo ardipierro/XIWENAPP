@@ -61,6 +61,7 @@ export function useScreenNavigation() {
     'calendar': 'calendar', // Unified Calendar (Teacher/Student)
     'assignmentsView': 'assignmentsView', // Student Assignments View
     'gamification': 'gamification', // Gamification Panel (Student)
+    'messages': 'messages', // Messages Panel (Teacher/Student)
   };
 
   /**

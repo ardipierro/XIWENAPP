@@ -26,7 +26,8 @@ import {
   Trophy,
   CalendarDays,
   CheckSquare,
-  FileCheck
+  FileCheck,
+  MessageCircle
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -85,6 +86,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: BookOpen, label: 'Cursos', path: '/admin', action: 'courses' },
               { icon: FileText, label: 'Contenidos', path: '/admin', action: 'content' },
               { icon: Calendar, label: 'Clases', path: '/admin', action: 'classes' },
+              { icon: MessageCircle, label: 'Mensajes', path: '/admin', action: 'messages' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
               { icon: ClipboardList, label: 'Asistencias', path: '/admin', action: 'attendance' },
             ]
@@ -115,6 +117,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: CheckSquare, label: 'Tareas', path: '/teacher', action: 'assignments' },
           { icon: FileCheck, label: 'Calificar', path: '/teacher', action: 'grading' },
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
+          { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Video, label: 'Clases en Vivo', path: '/teacher', action: 'liveClasses' },
           { icon: Presentation, label: 'Pizarras', path: '/teacher', action: 'whiteboardSessions' },
           { icon: PenTool, label: 'Excalidraw', path: '/teacher', action: 'excalidrawWhiteboard' },
@@ -133,6 +136,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'assignmentsView' },
           { icon: Trophy, label: 'Gamificación', path: '/student', action: 'gamification' },
           { icon: CalendarDays, label: 'Calendario', path: '/student', action: 'calendar' },
+          { icon: MessageCircle, label: 'Mensajes', path: '/student', action: 'messages' },
           { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classes' },
           { icon: Video, label: 'Clases en Vivo', path: '/student', action: 'liveClasses' },
           { icon: Presentation, label: 'Pizarras', path: '/student', action: 'whiteboardSessions' },

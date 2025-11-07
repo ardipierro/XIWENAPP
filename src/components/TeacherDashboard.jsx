@@ -75,6 +75,7 @@ import LiveGameSetup from './LiveGameSetup';
 import AssignmentManager from './AssignmentManager';
 import GradingInterface from './GradingInterface';
 import UnifiedCalendar from './UnifiedCalendar';
+import MessagesPanel from './MessagesPanel';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -1443,6 +1444,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <UnifiedCalendar userId={user?.id} userRole="teacher" />
+      </DashboardLayout>
+    );
+  }
+
+  // Messages Screen
+  if (navigation.currentScreen === 'messages') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <MessagesPanel user={user} />
       </DashboardLayout>
     );
   }
