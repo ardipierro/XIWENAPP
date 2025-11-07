@@ -5,8 +5,9 @@
 /**
  * Email del administrador principal
  * Este email siempre tendrá acceso de admin automáticamente
+ * Se configura a través de la variable de entorno VITE_ADMIN_EMAIL
  */
-export const ADMIN_EMAIL = 'ardipierro@gmail.com';
+export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'ardipierro@gmail.com';
 
 /**
  * Roles disponibles en el sistema
@@ -70,6 +71,11 @@ export const ROLE_INFO = {
     color: '#d1d5db' // gris claro
   }
 };
+
+/**
+ * Roles que tienen acceso al dashboard de administrador
+ */
+export const ADMIN_ROLES = [ROLES.ADMIN];
 
 /**
  * Roles que tienen acceso al dashboard de profesor
