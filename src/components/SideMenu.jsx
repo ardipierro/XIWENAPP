@@ -85,7 +85,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             id: 'ensenanza',
             label: 'Herramientas de Enseñanza',
             items: [
-              { icon: Gamepad2, label: 'Juego en Vivo', path: '/admin', action: 'liveGame' },
+              // Juego en Vivo movido a dashboard como acceso rápido
             ]
           }
         ]
@@ -104,7 +104,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
-          { icon: Gamepad2, label: 'Juego en Vivo', path: '/teacher', action: 'liveGame' },
+          // Juego en Vivo movido a dashboard como acceso rápido
         ]
       };
     }
