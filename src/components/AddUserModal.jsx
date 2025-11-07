@@ -146,7 +146,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
         </div>
 
         {/* Body - Scrollable */}
-        <div className="modal-body flex-1 overflow-y-auto px-6 pb-6">
+        <div className="modal-content flex-1 overflow-y-auto px-6 pb-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email (obligatorio) */}
             <div className="form-group">

@@ -249,7 +249,7 @@ function UnifiedLogin() {
 
           <button
             type="submit"
-            className="btn-primary"
+            className="btn btn-primary"
             disabled={loading}
           >
             {loading ? (

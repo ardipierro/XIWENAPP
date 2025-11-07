@@ -832,7 +832,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   }
 
 
-  // Renderizar Gestión de Contenido - CON Layout
+  // Renderizar Contenido - CON Layout
   if (currentScreen === 'content') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
@@ -883,7 +883,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return <Whiteboard onBack={handleBackToDashboard} />;
   }
 
-  // Renderizar Gestión de Usuarios/Alumnos - CON Layout
+  // Renderizar Usuarios/Alumnos - CON Layout
   if (currentScreen === 'users') {
     // Mostrar loading fullscreen si estamos procesando retorno de Ver Como
     if (sessionStorage.getItem('viewAsReturning') === 'true' && !hasProcessedReturn) {

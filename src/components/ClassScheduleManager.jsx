@@ -455,7 +455,7 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
             </div>
 
             <form onSubmit={handleSubmit} style={{display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0}}>
-              <div className="modal-body">
+              <div className="modal-content">
                 <div className="form-group">
                   <label className="form-label">Días de la semana (selecciona uno o más)</label>
                   <div className="days-checkbox-group">
