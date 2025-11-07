@@ -4,8 +4,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, Save } from 'lucide-react';
+import { Save, FileText } from 'lucide-react';
 import {
+  BaseModal,
   BaseButton,
   BaseInput,
   BaseTextarea,
@@ -191,164 +192,16 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-700">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-            {initialData ? 'Editar Contenido' : 'Crear Nuevo Contenido'}
-          </h2>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-zinc-500 dark:text-zinc-400" strokeWidth={2} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {error && (
-            <BaseAlert
-              variant="danger"
-              title="Error"
-              dismissible
-              onDismiss={() => setError(null)}
-              className="mb-6"
-            >
-              {error}
-            </BaseAlert>
-          )}
-
-          <div className="space-y-6">
-            {/* Tipo de contenido */}
-            <BaseSelect
-              label="Tipo de Contenido"
-              value={formData.type}
-              onChange={(e) => handleChange('type', e.target.value)}
-              options={TYPE_OPTIONS}
-              required
-            />
-
-            {/* Título */}
-            <BaseInput
-              label="Título"
-              value={formData.title}
-              onChange={(e) => handleChange('title', e.target.value)}
-              placeholder="Ej: Introducción a los verbos"
-              required
-            />
-
-            {/* Descripción */}
-            <BaseTextarea
-              label="Descripción"
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Descripción breve del contenido..."
-              rows={3}
-            />
-
-            {/* Campos específicos según tipo */}
-            {(formData.type === CONTENT_TYPES.VIDEO || formData.type === CONTENT_TYPES.LINK) && (
-              <BaseInput
-                label={formData.type === CONTENT_TYPES.VIDEO ? "URL del Video" : "URL del Link"}
-                value={formData.url}
-                onChange={(e) => handleChange('url', e.target.value)}
-                placeholder="https://..."
-                required
-              />
-            )}
-
-            {(formData.type === CONTENT_TYPES.LESSON || formData.type === CONTENT_TYPES.READING) && (
-              <BaseTextarea
-                label="Contenido"
-                value={formData.body}
-                onChange={(e) => handleChange('body', e.target.value)}
-                placeholder="Escribe el contenido aquí..."
-                rows={8}
-              />
-            )}
-
-            {formData.type === CONTENT_TYPES.EXERCISE && (
-              <>
-                <BaseSelect
-                  label="Tipo de Ejercicio"
-                  value={formData.contentType}
-                  onChange={(e) => handleChange('contentType', e.target.value)}
-                  options={EXERCISE_TYPE_OPTIONS}
-                  required
-                />
-                <BaseTextarea
-                  label="Instrucciones"
-                  value={formData.body}
-                  onChange={(e) => handleChange('body', e.target.value)}
-                  placeholder="Instrucciones para el ejercicio..."
-                  rows={4}
-                />
-                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
-                    💡 Las preguntas del ejercicio se agregarán después de crear el contenido.
-                  </p>
-                </div>
-              </>
-            )}
-
-            {/* Metadata */}
-            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
-                Información Adicional
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <BaseSelect
-                  label="Dificultad"
-                  value={formData.metadata.difficulty}
-                  onChange={(e) => handleMetadataChange('difficulty', e.target.value)}
-                  options={DIFFICULTY_OPTIONS}
-                />
-
-                <BaseInput
-                  label="Duración (minutos)"
-                  type="number"
-                  value={formData.metadata.duration}
-                  onChange={(e) => handleMetadataChange('duration', e.target.value)}
-                  placeholder="15"
-                  min="0"
-                />
-
-                <BaseInput
-                  label="Puntos"
-                  type="number"
-                  value={formData.metadata.points}
-                  onChange={(e) => handleMetadataChange('points', e.target.value)}
-                  placeholder="100"
-                  min="0"
-                />
-
-                <BaseInput
-                  label="Nivel"
-                  value={formData.metadata.level}
-                  onChange={(e) => handleMetadataChange('level', e.target.value)}
-                  placeholder="A1, B1, HSK1, etc."
-                />
-              </div>
-
-              <BaseInput
-                label="Tags (separados por comas)"
-                value={formData.metadata.tags}
-                onChange={(e) => handleMetadataChange('tags', e.target.value)}
-                placeholder="gramática, verbos, presente"
-                className="mt-4"
-              />
-            </div>
-          </div>
-        </form>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={initialData ? 'Editar Contenido' : 'Crear Nuevo Contenido'}
+      icon={FileText}
+      size="xl"
+      loading={saving}
+      footer={
+        <>
           <BaseButton
             variant="secondary"
             onClick={handleClose}
@@ -364,9 +217,143 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
           >
             {saving ? 'Guardando...' : (initialData ? 'Actualizar' : 'Crear')}
           </BaseButton>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <BaseAlert
+            variant="danger"
+            title="Error"
+            dismissible
+            onDismiss={() => setError(null)}
+          >
+            {error}
+          </BaseAlert>
+        )}
+
+        {/* Tipo de contenido */}
+        <BaseSelect
+          label="Tipo de Contenido"
+          value={formData.type}
+          onChange={(e) => handleChange('type', e.target.value)}
+          options={TYPE_OPTIONS}
+          required
+        />
+
+        {/* Título */}
+        <BaseInput
+          label="Título"
+          value={formData.title}
+          onChange={(e) => handleChange('title', e.target.value)}
+          placeholder="Ej: Introducción a los verbos"
+          required
+        />
+
+        {/* Descripción */}
+        <BaseTextarea
+          label="Descripción"
+          value={formData.description}
+          onChange={(e) => handleChange('description', e.target.value)}
+          placeholder="Descripción breve del contenido..."
+          rows={3}
+        />
+
+        {/* Campos específicos según tipo */}
+        {(formData.type === CONTENT_TYPES.VIDEO || formData.type === CONTENT_TYPES.LINK) && (
+          <BaseInput
+            label={formData.type === CONTENT_TYPES.VIDEO ? "URL del Video" : "URL del Link"}
+            value={formData.url}
+            onChange={(e) => handleChange('url', e.target.value)}
+            placeholder="https://..."
+            required
+          />
+        )}
+
+        {(formData.type === CONTENT_TYPES.LESSON || formData.type === CONTENT_TYPES.READING) && (
+          <BaseTextarea
+            label="Contenido"
+            value={formData.body}
+            onChange={(e) => handleChange('body', e.target.value)}
+            placeholder="Escribe el contenido aquí..."
+            rows={8}
+          />
+        )}
+
+        {formData.type === CONTENT_TYPES.EXERCISE && (
+          <>
+            <BaseSelect
+              label="Tipo de Ejercicio"
+              value={formData.contentType}
+              onChange={(e) => handleChange('contentType', e.target.value)}
+              options={EXERCISE_TYPE_OPTIONS}
+              required
+            />
+            <BaseTextarea
+              label="Instrucciones"
+              value={formData.body}
+              onChange={(e) => handleChange('body', e.target.value)}
+              placeholder="Instrucciones para el ejercicio..."
+              rows={4}
+            />
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                💡 Las preguntas del ejercicio se agregarán después de crear el contenido.
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* Metadata */}
+        <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
+            Información Adicional
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BaseSelect
+              label="Dificultad"
+              value={formData.metadata.difficulty}
+              onChange={(e) => handleMetadataChange('difficulty', e.target.value)}
+              options={DIFFICULTY_OPTIONS}
+            />
+
+            <BaseInput
+              label="Duración (minutos)"
+              type="number"
+              value={formData.metadata.duration}
+              onChange={(e) => handleMetadataChange('duration', e.target.value)}
+              placeholder="15"
+              min="0"
+            />
+
+            <BaseInput
+              label="Puntos"
+              type="number"
+              value={formData.metadata.points}
+              onChange={(e) => handleMetadataChange('points', e.target.value)}
+              placeholder="100"
+              min="0"
+            />
+
+            <BaseInput
+              label="Nivel"
+              value={formData.metadata.level}
+              onChange={(e) => handleMetadataChange('level', e.target.value)}
+              placeholder="A1, B1, HSK1, etc."
+            />
+          </div>
+
+          <BaseInput
+            label="Tags (separados por comas)"
+            value={formData.metadata.tags}
+            onChange={(e) => handleMetadataChange('tags', e.target.value)}
+            placeholder="gramática, verbos, presente"
+            className="mt-4"
+          />
         </div>
-      </div>
-    </div>
+      </form>
+    </BaseModal>
   );
 }
 
