@@ -3,8 +3,9 @@
  * @module components/AIConfigPanel
  */
 
-import { useState, useEffect } from 'react';
-import { Lightbulb, Filter, Settings } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { Lightbulb, Filter, Settings, Plus } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 import {
@@ -76,13 +77,13 @@ function AIConfigPanel() {
     }
   };
 
-  const handleConfigureFunction = (functionId) => {
+  const handleConfigureFunction = useCallback((functionId) => {
     const func = AI_FUNCTIONS.find(f => f.id === functionId);
     if (func) {
       setSelectedFunction(func);
       setModalOpen(true);
     }
-  };
+  }, []);
 
   const handleSaveFunction = async (functionId, functionConfig) => {
     try {
@@ -165,6 +166,11 @@ function AIConfigPanel() {
       <PageHeader
         icon={Lightbulb}
         title="Configuración de IA"
+        actionLabel="+ Crear Nueva Configuración"
+        onAction={() => {
+          // TODO: Implementar creación de nueva función
+          logger.info('Create new AI function clicked');
+        }}
       />
 
       {/* Description and Stats */}
@@ -283,8 +289,8 @@ function AIConfigPanel() {
         </div>
       )}
 
-      {/* Configuration Modal */}
-      {selectedFunction && (
+      {/* Configuration Modal - usando Portal */}
+      {selectedFunction && createPortal(
         <AIFunctionConfigModal
           isOpen={modalOpen}
           onClose={() => {
@@ -294,7 +300,8 @@ function AIConfigPanel() {
           aiFunction={selectedFunction}
           initialConfig={config.functions[selectedFunction.id]}
           onSave={handleSaveFunction}
-        />
+        />,
+        document.body
       )}
     </div>
   );
