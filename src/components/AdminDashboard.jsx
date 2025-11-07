@@ -59,6 +59,7 @@ import GameContainer from './GameContainer';
 import ContentManager from './ContentManager';
 import ClassManager from './ClassManager';
 import ExerciseManager from './ExerciseManager';
+import UnifiedContentManager from './UnifiedContentManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
@@ -488,7 +489,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Courses Screen - WITH Layout
+  // Unified Content Manager - WITH Layout (Reemplaza courses, content, exercises)
+  if (navigation.currentScreen === 'unifiedContent') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <UnifiedContentManager user={user} onBack={navigation.handleBackToDashboard} />
+      </DashboardLayout>
+    );
+  }
+
+  // LEGACY: Courses Screen - WITH Layout
   if (navigation.currentScreen === 'courses') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
@@ -497,11 +507,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Content Manager - WITH Layout
+  // LEGACY: Content Manager - WITH Layout
   if (navigation.currentScreen === 'content') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ContentManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openContentModal} />
+      </DashboardLayout>
+    );
+  }
+
+  // LEGACY: Exercise Manager - WITH Layout
+  if (navigation.currentScreen === 'exercises') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ExerciseManager user={user} onBack={navigation.handleBackToDashboard} />
       </DashboardLayout>
     );
   }
@@ -511,15 +530,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
-      </DashboardLayout>
-    );
-  }
-
-  // Exercise Manager - WITH Layout
-  if (navigation.currentScreen === 'exercises') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ExerciseManager user={user} onBack={navigation.handleBackToDashboard} />
       </DashboardLayout>
     );
   }

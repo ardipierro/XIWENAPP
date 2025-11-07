@@ -55,6 +55,7 @@ import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
 import ContentManager from './ContentManager';
+import UnifiedContentManager from './UnifiedContentManager';
 import ClassManager from './ClassManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
@@ -553,7 +554,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Renderizar CoursesScreen (Gestionar Cursos) - CON Layout
+  // Renderizar Unified Content Manager - CON Layout (Reemplaza courses y content)
+  if (navigation.currentScreen === 'unifiedContent') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <UnifiedContentManager user={user} onBack={navigation.handleBackToDashboard} />
+      </DashboardLayout>
+    );
+  }
+
+  // LEGACY: Renderizar CoursesScreen (Gestionar Cursos) - CON Layout
   if (navigation.currentScreen === 'courses') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
@@ -576,7 +586,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Renderizar Gestión de Contenido - CON Layout
+  // LEGACY: Renderizar Gestión de Contenido - CON Layout
   if (navigation.currentScreen === 'content') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>

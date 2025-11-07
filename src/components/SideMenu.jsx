@@ -87,9 +87,8 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: BarChart3, label: 'Dashboard', path: '/admin', action: 'dashboard' },
               { icon: Users, label: 'Usuarios', path: '/admin', action: 'users' },
               { icon: GraduationCap, label: 'Estudiantes', path: '/admin', action: 'students' },
-              { icon: BookOpen, label: 'Cursos', path: '/admin', action: 'courses' },
-              { icon: FileText, label: 'Contenidos', path: '/admin', action: 'content' },
-              { icon: Calendar, label: 'Clases', path: '/admin', action: 'classes' },
+              { icon: BookOpen, label: 'Contenidos', path: '/admin', action: 'unifiedContent' },
+              { icon: Video, label: 'Clases en Vivo', path: '/admin', action: 'liveClasses' },
               { icon: MessageCircle, label: 'Mensajes', path: '/admin', action: 'messages' },
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
@@ -100,13 +99,11 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           },
           {
             id: 'ensenanza',
-            label: 'Mi Enseñanza',
+            label: 'Herramientas de Enseñanza',
             items: [
-              { icon: Zap, label: 'Ejercicios', path: '/admin', action: 'exercises' },
               { icon: Gamepad2, label: 'Juego en Vivo', path: '/admin', action: 'liveGame' },
               { icon: Presentation, label: 'Pizarras', path: '/admin', action: 'whiteboardSessions' },
               { icon: PenTool, label: 'Excalidraw', path: '/admin', action: 'excalidrawSessions' },
-              { icon: Video, label: 'Clases en Vivo', path: '/admin', action: 'liveClasses' },
             ]
           }
         ]
@@ -118,9 +115,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         items: [
           { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
           { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
-          { icon: FileText, label: 'Contenido', path: '/teacher', action: 'content' },
-          { icon: BookOpen, label: 'Cursos', path: '/teacher', action: 'courses' },
-          { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classes' },
+          { icon: BookOpen, label: 'Contenidos', path: '/teacher', action: 'unifiedContent' },
           { icon: CheckSquare, label: 'Tareas', path: '/teacher', action: 'assignments' },
           { icon: FileCheck, label: 'Calificar', path: '/teacher', action: 'grading' },
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
