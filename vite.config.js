@@ -127,9 +127,10 @@ export default defineConfig({
             return 'firebase-vendor';
           }
 
-          // Excalidraw (muy pesado - lazy load separado)
+          // Excalidraw - INCLUIDO en vendor para evitar circular deps
+          // (era chunk separado pero causaba: "Cannot access 't' before initialization")
           if (id.includes('@excalidraw/excalidraw')) {
-            return 'excalidraw';
+            return 'vendor'; // Incluir en vendor general
           }
 
           // UI Libraries (lazy load)
