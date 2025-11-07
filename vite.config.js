@@ -21,9 +21,31 @@ export default defineConfig({
       injectRegister: 'auto',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB (por Excalidraw bundle)
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB (por Excalidraw y vendor)
+
+        // Excluir archivos muy grandes del precaché (usar runtime caching)
+        globIgnores: [
+          '**/excalidraw*.js',  // Lazy load bajo demanda
+          '**/vendor*.js'       // Cargado bajo demanda
+        ],
+
         // Estrategia de caché optimizada para móvil
         runtimeCaching: [
+          {
+            // Runtime caching para chunks grandes (excalidraw, vendor)
+            urlPattern: /assets\/(excalidraw|vendor)-.*\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'large-chunks-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 días
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
           {
             // Firebase Storage - CacheFirst con revalidación
             urlPattern: /^https:\/\/firebasestorage\.googleapis\.com\/.*/i,
