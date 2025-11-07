@@ -173,13 +173,15 @@ function AIConfigPanel() {
           Configura diferentes funciones de IA para tu plataforma educativa
         </p>
 
-        <div className="flex gap-4">
-          <BaseBadge variant="success" size="lg">
-            {getEnabledCount()} funciones activas
-          </BaseBadge>
-          <BaseBadge variant="default" size="lg">
-            {getConfiguredCount()} de {AI_FUNCTIONS.length} configuradas
-          </BaseBadge>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex gap-4">
+            <BaseBadge variant="success" size="lg">
+              {getEnabledCount()} funciones activas
+            </BaseBadge>
+            <BaseBadge variant="default" size="lg">
+              {getConfiguredCount()} de {AI_FUNCTIONS.length} configuradas
+            </BaseBadge>
+          </div>
         </div>
       </div>
 
@@ -282,7 +284,7 @@ function AIConfigPanel() {
       )}
 
       {/* Configuration Modal */}
-      {selectedFunction && modalOpen && (
+      {selectedFunction && (
         <AIFunctionConfigModal
           isOpen={modalOpen}
           onClose={() => {

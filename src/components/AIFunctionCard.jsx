@@ -8,9 +8,12 @@ import { BaseButton, BaseBadge } from './common';
 import { getProviderById } from '../constants/aiFunctions';
 
 function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) {
-  const isConfigured = config?.apiKey && config?.apiKey.length > 0;
-  const isEnabled = config?.enabled || false;
-  const provider = config?.provider ? getProviderById(config.provider) : null;
+  // Ensure config always has a value
+  const safeConfig = config || aiFunction.defaultConfig;
+
+  const isConfigured = safeConfig?.apiKey && safeConfig?.apiKey.length > 0;
+  const isEnabled = safeConfig?.enabled || false;
+  const provider = safeConfig?.provider ? getProviderById(safeConfig.provider) : null;
   const FunctionIcon = aiFunction.icon;
   const ProviderIcon = provider?.icon;
 
@@ -74,7 +77,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
                   {provider.name}
                 </p>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 truncate">
-                  {config.model}
+                  {safeConfig.model}
                 </p>
               </div>
             </div>
@@ -125,7 +128,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
               <div className="flex items-center gap-2 mt-2">
                 {ProviderIcon && <ProviderIcon size={14} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />}
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">
-                  {provider.name} · {config.model}
+                  {provider.name} · {safeConfig.model}
                 </span>
               </div>
             )}
