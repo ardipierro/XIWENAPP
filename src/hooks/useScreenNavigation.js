@@ -48,6 +48,7 @@ export function useScreenNavigation() {
     'students': 'students',
     'courses': 'courses',
     'content': 'content',
+    'unifiedContent': 'unifiedContent', // Unified Content Manager (NEW)
     'classes': 'classes',
     'exercises': 'exercises',
     'analytics': 'analytics',
@@ -55,6 +56,7 @@ export function useScreenNavigation() {
     'whiteboardSessions': 'whiteboardSessions',
     'excalidrawSessions': 'excalidrawSessions',
     'liveClasses': 'liveClasses',
+    'liveGame': 'liveGame', // Live Game Setup
     'setup': 'setup', // Game Setup (GameContainer)
     'assignments': 'assignments', // Assignment Manager (Teacher)
     'grading': 'grading', // Grading Interface (Teacher)
@@ -62,6 +64,9 @@ export function useScreenNavigation() {
     'assignmentsView': 'assignmentsView', // Student Assignments View
     'gamification': 'gamification', // Gamification Panel (Student)
     'messages': 'messages', // Messages Panel (Teacher/Student)
+    'payments': 'payments', // Payments Panel (Admin)
+    'aiConfig': 'aiConfig', // AI Configuration (Admin)
+    'settings': 'settings', // Settings (Admin)
   };
 
   /**
