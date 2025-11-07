@@ -70,8 +70,7 @@ import WhiteboardManager from './WhiteboardManager';
 import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
-import LiveClassManager from './LiveClassManager';
-import LiveClassRoom from './LiveClassRoom';
+// REMOVED: LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 import AssignmentManager from './AssignmentManager';
@@ -738,36 +737,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Renderizar Live Class Manager - CON Layout
-  if (navigation.currentScreen === 'liveClasses') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <LiveClassManager
-          user={user}
-          onBack={navigation.handleBackToDashboard}
-          onStartClass={(liveClass) => {
-            navigation.setSelectedLiveClass(liveClass);
-            navigation.setCurrentScreen('liveClassRoom');
-          }}
-        />
-      </DashboardLayout>
-    );
-  }
-
-  // Renderizar Live Class Room (Sala de video) - SIN Layout (pantalla completa)
-  if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
-    return (
-      <LiveClassRoom
-        liveClass={navigation.selectedLiveClass}
-        user={user}
-        userRole={userRole}
-        onLeave={() => {
-          navigation.setSelectedLiveClass(null);
-          navigation.setCurrentScreen('liveClasses');
-        }}
-      />
-    );
-  }
+  // REMOVED: Old liveClasses and liveClassRoom screens - Replaced by unified ClassSessionManager/ClassSessionRoom
 
   // Renderizar Class Session Manager (Sistema Unificado) - CON Layout
   if (navigation.currentScreen === 'classSessions') {

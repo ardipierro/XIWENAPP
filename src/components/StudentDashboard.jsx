@@ -6,7 +6,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStudentEnrollments } from '../firebase/firestore';
 import { getInstancesForStudent } from '../firebase/classInstances';
-import { getStudentAvailableLiveClasses } from '../firebase/liveClasses';
+// REMOVED: getStudentAvailableLiveClasses - using unified class sessions now
 import { getAssignedWhiteboards, subscribeToLiveWhiteboards } from '../firebase/whiteboard';
 import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle, Trophy, CalendarDays, DollarSign, MessageCircle } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
@@ -15,7 +15,7 @@ import MyAssignments from './student/MyAssignments';
 import CourseViewer from './student/CourseViewer';
 import ContentPlayer from './student/ContentPlayer';
 import StudentClassView from './StudentClassView';
-import LiveClassRoom from './LiveClassRoom';
+// REMOVED: LiveClassRoom - using unified ClassSessionRoom now
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
 import StudentAssignmentsView from './StudentAssignmentsView';
@@ -57,11 +57,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   const [gameHistory, setGameHistory] = useState([]);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [upcomingClasses, setUpcomingClasses] = useState([]);
-  const [liveClasses, setLiveClasses] = useState([]);
+  // REMOVED: liveClasses state - using unified class sessions now
   const [liveWhiteboards, setLiveWhiteboards] = useState([]);
   const [selectedLiveClass, setSelectedLiveClass] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'assignmentsView', 'gamification', 'calendar', 'messages', 'payments', 'classes', 'liveClasses', 'liveClass', 'whiteboardSessions', 'whiteboard', 'courseView', 'contentPlayer'
+  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'assignmentsView', 'gamification', 'calendar', 'messages', 'payments', 'classes', 'classSessions', 'classSessionRoom', 'whiteboardSessions', 'whiteboard', 'courseView', 'contentPlayer'
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [selectedCourseData, setSelectedCourseData] = useState(null);
   const [selectedContentId, setSelectedContentId] = useState(null);
@@ -260,7 +260,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       'payments': 'payments',
       'classes': 'classes',
       'classSessions': 'classSessions', // Unified Class Sessions (LiveKit + Whiteboards)
-      'liveClasses': 'liveClasses',
+      // REMOVED: 'liveClasses' - using unified classSessions now
       'whiteboardSessions': 'whiteboardSessions'
     };
 
@@ -275,15 +275,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     }
   };
 
-  const handleJoinLiveClass = (liveClass) => {
-    setSelectedLiveClass(liveClass);
-    setCurrentView('liveClass');
-  };
-
-  const handleLeaveLiveClass = () => {
-    setSelectedLiveClass(null);
-    setCurrentView('liveClasses');
-  };
+  // REMOVED: handleJoinLiveClass and handleLeaveLiveClass - using unified class sessions now
 
   const handleOpenWhiteboard = () => {
     setSelectedWhiteboardSession(null);
@@ -312,27 +304,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     setCurrentView('whiteboard');
   };
 
-  // Cargar clases en vivo disponibles
-  useEffect(() => {
-    if (!student?.id) return;
-
-    const loadLiveClasses = async () => {
-      try {
-        const classes = await getStudentAvailableLiveClasses(student.id);
-        // Filtrar solo las clases que están actualmente en vivo
-        const liveOnly = classes.filter(c => c.status === 'live');
-        setLiveClasses(liveOnly);
-      } catch (error) {
-        logger.error('Error loading live classes:', error);
-      }
-    };
-
-    loadLiveClasses();
-    // Refrescar cada 30 segundos
-    const interval = setInterval(loadLiveClasses, 30000);
-
-    return () => clearInterval(interval);
-  }, [student?.id]);
+  // REMOVED: loadLiveClasses useEffect - using unified class sessions now
 
   // Subscribe to live whiteboards assigned to this student
   useEffect(() => {
@@ -552,17 +524,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     );
   }
 
-  // Render LiveClassRoom view (when student joins a live class)
-  if (currentView === 'liveClass' && selectedLiveClass) {
-    return (
-      <LiveClassRoom
-        classId={selectedLiveClass.id}
-        user={user}
-        isTeacher={false}
-        onLeave={handleLeaveLiveClass}
-      />
-    );
-  }
+  // REMOVED: Old LiveClassRoom view - Replaced by unified ClassSessionRoom
 
   // Render Class Session Manager (Sistema Unificado) - WITH Layout
   if (currentView === 'classSessions') {
@@ -617,79 +579,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     );
   }
 
-  // Render Live Classes view (LiveKit sessions only)
-  if (currentView === 'liveClasses') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <div className="page-header mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Clases en Vivo</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Únete a las clases en tiempo real
-                </p>
-              </div>
-            </div>
-
-            {liveClasses.length === 0 ? (
-              <BaseEmptyState
-                icon={Video}
-                title="No hay clases en vivo disponibles"
-                description="Cuando tu profesor inicie una clase, aparecerá aquí"
-                size="md"
-              />
-            ) : (
-              <div className="live-classes-grid">
-                {liveClasses.map((liveClass) => (
-                  <div key={liveClass.id} className="live-class-card">
-                    <div className="live-class-header">
-                      <div className="live-indicator">
-                        <span className="live-dot"></span>
-                        <span className="live-text">EN VIVO</span>
-                      </div>
-                      <span className="participant-count">
-                        {liveClass.participants?.length || 0} participantes
-                      </span>
-                    </div>
-
-                    <h3 className="live-class-title">{liveClass.title}</h3>
-
-                    {liveClass.description && (
-                      <p className="live-class-description">{liveClass.description}</p>
-                    )}
-
-                    <div className="live-class-meta">
-                      <div className="meta-item">
-                        <Clock size={16} />
-                        <span>Iniciada {formatRelativeTime(liveClass.startedAt)}</span>
-                      </div>
-                      {liveClass.teacherName && (
-                        <div className="meta-item">
-                          <Target size={16} />
-                          <span>{liveClass.teacherName}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <BaseButton
-                      variant="primary"
-                      icon={Video}
-                      onClick={() => handleJoinLiveClass(liveClass)}
-                      fullWidth
-                      className="mt-4"
-                    >
-                      Unirse a la clase
-                    </BaseButton>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  // REMOVED: Old 'liveClasses' view - Replaced by unified ClassSessionManager
 
   // Render CourseViewer view
   if (currentView === 'courseView' && selectedCourseId) {
