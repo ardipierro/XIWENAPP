@@ -49,6 +49,7 @@ import {
   BaseAlert,
   BaseEmptyState
 } from './common';
+import CreateContentModal from './CreateContentModal';
 
 // ============================================
 // CONSTANTS
@@ -206,6 +207,27 @@ function UnifiedContentManager({ user, onBack }) {
     setShowCreateModal(true);
   };
 
+  const handleSave = async (contentData) => {
+    try {
+      if (selectedContent) {
+        // Editar
+        await updateContent(selectedContent.id, contentData);
+        logger.info('Content updated successfully', 'UnifiedContentManager');
+      } else {
+        // Crear
+        await createContent(contentData);
+        logger.info('Content created successfully', 'UnifiedContentManager');
+      }
+
+      await loadContents();
+      setShowCreateModal(false);
+      setSelectedContent(null);
+    } catch (err) {
+      logger.error('Error saving content:', err, 'UnifiedContentManager');
+      throw err;
+    }
+  };
+
   const handleDelete = async (contentId) => {
     if (!confirm('¿Estás seguro de eliminar este contenido?')) return;
 
@@ -361,6 +383,18 @@ function UnifiedContentManager({ user, onBack }) {
           ))}
         </div>
       )}
+
+      {/* Create/Edit Modal */}
+      <CreateContentModal
+        isOpen={showCreateModal}
+        onClose={() => {
+          setShowCreateModal(false);
+          setSelectedContent(null);
+        }}
+        onSave={handleSave}
+        initialData={selectedContent}
+        userId={user.uid}
+      />
     </div>
   );
 }
