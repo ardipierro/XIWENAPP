@@ -99,6 +99,23 @@ service cloud.firestore {
       allow write: if isTeacher() || isAdmin();
     }
 
+    // ============================================
+    // UNIFIED CONTENT SYSTEM (NEW)
+    // ============================================
+
+    // Contents - unified collection for all content types
+    // (courses, lessons, readings, videos, links, exercises, live-games)
+    match /contents/{contentId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Content-Course relationships
+    match /content_courses/{relationshipId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
     // Groups - authenticated users can read, teachers/admins can write
     match /groups/{groupId} {
       allow read: if isAuthenticated();

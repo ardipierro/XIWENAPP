@@ -64,7 +64,8 @@
       "Bash(firebase functions:secrets:access:*)",
       "Bash(firebase functions:list:*)",
       "Bash(firebase functions:log:*)",
-      "Bash(git stash show:*)"
+      "Bash(git stash show:*)",
+      "Bash(npm run migrate:unified-content:*)"
     ],
     "deny": [],
     "ask": []
