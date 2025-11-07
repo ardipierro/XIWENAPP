@@ -8,7 +8,7 @@ import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStud
 import { getInstancesForStudent } from '../firebase/classInstances';
 import { getStudentAvailableLiveClasses } from '../firebase/liveClasses';
 import { getAssignedWhiteboards, subscribeToLiveWhiteboards } from '../firebase/whiteboard';
-import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle } from 'lucide-react';
+import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle, DollarSign } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import MyCourses from './student/MyCourses';
 import MyAssignments from './student/MyAssignments';
@@ -18,6 +18,7 @@ import StudentClassView from './StudentClassView';
 import LiveClassRoom from './LiveClassRoom';
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
+import StudentFeesPanel from './StudentFeesPanel';
 
 // Base Components
 import {
@@ -248,7 +249,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       'assignments': 'assignments',
       'classes': 'classes',
       'liveClasses': 'liveClasses',
-      'whiteboardSessions': 'whiteboardSessions'
+      'whiteboardSessions': 'whiteboardSessions',
+      'payments': 'payments'
     };
 
     const view = actionMap[action];
@@ -453,6 +455,22 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               onPlayContent={handlePlayAssignmentContent}
               onPlayExercise={handlePlayAssignmentExercise}
             />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render Payments view
+  if (currentView === 'payments') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="student-dashboard">
+          <div className="dashboard-content">
+            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+              ← Volver a Inicio
+            </BaseButton>
+            <StudentFeesPanel user={user} />
           </div>
         </div>
       </DashboardLayout>

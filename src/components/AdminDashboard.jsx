@@ -37,7 +37,8 @@ import {
   Medal,
   Rocket,
   TrendingUp,
-  ClipboardList
+  ClipboardList,
+  DollarSign
 } from 'lucide-react';
 import {
   loadStudents,
@@ -74,6 +75,7 @@ import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
+import AdminPaymentsPanel from './AdminPaymentsPanel';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -528,6 +530,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
             ← Back to Home
           </button>
           <AttendanceView teacher={user} />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Payments Panel - WITH Layout
+  if (navigation.currentScreen === 'payments') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <div className="p-6 md:p-8">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Back to Home
+          </button>
+          <AdminPaymentsPanel user={user} />
         </div>
       </DashboardLayout>
     );
@@ -1065,6 +1081,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
       onClick: () => navigation.setCurrentScreen('analytics'),
       createLabel: "View Analytics",
       onCreateClick: () => navigation.setCurrentScreen('analytics')
+    },
+    {
+      id: 'payments',
+      icon: DollarSign,
+      title: "Payments",
+      count: 0,
+      countLabel: "system",
+      onClick: () => navigation.setCurrentScreen('payments'),
+      createLabel: "Manage Payments",
+      onCreateClick: () => navigation.setCurrentScreen('payments')
     }
   ];
 
