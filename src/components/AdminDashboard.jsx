@@ -716,29 +716,23 @@ function AdminDashboard({ user, userRole, onLogout }) {
       );
     }
 
-    // Filter users by role
-    const roleFilteredUsers = useMemo(() => {
-      let filtered = userManagement.users;
+    // Filter users by role (using regular variables instead of useMemo to avoid hook order issues)
+    let roleFilteredUsers = userManagement.users;
 
-      if (navigation.usersRoleFilter === 'students') {
-        filtered = filtered.filter(u => ['student', 'listener', 'trial'].includes(u.role));
-      } else if (navigation.usersRoleFilter === 'teachers') {
-        filtered = filtered.filter(u => ['teacher', 'trial_teacher'].includes(u.role));
-      } else if (navigation.usersRoleFilter === 'admins') {
-        filtered = filtered.filter(u => u.role === 'admin');
-      }
-
-      return filtered;
-    }, [userManagement.users, navigation.usersRoleFilter]);
+    if (navigation.usersRoleFilter === 'students') {
+      roleFilteredUsers = roleFilteredUsers.filter(u => ['student', 'listener', 'trial'].includes(u.role));
+    } else if (navigation.usersRoleFilter === 'teachers') {
+      roleFilteredUsers = roleFilteredUsers.filter(u => ['teacher', 'trial_teacher'].includes(u.role));
+    } else if (navigation.usersRoleFilter === 'admins') {
+      roleFilteredUsers = roleFilteredUsers.filter(u => u.role === 'admin');
+    }
 
     // Filter by search term
-    const filteredUsers = useMemo(() => {
-      return roleFilteredUsers.filter(user =>
-        user.name?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
-        user.email?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
-        user.role?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase())
-      );
-    }, [roleFilteredUsers, navigation.usersSearchTerm]);
+    const filteredUsers = roleFilteredUsers.filter(user =>
+      user.name?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
+      user.role?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase())
+    );
 
     return (
       <>
