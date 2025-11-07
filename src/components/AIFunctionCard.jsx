@@ -17,8 +17,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
   const getStatusBadge = () => {
     if (!isConfigured) {
       return (
-        <BaseBadge variant="default" size="sm">
-          <XCircle className="w-3 h-3 mr-1" />
+        <BaseBadge variant="default" size="sm" icon={XCircle}>
           Sin configurar
         </BaseBadge>
       );
@@ -26,16 +25,14 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
 
     if (isEnabled) {
       return (
-        <BaseBadge variant="success" size="sm">
-          <CheckCircle className="w-3 h-3 mr-1" />
+        <BaseBadge variant="success" size="sm" icon={CheckCircle}>
           Activo
         </BaseBadge>
       );
     }
 
     return (
-      <BaseBadge variant="warning" size="sm">
-        <AlertCircle className="w-3 h-3 mr-1" />
+      <BaseBadge variant="warning" size="sm" icon={AlertCircle}>
         Inactivo
       </BaseBadge>
     );

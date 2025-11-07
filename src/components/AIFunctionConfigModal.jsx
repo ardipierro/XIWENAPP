@@ -187,7 +187,7 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
           }}
           options={[
             { value: '', label: 'Selecciona un proveedor...' },
-            ...AI_PROVIDERS.map(p => ({ value: p.id, label: `${p.icon} ${p.name}` }))
+            ...AI_PROVIDERS.map(p => ({ value: p.id, label: p.name }))
           ]}
           required
         />
