@@ -58,6 +58,12 @@ export async function getAIConfig() {
         apiKey: '',
         basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
         tone: 'professional'
+      },
+      claude: {
+        enabled: false,
+        apiKey: '',
+        basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
+        tone: 'professional'
       }
     };
   } catch (error) {
@@ -77,6 +83,7 @@ export async function getActiveAIProvider() {
     if (config.openai?.enabled) return 'openai';
     if (config.grok?.enabled) return 'grok';
     if (config.google?.enabled) return 'google';
+    if (config.claude?.enabled) return 'claude';
 
     return null;
   } catch (error) {
@@ -87,7 +94,7 @@ export async function getActiveAIProvider() {
 
 /**
  * Call AI provider
- * @param {string} provider - Provider name (openai, grok, google)
+ * @param {string} provider - Provider name (openai, grok, google, claude)
  * @param {string} prompt - User prompt
  * @param {Object} config - Provider config
  * @returns {Promise<string>}
@@ -103,6 +110,8 @@ export async function callAI(provider, prompt, config) {
         return await callGrok(fullPrompt, config.apiKey);
       case 'google':
         return await callGoogle(fullPrompt, config.apiKey);
+      case 'claude':
+        return await callClaude(fullPrompt, config.apiKey);
       default:
         throw new Error('Invalid provider');
     }
@@ -187,6 +196,33 @@ async function callGoogle(prompt, apiKey) {
 
   const data = await response.json();
   return data.candidates[0].content.parts[0].text;
+}
+
+/**
+ * Call Anthropic Claude API
+ */
+async function callClaude(prompt, apiKey) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 2000,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Claude API error: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.content[0].text;
 }
 
 /**
