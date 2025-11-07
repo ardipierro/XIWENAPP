@@ -1429,11 +1429,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Grading Interface Screen
+  // Grading Interface Screen (uses AssignmentManager as it contains grading functionality)
   if (navigation.currentScreen === 'grading') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <GradingInterface teacherId={user?.id} />
+        <AssignmentManager teacherId={user?.id} />
       </DashboardLayout>
     );
   }
