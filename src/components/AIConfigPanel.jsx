@@ -86,6 +86,12 @@ function AIConfigPanel() {
             basePrompt: 'Eres un asistente educativo amigable y paciente.',
             tone: 'friendly'
           },
+          claude: {
+            enabled: false,
+            apiKey: '',
+            basePrompt: 'Eres un asistente educativo reflexivo y preciso.',
+            tone: 'professional'
+          },
           grok: {
             enabled: false,
             apiKey: '',
@@ -113,6 +119,12 @@ function AIConfigPanel() {
           apiKey: '',
           basePrompt: 'Eres un asistente educativo amigable y paciente.',
           tone: 'friendly'
+        },
+        claude: {
+          enabled: false,
+          apiKey: '',
+          basePrompt: 'Eres un asistente educativo reflexivo y preciso.',
+          tone: 'professional'
         },
         grok: {
           enabled: false,
