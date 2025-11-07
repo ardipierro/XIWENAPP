@@ -4,14 +4,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Lightbulb, Save, Filter } from 'lucide-react';
+import { Lightbulb, Filter, Settings } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 import {
   BaseButton,
-  BaseLoading,
   BaseAlert,
-  BaseBadge
+  BaseBadge,
+  BaseEmptyState
 } from './common';
 import PageHeader from './common/PageHeader';
 import AIFunctionCard from './AIFunctionCard';
@@ -21,7 +21,6 @@ import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
 function AIConfigPanel() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [selectedFunction, setSelectedFunction] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -105,23 +104,6 @@ function AIConfigPanel() {
     }
   };
 
-  const handleSaveAll = async () => {
-    try {
-      setSaving(true);
-      setError(null);
-
-      await saveAIConfig(config);
-      setSuccess('Toda la configuración guardada exitosamente');
-      logger.info('All AI config saved');
-
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      logger.error('Failed to save AI config:', err);
-      setError(`Error al guardar: ${err.message}`);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const getFilteredFunctions = () => {
     if (!selectedCategory) {
@@ -237,30 +219,26 @@ function AIConfigPanel() {
         })}
       </div>
 
-      {/* Functions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-        {filteredFunctions.map(func => (
-          <AIFunctionCard
-            key={func.id}
-            aiFunction={func}
-            config={config.functions[func.id]}
-            onConfigure={() => handleConfigureFunction(func.id)}
-          />
-        ))}
-      </div>
-
-      {/* Save All Button */}
-      <div className="flex justify-end mt-6">
-        <BaseButton
-          variant="primary"
-          icon={Save}
-          onClick={handleSaveAll}
-          loading={saving}
+      {/* Functions Grid or Empty State */}
+      {filteredFunctions.length === 0 ? (
+        <BaseEmptyState
+          icon={Settings}
+          title="No hay funciones en esta categoría"
+          description="Selecciona otra categoría para ver las funciones disponibles"
           size="lg"
-        >
-          Guardar Toda la Configuración
-        </BaseButton>
-      </div>
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+          {filteredFunctions.map(func => (
+            <AIFunctionCard
+              key={func.id}
+              aiFunction={func}
+              config={config.functions[func.id]}
+              onConfigure={() => handleConfigureFunction(func.id)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Configuration Modal */}
       {selectedFunction && modalOpen && (
