@@ -5,11 +5,12 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, MessageCircle, Shield } from 'lucide-react';
+import { Bell, MessageCircle, Shield, Lightbulb } from 'lucide-react';
 import UserMenu from './UserMenu.jsx';
 import AvatarSelector, { AVATARS } from './AvatarSelector.jsx';
 import ProfilePanel from './ProfilePanel.jsx';
 import ThemeSwitcher from './ThemeSwitcher.jsx';
+import AIAssistantModal from './AIAssistantModal.jsx';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
 import { isAdminEmail } from '../firebase/roleConfig.js';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.js';
@@ -32,6 +33,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
   const [userAvatar, setUserAvatar] = useState('default');
   const [notificationCount] = useState(0); // Placeholder para futuro
   const messageCount = useUnreadMessages(user?.uid); // Real-time unread count
@@ -114,10 +116,20 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
           </div>
         </div>
 
-        {/* Sección Derecha: Theme Switcher + Admin Panel + Notificaciones + Mensajes + Avatar */}
+        {/* Sección Derecha: Theme Switcher + AI Assistant + Admin Panel + Notificaciones + Mensajes + Avatar */}
         <div className="topbar-right">
           {/* Theme Switcher */}
           <ThemeSwitcher />
+
+          {/* AI Assistant Button */}
+          <button
+            className="icon-button ai-assistant-button"
+            onClick={() => setShowAIModal(true)}
+            aria-label="Asistente IA"
+            title="Asistente IA"
+          >
+            <Lightbulb size={20} strokeWidth={2} className="text-yellow-500" />
+          </button>
 
           {/* Admin Panel Button (solo para admins) */}
           {isAdmin && (
@@ -215,6 +227,12 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
           onUpdate={loadUserAvatar}
         />
       )}
+
+      {/* AI Assistant Modal */}
+      <AIAssistantModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+      />
     </div>
   );
 }

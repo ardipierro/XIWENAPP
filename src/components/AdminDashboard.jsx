@@ -77,6 +77,8 @@ import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 import MessagesPanel from './MessagesPanel';
 import AdminPaymentsPanel from './AdminPaymentsPanel';
+import AIConfigPanel from './AIConfigPanel';
+import './AdminDashboard.css';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -455,6 +457,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // ==========================================
   // RENDER SPECIFIC SCREENS (WITH LAYOUT)
   // ==========================================
+
+  // AI Configuration Panel - WITH Layout
+  if (navigation.currentScreen === 'aiConfig') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <div className="p-6 md:p-8">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Back to Home
+          </button>
+          <AIConfigPanel />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   // Live Game Setup - WITH Layout
   if (navigation.currentScreen === 'liveGame') {
