@@ -7,6 +7,7 @@
 import OpenAIProvider from './providers/OpenAIProvider.js';
 import GeminiProvider from './providers/GeminiProvider.js';
 import GrokProvider from './providers/GrokProvider.js';
+import logger from '../utils/logger';
 
 class AIService {
   constructor() {
@@ -60,7 +61,7 @@ class AIService {
   setProvider(providerName) {
     this.currentProviderName = providerName.toLowerCase();
     this.provider = this._createProvider(this.currentProviderName);
-    console.log(`AIService: Switched to ${this.provider.getProviderName()} provider`);
+    logger.info(`AIService: Switched to ${this.provider.getProviderName()} provider`);
   }
 
   /**

@@ -4,6 +4,7 @@
  */
 
 import BaseAIProvider from './BaseAIProvider.js';
+import logger from '../../utils/logger';
 
 class OpenAIProvider extends BaseAIProvider {
   constructor(apiKey, model = 'gpt-4o-mini') {
@@ -74,7 +75,7 @@ class OpenAIProvider extends BaseAIProvider {
       };
 
     } catch (error) {
-      console.error('OpenAIProvider error:', error);
+      logger.error('OpenAIProvider error:', error);
       return {
         success: false,
         error: error.message || 'Error al conectar con OpenAI'

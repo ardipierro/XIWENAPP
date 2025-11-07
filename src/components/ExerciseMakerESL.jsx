@@ -19,6 +19,7 @@ import BaseInput from './common/BaseInput';
 import BaseTextarea from './common/BaseTextarea';
 import BaseAlert from './common/BaseAlert';
 import AIService from '../services/AIService';
+import logger from '../utils/logger';
 
 // ============================================================================
 // INTERACTIVE EXERCISE COMPONENTS
@@ -340,7 +341,7 @@ const ListeningExercise = ({ audioText, question, options, correctIndex, onCompl
   return (
     <div className="space-y-4">
       {/* Audio Player */}
-      <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-xl border-2 border-purple-200 dark:border-purple-700">
+      <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 p-6 rounded-xl border-2 border-blue-200 dark:border-blue-700">
         <button
           onClick={handlePlay}
           disabled={isPlaying}
@@ -349,8 +350,8 @@ const ListeningExercise = ({ audioText, question, options, correctIndex, onCompl
             px-6 py-4 rounded-lg font-medium
             transition-all duration-200
             ${isPlaying
-              ? 'bg-purple-400 text-white cursor-wait'
-              : 'bg-purple-500 hover:bg-purple-600 text-white hover:shadow-lg active:scale-[0.98]'
+              ? 'bg-blue-400 text-white cursor-wait'
+              : 'bg-blue-500 hover:bg-blue-600 text-white hover:shadow-lg active:scale-[0.98]'
             }
           `}
         >
@@ -632,7 +633,7 @@ const ExerciseMakerESL = ({ isOpen, onClose }) => {
       }
     } catch (err) {
       setError('Error al generar ejercicios. Por favor, intenta de nuevo.');
-      console.error('Generate error:', err);
+      logger.error('Generate error:', err);
     } finally {
       setIsGenerating(false);
     }
@@ -674,7 +675,7 @@ const ExerciseMakerESL = ({ isOpen, onClose }) => {
                   relative flex flex-col items-center gap-2 p-4 rounded-xl border-2
                   transition-all duration-200
                   ${selectedProvider === provider.name
-                    ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 shadow-lg'
+                    ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 shadow-lg'
                     : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
                   }
                   ${!provider.configured ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:scale-[0.98]'}
@@ -711,8 +712,8 @@ const ExerciseMakerESL = ({ isOpen, onClose }) => {
 
                 {/* Selected Indicator */}
                 {selectedProvider === provider.name && provider.configured && (
-                  <div className="absolute inset-0 rounded-xl border-2 border-purple-500 pointer-events-none">
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-xl border-2 border-blue-500 pointer-events-none">
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                   </div>

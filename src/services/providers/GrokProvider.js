@@ -5,6 +5,7 @@
  */
 
 import BaseAIProvider from './BaseAIProvider.js';
+import logger from '../../utils/logger';
 
 class GrokProvider extends BaseAIProvider {
   constructor(apiKey, model = 'grok-2-latest') {
@@ -77,7 +78,7 @@ class GrokProvider extends BaseAIProvider {
       };
 
     } catch (error) {
-      console.error('GrokProvider error:', error);
+      logger.error('GrokProvider error:', error);
       return {
         success: false,
         error: error.message || 'Error al conectar con Grok'

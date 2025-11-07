@@ -4,6 +4,7 @@
  */
 
 import BaseAIProvider from './BaseAIProvider.js';
+import logger from '../../utils/logger';
 
 class GeminiProvider extends BaseAIProvider {
   constructor(apiKey, model = 'gemini-2.0-flash-exp') {
@@ -84,7 +85,7 @@ class GeminiProvider extends BaseAIProvider {
       };
 
     } catch (error) {
-      console.error('GeminiProvider error:', error);
+      logger.error('GeminiProvider error:', error);
       return {
         success: false,
         error: error.message || 'Error al conectar con Gemini'
