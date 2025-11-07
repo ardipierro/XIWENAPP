@@ -117,7 +117,149 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
     const startTimestamp = Timestamp.fromDate(startDate);
     const endTimestamp = Timestamp.fromDate(endDate);
 
-    // 1. Get scheduled classes - SIMPLIFIED to avoid complex indexes
+    // 1. Get class sessions (live/async sessions from class_sessions collection)
+    const sessionsRef = collection(db, 'class_sessions');
+
+    if (userRole === 'teacher') {
+      // Teacher: get their sessions
+      const sessionsQuery = query(
+        sessionsRef,
+        where('teacherId', '==', userId),
+        where('active', '==', true)
+      );
+      const sessionsSnap = await getDocs(sessionsQuery);
+      sessionsSnap.docs.forEach(doc => {
+        const data = doc.data();
+
+        // Handle single sessions
+        if (data.type === 'single' && data.scheduledStart) {
+          const sessionDate = data.scheduledStart;
+          if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
+            events.push({
+              id: doc.id,
+              title: data.name,
+              type: 'session',
+              subtype: data.mode, // 'live' or 'async'
+              startDate: data.scheduledStart,
+              endDate: data.scheduledStart,
+              description: data.description,
+              status: data.status, // 'scheduled', 'live', 'ended', 'cancelled'
+              mode: data.mode,
+              whiteboardType: data.whiteboardType,
+              roomName: data.roomName,
+              participants: data.participants || [],
+              color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : 'blue',
+              sessionData: data // Store full data for modal
+            });
+          }
+        }
+
+        // Handle recurring sessions - expand schedules
+        if (data.type === 'recurring' && data.schedules && data.schedules.length > 0) {
+          data.schedules.forEach(schedule => {
+            // Generate instances for each day in the date range
+            const currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+              if (currentDate.getDay() === schedule.day) {
+                const [hours, minutes] = schedule.startTime.split(':');
+                const sessionDate = new Date(currentDate);
+                sessionDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+                events.push({
+                  id: `${doc.id}_${currentDate.toISOString()}`,
+                  sessionId: doc.id,
+                  title: data.name,
+                  type: 'session',
+                  subtype: data.mode,
+                  startDate: Timestamp.fromDate(sessionDate),
+                  endDate: Timestamp.fromDate(sessionDate),
+                  description: data.description,
+                  status: data.status,
+                  mode: data.mode,
+                  whiteboardType: data.whiteboardType,
+                  roomName: data.roomName,
+                  participants: data.participants || [],
+                  color: data.status === 'live' ? 'red' : 'blue',
+                  sessionData: data,
+                  isRecurring: true
+                });
+              }
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+          });
+        }
+      });
+    } else {
+      // Students: get sessions assigned to them
+      const sessionsQuery = query(
+        sessionsRef,
+        where('assignedStudents', 'array-contains', userId),
+        where('active', '==', true)
+      );
+      const sessionsSnap = await getDocs(sessionsQuery);
+      sessionsSnap.docs.forEach(doc => {
+        const data = doc.data();
+
+        // Handle single sessions
+        if (data.type === 'single' && data.scheduledStart) {
+          const sessionDate = data.scheduledStart;
+          if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
+            events.push({
+              id: doc.id,
+              title: data.name,
+              type: 'session',
+              subtype: data.mode,
+              startDate: data.scheduledStart,
+              endDate: data.scheduledStart,
+              description: data.description,
+              status: data.status,
+              mode: data.mode,
+              whiteboardType: data.whiteboardType,
+              roomName: data.roomName,
+              participants: data.participants || [],
+              color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : 'blue',
+              sessionData: data
+            });
+          }
+        }
+
+        // Handle recurring sessions
+        if (data.type === 'recurring' && data.schedules && data.schedules.length > 0) {
+          data.schedules.forEach(schedule => {
+            const currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+              if (currentDate.getDay() === schedule.day) {
+                const [hours, minutes] = schedule.startTime.split(':');
+                const sessionDate = new Date(currentDate);
+                sessionDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+                events.push({
+                  id: `${doc.id}_${currentDate.toISOString()}`,
+                  sessionId: doc.id,
+                  title: data.name,
+                  type: 'session',
+                  subtype: data.mode,
+                  startDate: Timestamp.fromDate(sessionDate),
+                  endDate: Timestamp.fromDate(sessionDate),
+                  description: data.description,
+                  status: data.status,
+                  mode: data.mode,
+                  whiteboardType: data.whiteboardType,
+                  roomName: data.roomName,
+                  participants: data.participants || [],
+                  color: data.status === 'live' ? 'red' : 'blue',
+                  sessionData: data,
+                  isRecurring: true
+                });
+              }
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+          });
+        }
+      });
+    }
+
+    // 2. Get scheduled classes - SIMPLIFIED to avoid complex indexes
     const classesRef = collection(db, 'scheduledClasses');
 
     if (userRole === 'teacher') {
