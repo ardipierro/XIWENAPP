@@ -13,6 +13,7 @@ import {
   BaseAlert,
   BaseBadge
 } from './common';
+import PageHeader from './common/PageHeader';
 import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
@@ -140,12 +141,17 @@ function AIConfigPanel() {
   };
 
   if (loading) {
-    return <BaseLoading variant="fullscreen" text="Cargando configuración de IA..." />;
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="spinner"></div>
+        <p className="ml-4 text-zinc-600 dark:text-zinc-300">Cargando configuración de IA...</p>
+      </div>
+    );
   }
 
   if (!config) {
     return (
-      <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
+      <div>
         <BaseAlert variant="danger" title="Error">
           No se pudo cargar la configuración de IA. Por favor, recarga la página.
         </BaseAlert>
@@ -156,21 +162,20 @@ function AIConfigPanel() {
   const filteredFunctions = getFilteredFunctions();
 
   return (
-    <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
+    <div className="ai-config-panel">
       {/* Header */}
+      <PageHeader
+        icon={Lightbulb}
+        title="Configuración de IA"
+      />
+
+      {/* Description and Stats */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Lightbulb size={32} strokeWidth={2} className="text-yellow-500" />
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
-            Configuración de IA
-          </h1>
-        </div>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600 dark:text-zinc-400 mb-4">
           Configura diferentes funciones de IA para tu plataforma educativa
         </p>
 
-        {/* Stats */}
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4">
           <BaseBadge variant="success" size="lg">
             {getEnabledCount()} funciones activas
           </BaseBadge>
@@ -243,7 +248,7 @@ function AIConfigPanel() {
       </div>
 
       {/* Save All Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-end mt-6">
         <BaseButton
           variant="primary"
           icon={Save}
@@ -256,7 +261,7 @@ function AIConfigPanel() {
       </div>
 
       {/* Configuration Modal */}
-      {selectedFunction && (
+      {selectedFunction && modalOpen && (
         <AIFunctionConfigModal
           isOpen={modalOpen}
           onClose={() => {
