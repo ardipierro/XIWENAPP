@@ -280,7 +280,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
 
         {/* Contenido Tab Manual */}
         {activeTab === 'manual' && (
-          <>
+          <div className="min-h-[500px]">
             {/* Tipo de contenido */}
             <BaseSelect
               label="Tipo de Contenido"
@@ -401,12 +401,12 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
                 className="mt-4"
               />
             </div>
-          </>
+          </div>
         )}
 
         {/* Contenido Tab IA */}
         {activeTab === 'ai' && (
-          <div className="space-y-4">
+          <div className="min-h-[500px] space-y-4">
             <div className="p-4 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
               <p className="text-sm text-zinc-800 dark:text-zinc-200 mb-2">
                 <Sparkles className="w-4 h-4 inline mr-2" strokeWidth={2} />
