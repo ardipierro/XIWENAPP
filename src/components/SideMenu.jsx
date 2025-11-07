@@ -70,7 +70,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             items: [
               { icon: BarChart3, label: 'Dashboard', path: '/admin', action: 'dashboard' },
               { icon: Users, label: 'Usuarios', path: '/admin', action: 'users' },
-              { icon: GraduationCap, label: 'Estudiantes', path: '/admin', action: 'students' },
               { icon: BookOpen, label: 'Contenidos', path: '/admin', action: 'unifiedContent' },
               { icon: Video, label: 'Clases en Vivo', path: '/admin', action: 'liveClasses' },
               { icon: MessageCircle, label: 'Mensajes', path: '/admin', action: 'messages' },

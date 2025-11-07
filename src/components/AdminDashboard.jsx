@@ -1095,7 +1095,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
       title: "Students",
       count: stats.students,
       countLabel: stats.students === 1 ? "student" : "students",
-      onClick: () => navigation.setCurrentScreen('students'),
+      onClick: () => {
+        navigation.setCurrentScreen('users');
+        navigation.setUsersRoleFilter('students');
+      },
       createLabel: "Add Student",
       onCreateClick: () => setShowAddUserModal(true)
     },
