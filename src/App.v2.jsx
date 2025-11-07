@@ -32,6 +32,8 @@ const StudentAssignments = lazy(() => import('./screens/student/AssignmentsScree
 const StudentClasses = lazy(() => import('./screens/student/ClassesScreen'));
 const StudentGamification = lazy(() => import('./screens/student/GamificationScreen'));
 const StudentCalendar = lazy(() => import('./screens/student/CalendarScreen'));
+const StudentContentPlayer = lazy(() => import('./screens/student/ContentPlayerScreen'));
+const StudentPayments = lazy(() => import('./screens/student/PaymentsScreen'));
 
 // Teacher screens
 const TeacherLayout = lazy(() => import('./layouts/TeacherLayout'));
@@ -82,6 +84,8 @@ function App() {
                 <Route path="classes" element={<StudentClasses />} />
                 <Route path="gamification" element={<StudentGamification />} />
                 <Route path="calendar" element={<StudentCalendar />} />
+                <Route path="content/:contentId" element={<StudentContentPlayer />} />
+                <Route path="payments" element={<StudentPayments />} />
               </Route>
 
               {/* Teacher routes */}
