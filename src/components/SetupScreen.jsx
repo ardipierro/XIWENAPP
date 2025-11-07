@@ -160,7 +160,7 @@ function SetupScreen({
               ← Volver
             </button>
           )}
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-200 flex-1 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex-1 text-center">
             Juego de Preguntas por Turnos
           </h1>
           {onBack && <div className="w-24"></div>}
