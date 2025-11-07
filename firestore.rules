@@ -191,6 +191,125 @@ service cloud.firestore {
       allow write: if request.auth.uid == userId || isAdmin();
     }
 
+    // ============================================
+    // CLASS MANAGEMENT COLLECTIONS
+    // ============================================
+
+    // Classes - recurring class schedules
+    match /classes/{classId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Class instances - specific occurrences of classes
+    match /class_instances/{instanceId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Class sessions - live class sessions
+    match /class_sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Class attendance - attendance records
+    match /class_attendance/{attendanceId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Calendar events
+    match /calendarEvents/{eventId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Scheduled classes
+    match /scheduledClasses/{classId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // ============================================
+    // STUDENT & ENROLLMENT COLLECTIONS
+    // ============================================
+
+    // Students collection (separate from users)
+    match /students/{studentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Enrollments - course enrollments
+    match /enrollments/{enrollmentId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Submissions - assignment submissions
+    match /submissions/{submissionId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.studentId == request.auth.uid ||
+         isTeacher() ||
+         isAdmin());
+      allow write: if isAuthenticated() &&
+        (resource.data.studentId == request.auth.uid || isAdmin());
+    }
+
+    // ============================================
+    // GAME & ANALYTICS COLLECTIONS
+    // ============================================
+
+    // Game history
+    match /game_history/{gameId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // ============================================
+    // CREDIT SYSTEM COLLECTIONS
+    // ============================================
+
+    // Credit transactions
+    match /credit_transactions/{transactionId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // ============================================
+    // LIVE CLASS COLLECTIONS
+    // ============================================
+
+    // Live classes
+    match /live_classes/{classId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Live class participants
+    match /live_class_participants/{participantId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // ============================================
+    // WHITEBOARD COLLECTIONS
+    // ============================================
+
+    // Whiteboard sessions
+    match /whiteboard_sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Excalidraw sessions
+    match /excalidraw_sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;
