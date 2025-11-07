@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from './config';
+import logger from '../utils/logger';
 
 // ============================================
 // UTILIDADES
@@ -74,7 +75,7 @@ export async function createUser(userData) {
       // Si el email ya existe en Auth, buscar el usuario existente
       if (authError.code === 'auth/email-already-in-use') {
         emailAlreadyExisted = true;
-        console.log('⚠️ Email ya registrado en Auth, buscando UID existente...');
+        logger.debug('⚠️ Email ya registrado en Auth, buscando UID existente...');
 
         // Buscar el UID del usuario con ese email en Firestore
         const q = query(usersRef, where('email', '==', userData.email));
@@ -84,7 +85,7 @@ export async function createUser(userData) {
           // Usuario existe en Firestore, usar su UID
           const existingDoc = snapshot.docs[0];
           newAuthUser = { uid: existingDoc.id };
-          console.log('✅ Encontrado usuario existente, se actualizará su documento');
+          logger.debug('✅ Encontrado usuario existente, se actualizará su documento');
         } else {
           // No existe en Firestore pero sí en Auth - no podemos obtener el UID sin login
           return {
@@ -138,7 +139,7 @@ export async function createUser(userData) {
       emailAlreadyExisted: emailAlreadyExisted
     };
   } catch (error) {
-    console.error('Error al crear usuario:', error);
+    logger.error('Error al crear usuario:', error);
 
     return { success: false, error: error.message };
   }
@@ -159,7 +160,7 @@ export async function getUserById(userId) {
     }
     return null;
   } catch (error) {
-    console.error('Error al obtener usuario:', error);
+    logger.error('Error al obtener usuario:', error);
     return null;
   }
 }
@@ -181,7 +182,7 @@ export async function getUserByEmail(email) {
     }
     return null;
   } catch (error) {
-    console.error('Error al obtener usuario por email:', error);
+    logger.error('Error al obtener usuario por email:', error);
     return null;
   }
 }
@@ -201,7 +202,7 @@ export async function updateUser(userId, updates) {
     });
     return { success: true };
   } catch (error) {
-    console.error('Error al actualizar usuario:', error);
+    logger.error('Error al actualizar usuario:', error);
     return { success: false, error: error.message };
   }
 }
@@ -222,7 +223,7 @@ export async function deleteUser(userId) {
     });
     return { success: true };
   } catch (error) {
-    console.error('Error al eliminar usuario:', error);
+    logger.error('Error al eliminar usuario:', error);
     return { success: false, error: error.message };
   }
 }
@@ -239,7 +240,7 @@ export async function permanentlyDeleteUser(userId) {
     await deleteDoc(docRef);
     return { success: true };
   } catch (error) {
-    console.error('Error al eliminar permanentemente usuario:', error);
+    logger.error('Error al eliminar permanentemente usuario:', error);
     return { success: false, error: error.message };
   }
 }
@@ -291,7 +292,7 @@ export async function getAllUsers(filters = {}) {
 
     return users;
   } catch (error) {
-    console.error('Error al obtener usuarios:', error);
+    logger.error('Error al obtener usuarios:', error);
     return [];
   }
 }
@@ -320,7 +321,7 @@ export async function searchUsers(searchTerm) {
       user.name?.toLowerCase().includes(term)
     );
   } catch (error) {
-    console.error('Error al buscar usuarios:', error);
+    logger.error('Error al buscar usuarios:', error);
     return [];
   }
 }

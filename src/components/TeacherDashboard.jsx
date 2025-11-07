@@ -30,9 +30,7 @@ import {
   FlaskConical,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown,
-  Grid3x3,
-  List
+  ArrowDown
 } from 'lucide-react';
 import {
   loadStudents,
@@ -68,10 +66,10 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
-import QuickAccessCard from './QuickAccessCard';
 import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
+import DashboardMainView from './teacher/DashboardMainView';
 import './TeacherDashboard.css';
 
 // Icon mapping for role icons from roleConfig
@@ -134,10 +132,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
   // Flag para evitar doble ejecución del useEffect de retorno
   const [hasProcessedReturn, setHasProcessedReturn] = useState(false);
-
-  // Estados para búsqueda y vista en dashboard principal
-  const [dashboardSearchTerm, setDashboardSearchTerm] = useState('');
-  const [dashboardViewMode, setDashboardViewMode] = useState('grid'); // 'grid' or 'list'
 
   // Determinar si el usuario es admin (verificar tanto email como rol en Firestore)
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
@@ -1486,112 +1480,24 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Filtrar tarjetas según búsqueda
-  const dashboardCards = [
-    {
-      id: 'users',
-      icon: isAdmin ? Crown : Users,
-      title: isAdmin ? "Usuarios" : "Alumnos",
-      count: users.length,
-      countLabel: users.length === 1 ? "usuario" : "usuarios",
-      onClick: () => setCurrentScreen('users'),
-      createLabel: isAdmin ? "Nuevo Usuario" : "Nuevo Alumno",
-      onCreateClick: () => setShowAddUserModal(true)
-    },
-    {
-      id: 'courses',
-      icon: BookOpen,
-      title: "Cursos",
-      count: courses.length,
-      countLabel: courses.length === 1 ? "curso" : "cursos",
-      onClick: () => setCurrentScreen('courses'),
-      createLabel: "Nuevo Curso",
-      onCreateClick: () => {
-        setOpenCourseModal(true);
-        setCurrentScreen('courses');
-      }
-    },
-    {
-      id: 'content',
-      icon: FileText,
-      title: "Contenidos",
-      count: allContent.length,
-      countLabel: allContent.length === 1 ? "contenido" : "contenidos",
-      onClick: () => setCurrentScreen('content'),
-      createLabel: "Nuevo Contenido",
-      onCreateClick: () => {
-        setOpenContentModal(true);
-        setCurrentScreen('content');
-      }
-    },
-    {
-      id: 'classes',
-      icon: Calendar,
-      title: "Clases",
-      count: allClasses.length,
-      countLabel: allClasses.length === 1 ? "clase" : "clases",
-      onClick: () => setCurrentScreen('classes'),
-      createLabel: "Nueva Clase",
-      onCreateClick: () => {
-        setOpenClassModal(true);
-        setCurrentScreen('classes');
-      }
-    }
-  ];
-
-  const filteredDashboardCards = dashboardCards.filter(card =>
-    card.title.toLowerCase().includes(dashboardSearchTerm.toLowerCase())
-  );
-
   // Renderizar Dashboard Principal con el nuevo layout
   return (
     <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction} currentScreen={currentScreen}>
-        <div className="teacher-dashboard">
-          <div className="dashboard-content mt-6">
-            {/* Barra de búsqueda y selector de vista */}
-            <div className="flex gap-3 items-center mb-6">
-              <SearchBar
-                value={dashboardSearchTerm}
-                onChange={setDashboardSearchTerm}
-                placeholder="Buscar secciones..."
-                className="flex-1"
-              />
-              <div className="view-toggle">
-                <button
-                  onClick={() => setDashboardViewMode('grid')}
-                  className={`view-toggle-btn ${dashboardViewMode === 'grid' ? 'active' : ''}`}
-                  title="Vista grilla"
-                >
-                  <Grid3x3 size={18} strokeWidth={2} />
-                </button>
-                <button
-                  onClick={() => setDashboardViewMode('list')}
-                  className={`view-toggle-btn ${dashboardViewMode === 'list' ? 'active' : ''}`}
-                  title="Vista lista"
-                >
-                  <List size={18} strokeWidth={2} />
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Access Cards */}
-            <div className={dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
-              {filteredDashboardCards.map(card => (
-                <QuickAccessCard
-                  key={card.id}
-                  icon={card.icon}
-                  title={card.title}
-                  count={card.count}
-                  countLabel={card.countLabel}
-                  onClick={card.onClick}
-                  createLabel={card.createLabel}
-                  onCreateClick={card.onCreateClick}
-                />
-              ))}
-            </div>
-          </div>
-      </div>
+        <DashboardMainView
+          user={user}
+          userRole={userRole}
+          isAdmin={isAdmin}
+          users={users}
+          courses={courses}
+          allContent={allContent}
+          allClasses={allClasses}
+          onNavigate={setCurrentScreen}
+          onOpenAddUserModal={setShowAddUserModal}
+          onOpenCourseModal={setOpenCourseModal}
+          onOpenContentModal={setOpenContentModal}
+          onOpenClassModal={setOpenClassModal}
+        />
       </DashboardLayout>
 
       {/* Modal para agregar nuevo usuario/alumno */}

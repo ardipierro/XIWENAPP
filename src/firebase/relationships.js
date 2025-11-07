@@ -13,6 +13,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './config';
+import logger from '../utils/logger';
 
 // ============================================
 // COURSE-CONTENT RELATIONSHIPS (Many-to-Many)
@@ -32,7 +33,7 @@ export async function addContentToCourse(courseId, contentId, order = 0) {
     const existing = await getDocs(q);
 
     if (!existing.empty) {
-      console.log('El contenido ya está en el curso');
+      logger.debug('El contenido ya está en el curso');
       return { success: true, id: existing.docs[0].id };
     }
 
@@ -45,7 +46,7 @@ export async function addContentToCourse(courseId, contentId, order = 0) {
 
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error agregando contenido al curso:', error);
+    logger.error('Error agregando contenido al curso:', error);
     return { success: false, error: error.message };
   }
 }
@@ -68,7 +69,7 @@ export async function removeContentFromCourse(courseId, contentId) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error removiendo contenido del curso:', error);
+    logger.error('Error removiendo contenido del curso:', error);
     return { success: false, error: error.message };
   }
 }
@@ -109,7 +110,7 @@ export async function getCourseContents(courseId) {
 
     return contents;
   } catch (error) {
-    console.error('Error obteniendo contenidos del curso:', error);
+    logger.error('Error obteniendo contenidos del curso:', error);
     return [];
   }
 }
@@ -141,7 +142,7 @@ export async function getCoursesWithContent(contentId) {
 
     return courses;
   } catch (error) {
-    console.error('Error obteniendo cursos del contenido:', error);
+    logger.error('Error obteniendo cursos del contenido:', error);
     return [];
   }
 }
@@ -164,7 +165,7 @@ export async function addExerciseToCourse(courseId, exerciseId, order = 0) {
     const existing = await getDocs(q);
 
     if (!existing.empty) {
-      console.log('El ejercicio ya está en el curso');
+      logger.debug('El ejercicio ya está en el curso');
       return { success: true, id: existing.docs[0].id };
     }
 
@@ -177,7 +178,7 @@ export async function addExerciseToCourse(courseId, exerciseId, order = 0) {
 
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error agregando ejercicio al curso:', error);
+    logger.error('Error agregando ejercicio al curso:', error);
     return { success: false, error: error.message };
   }
 }
@@ -200,7 +201,7 @@ export async function removeExerciseFromCourse(courseId, exerciseId) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error removiendo ejercicio del curso:', error);
+    logger.error('Error removiendo ejercicio del curso:', error);
     return { success: false, error: error.message };
   }
 }
@@ -241,7 +242,7 @@ export async function getCourseExercises(courseId) {
 
     return exercises;
   } catch (error) {
-    console.error('Error obteniendo ejercicios del curso:', error);
+    logger.error('Error obteniendo ejercicios del curso:', error);
     return [];
   }
 }
@@ -273,7 +274,7 @@ export async function getCoursesWithExercise(exerciseId) {
 
     return courses;
   } catch (error) {
-    console.error('Error obteniendo cursos del ejercicio:', error);
+    logger.error('Error obteniendo cursos del ejercicio:', error);
     return [];
   }
 }
@@ -297,7 +298,7 @@ export async function assignToStudent(studentId, itemType, itemId, assignedBy) {
     const existing = await getDocs(q);
 
     if (!existing.empty) {
-      console.log('El recurso ya está asignado al estudiante');
+      logger.debug('El recurso ya está asignado al estudiante');
       return { success: true, id: existing.docs[0].id };
     }
 
@@ -311,7 +312,7 @@ export async function assignToStudent(studentId, itemType, itemId, assignedBy) {
 
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error asignando recurso al estudiante:', error);
+    logger.error('Error asignando recurso al estudiante:', error);
     return { success: false, error: error.message };
   }
 }
@@ -335,7 +336,7 @@ export async function removeFromStudent(studentId, itemType, itemId) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error removiendo asignación del estudiante:', error);
+    logger.error('Error removiendo asignación del estudiante:', error);
     return { success: false, error: error.message };
   }
 }
@@ -365,7 +366,7 @@ export async function getStudentAssignments(studentId) {
               itemDetails = contentDoc.data();
             }
           } catch (err) {
-            console.error(`Error cargando content ${data.itemId}:`, err);
+            logger.error(`Error cargando content ${data.itemId}:`, err);
           }
         } else if (data.itemType === 'exercise' && data.itemId) {
           try {
@@ -374,7 +375,7 @@ export async function getStudentAssignments(studentId) {
               itemDetails = exerciseDoc.data();
             }
           } catch (err) {
-            console.error(`Error cargando exercise ${data.itemId}:`, err);
+            logger.error(`Error cargando exercise ${data.itemId}:`, err);
           }
         } else if (data.itemType === 'course' && data.itemId) {
           try {
@@ -383,7 +384,7 @@ export async function getStudentAssignments(studentId) {
               itemDetails = courseDoc.data();
             }
           } catch (err) {
-            console.error(`Error cargando course ${data.itemId}:`, err);
+            logger.error(`Error cargando course ${data.itemId}:`, err);
           }
         }
 
@@ -397,7 +398,7 @@ export async function getStudentAssignments(studentId) {
 
     return assignments;
   } catch (error) {
-    console.error('Error obteniendo asignaciones del estudiante:', error);
+    logger.error('Error obteniendo asignaciones del estudiante:', error);
     return [];
   }
 }
@@ -421,7 +422,7 @@ export async function assignToGroup(groupId, itemType, itemId) {
     const existing = await getDocs(q);
 
     if (!existing.empty) {
-      console.log('El recurso ya está asignado al grupo');
+      logger.debug('El recurso ya está asignado al grupo');
       return { success: true, id: existing.docs[0].id };
     }
 
@@ -434,7 +435,7 @@ export async function assignToGroup(groupId, itemType, itemId) {
 
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error asignando recurso al grupo:', error);
+    logger.error('Error asignando recurso al grupo:', error);
     return { success: false, error: error.message };
   }
 }
@@ -458,7 +459,7 @@ export async function removeFromGroup(groupId, itemType, itemId) {
 
     return { success: true };
   } catch (error) {
-    console.error('Error removiendo asignación del grupo:', error);
+    logger.error('Error removiendo asignación del grupo:', error);
     return { success: false, error: error.message };
   }
 }
@@ -481,7 +482,7 @@ export async function getGroupAssignments(groupId) {
 
     return assignments;
   } catch (error) {
-    console.error('Error obteniendo asignaciones del grupo:', error);
+    logger.error('Error obteniendo asignaciones del grupo:', error);
     return [];
   }
 }
@@ -519,7 +520,7 @@ export async function updateContentCourses(contentId, courseIds) {
     await batch.commit();
     return { success: true };
   } catch (error) {
-    console.error('Error actualizando cursos del contenido:', error);
+    logger.error('Error actualizando cursos del contenido:', error);
     return { success: false, error: error.message };
   }
 }
@@ -553,7 +554,7 @@ export async function updateExerciseCourses(exerciseId, courseIds) {
     await batch.commit();
     return { success: true };
   } catch (error) {
-    console.error('Error actualizando cursos del ejercicio:', error);
+    logger.error('Error actualizando cursos del ejercicio:', error);
     return { success: false, error: error.message };
   }
 }

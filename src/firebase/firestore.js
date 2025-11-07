@@ -13,6 +13,7 @@ import {
   where // ⭐ NUEVO: Para queries en checkStudentCodeExists
 } from 'firebase/firestore';
 import { db } from './config';
+import logger from '../utils/logger';
 
 // ============================================
 // USUARIOS Y ROLES (NUEVO)
@@ -23,22 +24,22 @@ import { db } from './config';
  */
 export const getUserRole = async (userId) => {
   try {
-    console.log('📝 getUserRole - consultando userId:', userId);
+    logger.debug('📝 getUserRole - consultando userId:', userId);
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
       const role = userSnap.data().role;
-      console.log('✅ getUserRole - documento existe, rol:', role);
+      logger.debug('✅ getUserRole - documento existe, rol:', role);
       return role;
     }
 
-    console.log('⚠️ getUserRole - documento NO existe para userId:', userId);
+    logger.debug('⚠️ getUserRole - documento NO existe para userId:', userId);
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo rol:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
+    logger.error('❌ Error obteniendo rol:', error);
+    logger.error('Error code:', error.code);
+    logger.error('Error message:', error.message);
     return null;
   }
 };
@@ -48,7 +49,7 @@ export const getUserRole = async (userId) => {
  */
 export const setUserRole = async (userId, role) => {
   try {
-    console.log('📝 Intentando setear rol:', { userId, role });
+    logger.debug('📝 Intentando setear rol:', { userId, role });
     const userRef = doc(db, 'users', userId);
 
     const result = await setDoc(userRef, {
@@ -57,21 +58,21 @@ export const setUserRole = async (userId, role) => {
       updatedAt: serverTimestamp()
     }, { merge: true });
 
-    console.log('📝 Resultado de setDoc:', result);
-    console.log(`✅ Rol seteado: ${role} para usuario ${userId}`);
+    logger.debug('📝 Resultado de setDoc:', result);
+    logger.debug(`✅ Rol seteado: ${role} para usuario ${userId}`);
     return true;
   } catch (error) {
-    console.error('❌ Error seteando rol:', error);
-    console.error('userId:', userId, 'role:', role);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
-    console.error('Error name:', error.name);
-    console.error('Full error:', JSON.stringify(error, null, 2));
+    logger.error('❌ Error seteando rol:', error);
+    logger.error('userId:', userId, 'role:', role);
+    logger.error('Error code:', error.code);
+    logger.error('Error message:', error.message);
+    logger.error('Error name:', error.name);
+    logger.error('Full error:', JSON.stringify(error, null, 2));
 
     // Mensaje específico para errores comunes
     if (error.code === 'permission-denied') {
-      console.error('🔒 PERMISO DENEGADO: Debes actualizar las Firestore Security Rules');
-      console.error('Ve a Firebase Console → Firestore Database → Rules');
+      logger.error('🔒 PERMISO DENEGADO: Debes actualizar las Firestore Security Rules');
+      logger.error('Ve a Firebase Console → Firestore Database → Rules');
     }
 
     throw error; // Lanzar el error para capturarlo arriba
@@ -118,10 +119,10 @@ export const createUserProfile = async (userId, userData) => {
       });
     }
 
-    console.log('Usuario creado con rol:', role);
+    logger.debug('Usuario creado con rol:', role);
     return true;
   } catch (error) {
-    console.error('Error creando perfil:', error);
+    logger.error('Error creando perfil:', error);
     return false;
   }
 };
@@ -142,7 +143,7 @@ export const getUserProfile = async (userId) => {
     }
     return null;
   } catch (error) {
-    console.error('Error obteniendo perfil:', error);
+    logger.error('Error obteniendo perfil:', error);
     return null;
   }
 };
@@ -164,10 +165,10 @@ export const getAllUsers = async () => {
       });
     });
     
-    console.log(users.length + ' usuarios cargados');
+    logger.debug(users.length + ' usuarios cargados');
     return users;
   } catch (error) {
-    console.error('Error cargando usuarios:', error);
+    logger.error('Error cargando usuarios:', error);
     return [];
   }
 };
@@ -182,10 +183,10 @@ export const updateUserRole = async (userId, newRole) => {
       role: newRole,
       updatedAt: serverTimestamp()
     });
-    console.log('Rol actualizado a:', newRole);
+    logger.debug('Rol actualizado a:', newRole);
     return true;
   } catch (error) {
-    console.error('Error actualizando rol:', error);
+    logger.error('Error actualizando rol:', error);
     return false;
   }
 };
@@ -200,10 +201,10 @@ export const updateUserStatus = async (userId, newStatus) => {
       status: newStatus,
       updatedAt: serverTimestamp()
     });
-    console.log('Estado actualizado a:', newStatus);
+    logger.debug('Estado actualizado a:', newStatus);
     return true;
   } catch (error) {
-    console.error('Error actualizando estado:', error);
+    logger.error('Error actualizando estado:', error);
     return false;
   }
 };
@@ -218,10 +219,10 @@ export const updateUserAvatar = async (userId, avatarId) => {
       avatar: avatarId,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Avatar actualizado a:', avatarId);
+    logger.debug('✅ Avatar actualizado a:', avatarId);
     return true;
   } catch (error) {
-    console.error('❌ Error actualizando avatar:', error);
+    logger.error('❌ Error actualizando avatar:', error);
     return false;
   }
 };
@@ -239,7 +240,7 @@ export const getUserAvatar = async (userId) => {
     }
     return 'default';
   } catch (error) {
-    console.error('❌ Error obteniendo avatar:', error);
+    logger.error('❌ Error obteniendo avatar:', error);
     return 'default';
   }
 };
@@ -255,10 +256,10 @@ export const saveCategories = async (categories) => {
       data: categories,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Categorías guardadas en Firestore');
+    logger.debug('✅ Categorías guardadas en Firestore');
     return true;
   } catch (error) {
-    console.error('❌ Error guardando categorías:', error);
+    logger.error('❌ Error guardando categorías:', error);
     return false;
   }
 };
@@ -269,14 +270,14 @@ export const loadCategories = async () => {
     const docSnap = await getDoc(categoriesRef);
     
     if (docSnap.exists()) {
-      console.log('✅ Categorías cargadas desde Firestore');
+      logger.debug('✅ Categorías cargadas desde Firestore');
       return docSnap.data().data || {};
     } else {
-      console.log('📝 No hay categorías guardadas aún');
+      logger.debug('📝 No hay categorías guardadas aún');
       return {};
     }
   } catch (error) {
-    console.error('❌ Error cargando categorías:', error);
+    logger.error('❌ Error cargando categorías:', error);
     return {};
   }
 };
@@ -292,10 +293,10 @@ export const saveGameToFirestore = async (gameData) => {
       ...gameData,
       createdAt: serverTimestamp()
     });
-    console.log('✅ Juego guardado en Firestore con ID:', docRef.id);
+    logger.debug('✅ Juego guardado en Firestore con ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('❌ Error guardando juego:', error);
+    logger.error('❌ Error guardando juego:', error);
     return null;
   }
 };
@@ -319,10 +320,10 @@ export const loadGameHistory = async () => {
       return dateB - dateA;
     });
     
-    console.log(`✅ ${games.length} juegos cargados desde Firestore`);
+    logger.debug(`✅ ${games.length} juegos cargados desde Firestore`);
     return games;
   } catch (error) {
-    console.error('❌ Error cargando historial:', error);
+    logger.error('❌ Error cargando historial:', error);
     return [];
   }
 };
@@ -330,10 +331,10 @@ export const loadGameHistory = async () => {
 export const deleteGame = async (gameId) => {
   try {
     await deleteDoc(doc(db, 'gameHistory', gameId));
-    console.log('✅ Juego eliminado');
+    logger.debug('✅ Juego eliminado');
     return true;
   } catch (error) {
-    console.error('❌ Error eliminando juego:', error);
+    logger.error('❌ Error eliminando juego:', error);
     return false;
   }
 };
@@ -354,10 +355,10 @@ export const addStudent = async (studentData) => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Alumno agregado con ID:', docRef.id);
+    logger.debug('✅ Alumno agregado con ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('❌ Error agregando alumno:', error);
+    logger.error('❌ Error agregando alumno:', error);
     return null;
   }
 };
@@ -379,10 +380,10 @@ export const loadStudents = async () => {
       });
     });
     
-    console.log(`✅ ${students.length} alumnos cargados desde Firestore`);
+    logger.debug(`✅ ${students.length} alumnos cargados desde Firestore`);
     return students;
   } catch (error) {
-    console.error('❌ Error cargando alumnos:', error);
+    logger.error('❌ Error cargando alumnos:', error);
     return [];
   }
 };
@@ -397,10 +398,10 @@ export const updateStudent = async (studentId, studentData) => {
       ...studentData,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Alumno actualizado');
+    logger.debug('✅ Alumno actualizado');
     return true;
   } catch (error) {
-    console.error('❌ Error actualizando alumno:', error);
+    logger.error('❌ Error actualizando alumno:', error);
     return false;
   }
 };
@@ -415,10 +416,10 @@ export const deleteStudent = async (studentId) => {
       active: false,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Alumno marcado como inactivo');
+    logger.debug('✅ Alumno marcado como inactivo');
     return true;
   } catch (error) {
-    console.error('❌ Error eliminando alumno:', error);
+    logger.error('❌ Error eliminando alumno:', error);
     return false;
   }
 };
@@ -488,10 +489,10 @@ export const registerStudentProfile = async (studentId) => {
       updatedAt: serverTimestamp()
     });
 
-    console.log(`✅ Alumno registrado con código: ${code}`);
+    logger.debug(`✅ Alumno registrado con código: ${code}`);
     return code;
   } catch (error) {
-    console.error('❌ Error registrando alumno:', error);
+    logger.error('❌ Error registrando alumno:', error);
     return null;
   }
 };
@@ -512,7 +513,7 @@ export const getStudentProfile = async (studentId) => {
     }
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo perfil:', error);
+    logger.error('❌ Error obteniendo perfil:', error);
     return null;
   }
 };
@@ -523,29 +524,29 @@ export const getStudentProfile = async (studentId) => {
  */
 export const ensureStudentProfile = async (userId) => {
   try {
-    console.log('🔍 ensureStudentProfile - Verificando perfil para:', userId);
+    logger.debug('🔍 ensureStudentProfile - Verificando perfil para:', userId);
 
     // Verificar si ya existe
     const existingProfile = await getStudentProfile(userId);
     if (existingProfile) {
-      console.log('✅ Perfil ya existe:', existingProfile);
+      logger.debug('✅ Perfil ya existe:', existingProfile);
       return existingProfile;
     }
 
-    console.log('⚙️ Perfil no existe, intentando crear...');
+    logger.debug('⚙️ Perfil no existe, intentando crear...');
 
     // Obtener datos del usuario desde la colección "users"
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
-      console.error('❌ Usuario no encontrado en la colección users, userId:', userId);
-      console.error('El usuario debe tener un documento en la colección "users" primero');
+      logger.error('❌ Usuario no encontrado en la colección users, userId:', userId);
+      logger.error('El usuario debe tener un documento en la colección "users" primero');
       return null;
     }
 
     const userData = userSnap.data();
-    console.log('👤 Datos del usuario:', userData);
+    logger.debug('👤 Datos del usuario:', userData);
 
     // Crear perfil de estudiante
     const studentRef = doc(db, 'students', userId);
@@ -565,19 +566,19 @@ export const ensureStudentProfile = async (userId) => {
       updatedAt: serverTimestamp()
     };
 
-    console.log('📝 Creando perfil de estudiante:', studentData);
+    logger.debug('📝 Creando perfil de estudiante:', studentData);
     await setDoc(studentRef, studentData);
 
-    console.log('✅ Perfil de estudiante creado automáticamente');
+    logger.debug('✅ Perfil de estudiante creado automáticamente');
 
     // Retornar el perfil recién creado
     const newProfile = await getStudentProfile(userId);
-    console.log('✅ Perfil retornado:', newProfile);
+    logger.debug('✅ Perfil retornado:', newProfile);
     return newProfile;
   } catch (error) {
-    console.error('❌ Error creando perfil de estudiante:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
+    logger.error('❌ Error creando perfil de estudiante:', error);
+    logger.error('Error code:', error.code);
+    logger.error('Error message:', error.message);
     return null;
   }
 };
@@ -592,10 +593,10 @@ export const updateStudentAvatar = async (studentId, avatarId) => {
       'profile.avatar': avatarId,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Avatar actualizado');
+    logger.debug('✅ Avatar actualizado');
     return true;
   } catch (error) {
-    console.error('❌ Error actualizando avatar:', error);
+    logger.error('❌ Error actualizando avatar:', error);
     return false;
   }
 };
@@ -620,12 +621,12 @@ export const updateStudentPoints = async (studentId, pointsToAdd) => {
         updatedAt: serverTimestamp()
       });
 
-      console.log(`✅ Puntos actualizados: +${pointsToAdd} (Total: ${newPoints})`);
+      logger.debug(`✅ Puntos actualizados: +${pointsToAdd} (Total: ${newPoints})`);
       return { newPoints, newLevel };
     }
     return null;
   } catch (error) {
-    console.error('❌ Error actualizando puntos:', error);
+    logger.error('❌ Error actualizando puntos:', error);
     return null;
   }
 };
@@ -666,10 +667,10 @@ export const getStudentGameHistory = async (studentId) => {
 
     studentGames.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    console.log(`✅ ${studentGames.length} juegos cargados para el alumno`);
+    logger.debug(`✅ ${studentGames.length} juegos cargados para el alumno`);
     return studentGames;
   } catch (error) {
-    console.error('❌ Error cargando historial:', error);
+    logger.error('❌ Error cargando historial:', error);
     return [];
   }
 };
@@ -692,10 +693,10 @@ export const createCourse = async (courseData) => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Curso creado con ID:', docRef.id);
+    logger.debug('✅ Curso creado con ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('❌ Error creando curso:', error);
+    logger.error('❌ Error creando curso:', error);
     return null;
   }
 };
@@ -717,10 +718,10 @@ export const loadCourses = async () => {
       });
     });
     
-    console.log(`✅ ${courses.length} cursos cargados desde Firestore`);
+    logger.debug(`✅ ${courses.length} cursos cargados desde Firestore`);
     return courses;
   } catch (error) {
-    console.error('❌ Error cargando cursos:', error);
+    logger.error('❌ Error cargando cursos:', error);
     return [];
   }
 };
@@ -735,10 +736,10 @@ export const updateCourse = async (courseId, courseData) => {
       ...courseData,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Curso actualizado');
+    logger.debug('✅ Curso actualizado');
     return true;
   } catch (error) {
-    console.error('❌ Error actualizando curso:', error);
+    logger.error('❌ Error actualizando curso:', error);
     return false;
   }
 };
@@ -753,10 +754,10 @@ export const deleteCourse = async (courseId) => {
       active: false,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Curso marcado como inactivo');
+    logger.debug('✅ Curso marcado como inactivo');
     return true;
   } catch (error) {
-    console.error('❌ Error eliminando curso:', error);
+    logger.error('❌ Error eliminando curso:', error);
     return false;
   }
 };
@@ -774,7 +775,7 @@ export const enrollStudent = async (courseId, studentId) => {
       
       // Verificar si ya está inscrito
       if (currentStudents.includes(studentId)) {
-        console.log('ℹ️ El alumno ya está inscrito en este curso');
+        logger.debug('ℹ️ El alumno ya está inscrito en este curso');
         return true;
       }
       
@@ -783,12 +784,12 @@ export const enrollStudent = async (courseId, studentId) => {
         updatedAt: serverTimestamp()
       });
       
-      console.log('✅ Alumno inscrito al curso');
+      logger.debug('✅ Alumno inscrito al curso');
       return true;
     }
     return false;
   } catch (error) {
-    console.error('❌ Error inscribiendo alumno:', error);
+    logger.error('❌ Error inscribiendo alumno:', error);
     return false;
   }
 };
@@ -810,12 +811,12 @@ export const unenrollStudent = async (courseId, studentId) => {
         updatedAt: serverTimestamp()
       });
       
-      console.log('✅ Alumno desinscrito del curso');
+      logger.debug('✅ Alumno desinscrito del curso');
       return true;
     }
     return false;
   } catch (error) {
-    console.error('❌ Error desinscribiendo alumno:', error);
+    logger.error('❌ Error desinscribiendo alumno:', error);
     return false;
   }
 };
@@ -852,10 +853,10 @@ export const getCourseStudents = async (courseId) => {
         ...snap.data()
       }));
     
-    console.log(`✅ ${students.length} alumnos cargados del curso`);
+    logger.debug(`✅ ${students.length} alumnos cargados del curso`);
     return students;
   } catch (error) {
-    console.error('❌ Error cargando alumnos del curso:', error);
+    logger.error('❌ Error cargando alumnos del curso:', error);
     return [];
   }
 };
@@ -882,10 +883,10 @@ export const createLesson = async (courseId, lessonData) => {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ Lección creada:', lessonRef.id);
+    logger.debug('✅ Lección creada:', lessonRef.id);
     return lessonRef.id;
   } catch (error) {
-    console.error('❌ Error creando lección:', error);
+    logger.error('❌ Error creando lección:', error);
     return null;
   }
 };
@@ -911,10 +912,10 @@ export const getCourseLessons = async (courseId) => {
       .filter(lesson => lesson.active !== false)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-    console.log(`✅ ${lessons.length} lecciones cargadas para curso ${courseId}`);
+    logger.debug(`✅ ${lessons.length} lecciones cargadas para curso ${courseId}`);
     return lessons;
   } catch (error) {
-    console.error('❌ Error cargando lecciones:', error);
+    logger.error('❌ Error cargando lecciones:', error);
     return [];
   }
 };
@@ -934,10 +935,10 @@ export const getLesson = async (lessonId) => {
       };
     }
 
-    console.warn('⚠️ Lección no encontrada:', lessonId);
+    logger.warn('⚠️ Lección no encontrada:', lessonId);
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo lección:', error);
+    logger.error('❌ Error obteniendo lección:', error);
     return null;
   }
 };
@@ -954,10 +955,10 @@ export const updateLesson = async (lessonId, lessonData) => {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ Lección actualizada:', lessonId);
+    logger.debug('✅ Lección actualizada:', lessonId);
     return true;
   } catch (error) {
-    console.error('❌ Error actualizando lección:', error);
+    logger.error('❌ Error actualizando lección:', error);
     return false;
   }
 };
@@ -974,10 +975,10 @@ export const deleteLesson = async (lessonId) => {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ Lección eliminada (soft delete):', lessonId);
+    logger.debug('✅ Lección eliminada (soft delete):', lessonId);
     return true;
   } catch (error) {
-    console.error('❌ Error eliminando lección:', error);
+    logger.error('❌ Error eliminando lección:', error);
     return false;
   }
 };
@@ -996,10 +997,10 @@ export const reorderLessons = async (lessonUpdates) => {
     });
 
     await Promise.all(updates);
-    console.log('✅ Lecciones reordenadas');
+    logger.debug('✅ Lecciones reordenadas');
     return true;
   } catch (error) {
-    console.error('❌ Error reordenando lecciones:', error);
+    logger.error('❌ Error reordenando lecciones:', error);
     return false;
   }
 };
@@ -1023,7 +1024,7 @@ export const enrollStudentInCourse = async (studentId, courseId) => {
     const existingEnrollment = await getDocs(q);
 
     if (!existingEnrollment.empty) {
-      console.log('ℹ️ El alumno ya está inscrito en este curso');
+      logger.debug('ℹ️ El alumno ya está inscrito en este curso');
       return existingEnrollment.docs[0].id;
     }
 
@@ -1042,10 +1043,10 @@ export const enrollStudentInCourse = async (studentId, courseId) => {
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ Alumno inscrito en curso:', enrollmentRef.id);
+    logger.debug('✅ Alumno inscrito en curso:', enrollmentRef.id);
     return enrollmentRef.id;
   } catch (error) {
-    console.error('❌ Error inscribiendo alumno:', error);
+    logger.error('❌ Error inscribiendo alumno:', error);
     return null;
   }
 };
@@ -1064,7 +1065,7 @@ export const unenrollStudentFromCourse = async (studentId, courseId) => {
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      console.log('ℹ️ No se encontró inscripción para desinscribir');
+      logger.debug('ℹ️ No se encontró inscripción para desinscribir');
       return false;
     }
 
@@ -1072,10 +1073,10 @@ export const unenrollStudentFromCourse = async (studentId, courseId) => {
     const enrollmentId = querySnapshot.docs[0].id;
     await deleteDoc(doc(db, 'enrollments', enrollmentId));
 
-    console.log('✅ Alumno desinscrito del curso');
+    logger.debug('✅ Alumno desinscrito del curso');
     return true;
   } catch (error) {
-    console.error('❌ Error desinscribiendo alumno:', error);
+    logger.error('❌ Error desinscribiendo alumno:', error);
     return false;
   }
 };
@@ -1114,10 +1115,10 @@ export const getStudentEnrollments = async (studentId) => {
       }
     }
 
-    console.log(`✅ ${enrollments.length} inscripciones cargadas para el alumno`);
+    logger.debug(`✅ ${enrollments.length} inscripciones cargadas para el alumno`);
     return enrollments;
   } catch (error) {
-    console.error('❌ Error cargando inscripciones del alumno:', error);
+    logger.error('❌ Error cargando inscripciones del alumno:', error);
     return [];
   }
 };
@@ -1156,10 +1157,10 @@ export const getCourseEnrollments = async (courseId) => {
       }
     }
 
-    console.log(`✅ ${enrollments.length} alumnos inscritos en el curso`);
+    logger.debug(`✅ ${enrollments.length} alumnos inscritos en el curso`);
     return enrollments;
   } catch (error) {
-    console.error('❌ Error cargando inscripciones del curso:', error);
+    logger.error('❌ Error cargando inscripciones del curso:', error);
     return [];
   }
 };
@@ -1184,7 +1185,7 @@ export const getEnrollmentProgress = async (studentId, courseId) => {
     const enrollmentData = querySnapshot.docs[0].data();
     return enrollmentData.progress;
   } catch (error) {
-    console.error('❌ Error obteniendo progreso:', error);
+    logger.error('❌ Error obteniendo progreso:', error);
     return null;
   }
 };
@@ -1203,7 +1204,7 @@ export const updateEnrollmentProgress = async (studentId, courseId, progressData
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      console.log('⚠️ No se encontró inscripción para actualizar');
+      logger.debug('⚠️ No se encontró inscripción para actualizar');
       return false;
     }
 
@@ -1215,10 +1216,10 @@ export const updateEnrollmentProgress = async (studentId, courseId, progressData
       updatedAt: serverTimestamp()
     });
 
-    console.log('✅ Progreso actualizado');
+    logger.debug('✅ Progreso actualizado');
     return true;
   } catch (error) {
-    console.error('❌ Error actualizando progreso:', error);
+    logger.error('❌ Error actualizando progreso:', error);
     return false;
   }
 };
@@ -1233,7 +1234,7 @@ export const getStudentEnrolledCoursesCount = async (studentId) => {
     const querySnapshot = await getDocs(q);
     return querySnapshot.size;
   } catch (error) {
-    console.error('❌ Error contando cursos:', error);
+    logger.error('❌ Error contando cursos:', error);
     return 0;
   }
 };
@@ -1244,13 +1245,13 @@ export const getStudentEnrolledCoursesCount = async (studentId) => {
 
 export const migrateFromLocalStorage = async () => {
   try {
-    console.log('🔄 Iniciando migración desde localStorage...');
+    logger.debug('🔄 Iniciando migración desde localStorage...');
 
     const savedCategories = localStorage.getItem('quizGameCategories');
     if (savedCategories) {
       const categories = JSON.parse(savedCategories);
       await saveCategories(categories);
-      console.log('✅ Categorías migradas');
+      logger.debug('✅ Categorías migradas');
     }
 
     const savedHistory = localStorage.getItem('quizGameHistory');
@@ -1259,13 +1260,13 @@ export const migrateFromLocalStorage = async () => {
       for (const game of history) {
         await saveGameToFirestore(game);
       }
-      console.log(`✅ ${history.length} juegos migrados`);
+      logger.debug(`✅ ${history.length} juegos migrados`);
     }
 
-    console.log('🎉 Migración completada');
+    logger.debug('🎉 Migración completada');
     return true;
   } catch (error) {
-    console.error('❌ Error en migración:', error);
+    logger.error('❌ Error en migración:', error);
     return false;
   }
 };
