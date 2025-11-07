@@ -11,8 +11,10 @@ import {
   LogOut,
   Moon,
   Sun,
+  MessageSquare,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import MessagesPanel from '../components/shared/MessagesPanel';
 
 /**
  * StudentLayout - Main layout wrapper for student screens
@@ -29,6 +31,7 @@ function StudentLayout() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [messagesOpen, setMessagesOpen] = useState(false);
 
   // Navigation items
   const navItems = [
@@ -70,8 +73,15 @@ function StudentLayout() {
             </h1>
           </div>
 
-          {/* Right: Theme toggle + Logout */}
+          {/* Right: Messages + Theme toggle + Logout */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setMessagesOpen(true)}
+              className="p-2 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-800 text-text-secondary dark:text-neutral-400"
+              aria-label="Messages"
+            >
+              <MessageSquare size={20} />
+            </button>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-800 text-text-secondary dark:text-neutral-400"
@@ -171,6 +181,13 @@ function StudentLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Messages Panel */}
+      <MessagesPanel
+        isOpen={messagesOpen}
+        onClose={() => setMessagesOpen(false)}
+        userRole="student"
+      />
     </div>
   );
 }

@@ -41,6 +41,8 @@ const TeacherStudents = lazy(() => import('./screens/teacher/StudentsScreen'));
 const TeacherClasses = lazy(() => import('./screens/teacher/ClassesScreen'));
 const TeacherAssignments = lazy(() => import('./screens/teacher/AssignmentsScreen'));
 const TeacherAnalytics = lazy(() => import('./screens/teacher/AnalyticsScreen'));
+const TeacherContent = lazy(() => import('./screens/teacher/ContentScreen'));
+const TeacherGames = lazy(() => import('./screens/teacher/GamesScreen'));
 const TeacherCalendar = lazy(() => import('./screens/teacher/CalendarScreen'));
 
 // Admin screens
@@ -90,6 +92,8 @@ function App() {
                 <Route path="classes" element={<TeacherClasses />} />
                 <Route path="assignments" element={<TeacherAssignments />} />
                 <Route path="analytics" element={<TeacherAnalytics />} />
+                <Route path="content" element={<TeacherContent />} />
+                <Route path="games" element={<TeacherGames />} />
                 <Route path="calendar" element={<TeacherCalendar />} />
               </Route>
 
