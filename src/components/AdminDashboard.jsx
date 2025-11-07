@@ -72,6 +72,7 @@ import WhiteboardManager from './WhiteboardManager';
 import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
+import UserCard from './UserCard';
 import LiveClassManager from './LiveClassManager';
 import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
@@ -661,97 +662,12 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Students Panel (Cards View) - WITH Layout
+  // Students Panel -> REDIRECT to Users with filter
   if (navigation.currentScreen === 'students') {
-    const students = userManagement.users.filter(u => ['student', 'listener', 'trial'].includes(u.role));
-
-    const filteredStudents = students.filter(student =>
-      student.name?.toLowerCase().includes(navigation.studentsSearchTerm.toLowerCase()) ||
-      student.email?.toLowerCase().includes(navigation.studentsSearchTerm.toLowerCase())
-    );
-
-    return (
-      <>
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Back to Home
-          </button>
-
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <GraduationCap size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Students</h1>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
-                <Plus size={18} strokeWidth={2} /> Add Student
-              </button>
-              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Refresh list">
-                <RefreshCw size={18} strokeWidth={2} /> Refresh
-              </button>
-            </div>
-          </div>
-
-          <SearchBar
-            value={navigation.studentsSearchTerm}
-            onChange={navigation.setStudentsSearchTerm}
-            placeholder="Search students..."
-            viewMode={navigation.studentsViewMode}
-            onViewModeChange={navigation.setStudentsViewMode}
-            className="mb-6"
-          />
-
-          {successMessage && (
-            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-success-500 text-white animate-slide-down">
-              <CheckCircle size={18} strokeWidth={2} /> {successMessage}
-            </div>
-          )}
-          {errorMessage && (
-            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-error-500 text-white animate-slide-down">
-              <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
-            </div>
-          )}
-
-          {filteredStudents.length === 0 ? (
-            <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
-              <p>No students found</p>
-            </div>
-          ) : (
-            <div className={navigation.studentsViewMode === 'grid' ? 'students-grid' : 'students-list'}>
-              {filteredStudents.map(student => (
-                <StudentCard
-                  key={student.id}
-                  student={student}
-                  enrollmentCount={resourceAssignment.enrollmentCounts[student.id] || 0}
-                  onView={(student) => {
-                    navigation.setSelectedUserProfile(student);
-                    navigation.setShowUserProfile(true);
-                  }}
-                  onDelete={(student) => handleDeleteUser(student.id)}
-                  isAdmin={isAdmin}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </DashboardLayout>
-
-      {navigation.showUserProfile && navigation.selectedUserProfile && (
-        <div className="modal-overlay" onClick={handleCloseUserProfile}>
-          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <UserProfile
-              selectedUser={navigation.selectedUserProfile}
-              currentUser={user}
-              onBack={handleCloseUserProfile}
-              onUpdate={userManagement.loadUsers}
-              isAdmin={isAdmin}
-            />
-          </div>
-        </div>
-      )}
-    </>
-    );
+    // Automatically redirect to users panel with students filter
+    navigation.setCurrentScreen('users');
+    navigation.setUsersRoleFilter('students');
+    return null; // Will re-render with users screen
   }
 
   // User Management - WITH Layout
@@ -766,6 +682,30 @@ function AdminDashboard({ user, userRole, onLogout }) {
         </DashboardLayout>
       );
     }
+
+    // Filter users by role
+    const roleFilteredUsers = useMemo(() => {
+      let filtered = userManagement.users;
+
+      if (navigation.usersRoleFilter === 'students') {
+        filtered = filtered.filter(u => ['student', 'listener', 'trial'].includes(u.role));
+      } else if (navigation.usersRoleFilter === 'teachers') {
+        filtered = filtered.filter(u => ['teacher', 'trial_teacher'].includes(u.role));
+      } else if (navigation.usersRoleFilter === 'admins') {
+        filtered = filtered.filter(u => u.role === 'admin');
+      }
+
+      return filtered;
+    }, [userManagement.users, navigation.usersRoleFilter]);
+
+    // Filter by search term
+    const filteredUsers = useMemo(() => {
+      return roleFilteredUsers.filter(user =>
+        user.name?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
+        user.role?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase())
+      );
+    }, [roleFilteredUsers, navigation.usersSearchTerm]);
 
     return (
       <>
@@ -790,10 +730,62 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
           </div>
 
+          {/* Role Filter Tabs */}
+          <div className="flex gap-2 mb-4 flex-wrap">
+            <button
+              onClick={() => navigation.setUsersRoleFilter('all')}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                navigation.usersRoleFilter === 'all'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              <Users size={16} className="inline mr-2" strokeWidth={2} />
+              All Users ({userManagement.users.length})
+            </button>
+            <button
+              onClick={() => navigation.setUsersRoleFilter('students')}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                navigation.usersRoleFilter === 'students'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              <GraduationCap size={16} className="inline mr-2" strokeWidth={2} />
+              Students ({stats.students})
+            </button>
+            <button
+              onClick={() => navigation.setUsersRoleFilter('teachers')}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                navigation.usersRoleFilter === 'teachers'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              <UserCog size={16} className="inline mr-2" strokeWidth={2} />
+              Teachers ({stats.teachers})
+            </button>
+            <button
+              onClick={() => navigation.setUsersRoleFilter('admins')}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                navigation.usersRoleFilter === 'admins'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              <Crown size={16} className="inline mr-2" strokeWidth={2} />
+              Admins ({stats.admins})
+            </button>
+          </div>
+
+          {/* Search Bar with View Mode Toggle */}
           <SearchBar
-            value={userManagement.searchTerm}
-            onChange={userManagement.setSearchTerm}
+            value={navigation.usersSearchTerm}
+            onChange={navigation.setUsersSearchTerm}
             placeholder="Search users..."
+            viewMode={navigation.usersViewMode}
+            onViewModeChange={navigation.setUsersViewMode}
+            viewModes={['table', 'grid', 'list']}
             className="mb-6"
           />
 
@@ -808,19 +800,21 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
           )}
 
-          <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl overflow-hidden">
-            {sessionStorage.getItem('viewAsReturnUserId') && !navigation.hasProcessedReturn && userManagement.users.length === 0 ? (
-              <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
-                <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
-                <p>Loading...</p>
-              </div>
-            ) : userManagement.filteredUsers.length === 0 ? (
-              <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
-                <p>No users found with selected filters</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
+          {/* TABLE VIEW */}
+          {navigation.usersViewMode === 'table' && (
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl overflow-hidden">
+              {sessionStorage.getItem('viewAsReturnUserId') && !navigation.hasProcessedReturn && userManagement.users.length === 0 ? (
+                <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
+                  <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
+                  <p>Loading...</p>
+                </div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+                  <p>No users found with selected filters</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
                   <thead className="bg-tertiary-50 dark:bg-tertiary-900 border-b-2 border-primary-200 dark:border-primary-800">
                     <tr>
                       <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide min-w-[200px]">
@@ -928,7 +922,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {userManagement.filteredUsers.map(userItem => (
+                    {filteredUsers.map(userItem => (
                       <tr
                         key={userItem.id}
                         className={`border-b border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors ${
@@ -1003,6 +997,52 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             )}
           </div>
+        )}
+
+          {/* GRID VIEW */}
+          {navigation.usersViewMode === 'grid' && (
+            filteredUsers.length === 0 ? (
+              <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+                <p>No users found with selected filters</p>
+              </div>
+            ) : (
+              <div className="users-grid">
+                {filteredUsers.map(userItem => (
+                  <UserCard
+                    key={userItem.id}
+                    user={userItem}
+                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
+                    onView={handleViewUserProfile}
+                    onDelete={handleDeleteUser}
+                    isAdmin={isAdmin}
+                  />
+                ))}
+              </div>
+            )
+          )}
+
+          {/* LIST VIEW */}
+          {navigation.usersViewMode === 'list' && (
+            filteredUsers.length === 0 ? (
+              <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+                <p>No users found with selected filters</p>
+              </div>
+            ) : (
+              <div className="users-list">
+                {filteredUsers.map(userItem => (
+                  <UserCard
+                    key={userItem.id}
+                    user={userItem}
+                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
+                    onView={handleViewUserProfile}
+                    onDelete={handleDeleteUser}
+                    isAdmin={isAdmin}
+                  />
+                ))}
+              </div>
+            )
+          )}
+
         </div>
 
       </DashboardLayout>

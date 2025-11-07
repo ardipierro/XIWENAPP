@@ -1,4 +1,4 @@
-import { Search, X, Grid, List } from 'lucide-react';
+import { Search, X, Grid, List, Table } from 'lucide-react';
 
 /**
  * SearchBar - Barra de búsqueda reutilizable con selector de vista opcional
@@ -8,8 +8,9 @@ import { Search, X, Grid, List } from 'lucide-react';
  * @param {Function} props.onChange - Handler para cambios en el input
  * @param {string} [props.placeholder='Buscar...'] - Placeholder del input
  * @param {string} [props.className=''] - Clases adicionales
- * @param {string} [props.viewMode] - Modo de vista actual ('grid' o 'list')
+ * @param {string} [props.viewMode] - Modo de vista actual ('table', 'grid' o 'list')
  * @param {Function} [props.onViewModeChange] - Handler para cambiar modo de vista
+ * @param {Array<string>} [props.viewModes=['grid', 'list']] - Modos de vista disponibles
  */
 function SearchBar({
   value,
@@ -17,7 +18,8 @@ function SearchBar({
   placeholder = 'Buscar...',
   className = '',
   viewMode,
-  onViewModeChange
+  onViewModeChange,
+  viewModes = ['grid', 'list']
 }) {
   const handleClear = () => {
     onChange('');
@@ -93,20 +95,33 @@ function SearchBar({
 
       {/* View Toggle buttons */}
       <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
-        <button
-          className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-          onClick={() => onViewModeChange('grid')}
-          title="Vista de cuadrícula"
-        >
-          <Grid size={18} />
-        </button>
-        <button
-          className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-          onClick={() => onViewModeChange('list')}
-          title="Vista de lista"
-        >
-          <List size={18} />
-        </button>
+        {viewModes.includes('table') && (
+          <button
+            className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('table')}
+            title="Vista de tabla"
+          >
+            <Table size={18} />
+          </button>
+        )}
+        {viewModes.includes('grid') && (
+          <button
+            className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('grid')}
+            title="Vista de cuadrícula"
+          >
+            <Grid size={18} />
+          </button>
+        )}
+        {viewModes.includes('list') && (
+          <button
+            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => onViewModeChange('list')}
+            title="Vista de lista"
+          >
+            <List size={18} />
+          </button>
+        )}
       </div>
     </div>
   );
