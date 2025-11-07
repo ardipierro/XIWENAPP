@@ -511,12 +511,29 @@ const ExerciseMakerESL = ({ isOpen, onClose }) => {
     context: ''
   });
 
+  // AI Provider state
+  const [selectedProvider, setSelectedProvider] = useState(AIService.getCurrentProvider() || 'openai');
+  const [availableProviders, setAvailableProviders] = useState([]);
+
   // UI state
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
   const [generatedText, setGeneratedText] = useState('');
   const [exercises, setExercises] = useState([]);
   const [completedExercises, setCompletedExercises] = useState({});
+
+  // Load available providers on mount
+  useEffect(() => {
+    const providers = AIService.getAvailableProviders();
+    setAvailableProviders(providers);
+  }, []);
+
+  // Handle provider change
+  const handleProviderChange = (providerName) => {
+    setSelectedProvider(providerName);
+    AIService.setProvider(providerName);
+    setError(null); // Clear any previous errors
+  };
 
   // Options for dropdowns
   const themeOptions = [
@@ -642,6 +659,72 @@ const ExerciseMakerESL = ({ isOpen, onClose }) => {
       closeOnOverlayClick={!isGenerating}
     >
       <div className="space-y-6">
+        {/* AI Provider Selector */}
+        <div className="space-y-2">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Proveedor de IA
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {availableProviders.map((provider) => (
+              <button
+                key={provider.name}
+                onClick={() => handleProviderChange(provider.name)}
+                disabled={!provider.configured}
+                className={`
+                  relative flex flex-col items-center gap-2 p-4 rounded-xl border-2
+                  transition-all duration-200
+                  ${selectedProvider === provider.name
+                    ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 shadow-lg'
+                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+                  }
+                  ${!provider.configured ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:scale-[0.98]'}
+                `}
+                title={!provider.configured ? `${provider.label} no está configurado` : `Usar ${provider.label}`}
+              >
+                {/* Provider Icon & Name */}
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{provider.icon}</span>
+                  <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">
+                    {provider.label}
+                  </span>
+                </div>
+
+                {/* Model Badge */}
+                <span className="text-xs text-gray-600 dark:text-gray-400 font-mono">
+                  {provider.model}
+                </span>
+
+                {/* Status Badge */}
+                <div className="absolute top-2 right-2">
+                  {provider.configured ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
+                      <Check className="w-3 h-3" />
+                      OK
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-semibold">
+                      <X className="w-3 h-3" />
+                      Sin configurar
+                    </span>
+                  )}
+                </div>
+
+                {/* Selected Indicator */}
+                {selectedProvider === provider.name && provider.configured && (
+                  <div className="absolute inset-0 rounded-xl border-2 border-purple-500 pointer-events-none">
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            💡 Configura los proveedores en tu archivo .env con las variables VITE_OPENAI_API_KEY, VITE_GEMINI_API_KEY, VITE_GROK_API_KEY
+          </p>
+        </div>
+
         {/* Form Section */}
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

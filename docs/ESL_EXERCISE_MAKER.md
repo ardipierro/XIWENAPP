@@ -4,7 +4,8 @@ Componente modal para generar ejercicios de español como lengua extranjera (ESL
 
 ## ✨ Características
 
-- 🤖 **Generación con IA**: Usa OpenAI para crear ejercicios personalizados
+- 🤖 **Múltiples Proveedores de IA**: Soporta OpenAI (ChatGPT), Google Gemini y xAI Grok
+- 🔄 **Cambio Dinámico**: Selector visual para cambiar entre proveedores al vuelo
 - 🎨 **Mobile First**: Diseño responsive con Tailwind CSS
 - 🎭 **4 Tipos de Ejercicios**:
   - **Gap-fill**: Rellenar espacios en blanco
@@ -20,23 +21,48 @@ Componente modal para generar ejercicios de español como lengua extranjera (ESL
 
 ### 1. Variables de Entorno
 
-Añade tu API key de OpenAI en `.env`:
+Configura uno o más proveedores de IA en tu archivo `.env`:
 
 ```bash
+# OpenAI (ChatGPT)
 VITE_OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxx
-VITE_OPENAI_MODEL=gpt-4o-mini  # o gpt-4o, gpt-3.5-turbo
+VITE_OPENAI_MODEL=gpt-4o-mini
+
+# Google Gemini
+VITE_GEMINI_API_KEY=your-gemini-key
+VITE_GEMINI_MODEL=gemini-2.0-flash-exp
+
+# xAI Grok
+VITE_GROK_API_KEY=your-grok-key
+VITE_GROK_MODEL=grok-2-latest
+
+# Proveedor por defecto
+VITE_AI_PROVIDER=openai
 ```
 
-> 💡 **Obtener API Key**: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+### Obtener API Keys
+
+| Proveedor | URL | Notas |
+|-----------|-----|-------|
+| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | $5 gratis para nuevos usuarios |
+| **Gemini** | [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) | Gratis con límites generosos |
+| **Grok** | [console.x.ai](https://console.x.ai) | Beta, requiere cuenta de X |
+
+> 💡 **Consejo**: Puedes usar solo un proveedor o configurar varios para tener opciones de respaldo
 
 ### 2. Archivos Involucrados
 
 ```
 src/
 ├── services/
-│   └── AIService.js              # Servicio de OpenAI
+│   ├── AIService.js              # Servicio multi-proveedor (factory pattern)
+│   └── providers/
+│       ├── BaseAIProvider.js     # Clase base abstracta
+│       ├── OpenAIProvider.js     # Implementación OpenAI
+│       ├── GeminiProvider.js     # Implementación Google Gemini
+│       └── GrokProvider.js       # Implementación xAI Grok
 └── components/
-    └── ExerciseMakerESL.jsx      # Componente modal principal
+    └── ExerciseMakerESL.jsx      # Componente modal con selector de proveedores
 ```
 
 ## 🚀 Uso Básico
@@ -277,6 +303,68 @@ if (result.success) {
 ```javascript
 const test = await AIService.testConnection();
 console.log(test.success); // true si la API key es válida
+```
+
+### AIService.setProvider(providerName)
+
+Cambia el proveedor de IA activo:
+
+```javascript
+// Cambiar a Gemini
+AIService.setProvider('gemini');
+
+// Cambiar a Grok
+AIService.setProvider('grok');
+
+// Cambiar a OpenAI
+AIService.setProvider('openai');
+```
+
+### AIService.getCurrentProvider()
+
+Obtiene el proveedor actual:
+
+```javascript
+const current = AIService.getCurrentProvider();
+console.log(current); // 'openai', 'gemini', o 'grok'
+```
+
+### AIService.getAvailableProviders()
+
+Obtiene lista de proveedores con su estado de configuración:
+
+```javascript
+const providers = AIService.getAvailableProviders();
+// [
+//   {
+//     name: 'openai',
+//     label: 'OpenAI (ChatGPT)',
+//     icon: '🤖',
+//     model: 'gpt-4o-mini',
+//     configured: true
+//   },
+//   {
+//     name: 'gemini',
+//     label: 'Google Gemini',
+//     icon: '✨',
+//     model: 'gemini-2.0-flash-exp',
+//     configured: false
+//   },
+//   ...
+// ]
+```
+
+### AIService.testAllProviders()
+
+Prueba conexión de todos los proveedores:
+
+```javascript
+const results = await AIService.testAllProviders();
+// [
+//   { provider: 'openai', success: true },
+//   { provider: 'gemini', success: false, error: 'API key no configurada' },
+//   { provider: 'grok', success: true }
+// ]
 ```
 
 ## 🚧 Troubleshooting
