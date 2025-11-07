@@ -46,7 +46,7 @@ exports.generateMonthlyFees = functions.pubsub
   .schedule('0 0 1 * *')
   .timeZone('America/Argentina/Buenos_Aires')
   .onRun(async (context) => {
-    console.log('Starting monthly fee generation...');
+    functions.logger.info('Starting monthly fee generation...');
 
     const now = Timestamp.now();
     const currentDate = new Date();
@@ -64,7 +64,7 @@ exports.generateMonthlyFees = functions.pubsub
         .where('status', '==', 'active')
         .get();
 
-      console.log(`Found ${enrollmentsSnapshot.size} active enrollments`);
+      functions.logger.info(`Found ${enrollmentsSnapshot.size} active enrollments`);
 
       const batch = db.batch();
       let feesCreated = 0;
@@ -82,7 +82,7 @@ exports.generateMonthlyFees = functions.pubsub
             .get();
 
           if (!existingFeeQuery.empty) {
-            console.log(`Fee already exists for student ${enrollment.studentId} - ${currentMonth}`);
+            functions.logger.info(`Fee already exists for student ${enrollment.studentId} - ${currentMonth}`);
             continue;
           }
 
@@ -122,7 +122,7 @@ exports.generateMonthlyFees = functions.pubsub
           feesCreated++;
 
         } catch (error) {
-          console.error(`Error creating fee for enrollment ${enrollmentDoc.id}:`, error);
+          functions.logger.error(`Error creating fee for enrollment ${enrollmentDoc.id}:`, error);
           errors.push({
             enrollmentId: enrollmentDoc.id,
             error: error.message
@@ -133,13 +133,13 @@ exports.generateMonthlyFees = functions.pubsub
       // Commit batch
       if (feesCreated > 0) {
         await batch.commit();
-        console.log(`✅ Successfully created ${feesCreated} monthly fees for ${currentMonth}`);
+        functions.logger.info(`✅ Successfully created ${feesCreated} monthly fees for ${currentMonth}`);
       } else {
-        console.log(`ℹ️ No new fees to create for ${currentMonth}`);
+        functions.logger.info(`ℹ️ No new fees to create for ${currentMonth}`);
       }
 
       if (errors.length > 0) {
-        console.error(`❌ Errors occurred: ${errors.length}`, errors);
+        functions.logger.error(`❌ Errors occurred: ${errors.length}`, errors);
       }
 
       return {
@@ -150,7 +150,7 @@ exports.generateMonthlyFees = functions.pubsub
       };
 
     } catch (error) {
-      console.error('Error in generateMonthlyFees:', error);
+      functions.logger.error('Error in generateMonthlyFees:', error);
       throw error;
     }
   });
@@ -165,7 +165,7 @@ exports.checkOverdueFees = functions.pubsub
   .schedule('0 2 * * *')
   .timeZone('America/Argentina/Buenos_Aires')
   .onRun(async (context) => {
-    console.log('Checking for overdue fees...');
+    functions.logger.info('Checking for overdue fees...');
 
     const now = Timestamp.now();
     const today = new Date();
@@ -178,7 +178,7 @@ exports.checkOverdueFees = functions.pubsub
         .where('dueDate', '<', Timestamp.fromDate(today))
         .get();
 
-      console.log(`Found ${overdueFeesSnapshot.size} potentially overdue fees`);
+      functions.logger.info(`Found ${overdueFeesSnapshot.size} potentially overdue fees`);
 
       const batch = db.batch();
       let feesUpdated = 0;
@@ -207,9 +207,9 @@ exports.checkOverdueFees = functions.pubsub
 
       if (feesUpdated > 0) {
         await batch.commit();
-        console.log(`✅ Updated ${feesUpdated} overdue fees`);
+        functions.logger.info(`✅ Updated ${feesUpdated} overdue fees`);
       } else {
-        console.log(`ℹ️ No overdue fees to update`);
+        functions.logger.info(`ℹ️ No overdue fees to update`);
       }
 
       return {
@@ -218,7 +218,7 @@ exports.checkOverdueFees = functions.pubsub
       };
 
     } catch (error) {
-      console.error('Error in checkOverdueFees:', error);
+      functions.logger.error('Error in checkOverdueFees:', error);
       throw error;
     }
   });
@@ -239,7 +239,7 @@ exports.createMatriculaPayment = functions.https.onCall(async (data, context) =>
   const { enrollmentId, returnUrl } = data;
   const userId = context.auth.uid;
 
-  console.log('Creating matricula payment preference:', { enrollmentId, userId });
+  functions.logger.info('Creating matricula payment preference:', { enrollmentId, userId });
 
   try {
     // Get enrollment
@@ -297,7 +297,7 @@ exports.createMatriculaPayment = functions.https.onCall(async (data, context) =>
 
     const response = await mp.preferences.create(preference);
 
-    console.log('Matricula preference created:', response.body.id);
+    functions.logger.info('Matricula preference created:', response.body.id);
 
     return {
       success: true,
@@ -307,7 +307,7 @@ exports.createMatriculaPayment = functions.https.onCall(async (data, context) =>
     };
 
   } catch (error) {
-    console.error('Error creating matricula payment:', error);
+    functions.logger.error('Error creating matricula payment:', error);
 
     if (error instanceof functions.https.HttpsError) {
       throw error;
@@ -329,7 +329,7 @@ exports.createMonthlyFeePayment = functions.https.onCall(async (data, context) =
   const { feeId, returnUrl } = data;
   const userId = context.auth.uid;
 
-  console.log('Creating monthly fee payment preference:', { feeId, userId });
+  functions.logger.info('Creating monthly fee payment preference:', { feeId, userId });
 
   try {
     // Get fee
@@ -401,7 +401,7 @@ exports.createMonthlyFeePayment = functions.https.onCall(async (data, context) =
 
     const response = await mp.preferences.create(preference);
 
-    console.log('Monthly fee preference created:', response.body.id);
+    functions.logger.info('Monthly fee preference created:', response.body.id);
 
     return {
       success: true,
@@ -411,7 +411,7 @@ exports.createMonthlyFeePayment = functions.https.onCall(async (data, context) =
     };
 
   } catch (error) {
-    console.error('Error creating monthly fee payment:', error);
+    functions.logger.error('Error creating monthly fee payment:', error);
 
     if (error instanceof functions.https.HttpsError) {
       throw error;
@@ -433,7 +433,7 @@ exports.createCoursePayment = functions.https.onCall(async (data, context) => {
   const { courseId, returnUrl } = data;
   const userId = context.auth.uid;
 
-  console.log('Creating course payment preference:', { courseId, userId });
+  functions.logger.info('Creating course payment preference:', { courseId, userId });
 
   try {
     // Get course
@@ -496,7 +496,7 @@ exports.createCoursePayment = functions.https.onCall(async (data, context) => {
 
     const response = await mp.preferences.create(preference);
 
-    console.log('Course payment preference created:', response.body.id);
+    functions.logger.info('Course payment preference created:', response.body.id);
 
     return {
       success: true,
@@ -506,7 +506,7 @@ exports.createCoursePayment = functions.https.onCall(async (data, context) => {
     };
 
   } catch (error) {
-    console.error('Error creating course payment:', error);
+    functions.logger.error('Error creating course payment:', error);
 
     if (error instanceof functions.https.HttpsError) {
       throw error;
@@ -530,7 +530,7 @@ exports.applyFamilyDiscount = functions.https.onCall(async (data, context) => {
 
   const { guardianId, studentIds } = data;
 
-  console.log('Applying family discount:', { guardianId, studentCount: studentIds.length });
+  functions.logger.info('Applying family discount:', { guardianId, studentCount: studentIds.length });
 
   try {
     const batch = db.batch();
@@ -544,7 +544,7 @@ exports.applyFamilyDiscount = functions.https.onCall(async (data, context) => {
       const studentDoc = await db.collection('users').doc(studentId).get();
 
       if (!studentDoc.exists) {
-        console.warn(`Student ${studentId} not found, skipping`);
+        functions.logger.warn(`Student ${studentId} not found, skipping`);
         continue;
       }
 
@@ -594,7 +594,7 @@ exports.applyFamilyDiscount = functions.https.onCall(async (data, context) => {
 
     await batch.commit();
 
-    console.log(`✅ Family discount applied to ${students.length} students`);
+    functions.logger.info(`✅ Family discount applied to ${students.length} students`);
 
     return {
       success: true,
@@ -603,7 +603,7 @@ exports.applyFamilyDiscount = functions.https.onCall(async (data, context) => {
     };
 
   } catch (error) {
-    console.error('Error applying family discount:', error);
+    functions.logger.error('Error applying family discount:', error);
     throw new functions.https.HttpsError('internal', error.message);
   }
 });
@@ -627,7 +627,7 @@ exports.applyScholarship = functions.https.onCall(async (data, context) => {
     endDate
   } = data;
 
-  console.log('Applying scholarship:', { studentId, percentage, reason });
+  functions.logger.info('Applying scholarship:', { studentId, percentage, reason });
 
   try {
     // Get student
@@ -675,7 +675,7 @@ exports.applyScholarship = functions.https.onCall(async (data, context) => {
       }
     }
 
-    console.log(`✅ Scholarship ${percentage}% applied to student ${studentId}`);
+    functions.logger.info(`✅ Scholarship ${percentage}% applied to student ${studentId}`);
 
     return {
       success: true,
@@ -683,7 +683,7 @@ exports.applyScholarship = functions.https.onCall(async (data, context) => {
     };
 
   } catch (error) {
-    console.error('Error applying scholarship:', error);
+    functions.logger.error('Error applying scholarship:', error);
 
     if (error instanceof functions.https.HttpsError) {
       throw error;
@@ -705,7 +705,7 @@ exports.mercadopagoWebhook = functions.https.onRequest(async (req, res) => {
   const topic = req.query.topic || req.body.topic || req.body.type;
   const id = req.query.id || req.body.data?.id || req.body.id;
 
-  console.log('MercadoPago webhook received:', { topic, id, body: JSON.stringify(req.body) });
+  functions.logger.info('MercadoPago webhook received:', { topic, id, body: JSON.stringify(req.body) });
 
   if (topic === 'payment' && id) {
     try {
@@ -716,7 +716,7 @@ exports.mercadopagoWebhook = functions.https.onRequest(async (req, res) => {
       const payment = await mp.payment.get(id);
       const paymentData = payment.body;
 
-      console.log('Payment data retrieved:', {
+      functions.logger.info('Payment data retrieved:', {
         id: paymentData.id,
         status: paymentData.status,
         amount: paymentData.transaction_amount,
@@ -760,7 +760,7 @@ exports.mercadopagoWebhook = functions.https.onRequest(async (req, res) => {
             updatedAt: FieldValue.serverTimestamp()
           });
 
-          console.log(`✅ Matricula paid for enrollment ${enrollmentId}`);
+          functions.logger.info(`✅ Matricula paid for enrollment ${enrollmentId}`);
 
         } else if (type === 'monthly_fee') {
           const feeId = paymentData.metadata.fee_id;
@@ -775,7 +775,7 @@ exports.mercadopagoWebhook = functions.https.onRequest(async (req, res) => {
             updatedAt: FieldValue.serverTimestamp()
           });
 
-          console.log(`✅ Monthly fee paid: ${feeId}`);
+          functions.logger.info(`✅ Monthly fee paid: ${feeId}`);
 
         } else if (type === 'course_purchase') {
           const courseId = paymentData.metadata.course_id;
@@ -796,7 +796,7 @@ exports.mercadopagoWebhook = functions.https.onRequest(async (req, res) => {
             studentCount: FieldValue.increment(1)
           });
 
-          console.log(`✅ Course access granted: ${courseId} to ${studentId}`);
+          functions.logger.info(`✅ Course access granted: ${courseId} to ${studentId}`);
         }
       }
 
@@ -806,11 +806,11 @@ exports.mercadopagoWebhook = functions.https.onRequest(async (req, res) => {
       res.status(200).send('OK');
 
     } catch (error) {
-      console.error('Error processing webhook:', error);
+      functions.logger.error('Error processing webhook:', error);
       res.status(500).send('Error');
     }
   } else {
-    console.log('Webhook ignored - topic:', topic);
+    functions.logger.info('Webhook ignored - topic:', topic);
     res.status(200).send('OK');
   }
 });
@@ -870,7 +870,7 @@ exports.checkSubscriptionStatus = functions.https.onCall(async (data, context) =
     };
 
   } catch (error) {
-    console.error('Error checking subscription status:', error);
+    functions.logger.error('Error checking subscription status:', error);
     throw new functions.https.HttpsError('internal', error.message);
   }
 });
@@ -906,7 +906,7 @@ exports.getPaymentHistory = functions.https.onCall(async (data, context) => {
     };
 
   } catch (error) {
-    console.error('Error getting payment history:', error);
+    functions.logger.error('Error getting payment history:', error);
     throw new functions.https.HttpsError('internal', error.message);
   }
 });
