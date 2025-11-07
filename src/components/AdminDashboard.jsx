@@ -728,11 +728,49 @@ function AdminDashboard({ user, userRole, onLogout }) {
     }
 
     // Filter by search term
-    const filteredUsers = roleFilteredUsers.filter(user =>
+    let filteredUsers = roleFilteredUsers.filter(user =>
       user.name?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
       user.role?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase())
     );
+
+    // Apply sorting
+    filteredUsers = [...filteredUsers].sort((a, b) => {
+      let aVal, bVal;
+
+      switch (userManagement.sortField) {
+        case 'name':
+          aVal = a.name?.toLowerCase() || '';
+          bVal = b.name?.toLowerCase() || '';
+          break;
+        case 'email':
+          aVal = a.email?.toLowerCase() || '';
+          bVal = b.email?.toLowerCase() || '';
+          break;
+        case 'role':
+          aVal = a.role || '';
+          bVal = b.role || '';
+          break;
+        case 'status':
+          aVal = a.status || '';
+          bVal = b.status || '';
+          break;
+        case 'credits':
+          aVal = a.credits || 0;
+          bVal = b.credits || 0;
+          break;
+        case 'createdAt':
+          aVal = a.createdAt?.toMillis?.() || 0;
+          bVal = b.createdAt?.toMillis?.() || 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aVal < bVal) return userManagement.sortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return userManagement.sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
 
     return (
       <>
