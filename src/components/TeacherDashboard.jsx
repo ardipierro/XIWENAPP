@@ -833,16 +833,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-<<<<<<< HEAD
   // Renderizar Gestión de Usuarios/Alumnos - CON Layout
   if (navigation.currentScreen === 'users') {
-    if (sessionStorage.getItem('viewAsReturning') === 'true' && !navigation.hasProcessedReturn) {
-=======
-  // Renderizar Usuarios/Alumnos - CON Layout
-  if (currentScreen === 'users') {
     // Mostrar loading fullscreen si estamos procesando retorno de Ver Como
-    if (sessionStorage.getItem('viewAsReturning') === 'true' && !hasProcessedReturn) {
->>>>>>> origin/claude/git-project-access-011CUooJ93toWrp9EMmiX5GH
+    if (sessionStorage.getItem('viewAsReturning') === 'true' && !navigation.hasProcessedReturn) {
       return (
         <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
           <div className="loading-state" style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
