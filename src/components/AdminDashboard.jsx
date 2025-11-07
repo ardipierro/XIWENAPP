@@ -38,7 +38,8 @@ import {
   Rocket,
   TrendingUp,
   ClipboardList,
-  DollarSign
+  DollarSign,
+  Zap
 } from 'lucide-react';
 import {
   loadStudents,
@@ -1139,6 +1140,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
       onClick: () => navigation.setCurrentScreen('setup'),
       createLabel: "Play Game",
       onCreateClick: () => navigation.setCurrentScreen('setup')
+    },
+    {
+      id: 'liveGame',
+      icon: Zap,
+      title: "Live Game",
+      count: 0,
+      countLabel: "active",
+      onClick: () => navigation.setCurrentScreen('liveGame'),
+      createLabel: "Start Live Game",
+      onCreateClick: () => navigation.setCurrentScreen('liveGame')
     },
     {
       id: 'analytics',

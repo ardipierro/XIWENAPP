@@ -36,7 +36,8 @@ import {
   Grid3x3,
   List,
   CalendarDays,
-  CheckSquare
+  CheckSquare,
+  Zap
 } from 'lucide-react';
 import {
   loadStudents,
@@ -1550,6 +1551,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         navigation.setOpenClassModal(true);
         navigation.setCurrentScreen('classes');
       }
+    },
+    {
+      id: 'liveGame',
+      icon: Zap,
+      title: "Juego en Vivo",
+      count: 0,
+      countLabel: "activo",
+      onClick: () => navigation.setCurrentScreen('liveGame'),
+      createLabel: "Iniciar Juego",
+      onCreateClick: () => navigation.setCurrentScreen('liveGame')
     },
     {
       id: 'testCollab',
