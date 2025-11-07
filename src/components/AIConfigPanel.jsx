@@ -25,6 +25,7 @@ function AIConfigPanel() {
   const [loading, setLoading] = useState(true);
   const [selectedFunction, setSelectedFunction] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
@@ -87,6 +88,11 @@ function AIConfigPanel() {
 
   const handleSaveFunction = async (functionId, functionConfig) => {
     try {
+      console.log('=== SAVING CONFIG ===');
+      console.log('Current config:', config);
+      console.log('Function ID:', functionId);
+      console.log('Function config:', functionConfig);
+
       const updatedConfig = {
         ...config,
         functions: {
@@ -95,14 +101,20 @@ function AIConfigPanel() {
         }
       };
 
+      console.log('Updated config:', updatedConfig);
+
       await saveAIConfig(updatedConfig);
       setConfig(updatedConfig);
+
+      console.log('Config saved, state updated');
+
       setSuccess('Configuración guardada exitosamente');
       logger.info('AI function config saved:', functionId);
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
+      console.error('Save error:', err);
       logger.error('Failed to save AI function config:', err);
       throw err;
     }
@@ -160,6 +172,13 @@ function AIConfigPanel() {
 
   const filteredFunctions = getFilteredFunctions();
 
+  console.log('=== AIConfigPanel RENDER ===');
+  console.log('Config exists:', !!config);
+  console.log('Config.functions count:', config?.functions ? Object.keys(config.functions).length : 0);
+  console.log('Filtered functions:', filteredFunctions.length);
+  console.log('Modal open:', modalOpen);
+  console.log('Selected function:', selectedFunction?.id);
+
   return (
     <div className="ai-config-panel">
       {/* Header */}
@@ -168,8 +187,29 @@ function AIConfigPanel() {
         title="Configuración de IA"
         actionLabel="+ Crear Nueva Configuración"
         onAction={() => {
-          // TODO: Implementar creación de nueva función
-          logger.info('Create new AI function clicked');
+          // Crear una función template vacía
+          const newFunction = {
+            id: `custom_${Date.now()}`,
+            name: 'Nueva Función de IA',
+            description: 'Configura esta función personalizada',
+            icon: Settings,
+            category: 'custom',
+            defaultConfig: {
+              enabled: false,
+              provider: '',
+              model: '',
+              apiKey: '',
+              systemPrompt: '',
+              parameters: {
+                temperature: 0.7,
+                maxTokens: 2000,
+                topP: 1
+              }
+            }
+          };
+          setSelectedFunction(newFunction);
+          setIsCreatingNew(true);
+          setModalOpen(true);
         }}
       />
 
@@ -294,11 +334,15 @@ function AIConfigPanel() {
         <AIFunctionConfigModal
           isOpen={modalOpen}
           onClose={() => {
+            console.log('=== MODAL CLOSING ===');
+            console.log('Config before close:', config);
             setModalOpen(false);
             setSelectedFunction(null);
+            setIsCreatingNew(false);
+            console.log('Modal closed, states reset');
           }}
           aiFunction={selectedFunction}
-          initialConfig={config.functions[selectedFunction.id]}
+          initialConfig={config.functions[selectedFunction.id] || selectedFunction.defaultConfig}
           onSave={handleSaveFunction}
         />,
         document.body
