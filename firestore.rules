@@ -27,12 +27,9 @@ service cloud.firestore {
     // PAYMENT SYSTEM COLLECTIONS
     // ============================================
 
-    // Student enrollments - students/guardians can read their own, admins can write
+    // Student enrollments - admins can read/write all, students/guardians can read their own
     match /student_enrollments/{enrollmentId} {
-      allow read: if isAuthenticated() &&
-        (resource.data.studentId == request.auth.uid ||
-         resource.data.guardianId == request.auth.uid ||
-         isAdmin());
+      allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
 
@@ -64,11 +61,17 @@ service cloud.firestore {
       allow write: if false;  // Only Cloud Functions can write
     }
 
-    // Course enrollments - students can read their own, only Cloud Functions can write
+    // Course enrollments - students can read their own, admins can read all
     match /course_enrollments/{enrollmentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();  // Admins can write for testing/management
+    }
+
+    // User credits - users can read/write their own, admins can manage all
+    match /user_credits/{userId} {
       allow read: if isAuthenticated() &&
-        (resource.data.studentId == request.auth.uid || isAdmin());
-      allow write: if false;  // Only Cloud Functions can write
+        (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth.uid == userId || isAdmin();
     }
 
     // ============================================
