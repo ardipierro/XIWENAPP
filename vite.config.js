@@ -112,26 +112,19 @@ export default defineConfig({
     // Rollup optimizations
     rollupOptions: {
       output: {
-        // Chunking estratégico - Mobile First
+        // Chunking estratégico - Mobile First (simplificado para evitar circular deps)
         manualChunks: (id) => {
           // React core (crítico - cargar primero)
-          if (id.includes('node_modules/react/') ||
-              id.includes('node_modules/react-dom/') ||
-              id.includes('node_modules/react-router-dom/')) {
-            return 'react-core';
+          if (id.includes('node_modules/react') ||
+              id.includes('node_modules/react-dom') ||
+              id.includes('node_modules/react-router') ||
+              id.includes('node_modules/scheduler')) {
+            return 'react-vendor';
           }
 
-          // Firebase core (crítico - cargar temprano)
-          if (id.includes('firebase/app') ||
-              id.includes('firebase/auth')) {
-            return 'firebase-core';
-          }
-
-          // Firebase adicional (lazy load)
-          if (id.includes('firebase/firestore') ||
-              id.includes('firebase/storage') ||
-              id.includes('firebase/analytics')) {
-            return 'firebase-services';
+          // Firebase completo (evitar split que causa circular deps)
+          if (id.includes('firebase') || id.includes('@firebase')) {
+            return 'firebase-vendor';
           }
 
           // Excalidraw (muy pesado - lazy load separado)
@@ -144,24 +137,11 @@ export default defineConfig({
             return 'icons';
           }
 
-          if (id.includes('recharts')) {
+          if (id.includes('recharts') || id.includes('d3-')) {
             return 'charts';
           }
 
-          // Dashboards (ya lazy loaded por React.lazy, pero separar chunks)
-          if (id.includes('components/AdminDashboard')) {
-            return 'admin';
-          }
-
-          if (id.includes('components/TeacherDashboard')) {
-            return 'teacher';
-          }
-
-          if (id.includes('components/StudentDashboard')) {
-            return 'student';
-          }
-
-          // Vendor libs (otras librerías)
+          // Otras librerías node_modules
           if (id.includes('node_modules/')) {
             return 'vendor';
           }
