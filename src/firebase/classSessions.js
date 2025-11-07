@@ -206,18 +206,25 @@ export async function getClassSession(sessionId) {
  */
 export async function getTeacherSessions(teacherId) {
   try {
+    // Query sin orderBy para evitar requisito de índice compuesto
     const q = query(
       collection(db, 'class_sessions'),
       where('teacherId', '==', teacherId),
-      where('active', '==', true),
-      orderBy('createdAt', 'desc')
+      where('active', '==', true)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    const sessions = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Ordenar en el cliente por createdAt (desc)
+    return sessions.sort((a, b) => {
+      const timeA = a.createdAt?.toMillis?.() || 0;
+      const timeB = b.createdAt?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
   } catch (error) {
     logger.error('❌ Error obteniendo sesiones del profesor:', error);
     return [];
