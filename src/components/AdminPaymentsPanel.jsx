@@ -72,7 +72,6 @@ function AdminPaymentsPanel() {
 
       logger.info('Loading admin payment data');
 
-      // Load in parallel
       const [statsResult, enrollmentsResult, feesResult, paymentsResult] = await Promise.all([
         getPaymentStatistics(),
         getAllEnrollments({ status: 'active' }),
@@ -146,13 +145,13 @@ function AdminPaymentsPanel() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
           Gestión de Pagos
         </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
           Panel de control de ingresos y cobros
         </p>
       </div>
@@ -190,10 +189,10 @@ function AdminPaymentsPanel() {
             title="Ingresos Totales"
             variant="elevated"
           >
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            <p className="text-3xl font-bold text-zinc-900 dark:text-white">
               {formatCurrency(stats.payments.totalRevenue)}
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
               {stats.payments.approved} pagos aprobados
             </p>
           </BaseCard>
@@ -203,10 +202,10 @@ function AdminPaymentsPanel() {
             title="Inscripciones Activas"
             variant="elevated"
           >
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            <p className="text-3xl font-bold text-zinc-900 dark:text-white">
               {stats.enrollments.active}
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
               de {stats.enrollments.total} totales
             </p>
           </BaseCard>
@@ -216,7 +215,7 @@ function AdminPaymentsPanel() {
             title="Cuotas Pendientes"
             variant="elevated"
           >
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            <p className="text-3xl font-bold text-zinc-900 dark:text-white">
               {stats.monthlyFees.pending + stats.monthlyFees.overdue}
             </p>
             <p className="text-sm text-red-600 dark:text-red-400 mt-1">
@@ -229,10 +228,10 @@ function AdminPaymentsPanel() {
             title="Recaudado Este Mes"
             variant="elevated"
           >
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            <p className="text-3xl font-bold text-zinc-900 dark:text-white">
               {formatCurrency(stats.monthlyFees.collectedAmount)}
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
               de {formatCurrency(stats.monthlyFees.totalAmount)}
             </p>
           </BaseCard>
@@ -240,13 +239,13 @@ function AdminPaymentsPanel() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-700">
         <button
           onClick={() => setActiveTab('overview')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'overview'
-              ? 'text-primary border-b-2 border-primary'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
           Resumen
@@ -255,8 +254,8 @@ function AdminPaymentsPanel() {
           onClick={() => setActiveTab('fees')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'fees'
-              ? 'text-primary border-b-2 border-primary'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
           Cuotas Mensuales
@@ -265,8 +264,8 @@ function AdminPaymentsPanel() {
           onClick={() => setActiveTab('payments')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'payments'
-              ? 'text-primary border-b-2 border-primary'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
           Pagos
@@ -275,8 +274,8 @@ function AdminPaymentsPanel() {
           onClick={() => setActiveTab('enrollments')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'enrollments'
-              ? 'text-primary border-b-2 border-primary'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
           Inscripciones
@@ -299,13 +298,13 @@ function AdminPaymentsPanel() {
                 {payments.slice(0, 5).map((payment) => (
                   <div
                     key={payment.id}
-                    className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg"
                   >
                     <div>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="font-medium text-zinc-900 dark:text-white">
                         {payment.payerName || 'Estudiante'}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
                         {payment.type === 'matricula'
                           ? 'Matrícula'
                           : payment.type === 'monthly_fee'
@@ -317,7 +316,7 @@ function AdminPaymentsPanel() {
                     </div>
 
                     <div className="text-right">
-                      <p className="font-bold text-gray-900 dark:text-white">
+                      <p className="font-bold text-zinc-900 dark:text-white">
                         {formatCurrency(payment.amount)}
                       </p>
                       <BaseBadge variant={getStatusVariant(payment.status)}>
@@ -389,17 +388,17 @@ function AdminPaymentsPanel() {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                      <p className="font-semibold text-zinc-900 dark:text-white">
                         {fee.studentName}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
                         {fee.monthName}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="font-bold text-gray-900 dark:text-white">
+                        <p className="font-bold text-zinc-900 dark:text-white">
                           {formatCurrency(fee.finalAmount + (fee.lateFee || 0))}
                         </p>
                         {fee.lateFee > 0 && (
@@ -436,28 +435,28 @@ function AdminPaymentsPanel() {
                 <BaseCard key={payment.id}>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                      <p className="font-semibold text-zinc-900 dark:text-white">
                         {payment.payerName || 'Estudiante'}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                         {payment.payerEmail}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
                         {formatDate(payment.createdAt)}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
                         ID: {payment.mercadopagoPaymentId}
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-2xl font-bold text-zinc-900 dark:text-white">
                         {formatCurrency(payment.amount)}
                       </p>
                       <BaseBadge variant={getStatusVariant(payment.status)}>
                         {getStatusLabel(payment.status)}
                       </BaseBadge>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
                         {payment.paymentMethod}
                       </p>
                     </div>
@@ -484,13 +483,13 @@ function AdminPaymentsPanel() {
                 <BaseCard key={enrollment.id}>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                      <p className="font-semibold text-zinc-900 dark:text-white">
                         {enrollment.studentName}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
                         {enrollment.studentEmail}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                         Año: {enrollment.academicYear}
                       </p>
                       {enrollment.discount > 0 && (
@@ -502,26 +501,26 @@ function AdminPaymentsPanel() {
 
                     <div className="text-right space-y-2">
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400">
                           Matrícula
                         </p>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-gray-900 dark:text-white">
+                          <p className="font-medium text-zinc-900 dark:text-white">
                             {formatCurrency(enrollment.matriculaAmount)}
                           </p>
                           {enrollment.matriculaPaid ? (
-                            <CheckCircle size={16} className="text-green-500" />
+                            <CheckCircle size={16} className="text-green-500" strokeWidth={2} />
                           ) : (
-                            <AlertCircle size={16} className="text-amber-500" />
+                            <AlertCircle size={16} className="text-amber-500" strokeWidth={2} />
                           )}
                         </div>
                       </div>
 
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400">
                           Cuota
                         </p>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="font-medium text-zinc-900 dark:text-white">
                           {formatCurrency(enrollment.cuotaAmount)}
                         </p>
                       </div>
@@ -551,29 +550,29 @@ function AdminPaymentsPanel() {
         >
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Estudiante</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">Estudiante</p>
+              <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                 {selectedFee.studentName}
               </p>
             </div>
 
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Mes</p>
-              <p className="font-medium text-gray-900 dark:text-white">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">Mes</p>
+              <p className="font-medium text-zinc-900 dark:text-white">
                 {selectedFee.monthName}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Monto base</p>
-                <p className="font-medium text-gray-900 dark:text-white">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Monto base</p>
+                <p className="font-medium text-zinc-900 dark:text-white">
                   {formatCurrency(selectedFee.amount)}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Descuento</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Descuento</p>
                 <p className="font-medium text-green-600 dark:text-green-400">
                   -{formatCurrency(selectedFee.discount || 0)}
                 </p>
@@ -582,15 +581,15 @@ function AdminPaymentsPanel() {
               {selectedFee.lateFee > 0 && (
                 <>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Recargo</p>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">Recargo</p>
                     <p className="font-medium text-red-600 dark:text-red-400">
                       +{formatCurrency(selectedFee.lateFee)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Días de mora</p>
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">Días de mora</p>
+                    <p className="font-medium text-zinc-900 dark:text-white">
                       {selectedFee.daysPastDue} días
                     </p>
                   </div>
@@ -598,12 +597,12 @@ function AdminPaymentsPanel() {
               )}
             </div>
 
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
               <div className="flex justify-between items-center">
-                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                   Total
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">
                   {formatCurrency(selectedFee.finalAmount + (selectedFee.lateFee || 0))}
                 </p>
               </div>

@@ -69,13 +69,8 @@ function StudentFeesPanel() {
         return;
       }
 
-      // Load enrollment
       await loadEnrollment(user.uid);
-
-      // Load monthly fees
       await loadMonthlyFees(user.uid);
-
-      // Load payment history
       await loadPaymentHistory();
 
     } catch (err) {
@@ -173,7 +168,6 @@ function StudentFeesPanel() {
         logger.info('Matricula payment created, redirecting to checkout');
         setSuccess('Redirigiendo a MercadoPago...');
 
-        // Redirect to MercadoPago checkout
         setTimeout(() => {
           redirectToCheckout(result.initPoint, result.sandboxInitPoint);
         }, 1000);
@@ -204,7 +198,6 @@ function StudentFeesPanel() {
         logger.info('Monthly fee payment created, redirecting to checkout');
         setSuccess('Redirigiendo a MercadoPago...');
 
-        // Redirect to MercadoPago checkout
         setTimeout(() => {
           redirectToCheckout(result.initPoint, result.sandboxInitPoint);
         }, 1000);
@@ -226,13 +219,13 @@ function StudentFeesPanel() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
           Mis Pagos
         </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
           Gestiona tus cuotas mensuales y matrícula
         </p>
       </div>
@@ -291,22 +284,22 @@ function StudentFeesPanel() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Año Académico</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Año Académico</p>
+                <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                   {enrollment.academicYear || '2025'}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Matrícula</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Matrícula</p>
+                <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                   {formatCurrency(enrollment.matriculaAmount || 15000)}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Cuota Mensual</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Cuota Mensual</p>
+                <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                   {formatCurrency(enrollment.cuotaAmount || 8000)}
                   {enrollment.discount > 0 && (
                     <span className="text-sm text-green-600 dark:text-green-400 ml-2">
@@ -317,18 +310,18 @@ function StudentFeesPanel() {
               </div>
 
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Estado de Matrícula</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Estado de Matrícula</p>
                 <div className="flex items-center gap-2 mt-1">
                   {enrollment.matriculaPaid ? (
                     <>
-                      <CheckCircle size={20} className="text-green-500" />
+                      <CheckCircle size={20} className="text-green-500" strokeWidth={2} />
                       <span className="text-green-600 dark:text-green-400 font-medium">
                         Pagada
                       </span>
                     </>
                   ) : (
                     <>
-                      <AlertCircle size={20} className="text-amber-500" />
+                      <AlertCircle size={20} className="text-amber-500" strokeWidth={2} />
                       <span className="text-amber-600 dark:text-amber-400 font-medium">
                         Pendiente
                       </span>
@@ -347,7 +340,7 @@ function StudentFeesPanel() {
             )}
 
             {!enrollment.matriculaPaid && (
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
                 <BaseButton
                   variant="primary"
                   icon={CreditCard}
@@ -364,13 +357,13 @@ function StudentFeesPanel() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-700">
         <button
           onClick={() => setActiveTab('fees')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'fees'
-              ? 'text-primary border-b-2 border-primary'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
           Cuotas Mensuales
@@ -379,8 +372,8 @@ function StudentFeesPanel() {
           onClick={() => setActiveTab('history')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'history'
-              ? 'text-primary border-b-2 border-primary'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
           Historial de Pagos
@@ -423,10 +416,10 @@ function StudentFeesPanel() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">
                             Monto
                           </p>
-                          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          <p className="text-2xl font-bold text-zinc-900 dark:text-white">
                             {formatCurrency(totalAmount)}
                           </p>
                           {fee.lateFee > 0 && (
@@ -437,10 +430,10 @@ function StudentFeesPanel() {
                         </div>
 
                         <div className="text-right">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">
                             Vencimiento
                           </p>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <p className="text-sm font-medium text-zinc-900 dark:text-white">
                             {formatDate(fee.dueDate)}
                           </p>
                           {!isPaid && (
@@ -449,7 +442,7 @@ function StudentFeesPanel() {
                                 ? 'text-red-600 dark:text-red-400'
                                 : daysUntilDue <= 3
                                 ? 'text-amber-600 dark:text-amber-400'
-                                : 'text-gray-600 dark:text-gray-400'
+                                : 'text-zinc-600 dark:text-zinc-400'
                             }`}>
                               {isOverdue
                                 ? `Vencido hace ${Math.abs(daysUntilDue)} días`
@@ -465,7 +458,7 @@ function StudentFeesPanel() {
                       {isPaid && fee.paidAt && (
                         <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                           <p className="text-sm text-green-800 dark:text-green-200">
-                            ✓ Pagado el {formatDate(fee.paidAt)}
+                            Pagado el {formatDate(fee.paidAt)}
                           </p>
                         </div>
                       )}
@@ -505,24 +498,24 @@ function StudentFeesPanel() {
               {paymentHistory.map((payment) => (
                 <div
                   key={payment.id}
-                  className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                  className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                      <h3 className="font-semibold text-zinc-900 dark:text-white">
                         {payment.type === 'matricula'
                           ? 'Matrícula'
                           : payment.type === 'monthly_fee'
                           ? 'Cuota Mensual'
                           : 'Compra de Curso'}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                         {formatDate(payment.createdAt)}
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      <p className="text-lg font-bold text-zinc-900 dark:text-white">
                         {formatCurrency(payment.amount)}
                       </p>
                       <BaseBadge variant={getStatusVariant(payment.status)}>
@@ -532,7 +525,7 @@ function StudentFeesPanel() {
                   </div>
 
                   {payment.paymentMethod && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
                       Método: {payment.paymentMethod}
                     </p>
                   )}

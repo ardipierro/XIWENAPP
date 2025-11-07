@@ -46,7 +46,7 @@ const FillGap = ({ sentence, answer, onComplete }) => {
 
   return (
     <div className="space-y-3">
-      <p className="text-base md:text-lg text-gray-800 dark:text-gray-200 leading-relaxed">
+      <p className="text-base md:text-lg text-zinc-800 dark:text-zinc-200 leading-relaxed">
         {sentence.split('[___]')[0]}
         <input
           type="text"
@@ -61,7 +61,7 @@ const FillGap = ({ sentence, answer, onComplete }) => {
             disabled:opacity-50 disabled:cursor-not-allowed
             ${feedback === 'correct' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : ''}
             ${feedback === 'incorrect' ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' : ''}
-            ${feedback === null ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800' : ''}
+            ${feedback === null ? 'border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white' : ''}
           `}
           placeholder="..."
         />
@@ -89,10 +89,10 @@ const FillGap = ({ sentence, answer, onComplete }) => {
       {feedback === 'incorrect' && (
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" strokeWidth={2} />
             <span>Incorrecto</span>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Respuesta correcta: <span className="font-semibold text-green-600 dark:text-green-400">{answer}</span>
           </p>
         </div>
@@ -120,7 +120,7 @@ const MultipleChoice = ({ question, options, correctIndex, onComplete }) => {
 
   return (
     <div className="space-y-4">
-      <p className="text-base md:text-lg font-medium text-gray-800 dark:text-gray-200">
+      <p className="text-base md:text-lg font-medium text-zinc-800 dark:text-zinc-200">
         {question}
       </p>
 
@@ -140,17 +140,17 @@ const MultipleChoice = ({ question, options, correctIndex, onComplete }) => {
                 transition-all duration-200 font-medium
                 hover:shadow-md active:scale-[0.98]
                 disabled:cursor-not-allowed
-                ${!showFeedback && !isSelected ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-400' : ''}
-                ${!showFeedback && isSelected ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}
+                ${!showFeedback && !isSelected ? 'border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:border-blue-400 text-zinc-900 dark:text-white' : ''}
+                ${!showFeedback && isSelected ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-zinc-900 dark:text-white' : ''}
                 ${showFeedback && isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : ''}
                 ${showFeedback && isSelected && !isCorrect ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' : ''}
-                ${showFeedback && !isSelected && !isCorrect ? 'opacity-50 border-gray-300 dark:border-gray-600' : ''}
+                ${showFeedback && !isSelected && !isCorrect ? 'opacity-50 border-zinc-300 dark:border-zinc-600' : ''}
               `}
             >
               <div className="flex items-center justify-between gap-3">
                 <span>{option.label} {option.text}</span>
-                {showFeedback && isCorrect && <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />}
-                {showFeedback && isSelected && !isCorrect && <X className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />}
+                {showFeedback && isCorrect && <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" strokeWidth={2} />}
+                {showFeedback && isSelected && !isCorrect && <X className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" strokeWidth={2} />}
               </div>
             </button>
           );
