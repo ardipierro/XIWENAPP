@@ -38,6 +38,11 @@ export function useScreenNavigation() {
   const [studentsSearchTerm, setStudentsSearchTerm] = useState('');
   const [studentsViewMode, setStudentsViewMode] = useState('grid');
 
+  // Users panel view states (table/grid/list, search, role filter)
+  const [usersSearchTerm, setUsersSearchTerm] = useState('');
+  const [usersViewMode, setUsersViewMode] = useState('table'); // 'table', 'grid', 'list'
+  const [usersRoleFilter, setUsersRoleFilter] = useState('all'); // 'all', 'students', 'teachers', 'admins'
+
   /**
    * Action map: Menu action -> Screen name
    * Usado por handleMenuAction para mapear clicks del SideMenu a screens
@@ -225,6 +230,11 @@ export function useScreenNavigation() {
     studentsSearchTerm,
     studentsViewMode,
 
+    // Users panel view states
+    usersSearchTerm,
+    usersViewMode,
+    usersRoleFilter,
+
     // Direct setters (para cuando los componentes hijos necesiten actualizar)
     setCurrentScreen,
     setSelectedExerciseId,
@@ -244,6 +254,9 @@ export function useScreenNavigation() {
     setDashboardViewMode,
     setStudentsSearchTerm,
     setStudentsViewMode,
+    setUsersSearchTerm,
+    setUsersViewMode,
+    setUsersRoleFilter,
     setWhiteboardManagerKey,
     setExcalidrawManagerKey,
 
