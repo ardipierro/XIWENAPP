@@ -44,10 +44,10 @@ function AttendanceView({ teacher }) {
 
       const sessionsData = await getTeacherSessions(teacher.uid, startDate, endDate);
 
-      // Ordenar por fecha
+      // Ordenar por fecha (usar scheduledStart)
       sessionsData.sort((a, b) => {
-        const dateA = a.date.toDate ? a.date.toDate() : new Date(a.date);
-        const dateB = b.date.toDate ? b.date.toDate() : new Date(b.date);
+        const dateA = a.scheduledStart?.toDate ? a.scheduledStart.toDate() : (a.scheduledStart ? new Date(a.scheduledStart) : new Date(0));
+        const dateB = b.scheduledStart?.toDate ? b.scheduledStart.toDate() : (b.scheduledStart ? new Date(b.scheduledStart) : new Date(0));
         return dateA - dateB;
       });
 
@@ -73,8 +73,16 @@ function AttendanceView({ teacher }) {
       const attendanceData = await getSessionAttendance(selectedSession.id);
       setAttendance(attendanceData);
 
-      // Cargar miembros del grupo
-      const members = await getGroupMembers(selectedSession.groupId);
+      // Cargar miembros del grupo (si tiene assignedGroups)
+      let members = [];
+      if (selectedSession.assignedGroups && selectedSession.assignedGroups.length > 0) {
+        // Por ahora, cargar solo del primer grupo asignado
+        const groupId = selectedSession.assignedGroups[0];
+        members = await getGroupMembers(groupId);
+      } else if (selectedSession.groupId) {
+        // Fallback para sesiones antiguas que usan groupId
+        members = await getGroupMembers(selectedSession.groupId);
+      }
       setGroupMembers(members);
     } catch (error) {
       logger.error('Error al cargar detalles:', error);
@@ -161,6 +169,10 @@ function AttendanceView({ teacher }) {
   };
 
   const formatDate = (timestamp) => {
+    if (!timestamp) {
+      return 'Fecha no disponible';
+    }
+
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     const today = new Date();
 
@@ -271,9 +283,9 @@ function AttendanceView({ teacher }) {
                   onClick={() => setSelectedSession(session)}
                 >
                   <div className="session-info">
-                    <div className="session-name">{session.courseName}</div>
-                    <div className="session-group">{session.groupName}</div>
-                    <div className="session-datetime">{formatDate(session.date)}</div>
+                    <div className="session-name">{session.name || session.courseName}</div>
+                    <div className="session-group">{session.groupName || 'Sin grupo'}</div>
+                    <div className="session-datetime">{formatDate(session.scheduledStart)}</div>
                   </div>
                 </div>
               );
