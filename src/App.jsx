@@ -14,6 +14,11 @@ import { ADMIN_ROLES, TEACHER_ROLES, STUDENT_ROLES, GUARDIAN_ROLES } from './con
 import LandingPage from './LandingPage';
 import Login from './components/Login.jsx';
 import JoinGamePage from './components/JoinGamePage.jsx';
+import OfflineIndicator from './components/OfflineIndicator.jsx';
+
+// Offline utilities
+import { setupAutoSync } from './utils/syncQueue.js';
+import { syncOperation } from './utils/offlineFirestore.js';
 
 // Lazy imports for dashboards (code splitting)
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -75,6 +80,14 @@ function App() {
     }
   }, [isViewingAs, viewAsUser, user, userRole]);
 
+  /**
+   * Setup auto-sync for offline operations
+   */
+  useEffect(() => {
+    const cleanup = setupAutoSync(syncOperation);
+    return cleanup;
+  }, []);
+
   // No mostrar nada mientras se inicializa autenticación (carga instantánea)
   if (loading) {
     return null;
@@ -82,6 +95,7 @@ function App() {
 
   return (
     <Router>
+      <OfflineIndicator />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Public Routes - solo accesibles sin autenticación */}
