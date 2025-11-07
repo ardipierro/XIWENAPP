@@ -619,6 +619,70 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
+  // Settings Panel - WITH Layout
+  if (navigation.currentScreen === 'settings') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <div className="p-6 md:p-8 max-w-[1000px] mx-auto">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-6">
+            ← Back to Home
+          </button>
+
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-primary-900 dark:text-primary-100 mb-2">Settings</h1>
+              <p className="text-secondary-600 dark:text-secondary-400">
+                Manage system settings and preferences
+              </p>
+            </div>
+
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
+              <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
+              <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
+                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                  <span className="font-medium">Application Version</span>
+                  <span>v1.0.0</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                  <span className="font-medium">Environment</span>
+                  <span>{import.meta.env.MODE}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                  <span className="font-medium">Admin Email</span>
+                  <span>{user.email}</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="font-medium">Firebase Project</span>
+                  <span>xiwen-app-2026</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+              <div className="flex items-start gap-3">
+                <Settings className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1" size={20} />
+                <div>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                    Additional Settings Coming Soon
+                  </h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    More configuration options will be available in future updates, including:
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-blue-700 dark:text-blue-300">
+                    <li>• Email notifications preferences</li>
+                    <li>• System-wide defaults</li>
+                    <li>• Backup and restore options</li>
+                    <li>• Integration settings</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   // Whiteboard Manager - WITH Layout
   if (navigation.currentScreen === 'whiteboardSessions') {
     return (
