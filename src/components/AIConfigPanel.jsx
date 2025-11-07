@@ -208,30 +208,24 @@ function AIConfigPanel() {
       {/* Category Filter */}
       <div className="mb-6 flex flex-wrap gap-2 items-center">
         <Filter className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-        <button
+        <BaseButton
+          variant={selectedCategory === null ? 'primary' : 'secondary'}
+          size="sm"
           onClick={() => setSelectedCategory(null)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-            selectedCategory === null
-              ? 'bg-blue-600 text-white'
-              : 'bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700'
-          }`}
         >
           Todas ({AI_FUNCTIONS.length})
-        </button>
+        </BaseButton>
         {AI_CATEGORIES.map(category => {
           const count = AI_FUNCTIONS.filter(f => f.category === category.id).length;
           return (
-            <button
+            <BaseButton
               key={category.id}
+              variant={selectedCategory === category.id ? 'primary' : 'secondary'}
+              size="sm"
               onClick={() => setSelectedCategory(category.id)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                selectedCategory === category.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700'
-              }`}
             >
               {category.icon} {category.label} ({count})
-            </button>
+            </BaseButton>
           );
         })}
       </div>

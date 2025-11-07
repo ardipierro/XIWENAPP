@@ -149,11 +149,9 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
         )}
 
         {/* Function Description */}
-        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <p className="text-sm text-blue-900 dark:text-blue-100">
-            {aiFunction.description}
-          </p>
-        </div>
+        <BaseAlert variant="info">
+          {aiFunction.description}
+        </BaseAlert>
 
         {/* Enable/Disable Toggle */}
         <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
@@ -165,15 +163,13 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
               {config.enabled ? 'Esta función está activa' : 'Esta función está desactivada'}
             </p>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={config.enabled}
-              onChange={(e) => handleChange('enabled', e.target.checked)}
-            />
-            <div className="w-11 h-6 bg-zinc-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-blue-600"></div>
-          </label>
+          <BaseButton
+            variant={config.enabled ? 'success' : 'secondary'}
+            size="sm"
+            onClick={() => handleChange('enabled', !config.enabled)}
+          >
+            {config.enabled ? 'Activo' : 'Inactivo'}
+          </BaseButton>
         </div>
 
         {/* Provider Selection */}
@@ -248,9 +244,9 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
                 step="0.1"
                 value={config.parameters.temperature}
                 onChange={(e) => handleParameterChange('temperature', parseFloat(e.target.value))}
-                className="w-full"
+                className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-600 dark:accent-zinc-400"
               />
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
                 Creatividad (0 = preciso, 2 = creativo)
               </p>
             </div>
@@ -276,9 +272,9 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
                 step="0.05"
                 value={config.parameters.topP}
                 onChange={(e) => handleParameterChange('topP', parseFloat(e.target.value))}
-                className="w-full"
+                className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-600 dark:accent-zinc-400"
               />
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
                 Diversidad de respuestas
               </p>
             </div>
@@ -322,17 +318,11 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
             )}
 
             {testResponse && (
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  <h5 className="font-semibold text-green-900 dark:text-green-100">
-                    Respuesta exitosa:
-                  </h5>
-                </div>
-                <p className="text-sm text-green-900 dark:text-green-100 whitespace-pre-wrap">
+              <BaseAlert variant="success" title="Respuesta exitosa:">
+                <p className="text-sm whitespace-pre-wrap mt-2">
                   {testResponse}
                 </p>
-              </div>
+              </BaseAlert>
             )}
           </div>
         </div>

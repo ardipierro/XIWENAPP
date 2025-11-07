@@ -40,7 +40,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure }) {
   };
 
   return (
-    <BaseCard className="hover:shadow-lg transition-shadow duration-200">
+    <BaseCard hover>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
