@@ -28,3 +28,4 @@ export { useLocalStorage, default as useLocalStorageDefault } from './useLocalSt
 export { usePagination, default as usePaginationDefault } from './usePagination.js';
 export { useProfileEditor } from './useProfileEditor.js';
 export { useEnrollments } from './useEnrollments.js';
+export { useAsyncOperation, useCrudOperations, default as useAsyncOperationDefault } from './useAsyncOperation.js';
