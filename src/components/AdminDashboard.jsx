@@ -1325,7 +1325,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
               <Crown size={40} strokeWidth={2} className="text-indigo-600 dark:text-indigo-400" />
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
             </div>
-            <p className="section-subtitle">Complete XIWEN system management</p>
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 mb-12">
