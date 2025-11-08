@@ -63,7 +63,7 @@ export const colors = {
   success: '#10b981',
   warning: '#f59e0b',
   error: '#ef4444',
-  info: '#3b82f6',
+  info: '#a1a1aa',  // zinc-400 (gris neutral, NO azul)
 
   // Role colors
   teacher: '#a1a1aa',
@@ -149,7 +149,7 @@ export const tw = {
 
   // Button variants
   button: {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-700',
+    primary: 'bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700',
     secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white',
     success: 'bg-green-600 hover:bg-green-700 text-white dark:bg-green-600 dark:hover:bg-green-700',
     danger: 'bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700',
@@ -160,7 +160,7 @@ export const tw = {
 
   // Input/Select styles
   input: {
-    base: 'w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent transition-all',
+    base: 'w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-600 focus:border-transparent transition-all',
     error: 'border-red-500 dark:border-red-600 focus:ring-red-500',
     disabled: 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed opacity-60',
   },
@@ -168,11 +168,11 @@ export const tw = {
   // Badge variants
   badge: {
     default: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-    primary: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    primary: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300',
     success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
     warning: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
     danger: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-    info: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
+    info: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
   },
 };
 

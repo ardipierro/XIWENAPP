@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { z } from 'zod';
 import { ROLES, ROLE_INFO } from '../firebase/roleConfig';
 import { userSchema, validateData } from '../utils/validationSchemas';
-import './AddUserModal.css';
+import { BaseModal, BaseButton, BaseInput, BaseSelect, BaseTextarea } from './common';
 
 function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
   const [formData, setFormData] = useState({
@@ -127,249 +127,189 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
     }
   };
 
-  if (!isOpen) return null;
+  // Prepare role options for BaseSelect
+  const roleOptions = availableRoles.map(role => ({
+    value: role,
+    label: `${ROLE_INFO[role].icon} ${ROLE_INFO[role].name}`
+  }));
 
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-        {/* Header - Fixed */}
-        <div className="modal-header flex-shrink-0 px-6 pt-6 pb-4">
-          <h3 className="modal-title">
-            {isAdmin ? 'Crear Nuevo Usuario' : 'Agregar Alumno'}
-          </h3>
-          <button
-            className="modal-close-btn"
-            onClick={handleClose}
-            disabled={loading}
-            aria-label="Cerrar modal"
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isAdmin ? 'Crear Nuevo Usuario' : 'Agregar Alumno'}
+      size="lg"
+      closeOnOverlayClick={!loading}
+      footer={
+        generatedPassword ? (
+          <BaseButton
+            variant="primary"
+            onClick={() => {
+              setGeneratedPassword('');
+              setFormData({
+                name: '',
+                email: '',
+                role: 'student',
+                password: '',
+                phone: '',
+                notes: ''
+              });
+              onClose();
+            }}
           >
-            ✕
-          </button>
-        </div>
-
-        {/* Body - Scrollable */}
-        <div className="modal-content flex-1 overflow-y-auto px-6 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email (obligatorio) */}
-            <div className="form-group">
-              <label htmlFor="email" className="form-label required">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`form-input ${fieldErrors.email ? 'error' : ''}`}
-                placeholder="usuario@ejemplo.com"
-                required
-                disabled={loading}
-              />
-              {fieldErrors.email ? (
-                <span className="form-error">{fieldErrors.email}</span>
-              ) : (
-                <span className="form-hint">
-                  El usuario usará este email para iniciar sesión
-                </span>
-              )}
-            </div>
-
-            {/* Contraseña (opcional - se genera automática si no se provee) */}
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">
-                Contraseña
-              </label>
-              <input
-                type="text"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`form-input ${fieldErrors.password ? 'error' : ''}`}
-                placeholder="Dejar vacío para generar automáticamente"
-                disabled={loading}
-              />
-              {fieldErrors.password ? (
-                <span className="form-error">{fieldErrors.password}</span>
-              ) : (
-                <span className="form-hint">
-                  Si no ingresas una, se generará automáticamente
-                </span>
-              )}
-            </div>
-
-            {/* Nombre (opcional) */}
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">
-                Nombre completo
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className={`form-input ${fieldErrors.name ? 'error' : ''}`}
-                placeholder="Ej: Juan Pérez"
-                disabled={loading}
-              />
-              {fieldErrors.name ? (
-                <span className="form-error">{fieldErrors.name}</span>
-              ) : (
-                <span className="form-hint">
-                  Opcional - puede configurarlo después
-                </span>
-              )}
-            </div>
-
-            {/* Rol */}
-            <div className="form-group">
-              <label htmlFor="role" className="form-label required">
-                Rol
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className={`form-select ${fieldErrors.role ? 'error' : ''}`}
-                required
-                disabled={loading}
-              >
-                {availableRoles.map(role => (
-                  <option key={role} value={role}>
-                    {ROLE_INFO[role].icon} {ROLE_INFO[role].name}
-                  </option>
-                ))}
-              </select>
-              {fieldErrors.role ? (
-                <span className="form-error">{fieldErrors.role}</span>
-              ) : (
-                <span className="form-hint">
-                  {ROLE_INFO[formData.role]?.description}
-                </span>
-              )}
-            </div>
-
-            {/* Teléfono (opcional) */}
-            <div className="form-group">
-              <label htmlFor="phone" className="form-label">
-                Teléfono
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className={`form-input ${fieldErrors.phone ? 'error' : ''}`}
-                placeholder="Ej: 123456789"
-                disabled={loading}
-              />
-              {fieldErrors.phone && (
-                <span className="form-error">{fieldErrors.phone}</span>
-              )}
-            </div>
-
-            {/* Notas (opcional) */}
-            <div className="form-group">
-              <label htmlFor="notes" className="form-label">
-                Notas
-              </label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                className="form-textarea"
-                placeholder="Información adicional sobre el usuario..."
-                rows="3"
-                disabled={loading}
-              />
-            </div>
-
-            {/* Error message */}
-            {error && (
-              <div className="error-message">
-                ⚠️ {error}
-              </div>
-            )}
-
-            {/* Success message with generated password */}
-            {generatedPassword && (
-              <div className="success-message-box">
-                <div className="success-header">
-                  ✅ Usuario creado exitosamente
-                </div>
-                <div className="password-display">
-                  <p className="password-label">Contraseña temporal:</p>
-                  <div className="password-value">
-                    <code>{generatedPassword}</code>
-                    <button
-                      type="button"
-                      className="copy-password-btn"
-                      onClick={() => {
-                        navigator.clipboard.writeText(generatedPassword);
-                        alert('Contraseña copiada al portapapeles');
-                      }}
-                    >
-                      📋 Copiar
-                    </button>
-                  </div>
-                  <p className="password-warning">
-                    ⚠️ Guarda esta contraseña. El usuario deberá usarla para su primer inicio de sesión.
-                  </p>
-                </div>
-              </div>
-            )}
-          </form>
-        </div>
-
-        {/* Footer - Fixed */}
-        <div className="modal-footer">
-          {generatedPassword ? (
-            <button
-              type="button"
-              onClick={() => {
-                setGeneratedPassword('');
-                setFormData({
-                  name: '',
-                  email: '',
-                  role: 'student',
-                  password: '',
-                  phone: '',
-                  notes: ''
-                });
-                onClose();
-              }}
-              className="btn btn-primary"
+            Cerrar
+          </BaseButton>
+        ) : (
+          <>
+            <BaseButton
+              variant="ghost"
+              onClick={handleClose}
+              disabled={loading}
             >
-              Cerrar
-            </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="btn btn-ghost"
-                disabled={loading}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loading}
-                onClick={handleSubmit}
-              >
-                {loading ? 'Creando...' : 'Crear Usuario'}
-              </button>
-            </>
+              Cancelar
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              onClick={handleSubmit}
+              loading={loading}
+            >
+              Crear Usuario
+            </BaseButton>
+          </>
+        )
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Email (obligatorio) */}
+        <BaseInput
+          type="email"
+          id="email"
+          name="email"
+          label="Email"
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="usuario@ejemplo.com"
+          required
+          disabled={loading}
+          error={fieldErrors.email}
+          helperText={fieldErrors.email || 'El usuario usará este email para iniciar sesión'}
+        />
+
+        {/* Contraseña (opcional - se genera automática si no se provee) */}
+        <BaseInput
+          type="text"
+          id="password"
+          name="password"
+          label="Contraseña"
+          value={formData.password}
+          onChange={handleChange}
+          placeholder="Dejar vacío para generar automáticamente"
+          disabled={loading}
+          error={fieldErrors.password}
+          helperText={fieldErrors.password || 'Si no ingresas una, se generará automáticamente'}
+        />
+
+        {/* Nombre (opcional) */}
+        <BaseInput
+          type="text"
+          id="name"
+          name="name"
+          label="Nombre completo"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Ej: Juan Pérez"
+          disabled={loading}
+          error={fieldErrors.name}
+          helperText={fieldErrors.name || 'Opcional - puede configurarlo después'}
+        />
+
+        {/* Rol */}
+        <div>
+          <BaseSelect
+            id="role"
+            name="role"
+            label="Rol"
+            value={formData.role}
+            onChange={handleChange}
+            options={roleOptions}
+            required
+            disabled={loading}
+            error={fieldErrors.role}
+          />
+          {!fieldErrors.role && (
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              {ROLE_INFO[formData.role]?.description}
+            </p>
           )}
         </div>
-      </div>
-    </div>
+
+        {/* Teléfono (opcional) */}
+        <BaseInput
+          type="tel"
+          id="phone"
+          name="phone"
+          label="Teléfono"
+          value={formData.phone}
+          onChange={handleChange}
+          placeholder="Ej: 123456789"
+          disabled={loading}
+          error={fieldErrors.phone}
+        />
+
+        {/* Notas (opcional) */}
+        <BaseTextarea
+          id="notes"
+          name="notes"
+          label="Notas"
+          value={formData.notes}
+          onChange={handleChange}
+          placeholder="Información adicional sobre el usuario..."
+          rows={3}
+          disabled={loading}
+        />
+
+        {/* Error message */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-sm text-red-800 dark:text-red-200">
+              ⚠️ {error}
+            </p>
+          </div>
+        )}
+
+        {/* Success message with generated password */}
+        {generatedPassword && (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <div className="text-sm font-semibold text-green-800 dark:text-green-200 mb-3">
+              ✅ Usuario creado exitosamente
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Contraseña temporal:
+              </p>
+              <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded p-3">
+                <code className="flex-1 text-sm font-mono text-gray-900 dark:text-gray-100">
+                  {generatedPassword}
+                </code>
+                <BaseButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(generatedPassword);
+                    alert('Contraseña copiada al portapapeles');
+                  }}
+                >
+                  📋 Copiar
+                </BaseButton>
+              </div>
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                ⚠️ Guarda esta contraseña. El usuario deberá usarla para su primer inicio de sesión.
+              </p>
+            </div>
+          </div>
+        )}
+      </form>
+    </BaseModal>
   );
 }
 

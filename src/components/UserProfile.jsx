@@ -322,7 +322,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               </span>
 
               {/* Badge de Créditos */}
-              <span className="profile-role-badge" style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: '#78350f', border: '1px solid #fbbf24' }}>
+              <span className="profile-role-badge" style={{ background: '#fbbf24', color: '#78350f', border: '1px solid #fbbf24' }}>
                 <CreditCard size={16} strokeWidth={2} className="inline mr-1" />
                 {userCredits} créditos
               </span>
@@ -332,7 +332,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 <span
                   onClick={handleViewAs}
                   className="profile-role-badge cursor-pointer hover:opacity-80 transition-opacity"
-                  style={{ background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)', color: 'white', border: '1px solid #fb923c' }}
+                  style={{ background: '#fb923c', color: 'white', border: '1px solid #fb923c' }}
                   title="Cambiar a la vista de este usuario"
                 >
                   <Eye size={16} strokeWidth={2} className="inline mr-1" />

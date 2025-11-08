@@ -629,7 +629,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           {/* Live Whiteboards - Priority Section */}
           {liveWhiteboards.length > 0 && (
             <div className="live-whiteboards-section card" style={{
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              background: '#10b981',
               color: 'white',
               border: 'none'
             }}>
