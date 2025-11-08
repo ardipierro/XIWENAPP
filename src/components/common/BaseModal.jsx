@@ -70,7 +70,7 @@ function BaseModal({
         className={`
           relative w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
           bg-white dark:bg-gray-800
-          rounded-xl shadow-2xl
+          rounded-xl border border-gray-200 dark:border-gray-700
           flex flex-col
           animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
           ${loading ? 'pointer-events-none opacity-70' : ''}

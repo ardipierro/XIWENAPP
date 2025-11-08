@@ -229,7 +229,7 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
             return (
               <div
                 key={session.id}
-                className="card card-grid-item cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
+                className="card card-grid-item cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300 flex flex-col overflow-hidden"
                 onClick={() => handleOpenSession(session)}
                 style={{ padding: 0 }}
               >
@@ -327,7 +327,7 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
             return (
               <div
                 key={session.id}
-                className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
+                className="card card-list cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300"
                 onClick={() => handleOpenSession(session)}
               >
                 {/* Thumbnail pequeño */}

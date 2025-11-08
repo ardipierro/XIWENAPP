@@ -70,7 +70,7 @@ function ResultsScreen({
 
   return (
     <div className="min-h-screen bg-amber-50 p-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 relative">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-gray-200 dark:border-gray-700 p-8 relative">
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-4">
             <svg className="w-28 h-28 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@ function ResultsScreen({
       </div>
 
       {showExerciseHistory && (
-        <div className="max-w-4xl mx-auto mt-6 bg-white rounded-2xl shadow-xl p-8">
+        <div className="max-w-4xl mx-auto mt-6 bg-white rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <BarChart3 size={24} strokeWidth={2} className="inline-icon" /> Historial del ejercicio: {currentCategory}
           </h2>

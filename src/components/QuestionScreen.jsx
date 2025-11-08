@@ -283,7 +283,7 @@ function QuestionScreen({
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto relative">
         {/* Tanteador */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-semibold">Tanteador</h3>
             <div className="flex items-center gap-3">
@@ -324,7 +324,7 @@ function QuestionScreen({
                 key={student}
                 className={`p-3 rounded-lg relative ${
                   student === currentStudent
-                    ? 'bg-gray-200 dark:bg-gray-700 border-4 border-gray-500 dark:border-gray-400 shadow-lg transform scale-105'
+                    ? 'bg-gray-200 dark:bg-gray-700 border-4 border-gray-500 dark:border-gray-400 border border-gray-300 dark:border-gray-600 transform scale-105'
                     : 'bg-gray-100 dark:bg-gray-800'
                 }`}
               >
@@ -345,7 +345,7 @@ function QuestionScreen({
         </div>
 
         {/* Pregunta */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
           <div className="mb-8">
             {!hasStarted && isPaused && !showFeedback && !unlimitedTime ? (
               <div className="bg-gray-100 dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600 rounded-lg p-8 text-center">

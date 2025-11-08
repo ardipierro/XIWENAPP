@@ -573,7 +573,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView }) {
   }
 
   return (
-    <BaseCard className="group hover:shadow-lg transition-all">
+    <BaseCard className="group hover:border-zinc-500 dark:hover:border-zinc-400 transition-all">
       <div className="relative">
         {/* Icon Header */}
         <div className={`absolute top-4 right-4 p-2 bg-${config.color}-100 dark:bg-${config.color}-900/20 rounded-lg`}>

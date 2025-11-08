@@ -46,7 +46,7 @@ function OfflineIndicator() {
         isOnline
           ? 'bg-yellow-500 dark:bg-yellow-600'
           : 'bg-red-500 dark:bg-red-600'
-      } text-white shadow-lg transition-all duration-300 ease-in-out`}
+      } text-white border border-gray-300 dark:border-gray-600 transition-all duration-300 ease-in-out`}
       role="alert"
       aria-live="polite"
     >

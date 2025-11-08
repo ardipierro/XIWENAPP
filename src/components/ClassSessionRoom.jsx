@@ -184,7 +184,7 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
           size="sm"
           icon={layout === 'split' ? Minimize2 : Maximize2}
           onClick={() => setLayout(layout === 'split' ? 'video-only' : 'split')}
-          className="bg-white dark:bg-gray-800 shadow-lg"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
         >
           {layout === 'split' ? 'Solo Video' : 'Dividir'}
         </BaseButton>
@@ -194,7 +194,7 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
           size="sm"
           icon={X}
           onClick={onLeave}
-          className="bg-white dark:bg-gray-800 shadow-lg"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
         >
           Salir
         </BaseButton>
@@ -267,7 +267,7 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
             size="sm"
             icon={X}
             onClick={onLeave}
-            className="bg-white dark:bg-gray-800 shadow-lg"
+            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
           >
             Salir
           </BaseButton>

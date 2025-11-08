@@ -150,7 +150,7 @@ function SetupScreen({
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-4 md:p-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-8">
         <div className="flex items-center justify-between mb-8">
           {onBack && (
             <button
