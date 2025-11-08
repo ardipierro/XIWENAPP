@@ -177,8 +177,8 @@ export default function EventDetailModal({
               )}
 
               {event.isRecurring && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                  <p className="text-sm text-blue-800 dark:text-blue-300 font-medium">
+                <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3">
+                  <p className="text-sm text-zinc-800 dark:text-zinc-300 font-medium">
                     Esta es una sesión recurrente
                   </p>
                 </div>

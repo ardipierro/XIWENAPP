@@ -757,8 +757,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
                 })}
               </div>
 
-              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <p className="text-xs text-blue-700 dark:text-blue-300">
+              <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                <p className="text-xs text-zinc-700 dark:text-zinc-300">
                   <strong>Nota:</strong> Las credenciales se guardan de forma segura en el navegador local. No se comparten con otros usuarios.
                 </p>
               </div>
@@ -1446,7 +1446,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
           <div className="mb-12 text-center">
             <div className="flex items-center gap-3 mb-2 justify-center">
-              <Crown size={40} strokeWidth={2} className="text-indigo-600 dark:text-indigo-400" />
+              <Crown size={40} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
             </div>
           </div>

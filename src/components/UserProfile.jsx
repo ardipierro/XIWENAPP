@@ -684,8 +684,8 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                   <div key={guardian.id} className="card p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                          <User size={20} className="text-blue-600 dark:text-blue-400" />
+                        <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                          <User size={20} className="text-zinc-600 dark:text-zinc-400" />
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 dark:text-white">

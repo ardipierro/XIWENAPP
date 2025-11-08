@@ -127,7 +127,7 @@ export const MultipleChoice = ({ question, options, correctIndex, onComplete }) 
             className={`
               w-full p-4 text-left rounded-lg border-2 transition-all
               disabled:cursor-not-allowed
-              ${selectedIndex === index && feedback === null ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}
+              ${selectedIndex === index && feedback === null ? 'border-zinc-500 bg-zinc-50 dark:bg-zinc-900' : ''}
               ${selectedIndex !== index && feedback === null ? 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500' : ''}
               ${feedback === 'correct' && index === correctIndex ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               ${feedback === 'incorrect' && index === selectedIndex ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}
@@ -207,7 +207,7 @@ const DragMatch = ({ dragItems, dropItems, onComplete }) => {
               key={index}
               className={`
                 p-3 rounded-lg border-2 cursor-move
-                ${matches[index] !== undefined ? 'opacity-50' : 'hover:border-blue-500'}
+                ${matches[index] !== undefined ? 'opacity-50' : 'hover:border-zinc-500'}
                 ${feedback === 'correct' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
                 ${feedback === 'incorrect' && matches[index] !== index ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}
                 ${feedback === null ? 'border-zinc-300 dark:border-zinc-600' : ''}
@@ -310,7 +310,7 @@ const ListeningExercise = ({ audioText, question, options, correctIndex, onCompl
             disabled={feedback !== null}
             className={`
               w-full p-4 text-left rounded-lg border-2 transition-all
-              ${selectedIndex === index && feedback === null ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}
+              ${selectedIndex === index && feedback === null ? 'border-zinc-500 bg-zinc-50 dark:bg-zinc-900' : ''}
               ${selectedIndex !== index && feedback === null ? 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400' : ''}
               ${feedback === 'correct' && index === correctIndex ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               ${feedback === 'incorrect' && index === selectedIndex ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}
@@ -918,7 +918,7 @@ IMPORTANTE:
               className="p-6 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700"
             >
               <div className="flex items-center gap-2 mb-4">
-                <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+                <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full text-sm font-semibold">
                   Ejercicio {index + 1}
                 </span>
                 {completedExercises[index] !== undefined && (
@@ -976,7 +976,7 @@ IMPORTANTE:
       {/* Loading State */}
       {isGenerating && (
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+          <Loader2 className="w-12 h-12 text-zinc-500 animate-spin" />
           <p className="text-gray-600 dark:text-gray-400 font-medium">
             La IA está creando tus ejercicios...
           </p>
