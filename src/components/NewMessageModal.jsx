@@ -11,6 +11,7 @@ import {
   sendMessage
 } from '../firebase/messages';
 import logger from '../utils/logger';
+import { BaseModal, BaseButton, BaseInput, BaseTextarea } from './common';
 
 /**
  * New Message Modal Component
@@ -100,21 +101,6 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
   };
 
   /**
-   * Get role badge color
-   */
-  const getRoleBadgeClass = (role) => {
-    const classes = {
-      admin: 'role-badge-admin',
-      teacher: 'role-badge-teacher',
-      trial_teacher: 'role-badge-teacher',
-      student: 'role-badge-student',
-      listener: 'role-badge-listener',
-      trial: 'role-badge-trial'
-    };
-    return classes[role] || 'role-badge-default';
-  };
-
-  /**
    * Get role display name
    */
   const getRoleDisplayName = (role) => {
@@ -129,125 +115,144 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
     return names[role] || role;
   };
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content new-message-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Nuevo Mensaje</h2>
-          <button className="modal-close" onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
+  /**
+   * Get role badge variant
+   */
+  const getRoleBadgeVariant = (role) => {
+    const variants = {
+      admin: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
+      teacher: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+      trial_teacher: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+      student: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+      listener: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+      trial: 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300'
+    };
+    return variants[role] || variants.student;
+  };
 
-        <div className="modal-body">
-          {/* Selected User */}
-          {selectedUser ? (
-            <div className="selected-user">
-              <div className="selected-user-info">
-                <div className="user-avatar">
+  return (
+    <BaseModal
+      isOpen={true}
+      onClose={onClose}
+      title="Nuevo Mensaje"
+      size="lg"
+      footer={
+        selectedUser && (
+          <>
+            <BaseButton variant="ghost" onClick={onClose}>
+              Cancelar
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              icon={Send}
+              onClick={handleSend}
+              disabled={!message.trim() || sending}
+              loading={sending}
+            >
+              Enviar
+            </BaseButton>
+          </>
+        )
+      }
+    >
+      <div className="space-y-4">
+        {/* Selected User */}
+        {selectedUser ? (
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold">
                   {selectedUser.name?.charAt(0).toUpperCase() || '?'}
                 </div>
-                <div className="user-details">
-                  <div className="user-name">{selectedUser.name || 'Usuario'}</div>
-                  <div className="user-email">{selectedUser.email}</div>
+                <div>
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {selectedUser.name || 'Usuario'}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {selectedUser.email}
+                  </div>
                 </div>
-                <span className={`role-badge ${getRoleBadgeClass(selectedUser.role)}`}>
+                <span className={`px-2 py-1 text-xs font-medium rounded ${getRoleBadgeVariant(selectedUser.role)}`}>
                   {getRoleDisplayName(selectedUser.role)}
                 </span>
               </div>
-              <button
-                className="remove-user-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
+                icon={X}
                 onClick={() => setSelectedUser(null)}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Search Box */}
-              <div className="search-box">
-                <Search size={16} />
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre o email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  autoFocus
-                />
-              </div>
-
-              {/* Search Results */}
-              <div className="search-results">
-                {searching ? (
-                  <div className="search-loading">
-                    <div className="spinner-small"></div>
-                    <span>Buscando...</span>
-                  </div>
-                ) : searchResults.length > 0 ? (
-                  searchResults.map(user => (
-                    <div
-                      key={user.id}
-                      className="user-result-item"
-                      onClick={() => handleSelectUser(user)}
-                    >
-                      <div className="user-avatar">
-                        {user.name?.charAt(0).toUpperCase() || '?'}
-                      </div>
-                      <div className="user-details">
-                        <div className="user-name">{user.name || 'Usuario'}</div>
-                        <div className="user-email">{user.email}</div>
-                      </div>
-                      <span className={`role-badge ${getRoleBadgeClass(user.role)}`}>
-                        {getRoleDisplayName(user.role)}
-                      </span>
-                    </div>
-                  ))
-                ) : searchTerm.trim().length >= 2 ? (
-                  <div className="search-empty">
-                    No se encontraron usuarios
-                  </div>
-                ) : (
-                  <div className="search-hint">
-                    Escribe al menos 2 caracteres para buscar
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Message Input */}
-          {selectedUser && (
-            <form className="message-form" onSubmit={handleSend}>
-              <textarea
-                className="message-textarea"
-                placeholder="Escribe tu mensaje..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={4}
-                autoFocus
               />
-              <div className="message-form-actions">
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={onClose}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={!message.trim() || sending}
-                >
-                  <Send size={16} />
-                  {sending ? 'Enviando...' : 'Enviar'}
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Search Box */}
+            <BaseInput
+              type="text"
+              placeholder="Buscar por nombre o email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              icon={Search}
+              autoFocus
+            />
+
+            {/* Search Results */}
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {searching ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-gray-600 dark:text-gray-400">
+                  <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300 rounded-full animate-spin"></div>
+                  <span>Buscando...</span>
+                </div>
+              ) : searchResults.length > 0 ? (
+                searchResults.map(user => (
+                  <div
+                    key={user.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors"
+                    onClick={() => handleSelectUser(user)}
+                  >
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold">
+                      {user.name?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 dark:text-gray-100">
+                        {user.name || 'Usuario'}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {user.email}
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 text-xs font-medium rounded ${getRoleBadgeVariant(user.role)}`}>
+                      {getRoleDisplayName(user.role)}
+                    </span>
+                  </div>
+                ))
+              ) : searchTerm.trim().length >= 2 ? (
+                <div className="text-center py-8 text-gray-600 dark:text-gray-400">
+                  No se encontraron usuarios
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-500">
+                  Escribe al menos 2 caracteres para buscar
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Message Input */}
+        {selectedUser && (
+          <form onSubmit={handleSend}>
+            <BaseTextarea
+              placeholder="Escribe tu mensaje..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={4}
+              autoFocus
+            />
+          </form>
+        )}
       </div>
-    </div>
+    </BaseModal>
   );
 }
 

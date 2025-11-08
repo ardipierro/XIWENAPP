@@ -53,7 +53,7 @@ function BaseCard({
   // Variant styles
   const variants = {
     default: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-    elevated: 'bg-white dark:bg-gray-800 shadow-lg',
+    elevated: 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600',
     bordered: 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600',
     flat: 'bg-gray-50 dark:bg-gray-900'
   };
@@ -64,7 +64,7 @@ function BaseCard({
         rounded-xl overflow-hidden flex flex-col
         ${variants[variant]}
         ${isClickable ? 'cursor-pointer' : ''}
-        ${hover ? 'transition-all hover:shadow-xl hover:scale-[1.02]' : ''}
+        ${hover ? 'transition-all hover:border-zinc-500 dark:hover:border-zinc-400' : ''}
         ${className}
       `}
       onClick={onClick}
@@ -89,7 +89,7 @@ function BaseCard({
       {(Icon || avatar) && !image && (
         <div className="p-6 pb-0">
           {Icon && (
-            <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300 flex items-center justify-center">
               <Icon size={24} strokeWidth={2} />
             </div>
           )}

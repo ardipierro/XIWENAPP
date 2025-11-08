@@ -21,7 +21,8 @@ import {
   Target,
   FlaskConical,
   Plus,
-  Trash2
+  Trash2,
+  UsersRound
 } from 'lucide-react';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { updateUser, deleteUser } from '../firebase/users';
@@ -32,6 +33,11 @@ import {
 } from '../firebase/firestore';
 import { loadCourses } from '../firebase/firestore';
 import { getUserCredits } from '../firebase/credits';
+import {
+  getStudentGuardians,
+  linkGuardianToStudent,
+  unlinkGuardianFromStudent
+} from '../firebase/guardians';
 import CreditManager from './CreditManager';
 import StudentClassView from './StudentClassView';
 import ConfirmModal from './ConfirmModal';
@@ -75,6 +81,10 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   // Estado para créditos
   const [userCredits, setUserCredits] = useState(selectedUser?.credits || 0);
 
+  // Estados para tutores
+  const [guardians, setGuardians] = useState([]);
+  const [loadingGuardians, setLoadingGuardians] = useState(false);
+
   useEffect(() => {
     // Only update formData if not currently editing
     // This prevents losing user changes if selectedUser updates
@@ -93,6 +103,8 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   useEffect(() => {
     if (activeTab === 'courses') {
       loadCoursesData();
+    } else if (activeTab === 'guardians') {
+      loadGuardiansData();
     }
   }, [activeTab]);
 
@@ -129,6 +141,19 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       showMessage('error', 'Error al cargar cursos');
     } finally {
       setLoadingCourses(false);
+    }
+  };
+
+  const loadGuardiansData = async () => {
+    setLoadingGuardians(true);
+    try {
+      const guardianLinks = await getStudentGuardians(selectedUser.id);
+      setGuardians(guardianLinks);
+    } catch (error) {
+      logger.error('Error al cargar tutores:', error);
+      showMessage('error', 'Error al cargar tutores');
+    } finally {
+      setLoadingGuardians(false);
     }
   };
 
@@ -322,7 +347,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               </span>
 
               {/* Badge de Créditos */}
-              <span className="profile-role-badge" style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: '#78350f', border: '1px solid #fbbf24' }}>
+              <span className="profile-role-badge" style={{ background: '#fbbf24', color: '#78350f', border: '1px solid #fbbf24' }}>
                 <CreditCard size={16} strokeWidth={2} className="inline mr-1" />
                 {userCredits} créditos
               </span>
@@ -332,7 +357,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 <span
                   onClick={handleViewAs}
                   className="profile-role-badge cursor-pointer hover:opacity-80 transition-opacity"
-                  style={{ background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)', color: 'white', border: '1px solid #fb923c' }}
+                  style={{ background: '#fb923c', color: 'white', border: '1px solid #fb923c' }}
                   title="Cambiar a la vista de este usuario"
                 >
                   <Eye size={16} strokeWidth={2} className="inline mr-1" />
@@ -381,6 +406,14 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
           >
             <Calendar size={18} strokeWidth={2} className="inline-icon" /> Clases
           </button>
+          {(['student', 'listener', 'trial'].includes(selectedUser?.role)) && (
+            <button
+              className={activeTab === 'guardians' ? 'tab-active' : 'tab'}
+              onClick={() => setActiveTab('guardians')}
+            >
+              <UsersRound size={18} strokeWidth={2} className="inline-icon" /> Tutores
+            </button>
+          )}
         </div>
       </div>
 
@@ -621,6 +654,56 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         {activeTab === 'classes' && (
           <div>
             <StudentClassView student={selectedUser} />
+          </div>
+        )}
+
+        {/* Tab: Tutores */}
+        {activeTab === 'guardians' && (
+          <div>
+            <h3 className="section-title">
+              <UsersRound size={20} strokeWidth={2} className="inline-icon" />
+              Tutores Vinculados
+            </h3>
+
+            {loadingGuardians ? (
+              <div className="text-center py-8">
+                <div className="spinner"></div>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">Cargando tutores...</p>
+              </div>
+            ) : guardians.length === 0 ? (
+              <div className="empty-state">
+                <UsersRound size={48} strokeWidth={1.5} className="empty-state-icon" />
+                <p className="empty-state-text">Este estudiante no tiene tutores vinculados</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  Los tutores pueden ser vinculados desde el panel de Gestión de Tutores
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {guardians.map((guardian) => (
+                  <div key={guardian.id} className="card p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                          <User size={20} className="text-zinc-600 dark:text-zinc-400" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">
+                            {guardian.guardianName}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {guardian.guardianEmail}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            Relación: {guardian.relationshipType || 'No especificada'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

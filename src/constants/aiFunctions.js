@@ -31,40 +31,59 @@ export const AI_PROVIDERS = [
     id: 'openai',
     name: 'OpenAI',
     icon: Bot,
+    description: 'Modelos GPT de OpenAI. Soporta temperature y top_p.',
     models: [
       { value: 'gpt-4', label: 'GPT-4' },
       { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
       { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
-    ]
+    ],
+    supportsTemperature: true,
+    supportsTopP: true,
+    supportsMaxTokens: true
   },
   {
     id: 'claude',
     name: 'Claude',
     icon: Brain,
+    description: 'Modelos Claude de Anthropic. Solo soporta temperature (no top_p).',
     models: [
-      { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
-      { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' },
-      { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku' }
-    ]
+      { value: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5 (Latest)' },
+      { value: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5 (Sep 2024)' },
+      { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 (Latest)' },
+      { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (Oct 2024)' },
+      { value: 'claude-opus-4-1', label: 'Claude Opus 4.1 (Latest)' },
+      { value: 'claude-opus-4-1-20250805', label: 'Claude Opus 4.1 (Aug 2024)' }
+    ],
+    supportsTemperature: true,
+    supportsTopP: false,
+    supportsMaxTokens: true
   },
   {
     id: 'grok',
     name: 'Grok',
     icon: Rocket,
+    description: 'Modelos Grok de xAI. Soporta temperature y top_p.',
     models: [
       { value: 'grok-beta', label: 'Grok Beta' },
       { value: 'grok-2', label: 'Grok 2' }
-    ]
+    ],
+    supportsTemperature: true,
+    supportsTopP: true,
+    supportsMaxTokens: true
   },
   {
     id: 'google',
     name: 'Google',
     icon: Search,
+    description: 'Modelos Gemini de Google. Soporta temperature y top_p.',
     models: [
-      { value: 'gemini-pro', label: 'Gemini Pro' },
+      { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash (Experimental)' },
       { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
       { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' }
-    ]
+    ],
+    supportsTemperature: true,
+    supportsTopP: true,
+    supportsMaxTokens: true
   }
 ];
 
@@ -100,7 +119,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'claude',
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5',
       apiKey: '',
       systemPrompt: 'Eres un tutor paciente y amigable. Respondes preguntas de estudiantes de español de manera clara, usando ejemplos y siendo alentador. Adaptas tu nivel de explicación al nivel del estudiante.',
       parameters: {
@@ -138,7 +157,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'google',
-      model: 'gemini-pro',
+      model: 'gemini-2.0-flash-exp',
       apiKey: '',
       systemPrompt: 'Eres un creador de contenido educativo especializado en enseñanza de español. Generas lecciones bien estructuradas, lecturas apropiadas por nivel, y material didáctico efectivo.',
       parameters: {
@@ -176,7 +195,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'claude',
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-haiku-4-5',
       apiKey: '',
       systemPrompt: 'Eres un asistente que genera feedback personalizado y constructivo para estudiantes. Tus comentarios son específicos, alentadores y proporcionan pasos claros para mejorar.',
       parameters: {
@@ -214,7 +233,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'google',
-      model: 'gemini-1.5-pro',
+      model: 'gemini-2.0-flash-exp',
       apiKey: '',
       systemPrompt: 'Eres un especialista en fonética española. Analizas transcripciones de audio y proporcionas feedback específico sobre pronunciación, entonación y ritmo.',
       parameters: {

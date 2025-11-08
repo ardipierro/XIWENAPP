@@ -55,16 +55,16 @@ function BaseAlert({
       defaultIcon: AlertTriangle,
     },
     info: {
-      container: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
-      icon: 'text-blue-600 dark:text-blue-400',
-      title: 'text-blue-900 dark:text-blue-300',
-      text: 'text-blue-800 dark:text-blue-400',
-      border: 'border-l-blue-600',
+      container: 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700',
+      icon: 'text-gray-700 dark:text-gray-400',
+      title: 'text-gray-900 dark:text-gray-200',
+      text: 'text-gray-800 dark:text-gray-300',
+      border: 'border-l-gray-600',
       defaultIcon: Info,
     },
   };
 
-  const config = variants[variant];
+  const config = variants[variant] || variants.info; // Fallback to 'info' if invalid variant
   const IconComponent = CustomIcon || config.defaultIcon;
 
   return (

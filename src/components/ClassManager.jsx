@@ -575,7 +575,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
             {filteredClasses.map(cls => (
               <div
                 key={cls.id}
-                className="class-card card card-grid-item cursor-pointer hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden"
+                className="class-card card card-grid-item cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300 flex flex-col overflow-hidden"
                 onClick={() => handleViewDetails(cls)}
                 title="Click para configurar clase"
                 style={{ padding: 0 }}
@@ -642,7 +642,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
             {filteredClasses.map(cls => (
               <div
                 key={cls.id}
-                className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
+                className="card card-list cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300"
                 onClick={() => handleViewDetails(cls)}
                 title="Click para configurar clase"
               >

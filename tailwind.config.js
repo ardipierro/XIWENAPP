@@ -77,7 +77,7 @@ export default {
         success: '#10b981',        // green-500
         warning: '#f59e0b',        // amber-500
         error: '#ef4444',          // red-500
-        info: '#a1a1aa',           // zinc-400 (gris neutral)
+        info: '#a1a1aa',           // zinc-400 (gris neutral, NO azul)
       },
       
       // Espaciado personalizado (Mobile First)

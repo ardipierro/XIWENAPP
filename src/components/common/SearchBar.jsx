@@ -36,8 +36,15 @@ function SearchBar({
         </div>
         <input
           type="text"
+          name="search-bar-unique"
+          autoComplete="off"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            e.stopPropagation();
+            onChange(e.target.value);
+          }}
+          onInput={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           placeholder={placeholder}
           className="input w-full pl-10 pr-10"
         />
@@ -63,8 +70,15 @@ function SearchBar({
       {/* Input sin bordes ni fondo */}
       <input
         type="text"
+        name="search-bar-unique-inline"
+        autoComplete="off"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          e.stopPropagation();
+          onChange(e.target.value);
+        }}
+        onInput={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         placeholder={placeholder}
         style={{
           flex: 1,

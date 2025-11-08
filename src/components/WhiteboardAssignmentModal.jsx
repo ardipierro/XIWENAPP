@@ -1,12 +1,12 @@
 import logger from '../utils/logger';
 
 import { useState, useEffect } from 'react';
-import { X, Users, UserPlus, Radio, Edit } from 'lucide-react';
+import { Users, UserPlus, Radio, Edit } from 'lucide-react';
 import { getUsersByRole } from '../firebase/users';
 import { getGroupsByTeacher } from '../firebase/groups';
 import { assignStudentsToWhiteboard, assignGroupsToWhiteboard, startLiveSession, updateWhiteboardSession } from '../firebase/whiteboard';
 import { auth } from '../firebase/config';
-import './WhiteboardAssignmentModal.css';
+import { BaseModal, BaseButton, BaseInput } from './common';
 
 /**
  * Modal for editing whiteboard details, assigning students/groups, and starting live sessions
@@ -140,160 +140,180 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" style={{ maxWidth: '700px' }} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title">
-            <Edit size={24} />
-            Editar Pizarra
-          </h2>
-          <button onClick={onClose} className="modal-close-btn">
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="modal-body">
-          {/* Main Tabs */}
-          <div className="tabs" style={{ marginBottom: '20px' }}>
+    <BaseModal
+      isOpen={true}
+      onClose={onClose}
+      title="Editar Pizarra"
+      size="lg"
+      icon={Edit}
+      footer={
+        <>
+          <BaseButton variant="ghost" onClick={onClose} disabled={saving}>
+            Cancelar
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            onClick={handleSaveAll}
+            disabled={saving || loading}
+            loading={saving}
+          >
+            Guardar Cambios
+          </BaseButton>
+          <BaseButton
+            variant="success"
+            icon={Radio}
+            onClick={handleGoLive}
+            disabled={saving || loading}
+            loading={saving}
+          >
+            Iniciar en Vivo
+          </BaseButton>
+        </>
+      }
+    >
+      <div className="space-y-6">
+        {/* Main Tabs */}
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <div className="flex gap-2">
             <button
-              className={`tab ${activeTab === 'details' ? 'active' : ''}`}
               onClick={() => setActiveTab('details')}
+              className={`px-4 py-2 font-semibold flex items-center gap-2 transition-colors ${
+                activeTab === 'details'
+                  ? 'border-b-2 border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
             >
-              <Edit size={16} />
+              <Edit size={16} strokeWidth={2} />
               Detalles
             </button>
             <button
-              className={`tab ${activeTab === 'students' ? 'active' : ''}`}
               onClick={() => setActiveTab('students')}
+              className={`px-4 py-2 font-semibold flex items-center gap-2 transition-colors ${
+                activeTab === 'students'
+                  ? 'border-b-2 border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
             >
-              <UserPlus size={16} />
+              <UserPlus size={16} strokeWidth={2} />
               Estudiantes ({selectedStudents.length})
             </button>
             <button
-              className={`tab ${activeTab === 'groups' ? 'active' : ''}`}
               onClick={() => setActiveTab('groups')}
+              className={`px-4 py-2 font-semibold flex items-center gap-2 transition-colors ${
+                activeTab === 'groups'
+                  ? 'border-b-2 border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
             >
-              <Users size={16} />
+              <Users size={16} strokeWidth={2} />
               Grupos ({selectedGroups.length})
             </button>
           </div>
+        </div>
 
-          {loading && activeTab !== 'details' ? (
-            <p>Cargando...</p>
-          ) : (
-            <>
-              {/* Details Tab */}
-              {activeTab === 'details' && (
-                <div className="details-section">
-                  <div className="form-group">
-                    <label htmlFor="whiteboard-title" style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
-                      Título de la Pizarra
-                    </label>
-                    <input
-                      id="whiteboard-title"
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Ej: Clase de Geometría"
-                      style={{
-                        width: '100%',
-                        padding: '12px',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        background: 'var(--bg-secondary)'
-                      }}
-                      autoFocus
-                    />
-                  </div>
+        {loading && activeTab !== 'details' ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-8 h-8 border-4 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300 rounded-full animate-spin"></div>
+            <span className="ml-3 text-gray-600 dark:text-gray-400">Cargando...</span>
+          </div>
+        ) : (
+          <>
+            {/* Details Tab */}
+            {activeTab === 'details' && (
+              <div className="space-y-4">
+                <BaseInput
+                  id="whiteboard-title"
+                  type="text"
+                  label="Título de la Pizarra"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Ej: Clase de Geometría"
+                  autoFocus
+                />
 
-                  <div style={{ marginTop: '20px', padding: '12px', background: 'var(--bg-tertiary)', borderRadius: '8px' }}>
-                    <strong>Información:</strong>
-                    <ul style={{ marginTop: '8px', paddingLeft: '20px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                      <li>Creada: {new Date(session.createdAt?.seconds * 1000 || Date.now()).toLocaleDateString()}</li>
-                      <li>Diapositivas: {session.slides?.length || 0}</li>
-                      <li>Estudiantes asignados: {selectedStudents.length}</li>
-                      <li>Grupos asignados: {selectedGroups.length}</li>
-                    </ul>
-                  </div>
+                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Información:</p>
+                  <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                    <li>• Creada: {new Date(session.createdAt?.seconds * 1000 || Date.now()).toLocaleDateString()}</li>
+                    <li>• Diapositivas: {session.slides?.length || 0}</li>
+                    <li>• Estudiantes asignados: {selectedStudents.length}</li>
+                    <li>• Grupos asignados: {selectedGroups.length}</li>
+                  </ul>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Students Tab */}
-              {activeTab === 'students' && (
-                <div className="assignment-list">
-                  {students.length === 0 ? (
-                    <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      No hay estudiantes disponibles
-                    </p>
-                  ) : (
-                    students.map(student => (
-                      <label key={student.id} className="assignment-item">
-                        <input
-                          type="checkbox"
-                          checked={selectedStudents.includes(student.id)}
-                          onChange={() => toggleStudent(student.id)}
-                        />
-                        <span>{student.displayName || student.email}</span>
-                        {student.email && <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                          {student.email}
-                        </span>}
-                      </label>
-                    ))
-                  )}
-                </div>
-              )}
-
-              {/* Groups Tab */}
-              {activeTab === 'groups' && (
-                <div className="assignment-list">
-                  {groups.length === 0 ? (
-                    <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      No hay grupos disponibles
-                    </p>
-                  ) : (
-                    groups.map(group => (
-                      <label key={group.id} className="assignment-item">
-                        <input
-                          type="checkbox"
-                          checked={selectedGroups.includes(group.id)}
-                          onChange={() => toggleGroup(group.id)}
-                        />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600 }}>{group.name}</div>
-                          <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                            {group.studentCount || 0} estudiantes
-                          </div>
+            {/* Students Tab */}
+            {activeTab === 'students' && (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {students.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    No hay estudiantes disponibles
+                  </div>
+                ) : (
+                  students.map(student => (
+                    <label
+                      key={student.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedStudents.includes(student.id)}
+                        onChange={() => toggleStudent(student.id)}
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {student.displayName || student.email}
                         </div>
-                      </label>
-                    ))
-                  )}
-                </div>
-              )}
+                        {student.email && student.displayName && (
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            {student.email}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
+            )}
 
-            </>
-          )}
-        </div>
-
-        <div className="modal-footer">
-          <button onClick={onClose} className="btn btn-secondary" disabled={saving}>
-            Cancelar
-          </button>
-          <button onClick={handleSaveAll} className="btn btn-primary" disabled={saving || loading}>
-            {saving ? 'Guardando...' : 'Guardar Cambios'}
-          </button>
-          <button
-            onClick={handleGoLive}
-            className="btn"
-            style={{ background: '#10b981', borderColor: '#10b981' }}
-            disabled={saving || loading}
-          >
-            <Radio size={16} />
-            {saving ? 'Iniciando...' : 'Iniciar en Vivo'}
-          </button>
-        </div>
+            {/* Groups Tab */}
+            {activeTab === 'groups' && (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {groups.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    No hay grupos disponibles
+                  </div>
+                ) : (
+                  groups.map(group => (
+                    <label
+                      key={group.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedGroups.includes(group.id)}
+                        onChange={() => toggleGroup(group.id)}
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 dark:text-gray-100">
+                          {group.name}
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                          {group.studentCount || 0} estudiantes
+                        </div>
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </BaseModal>
   );
 }
 

@@ -5,6 +5,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Send, X, Play, Pause } from 'lucide-react';
+import logger from '../utils/logger';
 import './VoiceRecorder.css';
 
 /**
@@ -74,7 +75,7 @@ function VoiceRecorder({ onSend, onCancel }) {
       setIsRecording(true);
       startTimer();
     } catch (error) {
-      console.error('Error starting recording:', error);
+      logger.error('Error starting recording:', error);
       alert('No se pudo acceder al micrófono. Por favor, verifica los permisos.');
       onCancel();
     }

@@ -247,7 +247,7 @@ function ClassSessionManager({ user, onJoinSession }) {
   // Render badge por modo
   const renderModeBadge = (mode) => {
     return mode === 'live' ? (
-      <BaseBadge variant="info" icon={Video} size="sm">
+      <BaseBadge variant="default" icon={Video} size="sm">
         En Vivo
       </BaseBadge>
     ) : (
@@ -261,14 +261,14 @@ function ClassSessionManager({ user, onJoinSession }) {
   const renderWhiteboardBadge = (whiteboardType) => {
     if (whiteboardType === 'canvas') {
       return (
-        <BaseBadge variant="primary" icon={Presentation} size="sm">
+        <BaseBadge variant="default" icon={Presentation} size="sm">
           Canvas
         </BaseBadge>
       );
     }
     if (whiteboardType === 'excalidraw') {
       return (
-        <BaseBadge variant="primary" icon={PenTool} size="sm">
+        <BaseBadge variant="default" icon={PenTool} size="sm">
           Excalidraw
         </BaseBadge>
       );
@@ -446,7 +446,7 @@ function ClassSessionManager({ user, onJoinSession }) {
               className={`
                 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2
                 ${filterMode === 'live'
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
                   : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
                 }
               `}

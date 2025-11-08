@@ -432,7 +432,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
           {filteredContents.map((content) => (
             <div
               key={content.id}
-              className="card card-grid-item flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
+              className="card card-grid-item flex flex-col cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300 overflow-hidden"
               style={{ padding: 0 }}
               onClick={() => handleEdit(content.id)}
               title="Click para editar contenido"
@@ -482,7 +482,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
           {filteredContents.map((content) => (
             <div
               key={content.id}
-              className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
+              className="card card-list cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300"
               onClick={() => handleEdit(content.id)}
               title="Click para editar contenido"
             >

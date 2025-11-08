@@ -443,7 +443,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
           {filteredCourses.map((course) => (
             <div
               key={course.id}
-              className="card card-grid-item flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
+              className="card card-grid-item flex flex-col cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300 overflow-hidden"
               style={{ padding: 0 }}
               onClick={() => handleOpenCourseModal(course, 'info')}
               title="Click para gestionar curso"
@@ -500,7 +500,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
           {filteredCourses.map((course) => (
             <div
               key={course.id}
-              className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
+              className="card card-list cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300"
               onClick={() => handleOpenCourseModal(course, 'info')}
               title="Click para gestionar curso"
             >

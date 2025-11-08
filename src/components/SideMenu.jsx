@@ -28,7 +28,8 @@ import {
   DollarSign,
   Shield,
   Settings,
-  Lightbulb
+  Lightbulb,
+  UsersRound
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -72,6 +73,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: Users, label: 'Usuarios', path: '/admin', action: 'users' },
               { icon: BookOpen, label: 'Contenidos', path: '/admin', action: 'unifiedContent' },
               { icon: Calendar, label: 'Clases', path: '/admin', action: 'classSessions' },
+              { icon: CalendarDays, label: 'Calendario', path: '/admin', action: 'calendar' },
               { icon: MessageCircle, label: 'Mensajes', path: '/admin', action: 'messages' },
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },

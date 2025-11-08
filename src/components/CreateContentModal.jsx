@@ -45,7 +45,7 @@ const EXERCISE_TYPE_OPTIONS = [
   { value: EXERCISE_TYPES.LISTENING, label: 'Comprensión Auditiva' }
 ];
 
-function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userId }) {
+function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userId, onNavigateToAIConfig }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -66,6 +66,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('manual'); // 'manual' | 'ai'
+  const [generatedExercises, setGeneratedExercises] = useState(null);
 
   // Cargar datos iniciales si es edición
   useEffect(() => {
@@ -104,6 +105,30 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         [field]: value
       }
     }));
+  };
+
+  const handleExercisesGenerated = (data) => {
+    setGeneratedExercises(data);
+
+    // Auto-populate form fields
+    const { metadata, exercises } = data;
+
+    setFormData(prev => ({
+      ...prev,
+      title: prev.title || `Ejercicios: ${metadata.subtheme} (${metadata.difficulty})`,
+      description: prev.description || `${exercises.length} ejercicio(s) de ${metadata.type} sobre ${metadata.subtheme}`,
+      type: CONTENT_TYPES.EXERCISE,
+      contentType: metadata.type,
+      body: JSON.stringify(exercises, null, 2),
+      metadata: {
+        ...prev.metadata,
+        difficulty: metadata.difficulty,
+        level: metadata.difficulty,
+        tags: `${metadata.theme}, ${metadata.subtheme}, ${metadata.type}`
+      }
+    }));
+
+    logger.info('Exercises auto-populated to form:', { title: formData.title, exerciseCount: exercises.length });
   };
 
   const handleSubmit = async (e) => {
@@ -252,7 +277,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
               <span>Manual</span>
             </div>
             {activeTab === 'manual' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white dark:bg-gray-800" />
             )}
           </button>
           <button
@@ -271,7 +296,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
               <span>Generar con IA</span>
             </div>
             {activeTab === 'ai' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white dark:bg-gray-800" />
             )}
           </button>
         </div>
@@ -404,8 +429,17 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
 
         {/* Contenido Tab IA */}
         {activeTab === 'ai' && (
-          <div className="min-h-[500px]">
-            <ExerciseGeneratorContent />
+          <div className="min-h-[500px] space-y-4">
+            {generatedExercises && (
+              <BaseAlert variant="success" title="Ejercicios Listos">
+                ✅ {generatedExercises.exercises.length} ejercicio(s) generado(s) y listo(s) para guardar.
+                Presiona <strong>"Crear"</strong> para guardar en la base de datos.
+              </BaseAlert>
+            )}
+            <ExerciseGeneratorContent
+              onNavigateToAIConfig={onNavigateToAIConfig}
+              onExercisesGenerated={handleExercisesGenerated}
+            />
           </div>
         )}
       </form>

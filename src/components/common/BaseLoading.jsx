@@ -48,7 +48,7 @@ function BaseLoading({
     return (
       <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
         <Loader2
-          className={`${spinnerSizes[size]} text-blue-600 dark:text-blue-400 animate-spin`}
+          className={`${spinnerSizes[size]} text-zinc-800 dark:text-zinc-300 animate-spin`}
         />
         {text && (
           <p className="text-sm text-gray-600 dark:text-gray-400">{text}</p>
@@ -65,7 +65,7 @@ function BaseLoading({
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className={`${dotSizes[size]} rounded-full bg-blue-600 dark:bg-blue-400 animate-bounce`}
+              className={`${dotSizes[size]} rounded-full bg-zinc-800 dark:bg-zinc-300 animate-bounce`}
               style={{ animationDelay: `${i * 0.15}s` }}
             />
           ))}
@@ -82,8 +82,8 @@ function BaseLoading({
     return (
       <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
         <div className="relative">
-          <div className={`${spinnerSizes[size]} rounded-full bg-blue-600 dark:bg-blue-400 animate-ping absolute opacity-75`} />
-          <div className={`${spinnerSizes[size]} rounded-full bg-blue-600 dark:bg-blue-400 relative`} />
+          <div className={`${spinnerSizes[size]} rounded-full bg-zinc-800 dark:bg-zinc-300 animate-ping absolute opacity-75`} />
+          <div className={`${spinnerSizes[size]} rounded-full bg-zinc-800 dark:bg-zinc-300 relative`} />
         </div>
         {text && (
           <p className="text-sm text-gray-600 dark:text-gray-400">{text}</p>
@@ -100,7 +100,7 @@ function BaseLoading({
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
-              className={`${barSizes[size]} bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse`}
+              className={`${barSizes[size]} bg-zinc-800 dark:bg-zinc-300 rounded-full animate-pulse`}
               style={{
                 animationDelay: `${i * 0.15}s`,
                 animationDuration: '1s',
@@ -120,7 +120,7 @@ function BaseLoading({
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
         <div className="flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-12 h-12 text-blue-600 dark:text-blue-400 animate-spin" />
+          <Loader2 className="w-12 h-12 text-zinc-800 dark:text-zinc-300 animate-spin" />
           {text && (
             <p className="text-base text-gray-900 dark:text-white font-medium">
               {text}

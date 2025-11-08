@@ -219,7 +219,7 @@ function GroupManager({ user, courses }) {
           {filteredGroups.map((group) => (
             <div
               key={group.id}
-              className="card flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
+              className="card flex flex-col cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300 overflow-hidden"
               style={{ padding: 0 }}
               onClick={() => handleSelectGroup(group)}
               title="Click para gestionar grupo"
@@ -252,7 +252,7 @@ function GroupManager({ user, courses }) {
           {filteredGroups.map((group) => (
             <div
               key={group.id}
-              className="card card-list cursor-pointer hover:shadow-lg transition-all duration-300"
+              className="card card-list cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300"
               onClick={() => handleSelectGroup(group)}
               title="Click para gestionar grupo"
             >

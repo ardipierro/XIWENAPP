@@ -108,7 +108,7 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
               ) : results.percentage >= 50 ? (
                 <Smile size={48} strokeWidth={2} className="text-green-500" />
               ) : (
-                <Zap size={48} strokeWidth={2} className="text-blue-500" />
+                <Zap size={48} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
               )}
             </div>
             <h2 className="results-title">¡Ejercicio Completado!</h2>

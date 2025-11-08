@@ -4,12 +4,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Check, X, Volume2, GripVertical } from 'lucide-react';
+import { Sparkles, Loader2, Check, X, Volume2, GripVertical, Settings } from 'lucide-react';
 import BaseButton from './common/BaseButton';
 import BaseSelect from './common/BaseSelect';
 import BaseTextarea from './common/BaseTextarea';
 import BaseAlert from './common/BaseAlert';
 import AIService from '../services/AIService';
+import { AI_PROVIDERS } from '../constants/aiFunctions';
+import { callAI, getAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 
 // ============================================================================
@@ -19,7 +21,7 @@ import logger from '../utils/logger';
 /**
  * FillGap - Fill in the blank exercise component
  */
-const FillGap = ({ sentence, answer, onComplete }) => {
+export const FillGap = ({ sentence, answer, onComplete }) => {
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
 
@@ -95,7 +97,7 @@ const FillGap = ({ sentence, answer, onComplete }) => {
 /**
  * MultipleChoice - Multiple choice question component
  */
-const MultipleChoice = ({ question, options, correctIndex, onComplete }) => {
+export const MultipleChoice = ({ question, options, correctIndex, onComplete }) => {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
@@ -125,7 +127,7 @@ const MultipleChoice = ({ question, options, correctIndex, onComplete }) => {
             className={`
               w-full p-4 text-left rounded-lg border-2 transition-all
               disabled:cursor-not-allowed
-              ${selectedIndex === index && feedback === null ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}
+              ${selectedIndex === index && feedback === null ? 'border-zinc-500 bg-zinc-50 dark:bg-zinc-900' : ''}
               ${selectedIndex !== index && feedback === null ? 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500' : ''}
               ${feedback === 'correct' && index === correctIndex ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               ${feedback === 'incorrect' && index === selectedIndex ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}
@@ -205,7 +207,7 @@ const DragMatch = ({ dragItems, dropItems, onComplete }) => {
               key={index}
               className={`
                 p-3 rounded-lg border-2 cursor-move
-                ${matches[index] !== undefined ? 'opacity-50' : 'hover:border-blue-500'}
+                ${matches[index] !== undefined ? 'opacity-50' : 'hover:border-zinc-500'}
                 ${feedback === 'correct' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
                 ${feedback === 'incorrect' && matches[index] !== index ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}
                 ${feedback === null ? 'border-zinc-300 dark:border-zinc-600' : ''}
@@ -290,7 +292,7 @@ const ListeningExercise = ({ audioText, question, options, correctIndex, onCompl
           disabled={isPlaying}
           variant="secondary"
           size="sm"
-          leftIcon={Volume2}
+          icon={Volume2}
         >
           {isPlaying ? 'Reproduciendo...' : 'Escuchar audio'}
         </BaseButton>
@@ -308,7 +310,7 @@ const ListeningExercise = ({ audioText, question, options, correctIndex, onCompl
             disabled={feedback !== null}
             className={`
               w-full p-4 text-left rounded-lg border-2 transition-all
-              ${selectedIndex === index && feedback === null ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}
+              ${selectedIndex === index && feedback === null ? 'border-zinc-500 bg-zinc-50 dark:bg-zinc-900' : ''}
               ${selectedIndex !== index && feedback === null ? 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400' : ''}
               ${feedback === 'correct' && index === correctIndex ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               ${feedback === 'incorrect' && index === selectedIndex ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}
@@ -365,11 +367,11 @@ const parseExercises = (text) => {
     if (!currentBlock) continue;
 
     // Gap-fill exercise
-    if (currentBlock.includes('[___]') && currentBlock.includes('[ANS:')) {
-      const answerMatch = currentBlock.match(/\[ANS:\s*(.+?)\]/);
+    if (currentBlock.includes('[___]') && currentBlock.includes('=')) {
+      const answerMatch = currentBlock.match(/=(.+?)=/);
       if (answerMatch) {
         const answer = answerMatch[1].trim();
-        const sentence = currentBlock.replace(/\[ANS:.+?\]/, '').trim();
+        const sentence = currentBlock.replace(/=.+?=/, '').trim();
 
         exercises.push({
           type: 'gap-fill',
@@ -475,7 +477,7 @@ const parseExercises = (text) => {
 // MAIN COMPONENT
 // ============================================================================
 
-const ExerciseGeneratorContent = () => {
+const ExerciseGeneratorContent = ({ onNavigateToAIConfig, onExercisesGenerated }) => {
   // Form state
   const [formData, setFormData] = useState({
     theme: '',
@@ -489,6 +491,14 @@ const ExerciseGeneratorContent = () => {
   // AI Provider state
   const [selectedProvider, setSelectedProvider] = useState(AIService.getCurrentProvider() || 'openai');
   const [availableProviders, setAvailableProviders] = useState([]);
+
+  // AI Configuration state
+  const [aiConfig, setAiConfig] = useState({
+    temperature: 0.7,
+    maxTokens: 2000,
+    topP: 1,
+    systemPrompt: 'Eres un asistente experto en crear ejercicios de español como lengua extranjera. Genera ejercicios creativos, educativos y apropiados para el nivel especificado.'
+  });
 
   // UI state
   const [isGenerating, setIsGenerating] = useState(false);
@@ -504,10 +514,19 @@ const ExerciseGeneratorContent = () => {
   }, []);
 
   // Handle provider change
-  const handleProviderChange = (providerName) => {
+  const handleProviderChange = (e) => {
+    const providerName = e.target.value;
     setSelectedProvider(providerName);
     AIService.setProvider(providerName);
     setError(null);
+  };
+
+  // Handle AI config change
+  const handleAiConfigChange = (field, value) => {
+    setAiConfig(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   // Options for dropdowns
@@ -554,10 +573,28 @@ const ExerciseGeneratorContent = () => {
   // Parse exercises when generated text changes
   useEffect(() => {
     if (generatedText) {
+      logger.info('Parsing exercises from generatedText, length:', generatedText.length);
       const parsed = parseExercises(generatedText);
+      logger.info('Parsed exercises count:', parsed.length);
+      logger.info('Parsed exercises:', parsed);
       setExercises(parsed);
+
+      // Notify parent component if callback provided (only once per generation)
+      if (onExercisesGenerated && parsed.length > 0) {
+        onExercisesGenerated({
+          exercises: parsed,
+          rawText: generatedText,
+          metadata: {
+            theme: formData.theme,
+            subtheme: formData.subtheme,
+            type: formData.type,
+            difficulty: formData.difficulty,
+            quantity: formData.quantity
+          }
+        });
+      }
     }
-  }, [generatedText]);
+  }, [generatedText]); // Only depend on generatedText to avoid infinite loops
 
   const handleGenerate = async () => {
     // Validation
@@ -573,20 +610,86 @@ const ExerciseGeneratorContent = () => {
     setCompletedExercises({});
 
     try {
-      const result = await AIService.generateExercises({
-        theme: formData.theme,
-        subtheme: formData.subtheme,
-        type: formData.type,
-        difficulty: formData.difficulty,
-        quantity: formData.quantity,
-        context: formData.context
+      // Build the exercise generation prompt
+      const { theme, subtheme, type, difficulty, quantity, context } = formData;
+
+      let prompt = `Genera ${quantity} ejercicio${quantity > 1 ? 's' : ''} de ${type} sobre ${subtheme} (tema: ${theme}) para estudiantes de español, nivel ${difficulty}.`;
+
+      if (context && context.trim()) {
+        prompt += ` ${context}.`;
+      }
+
+      prompt += `
+
+FORMATO OBLIGATORIO (usa EXACTAMENTE estos marcadores):
+
+Para gap-fill (rellenar espacios):
+- Usa [___] para espacios en blanco
+- Después de cada ejercicio, indica la respuesta correcta con =respuesta=
+Ejemplo:
+El gato [___] en el sofá.
+=duerme=
+
+Para multiple-choice (opción múltiple):
+- Escribe la pregunta
+- Opciones con --A--, --B--, --C--, --D--
+- Marca la correcta con ** antes y después, ejemplo: **--A--**
+Ejemplo:
+¿Cuál es el verbo correcto?
+--A-- como
+**--B-- comer**
+--C-- comiendo
+--D-- comí
+
+Para drag-to-match (arrastrar y emparejar):
+- Usa <drag>palabra</drag> para elementos arrastrables
+- Usa <drop>respuesta_correcta</drop> para zonas de destino
+- Pon las opciones y destinos en líneas separadas
+Ejemplo:
+Empareja cada animal con su sonido:
+<drag>perro</drag> <drag>gato</drag> <drag>vaca</drag>
+<drop>guau</drop> <drop>miau</drop> <drop>muu</drop>
+
+Para listening (comprensión auditiva):
+- Texto entre <audio>texto_para_leer</audio>
+- Preguntas de comprensión después con --A--, --B--, etc.
+- Marca respuesta correcta con **
+Ejemplo:
+<audio>María va al mercado cada domingo por la mañana.</audio>
+¿Cuándo va María al mercado?
+**--A-- Los domingos**
+--B-- Los lunes
+--C-- Cada tarde
+--D-- Nunca
+
+IMPORTANTE:
+- Usa SOLO los marcadores especificados
+- Separa cada ejercicio con una línea en blanco
+- Nivel ${difficulty} apropiado
+- Contenido 100% en español
+- Si hay contexto específico, úsalo
+- No agregues explicaciones extra, solo los ejercicios`;
+
+      // Get the selected provider's model
+      const currentProvider = AI_PROVIDERS.find(p => p.id === selectedProvider);
+      const providerInfo = availableProviders.find(p => p.name === selectedProvider);
+
+      // Call AI via Cloud Function
+      const response = await callAI(selectedProvider, prompt, {
+        model: providerInfo?.model || currentProvider?.models[0]?.value || 'gpt-4',
+        systemPrompt: aiConfig.systemPrompt,
+        parameters: {
+          temperature: aiConfig.temperature,
+          maxTokens: aiConfig.maxTokens,
+          topP: aiConfig.topP
+        }
       });
 
-      if (result.success) {
-        setGeneratedText(result.data);
-      } else {
-        setError(result.error);
-      }
+      logger.info('AI response received, length:', response?.length);
+      logger.info('Response preview:', response?.substring(0, 200));
+
+      setGeneratedText(response);
+
     } catch (err) {
       setError('Error al generar ejercicios. Por favor, intenta de nuevo.');
       logger.error('Generate error:', err);
@@ -605,75 +708,120 @@ const ExerciseGeneratorContent = () => {
   const isFormValid = formData.theme && formData.subtheme && formData.type && formData.difficulty;
   const hasExercises = exercises.length > 0;
 
+  // Crear opciones de proveedores para el dropdown
+  const providerOptions = availableProviders.map(p => ({
+    value: p.name,
+    label: `${p.label} - ${p.model}`,
+    disabled: !p.configured
+  }));
+
+  // Obtener información del proveedor seleccionado
+  const currentProvider = AI_PROVIDERS.find(p => p.id === selectedProvider);
+
   return (
     <div className="space-y-6">
-      {/* AI Provider Selector */}
-      <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-          Proveedor de IA
-        </label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {availableProviders.map((provider) => (
-            <button
-              key={provider.name}
-              onClick={() => handleProviderChange(provider.name)}
-              disabled={!provider.configured}
-              className={`
-                relative flex flex-col items-center gap-2 p-4 rounded-xl border-2
-                transition-all duration-200
-                ${selectedProvider === provider.name
-                  ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 shadow-lg'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-                }
-                ${!provider.configured ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:scale-[0.98]'}
-              `}
-              title={!provider.configured ? `${provider.label} no está configurado` : `Usar ${provider.label}`}
-            >
-              {/* Provider Icon & Name */}
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{provider.icon}</span>
-                <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">
-                  {provider.label}
-                </span>
+      {/* AI Configuration Section */}
+      <div className="space-y-4 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-3">
+          Configuración de IA
+        </h3>
+
+        {/* Provider Selector (Dropdown) */}
+        <BaseSelect
+          label="Proveedor de IA"
+          value={selectedProvider}
+          onChange={handleProviderChange}
+          options={providerOptions}
+          required
+        />
+
+        {/* System Prompt */}
+        <BaseTextarea
+          label="System Prompt"
+          value={aiConfig.systemPrompt}
+          onChange={(e) => handleAiConfigChange('systemPrompt', e.target.value)}
+          placeholder="Define cómo debe comportarse la IA..."
+          rows={3}
+          helperText="Instrucciones para guiar el comportamiento de la IA"
+        />
+
+        {/* Advanced Parameters */}
+        {currentProvider && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Temperature */}
+            {currentProvider.supportsTemperature && (
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  Temperature ({aiConfig.temperature})
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="2"
+                  step="0.1"
+                  value={aiConfig.temperature}
+                  onChange={(e) => handleAiConfigChange('temperature', parseFloat(e.target.value))}
+                  className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-600 dark:accent-zinc-400"
+                />
+                <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                  Creatividad (0 = preciso, 2 = creativo)
+                </p>
               </div>
+            )}
 
-              {/* Model Badge */}
-              <span className="text-xs text-gray-600 dark:text-gray-400 font-mono">
-                {provider.model}
-              </span>
-
-              {/* Status Badge */}
-              <div className="absolute top-2 right-2">
-                {provider.configured ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
-                    <Check className="w-3 h-3" />
-                    OK
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-semibold">
-                    <X className="w-3 h-3" />
-                    Sin configurar
-                  </span>
-                )}
+            {/* Max Tokens */}
+            {currentProvider.supportsMaxTokens && (
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  Max Tokens
+                </label>
+                <input
+                  type="number"
+                  min="100"
+                  max="4000"
+                  step="100"
+                  value={aiConfig.maxTokens}
+                  onChange={(e) => handleAiConfigChange('maxTokens', parseInt(e.target.value))}
+                  className="input w-full"
+                />
+                <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                  Longitud máxima de respuesta
+                </p>
               </div>
+            )}
 
-              {/* Selected Indicator */}
-              {selectedProvider === provider.name && provider.configured && (
-                <div className="absolute inset-0 rounded-xl border-2 border-blue-500 pointer-events-none">
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          💡 Configura los proveedores en tu archivo .env con las variables VITE_OPENAI_API_KEY, VITE_GEMINI_API_KEY, VITE_GROK_API_KEY
-        </p>
+            {/* Top P */}
+            {currentProvider.supportsTopP && (
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  Top P ({aiConfig.topP})
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={aiConfig.topP}
+                  onChange={(e) => handleAiConfigChange('topP', parseFloat(e.target.value))}
+                  className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-600 dark:accent-zinc-400"
+                />
+                <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                  Diversidad de respuestas
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Warning for Claude */}
+        {currentProvider?.id === 'claude' && (
+          <BaseAlert variant="info">
+            ℹ️ Claude no soporta el parámetro Top P. Solo puedes ajustar Temperature y Max Tokens.
+          </BaseAlert>
+        )}
       </div>
 
-      {/* Form Section */}
+      {/* Exercise Parameters Section */}
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Theme */}
@@ -746,7 +894,7 @@ const ExerciseGeneratorContent = () => {
           loading={isGenerating}
           variant="primary"
           className="w-full"
-          leftIcon={isGenerating ? Loader2 : Sparkles}
+          icon={isGenerating ? Loader2 : Sparkles}
         >
           {isGenerating ? 'Generando ejercicios...' : 'Crear Ejercicios con IA'}
         </BaseButton>
@@ -767,10 +915,10 @@ const ExerciseGeneratorContent = () => {
           {exercises.map((exercise, index) => (
             <div
               key={index}
-              className="p-6 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 shadow-sm"
+              className="p-6 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700"
             >
               <div className="flex items-center gap-2 mb-4">
-                <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+                <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full text-sm font-semibold">
                   Ejercicio {index + 1}
                 </span>
                 {completedExercises[index] !== undefined && (
@@ -828,7 +976,7 @@ const ExerciseGeneratorContent = () => {
       {/* Loading State */}
       {isGenerating && (
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+          <Loader2 className="w-12 h-12 text-zinc-500 animate-spin" />
           <p className="text-gray-600 dark:text-gray-400 font-medium">
             La IA está creando tus ejercicios...
           </p>
