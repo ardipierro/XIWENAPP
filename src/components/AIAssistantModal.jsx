@@ -48,6 +48,35 @@ function AIAssistantModal({ isOpen, onClose }) {
   }, [isOpen]);
 
   const loadAIProvider = async () => {
+    const config = await safeAsync(getAIConfig, {
+      context: 'AIAssistantModal'
+    });
+
+    if (!config) {
+      alert('No hay ninguna IA configurada. Contacta al administrador.');
+      onClose();
+      return;
+    }
+
+    // Check if there's a function configured (new structure)
+    if (config.functions) {
+      const chatAssistant = config.functions.chat_assistant;
+      if (chatAssistant && chatAssistant.enabled) {
+        setActiveProvider(chatAssistant.provider);
+        setProviderConfig(chatAssistant);
+        return;
+      }
+
+      // If chat_assistant is not enabled, try to find any enabled function
+      const enabledFunction = Object.values(config.functions).find(f => f.enabled);
+      if (enabledFunction) {
+        setActiveProvider(enabledFunction.provider);
+        setProviderConfig(enabledFunction);
+        return;
+      }
+    }
+
+    // Legacy structure - check individual providers
     const provider = await safeAsync(getActiveAIProvider, {
       context: 'AIAssistantModal'
     });
@@ -60,12 +89,28 @@ function AIAssistantModal({ isOpen, onClose }) {
 
     setActiveProvider(provider);
 
-    const config = await safeAsync(getAIConfig, {
-      context: 'AIAssistantModal'
-    });
+    // Build a config object with defaults for legacy structure
+    const legacyConfig = {
+      provider: provider,
+      model: getDefaultModel(provider),
+      systemPrompt: config[provider]?.basePrompt || 'Eres un asistente educativo experto.',
+      parameters: {
+        temperature: 0.7,
+        maxTokens: 2000,
+        topP: 1
+      }
+    };
 
-    if (config) {
-      setProviderConfig(config[provider]);
+    setProviderConfig(legacyConfig);
+  };
+
+  const getDefaultModel = (provider) => {
+    switch (provider) {
+      case 'openai': return 'gpt-4';
+      case 'claude': return 'claude-sonnet-4-5';
+      case 'grok': return 'grok-2';
+      case 'google': return 'gemini-pro';
+      default: return 'gpt-4';
     }
   };
 

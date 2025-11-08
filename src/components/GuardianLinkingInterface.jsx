@@ -492,7 +492,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <BaseSelect
-          label="Seleccionar Tutor *"
+          label="Tutor *"
           value={selectedGuardian}
           onChange={(e) => setSelectedGuardian(e.target.value)}
           options={[
@@ -506,7 +506,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
         />
 
         <BaseSelect
-          label="Seleccionar Estudiante *"
+          label="Estudiante *"
           value={selectedStudent}
           onChange={(e) => setSelectedStudent(e.target.value)}
           options={[

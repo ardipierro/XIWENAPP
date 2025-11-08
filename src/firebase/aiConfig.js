@@ -149,30 +149,38 @@ export async function callAIFunction(functionId, prompt) {
 }
 
 /**
- * Call AI provider
- * @param {string} provider - Provider name (openai, grok, google, claude)
+ * Call AI provider via Cloud Function (secure backend call)
+ * @param {string} provider - Provider name (openai, grok, gemini, claude)
  * @param {string} prompt - User prompt
- * @param {Object} config - Provider config with systemPrompt, apiKey, model, parameters
+ * @param {Object} config - Provider config with systemPrompt, model, parameters
  * @returns {Promise<string>}
  */
 export async function callAI(provider, prompt, config) {
   try {
-    // Use systemPrompt if available, otherwise use legacy basePrompt
-    const systemPrompt = config.systemPrompt || config.basePrompt || '';
-    const fullPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
+    logger.info(`Calling AI provider: ${provider}`, 'AIConfig');
 
-    switch (provider) {
-      case 'openai':
-        return await callOpenAI(fullPrompt, config.apiKey, config.model, config.parameters);
-      case 'grok':
-        return await callGrok(fullPrompt, config.apiKey, config.model, config.parameters);
-      case 'google':
-        return await callGoogle(fullPrompt, config.apiKey, config.model, config.parameters);
-      case 'claude':
-        return await callClaude(fullPrompt, config.apiKey, config.model, config.parameters);
-      default:
-        throw new Error('Invalid provider');
-    }
+    // Import Firebase Functions
+    const { getFunctions, httpsCallable } = await import('firebase/functions');
+    const functions = getFunctions();
+
+    // Call Cloud Function
+    const callAIFunction = httpsCallable(functions, 'callAI');
+
+    const result = await callAIFunction({
+      provider: provider === 'google' ? 'gemini' : provider, // Normalize 'google' to 'gemini'
+      prompt,
+      config: {
+        model: config.model,
+        systemPrompt: config.systemPrompt || config.basePrompt || '',
+        temperature: config.parameters?.temperature || config.temperature || 0.7,
+        maxTokens: config.parameters?.maxTokens || config.maxTokens || 2000,
+        topP: config.parameters?.topP || config.topP || 1
+      }
+    });
+
+    logger.info(`AI response received from ${provider}`, 'AIConfig');
+    return result.data.response;
+
   } catch (error) {
     logger.error('Error calling AI', error, 'AIConfig');
     throw error;
@@ -180,117 +188,33 @@ export async function callAI(provider, prompt, config) {
 }
 
 /**
- * Call OpenAI API
+ * Check which AI providers have configured credentials in Secret Manager
+ * @returns {Promise<Object>} Object with provider status (claude, openai, grok, gemini)
  */
-async function callOpenAI(prompt, apiKey, model = 'gpt-4', parameters = {}) {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: model || 'gpt-4',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: parameters.temperature || 0.7,
-      max_tokens: parameters.maxTokens || 2000,
-      top_p: parameters.topP || 1
-    })
-  });
+export async function checkAICredentials() {
+  try {
+    logger.info('Checking AI credentials status', 'AIConfig');
 
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`);
+    const { getFunctions, httpsCallable } = await import('firebase/functions');
+    const functions = getFunctions();
+
+    const checkCredentials = httpsCallable(functions, 'checkAICredentials');
+
+    const result = await checkCredentials();
+
+    logger.info('AI credentials status received', 'AIConfig');
+    return result.data.credentials;
+
+  } catch (error) {
+    logger.error('Error checking AI credentials', error, 'AIConfig');
+    // Return all false if error
+    return {
+      claude: false,
+      openai: false,
+      grok: false,
+      gemini: false
+    };
   }
-
-  const data = await response.json();
-  return data.choices[0].message.content;
-}
-
-/**
- * Call Grok API
- */
-async function callGrok(prompt, apiKey, model = 'grok-beta', parameters = {}) {
-  const response = await fetch('https://api.x.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: model || 'grok-beta',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: parameters.temperature || 0.7,
-      max_tokens: parameters.maxTokens || 2000,
-      top_p: parameters.topP || 1
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Grok API error: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.choices[0].message.content;
-}
-
-/**
- * Call Google Gemini API
- */
-async function callGoogle(prompt, apiKey, model = 'gemini-pro', parameters = {}) {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-pro'}:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-          temperature: parameters.temperature || 0.7,
-          maxOutputTokens: parameters.maxTokens || 2000,
-          topP: parameters.topP || 1
-        }
-      })
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Google API error: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.candidates[0].content.parts[0].text;
-}
-
-/**
- * Call Anthropic Claude API
- */
-async function callClaude(prompt, apiKey, model = 'claude-3-5-sonnet-20241022', parameters = {}) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: model || 'claude-3-5-sonnet-20241022',
-      max_tokens: parameters.maxTokens || 2000,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: parameters.temperature || 0.7,
-      top_p: parameters.topP || 1
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Claude API error: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.content[0].text;
 }
 
 /**
@@ -311,5 +235,6 @@ export default {
   saveAIConfig,
   getAIConfig,
   getActiveAIProvider,
-  callAI
+  callAI,
+  checkAICredentials
 };

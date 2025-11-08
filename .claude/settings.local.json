@@ -67,7 +67,10 @@
       "Bash(git stash show:*)",
       "Bash(npm run migrate:unified-content:*)",
       "Bash(del nul 2)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git reset:*)",
+      "Bash(firebase firestore:get:*)",
+      "Bash(timeout 30 bash:*)"
     ],
     "deny": [],
     "ask": []

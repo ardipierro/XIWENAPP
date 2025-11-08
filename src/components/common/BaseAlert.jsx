@@ -64,7 +64,7 @@ function BaseAlert({
     },
   };
 
-  const config = variants[variant];
+  const config = variants[variant] || variants.info; // Fallback to 'info' if invalid variant
   const IconComponent = CustomIcon || config.defaultIcon;
 
   return (

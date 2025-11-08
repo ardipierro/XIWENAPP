@@ -81,8 +81,11 @@ import LiveGameSetup from './LiveGameSetup';
 import MessagesPanel from './MessagesPanel';
 import AdminPaymentsPanel from './AdminPaymentsPanel';
 import AIConfigPanel from './AIConfigPanel';
+import AICredentialsModal from './AICredentialsModal';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
+import GuardianLinkingInterface from './GuardianLinkingInterface';
+import AIService from '../services/AIService';
 import './AdminDashboard.css';
 
 // Custom hooks
@@ -121,6 +124,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showAICredentialsModal, setShowAICredentialsModal] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [aiCredentials, setAiCredentials] = useState({
+    claude: true,
+    openai: true,
+    gemini: true,
+    grok: true
+  });
 
   // Admin-specific stats (extended from userManagement.stats)
   const [adminStats, setAdminStats] = useState({
@@ -527,7 +538,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'unifiedContent') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <UnifiedContentManager user={user} onBack={navigation.handleBackToDashboard} />
+        <UnifiedContentManager
+          user={user}
+          onBack={navigation.handleBackToDashboard}
+          onNavigateToAIConfig={() => navigation.handleMenuAction('aiConfig')}
+        />
       </DashboardLayout>
     );
   }
@@ -658,6 +673,78 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
+            {/* AI Credentials Section */}
+            <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-6">
+              <h2 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Credenciales de IA
+              </h2>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+                Configura las API keys de los proveedores de IA para usar funciones inteligentes en la plataforma
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {AIService.getAvailableProviders().map((provider) => {
+                  // Check credentials from Firebase Secret Manager
+                  const isConfigured = aiCredentials[provider.name] || false;
+
+                  return (
+                    <button
+                      key={provider.name}
+                      onClick={() => {
+                        setSelectedProvider({
+                          ...provider,
+                          docsUrl: provider.name === 'openai' ? 'https://platform.openai.com/api-keys' :
+                                   provider.name === 'gemini' ? 'https://aistudio.google.com/app/apikey' :
+                                   provider.name === 'grok' ? 'https://console.x.ai/' :
+                                   'https://console.anthropic.com/settings/keys'
+                        });
+                        setShowAICredentialsModal(true);
+                      }}
+                      className={`
+                        relative flex items-center gap-4 p-4 rounded-xl border-2
+                        transition-all duration-200
+                        ${isConfigured
+                          ? 'border-green-500 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30'
+                          : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600'
+                        }
+                        hover:shadow-md active:scale-[0.98]
+                      `}
+                    >
+                      <div className="text-3xl">{provider.icon}</div>
+                      <div className="flex-1 text-left">
+                        <h3 className="font-semibold text-zinc-900 dark:text-white">
+                          {provider.label}
+                        </h3>
+                        <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                          {provider.model}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        {isConfigured ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
+                            <CheckCircle className="w-3 h-3" />
+                            Configurado
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 rounded-full text-xs font-semibold">
+                            <Settings className="w-3 h-3" />
+                            Configurar
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  <strong>Nota:</strong> Las credenciales se guardan de forma segura en el navegador local. No se comparten con otros usuarios.
+                </p>
+              </div>
+            </div>
+
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
               <div className="flex items-start gap-3">
                 <Settings className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1" size={20} />
@@ -679,6 +766,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
           </div>
         </div>
+
+        {/* AI Credentials Modal */}
+        <AICredentialsModal
+          isOpen={showAICredentialsModal}
+          onClose={() => {
+            setShowAICredentialsModal(false);
+            setSelectedProvider(null);
+          }}
+          provider={selectedProvider}
+          isConfigured={selectedProvider ? aiCredentials[selectedProvider.name] : false}
+          onSave={async (providerName, apiKey) => {
+            logger.info('API Key saved for provider:', providerName);
+            // Reload providers to update configured status
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          }}
+        />
       </DashboardLayout>
     );
   }
@@ -765,6 +870,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
     navigation.setCurrentScreen('users');
     navigation.setUsersRoleFilter('students');
     return null; // Will re-render with users screen
+  }
+
+  // Guardian Linking Interface - WITH Layout
+  if (navigation.currentScreen === 'guardians') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Back to Home
+          </button>
+          <GuardianLinkingInterface adminId={user.uid} />
+        </div>
+      </DashboardLayout>
+    );
   }
 
   // User Management - WITH Layout

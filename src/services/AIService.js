@@ -27,6 +27,23 @@ class AIService {
   }
 
   /**
+   * Get API key for a provider (checks localStorage first, then .env)
+   * @private
+   * @param {string} providerName - Provider name
+   * @param {string} envKey - Environment variable API key
+   * @returns {string} API key
+   */
+  _getApiKey(providerName, envKey) {
+    if (typeof window !== 'undefined') {
+      const storedKey = localStorage.getItem(`ai_credentials_${providerName}`);
+      if (storedKey) {
+        return storedKey;
+      }
+    }
+    return envKey;
+  }
+
+  /**
    * Create a provider instance
    * @private
    * @param {string} providerName - Provider name (openai, gemini, grok, claude)
@@ -36,26 +53,26 @@ class AIService {
     switch (providerName.toLowerCase()) {
       case 'gemini':
         return new GeminiProvider(
-          import.meta.env.VITE_GEMINI_API_KEY,
+          this._getApiKey('gemini', import.meta.env.VITE_GEMINI_API_KEY),
           import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash-exp'
         );
 
       case 'grok':
         return new GrokProvider(
-          import.meta.env.VITE_GROK_API_KEY,
+          this._getApiKey('grok', import.meta.env.VITE_GROK_API_KEY),
           import.meta.env.VITE_GROK_MODEL || 'grok-2-latest'
         );
 
       case 'claude':
         return new ClaudeProvider(
-          import.meta.env.VITE_CLAUDE_API_KEY,
-          import.meta.env.VITE_CLAUDE_MODEL || 'claude-3-5-sonnet-20241022'
+          this._getApiKey('claude', import.meta.env.VITE_CLAUDE_API_KEY),
+          import.meta.env.VITE_CLAUDE_MODEL || 'claude-sonnet-4-5'
         );
 
       case 'openai':
       default:
         return new OpenAIProvider(
-          import.meta.env.VITE_OPENAI_API_KEY,
+          this._getApiKey('openai', import.meta.env.VITE_OPENAI_API_KEY),
           import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini'
         );
     }
@@ -118,18 +135,24 @@ class AIService {
         name: 'claude',
         label: 'Anthropic Claude',
         icon: '🧠',
-        model: import.meta.env.VITE_CLAUDE_MODEL || 'claude-3-5-sonnet-20241022',
+        model: import.meta.env.VITE_CLAUDE_MODEL || 'claude-sonnet-4-5',
         apiKey: import.meta.env.VITE_CLAUDE_API_KEY
       }
     ];
 
-    return providers.map(p => ({
-      name: p.name,
-      label: p.label,
-      icon: p.icon,
-      model: p.model,
-      configured: !!(p.apiKey && p.apiKey !== 'your-api-key-here' && p.apiKey !== 'your-key-here')
-    }));
+    return providers.map(p => {
+      // Check localStorage first, then .env
+      const storedKey = typeof window !== 'undefined' ? localStorage.getItem(`ai_credentials_${p.name}`) : null;
+      const apiKey = storedKey || p.apiKey;
+
+      return {
+        name: p.name,
+        label: p.label,
+        icon: p.icon,
+        model: p.model,
+        configured: !!(apiKey && apiKey !== 'your-api-key-here' && apiKey !== 'your-key-here')
+      };
+    });
   }
 
   /**

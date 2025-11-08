@@ -560,7 +560,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'unifiedContent') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <UnifiedContentManager user={user} onBack={navigation.handleBackToDashboard} />
+        <UnifiedContentManager
+          user={user}
+          onBack={navigation.handleBackToDashboard}
+          onNavigateToAIConfig={() => navigation.handleMenuAction('aiConfig')}
+        />
       </DashboardLayout>
     );
   }
