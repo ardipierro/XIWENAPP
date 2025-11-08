@@ -32,7 +32,7 @@ export default function GamificationPanel({ userId }) {
             <h2 className="text-3xl font-bold">Nivel {profile?.level || 1}</h2>
             <p className="text-gray-200">{profile?.xp || 0} XP</p>
           </div>
-          <div className="p-4 bg-white bg-opacity-20 rounded-lg">
+          <div className="p-4 bg-white dark:bg-gray-800 bg-opacity-20 rounded-lg">
             <Trophy size={32} />
           </div>
         </div>
@@ -44,9 +44,9 @@ export default function GamificationPanel({ userId }) {
               <span>Nivel {levelProgress.currentLevel}</span>
               <span>Nivel {levelProgress.currentLevel + 1}</span>
             </div>
-            <div className="w-full bg-white bg-opacity-20 rounded-full h-3">
+            <div className="w-full bg-white dark:bg-gray-800 bg-opacity-20 rounded-full h-3">
               <div
-                className="bg-white h-3 rounded-full"
+                className="bg-white dark:bg-gray-800 h-3 rounded-full"
                 style={{ width: `${levelProgress.progressPercent}%` }}
               />
             </div>

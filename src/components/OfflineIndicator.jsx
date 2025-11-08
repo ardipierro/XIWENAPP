@@ -73,7 +73,7 @@ function OfflineIndicator() {
 
           {/* Connection details (for slow connections) */}
           {isOnline && isSlowConnection && connectionInfo.effectiveType && (
-            <span className="hidden md:inline-flex items-center gap-1 text-xs opacity-75 bg-white/20 px-2 py-1 rounded">
+            <span className="hidden md:inline-flex items-center gap-1 text-xs opacity-75 bg-white dark:bg-gray-800/20 px-2 py-1 rounded">
               <AlertTriangle size={12} />
               {connectionInfo.effectiveType.toUpperCase()}
               {connectionInfo.downlink && ` (${connectionInfo.downlink.toFixed(1)} Mbps)`}
@@ -84,7 +84,7 @@ function OfflineIndicator() {
         {/* Dismiss button */}
         <button
           onClick={() => setVisible(false)}
-          className="ml-2 p-1 hover:bg-white/20 rounded transition-colors flex-shrink-0"
+          className="ml-2 p-1 hover:bg-white dark:bg-gray-800/20 rounded transition-colors flex-shrink-0"
           aria-label="Cerrar notificación"
         >
           <svg

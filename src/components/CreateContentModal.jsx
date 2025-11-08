@@ -277,7 +277,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
               <span>Manual</span>
             </div>
             {activeTab === 'manual' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white dark:bg-gray-800" />
             )}
           </button>
           <button
@@ -296,7 +296,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
               <span>Generar con IA</span>
             </div>
             {activeTab === 'ai' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white dark:bg-gray-800" />
             )}
           </button>
         </div>

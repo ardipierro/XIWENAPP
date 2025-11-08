@@ -541,7 +541,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
                 type="checkbox"
                 checked={permissions.canViewGrades}
                 onChange={(e) => setPermissions({ ...permissions, canViewGrades: e.target.checked })}
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Ver calificaciones
@@ -553,7 +553,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
                 type="checkbox"
                 checked={permissions.canViewAttendance}
                 onChange={(e) => setPermissions({ ...permissions, canViewAttendance: e.target.checked })}
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Ver asistencia
@@ -565,7 +565,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
                 type="checkbox"
                 checked={permissions.canViewBehavior}
                 onChange={(e) => setPermissions({ ...permissions, canViewBehavior: e.target.checked })}
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Ver comportamiento
@@ -577,7 +577,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
                 type="checkbox"
                 checked={permissions.canReceiveNotifications}
                 onChange={(e) => setPermissions({ ...permissions, canReceiveNotifications: e.target.checked })}
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Recibir notificaciones
