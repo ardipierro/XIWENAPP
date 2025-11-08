@@ -90,7 +90,41 @@ export function ThemeProvider({ children }) {
     // Actualizar color de la barra de estado con el color específico del tema
     const themeColor = THEME_INFO[currentTheme]?.themeColor || '#09090b';
     updateThemeColor(themeColor);
+
+    // Aplicar colores personalizados si existen
+    applyCustomColors(currentTheme);
   }, [currentTheme]);
+
+  // Aplicar colores personalizados del tema actual
+  const applyCustomColors = (theme) => {
+    const saved = localStorage.getItem('customThemeColors');
+    if (!saved) {
+      // Si no hay colores personalizados, limpiar cualquier override
+      const root = document.documentElement;
+      // Remover todas las variables CSS inline para que usen los valores por defecto
+      root.style.cssText = '';
+      return;
+    }
+
+    try {
+      const customColors = JSON.parse(saved);
+      const themeColors = customColors[theme];
+
+      if (themeColors) {
+        const root = document.documentElement;
+        // Aplicar cada color personalizado como variable CSS inline
+        Object.entries(themeColors).forEach(([key, value]) => {
+          root.style.setProperty(`--color-${key}`, value);
+        });
+      } else {
+        // Si no hay colores para este tema, limpiar overrides
+        const root = document.documentElement;
+        root.style.cssText = '';
+      }
+    } catch (error) {
+      console.error('Error applying custom theme colors:', error);
+    }
+  };
 
   // Función para actualizar dinámicamente el color de la barra de estado
   const updateThemeColor = (color) => {

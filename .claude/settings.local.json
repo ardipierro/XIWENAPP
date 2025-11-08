@@ -70,7 +70,17 @@
       "Bash(git fetch:*)",
       "Bash(git reset:*)",
       "Bash(firebase firestore:get:*)",
-      "Bash(timeout 30 bash:*)"
+      "Bash(timeout 30 bash:*)",
+      "Bash(src/components/exercisebuilder/TextToExerciseParser.jsx)",
+      "Bash(src/components/exercisebuilder/SettingsPanel.jsx)",
+      "Bash(for file in MultipleChoiceExercise FillInBlankExercise MatchingExercise TrueFalseExercise index)",
+      "Bash(do git show main:src/components/designlab/exercises/$file.jsx)",
+      "Bash(src/components/exercisebuilder/exercises/$file.jsx)",
+      "Bash(src/components/exercisebuilder/exercises/$file.js)",
+      "Bash(done)",
+      "Bash(src/hooks/useExerciseState.js)",
+      "Bash(src/hooks/useExerciseBuilderConfig.js)",
+      "Bash(src/firebase/exerciseBuilderConfig.js)"
     ],
     "deny": [],
     "ask": []
