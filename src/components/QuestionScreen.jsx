@@ -280,10 +280,10 @@ function QuestionScreen({
   }, [timeLeft, showFeedback, isPaused, unlimitedTime])
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-4xl mx-auto relative">
         {/* Tanteador */}
-        <div className="bg-white rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-semibold">Tanteador</h3>
             <div className="flex items-center gap-3">
@@ -329,7 +329,7 @@ function QuestionScreen({
                 }`}
               >
                 {student === currentStudent && (
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gray-600 dark:bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gray-600 dark:bg-gray-50 dark:bg-gray-9000 text-white text-xs font-bold px-2 py-1 rounded-full">
                     TU TURNO
                   </div>
                 )}
@@ -345,12 +345,12 @@ function QuestionScreen({
         </div>
 
         {/* Pregunta */}
-        <div className="bg-white rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
           <div className="mb-8">
             {!hasStarted && isPaused && !showFeedback && !unlimitedTime ? (
               <div className="bg-gray-100 dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600 rounded-lg p-8 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Juego en Pausa</h3>
-                <p className="text-gray-700 dark:text-gray-300">Presiona "Iniciar" cuando estén listos</p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white dark:text-gray-100 mb-2">Juego en Pausa</h3>
+                <p className="text-gray-700 dark:text-gray-300 dark:text-gray-300">Presiona "Iniciar" cuando estén listos</p>
               </div>
             ) : (
               <>
@@ -400,9 +400,9 @@ function QuestionScreen({
             </div>
           )}
 
-          <div className="text-center text-xl text-gray-600 dark:text-gray-400">
+          <div className="text-center text-xl text-gray-600 dark:text-gray-400 dark:text-gray-400">
             Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
-            <span className="ml-2 text-gray-700 dark:text-gray-300 font-semibold">
+            <span className="ml-2 text-gray-700 dark:text-gray-300 dark:text-gray-300 font-semibold">
               ({parsedQuestions.length - currentQuestionIndex - 1} restantes)
             </span>
           </div>
