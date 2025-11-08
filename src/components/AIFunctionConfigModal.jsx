@@ -4,21 +4,24 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, TestTube, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Save, TestTube, Loader2, XCircle } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
   BaseInput,
   BaseTextarea,
   BaseSelect,
-  BaseAlert,
-  BaseBadge
+  BaseAlert
 } from './common';
 import { AI_PROVIDERS } from '../constants/aiFunctions';
 import { callAI } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 
+/**
+ * Modal de configuración de función de IA
+ */
 function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
+  // Estado interno del formulario
   const [config, setConfig] = useState(aiFunction.defaultConfig);
   const [testing, setTesting] = useState(false);
   const [testPrompt, setTestPrompt] = useState('Hola, ¿puedes ayudarme con español?');
@@ -27,23 +30,16 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  // Load initial config when modal opens
+  // Cargar config inicial cuando se abre el modal
   useEffect(() => {
-    if (isOpen && initialConfig) {
-      setConfig(initialConfig);
-    } else if (isOpen) {
-      setConfig(aiFunction.defaultConfig);
-    }
-  }, [isOpen, initialConfig, aiFunction]);
-
-  // Reset test state when modal closes
-  useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      setConfig(initialConfig || aiFunction.defaultConfig);
+      // Limpiar estados de test
       setTestResponse('');
       setTestError(null);
       setError(null);
     }
-  }, [isOpen]);
+  }, [isOpen, initialConfig, aiFunction.defaultConfig]);
 
   const selectedProvider = AI_PROVIDERS.find(p => p.id === config.provider);
 
@@ -65,11 +61,6 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
   };
 
   const handleTest = async () => {
-    if (!config.apiKey) {
-      setTestError('Por favor, ingresa una API key primero');
-      return;
-    }
-
     if (!testPrompt.trim()) {
       setTestError('Por favor, ingresa un mensaje de prueba');
       return;
@@ -84,10 +75,10 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
 
       if (result) {
         setTestResponse(result);
-        logger.info('AI test successful for function:', aiFunction.id);
+        logger.info('AI test successful:', aiFunction.id);
       }
     } catch (err) {
-      logger.error('Failed to test AI:', err);
+      logger.error('AI test failed:', err);
       setTestError(`Error: ${err.message}`);
     } finally {
       setTesting(false);
@@ -95,16 +86,14 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
   };
 
   const handleSave = async () => {
-    if (!config.apiKey && config.enabled) {
-      setError('No puedes activar la función sin una API key');
-      return;
-    }
-
     try {
       setSaving(true);
       setError(null);
 
+      // Guardar configuración
       await onSave(aiFunction.id, config);
+
+      // Cerrar modal
       onClose();
     } catch (err) {
       logger.error('Failed to save AI config:', err);
@@ -142,18 +131,19 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
       }
     >
       <div className="space-y-6">
+        {/* Error alert */}
         {error && (
           <BaseAlert variant="danger" title="Error" dismissible onDismiss={() => setError(null)}>
             {error}
           </BaseAlert>
         )}
 
-        {/* Function Description */}
+        {/* Descripción de la función */}
         <BaseAlert variant="info">
           {aiFunction.description}
         </BaseAlert>
 
-        {/* Enable/Disable Toggle */}
+        {/* Toggle Enabled/Disabled */}
         <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
           <div>
             <h4 className="font-semibold text-zinc-900 dark:text-white">
@@ -180,16 +170,14 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
             const newProvider = e.target.value;
             const provider = AI_PROVIDERS.find(p => p.id === newProvider);
             handleChange('provider', newProvider);
-            // Set default model for new provider
+            // Setear modelo default del proveedor
             if (provider && provider.models.length > 0) {
               handleChange('model', provider.models[0].value);
             }
           }}
-          options={[
-            { value: '', label: 'Selecciona un proveedor...' },
-            ...AI_PROVIDERS.map(p => ({ value: p.id, label: p.name }))
-          ]}
+          options={AI_PROVIDERS.map(p => ({ value: p.id, label: p.name }))}
           required
+          helperText={selectedProvider?.description}
         />
 
         {/* Model Selection */}
@@ -198,23 +186,10 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
             label="Modelo"
             value={config.model}
             onChange={(e) => handleChange('model', e.target.value)}
-            options={[
-              { value: '', label: 'Selecciona un modelo...' },
-              ...selectedProvider.models
-            ]}
+            options={selectedProvider.models}
             required
           />
         )}
-
-        {/* API Key */}
-        <BaseInput
-          label="API Key"
-          type="password"
-          value={config.apiKey}
-          onChange={(e) => handleChange('apiKey', e.target.value)}
-          placeholder="sk-..."
-          helperText="Tu API key se guarda de forma segura y solo se usa para esta función"
-        />
 
         {/* System Prompt */}
         <BaseTextarea
@@ -223,63 +198,81 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
           onChange={(e) => handleChange('systemPrompt', e.target.value)}
           placeholder="Eres un..."
           rows={4}
-          helperText="Define cómo debe comportarse la IA para esta función específica"
+          helperText="Define cómo debe comportarse la IA para esta función"
         />
 
         {/* Advanced Parameters */}
-        <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
-          <h4 className="font-semibold text-zinc-900 dark:text-white mb-4">
-            Parámetros Avanzados
-          </h4>
+        {selectedProvider && (
+          <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+            <h4 className="font-semibold text-zinc-900 dark:text-white mb-4">
+              Parámetros Avanzados
+            </h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Temperature ({config.parameters.temperature})
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="2"
-                step="0.1"
-                value={config.parameters.temperature}
-                onChange={(e) => handleParameterChange('temperature', parseFloat(e.target.value))}
-                className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-600 dark:accent-zinc-400"
-              />
-              <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
-                Creatividad (0 = preciso, 2 = creativo)
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Temperature */}
+              {selectedProvider.supportsTemperature && (
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    Temperature ({config.parameters.temperature})
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value={config.parameters.temperature}
+                    onChange={(e) => handleParameterChange('temperature', parseFloat(e.target.value))}
+                    className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-600 dark:accent-zinc-400"
+                  />
+                  <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                    Creatividad (0 = preciso, 2 = creativo)
+                  </p>
+                </div>
+              )}
+
+              {/* Max Tokens */}
+              {selectedProvider.supportsMaxTokens && (
+                <BaseInput
+                  label="Max Tokens"
+                  type="number"
+                  value={config.parameters.maxTokens}
+                  onChange={(e) => handleParameterChange('maxTokens', parseInt(e.target.value))}
+                  min="100"
+                  max="4000"
+                  helperText="Longitud máxima de respuesta"
+                />
+              )}
+
+              {/* Top P */}
+              {selectedProvider.supportsTopP && (
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    Top P ({config.parameters.topP})
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={config.parameters.topP}
+                    onChange={(e) => handleParameterChange('topP', parseFloat(e.target.value))}
+                    className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-600 dark:accent-zinc-400"
+                  />
+                  <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                    Diversidad de respuestas
+                  </p>
+                </div>
+              )}
             </div>
 
-            <BaseInput
-              label="Max Tokens"
-              type="number"
-              value={config.parameters.maxTokens}
-              onChange={(e) => handleParameterChange('maxTokens', parseInt(e.target.value))}
-              min="100"
-              max="4000"
-              helperText="Longitud máxima de respuesta"
-            />
-
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Top P ({config.parameters.topP})
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={config.parameters.topP}
-                onChange={(e) => handleParameterChange('topP', parseFloat(e.target.value))}
-                className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-zinc-600 dark:accent-zinc-400"
-              />
-              <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
-                Diversidad de respuestas
-              </p>
-            </div>
+            {/* Warning for Claude */}
+            {selectedProvider.id === 'claude' && (
+              <BaseAlert variant="info" className="mt-4">
+                ℹ️ Claude no soporta el parámetro Top P. Solo puedes ajustar Temperature.
+              </BaseAlert>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Test Section */}
         <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
@@ -302,7 +295,6 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
               icon={testing ? Loader2 : TestTube}
               onClick={handleTest}
               loading={testing}
-              disabled={!config.apiKey}
               fullWidth
             >
               {testing ? 'Probando...' : 'Probar Ahora'}
