@@ -485,7 +485,14 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
               ← Volver a Inicio
             </BaseButton>
-            <UnifiedCalendar userId={student?.id} userRole="student" />
+            <UnifiedCalendar
+              userId={user?.uid}
+              userRole="student"
+              onJoinSession={(session) => {
+                setSelectedLiveClass(session);
+                setCurrentView('classSessionRoom');
+              }}
+            />
           </div>
         </div>
       </DashboardLayout>
