@@ -6,13 +6,73 @@
 import { useState } from 'react';
 import logger from '../utils/logger';
 import { useCalendar, useCalendarNavigation } from '../hooks/useCalendar';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Plus, Video } from 'lucide-react';
 import { BaseLoading } from './common';
+import EventDetailModal from './EventDetailModal';
+import { startClassSession, endClassSession } from '../firebase/classSessions';
 
-export default function UnifiedCalendar({ userId, userRole }) {
+export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJoinSession }) {
   const { currentDate, view, setView, goToToday, goToNext, goToPrevious, getDateRange, getDisplayText } = useCalendarNavigation();
   const { start, end } = getDateRange();
-  const { events, loading, error, createEvent } = useCalendar(userId, userRole, start, end);
+  const { events, loading, error, createEvent, refresh } = useCalendar(userId, userRole, start, end);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const handleStartSession = async (event) => {
+    try {
+      setActionLoading(true);
+      const sessionId = event.sessionId || event.id;
+      const result = await startClassSession(sessionId);
+
+      if (result.success) {
+        logger.info('Session started successfully');
+        await refresh();
+        setSelectedEvent(null);
+
+        // If onJoinSession is provided, join the session
+        if (onJoinSession) {
+          onJoinSession(event);
+        }
+      } else {
+        logger.error('Failed to start session:', result.error);
+        alert('Error al iniciar sesión: ' + result.error);
+      }
+    } catch (error) {
+      logger.error('Error starting session:', error);
+      alert('Error al iniciar sesión');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEndSession = async (event) => {
+    try {
+      setActionLoading(true);
+      const sessionId = event.sessionId || event.id;
+      const result = await endClassSession(sessionId);
+
+      if (result.success) {
+        logger.info('Session ended successfully');
+        await refresh();
+        setSelectedEvent(null);
+      } else {
+        logger.error('Failed to end session:', result.error);
+        alert('Error al finalizar sesión: ' + result.error);
+      }
+    } catch (error) {
+      logger.error('Error ending session:', error);
+      alert('Error al finalizar sesión');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleJoinSession = (event) => {
+    if (onJoinSession) {
+      onJoinSession(event);
+      setSelectedEvent(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -47,6 +107,15 @@ export default function UnifiedCalendar({ userId, userRole }) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {userRole === 'teacher' && onCreateSession && (
+            <button
+              onClick={onCreateSession}
+              className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2 hover:bg-primary-dark transition-colors"
+            >
+              <Plus size={20} />
+              Nueva Sesión
+            </button>
+          )}
           <select
             value={view}
             onChange={(e) => setView(e.target.value)}
@@ -84,14 +153,26 @@ export default function UnifiedCalendar({ userId, userRole }) {
       </div>
 
       {/* Calendar Views */}
-      {view === 'month' && <MonthView currentDate={currentDate} events={events} />}
-      {view === 'week' && <WeekView currentDate={currentDate} events={events} />}
-      {view === 'day' && <DayView currentDate={currentDate} events={events} />}
+      {view === 'month' && <MonthView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
+      {view === 'week' && <WeekView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
+      {view === 'day' && <DayView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
+
+      {/* Event Detail Modal */}
+      {selectedEvent && (
+        <EventDetailModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onJoinSession={handleJoinSession}
+          onStartSession={handleStartSession}
+          onEndSession={handleEndSession}
+          userRole={userRole}
+        />
+      )}
     </div>
   );
 }
 
-function MonthView({ currentDate, events }) {
+function MonthView({ currentDate, events, onEventClick }) {
   const [selectedDate, setSelectedDate] = useState(null);
 
   const year = currentDate.getFullYear();
@@ -186,14 +267,28 @@ function MonthView({ currentDate, events }) {
                   {dayEvents.slice(0, 3).map((event, index) => (
                     <div
                       key={index}
-                      className={`text-xs px-1 py-0.5 rounded truncate ${
-                        event.type === 'class'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEventClick(event);
+                      }}
+                      className={`text-xs px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 ${
+                        event.type === 'session'
+                          ? event.status === 'live'
+                            ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 font-medium'
+                            : 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                          : event.type === 'class'
                           ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                           : event.type === 'assignment'
-                          ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
+                          ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300'
                           : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
                       }`}
                     >
+                      {event.type === 'session' && event.status === 'live' && (
+                        <span className="inline-block w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                      )}
+                      {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
+                        <Video size={10} />
+                      )}
                       {event.title}
                     </div>
                   ))}
@@ -212,7 +307,7 @@ function MonthView({ currentDate, events }) {
   );
 }
 
-function WeekView({ currentDate, events }) {
+function WeekView({ currentDate, events, onEventClick }) {
   const weekDays = [];
   const startOfWeek = new Date(currentDate);
   startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
@@ -246,7 +341,7 @@ function WeekView({ currentDate, events }) {
               </div>
               <div className="space-y-2">
                 {dayEvents.map((event, idx) => (
-                  <EventCard key={idx} event={event} compact />
+                  <EventCard key={idx} event={event} compact onClick={() => onEventClick(event)} />
                 ))}
               </div>
             </div>
@@ -257,7 +352,7 @@ function WeekView({ currentDate, events }) {
   );
 }
 
-function DayView({ currentDate, events }) {
+function DayView({ currentDate, events, onEventClick }) {
   const dayEvents = events.filter(event => {
     const eventDate = event.startDate?.toDate?.();
     return eventDate?.toDateString() === currentDate.toDateString();
@@ -282,7 +377,7 @@ function DayView({ currentDate, events }) {
       ) : (
         <div className="space-y-3">
           {dayEvents.map((event, index) => (
-            <EventCard key={index} event={event} />
+            <EventCard key={index} event={event} onClick={() => onEventClick(event)} />
           ))}
         </div>
       )}
@@ -290,10 +385,13 @@ function DayView({ currentDate, events }) {
   );
 }
 
-function EventCard({ event, compact = false }) {
+function EventCard({ event, compact = false, onClick }) {
   const typeColors = {
+    session: event.status === 'live'
+      ? 'bg-red-100 dark:bg-red-900 border-red-500 text-red-900 dark:text-red-100'
+      : 'bg-blue-100 dark:bg-blue-900 border-blue-500 text-blue-900 dark:text-blue-100',
     class: 'bg-gray-100 dark:bg-gray-800 border-gray-400 text-gray-900 dark:text-gray-100',
-    assignment: 'bg-red-100 dark:bg-red-900 border-red-500 text-red-900 dark:text-red-100',
+    assignment: 'bg-orange-100 dark:bg-orange-900 border-orange-500 text-orange-900 dark:text-orange-100',
     event: 'bg-green-100 dark:bg-green-900 border-green-500 text-green-900 dark:text-green-100'
   };
 
@@ -301,10 +399,21 @@ function EventCard({ event, compact = false }) {
 
   if (compact) {
     return (
-      <div className={`p-2 rounded border-l-4 ${color}`}>
-        <p className="text-xs font-medium truncate">{event.title}</p>
+      <div
+        onClick={onClick}
+        className={`p-2 rounded border-l-4 ${color} cursor-pointer hover:opacity-80 transition-opacity`}
+      >
+        <div className="flex items-center gap-1 mb-1">
+          {event.type === 'session' && event.status === 'live' && (
+            <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+          )}
+          {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
+            <Video size={12} />
+          )}
+          <p className="text-xs font-medium truncate flex-1">{event.title}</p>
+        </div>
         {event.startDate && (
-          <p className="text-xs opacity-75 flex items-center gap-1 mt-1">
+          <p className="text-xs opacity-75 flex items-center gap-1">
             <Clock size={10} />
             {event.startDate.toDate().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
           </p>
@@ -314,12 +423,30 @@ function EventCard({ event, compact = false }) {
   }
 
   return (
-    <div className={`p-4 rounded-lg border-l-4 ${color}`}>
+    <div
+      onClick={onClick}
+      className={`p-4 rounded-lg border-l-4 ${color} cursor-pointer hover:opacity-80 transition-opacity`}
+    >
       <div className="flex items-start justify-between mb-2">
-        <h4 className="font-semibold">{event.title}</h4>
-        <span className="text-xs px-2 py-1 bg-white dark:bg-gray-800 rounded">
-          {event.type === 'class' ? 'Clase' : event.type === 'assignment' ? 'Tarea' : 'Evento'}
-        </span>
+        <div className="flex items-center gap-2 flex-1">
+          {event.type === 'session' && event.status === 'live' && (
+            <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+          )}
+          {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
+            <Video size={16} />
+          )}
+          <h4 className="font-semibold">{event.title}</h4>
+        </div>
+        <div className="flex gap-1 items-center">
+          {event.type === 'session' && event.status === 'live' && (
+            <span className="text-xs px-2 py-1 bg-red-500 text-white rounded font-medium">
+              EN VIVO
+            </span>
+          )}
+          <span className="text-xs px-2 py-1 bg-white dark:bg-gray-800 rounded">
+            {event.type === 'session' ? 'Sesión' : event.type === 'class' ? 'Clase' : event.type === 'assignment' ? 'Tarea' : 'Evento'}
+          </span>
+        </div>
       </div>
 
       {event.description && (

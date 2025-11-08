@@ -1461,7 +1461,17 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'calendar') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <UnifiedCalendar userId={user?.id} userRole="teacher" />
+        <UnifiedCalendar
+          userId={user?.uid}
+          userRole="teacher"
+          onCreateSession={() => {
+            navigation.setCurrentScreen('classSessions');
+          }}
+          onJoinSession={(session) => {
+            navigation.setSelectedLiveClass(session);
+            navigation.setCurrentScreen('classSessionRoom');
+          }}
+        />
       </DashboardLayout>
     );
   }
