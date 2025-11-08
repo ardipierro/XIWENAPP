@@ -667,7 +667,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                         variant="secondary"
                         size="sm"
                         onClick={() => handleJoinLiveWhiteboard(whiteboard)}
-                        className="bg-white text-green-600 hover:bg-green-50 border-none font-semibold"
+                        className="bg-white dark:bg-gray-800 text-green-600 hover:bg-green-50 border-none font-semibold"
                       >
                         Unirse →
                       </BaseButton>
@@ -750,7 +750,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 <span className="progress-value">{points} pts</span>
               </div>
               <div className="progress-next">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
                   {pointsToNextLevel} pts para nivel {level + 1}
                 </span>
               </div>
