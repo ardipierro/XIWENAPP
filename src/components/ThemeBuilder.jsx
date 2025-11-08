@@ -1,6 +1,6 @@
 /**
- * @fileoverview Design System Tester PRO - Laboratorio de diseño interactivo mejorado
- * @module components/DesignLab
+ * @fileoverview Theme Builder - Laboratorio de diseño de sistema interactivo
+ * @module components/ThemeBuilder
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -218,7 +218,7 @@ function generatePalette(baseColor) {
 /**
  * Design System Tester PRO - Laboratorio visual interactivo mejorado
  */
-function DesignLab() {
+function ThemeBuilder() {
   const [config, setConfig] = useState(() => {
     const saved = localStorage.getItem('designLabConfig');
     return saved ? JSON.parse(saved) : DEFAULT_CONFIG;
@@ -1142,4 +1142,4 @@ function ComponentShowcase({ mode, config, title }) {
   );
 }
 
-export default DesignLab;
+export default ThemeBuilder;

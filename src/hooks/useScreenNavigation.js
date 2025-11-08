@@ -73,6 +73,8 @@ export function useScreenNavigation() {
     'payments': 'payments', // Payments Panel (Admin)
     'aiConfig': 'aiConfig', // AI Configuration (Admin)
     'settings': 'settings', // Settings (Admin)
+    'themeBuilder': 'themeBuilder', // Theme Builder (Admin/Teacher)
+    'exerciseBuilder': 'exerciseBuilder', // Exercise Builder (Admin/Teacher)
   };
 
   /**
