@@ -86,6 +86,7 @@ import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import UnifiedCalendar from './UnifiedCalendar';
 import AIService from '../services/AIService';
+import ThemeCustomizer from './ThemeCustomizer';
 import './AdminDashboard.css';
 
 // Custom hooks
@@ -532,6 +533,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
             ← Back to Home
           </button>
           <AIConfigPanel />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Settings Panel - WITH Layout (Theme Customizer)
+  if (navigation.currentScreen === 'settings') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <div className="p-6 md:p-8">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Volver al Inicio
+          </button>
+          <ThemeCustomizer />
         </div>
       </DashboardLayout>
     );
