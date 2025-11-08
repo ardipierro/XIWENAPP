@@ -69,7 +69,7 @@ function ResultsScreen({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 p-8">
+    <div className="min-h-screen bg-amber-50 p-8">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 relative">
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-4">
@@ -92,15 +92,15 @@ function ResultsScreen({
             let trophyIcon = null
 
             if (isFirst) {
-              bgClass = 'bg-gradient-to-r from-yellow-200 to-orange-200'
+              bgClass = 'bg-amber-200'
               borderClass = 'border-4 border-yellow-400'
               trophyIcon = <Trophy size={64} strokeWidth={2} className="text-yellow-600" />
             } else if (isSecond) {
-              bgClass = 'bg-gradient-to-r from-gray-200 to-gray-300'
+              bgClass = 'bg-gray-200'
               borderClass = 'border-4 border-gray-400'
               trophyIcon = <Medal size={64} strokeWidth={2} className="text-gray-600" />
             } else if (isThird) {
-              bgClass = 'bg-gradient-to-r from-gray-100 to-gray-200'
+              bgClass = 'bg-gray-100'
               borderClass = 'border-4 border-gray-300'
               trophyIcon = <Medal size={64} strokeWidth={2} className="text-gray-500" />
             }
@@ -191,9 +191,9 @@ function ResultsScreen({
           <div className="space-y-3">
             {getExerciseHistory(currentCategory).map((player, index) => (
               <div key={index} className={`p-4 rounded-lg border-2 ${
-                index === 0 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-700' :
-                index === 1 ? 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 dark:from-gray-800 dark:to-gray-700 dark:border-gray-600' :
-                index === 2 ? 'bg-gradient-to-r from-gray-100 to-gray-200 border-gray-300 dark:from-gray-700 dark:to-gray-600 dark:border-gray-500' :
+                index === 0 ? 'bg-amber-50 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-700' :
+                index === 1 ? 'bg-gray-50 border-gray-300 dark:bg-gray-800 dark:border-gray-600' :
+                index === 2 ? 'bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500' :
                 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
               }`}>
                 <div className="flex justify-between items-center">

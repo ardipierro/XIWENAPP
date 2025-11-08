@@ -244,7 +244,7 @@ function AdminPaymentsPanel() {
           onClick={() => setActiveTab('overview')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'overview'
-              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              ? 'text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100'
               : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
@@ -254,7 +254,7 @@ function AdminPaymentsPanel() {
           onClick={() => setActiveTab('fees')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'fees'
-              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              ? 'text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100'
               : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
@@ -264,7 +264,7 @@ function AdminPaymentsPanel() {
           onClick={() => setActiveTab('payments')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'payments'
-              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              ? 'text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100'
               : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >
@@ -274,7 +274,7 @@ function AdminPaymentsPanel() {
           onClick={() => setActiveTab('enrollments')}
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'enrollments'
-              ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+              ? 'text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100'
               : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
           }`}
         >

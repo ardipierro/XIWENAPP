@@ -658,17 +658,17 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
               <div className="flex items-start gap-3">
-                <Settings className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1" size={20} />
+                <Settings className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-1" size={20} />
                 <div>
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                     Additional Settings Coming Soon
                   </h3>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     More configuration options will be available in future updates, including:
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm text-blue-700 dark:text-blue-300">
+                  <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
                     <li>• Email notifications preferences</li>
                     <li>• System-wide defaults</li>
                     <li>• Backup and restore options</li>
@@ -846,7 +846,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <Shield size={32} strokeWidth={2} className="text-indigo-600 dark:text-indigo-400" />
+              <Shield size={32} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
               <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h1>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -865,7 +865,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
               onClick={() => navigation.setUsersRoleFilter('all')}
               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                 navigation.usersRoleFilter === 'all'
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-gray-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
@@ -876,7 +876,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
               onClick={() => navigation.setUsersRoleFilter('students')}
               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                 navigation.usersRoleFilter === 'students'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gray-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
@@ -887,7 +887,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
               onClick={() => navigation.setUsersRoleFilter('teachers')}
               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                 navigation.usersRoleFilter === 'teachers'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-gray-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
@@ -1066,7 +1066,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                             onClick={() => handleViewUserProfile(userItem)}
                             title="View full profile"
                           >
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center text-white flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-white flex-shrink-0">
                               {(() => {
                                 const iconName = ROLE_INFO[userItem.role]?.icon || 'User';
                                 const IconComponent = ICON_MAP[iconName] || User;
@@ -1081,17 +1081,17 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           </div>
                         </td>
                         <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <div className="inline-block px-3 py-1 rounded-xl bg-gradient-to-r from-warning-500 to-warning-700 text-white font-semibold text-[13px]">
+                          <div className="inline-block px-3 py-1 rounded-xl bg-amber-600 text-white font-semibold text-[13px]">
                             {userItem.credits || 0}
                           </div>
                         </td>
                         <td className="p-4 text-primary-900 dark:text-primary-100">
                           <span className={`inline-block px-3 py-1 rounded-xl font-semibold text-xs uppercase tracking-wide text-white ${
                             userItem.role === 'admin'
-                              ? 'bg-gradient-to-r from-warning-500 to-warning-700'
+                              ? 'bg-amber-600'
                               : userItem.role === 'teacher' || userItem.role === 'trial_teacher'
-                              ? 'bg-gradient-to-r from-purple-500 to-purple-700'
-                              : 'bg-gradient-to-r from-blue-500 to-blue-700'
+                              ? 'bg-zinc-800'
+                              : 'bg-gray-600'
                           }`}>
                             {ROLE_INFO[userItem.role]?.name || userItem.role}
                           </span>
@@ -1329,7 +1329,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 mb-12">
             <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-accent-500 to-accent-700">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
                 <Users size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1339,7 +1339,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
 
             <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-warning-500 to-warning-700">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-amber-600">
                 <Crown size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1349,7 +1349,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
 
             <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-purple-500 to-purple-700">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
                 <UserCog size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1359,7 +1359,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
 
             <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-blue-500 to-blue-700">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gray-600">
                 <GraduationCap size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">

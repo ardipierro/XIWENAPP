@@ -184,7 +184,7 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
               <>
                 <div className="link-info">
                   <div className="link-icon">
-                    <Link size={40} strokeWidth={2} className="text-blue-500" />
+                    <Link size={40} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
                   </div>
                   <div>
                     <h3>Recurso externo</h3>

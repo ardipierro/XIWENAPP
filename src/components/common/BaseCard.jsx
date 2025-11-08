@@ -89,7 +89,7 @@ function BaseCard({
       {(Icon || avatar) && !image && (
         <div className="p-6 pb-0">
           {Icon && (
-            <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300 flex items-center justify-center">
               <Icon size={24} strokeWidth={2} />
             </div>
           )}

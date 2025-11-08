@@ -48,7 +48,7 @@ const FillGap = ({ sentence, answer, onComplete }) => {
           className={`
             mx-2 px-3 py-1 min-w-[120px] border-2 rounded-lg
             text-center font-medium transition-all
-            focus:ring-2 focus:ring-blue-500 focus:outline-none
+            focus:ring-2 focus:ring-gray-500 focus:outline-none
             disabled:opacity-50 disabled:cursor-not-allowed
             ${feedback === 'correct' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : ''}
             ${feedback === 'incorrect' ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' : ''}
@@ -308,7 +308,7 @@ const ListeningExercise = ({ audioText, question, options, correctIndex, onCompl
             disabled={feedback !== null}
             className={`
               w-full p-4 text-left rounded-lg border-2 transition-all
-              ${selectedIndex === index && feedback === null ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}
+              ${selectedIndex === index && feedback === null ? 'border-gray-500 bg-gray-50 dark:bg-gray-900/20' : ''}
               ${selectedIndex !== index && feedback === null ? 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400' : ''}
               ${feedback === 'correct' && index === correctIndex ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
               ${feedback === 'incorrect' && index === selectedIndex ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}
@@ -659,8 +659,8 @@ const ExerciseGeneratorContent = () => {
 
               {/* Selected Indicator */}
               {selectedProvider === provider.name && provider.configured && (
-                <div className="absolute inset-0 rounded-xl border-2 border-blue-500 pointer-events-none">
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className="absolute inset-0 rounded-xl border-2 border-gray-500 pointer-events-none">
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center">
                     <Check className="w-4 h-4 text-white" />
                   </div>
                 </div>
@@ -770,7 +770,7 @@ const ExerciseGeneratorContent = () => {
               className="p-6 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 shadow-sm"
             >
               <div className="flex items-center gap-2 mb-4">
-                <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+                <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-semibold">
                   Ejercicio {index + 1}
                 </span>
                 {completedExercises[index] !== undefined && (
@@ -828,7 +828,7 @@ const ExerciseGeneratorContent = () => {
       {/* Loading State */}
       {isGenerating && (
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+          <Loader2 className="w-12 h-12 text-gray-500 animate-spin" />
           <p className="text-gray-600 dark:text-gray-400 font-medium">
             La IA está creando tus ejercicios...
           </p>

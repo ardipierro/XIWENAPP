@@ -280,7 +280,7 @@ function QuestionScreen({
   }, [timeLeft, showFeedback, isPaused, unlimitedTime])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-8">
+    <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto relative">
         {/* Tanteador */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
@@ -324,7 +324,7 @@ function QuestionScreen({
                 key={student}
                 className={`p-3 rounded-lg relative ${
                   student === currentStudent
-                    ? 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 border-4 border-gray-500 dark:border-gray-400 shadow-lg transform scale-105'
+                    ? 'bg-gray-200 dark:bg-gray-700 border-4 border-gray-500 dark:border-gray-400 shadow-lg transform scale-105'
                     : 'bg-gray-100 dark:bg-gray-800'
                 }`}
               >

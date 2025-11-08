@@ -1,10 +1,9 @@
 import { AlertTriangle } from 'lucide-react';
-import BaseModal from './common/BaseModal';
-import './ConfirmModal.css';
+import { BaseModal, BaseButton } from './common';
 
 /**
  * Modal de confirmación personalizado
- * Ahora usa BaseModal como base
+ * 100% conforme con MASTER_STANDARDS.md
  */
 function ConfirmModal({
   isOpen,
@@ -18,20 +17,18 @@ function ConfirmModal({
 }) {
   const footer = (
     <>
-      <button
-        type="button"
-        className="btn btn-outline"
+      <BaseButton
+        variant="ghost"
         onClick={onCancel}
       >
         {cancelText}
-      </button>
-      <button
-        type="button"
-        className={`btn ${isDanger ? 'btn-danger' : 'btn-primary'}`}
+      </BaseButton>
+      <BaseButton
+        variant={isDanger ? 'danger' : 'primary'}
         onClick={onConfirm}
       >
         {confirmText}
-      </button>
+      </BaseButton>
     </>
   );
 
@@ -46,7 +43,7 @@ function ConfirmModal({
       isDanger={isDanger}
       closeOnOverlayClick={true}
     >
-      <p className="confirm-message">{message}</p>
+      <p className="text-gray-600 dark:text-gray-300">{message}</p>
     </BaseModal>
   );
 }
