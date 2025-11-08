@@ -724,7 +724,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                         relative flex items-center gap-4 p-4 rounded-xl border-2
                         transition-all duration-200
                         ${isConfigured
-                          ? 'border-green-500 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30'
+                          ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                           : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
                         }
                         hover:border-zinc-500 dark:hover:border-zinc-400 active:scale-[0.98]
@@ -1493,7 +1493,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
 
             <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-success-500 to-success-700">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-green-600">
                 <CheckCircle size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1503,7 +1503,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
 
             <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-error-500 to-error-700">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-red-600">
                 <Ban size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
