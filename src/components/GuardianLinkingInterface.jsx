@@ -157,7 +157,7 @@ export default function GuardianLinkingInterface({ adminId }) {
         {/* Guardians List */}
         {guardians.length === 0 ? (
           <BaseEmptyState
-            icon={<Users size={64} strokeWidth={2} />}
+            icon={Users}
             title="No hay tutores registrados"
             description="Crea un nuevo tutor para comenzar a vincular estudiantes"
           />

@@ -71,9 +71,9 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             items: [
               { icon: BarChart3, label: 'Dashboard', path: '/admin', action: 'dashboard' },
               { icon: Users, label: 'Usuarios', path: '/admin', action: 'users' },
-              { icon: UsersRound, label: 'Tutores', path: '/admin', action: 'guardians' },
               { icon: BookOpen, label: 'Contenidos', path: '/admin', action: 'unifiedContent' },
               { icon: Calendar, label: 'Clases', path: '/admin', action: 'classSessions' },
+              { icon: CalendarDays, label: 'Calendario', path: '/admin', action: 'calendar' },
               { icon: MessageCircle, label: 'Mensajes', path: '/admin', action: 'messages' },
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },

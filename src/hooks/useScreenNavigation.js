@@ -51,7 +51,6 @@ export function useScreenNavigation() {
     'dashboard': 'dashboard',
     'users': 'users',
     'students': 'students',
-    'guardians': 'guardians', // Guardian Linking Interface (Admin)
     'courses': 'courses',
     'content': 'content',
     'unifiedContent': 'unifiedContent', // Unified Content Manager (NEW)

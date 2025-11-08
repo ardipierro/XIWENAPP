@@ -84,7 +84,7 @@ import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
-import GuardianLinkingInterface from './GuardianLinkingInterface';
+import UnifiedCalendar from './UnifiedCalendar';
 import AIService from '../services/AIService';
 import './AdminDashboard.css';
 
@@ -504,6 +504,25 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // RENDER SPECIFIC SCREENS (WITH LAYOUT)
   // ==========================================
 
+  // Unified Calendar Screen - WITH Layout
+  if (navigation.currentScreen === 'calendar') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <UnifiedCalendar
+          userId={user?.uid}
+          userRole="admin"
+          onCreateSession={() => {
+            navigation.setCurrentScreen('classSessions');
+          }}
+          onJoinSession={(session) => {
+            navigation.setSelectedLiveClass(session);
+            navigation.setCurrentScreen('classSessionRoom');
+          }}
+        />
+      </DashboardLayout>
+    );
+  }
+
   // AI Configuration Panel - WITH Layout
   if (navigation.currentScreen === 'aiConfig') {
     return (
@@ -870,20 +889,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
     navigation.setCurrentScreen('users');
     navigation.setUsersRoleFilter('students');
     return null; // Will re-render with users screen
-  }
-
-  // Guardian Linking Interface - WITH Layout
-  if (navigation.currentScreen === 'guardians') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Back to Home
-          </button>
-          <GuardianLinkingInterface adminId={user.uid} />
-        </div>
-      </DashboardLayout>
-    );
   }
 
   // User Management - WITH Layout
