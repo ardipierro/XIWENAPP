@@ -54,16 +54,16 @@ function AIConfigPanel() {
    */
   const loadCredentials = async () => {
     try {
-      console.log('[AIConfigPanel] Loading credentials...');
+      logger.info('[AIConfigPanel] Loading credentials...');
       const credStatus = await checkAICredentials();
-      console.log('[AIConfigPanel] Credentials loaded:', credStatus);
+      logger.info('[AIConfigPanel] Credentials loaded:', credStatus);
       setCredentials(credStatus);
       logger.info('AI credentials status loaded:', credStatus);
     } catch (err) {
-      console.error('[AIConfigPanel] Failed to load credentials:', err);
+      logger.error('[AIConfigPanel] Failed to load credentials:', err);
       logger.error('Failed to load credentials status:', err);
       // Keep default values on error (already set in useState)
-      console.log('[AIConfigPanel] Using default credentials');
+      logger.info('[AIConfigPanel] Using default credentials');
       logger.info('Using default credentials status');
     }
   };

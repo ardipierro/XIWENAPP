@@ -53,7 +53,7 @@ function BaseCard({
   // Variant styles
   const variants = {
     default: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-    elevated: 'bg-white dark:bg-gray-800 shadow-lg',
+    elevated: 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600',
     bordered: 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600',
     flat: 'bg-gray-50 dark:bg-gray-900'
   };
@@ -64,7 +64,7 @@ function BaseCard({
         rounded-xl overflow-hidden flex flex-col
         ${variants[variant]}
         ${isClickable ? 'cursor-pointer' : ''}
-        ${hover ? 'transition-all hover:shadow-xl hover:scale-[1.02]' : ''}
+        ${hover ? 'transition-all hover:border-zinc-500 dark:hover:border-zinc-400' : ''}
         ${className}
       `}
       onClick={onClick}

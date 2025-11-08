@@ -6,6 +6,7 @@
 import { Settings, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import { BaseButton, BaseBadge } from './common';
 import { getProviderById } from '../constants/aiFunctions';
+import logger from '../utils/logger';
 
 /**
  * Card de función de IA - soporta vista grid y list
@@ -24,7 +25,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', cr
     : false;
 
   // Debug logging
-  console.log(`[AIFunctionCard] ${aiFunction.name}:`, {
+  logger.debug(`[AIFunctionCard] ${aiFunction.name}:`, {
     isConfigured,
     isEnabled,
     hasCredentials,
@@ -74,7 +75,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', cr
   if (viewMode === 'grid') {
     return (
       <div
-        className="card card-grid-item flex flex-col cursor-pointer transition-all duration-300 overflow-hidden hover:shadow-lg"
+        className="card card-grid-item flex flex-col cursor-pointer transition-all duration-300 overflow-hidden hover:border-zinc-500 dark:hover:border-zinc-400"
         style={{ padding: 0 }}
         onClick={onConfigure}
       >
@@ -153,7 +154,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', cr
   // Vista List (horizontal)
   return (
     <div
-      className="card card-list cursor-pointer transition-all duration-300 hover:shadow-md"
+      className="card card-list cursor-pointer transition-all duration-300 hover:border-zinc-500 dark:hover:border-zinc-400"
       onClick={onConfigure}
     >
       {/* Icono pequeño */}
