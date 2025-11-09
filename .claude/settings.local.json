@@ -82,7 +82,10 @@
       "Bash(src/hooks/useExerciseBuilderConfig.js)",
       "Bash(src/firebase/exerciseBuilderConfig.js)",
       "Bash(gh pr list:*)",
-      "Bash(src/components/DesignLab.jsx)"
+      "Bash(src/components/DesignLab.jsx)",
+      "Bash(src/services/ttsService.js)",
+      "Bash(src/components/interactive-book/TTSSettings.jsx)",
+      "Bash(src/components/interactive-book/AudioPlayer.jsx)"
     ],
     "deny": [],
     "ask": []
