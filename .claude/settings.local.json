@@ -89,7 +89,10 @@
       "Bash(src/components/Navigation.jsx)",
       "Bash(src/components/ThemeCustomizer.jsx)",
       "Bash(src/firebase/storage.js)",
-      "Bash(src/contexts/ThemeContext.jsx)"
+      "Bash(src/contexts/ThemeContext.jsx)",
+      "Bash(src/components/interactive-book/DialogueBubble.jsx)",
+      "Bash(src/components/interactive-book/ViewCustomizer.jsx)",
+      "Bash(src/services/enhancedTTSService.js)"
     ],
     "deny": [],
     "ask": []
