@@ -17,6 +17,7 @@ import {
   unassignCourseFromGroup
 } from '../firebase/groups';
 import { loadStudents } from '../firebase/firestore';
+import { BaseButton } from './common';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 
@@ -206,12 +207,12 @@ function GroupManager({ user, courses }) {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             Crea tu primer grupo para organizar estudiantes
           </p>
-          <button
+          <BaseButton
             onClick={() => setShowCreateModal(true)}
-            className="btn btn-primary"
+            variant="primary"
           >
             Crear Primer Grupo
-          </button>
+          </BaseButton>
         </div>
       ) : viewMode === 'grid' ? (
         /* Vista Grilla */
@@ -288,8 +289,9 @@ function GroupManager({ user, courses }) {
               <h3 className="modal-title">
                 Crear Nuevo Grupo
               </h3>
-              <button
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-3xl leading-none"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   setShowCreateModal(false);
                   setFormData({ name: '', description: '', color: '#3f3f46' });
@@ -297,46 +299,51 @@ function GroupManager({ user, courses }) {
                   setSelectedCourses([]);
                   setActiveCreateTab('info');
                 }}
-              >
-                ×
-              </button>
+                icon={X}
+              />
             </div>
 
             {/* Tabs */}
             <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
-              <button
+              <BaseButton
                 type="button"
                 onClick={() => setActiveCreateTab('info')}
+                variant={activeCreateTab === 'info' ? 'ghost' : 'ghost'}
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeCreateTab === 'info'
                     ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
+                icon={FileText}
               >
-                <FileText size={18} strokeWidth={2} className="inline-icon" /> Información
-              </button>
-              <button
+                Información
+              </BaseButton>
+              <BaseButton
                 type="button"
                 onClick={() => setActiveCreateTab('students')}
+                variant={activeCreateTab === 'students' ? 'ghost' : 'ghost'}
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeCreateTab === 'students'
                     ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
+                icon={Users}
               >
-                <Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes ({selectedStudents.length})
-              </button>
-              <button
+                Estudiantes ({selectedStudents.length})
+              </BaseButton>
+              <BaseButton
                 type="button"
                 onClick={() => setActiveCreateTab('courses')}
+                variant={activeCreateTab === 'courses' ? 'ghost' : 'ghost'}
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeCreateTab === 'courses'
                     ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
+                icon={BookOpen}
               >
-                <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos ({selectedCourses.length})
-              </button>
+                Cursos ({selectedCourses.length})
+              </BaseButton>
             </div>
 
             <form onSubmit={handleCreate}>
@@ -449,10 +456,15 @@ function GroupManager({ user, courses }) {
 
               {/* Actions */}
               <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button type="submit" className="btn btn-primary flex-1">
-                  <Check size={18} strokeWidth={2} className="inline-icon" /> Crear Grupo
-                </button>
-                <button
+                <BaseButton
+                  type="submit"
+                  variant="primary"
+                  icon={Check}
+                  className="flex-1"
+                >
+                  Crear Grupo
+                </BaseButton>
+                <BaseButton
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false);
@@ -461,10 +473,11 @@ function GroupManager({ user, courses }) {
                     setSelectedCourses([]);
                     setActiveCreateTab('info');
                   }}
-                  className="btn btn-ghost flex-1"
+                  variant="ghost"
+                  className="flex-1"
                 >
                   Cancelar
-                </button>
+                </BaseButton>
               </div>
             </form>
           </div>
@@ -485,40 +498,41 @@ function GroupManager({ user, courses }) {
                   {selectedGroup.description}
                 </p>
               </div>
-              <button
+              <BaseButton
                 onClick={() => setSelectedGroup(null)}
-                className="modal-close-btn"
+                variant="ghost"
+                size="sm"
+                icon={X}
                 aria-label="Cerrar modal"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              />
             </div>
 
             {/* Tabs */}
             <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-              <button
+              <BaseButton
                 onClick={() => setActiveGroupTab('students')}
+                variant="ghost"
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeGroupTab === 'students'
                     ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
+                icon={Users}
               >
-                <Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes ({groupMembers.length})
-              </button>
-              <button
+                Estudiantes ({groupMembers.length})
+              </BaseButton>
+              <BaseButton
                 onClick={() => setActiveGroupTab('courses')}
+                variant="ghost"
                 className={`px-4 py-2 font-semibold transition-colors ${
                   activeGroupTab === 'courses'
                     ? 'border-b-2 border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
+                icon={BookOpen}
               >
-                <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos ({groupCourses.length})
-              </button>
+                Cursos ({groupCourses.length})
+              </BaseButton>
             </div>
 
             {/* Tab Content - Scrollable */}
@@ -530,12 +544,13 @@ function GroupManager({ user, courses }) {
                     {groupMembers.map((member) => (
                       <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
                         <span className="text-gray-900 dark:text-gray-100">{member.studentName}</span>
-                        <button
+                        <BaseButton
                           onClick={() => handleRemoveStudent(member.studentId)}
-                          className="btn btn-danger"
+                          variant="danger"
+                          size="sm"
                         >
                           Remover
-                        </button>
+                        </BaseButton>
                       </div>
                     ))}
                   </div>
@@ -546,13 +561,15 @@ function GroupManager({ user, courses }) {
                       </summary>
                       <div className="mt-3 grid gap-2">
                         {availableStudents.map((student) => (
-                          <button
+                          <BaseButton
                             key={student.id}
                             onClick={() => handleAddStudent(student.id, student.name)}
-                            className="btn btn-sm btn-outline text-left"
+                            variant="outline"
+                            size="sm"
+                            className="text-left"
                           >
                             {student.name}
-                          </button>
+                          </BaseButton>
                         ))}
                       </div>
                     </details>
@@ -567,12 +584,13 @@ function GroupManager({ user, courses }) {
                     {groupCourses.map((gc) => (
                       <div key={gc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
                         <span className="text-gray-900 dark:text-gray-100">{gc.courseName}</span>
-                        <button
+                        <BaseButton
                           onClick={() => unassignCourseFromGroup(selectedGroup.id, gc.courseId).then(() => handleSelectGroup(selectedGroup))}
-                          className="btn btn-danger"
+                          variant="danger"
+                          size="sm"
                         >
                           Desasignar
-                        </button>
+                        </BaseButton>
                       </div>
                     ))}
                   </div>
@@ -583,13 +601,15 @@ function GroupManager({ user, courses }) {
                       </summary>
                       <div className="mt-3 grid gap-2">
                         {availableCourses.map((course) => (
-                          <button
+                          <BaseButton
                             key={course.id}
                             onClick={() => handleAssignCourse(course.id, course.name)}
-                            className="btn btn-sm btn-outline text-left"
+                            variant="outline"
+                            size="sm"
+                            className="text-left"
                           >
                             {course.name}
-                          </button>
+                          </BaseButton>
                         ))}
                       </div>
                     </details>
@@ -605,7 +625,7 @@ function GroupManager({ user, courses }) {
                 <p className="text-xs text-red-700 dark:text-red-400 mb-3">
                   Esta acción eliminará permanentemente el grupo y removerá todos los miembros.
                 </p>
-                <button
+                <BaseButton
                   onClick={(e) => {
                     e.stopPropagation();
                     if (confirm(`¿Eliminar el grupo "${selectedGroup.name}"?`)) {
@@ -613,10 +633,11 @@ function GroupManager({ user, courses }) {
                       setSelectedGroup(null);
                     }
                   }}
-                  className="btn btn-danger"
+                  variant="danger"
+                  icon={Trash2}
                 >
-                  <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar Grupo Permanentemente
-                </button>
+                  Eliminar Grupo Permanentemente
+                </BaseButton>
               </div>
             </div>
           </div>
