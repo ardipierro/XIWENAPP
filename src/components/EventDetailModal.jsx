@@ -1,14 +1,24 @@
 /**
  * @fileoverview Modal for displaying detailed event information
  * @module components/EventDetailModal
+ *
+ * Mobile First:
+ * - BaseModal con size responsive
+ * - Botones full-width en móvil
+ * - Touch targets ≥ 48px
+ * - Info apilada verticalmente
+ * - 100% Tailwind CSS
  */
 
-import { X, Clock, MapPin, Users, Video, Calendar, PenTool, FileText, Play, StopCircle } from 'lucide-react';
-import { BaseButton, BaseBadge } from './common';
+import { useState, useEffect } from 'react';
+import { Clock, MapPin, Users, Video, Calendar, PenTool, FileText, Play, StopCircle } from 'lucide-react';
+import { BaseModal, BaseButton, BaseBadge } from './common';
+import logger from '../utils/logger';
 
 /**
  * EventDetailModal - Shows full event details with actions
  * @param {Object} event - Event object
+ * @param {boolean} isOpen - Modal open state
  * @param {Function} onClose - Close handler
  * @param {Function} onJoinSession - Handler for joining session
  * @param {Function} onStartSession - Handler for starting session
@@ -17,12 +27,21 @@ import { BaseButton, BaseBadge } from './common';
  */
 export default function EventDetailModal({
   event,
+  isOpen,
   onClose,
   onJoinSession,
   onStartSession,
   onEndSession,
   userRole
 }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (!event) return null;
 
   const getEventIcon = () => {
@@ -104,37 +123,80 @@ export default function EventDetailModal({
            userRole === 'teacher';
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-start justify-between">
-          <div className="flex items-start gap-3 flex-1">
-            <div className="p-2 rounded-lg bg-primary bg-opacity-10 text-primary">
-              {getEventIcon()}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {event.title}
-                </h2>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <BaseBadge variant="outline">{getTypeLabel()}</BaseBadge>
-                {getStatusBadge()}
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <X size={20} className="text-gray-500 dark:text-gray-400" />
-          </button>
-        </div>
+  const handleAction = async (action, handler) => {
+    try {
+      logger.debug('EventDetailModal: Action triggered', { action, eventId: event.id });
+      await handler(event);
+    } catch (err) {
+      logger.error('EventDetailModal: Action failed', { action, error: err });
+    }
+  };
 
-        {/* Body */}
-        <div className="px-6 py-4 space-y-4">
+  return (
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={event.title}
+      subtitle={getTypeLabel()}
+      icon={getEventIcon().type}
+      size={isMobile ? 'full' : 'lg'}
+      footer={
+        <div className="flex flex-col-reverse md:flex-row gap-2 w-full">
+          <BaseButton
+            onClick={onClose}
+            variant="ghost"
+            fullWidth
+            className="md:w-auto"
+          >
+            Cerrar
+          </BaseButton>
+
+          {canEndSession() && onEndSession && (
+            <BaseButton
+              onClick={() => handleAction('end', onEndSession)}
+              variant="danger"
+              icon={StopCircle}
+              fullWidth
+              className="md:w-auto"
+            >
+              Finalizar sesión
+            </BaseButton>
+          )}
+
+          {canStartSession() && onStartSession && (
+            <BaseButton
+              onClick={() => handleAction('start', onStartSession)}
+              variant="success"
+              icon={Play}
+              fullWidth
+              className="md:w-auto"
+            >
+              Iniciar sesión
+            </BaseButton>
+          )}
+
+          {canJoinSession() && onJoinSession && (
+            <BaseButton
+              onClick={() => handleAction('join', onJoinSession)}
+              variant="success"
+              icon={Video}
+              fullWidth
+              className="md:w-auto"
+            >
+              Unirse a la sesión
+            </BaseButton>
+          )}
+        </div>
+      }
+    >
+      {/* Status badges */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <BaseBadge variant="default">{getTypeLabel()}</BaseBadge>
+        {getStatusBadge()}
+      </div>
+
+      {/* Body */}
+      <div className="space-y-4 md:space-y-6">
           {/* Date and Time */}
           <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
             <Clock size={20} className="text-gray-400" />
@@ -224,43 +286,7 @@ export default function EventDetailModal({
           )}
         </div>
 
-        {/* Actions */}
-        <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex gap-3 justify-end">
-          {canJoinSession() && onJoinSession && (
-            <BaseButton
-              onClick={() => onJoinSession(event)}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Video size={18} />
-              Unirse a la sesión
-            </BaseButton>
-          )}
-
-          {canStartSession() && onStartSession && (
-            <BaseButton
-              onClick={() => onStartSession(event)}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Play size={18} />
-              Iniciar sesión
-            </BaseButton>
-          )}
-
-          {canEndSession() && onEndSession && (
-            <BaseButton
-              onClick={() => onEndSession(event)}
-              variant="danger"
-            >
-              <StopCircle size={18} />
-              Finalizar sesión
-            </BaseButton>
-          )}
-
-          <BaseButton onClick={onClose} variant="outline">
-            Cerrar
-          </BaseButton>
-        </div>
       </div>
-    </div>
+    </BaseModal>
   );
 }
