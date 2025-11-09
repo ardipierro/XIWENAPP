@@ -1,11 +1,17 @@
 /**
  * @fileoverview Layout principal del dashboard con TopBar, SideMenu y contenido
  * @module components/DashboardLayout
+ *
+ * Mobile First:
+ * - BottomNavigation en móvil (<md)
+ * - SideMenu en desktop (≥lg)
+ * - TopBar adaptativo
  */
 
 import { useState } from 'react';
 import TopBar from './TopBar.jsx';
 import SideMenu from './SideMenu.jsx';
+import BottomNavigation from './BottomNavigation.jsx';
 import ViewAsBanner from './ViewAsBanner.jsx';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { isAdminEmail } from '../firebase/roleConfig.js';
@@ -77,6 +83,14 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
       <main className={`dashboard-main ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div className="dashboard-main-content">{children}</div>
       </main>
+
+      {/* Bottom Navigation - Solo móvil (<md) */}
+      <BottomNavigation
+        userRole={userRole}
+        currentScreen={currentScreen}
+        onNavigate={handleNavigate}
+        onMenuAction={onMenuAction}
+      />
     </div>
   );
 }
