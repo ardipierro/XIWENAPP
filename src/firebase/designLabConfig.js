@@ -12,23 +12,83 @@ import logger from '../utils/logger';
  * @constant
  */
 export const DEFAULT_CONFIG = {
+  // Tema y modo
   theme: 'light',
+
+  // Tipografía
   fontSize: 16,
+  fontFamily: 'sans-serif', // 'sans-serif', 'serif', 'mono', 'dyslexic'
+  lineHeight: 1.6, // 1.4 (compact), 1.6 (normal), 1.8 (comfortable), 2.0 (spacious)
+  letterSpacing: 'normal', // 'tight', 'normal', 'wide'
+  fontWeight: 'normal', // 'light', 'normal', 'medium', 'semibold', 'bold'
+
+  // Colores de feedback (ya existentes)
   feedbackColors: {
     correct: '#10b981', // green-500
     incorrect: '#ef4444', // red-500
     neutral: '#71717a' // zinc-500
   },
+
+  // Colores personalizados (expandido)
   customColors: {
-    textColor: null, // null = usar default de Tailwind
-    exerciseBackground: null, // null = usar default
+    textColor: null,
+    exerciseBackground: null,
     cardBackground: null,
-    borderColor: null
+    borderColor: null,
+    primaryAccent: null, // Color principal de acento
+    secondaryAccent: null, // Color secundario
+    successColor: null, // Override para success
+    warningColor: null, // Override para warning
+    errorColor: null, // Override para error
+    infoColor: null, // Override para info
+    linkColor: null, // Color de enlaces
+    hoverColor: null, // Color al hacer hover
+    focusColor: null, // Color de focus
+    gradientStart: null, // Inicio de gradientes
+    gradientEnd: null // Fin de gradientes
   },
+
+  // Estilos personalizados
+  customStyles: {
+    borderRadius: 'normal', // 'sharp' (0), 'slight' (4px), 'normal' (8px), 'rounded' (12px), 'pill' (999px)
+    borderWidth: 'normal', // 'thin' (1px), 'normal' (2px), 'thick' (3px)
+    shadowIntensity: 'normal', // 'none', 'subtle', 'normal', 'strong'
+    padding: 'normal', // 'compact', 'normal', 'comfortable', 'spacious'
+    cardWidth: 'normal', // 'narrow', 'normal', 'wide', 'full'
+    buttonSize: 'normal', // 'sm', 'normal', 'lg', 'xl'
+    iconSize: 'normal', // 'sm', 'normal', 'lg', 'xl'
+    badgeStyle: 'filled', // 'filled', 'outlined', 'soft'
+    progressBarStyle: 'gradient', // 'solid', 'gradient', 'striped'
+    hoverEffect: 'normal', // 'none', 'subtle', 'normal', 'strong'
+    transitionSpeed: 'normal', // 'instant', 'fast', 'normal', 'slow'
+    contentDensity: 'normal' // 'compact', 'normal', 'comfortable'
+  },
+
+  // Efectos visuales
+  visualEffects: {
+    blur: false, // Efectos de blur
+    gradients: true, // Usar gradientes
+    glassmorphism: false, // Efecto glass/frosted
+    neumorphism: false // Efecto neumórfico
+  },
+
+  // Opciones de interacción (ya existentes)
   animations: true,
   soundEffects: true,
   autoCorrect: false,
   showHints: true,
+
+  // Accesibilidad
+  accessibility: {
+    highContrast: false, // Modo alto contraste
+    reducedMotion: false, // Reducir animaciones
+    focusIndicators: 'normal', // 'subtle', 'normal', 'strong'
+    underlineLinks: false, // Subrayar enlaces
+    largerClickTargets: false, // Aumentar área de click
+    screenReaderOptimized: false // Optimizar para lectores de pantalla
+  },
+
+  // Configuración general
   difficultyLevel: 'intermediate', // beginner, intermediate, advanced
   language: 'es',
   cefrLevel: 'A1' // A1, A2, B1, B2, C1, C2

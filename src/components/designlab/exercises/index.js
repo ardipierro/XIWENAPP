@@ -11,3 +11,7 @@ export { AudioListeningExercise } from './AudioListeningExercise';
 export { TextSelectionExercise } from './TextSelectionExercise';
 export { DragDropOrderExercise } from './DragDropOrderExercise';
 export { DialogueRolePlayExercise } from './DialogueRolePlayExercise';
+export { VerbIdentificationExercise } from './VerbIdentificationExercise';
+export { InteractiveReadingExercise } from './InteractiveReadingExercise';
+export { AIAudioPronunciationExercise } from './AIAudioPronunciationExercise';
+export { FreeDragDropExercise } from './FreeDragDropExercise';
