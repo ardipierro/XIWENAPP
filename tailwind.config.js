@@ -146,6 +146,10 @@ export default {
           '0%, 100%': { height: '8px' },
           '50%': { height: '32px' },
         },
+        reactionPickerPop: {
+          '0%': { opacity: '0', transform: 'translateY(5px) scale(0.9)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
         spin: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
