@@ -99,16 +99,14 @@ function AudioPlayer({
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
-      setUseTTS(false);
     }
   };
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      const current = audioRef.current.currentTime;
-      const dur = audioRef.current.duration;
-      setCurrentTime(current);
-      setProgress((current / dur) * 100);
+      setCurrentTime(audioRef.current.currentTime);
+      const prog = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+      setProgress(prog || 0);
     }
   };
 
@@ -122,81 +120,63 @@ function AudioPlayer({
   };
 
   const handleAudioError = (e) => {
-    logger.warn('⚠️ Audio no disponible, usando TTS:', e);
-    if (text && ttsSupported) {
-      setUseTTS(true);
-      setDuration(estimateDuration(text));
-    }
+    logger.error('Error cargando audio, fallback a TTS:', e);
+    setUseTTS(true);
+    setDuration(estimateDuration(text));
   };
 
   const playAudio = async () => {
-    try {
-      if (useTTS) {
-        await playTTS();
-      } else if (audioRef.current) {
+    if (isPlaying) return;
+
+    setIsPlaying(true);
+
+    if (useTTS) {
+      playTTS();
+    } else if (audioRef.current) {
+      try {
         await audioRef.current.play();
-        setIsPlaying(true);
-        if (onPlay) {
-          onPlay();
-        }
-      }
-    } catch (err) {
-      logger.error('Error al reproducir:', err);
-      // Intentar con TTS como fallback
-      if (text && ttsSupported && !useTTS) {
+      } catch (err) {
+        logger.error('Error reproduciendo audio:', err);
         setUseTTS(true);
-        await playTTS();
+        playTTS();
       }
+    }
+  };
+
+  const pauseAudio = () => {
+    setIsPlaying(false);
+
+    if (useTTS) {
+      ttsService.stop();
+      if (ttsIntervalRef.current) {
+        clearInterval(ttsIntervalRef.current);
+      }
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  };
+
+  const resetAudio = () => {
+    setProgress(0);
+    setCurrentTime(0);
+
+    if (useTTS) {
+      ttsService.stop();
+      if (ttsIntervalRef.current) {
+        clearInterval(ttsIntervalRef.current);
+      }
+    } else if (audioRef.current) {
+      audioRef.current.currentTime = 0;
     }
   };
 
   const playTTS = async () => {
     if (!text) return;
 
-    setIsPlaying(true);
-    setProgress(0);
-    setCurrentTime(0);
-
     if (onPlay) {
       onPlay();
     }
 
-<<<<<<< HEAD
-    // Simular progreso durante la reproducción TTS
-    const estimatedDuration = estimateDuration(text);
-    const startTime = Date.now();
-
-    ttsIntervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
-      const currentProgress = (elapsed / estimatedDuration) * 100;
-
-      if (currentProgress >= 100) {
-        clearInterval(ttsIntervalRef.current);
-        setProgress(100);
-        setCurrentTime(estimatedDuration);
-        setTimeout(() => {
-          setIsPlaying(false);
-          setProgress(0);
-          setCurrentTime(0);
-          if (onComplete) {
-            onComplete();
-          }
-        }, 100);
-      } else {
-        setProgress(currentProgress);
-        setCurrentTime(elapsed);
-      }
-    }, 100);
-
-    try {
-      await ttsService.speak(text, {
-        rate: 0.9, // Un poco más lento para español argentino
-        volume: isMuted ? 0 : 1.0
-      });
-    } catch (err) {
-      logger.error('Error en TTS:', err);
-      clearInterval(ttsIntervalRef.current);
-=======
     try {
       // Intentar generar con servicio premium (mejor calidad)
       const result = await premiumTTSService.generateSpeech(text, {
@@ -216,36 +196,16 @@ function AudioPlayer({
         };
         audio.onended = () => {
           setIsPlaying(false);
-          setProgress(0);
-          setCurrentTime(0);
+          setProgress(100);
           premiumTTSService.cleanup(result.audioUrl);
           if (onComplete) {
             onComplete();
           }
         };
-        audio.volume = isMuted ? 0 : 1.0;
+
         await audio.play();
-      } else if (result.type === 'responsivevoice') {
-        // ResponsiveVoice maneja su propia reproducción
-        // Simular progreso
-        const estimatedDuration = estimateDuration(text);
-        const startTime = Date.now();
-
-        ttsIntervalRef.current = setInterval(() => {
-          const elapsed = (Date.now() - startTime) / 1000;
-          const currentProgress = (elapsed / estimatedDuration) * 100;
-
-          if (currentProgress >= 100) {
-            clearInterval(ttsIntervalRef.current);
-            setProgress(100);
-            setCurrentTime(estimatedDuration);
-          } else {
-            setProgress(currentProgress);
-            setCurrentTime(elapsed);
-          }
-        }, 100);
       } else {
-        // Fallback a Web Speech API
+        // Fallback a Web Speech API (navegador)
         const estimatedDuration = estimateDuration(text);
         const startTime = Date.now();
 
@@ -281,69 +241,14 @@ function AudioPlayer({
       if (ttsIntervalRef.current) {
         clearInterval(ttsIntervalRef.current);
       }
->>>>>>> origin/claude/enrich-ade1-json-interactive-011CUwKx2KQeMZtcfhUHcK6m
       setIsPlaying(false);
-    }
-  };
-
-  const pauseAudio = () => {
-    if (useTTS) {
-      ttsService.pause();
-      setIsPlaying(false);
-      if (ttsIntervalRef.current) {
-        clearInterval(ttsIntervalRef.current);
-      }
-    } else if (audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
-
-  const togglePlay = () => {
-    if (isPlaying) {
-      pauseAudio();
-    } else {
-      playAudio();
     }
   };
 
   const toggleMute = () => {
-    if (useTTS) {
-      setIsMuted(!isMuted);
-    } else if (audioRef.current) {
+    setIsMuted(!isMuted);
+    if (audioRef.current) {
       audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const restart = () => {
-    if (useTTS) {
-      ttsService.stop();
-      if (ttsIntervalRef.current) {
-        clearInterval(ttsIntervalRef.current);
-      }
-      setProgress(0);
-      setCurrentTime(0);
-      playTTS();
-    } else if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      setProgress(0);
-      setCurrentTime(0);
-      playAudio();
-    }
-  };
-
-  const handleProgressClick = (e) => {
-    if (useTTS) {
-      // TTS no soporta seek, reiniciar desde el principio
-      restart();
-    } else if (audioRef.current) {
-      const bounds = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - bounds.left;
-      const width = bounds.width;
-      const percentage = x / width;
-      const newTime = percentage * duration;
-      audioRef.current.currentTime = newTime;
     }
   };
 
@@ -355,84 +260,71 @@ function AudioPlayer({
   };
 
   return (
-    <div className={`bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 ${className}`}>
-      {/* Audio element (solo si no usamos TTS) */}
-      {!useTTS && <audio ref={audioRef} src={audioUrl} preload="metadata" />}
+    <div className={`audio-player ${className}`}>
+      <div className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+        {/* Play/Pause Button */}
+        <button
+          onClick={isPlaying ? pauseAudio : playAudio}
+          className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors"
+          title={isPlaying ? 'Pausar' : 'Reproducir'}
+        >
+          {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
+        </button>
 
-      <div className="flex items-center gap-3">
-        {/* Controles */}
+        {/* Progress Bar */}
+        <div className="flex-1">
+          <div className="h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-600 transition-all duration-200"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="flex justify-between mt-1 text-xs text-gray-600 dark:text-gray-400">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+        </div>
+
+        {/* Controls */}
         <div className="flex items-center gap-2">
+          {useTTS && (
+            <div className="text-blue-600 dark:text-blue-400" title="Usando Text-to-Speech">
+              <Mic size={18} />
+            </div>
+          )}
+
           <button
-            onClick={togglePlay}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            onClick={resetAudio}
+            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            title="Reiniciar"
           >
-            {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
+            <RotateCcw size={18} className="text-gray-600 dark:text-gray-400" />
           </button>
 
           <button
             onClick={toggleMute}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            title={isMuted ? 'Activar sonido' : 'Silenciar'}
           >
             {isMuted ? (
               <VolumeX size={18} className="text-gray-600 dark:text-gray-400" />
             ) : (
-              <Volume2 size={18} className="text-blue-600 dark:text-blue-400" />
+              <Volume2 size={18} className="text-gray-600 dark:text-gray-400" />
             )}
           </button>
-
-          <button
-            onClick={restart}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
-          >
-            <RotateCcw size={16} className="text-gray-600 dark:text-gray-400" />
-          </button>
-
-          {/* Indicador TTS */}
-          {useTTS && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-              <Mic size={12} className="text-purple-600 dark:text-purple-400" />
-              <span className="text-xs text-purple-700 dark:text-purple-300 font-medium">
-                IA
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Progress Bar */}
-        <div className="flex-1">
-          <div
-            onClick={handleProgressClick}
-            className="h-2 bg-blue-200 dark:bg-blue-800 rounded-full cursor-pointer overflow-hidden"
-          >
-            <div
-              className="h-full bg-blue-600 dark:bg-blue-500 transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              {formatTime(currentTime)}
-            </span>
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              {formatTime(duration)}
-            </span>
-          </div>
         </div>
       </div>
 
-      {/* Texto */}
+      {/* Show text if enabled */}
       {showText && text && (
-        <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+        <div className="mt-2 text-sm text-gray-700 dark:text-gray-300 px-3">
           {text}
         </div>
       )}
 
-      {/* Info TTS */}
-      {useTTS && (
-        <div className="mt-2 text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1">
-          <Mic size={12} />
-          <span>Voz generada por IA (Text-to-Speech)</span>
-        </div>
+      {/* Hidden audio element (usado solo si no es TTS) */}
+      {!useTTS && audioUrl && (
+        <audio ref={audioRef} src={audioUrl} preload="metadata" />
       )}
     </div>
   );

@@ -285,8 +285,6 @@ export default function EventDetailModal({
             </div>
           )}
         </div>
-
-      </div>
     </BaseModal>
   );
 }
