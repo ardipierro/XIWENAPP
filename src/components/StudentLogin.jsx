@@ -5,6 +5,8 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'fire
 import { auth, db } from '../firebase/config';
 import { setUserRole, getStudentProfile } from '../firebase/firestore';
 import { doc, setDoc } from 'firebase/firestore';
+import { ArrowLeft } from 'lucide-react';
+import { BaseButton } from './common';
 import './StudentLogin.css';
 
 function StudentLogin({ onLoginSuccess }) {
@@ -84,7 +86,14 @@ function StudentLogin({ onLoginSuccess }) {
   return (
     <div className="student-login-container">
       <div className="student-login-content">
-        <button className="back-button" onClick={() => window.history.back()}>Volver</button>
+        <BaseButton
+          variant="ghost"
+          size="sm"
+          icon={ArrowLeft}
+          onClick={() => window.history.back()}
+        >
+          Volver
+        </BaseButton>
         <div className="student-login-header">
           <div className="student-icon">👨‍🎓</div>
           <h1>{isRegistering ? 'Registro Alumno' : 'Login Alumno'}</h1>
@@ -124,14 +133,24 @@ function StudentLogin({ onLoginSuccess }) {
             />
           </div>
           {error && <p className="error-message">{error}</p>}
-          <button type="submit" disabled={loading} className="submit-button">
-            {loading ? 'Cargando...' : (isRegistering ? 'Registrarse' : 'Ingresar')}
-          </button>
+          <BaseButton
+            type="submit"
+            variant="primary"
+            fullWidth
+            disabled={loading}
+            loading={loading}
+          >
+            {isRegistering ? 'Registrarse' : 'Ingresar'}
+          </BaseButton>
         </form>
         <div className="switch-mode">
-          <button onClick={() => setIsRegistering(!isRegistering)}>
+          <BaseButton
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsRegistering(!isRegistering)}
+          >
             {isRegistering ? 'Ya tengo cuenta' : 'Crear cuenta nueva'}
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>

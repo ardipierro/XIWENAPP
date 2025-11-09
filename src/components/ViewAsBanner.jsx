@@ -1,6 +1,7 @@
 import { Eye, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useViewAs } from '../contexts/ViewAsContext';
+import { BaseButton } from './common';
 import './ViewAsBanner.css';
 
 /**
@@ -46,16 +47,15 @@ function ViewAsBanner() {
           <strong className="banner-label">Modo Visualización:</strong> Viendo como {viewAsUser?.name || viewAsUser?.email}
         </div>
       </div>
-      <button
+      <BaseButton
         onClick={handleExitViewAs}
-        className="banner-button"
+        variant="warning"
+        size="sm"
+        icon={ArrowLeft}
       >
-        <div className="banner-button-icon">
-          <ArrowLeft size={20} strokeWidth={2} />
-        </div>
-        <span className="banner-button-full">Volver a Admin</span>
-        <span className="banner-button-short">Admin</span>
-      </button>
+        <span className="hidden sm:inline">Volver a Admin</span>
+        <span className="sm:hidden">Admin</span>
+      </BaseButton>
     </div>
   );
 }

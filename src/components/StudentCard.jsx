@@ -1,4 +1,5 @@
 import { User, Mail, BookOpen, Award, Eye, Trash2, DollarSign } from 'lucide-react';
+import { BaseButton } from './common';
 import './StudentCard.css';
 
 /**
@@ -92,29 +93,28 @@ function StudentCard({
 
         {/* Actions */}
         <div className="student-actions">
-          <button
+          <BaseButton
             onClick={(e) => {
               e.stopPropagation();
               onView && onView(student);
             }}
-            className="student-action-btn btn-view"
-            title="Ver detalles"
+            variant="ghost"
+            size="sm"
+            icon={Eye}
           >
-            <Eye size={18} />
-            <span>Ver</span>
-          </button>
+            Ver
+          </BaseButton>
 
           {isAdmin && (
-            <button
+            <BaseButton
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete && onDelete(student);
               }}
-              className="student-action-btn btn-delete"
-              title="Eliminar"
-            >
-              <Trash2 size={18} />
-            </button>
+              variant="danger"
+              size="sm"
+              icon={Trash2}
+            />
           )}
         </div>
       </div>
