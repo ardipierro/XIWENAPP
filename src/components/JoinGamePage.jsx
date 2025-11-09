@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getGameSessionByCode } from '../firebase/gameSession';
 import LiveGameStudent from './LiveGameStudent';
+import { BaseButton } from './common';
 import './JoinGamePage.css';
 
 /**
@@ -140,20 +141,16 @@ function JoinGamePage() {
                 <div className="error-box">{error}</div>
               )}
 
-              <button
+              <BaseButton
                 type="submit"
                 disabled={joinCode.length !== 6 || loading}
-                className="btn-primary-large"
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={loading}
               >
-                {loading ? (
-                  <>
-                    <div className="spinner-inline"></div>
-                    Buscando...
-                  </>
-                ) : (
-                  'Continuar'
-                )}
-              </button>
+                Continuar
+              </BaseButton>
             </form>
           </div>
         ) : (
@@ -203,7 +200,7 @@ function JoinGamePage() {
               )}
 
               <div className="form-actions">
-                <button
+                <BaseButton
                   type="button"
                   onClick={() => {
                     setStep('enter-code');
@@ -211,17 +208,19 @@ function JoinGamePage() {
                     setStudentName('');
                     setError('');
                   }}
-                  className="btn-secondary-large"
+                  variant="ghost"
+                  size="lg"
                 >
                   Volver
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   type="submit"
                   disabled={!studentName.trim()}
-                  className="btn-primary-large"
+                  variant="primary"
+                  size="lg"
                 >
                   Unirse
-                </button>
+                </BaseButton>
               </div>
             </form>
           </div>
