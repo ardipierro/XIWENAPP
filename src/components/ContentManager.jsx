@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock, X, ArrowLeft } from 'lucide-react';
 import { useContent } from '../hooks/useContent.js';
 import ContentRepository from '../services/ContentRepository.js';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse.js';
@@ -15,6 +15,7 @@ import {
 } from '../firebase/relationships.js';
 import { uploadImage, deleteImage } from '../firebase/storage';
 import logger from '../utils/logger.js';
+import { BaseButton } from './common';
 import ConfirmModal from './ConfirmModal';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
@@ -378,9 +379,9 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
     <div className="content-manager">
       {/* Botón Volver */}
       {onBack && (
-        <button onClick={onBack} className="btn btn-ghost mb-4">
-          ← Volver a Inicio
-        </button>
+        <BaseButton onClick={onBack} variant="ghost" icon={ArrowLeft} className="mb-4">
+          Volver a Inicio
+        </BaseButton>
       )}
 
       {/* Header */}
@@ -418,12 +419,12 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
               : 'Intenta con otros filtros de búsqueda'}
           </p>
           {contents.length === 0 && (
-            <button
-              className="btn btn-primary"
+            <BaseButton
+              variant="primary"
               onClick={() => setShowCreateModal(true)}
             >
               Crear Primer Contenido
-            </button>
+            </BaseButton>
           )}
         </div>
       ) : viewMode === 'grid' ? (
@@ -534,42 +535,43 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
               <h3 className="modal-title">
                 Crear Nuevo Contenido
               </h3>
-              <button
-                className="modal-close-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowCreateModal(false)}
+                icon={X}
                 aria-label="Cerrar modal"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              />
             </div>
 
             <div className="flex flex-col flex-1 min-h-0">
               {/* Tabs */}
               <div className="modal-tabs-container">
                 <div className="modal-tabs">
-                <button
+                <BaseButton
                   onClick={() => setActiveTab('general')}
+                  variant="ghost"
                   className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'general'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
+                  icon={FileText}
                 >
-                  <FileText size={18} strokeWidth={2} className="inline-icon" /> General
-                </button>
-                <button
+                  General
+                </BaseButton>
+                <BaseButton
                   onClick={() => setActiveTab('config')}
+                  variant="ghost"
                   className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'config'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
+                  icon={Settings}
                 >
-                  <Settings size={18} strokeWidth={2} className="inline-icon" /> Configuración
-                </button>
+                  Configuración
+                </BaseButton>
                 </div>
               </div>
 
@@ -634,14 +636,15 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                             alt="Vista previa de la imagen del contenido"
                             className="w-full h-48 object-cover rounded-lg mb-2"
                           />
-                          <button
+                          <BaseButton
                             type="button"
                             onClick={handleRemoveImage}
                             disabled={uploadingImage}
-                            className="btn btn-danger btn-sm"
+                            variant="danger"
+                            size="sm"
                           >
                             {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                          </button>
+                          </BaseButton>
                         </div>
                       ) : (
                         <div>
@@ -685,20 +688,22 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
               {/* Footer con botones (sin zona de peligro en crear) */}
               <div className="px-6 pt-4 pb-4 flex-shrink-0">
                 <div className="flex gap-2">
-                  <button
+                  <BaseButton
                     type="button"
-                    className="btn btn-outline flex-1"
+                    variant="outline"
                     onClick={() => setShowCreateModal(false)}
+                    className="flex-1"
                   >
                     Cancelar
-                  </button>
-                  <button
+                  </BaseButton>
+                  <BaseButton
                     type="button"
-                    className="btn btn-primary flex-1"
+                    variant="primary"
                     onClick={handleCreate}
+                    className="flex-1"
                   >
                     Crear Contenido
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -714,42 +719,43 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
               <h3 className="modal-title">
                 Editar Contenido
               </h3>
-              <button
-                className="modal-close-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowEditModal(false)}
+                icon={X}
                 aria-label="Cerrar modal"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              />
             </div>
 
             <div className="flex flex-col flex-1 min-h-0">
               {/* Tabs */}
               <div className="modal-tabs-container">
                 <div className="modal-tabs">
-                <button
+                <BaseButton
                   onClick={() => setActiveTab('general')}
+                  variant="ghost"
                   className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'general'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
+                  icon={FileText}
                 >
-                  <FileText size={18} strokeWidth={2} className="inline-icon" /> General
-                </button>
-                <button
+                  General
+                </BaseButton>
+                <BaseButton
                   onClick={() => setActiveTab('config')}
+                  variant="ghost"
                   className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'config'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
+                  icon={Settings}
                 >
-                  <Settings size={18} strokeWidth={2} className="inline-icon" /> Configuración
-                </button>
+                  Configuración
+                </BaseButton>
                 </div>
               </div>
 
@@ -814,14 +820,15 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                             alt="Vista previa de la imagen del contenido"
                             className="w-full h-48 object-cover rounded-lg mb-2"
                           />
-                          <button
+                          <BaseButton
                             type="button"
                             onClick={handleRemoveImage}
                             disabled={uploadingImage}
-                            className="btn btn-danger btn-sm"
+                            variant="danger"
+                            size="sm"
                           >
                             {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                          </button>
+                          </BaseButton>
                         </div>
                       ) : (
                         <div>
@@ -864,30 +871,31 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
 
               {/* Footer con botones */}
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
-                  className="btn btn-danger"
+                  variant="danger"
                   onClick={() => setShowConfirmDelete(true)}
+                  icon={Trash2}
                 >
-                  <Trash2 size={16} strokeWidth={2} /> Eliminar
-                </button>
-                <button
+                  Eliminar
+                </BaseButton>
+                <BaseButton
                   type="button"
-                  className="btn btn-outline"
+                  variant="outline"
                   onClick={() => setShowEditModal(false)}
                 >
                   Cancelar
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   type="button"
-                  className="btn btn-primary"
+                  variant="primary"
                   onClick={(e) => {
                     e.preventDefault();
                     handleUpdate(e);
                   }}
                 >
                   Guardar Cambios
-                </button>
+                </BaseButton>
               </div>
             </div>
           </div>
@@ -902,16 +910,13 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
               <h3 className="modal-title">
                 {selectedContent.title}
               </h3>
-              <button
-                className="modal-close-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowViewModal(false)}
+                icon={X}
                 aria-label="Cerrar modal"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              />
             </div>
 
             <div className="modal-content">
@@ -972,21 +977,22 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
             </div>
 
             <div className="modal-footer">
-                <button
-                  className="btn btn-outline"
+                <BaseButton
+                  variant="outline"
                   onClick={() => setShowViewModal(false)}
                 >
                   Cerrar
-                </button>
-                <button
-                  className="btn btn-primary"
+                </BaseButton>
+                <BaseButton
+                  variant="primary"
                   onClick={() => {
                     setShowViewModal(false);
                     handleEdit(selectedContent.id);
                   }}
+                  icon={Edit}
                 >
                   Editar
-                </button>
+                </BaseButton>
               </div>
           </div>
         </div>
