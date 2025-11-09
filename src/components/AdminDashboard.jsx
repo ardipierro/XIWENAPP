@@ -87,6 +87,7 @@ import ClassSessionRoom from './ClassSessionRoom';
 import UnifiedCalendar from './UnifiedCalendar';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
+import InteractiveBookViewer from './InteractiveBookViewer';
 import AIService from '../services/AIService';
 import ThemeCustomizer from './ThemeCustomizer';
 import './AdminDashboard.css';
@@ -554,6 +555,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ExerciseBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Interactive Book Viewer - WITH Layout
+  if (navigation.currentScreen === 'interactiveBook') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <InteractiveBookViewer />
       </DashboardLayout>
     );
   }

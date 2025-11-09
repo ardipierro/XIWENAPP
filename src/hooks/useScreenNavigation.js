@@ -75,6 +75,7 @@ export function useScreenNavigation() {
     'settings': 'settings', // Settings (Admin)
     'themeBuilder': 'themeBuilder', // Theme Builder (Admin/Teacher)
     'exerciseBuilder': 'exerciseBuilder', // Exercise Builder (Admin/Teacher)
+    'interactiveBook': 'interactiveBook', // Interactive Book Viewer (Admin/Teacher)
   };
 
   /**
