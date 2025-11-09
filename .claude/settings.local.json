@@ -119,7 +119,8 @@
       "Bash(src/components/VoiceRecorder.jsx)",
       "Bash(src/components/QuickAccessCard.jsx)",
       "Bash(src/components/StudentCard.jsx)",
-      "Bash(src/components/ViewAsBanner.jsx)"
+      "Bash(src/components/ViewAsBanner.jsx)",
+      "Bash(/tmp/teacher_dashboard_with_viewmode.jsx)"
     ],
     "deny": [],
     "ask": []

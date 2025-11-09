@@ -18,9 +18,33 @@ function FillInBlankExercise({ exercise, onComplete }) {
   const [showHint, setShowHint] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
+  // Soporte para ambos formatos de JSON
+  const getCorrectAnswers = () => {
+    if (exercise.correctAnswers) {
+      return exercise.correctAnswers;
+    }
+    if (exercise.blanks && exercise.blanks[0]) {
+      return exercise.blanks[0].correctAnswers;
+    }
+    return [];
+  };
+
+  const getHint = () => {
+    if (exercise.hint) return exercise.hint;
+    if (exercise.blanks && exercise.blanks[0]) return exercise.blanks[0].hint;
+    return null;
+  };
+
+  const getPoints = () => {
+    if (exercise.points) return exercise.points;
+    if (exercise.blanks && exercise.blanks[0]) return exercise.blanks[0].points;
+    return 10;
+  };
+
   const checkAnswer = () => {
     const trimmedAnswer = userAnswer.trim();
-    const correct = exercise.blanks[0].correctAnswers.some(
+    const correctAnswers = getCorrectAnswers();
+    const correct = correctAnswers.some(
       answer => answer.toLowerCase() === trimmedAnswer.toLowerCase()
     );
 
@@ -32,7 +56,7 @@ function FillInBlankExercise({ exercise, onComplete }) {
       onComplete({
         correct: true,
         attempts: attempts + 1,
-        points: exercise.blanks[0].points || 10
+        points: getPoints()
       });
     }
   };
@@ -112,7 +136,7 @@ function FillInBlankExercise({ exercise, onComplete }) {
               </p>
               {!isCorrect && (
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  Respuesta correcta: {exercise.blanks[0].correctAnswers[0]}
+                  Respuesta correcta: {getCorrectAnswers()[0]}
                 </p>
               )}
             </div>
@@ -121,13 +145,13 @@ function FillInBlankExercise({ exercise, onComplete }) {
       )}
 
       {/* Hint */}
-      {exercise.blanks[0].hint && (
+      {getHint() && (
         <div className="mb-3">
           {showHint ? (
             <div className="p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded text-sm text-amber-900 dark:text-amber-100">
               <div className="flex items-start gap-2">
                 <Lightbulb size={16} className="text-amber-600 dark:text-amber-400 mt-0.5" />
-                <span>{exercise.blanks[0].hint}</span>
+                <span>{getHint()}</span>
               </div>
             </div>
           ) : (
@@ -167,7 +191,7 @@ function FillInBlankExercise({ exercise, onComplete }) {
       {/* Puntos */}
       {isChecked && isCorrect && (
         <div className="mt-2 text-xs text-green-700 dark:text-green-400">
-          +{exercise.blanks[0].points || 10} puntos
+          +{getPoints()} puntos
         </div>
       )}
     </div>
