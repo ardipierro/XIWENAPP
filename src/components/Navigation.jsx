@@ -5,7 +5,6 @@ import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
 import { Home, GraduationCap, Crown, LogOut } from 'lucide-react';
 import { BaseButton } from './common';
-import './Navigation.css';
 
 function Navigation({ user, userRole }) {
   const navigate = useNavigate();
@@ -44,14 +43,14 @@ function Navigation({ user, userRole }) {
   const canAccessAdmin = userRole === 'admin';
 
   return (
-    <nav className="app-navigation">
-      <div className="nav-content">
-        <div className="nav-brand">
-          <span className="nav-logo">习文</span>
-          <span className="nav-title">XIWEN APP</span>
+    <nav className="bg-primary-900 shadow-md sticky top-0 z-[100] py-4">
+      <div className="max-w-[1400px] mx-auto px-6 flex md:flex-row flex-col items-center justify-between gap-6 md:gap-6 md:gap-4">
+        <div className="flex items-center gap-4">
+          <span className="text-3xl font-bold text-white [text-shadow:2px_2px_4px_rgba(0,0,0,0.2)]">习文</span>
+          <span className="text-lg font-semibold text-white tracking-wider">XIWEN APP</span>
         </div>
 
-        <div className="nav-links">
+        <div className="flex md:flex-row flex-col items-center gap-4 flex-wrap md:w-auto w-full md:justify-start justify-center">
           <BaseButton
             onClick={handleNavigateToDashboard}
             variant="ghost"
@@ -83,9 +82,9 @@ function Navigation({ user, userRole }) {
             </BaseButton>
           )}
 
-          <div className="nav-user">
-            <span className="user-email">{user?.email}</span>
-            <span className="user-role-badge">{userRole}</span>
+          <div className="flex flex-col md:items-end items-center gap-1 md:pl-4 md:border-l md:border-white/30 md:pt-0 pt-2 md:border-t-0 border-t border-white/30">
+            <span className="text-white text-sm font-medium">{user?.email}</span>
+            <span className="bg-white/25 text-white px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide">{userRole}</span>
           </div>
 
           <BaseButton
