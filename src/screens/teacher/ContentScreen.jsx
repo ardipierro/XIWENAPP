@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BaseCard, BaseTable, BaseButton, BaseModal } from '../../components/base';
-import { Plus, FileText, Video, BookOpen, Link as LinkIcon, Edit, Trash } from 'lucide-react';
+import { Plus, FileText, Video, BookOpen, Link as LinkIcon, Edit, Trash, Sparkles } from 'lucide-react';
+import ExerciseMakerModal from '../../components/shared/ExerciseMakerModal';
 
 /**
  * ContentScreen - Teacher content management
@@ -15,6 +16,7 @@ function ContentScreen() {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [exerciseMakerOpen, setExerciseMakerOpen] = useState(false);
   const [newContent, setNewContent] = useState({ title: '', type: 'lesson', course: '', description: '' });
 
   useEffect(() => {
@@ -113,9 +115,14 @@ function ContentScreen() {
           <h1 className="text-3xl font-bold text-text-primary dark:text-text-inverse mb-2">My Content</h1>
           <p className="text-text-secondary dark:text-neutral-400">{content.length} total content items</p>
         </div>
-        <BaseButton variant="primary" iconLeft={<Plus size={18} />} onClick={() => setCreateModalOpen(true)}>
-          Create Content
-        </BaseButton>
+        <div className="flex gap-3">
+          <BaseButton variant="secondary" iconLeft={<Sparkles size={18} />} onClick={() => setExerciseMakerOpen(true)}>
+            AI Exercise Maker
+          </BaseButton>
+          <BaseButton variant="primary" iconLeft={<Plus size={18} />} onClick={() => setCreateModalOpen(true)}>
+            Create Content
+          </BaseButton>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -199,6 +206,26 @@ function ContentScreen() {
           </div>
         </div>
       </BaseModal>
+
+      {/* AI Exercise Maker Modal */}
+      <ExerciseMakerModal
+        isOpen={exerciseMakerOpen}
+        onClose={() => setExerciseMakerOpen(false)}
+        onSave={(exercise) => {
+          // Add AI-generated exercise to content list
+          const newExercise = {
+            id: Math.max(...content.map(c => c.id), 0) + 1,
+            title: `AI: ${exercise.theme} - ${exercise.subtheme || exercise.type} (${exercise.difficulty})`,
+            type: 'lesson',
+            course: 'AI Generated',
+            status: 'draft',
+            created: new Date().toISOString().split('T')[0],
+            aiGenerated: true,
+            exerciseData: exercise
+          };
+          setContent(prev => [newExercise, ...prev]);
+        }}
+      />
     </div>
   );
 }
