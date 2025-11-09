@@ -22,7 +22,11 @@ import {
   MultipleChoiceExercise,
   FillInBlankExercise,
   MatchingExercise,
-  TrueFalseExercise
+  TrueFalseExercise,
+  AudioListeningExercise,
+  TextSelectionExercise,
+  DragDropOrderExercise,
+  DialogueRolePlayExercise
 } from '../components/designlab/exercises';
 import { useDesignLabConfig } from '../hooks/useDesignLabConfig';
 import logger from '../utils/logger';
@@ -132,6 +136,91 @@ export function DesignLabPage() {
         statement: 'En español, todos los adjetivos van antes del sustantivo.',
         correctAnswer: false,
         explanation: 'En español, la mayoría de los adjetivos van después del sustantivo, aunque algunos pueden ir antes (grande, pequeño, buen, mal, etc.).',
+        cefrLevel: 'A2',
+        onComplete: handleExerciseComplete
+      }
+    },
+    {
+      type: 'audio-listening',
+      title: 'Audio: Comprensión Auditiva (Español Rioplatense)',
+      props: {
+        title: 'Diálogo en el Supermercado',
+        audioUrl: '/audio/ejemplo-rioplatense.mp3', // Reemplazar con URL real
+        transcript: 'Che, ¿vos sabés dónde están las galletitas? Sí, mirá, están en el pasillo tres, al lado de los cereales.',
+        questions: [
+          {
+            question: '¿Qué está buscando la persona?',
+            options: [
+              { value: 'a', label: 'Cereales' },
+              { value: 'b', label: 'Galletitas' },
+              { value: 'c', label: 'Pan' }
+            ],
+            correctAnswer: 'b'
+          },
+          {
+            question: '¿En qué pasillo están las galletitas?',
+            options: [
+              { value: 'a', label: 'Pasillo 1' },
+              { value: 'b', label: 'Pasillo 2' },
+              { value: 'c', label: 'Pasillo 3' }
+            ],
+            correctAnswer: 'c'
+          }
+        ],
+        explanation: 'El español rioplatense usa "vos" en lugar de "tú" y tiene entonación característica.',
+        cefrLevel: 'B1',
+        showTranscript: false,
+        onComplete: handleExerciseComplete
+      }
+    },
+    {
+      type: 'text-selection',
+      title: 'Selección: Español → Chino',
+      props: {
+        instruction: 'Selecciona la palabra que significa "libro"',
+        text: 'En la mesa hay un libro, una pluma y un cuaderno.',
+        words: [
+          { spanish: 'mesa', chinese: '桌子', start: 6, end: 10 },
+          { spanish: 'libro', chinese: '书', start: 18, end: 23 },
+          { spanish: 'pluma', chinese: '钢笔', start: 29, end: 34 },
+          { spanish: 'cuaderno', chinese: '笔记本', start: 40, end: 48 }
+        ],
+        targetWord: 'libro',
+        explanation: '书 (shū) significa "libro" en chino.',
+        cefrLevel: 'A2',
+        onComplete: handleExerciseComplete
+      }
+    },
+    {
+      type: 'dragdrop-order',
+      title: 'Drag & Drop: Ordenar Oración',
+      props: {
+        instruction: 'Arrastra las palabras para formar la oración correcta',
+        items: ['Yo', 'me', 'levanto', 'a', 'las', 'ocho'],
+        explanation: 'En español, el verbo reflexivo va después del pronombre.',
+        cefrLevel: 'A1',
+        showNumbers: true,
+        onComplete: handleExerciseComplete
+      }
+    },
+    {
+      type: 'dialogue-roleplay',
+      title: 'Diálogo: En el Restaurante',
+      props: {
+        title: 'Conversación en un Restaurante',
+        context: 'Estás en un restaurante y el mesero viene a tomar tu orden.',
+        dialogue: [
+          { speaker: 'A', text: 'Buenas tardes, ¿qué desea ordenar?' },
+          { speaker: 'B', userInput: true, correctAnswers: ['Quiero una pizza', 'Una pizza por favor', 'Me gustaría una pizza'] },
+          { speaker: 'A', text: '¿Qué sabor de pizza prefiere?' },
+          { speaker: 'B', userInput: true, correctAnswers: ['Margherita', 'De queso', 'Napolitana'] },
+          { speaker: 'A', text: 'Perfecto, ¿algo para tomar?' },
+          { speaker: 'B', userInput: true, correctAnswers: ['Agua', 'Una gaseosa', 'Agua mineral'] }
+        ],
+        roleA: 'Mesero',
+        roleB: 'Cliente',
+        userRole: 'B',
+        explanation: 'Es importante usar "por favor" y expresiones corteses en contextos formales.',
         cefrLevel: 'A2',
         onComplete: handleExerciseComplete
       }
@@ -297,6 +386,10 @@ export function DesignLabPage() {
                   {example.type === 'blank' && <FillInBlankExercise {...example.props} />}
                   {example.type === 'match' && <MatchingExercise {...example.props} />}
                   {example.type === 'truefalse' && <TrueFalseExercise {...example.props} />}
+                  {example.type === 'audio-listening' && <AudioListeningExercise {...example.props} />}
+                  {example.type === 'text-selection' && <TextSelectionExercise {...example.props} />}
+                  {example.type === 'dragdrop-order' && <DragDropOrderExercise {...example.props} />}
+                  {example.type === 'dialogue-roleplay' && <DialogueRolePlayExercise {...example.props} />}
                 </div>
               ))}
             </div>

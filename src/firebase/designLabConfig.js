@@ -19,6 +19,12 @@ export const DEFAULT_CONFIG = {
     incorrect: '#ef4444', // red-500
     neutral: '#71717a' // zinc-500
   },
+  customColors: {
+    textColor: null, // null = usar default de Tailwind
+    exerciseBackground: null, // null = usar default
+    cardBackground: null,
+    borderColor: null
+  },
   animations: true,
   soundEffects: true,
   autoCorrect: false,
