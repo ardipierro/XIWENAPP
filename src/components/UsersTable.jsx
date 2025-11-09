@@ -23,6 +23,7 @@ import {
   Ban
 } from 'lucide-react';
 import { ROLES, ROLE_INFO } from '../firebase/roleConfig';
+import { BaseButton } from './common';
 
 // Icon mapping for role icons
 const ICON_MAP = {
@@ -107,18 +108,18 @@ function UsersTable({
           Usuarios del Sistema
         </h2>
         <div className="users-actions">
-          <button
-            className="btn-icon-refresh"
+          <BaseButton
+            variant="ghost"
+            size="sm"
             onClick={onRefresh}
             disabled={loading}
             title="Actualizar lista"
-          >
-            <RefreshCw size={20} strokeWidth={2} className={loading ? 'animate-spin' : ''} />
-          </button>
-          <button className="btn btn-primary" onClick={onAddUser}>
-            <Plus size={18} strokeWidth={2} />
+            icon={RefreshCw}
+            className="btn-icon-refresh"
+          />
+          <BaseButton variant="primary" onClick={onAddUser} icon={Plus}>
             Nuevo Usuario
-          </button>
+          </BaseButton>
         </div>
       </div>
 
