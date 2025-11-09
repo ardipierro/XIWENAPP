@@ -41,6 +41,7 @@ import {
   Edit2,
   Table
 } from 'lucide-react';
+import { BaseModal, BaseButton } from './common';
 
 // Valores por defecto del sistema
 const DEFAULT_CONFIG = {
@@ -745,37 +746,37 @@ function ThemeBuilder() {
       )}
 
       {/* Modal para guardar preset */}
-      {showPresetModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`${mode === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 max-w-md w-full`}>
-            <h3 className={`text-xl font-semibold mb-4 ${mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Save Preset
-            </h3>
-            <input
-              type="text"
-              value={presetName}
-              onChange={(e) => setPresetName(e.target.value)}
-              placeholder="Enter preset name..."
-              className={`w-full px-4 py-2 rounded-lg border mb-4 ${mode === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-              onKeyPress={(e) => e.key === 'Enter' && savePreset()}
-            />
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowPresetModal(false)}
-                className={`flex-1 px-4 py-2 rounded-lg ${mode === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={savePreset}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BaseModal
+        isOpen={showPresetModal}
+        onClose={() => setShowPresetModal(false)}
+        title="Save Preset"
+        size="sm"
+        footer={
+          <>
+            <BaseButton
+              onClick={() => setShowPresetModal(false)}
+              variant="ghost"
+            >
+              Cancel
+            </BaseButton>
+            <BaseButton
+              onClick={savePreset}
+              variant="primary"
+            >
+              Save
+            </BaseButton>
+          </>
+        }
+      >
+        <input
+          type="text"
+          value={presetName}
+          onChange={(e) => setPresetName(e.target.value)}
+          placeholder="Enter preset name..."
+          className={`w-full px-4 py-2 rounded-lg border ${mode === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+          onKeyPress={(e) => e.key === 'Enter' && savePreset()}
+        />
+      </BaseModal>
     </div>
   );
 }

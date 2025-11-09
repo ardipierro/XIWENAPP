@@ -8,8 +8,9 @@ import {
   checkStudentCodeExists,
   generateStudentCode
 } from '../firebase/firestore';
-import { GraduationCap, Settings, X, UserPlus, Users, RefreshCw } from 'lucide-react';
+import { GraduationCap, Settings, X, UserPlus, Users, RefreshCw, Edit, Trash2 } from 'lucide-react';
 import SearchBar from './common/SearchBar';
+import { BaseModal, BaseButton } from './common';
 import './StudentManager.css';
 
 function StudentManager({ onClose, onStudentSelect }) {
@@ -429,27 +430,39 @@ function StudentManager({ onClose, onStudentSelect }) {
         </div>
 
         {/* Modal Gestionar Alumno */}
-        {selectedStudent && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 2001}}>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              {/* Header */}
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Gestionar Alumno
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">{selectedStudent.name}</p>
-                </div>
-                <button
-                  onClick={() => setSelectedStudent(null)}
-                  className="btn btn-ghost"
-                >
-                  <X size={18} strokeWidth={2} />
-                </button>
-              </div>
-
-              {/* Student Info */}
-              <div className="space-y-4">
+        <BaseModal
+          isOpen={!!selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+          title="Gestionar Alumno"
+          subtitle={selectedStudent?.name}
+          size="lg"
+          footer={
+            <>
+              <BaseButton
+                onClick={() => {
+                  handleEdit(selectedStudent);
+                  setSelectedStudent(null);
+                }}
+                variant="primary"
+                icon={Edit}
+              >
+                Editar Alumno
+              </BaseButton>
+              <BaseButton
+                onClick={() => {
+                  handleDelete(selectedStudent.id, selectedStudent.name);
+                  setSelectedStudent(null);
+                }}
+                variant="danger"
+                icon={Trash2}
+              >
+                Eliminar
+              </BaseButton>
+            </>
+          }
+        >
+          {selectedStudent && (
+            <div className="space-y-4">
                 <div>
                   <label className="label">Nombre Completo</label>
                   <input
@@ -491,44 +504,21 @@ function StudentManager({ onClose, onStudentSelect }) {
                       className="input flex-1"
                       disabled
                     />
-                    <button
+                    <BaseButton
                       onClick={() => {
                         handleRegenerateCode(selectedStudent);
                         setSelectedStudent(null);
                       }}
-                      className="btn btn-outline"
-                      title="Regenerar código"
+                      variant="outline"
+                      icon={RefreshCw}
                     >
-                      <RefreshCw size={16} strokeWidth={2} /> Regenerar
-                    </button>
+                      Regenerar
+                    </BaseButton>
                   </div>
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => {
-                    handleEdit(selectedStudent);
-                    setSelectedStudent(null);
-                  }}
-                  className="btn btn-primary flex-1"
-                >
-                  Editar Alumno
-                </button>
-                <button
-                  onClick={() => {
-                    handleDelete(selectedStudent.id, selectedStudent.name);
-                    setSelectedStudent(null);
-                  }}
-                  className="btn btn-danger flex-1"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+            )}
+        </BaseModal>
       </div>
     </div>
   );
