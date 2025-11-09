@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { LiveKitRoom, VideoConference, RoomAudioRenderer, useToken } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { generateLiveKitToken, LIVEKIT_URL, joinLiveClass, leaveLiveClass, startLiveClass, endLiveClass } from '../firebase/liveClasses';
-import { PhoneOff, Users, Clock } from 'lucide-react';
+import { PhoneOff, Users, Clock, ArrowLeft } from 'lucide-react';
+import { BaseButton } from './common';
 import './LiveClassRoom.css';
 
 /**
@@ -93,9 +94,9 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
         <div className="error-content">
           <h2>Error al unirse a la clase</h2>
           <p>{error}</p>
-          <button onClick={onLeave} className="btn btn-primary">
+          <BaseButton onClick={onLeave} variant="primary" icon={ArrowLeft}>
             Volver
-          </button>
+          </BaseButton>
         </div>
       </div>
     );
@@ -131,14 +132,15 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
           </div>
         </div>
 
-        <button
+        <BaseButton
           onClick={handleLeave}
-          className="btn-leave"
+          variant="danger"
+          icon={PhoneOff}
           title="Salir de la clase"
+          className="btn-leave"
         >
-          <PhoneOff size={20} />
           Salir
-        </button>
+        </BaseButton>
       </div>
 
       {/* Sala de video LiveKit */}
