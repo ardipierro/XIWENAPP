@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext();
@@ -122,7 +123,7 @@ export function ThemeProvider({ children }) {
         root.style.cssText = '';
       }
     } catch (error) {
-      console.error('Error applying custom theme colors:', error);
+      logger.error('Error applying custom theme colors:', error);
     }
   };
 

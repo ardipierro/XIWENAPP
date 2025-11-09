@@ -3,6 +3,7 @@
  * @module components/DesignLab
  */
 
+import logger from '../utils/logger';
 import { useState, useEffect, useRef } from 'react';
 import {
   Palette,
@@ -265,7 +266,7 @@ function DesignLab() {
         setCustomColors(parsed);
         setHistory([parsed]);
       } catch (error) {
-        console.error('Error loading custom colors:', error);
+        logger.error('Error loading custom colors:', error);
       }
     } else {
       setHistory([{}]);

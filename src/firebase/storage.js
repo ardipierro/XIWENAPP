@@ -193,7 +193,7 @@ export async function uploadMessageAttachment(file, conversationId, userId) {
       type: file.type
     };
   } catch (error) {
-    console.error('Error uploading message attachment:', error);
+    logger.error('Error uploading message attachment:', error);
     return { success: false, error: error.message };
   }
 }
@@ -229,7 +229,7 @@ export async function uploadAudioMessage(audioBlob, conversationId, userId) {
       type: 'audio/webm'
     };
   } catch (error) {
-    console.error('Error uploading audio message:', error);
+    logger.error('Error uploading audio message:', error);
     return { success: false, error: error.message };
   }
 }

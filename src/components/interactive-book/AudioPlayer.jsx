@@ -3,6 +3,7 @@
  * @module components/interactive-book/AudioPlayer
  */
 
+import logger from '../../utils/logger';
 import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { BaseButton } from '../common';
@@ -76,7 +77,7 @@ function AudioPlayer({
   };
 
   const handleError = (e) => {
-    console.error('Error loading audio:', e);
+    logger.error('Error loading audio:', e);
     setError('No se pudo cargar el audio');
     setIsPlaying(false);
   };
@@ -91,7 +92,7 @@ function AudioPlayer({
         }
       }
     } catch (err) {
-      console.error('Error playing audio:', err);
+      logger.error('Error playing audio:', err);
       setError('Error al reproducir');
     }
   };
