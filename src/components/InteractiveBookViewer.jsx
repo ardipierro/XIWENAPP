@@ -19,7 +19,8 @@ import {
   Layers,
   MessageSquare,
   CheckCircle,
-  Award
+  Award,
+  Trophy
 } from 'lucide-react';
 import logger from '../utils/logger';
 import {
@@ -30,6 +31,13 @@ import {
   BaseAlert,
   BaseEmptyState
 } from './common';
+import {
+  AudioPlayer,
+  FillInBlankExercise,
+  MultipleChoiceExercise,
+  VocabularyMatchingExercise,
+  DragDropMenuExercise
+} from './interactive-book';
 
 /**
  * Visualizador del libro interactivo ADE1
@@ -42,6 +50,8 @@ function InteractiveBookViewer() {
   const [viewMode, setViewMode] = useState('preview'); // preview | json
   const [expandedUnits, setExpandedUnits] = useState(new Set([0])); // Primera unidad expandida por defecto
   const [selectedUnit, setSelectedUnit] = useState(null);
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [exerciseResults, setExerciseResults] = useState({});
 
   useEffect(() => {
     loadBookData();
@@ -77,6 +87,19 @@ function InteractiveBookViewer() {
       newExpanded.add(index);
     }
     setExpandedUnits(newExpanded);
+  };
+
+  const handleExerciseComplete = (exerciseId, result) => {
+    logger.info('✅ Ejercicio completado:', exerciseId, result);
+
+    setExerciseResults(prev => ({
+      ...prev,
+      [exerciseId]: result
+    }));
+
+    if (result.correct && result.points) {
+      setTotalPoints(prev => prev + result.points);
+    }
   };
 
   const getExerciseIcon = (type) => {
@@ -216,6 +239,17 @@ function InteractiveBookViewer() {
               </p>
             )}
 
+            {/* Audio Player */}
+            {line.audioUrl && (
+              <div className="mt-3">
+                <AudioPlayer
+                  audioUrl={line.audioUrl}
+                  text={line.text}
+                  showText={false}
+                />
+              </div>
+            )}
+
             {line.notes && line.notes.length > 0 && (
               <div className="mt-2 space-y-2">
                 {line.notes.map((note, idx) => (
@@ -239,19 +273,22 @@ function InteractiveBookViewer() {
               </div>
             )}
 
+            {/* Interactive Exercises */}
             {hasExercise && line.exercise && (
-              <div className="mt-3 p-3 bg-white dark:bg-gray-900 rounded border border-green-300 dark:border-green-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <ExerciseIcon size={16} className="text-green-600 dark:text-green-400" />
-                  <span className="text-sm font-semibold text-green-900 dark:text-green-100">
-                    {line.exercise.prompt || 'Ejercicio'}
-                  </span>
-                </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400">
-                  Tipo: {line.exercise.type}
-                  {line.exercise.points && ` • ${line.exercise.points} puntos`}
-                </div>
-              </div>
+              <>
+                {line.exercise.type === 'fill_in_blank' && (
+                  <FillInBlankExercise
+                    exercise={line.exercise}
+                    onComplete={(result) => handleExerciseComplete(line.exercise.exerciseId, result)}
+                  />
+                )}
+                {line.exercise.type === 'multiple_choice' && (
+                  <MultipleChoiceExercise
+                    exercise={line.exercise}
+                    onComplete={(result) => handleExerciseComplete(line.exercise.exerciseId, result)}
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
@@ -260,58 +297,80 @@ function InteractiveBookViewer() {
   };
 
   const renderExercise = (exercise, index) => {
-    const ExerciseIcon = getExerciseIcon(exercise.type);
+    // Renderizar según el tipo de ejercicio
+    switch (exercise.type) {
+      case 'vocabulary_matching':
+        return (
+          <VocabularyMatchingExercise
+            key={exercise.exerciseId || index}
+            exercise={exercise}
+            onComplete={(result) => handleExerciseComplete(exercise.exerciseId, result)}
+          />
+        );
 
-    return (
-      <BaseCard
-        key={exercise.exerciseId || index}
-        icon={ExerciseIcon}
-        title={exercise.title}
-        subtitle={exercise.instructions}
-        badges={[
-          <BaseBadge key="type" variant="primary">
-            {exercise.type}
-          </BaseBadge>,
-          exercise.difficulty && (
-            <BaseBadge
-              key="difficulty"
-              variant={
-                exercise.difficulty === 'beginner'
-                  ? 'success'
-                  : exercise.difficulty === 'intermediate'
-                  ? 'warning'
-                  : 'danger'
-              }
-            >
-              {exercise.difficulty}
-            </BaseBadge>
-          ),
-          exercise.points && (
-            <BaseBadge key="points" variant="info">
-              {exercise.points} pts
-            </BaseBadge>
-          )
-        ].filter(Boolean)}
-      >
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          {exercise.type === 'vocabulary_matching' && exercise.pairs && (
-            <div>
-              <strong>{exercise.pairs.length}</strong> pares para emparejar
+      case 'drag_and_drop_menu':
+        return (
+          <DragDropMenuExercise
+            key={exercise.exerciseId || index}
+            exercise={exercise}
+            onComplete={(result) => handleExerciseComplete(exercise.exerciseId, result)}
+          />
+        );
+
+      case 'conjugation_fill_blank':
+      case 'listening_comprehension':
+      default:
+        // Ejercicios no implementados aún - mostrar card informativa
+        const ExerciseIcon = getExerciseIcon(exercise.type);
+        return (
+          <BaseCard
+            key={exercise.exerciseId || index}
+            icon={ExerciseIcon}
+            title={exercise.title}
+            subtitle={exercise.instructions}
+            badges={[
+              <BaseBadge key="type" variant="primary">
+                {exercise.type}
+              </BaseBadge>,
+              exercise.difficulty && (
+                <BaseBadge
+                  key="difficulty"
+                  variant={
+                    exercise.difficulty === 'beginner'
+                      ? 'success'
+                      : exercise.difficulty === 'intermediate'
+                      ? 'warning'
+                      : 'danger'
+                  }
+                >
+                  {exercise.difficulty}
+                </BaseBadge>
+              ),
+              exercise.points && (
+                <BaseBadge key="points" variant="info">
+                  {exercise.points} pts
+                </BaseBadge>
+              )
+            ].filter(Boolean)}
+          >
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {exercise.type === 'conjugation_fill_blank' && exercise.questions && (
+                <div>
+                  <strong>{exercise.questions.length}</strong> preguntas de conjugación
+                </div>
+              )}
+              {exercise.type === 'listening_comprehension' && exercise.questions && (
+                <div>
+                  <strong>{exercise.questions.length}</strong> preguntas de comprensión
+                </div>
+              )}
+              <div className="mt-2 text-xs text-amber-700 dark:text-amber-400">
+                ⚠️ Este tipo de ejercicio estará disponible pronto
+              </div>
             </div>
-          )}
-          {exercise.type === 'conjugation_fill_blank' && exercise.questions && (
-            <div>
-              <strong>{exercise.questions.length}</strong> preguntas de conjugación
-            </div>
-          )}
-          {exercise.type === 'listening_comprehension' && exercise.questions && (
-            <div>
-              <strong>{exercise.questions.length}</strong> preguntas de comprensión
-            </div>
-          )}
-        </div>
-      </BaseCard>
-    );
+          </BaseCard>
+        );
+    }
   };
 
   const renderUnit = (unit, index) => {
@@ -536,7 +595,23 @@ function InteractiveBookViewer() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex items-center gap-4">
+            {/* Indicador de puntos */}
+            {totalPoints > 0 && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg border-2 border-amber-500 dark:border-amber-600">
+                <Trophy size={20} className="text-amber-600 dark:text-amber-400" />
+                <div>
+                  <div className="text-sm font-bold text-amber-900 dark:text-amber-100">
+                    {totalPoints} pts
+                  </div>
+                  <div className="text-xs text-amber-700 dark:text-amber-300">
+                    {Object.keys(exerciseResults).length} ejercicios
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
             <BaseButton
               variant={viewMode === 'preview' ? 'primary' : 'ghost'}
               size="sm"
@@ -561,6 +636,7 @@ function InteractiveBookViewer() {
             >
               Recargar
             </BaseButton>
+            </div>
           </div>
         </div>
 
