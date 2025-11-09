@@ -833,7 +833,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <p>No se encontraron alumnos</p>
             </div>
           ) : (
-            <div className={navigation.studentsViewMode === 'grid' ? 'students-grid' : 'students-list'}>
+            <div className={navigation.studentsViewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8' : 'flex flex-col gap-3 mb-8'}>
               {filteredStudents.map(student => (
                 <StudentCard
                   key={student.id}
@@ -845,6 +845,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   }}
                   onDelete={(student) => handleDeleteUser(student.id)}
                   isAdmin={isAdmin}
+                  viewMode={navigation.studentsViewMode}
                 />
               ))}
             </div>
