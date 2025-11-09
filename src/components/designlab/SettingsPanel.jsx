@@ -1,19 +1,19 @@
 /**
- * @fileoverview Panel de configuración visual del Design Lab
+ * @fileoverview Panel de configuración visual del Design Lab (ACTUALIZADO con personalización avanzada)
  * @module components/designlab/SettingsPanel
  */
 
 import { useState } from 'react';
-import { Settings, Sun, Moon, Type, Palette, Sparkles, Volume2, RotateCcw, Save } from 'lucide-react';
+import { Settings, Sun, Moon, Type, Palette, Sparkles, Volume2, RotateCcw, Paintbrush } from 'lucide-react';
 import { BaseButton, BaseCard, BaseModal, BaseBadge, BaseAlert } from '../common';
 import { useDesignLabConfig } from '../../hooks/useDesignLabConfig';
 import logger from '../../utils/logger';
 
 /**
- * Panel de configuración del Design Lab
+ * Panel de configuración del Design Lab con personalización visual avanzada
  */
 export function SettingsPanel() {
-  const { config, loading, saving, updateField, resetConfig } = useDesignLabConfig();
+  const { config, loading, saving, updateField, updateConfig, resetConfig } = useDesignLabConfig();
   const [showModal, setShowModal] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
 
@@ -29,10 +29,27 @@ export function SettingsPanel() {
     });
   };
 
+  const handleCustomColorChange = (field, value) => {
+    updateField('customColors', {
+      ...config.customColors,
+      [field]: value || null // null si está vacío
+    });
+  };
+
   const handleReset = async () => {
     await resetConfig();
     setResetConfirm(false);
     logger.info('Design Lab config reset');
+  };
+
+  const handleResetCustomColors = () => {
+    updateField('customColors', {
+      textColor: null,
+      exerciseBackground: null,
+      cardBackground: null,
+      borderColor: null
+    });
+    logger.info('Custom colors reset');
   };
 
   if (loading) {
@@ -60,7 +77,7 @@ export function SettingsPanel() {
         icon={Settings}
         size="lg"
       >
-        <div className="space-y-6">
+        <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
           {/* Tema */}
           <BaseCard title="Tema" variant="flat">
             <div className="flex gap-3">
@@ -84,7 +101,7 @@ export function SettingsPanel() {
           </BaseCard>
 
           {/* Tamaño de fuente */}
-          <BaseCard title="Tamaño de Fuente" variant="flat">
+          <BaseCard title="Tamaño de Fuente" icon={Type} variant="flat">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -136,6 +153,53 @@ export function SettingsPanel() {
                   </div>
                 </div>
               ))}
+            </div>
+          </BaseCard>
+
+          {/* NUEVO: Colores personalizados de ejercicios */}
+          <BaseCard title="Personalización Visual" icon={Paintbrush} variant="flat">
+            <div className="space-y-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                Personaliza los colores de los ejercicios. Deja vacío para usar los valores por defecto.
+              </p>
+
+              {[
+                { key: 'textColor', label: 'Color de Texto', placeholder: '#000000' },
+                { key: 'exerciseBackground', label: 'Fondo de Ejercicio', placeholder: 'Transparent' },
+                { key: 'cardBackground', label: 'Fondo de Cards', placeholder: '#ffffff' },
+                { key: 'borderColor', label: 'Color de Bordes', placeholder: '#e5e7eb' }
+              ].map((colorOption) => (
+                <div key={colorOption.key} className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {colorOption.label}
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={config.customColors?.[colorOption.key] || '#ffffff'}
+                      onChange={(e) => handleCustomColorChange(colorOption.key, e.target.value)}
+                      className="w-12 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
+                      disabled={!config.customColors?.[colorOption.key]}
+                    />
+                    <input
+                      type="text"
+                      value={config.customColors?.[colorOption.key] || ''}
+                      onChange={(e) => handleCustomColorChange(colorOption.key, e.target.value)}
+                      placeholder={colorOption.placeholder}
+                      className="w-24 px-2 py-1 text-xs font-mono border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <BaseButton
+                variant="ghost"
+                size="sm"
+                onClick={handleResetCustomColors}
+                fullWidth
+              >
+                Resetear Colores Personalizados
+              </BaseButton>
             </div>
           </BaseCard>
 
@@ -196,7 +260,7 @@ export function SettingsPanel() {
                   onClick={() => setResetConfirm(true)}
                   size="sm"
                 >
-                  Resetear
+                  Resetear Todo
                 </BaseButton>
                 <BaseButton
                   variant="primary"
