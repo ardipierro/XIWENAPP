@@ -11,6 +11,7 @@ import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { getUserCredits } from '../firebase/credits';
 import Navigation from './Navigation';
 import SearchBar from './common/SearchBar';
+import { BaseModal, BaseButton } from './common';
 import './AdminPanel.css';
 
 function AdminPanel({ user, userRole, onBack }) {
@@ -276,27 +277,23 @@ function AdminPanel({ user, userRole, onBack }) {
       </div>
 
       {/* Modal Gestionar Usuario */}
-      {selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{zIndex: 1000}}>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  Gestionar Usuario
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">{selectedUser.name}</p>
-              </div>
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="btn btn-ghost"
-              >
-                <X size={18} strokeWidth={2} />
-              </button>
-            </div>
-
-            {/* User Info */}
-            <div className="space-y-4">
+      <BaseModal
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+        title="Gestionar Usuario"
+        subtitle={selectedUser?.name}
+        size="lg"
+        footer={
+          <BaseButton
+            onClick={() => setSelectedUser(null)}
+            variant="ghost"
+          >
+            Cerrar
+          </BaseButton>
+        }
+      >
+        {selectedUser && (
+          <div className="space-y-4">
               <div>
                 <label className="label">Email</label>
                 <input
@@ -359,19 +356,8 @@ function AdminPanel({ user, userRole, onBack }) {
                 </div>
               )}
             </div>
-
-            {/* Actions */}
-            <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="btn btn-outline flex-1"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
+      </BaseModal>
     </div>
     </>
   );

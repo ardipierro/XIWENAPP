@@ -16,7 +16,7 @@ import {
   Send,
   X
 } from 'lucide-react';
-import { BaseLoading } from './common';
+import { BaseLoading, BaseModal, BaseButton } from './common';
 
 export default function StudentAssignmentsView({ studentId }) {
   const { assignments, loading } = useAssignments(studentId, 'student');
@@ -275,38 +275,64 @@ function SubmissionModal({ assignment, studentId, onClose }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {assignment.title}
-              </h2>
-              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
-                {assignment.deadline && (
-                  <div className="flex items-center gap-1">
-                    <Calendar size={16} />
-                    <span>
-                      Vence: {assignment.deadline.toDate().toLocaleDateString('es-ES')}
-                    </span>
-                  </div>
-                )}
-                <div>
-                  {assignment.points} puntos
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <X size={24} />
-            </button>
-          </div>
+  // Footer dinámico según estado
+  const footer = !isSubmitted ? (
+    <>
+      <BaseButton
+        onClick={onClose}
+        variant="ghost"
+      >
+        Cancelar
+      </BaseButton>
+      <BaseButton
+        onClick={handleSaveDraft}
+        disabled={isSaving}
+        variant="outline"
+      >
+        {isSaving ? 'Guardando...' : 'Guardar borrador'}
+      </BaseButton>
+      <BaseButton
+        onClick={handleSubmit}
+        disabled={isSaving}
+        variant="primary"
+        icon={Send}
+      >
+        {isSaving ? 'Entregando...' : 'Entregar tarea'}
+      </BaseButton>
+    </>
+  ) : (
+    <BaseButton onClick={onClose} variant="ghost" fullWidth>
+      Cerrar
+    </BaseButton>
+  );
 
+  // Subtitle con info de deadline y puntos
+  const subtitle = (
+    <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+      {assignment.deadline && (
+        <div className="flex items-center gap-1">
+          <Calendar size={16} />
+          <span>
+            Vence: {assignment.deadline.toDate().toLocaleDateString('es-ES')}
+          </span>
+        </div>
+      )}
+      <div>
+        {assignment.points} puntos
+      </div>
+    </div>
+  );
+
+  return (
+    <BaseModal
+      isOpen={true}
+      onClose={onClose}
+      title={assignment.title}
+      subtitle={subtitle}
+      size="xl"
+      footer={footer}
+    >
+      <div className="space-y-6">
           {/* Description */}
           {assignment.description && (
             <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
@@ -373,33 +399,6 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                   </label>
                 </div>
               </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="btn btn-ghost flex-1"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveDraft}
-                  disabled={isSaving}
-                  className="btn btn-outline flex-1 disabled:opacity-50"
-                >
-                  {isSaving ? 'Guardando...' : 'Guardar borrador'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isSaving}
-                  className="btn btn-primary flex-1 disabled:opacity-50"
-                >
-                  <Send size={18} strokeWidth={2} />
-                  {isSaving ? 'Entregando...' : 'Entregar tarea'}
-                </button>
-              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -419,17 +418,9 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                   </p>
                 </div>
               </div>
-
-              <button
-                onClick={onClose}
-                className="btn btn-ghost w-full"
-              >
-                Cerrar
-              </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </BaseModal>
   );
 }
