@@ -903,6 +903,8 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             value={userManagement.searchTerm}
             onChange={userManagement.setSearchTerm}
             placeholder={isAdmin ? "Buscar usuarios..." : "Buscar alumnos..."}
+            viewMode={navigation.studentsViewMode}
+            onViewModeChange={navigation.setStudentsViewMode}
             className="mb-6"
           />
 
@@ -927,7 +929,38 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <div className="no-users">
                 <p>No se encontraron usuarios con los filtros seleccionados</p>
               </div>
+            ) : navigation.studentsViewMode === 'grid' ? (
+              /* Vista de grilla con StudentCard */
+              <div className="quick-access-grid">
+                {userManagement.filteredUsers.map(userItem => (
+                  <StudentCard
+                    key={userItem.id}
+                    student={userItem}
+                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
+                    onView={handleViewUserProfile}
+                    onDelete={isAdmin ? handleDeleteUser : null}
+                    isAdmin={isAdmin}
+                    viewMode="grid"
+                  />
+                ))}
+              </div>
+            ) : navigation.studentsViewMode === 'list' ? (
+              /* Vista de lista con StudentCard */
+              <div className="flex flex-col gap-4">
+                {userManagement.filteredUsers.map(userItem => (
+                  <StudentCard
+                    key={userItem.id}
+                    student={userItem}
+                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
+                    onView={handleViewUserProfile}
+                    onDelete={isAdmin ? handleDeleteUser : null}
+                    isAdmin={isAdmin}
+                    viewMode="list"
+                  />
+                ))}
+              </div>
             ) : (
+              /* Vista de tabla (default) */
               <div className="users-table-container">
                 <table className="users-table">
                   <thead>
