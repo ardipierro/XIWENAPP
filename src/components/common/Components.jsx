@@ -1,8 +1,20 @@
 // ============================================
 // XIWENAPP - COMPONENTES REUTILIZABLES
 // ============================================
-// Este archivo contiene ejemplos de componentes que puedes usar
-// en toda tu aplicación para mantener consistencia
+// @deprecated Este archivo es LEGACY y NO debe usarse en código nuevo
+//
+// USAR EN SU LUGAR:
+// - Button → BaseButton (./BaseButton.jsx)
+// - Card → BaseCard (./BaseCard.jsx)
+// - Input → BaseInput (./BaseInput.jsx)
+// - Badge → BaseBadge (./BaseBadge.jsx)
+// - Alert → BaseAlert (./BaseAlert.jsx)
+// - Modal → BaseModal (./BaseModal.jsx)
+// - Spinner → BaseLoading (./BaseLoading.jsx)
+//
+// Este archivo se mantiene solo para compatibilidad retroactiva
+// y será eliminado en una futura versión.
+// ============================================
 
 import React from 'react';
 
