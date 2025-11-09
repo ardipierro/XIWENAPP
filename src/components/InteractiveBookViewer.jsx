@@ -37,7 +37,9 @@ import {
   MultipleChoiceExercise,
   VocabularyMatchingExercise,
   DragDropMenuExercise,
-  TTSSettings
+  TTSSettings,
+  DialogueBubble,
+  ViewCustomizer
 } from './interactive-book';
 
 /**
@@ -53,6 +55,7 @@ function InteractiveBookViewer() {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [totalPoints, setTotalPoints] = useState(0);
   const [exerciseResults, setExerciseResults] = useState({});
+  const [viewSettings, setViewSettings] = useState(null);
 
   useEffect(() => {
     loadBookData();
@@ -192,108 +195,15 @@ function InteractiveBookViewer() {
     );
   };
 
-  const renderDialogueLine = (line, index) => {
-    const hasExercise = line.interactiveType;
-    const ExerciseIcon = hasExercise ? getExerciseIcon(line.exercise?.type) : null;
-
+  const renderDialogueLine = (line, index, totalLines) => {
     return (
-      <div
+      <DialogueBubble
         key={line.lineId}
-        className={`p-4 rounded-lg border ${
-          hasExercise
-            ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
-            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-        }`}
-      >
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0">
-            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-              <span className="text-xs font-bold text-gray-600 dark:text-gray-300">
-                {line.character.substring(0, 2).toUpperCase()}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold text-sm text-gray-900 dark:text-white">
-                {line.character}
-              </span>
-              {hasExercise && (
-                <BaseBadge variant="success" size="sm">
-                  <ExerciseIcon size={12} className="mr-1" />
-                  Interactivo
-                </BaseBadge>
-              )}
-              {line.audioUrl && (
-                <Volume2 size={14} className="text-gray-400" />
-              )}
-            </div>
-
-            <p className="text-base text-gray-900 dark:text-white mb-1">
-              {line.text}
-            </p>
-
-            {line.translation && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {line.translation}
-              </p>
-            )}
-
-            {/* Audio Player */}
-            {line.audioUrl && (
-              <div className="mt-3">
-                <AudioPlayer
-                  audioUrl={line.audioUrl}
-                  text={line.text}
-                  showText={false}
-                />
-              </div>
-            )}
-
-            {line.notes && line.notes.length > 0 && (
-              <div className="mt-2 space-y-2">
-                {line.notes.map((note, idx) => (
-                  <div
-                    key={idx}
-                    className="text-xs p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded"
-                  >
-                    <span className="font-semibold text-amber-900 dark:text-amber-200">
-                      {note.word}:
-                    </span>{' '}
-                    <span className="text-amber-800 dark:text-amber-300">
-                      {note.definition}
-                    </span>
-                    {note.rioplatenseNote && (
-                      <div className="mt-1 text-amber-700 dark:text-amber-400">
-                        🇦🇷 {note.rioplatenseNote}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Interactive Exercises */}
-            {hasExercise && line.exercise && (
-              <>
-                {line.exercise.type === 'fill_in_blank' && (
-                  <FillInBlankExercise
-                    exercise={line.exercise}
-                    onComplete={(result) => handleExerciseComplete(line.exercise.exerciseId, result)}
-                  />
-                )}
-                {line.exercise.type === 'multiple_choice' && (
-                  <MultipleChoiceExercise
-                    exercise={line.exercise}
-                    onComplete={(result) => handleExerciseComplete(line.exercise.exerciseId, result)}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+        line={line}
+        index={index}
+        totalLines={totalLines}
+        onExerciseComplete={handleExerciseComplete}
+      />
     );
   };
 
@@ -456,9 +366,9 @@ function InteractiveBookViewer() {
                   <MessageSquare size={18} />
                   Diálogo Interactivo
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-1">
                   {unit.content.dialogue.lines.map((line, idx) =>
-                    renderDialogueLine(line, idx)
+                    renderDialogueLine(line, idx, unit.content.dialogue.lines.length)
                   )}
                 </div>
                 {unit.content.dialogue.fullAudioUrl && (
@@ -484,7 +394,7 @@ function InteractiveBookViewer() {
                   <Award size={18} />
                   Ejercicios ({unit.content.exercises.length})
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   {unit.content.exercises.map((exercise, idx) =>
                     renderExercise(exercise, idx)
                   )}
@@ -648,6 +558,9 @@ function InteractiveBookViewer() {
 
             {/* Configuración TTS */}
             <TTSSettings />
+
+            {/* Configuración de Vista */}
+            <ViewCustomizer onSettingsChange={setViewSettings} />
 
             {/* Unidades */}
             <div className="space-y-4">
