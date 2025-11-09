@@ -1,247 +1,198 @@
 /**
- * AIService - Multi-provider AI service for exercise generation
- * Supports: OpenAI, Google Gemini, xAI Grok, Anthropic Claude
- * Uses factory pattern for provider selection
+ * AIService - Simplified AI service using Firestore aiConfig
+ * Integrates with existing aiConfig.js module
  */
 
-import OpenAIProvider from './providers/OpenAIProvider.js';
-import GeminiProvider from './providers/GeminiProvider.js';
-import GrokProvider from './providers/GrokProvider.js';
-import ClaudeProvider from './providers/ClaudeProvider.js';
-import logger from '../utils/logger';
+import { getAIConfig, callAI, AI_PROVIDERS } from '../firebase/aiConfig';
 
 class AIService {
   constructor() {
-    this.currentProviderName = null;
-    this.provider = null;
-    this._initDefaultProvider();
+    this.config = null;
+    this.currentProvider = null;
   }
 
   /**
-   * Initialize default provider from environment
-   * @private
+   * Initialize service (load config from Firestore)
    */
-  _initDefaultProvider() {
-    const defaultProvider = import.meta.env.VITE_AI_PROVIDER || 'openai';
-    this.setProvider(defaultProvider);
-  }
+  async initialize() {
+    this.config = await getAIConfig();
 
-  /**
-   * Get API key for a provider (checks localStorage first, then .env)
-   * @private
-   * @param {string} providerName - Provider name
-   * @param {string} envKey - Environment variable API key
-   * @returns {string} API key
-   */
-  _getApiKey(providerName, envKey) {
-    if (typeof window !== 'undefined') {
-      const storedKey = localStorage.getItem(`ai_credentials_${providerName}`);
-      if (storedKey) {
-        return storedKey;
+    // Find first enabled provider
+    for (const provider of AI_PROVIDERS) {
+      if (this.config[provider.id]?.enabled && this.config[provider.id]?.apiKey) {
+        this.currentProvider = provider.id;
+        break;
       }
     }
-    return envKey;
+
+    return this.currentProvider !== null;
   }
 
   /**
-   * Create a provider instance
-   * @private
-   * @param {string} providerName - Provider name (openai, gemini, grok, claude)
-   * @returns {BaseAIProvider} Provider instance
+   * Set active provider
    */
-  _createProvider(providerName) {
-    switch (providerName.toLowerCase()) {
-      case 'gemini':
-        return new GeminiProvider(
-          this._getApiKey('gemini', import.meta.env.VITE_GEMINI_API_KEY),
-          import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash-exp'
-        );
-
-      case 'grok':
-        return new GrokProvider(
-          this._getApiKey('grok', import.meta.env.VITE_GROK_API_KEY),
-          import.meta.env.VITE_GROK_MODEL || 'grok-2-latest'
-        );
-
-      case 'claude':
-        return new ClaudeProvider(
-          this._getApiKey('claude', import.meta.env.VITE_CLAUDE_API_KEY),
-          import.meta.env.VITE_CLAUDE_MODEL || 'claude-sonnet-4-5'
-        );
-
-      case 'openai':
-      default:
-        return new OpenAIProvider(
-          this._getApiKey('openai', import.meta.env.VITE_OPENAI_API_KEY),
-          import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini'
-        );
+  setProvider(providerId) {
+    if (this.config[providerId]?.enabled && this.config[providerId]?.apiKey) {
+      this.currentProvider = providerId;
+      return true;
     }
-  }
-
-  /**
-   * Set the active AI provider
-   * @param {string} providerName - Provider name (openai, gemini, grok, claude)
-   */
-  setProvider(providerName) {
-    this.currentProviderName = providerName.toLowerCase();
-    this.provider = this._createProvider(this.currentProviderName);
-    logger.info(`AIService: Switched to ${this.provider.getProviderName()} provider`);
+    return false;
   }
 
   /**
    * Get current provider name
-   * @returns {string}
    */
   getCurrentProvider() {
-    return this.currentProviderName;
+    return this.currentProvider;
   }
 
   /**
-   * Get current provider instance
-   * @returns {BaseAIProvider}
-   */
-  getProvider() {
-    return this.provider;
-  }
-
-  /**
-   * Get list of available providers with their configuration status
-   * @returns {Array<{name: string, label: string, configured: boolean, model: string}>}
+   * Get list of available configured providers
    */
   getAvailableProviders() {
-    const providers = [
-      {
-        name: 'openai',
-        label: 'OpenAI (ChatGPT)',
-        icon: '🤖',
-        model: import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini',
-        apiKey: import.meta.env.VITE_OPENAI_API_KEY
-      },
-      {
-        name: 'gemini',
-        label: 'Google Gemini',
-        icon: '✨',
-        model: import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash-exp',
-        apiKey: import.meta.env.VITE_GEMINI_API_KEY
-      },
-      {
-        name: 'grok',
-        label: 'xAI Grok',
-        icon: '🚀',
-        model: import.meta.env.VITE_GROK_MODEL || 'grok-2-latest',
-        apiKey: import.meta.env.VITE_GROK_API_KEY
-      },
-      {
-        name: 'claude',
-        label: 'Anthropic Claude',
-        icon: '🧠',
-        model: import.meta.env.VITE_CLAUDE_MODEL || 'claude-sonnet-4-5',
-        apiKey: import.meta.env.VITE_CLAUDE_API_KEY
-      }
-    ];
+    if (!this.config) return [];
 
-    return providers.map(p => {
-      // Check localStorage first, then .env
-      const storedKey = typeof window !== 'undefined' ? localStorage.getItem(`ai_credentials_${p.name}`) : null;
-      const apiKey = storedKey || p.apiKey;
-
-      return {
-        name: p.name,
-        label: p.label,
-        icon: p.icon,
-        model: p.model,
-        configured: !!(apiKey && apiKey !== 'your-api-key-here' && apiKey !== 'your-key-here')
-      };
-    });
+    return AI_PROVIDERS.map(provider => ({
+      name: provider.id,
+      label: provider.name,
+      icon: provider.icon,
+      configured: this.config[provider.id]?.enabled && !!this.config[provider.id]?.apiKey,
+      active: this.currentProvider === provider.id
+    }));
   }
 
   /**
-   * Check if current provider is configured
-   * @returns {boolean}
+   * Check if service is configured
    */
   isConfigured() {
-    return this.provider && this.provider.hasApiKey();
+    return this.currentProvider !== null &&
+           this.config[this.currentProvider]?.enabled &&
+           !!this.config[this.currentProvider]?.apiKey;
   }
 
   /**
    * Generate ESL exercises using current provider
-   * @param {Object} params - Exercise generation parameters
-   * @param {string} params.theme - Main theme (gramática, vocabulario, pronunciación)
-   * @param {string} params.subtheme - Subtheme (verbos, adjetivos, preguntas)
-   * @param {string} params.type - Exercise type (gap-fill, drag-to-match, listening)
-   * @param {string} params.difficulty - CEFR level (A1, A2, B1, B2, C1, C2)
-   * @param {number} params.quantity - Number of exercises (1-10)
-   * @param {string} params.context - Optional context (e.g., "usa animales cotidianos")
-   * @returns {Promise<{success: boolean, data?: string, error?: string, provider?: string}>}
    */
   async generateExercises(params) {
-    if (!this.provider) {
+    if (!this.isConfigured()) {
       return {
         success: false,
-        error: 'No hay proveedor de IA configurado'
+        error: 'No hay proveedor de IA configurado. Por favor, configura un proveedor en Admin > AI Config.'
       };
     }
 
-    const result = await this.provider.generateExercises(params);
+    try {
+      // Build prompt for exercise generation
+      const prompt = this._buildExercisePrompt(params);
 
-    // Add provider info to result
-    return {
-      ...result,
-      provider: this.currentProviderName
-    };
+      // Call AI
+      const response = await callAI(
+        this.currentProvider,
+        prompt,
+        this.config[this.currentProvider]
+      );
+
+      return {
+        success: true,
+        data: response,
+        provider: this.currentProvider
+      };
+    } catch (error) {
+      console.error('AIService error:', error);
+      return {
+        success: false,
+        error: error.message || 'Error al generar ejercicios'
+      };
+    }
   }
 
   /**
-   * Test current provider API connection
-   * @returns {Promise<{success: boolean, error?: string, provider?: string}>}
+   * Build exercise generation prompt
+   * @private
+   */
+  _buildExercisePrompt(params) {
+    const { theme, subtheme, type, difficulty, quantity, context } = params;
+
+    let prompt = `Genera ${quantity} ejercicio(s) de ${theme}`;
+
+    if (subtheme) {
+      prompt += ` enfocado en ${subtheme}`;
+    }
+
+    prompt += ` de nivel ${difficulty} (CEFR).`;
+
+    if (context) {
+      prompt += ` Contexto adicional: ${context}.`;
+    }
+
+    prompt += `\n\nTipo de ejercicio: ${type}`;
+
+    // Add format instructions based on type
+    if (type === 'gap-fill' || type === 'fill-in') {
+      prompt += `\n\nFormato requerido para cada ejercicio:
+SENTENCE: [frase con [___] donde va la palabra faltante]
+ANSWER: [respuesta correcta]
+EXPLANATION: [explicación breve opcional]
+
+Ejemplo:
+SENTENCE: I [___] to school every day.
+ANSWER: go
+EXPLANATION: Presente simple con "I"`;
+    } else if (type === 'multiple-choice') {
+      prompt += `\n\nFormato requerido para cada ejercicio:
+QUESTION: [pregunta]
+OPTIONS: [opción A] | [opción B] | [opción C] | [opción D]
+CORRECT: [índice de la respuesta correcta: 0, 1, 2, o 3]
+EXPLANATION: [explicación breve opcional]
+
+Ejemplo:
+QUESTION: What is the past tense of "go"?
+OPTIONS: goed | went | gone | going
+CORRECT: 1
+EXPLANATION: "Went" es el pasado simple de "go"`;
+    } else if (type === 'drag-to-match') {
+      prompt += `\n\nFormato requerido para cada ejercicio:
+PAIRS: [término 1] = [definición 1] | [término 2] = [definición 2] | ...
+
+Ejemplo:
+PAIRS: cat = animal doméstico felino | dog = animal doméstico canino | bird = animal que vuela`;
+    }
+
+    prompt += `\n\nGenera exactamente ${quantity} ejercicio(s) siguiendo el formato especificado.`;
+
+    return prompt;
+  }
+
+  /**
+   * Test current provider connection
    */
   async testConnection() {
-    if (!this.provider) {
+    if (!this.isConfigured()) {
       return {
         success: false,
-        error: 'No hay proveedor de IA configurado'
+        error: 'No provider configured'
       };
     }
 
-    const result = await this.provider.testConnection();
+    try {
+      const response = await callAI(
+        this.currentProvider,
+        'Di "test exitoso" en español',
+        this.config[this.currentProvider]
+      );
 
-    return {
-      ...result,
-      provider: this.currentProviderName
-    };
-  }
-
-  /**
-   * Test all providers and return their status
-   * @returns {Promise<Array<{provider: string, success: boolean, error?: string}>>}
-   */
-  async testAllProviders() {
-    const providers = ['openai', 'gemini', 'grok', 'claude'];
-    const results = [];
-
-    for (const providerName of providers) {
-      const originalProvider = this.currentProviderName;
-
-      try {
-        this.setProvider(providerName);
-        const result = await this.testConnection();
-        results.push({
-          provider: providerName,
-          ...result
-        });
-      } catch (error) {
-        results.push({
-          provider: providerName,
-          success: false,
-          error: error.message
-        });
-      }
-
-      // Restore original provider
-      this.setProvider(originalProvider);
+      return {
+        success: true,
+        message: response,
+        provider: this.currentProvider
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+        provider: this.currentProvider
+      };
     }
-
-    return results;
   }
 }
 
