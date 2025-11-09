@@ -114,11 +114,15 @@ export default defineConfig({
       output: {
         // Chunking estratégico - Mobile First (simplificado para evitar circular deps)
         manualChunks: (id) => {
-          // React core (crítico - cargar primero)
+          // React core + recharts juntos (recharts necesita React en el mismo contexto)
           if (id.includes('node_modules/react') ||
               id.includes('node_modules/react-dom') ||
               id.includes('node_modules/react-router') ||
-              id.includes('node_modules/scheduler')) {
+              id.includes('node_modules/scheduler') ||
+              id.includes('node_modules/recharts') ||
+              id.includes('node_modules/@reduxjs/toolkit') ||
+              id.includes('node_modules/react-redux') ||
+              id.includes('node_modules/use-sync-external-store')) {
             return 'react-vendor';
           }
 
@@ -138,7 +142,8 @@ export default defineConfig({
             return 'icons';
           }
 
-          if (id.includes('recharts') || id.includes('d3-')) {
+          // D3 separado si no es parte de recharts
+          if (id.includes('d3-') && !id.includes('recharts')) {
             return 'charts';
           }
 
