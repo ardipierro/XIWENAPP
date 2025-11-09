@@ -102,7 +102,16 @@
       "Bash(src/components/exercisebuilder/exercises/FreeDragDropExercise.jsx)",
       "Bash(for file in VerbIdentificationExercise.jsx InteractiveReadingExercise.jsx AIAudioPronunciationExercise.jsx FreeDragDropExercise.jsx)",
       "Bash(do sed -i 's/useDesignLabConfig/useExerciseBuilderConfig/g' \"src/components/exercisebuilder/exercises/$file\")",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(generate-audio-free.js)",
+      "Bash(generate-audio-gtts.py)",
+      "Bash(generate-audio-offline.py)",
+      "Bash(generate-audio-web.py)",
+      "Bash(generate-simple-audio.py:*)",
+      "Bash(public/audio/ai/buenos-dias.wav)",
+      "Bash(public/audio/ai/jirafa.wav)",
+      "Bash(public/audio/ai/perro.wav)",
+      "Bash(public/audio/ai/tigres.wav)"
     ],
     "deny": [],
     "ask": []
