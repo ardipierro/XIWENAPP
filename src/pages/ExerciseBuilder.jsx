@@ -22,7 +22,11 @@ import {
   MultipleChoiceExercise,
   FillInBlankExercise,
   MatchingExercise,
-  TrueFalseExercise
+  TrueFalseExercise,
+  AudioListeningExercise,
+  DialogueRolePlayExercise,
+  DragDropOrderExercise,
+  TextSelectionExercise
 } from '../components/exercisebuilder/exercises';
 import { useExerciseBuilderConfig } from '../hooks/useExerciseBuilderConfig';
 import logger from '../utils/logger';
@@ -133,6 +137,75 @@ export function ExerciseBuilder() {
         correctAnswer: false,
         explanation: 'En español, la mayoría de los adjetivos van después del sustantivo, aunque algunos pueden ir antes (grande, pequeño, buen, mal, etc.).',
         cefrLevel: 'A2',
+        onComplete: handleExerciseComplete
+      }
+    },
+    {
+      type: 'audio',
+      title: 'Audio Listening: Comprensión',
+      props: {
+        instruction: 'Escucha el audio y responde las preguntas',
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        transcript: 'Este es un ejemplo de audio para comprensión auditiva. En una lección real, aquí tendríamos un diálogo o narración en español.',
+        questions: [
+          {
+            id: 1,
+            question: '¿De qué trata el audio?',
+            options: ['Música', 'Conversación', 'Narración', 'Podcast'],
+            correctAnswer: 0
+          }
+        ],
+        cefrLevel: 'B1',
+        onComplete: handleExerciseComplete
+      }
+    },
+    {
+      type: 'dialogue',
+      title: 'Diálogo: En el restaurante',
+      props: {
+        title: 'Diálogo en el Restaurante',
+        context: 'Estás en un restaurante español y quieres pedir comida.',
+        roleA: 'Camarero',
+        roleB: 'Cliente',
+        userRole: 'B',
+        dialogue: [
+          { speaker: 'A', text: '¡Buenas tardes! ¿Qué desea tomar?', userInput: false },
+          { speaker: 'B', text: 'Buenas tardes. Quisiera ver el menú, por favor.', userInput: true, correctAnswers: ['Quisiera ver el menú', 'El menú por favor', 'Quiero ver el menú'] },
+          { speaker: 'A', text: 'Aquí tiene. Le recomiendo nuestro plato del día.', userInput: false },
+          { speaker: 'B', text: 'Perfecto, tomaré el plato del día.', userInput: true, correctAnswers: ['Tomaré el plato del día', 'Quiero el plato del día', 'Me gustaría el plato del día'] }
+        ],
+        explanation: 'En un restaurante, es común usar "quisiera" (más formal) o "quiero" (menos formal) para pedir.',
+        cefrLevel: 'A2',
+        onComplete: handleExerciseComplete
+      }
+    },
+    {
+      type: 'dragdrop',
+      title: 'Drag & Drop: Ordena la oración',
+      props: {
+        instruction: 'Arrastra las palabras para formar una oración correcta',
+        items: ['Yo', 'voy', 'al', 'mercado', 'todos', 'los', 'días'],
+        explanation: 'El orden correcto en español es: Sujeto + Verbo + Complementos',
+        cefrLevel: 'A1',
+        onComplete: handleExerciseComplete
+      }
+    },
+    {
+      type: 'textselection',
+      title: 'Text Selection: Encuentra la palabra',
+      props: {
+        instruction: 'Selecciona la palabra "casa" en el texto',
+        text: 'Mi casa es grande y tiene un jardín bonito. La casa está en la ciudad.',
+        words: [
+          { spanish: 'casa', chinese: '房子', start: 3, end: 7 },
+          { spanish: 'grande', chinese: '大的', start: 11, end: 17 },
+          { spanish: 'jardín', chinese: '花园', start: 34, end: 40 },
+          { spanish: 'bonito', chinese: '漂亮的', start: 41, end: 47 },
+          { spanish: 'ciudad', chinese: '城市', start: 68, end: 74 }
+        ],
+        targetWord: 'casa',
+        explanation: '"Casa" significa "house" en inglés y "房子" en chino.',
+        cefrLevel: 'A1',
         onComplete: handleExerciseComplete
       }
     }
@@ -297,6 +370,10 @@ export function ExerciseBuilder() {
                   {example.type === 'blank' && <FillInBlankExercise {...example.props} />}
                   {example.type === 'match' && <MatchingExercise {...example.props} />}
                   {example.type === 'truefalse' && <TrueFalseExercise {...example.props} />}
+                  {example.type === 'audio' && <AudioListeningExercise {...example.props} />}
+                  {example.type === 'dialogue' && <DialogueRolePlayExercise {...example.props} />}
+                  {example.type === 'dragdrop' && <DragDropOrderExercise {...example.props} />}
+                  {example.type === 'textselection' && <TextSelectionExercise {...example.props} />}
                 </div>
               ))}
             </div>
