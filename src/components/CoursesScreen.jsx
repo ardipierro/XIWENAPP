@@ -3,7 +3,7 @@ import logger from '../utils/logger';
 import { useState, useEffect } from 'react';
 import {
   BookOpen, FileText, Gamepad2, Trash2, Clock,
-  Plus, Users, Image as ImageIcon, Settings, Info
+  Plus, Users, Image as ImageIcon, Settings, Info, X, ArrowLeft
 } from 'lucide-react';
 import { loadCourses, createCourse, updateCourse, deleteCourse, loadStudents } from '../firebase/firestore';
 import { getContentByTeacher } from '../firebase/content';
@@ -11,6 +11,7 @@ import { getExercisesByTeacher } from '../firebase/exercises';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadImage, deleteImage } from '../firebase/storage';
+import { BaseButton } from './common';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import {
@@ -396,9 +397,9 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
     <div className="courses-screen">
       {/* Back Button */}
       {onBack && (
-        <button onClick={onBack} className="btn btn-ghost mb-4">
-          ← Volver a Inicio
-        </button>
+        <BaseButton onClick={onBack} variant="ghost" icon={ArrowLeft} className="mb-4">
+          Volver a Inicio
+        </BaseButton>
       )}
 
       {/* Header */}
@@ -432,9 +433,9 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
             {searchTerm ? 'Intenta con otro término de búsqueda' : 'Crea tu primer curso para comenzar'}
           </p>
           {!searchTerm && (
-            <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+            <BaseButton variant="primary" onClick={() => setShowCreateModal(true)}>
               + Crear Primer Curso
-            </button>
+            </BaseButton>
           )}
         </div>
       ) : viewMode === 'grid' ? (
@@ -565,16 +566,13 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
               <h3 className="modal-title">
                 Crear Nuevo Curso
               </h3>
-              <button
-                className="modal-close-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowCreateModal(false)}
+                icon={X}
                 aria-label="Cerrar modal"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              />
             </div>
 
             {/* Tabs - Fixed */}
@@ -634,14 +632,15 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                         alt="Vista previa de la imagen del curso"
                         className="w-full h-48 object-cover rounded-lg mb-2"
                       />
-                      <button
+                      <BaseButton
                         type="button"
                         onClick={handleRemoveImage}
                         disabled={uploadingImage}
-                        className="btn btn-danger btn-sm"
+                        variant="danger"
+                        size="sm"
                       >
                         {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                      </button>
+                      </BaseButton>
                     </div>
                   ) : (
                     <div>
@@ -674,21 +673,21 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
 
             {/* Footer con botones (sin zona de peligro en crear) */}
             <div className="modal-footer">
-              <button
+              <BaseButton
                 type="button"
-                className="btn btn-outline"
+                variant="outline"
                 onClick={() => setShowCreateModal(false)}
               >
                 Cancelar
-              </button>
-              <button
+              </BaseButton>
+              <BaseButton
                 type="submit"
-                className="btn btn-primary"
+                variant="primary"
                 onClick={handleCreate}
                 disabled={uploadingImage}
               >
                 {uploadingImage ? 'Subiendo...' : 'Crear Curso'}
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -703,51 +702,54 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
               <h3 className="modal-title">
                 {selectedCourse.name}
               </h3>
-              <button
-                className="modal-close-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={handleCloseCourseModal}
+                icon={X}
                 aria-label="Cerrar modal"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              />
             </div>
 
             {/* Tabs - Fixed */}
             <div className="modal-tabs-container">
               <div className="modal-tabs">
-                <button
+                <BaseButton
                   onClick={() => setActiveModalTab('info')}
+                  variant="ghost"
                   className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeModalTab === 'info'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
+                  icon={Info}
                 >
-                  <Info size={18} strokeWidth={2} className="inline-icon" /> Información
-                </button>
-                <button
+                  Información
+                </BaseButton>
+                <BaseButton
                   onClick={() => setActiveModalTab('content')}
+                  variant="ghost"
                   className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeModalTab === 'content'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
+                  icon={FileText}
                 >
-<FileText size={18} strokeWidth={2} className="inline-icon" /> Contenidos ({courseContents.length})
-                </button>
-                <button
+                  Contenidos ({courseContents.length})
+                </BaseButton>
+                <BaseButton
                   onClick={() => setActiveModalTab('students')}
+                  variant="ghost"
                   className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
                     activeModalTab === 'students'
                       ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
                       : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
+                  icon={Users}
                 >
-<Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes ({courseStudents.length})
-                </button>
+                  Estudiantes ({courseStudents.length})
+                </BaseButton>
               </div>
             </div>
 
@@ -859,12 +861,13 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                                   <span className="font-medium text-gray-900 dark:text-gray-100">{content.title}</span>
                                   <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({content.type})</span>
                                 </div>
-                                <button
-                                  className="btn btn-sm btn-danger"
+                                <BaseButton
+                                  variant="danger"
+                                  size="sm"
                                   onClick={() => handleRemoveContent(content.id)}
                                 >
                                   Eliminar
-                                </button>
+                                </BaseButton>
                               </div>
                             ))}
                           </div>
@@ -894,13 +897,14 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                                   </option>
                                 ))}
                             </select>
-                            <button
-                              className="btn btn-success"
+                            <BaseButton
+                              variant="success"
                               onClick={() => handleAddContent(selectedContentToAdd)}
                               disabled={!selectedContentToAdd}
+                              icon={Plus}
                             >
-                              <Plus size={16} strokeWidth={2} /> Agregar
-                            </button>
+                              Agregar
+                            </BaseButton>
                           </div>
                         )}
                       </div>
@@ -924,12 +928,13 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                                   <span className="font-medium text-gray-900 dark:text-gray-100">{student.displayName || student.email}</span>
                                   <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({student.email})</span>
                                 </div>
-                                <button
-                                  className="btn btn-sm btn-danger"
+                                <BaseButton
+                                  variant="danger"
+                                  size="sm"
                                   onClick={() => handleRemoveStudent(student.id)}
                                 >
                                   Eliminar
-                                </button>
+                                </BaseButton>
                               </div>
                             ))}
                           </div>
@@ -959,13 +964,14 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                                   </option>
                                 ))}
                             </select>
-                            <button
-                              className="btn btn-success"
+                            <BaseButton
+                              variant="success"
                               onClick={() => handleAddStudent(selectedStudentToAdd)}
                               disabled={!selectedStudentToAdd}
+                              icon={Plus}
                             >
-                              <Plus size={16} strokeWidth={2} /> Agregar
-                            </button>
+                              Agregar
+                            </BaseButton>
                           </div>
                         )}
                       </div>
@@ -977,23 +983,24 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
 
             {/* Footer con botones */}
             <div className="modal-footer">
-              <button
+              <BaseButton
                 type="button"
-                className="btn btn-danger"
+                variant="danger"
                 onClick={() => setShowConfirmDelete(true)}
+                icon={Trash2}
               >
-                <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
-              </button>
-              <button
+                Eliminar
+              </BaseButton>
+              <BaseButton
                 type="button"
-                className="btn btn-outline"
+                variant="outline"
                 onClick={handleCloseCourseModal}
               >
                 Cancelar
-              </button>
-              <button
+              </BaseButton>
+              <BaseButton
                 type="button"
-                className="btn btn-primary"
+                variant="primary"
                 onClick={(e) => {
                   e.preventDefault();
                   handleUpdate(e);
@@ -1001,7 +1008,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                 disabled={uploadingImage}
               >
                 {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
