@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, CheckCircle, AlertTriangle, Calendar, FileText, BookMarked, BarChart3, Settings, Gamepad2 } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, CheckCircle, AlertTriangle, Calendar, FileText, BookMarked, BarChart3, Settings, Gamepad2, X } from 'lucide-react';
 import { useExercises } from '../hooks/useExercises.js';
 import ExerciseRepository from '../services/ExerciseRepository.js';
 import {
@@ -12,6 +12,7 @@ import {
   getCoursesWithExercise
 } from '../firebase/relationships.js';
 import logger from '../utils/logger.js';
+import { BaseButton } from './common';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 
@@ -387,12 +388,12 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               : 'Intenta con otros filtros de búsqueda'}
           </p>
           {exercises.length === 0 && (
-            <button
-              className="btn btn-primary"
+            <BaseButton
+              variant="primary"
               onClick={() => setShowCreateModal(true)}
             >
               Crear Primer Ejercicio
-            </button>
+            </BaseButton>
           )}
         </div>
       ) : viewMode === 'grid' ? (
@@ -448,12 +449,14 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
                 {/* Botones */}
                 <div className="card-actions">
-                  <button
-                    className="btn btn-primary flex-1"
+                  <BaseButton
+                    variant="primary"
                     onClick={() => handleEdit(exercise.id)}
+                    icon={Settings}
+                    className="flex-1"
                   >
-                    <Settings size={16} strokeWidth={2} /> Gestionar
-                  </button>
+                    Gestionar
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -514,12 +517,13 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
                 {/* Botones */}
                 <div className="card-actions-list">
-                  <button
-                    className="btn btn-primary"
+                  <BaseButton
+                    variant="primary"
                     onClick={() => handleEdit(exercise.id)}
+                    icon={Settings}
                   >
-                    <Settings size={16} strokeWidth={2} /> Gestionar
-                  </button>
+                    Gestionar
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -535,15 +539,13 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               <h3 className="modal-title">
                 Crear Nuevo Ejercicio
               </h3>
-              <button
-                className="modal-close-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowCreateModal(false)}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+                icon={X}
+                aria-label="Cerrar modal"
+              />
             </div>
 
             <form onSubmit={handleCreate} className="flex flex-col flex-1 min-h-0">
@@ -665,16 +667,16 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               </div>
 
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
-                  className="btn btn-outline"
+                  variant="outline"
                   onClick={() => setShowCreateModal(false)}
                 >
                   Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
+                </BaseButton>
+                <BaseButton type="submit" variant="primary">
                   Crear Ejercicio
-                </button>
+                </BaseButton>
               </div>
             </form>
           </div>
@@ -689,15 +691,13 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               <h3 className="modal-title">
                 Editar Ejercicio
               </h3>
-              <button
-                className="modal-close-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowEditModal(false)}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+                icon={X}
+                aria-label="Cerrar modal"
+              />
             </div>
 
             <form onSubmit={handleUpdate} className="flex flex-col flex-1 min-h-0">
@@ -852,16 +852,16 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               </div>
 
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
-                  className="btn btn-outline"
+                  variant="outline"
                   onClick={() => setShowEditModal(false)}
                 >
                   Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
+                </BaseButton>
+                <BaseButton type="submit" variant="primary">
                   Guardar Cambios
-                </button>
+                </BaseButton>
               </div>
             </form>
           </div>
@@ -876,15 +876,13 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               <h3 className="modal-title">
                 {selectedExercise.title}
               </h3>
-              <button
-                className="modal-close-btn"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowViewModal(false)}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+                icon={X}
+                aria-label="Cerrar modal"
+              />
             </div>
 
             <div className="modal-content flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
@@ -970,21 +968,22 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
             </div>
 
             <div className="modal-footer">
-              <button
-                className="btn btn-outline"
+              <BaseButton
+                variant="outline"
                 onClick={() => setShowViewModal(false)}
               >
                 Cerrar
-              </button>
-              <button
-                className="btn btn-primary"
+              </BaseButton>
+              <BaseButton
+                variant="primary"
                 onClick={() => {
                   setShowViewModal(false);
                   handleEdit(selectedExercise.id);
                 }}
+                icon={Edit}
               >
                 Editar
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
