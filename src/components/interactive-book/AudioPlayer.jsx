@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Mic } from 'lucide-react';
 import PropTypes from 'prop-types';
 import ttsService from '../../services/ttsService';
+import premiumTTSService from '../../services/premiumTTSService';
 import logger from '../../utils/logger';
 
 /**
@@ -160,40 +161,90 @@ function AudioPlayer({
       onPlay();
     }
 
-    // Simular progreso durante la reproducción TTS
-    const estimatedDuration = estimateDuration(text);
-    const startTime = Date.now();
+    try {
+      // Intentar generar con servicio premium (mejor calidad)
+      const result = await premiumTTSService.generateSpeech(text, {
+        gender: 'female',
+        preferPremium: false // Cambiar a true si tienes API key de ElevenLabs
+      });
 
-    ttsIntervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
-      const currentProgress = (elapsed / estimatedDuration) * 100;
-
-      if (currentProgress >= 100) {
-        clearInterval(ttsIntervalRef.current);
-        setProgress(100);
-        setCurrentTime(estimatedDuration);
-        setTimeout(() => {
+      if (result.audioUrl) {
+        // Si se generó un archivo de audio, reproducirlo
+        const audio = new Audio(result.audioUrl);
+        audio.onloadedmetadata = () => {
+          setDuration(audio.duration);
+        };
+        audio.ontimeupdate = () => {
+          setCurrentTime(audio.currentTime);
+          setProgress((audio.currentTime / audio.duration) * 100);
+        };
+        audio.onended = () => {
           setIsPlaying(false);
           setProgress(0);
           setCurrentTime(0);
+          premiumTTSService.cleanup(result.audioUrl);
           if (onComplete) {
             onComplete();
           }
+        };
+        audio.volume = isMuted ? 0 : 1.0;
+        await audio.play();
+      } else if (result.type === 'responsivevoice') {
+        // ResponsiveVoice maneja su propia reproducción
+        // Simular progreso
+        const estimatedDuration = estimateDuration(text);
+        const startTime = Date.now();
+
+        ttsIntervalRef.current = setInterval(() => {
+          const elapsed = (Date.now() - startTime) / 1000;
+          const currentProgress = (elapsed / estimatedDuration) * 100;
+
+          if (currentProgress >= 100) {
+            clearInterval(ttsIntervalRef.current);
+            setProgress(100);
+            setCurrentTime(estimatedDuration);
+          } else {
+            setProgress(currentProgress);
+            setCurrentTime(elapsed);
+          }
         }, 100);
       } else {
-        setProgress(currentProgress);
-        setCurrentTime(elapsed);
-      }
-    }, 100);
+        // Fallback a Web Speech API
+        const estimatedDuration = estimateDuration(text);
+        const startTime = Date.now();
 
-    try {
-      await ttsService.speak(text, {
-        rate: 0.9, // Un poco más lento para español argentino
-        volume: isMuted ? 0 : 1.0
-      });
+        ttsIntervalRef.current = setInterval(() => {
+          const elapsed = (Date.now() - startTime) / 1000;
+          const currentProgress = (elapsed / estimatedDuration) * 100;
+
+          if (currentProgress >= 100) {
+            clearInterval(ttsIntervalRef.current);
+            setProgress(100);
+            setCurrentTime(estimatedDuration);
+            setTimeout(() => {
+              setIsPlaying(false);
+              setProgress(0);
+              setCurrentTime(0);
+              if (onComplete) {
+                onComplete();
+              }
+            }, 100);
+          } else {
+            setProgress(currentProgress);
+            setCurrentTime(elapsed);
+          }
+        }, 100);
+
+        await ttsService.speak(text, {
+          rate: 0.9,
+          volume: isMuted ? 0 : 1.0
+        });
+      }
     } catch (err) {
       logger.error('Error en TTS:', err);
-      clearInterval(ttsIntervalRef.current);
+      if (ttsIntervalRef.current) {
+        clearInterval(ttsIntervalRef.current);
+      }
       setIsPlaying(false);
     }
   };

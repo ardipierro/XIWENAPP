@@ -37,9 +37,12 @@ import {
   MultipleChoiceExercise,
   VocabularyMatchingExercise,
   DragDropMenuExercise,
+  ConjugationExercise,
+  ListeningComprehensionExercise,
   TTSSettings,
   DialogueBubble,
-  ViewCustomizer
+  ViewCustomizer,
+  FullDialoguePlayer
 } from './interactive-book';
 
 /**
@@ -229,7 +232,25 @@ function InteractiveBookViewer() {
         );
 
       case 'conjugation_fill_blank':
+        return (
+          <ConjugationExercise
+            key={exercise.exerciseId || index}
+            exercise={exercise}
+            onComplete={(result) => handleExerciseComplete(exercise.exerciseId, result)}
+          />
+        );
+
       case 'listening_comprehension':
+        return (
+          <ListeningComprehensionExercise
+            key={exercise.exerciseId || index}
+            exercise={exercise}
+            onComplete={(result) => handleExerciseComplete(exercise.exerciseId, result)}
+          />
+        );
+
+      case 'role_play_creator':
+      case 'audio_comprehension':
       default:
         // Ejercicios no implementados aún - mostrar card informativa
         const ExerciseIcon = getExerciseIcon(exercise.type);
@@ -366,6 +387,13 @@ function InteractiveBookViewer() {
                   <MessageSquare size={18} />
                   Diálogo Interactivo
                 </h4>
+
+                {/* Reproductor de diálogo completo */}
+                <FullDialoguePlayer
+                  dialogue={unit.content.dialogue}
+                  onComplete={() => logger.info('Diálogo completo reproducido')}
+                />
+
                 <div className="space-y-1">
                   {unit.content.dialogue.lines.map((line, idx) =>
                     renderDialogueLine(line, idx, unit.content.dialogue.lines.length)
