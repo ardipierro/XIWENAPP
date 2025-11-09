@@ -81,6 +81,7 @@ import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
+import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
 
 // Custom hooks
@@ -1502,6 +1503,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ExerciseBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Design Lab - Theme Tester Screen
+  if (navigation.currentScreen === 'designLab') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <DesignLab />
       </DashboardLayout>
     );
   }

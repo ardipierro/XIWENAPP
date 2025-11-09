@@ -81,7 +81,8 @@
       "Bash(src/hooks/useExerciseState.js)",
       "Bash(src/hooks/useExerciseBuilderConfig.js)",
       "Bash(src/firebase/exerciseBuilderConfig.js)",
-      "Bash(gh pr list:*)"
+      "Bash(gh pr list:*)",
+      "Bash(src/components/DesignLab.jsx)"
     ],
     "deny": [],
     "ask": []

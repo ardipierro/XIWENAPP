@@ -32,7 +32,8 @@ import {
   UsersRound,
   Palette,
   Layers,
-  Sparkles
+  Sparkles,
+  FlaskConical
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -91,6 +92,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             items: [
               { icon: Palette, label: 'Theme Builder', path: '/admin', action: 'themeBuilder' },
               { icon: Layers, label: 'Exercise Builder', path: '/admin', action: 'exerciseBuilder' },
+              { icon: FlaskConical, label: 'Design Lab', path: '/admin', action: 'designLab' },
               { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
               // Juego en Vivo movido a dashboard como acceso rápido
             ]
@@ -113,6 +115,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
           { icon: Palette, label: 'Theme Builder', path: '/teacher', action: 'themeBuilder' },
           { icon: Layers, label: 'Exercise Builder', path: '/teacher', action: 'exerciseBuilder' },
+          { icon: FlaskConical, label: 'Design Lab', path: '/teacher', action: 'designLab' },
           { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
           // Juego en Vivo movido a dashboard como acceso rápido
         ]

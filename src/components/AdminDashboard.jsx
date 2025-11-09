@@ -87,6 +87,7 @@ import ClassSessionRoom from './ClassSessionRoom';
 import UnifiedCalendar from './UnifiedCalendar';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
+import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import AIService from '../services/AIService';
 import ThemeCustomizer from './ThemeCustomizer';
@@ -555,6 +556,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ExerciseBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Design Lab - Theme Tester - WITH Layout
+  if (navigation.currentScreen === 'designLab') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <DesignLab />
       </DashboardLayout>
     );
   }
