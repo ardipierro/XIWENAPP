@@ -1,11 +1,39 @@
 # Guía de Generación de Audio IA Natural para Design Lab
 
 **Última actualización:** 2025-01-09
-**Versión:** 1.0
+**Versión:** 2.0
 
 ## 📋 Resumen
 
 Esta guía te ayudará a generar audio de **alta calidad y voz natural (NO robótica)** para los ejercicios de pronunciación del Design Lab, específicamente para el componente `AIAudioPronunciationExercise`.
+
+---
+
+## 🎉 ¿QUIERES EMPEZAR SIN REGISTRO?
+
+**⚡ NUEVA GUÍA:** Si prefieres herramientas **100% gratuitas SIN NECESIDAD DE REGISTRO**, consulta:
+
+📖 **`.claude/AUDIO_IA_FREE_NO_REGISTRATION.md`**
+
+### Top 3 Opciones Sin Registro:
+
+1. **ttsMP3.com** - Más fácil, ilimitado, sin login ⭐⭐⭐⭐⭐
+2. **Luvvoice** - Voces neurales de alta calidad, sin registro ⭐⭐⭐⭐⭐
+3. **SPEECHMA** - 580+ voces premium, sin costos ocultos ⭐⭐⭐⭐⭐
+
+**Tiempo para generar 4 frases:** 5-10 minutos
+**Costo:** $0
+**Registro:** ❌ No necesario
+
+---
+
+## 📌 Esta Guía (Servicios Profesionales con Registro)
+
+Si necesitas **máxima calidad** o **generación automatizada a gran escala**, esta guía cubre servicios profesionales que requieren registro pero ofrecen:
+- ✅ Voces ultra realistas (Neural2, WaveNet)
+- ✅ APIs para automatización
+- ✅ Control fino de entonación (SSML)
+- ✅ Planes gratuitos generosos
 
 ---
 
