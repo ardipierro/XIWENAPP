@@ -22,7 +22,8 @@ import {
   FlaskConical,
   Plus,
   Trash2,
-  UsersRound
+  UsersRound,
+  X
 } from 'lucide-react';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { updateUser, deleteUser } from '../firebase/users';
@@ -38,6 +39,7 @@ import {
   linkGuardianToStudent,
   unlinkGuardianFromStudent
 } from '../firebase/guardians';
+import { BaseButton } from './common';
 import CreditManager from './CreditManager';
 import StudentClassView from './StudentClassView';
 import ConfirmModal from './ConfirmModal';
@@ -367,9 +369,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
             </div>
           </div>
         </div>
-        <button onClick={onBack} className="modal-close-btn" title="Cerrar">
-          ×
-        </button>
+        <BaseButton onClick={onBack} variant="ghost" size="sm" icon={X} title="Cerrar" />
       </div>
 
       {/* Message */}
@@ -382,37 +382,47 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       {/* Tabs */}
       <div className="modal-tabs-container">
         <div className="modal-tabs">
-          <button
+          <BaseButton
             className={activeTab === 'info' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('info')}
+            variant="ghost"
+            icon={BarChart3}
           >
-            <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> Información
-          </button>
-          <button
+            Información
+          </BaseButton>
+          <BaseButton
             className={activeTab === 'courses' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('courses')}
+            variant="ghost"
+            icon={BookOpen}
           >
-            <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos
-          </button>
-          <button
+            Cursos
+          </BaseButton>
+          <BaseButton
             className={activeTab === 'credits' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('credits')}
+            variant="ghost"
+            icon={CreditCard}
           >
-            <CreditCard size={18} strokeWidth={2} className="inline-icon" /> Créditos
-          </button>
-          <button
+            Créditos
+          </BaseButton>
+          <BaseButton
             className={activeTab === 'classes' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('classes')}
+            variant="ghost"
+            icon={Calendar}
           >
-            <Calendar size={18} strokeWidth={2} className="inline-icon" /> Clases
-          </button>
+            Clases
+          </BaseButton>
           {(['student', 'listener', 'trial'].includes(selectedUser?.role)) && (
-            <button
+            <BaseButton
               className={activeTab === 'guardians' ? 'tab-active' : 'tab'}
               onClick={() => setActiveTab('guardians')}
+              variant="ghost"
+              icon={UsersRound}
             >
-              <UsersRound size={18} strokeWidth={2} className="inline-icon" /> Tutores
-            </button>
+              Tutores
+            </BaseButton>
           )}
         </div>
       </div>
@@ -583,12 +593,13 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                               (Asignado: {formatDate(enrollment.enrolledAt)})
                             </span>
                           </div>
-                          <button
-                            className="btn btn-sm btn-danger"
+                          <BaseButton
+                            variant="danger"
+                            size="sm"
                             onClick={() => handleUnenrollCourse(enrollment.courseId)}
                           >
                             Eliminar
-                          </button>
+                          </BaseButton>
                         </div>
                       ))}
                     </div>
@@ -619,8 +630,8 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                             </option>
                           ))}
                       </select>
-                      <button
-                        className="btn btn-success"
+                      <BaseButton
+                        variant="success"
                         onClick={() => {
                           if (selectedCourseToAdd) {
                             handleEnrollCourse(selectedCourseToAdd);
@@ -628,9 +639,10 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                           }
                         }}
                         disabled={!selectedCourseToAdd}
+                        icon={Plus}
                       >
-                        <Plus size={16} strokeWidth={2} /> Agregar
-                      </button>
+                        Agregar
+                      </BaseButton>
                     </div>
                   )}
                 </div>
@@ -713,25 +725,26 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         {!editing ? (
           <>
             {isAdmin && !isAdminEmail(selectedUser.email) && currentUser.uid !== selectedUser.id && (
-              <button
-                className="btn btn-danger"
+              <BaseButton
+                variant="danger"
                 onClick={handleDeleteClick}
                 disabled={saving}
+                icon={Trash2}
               >
-                <Trash2 size={18} strokeWidth={2} /> Eliminar
-              </button>
+                Eliminar
+              </BaseButton>
             )}
-            <button className="btn btn-outline" onClick={onBack}>
+            <BaseButton variant="outline" onClick={onBack}>
               Cancelar
-            </button>
-            <button className="btn btn-primary" onClick={() => setEditing(true)}>
-              <Edit size={18} strokeWidth={2} /> Editar
-            </button>
+            </BaseButton>
+            <BaseButton variant="primary" onClick={() => setEditing(true)} icon={Edit}>
+              Editar
+            </BaseButton>
           </>
         ) : (
           <>
-            <button
-              className="btn btn-outline"
+            <BaseButton
+              variant="outline"
               onClick={() => {
                 setEditing(false);
                 setFormData({
@@ -746,14 +759,15 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               disabled={saving}
             >
               Cancelar
-            </button>
-            <button
-              className="btn btn-primary"
+            </BaseButton>
+            <BaseButton
+              variant="primary"
               onClick={handleSave}
               disabled={saving}
+              icon={Save}
             >
-              <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar'}
-            </button>
+              {saving ? 'Guardando...' : 'Guardar'}
+            </BaseButton>
           </>
         )}
       </div>
