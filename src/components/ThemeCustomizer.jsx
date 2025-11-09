@@ -3,6 +3,7 @@
  * @module components/ThemeCustomizer
  */
 
+import logger from '../utils/logger';
 import { useState, useEffect } from 'react';
 import { Palette, RotateCcw, Download, Upload, Check } from 'lucide-react';
 import { THEMES, THEME_INFO } from '../contexts/ThemeContext';
@@ -181,7 +182,7 @@ function ThemeCustomizer() {
       try {
         setCustomColors(JSON.parse(saved));
       } catch (error) {
-        console.error('Error loading custom colors:', error);
+        logger.error('Error loading custom colors:', error);
       }
     }
   }, []);

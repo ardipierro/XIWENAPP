@@ -85,7 +85,11 @@
       "Bash(src/components/DesignLab.jsx)",
       "Bash(src/services/ttsService.js)",
       "Bash(src/components/interactive-book/TTSSettings.jsx)",
-      "Bash(src/components/interactive-book/AudioPlayer.jsx)"
+      "Bash(src/components/interactive-book/AudioPlayer.jsx)",
+      "Bash(src/components/Navigation.jsx)",
+      "Bash(src/components/ThemeCustomizer.jsx)",
+      "Bash(src/firebase/storage.js)",
+      "Bash(src/contexts/ThemeContext.jsx)"
     ],
     "deny": [],
     "ask": []

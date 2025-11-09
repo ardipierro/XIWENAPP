@@ -4,6 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
 import { Home, GraduationCap, Crown, LogOut } from 'lucide-react';
+import { BaseButton } from './common';
 import './Navigation.css';
 
 function Navigation({ user, userRole }) {
@@ -51,20 +52,35 @@ function Navigation({ user, userRole }) {
         </div>
 
         <div className="nav-links">
-          <button onClick={handleNavigateToDashboard} className="nav-btn">
-            <Home size={18} strokeWidth={2} className="inline-icon" /> Mi Dashboard
-          </button>
+          <BaseButton
+            onClick={handleNavigateToDashboard}
+            variant="ghost"
+            size="sm"
+            icon={Home}
+          >
+            Mi Dashboard
+          </BaseButton>
 
           {canAccessTeacher && (
-            <button onClick={() => navigate('/teacher')} className="nav-btn">
-              <GraduationCap size={18} strokeWidth={2} className="inline-icon" /> Profesor
-            </button>
+            <BaseButton
+              onClick={() => navigate('/teacher')}
+              variant="ghost"
+              size="sm"
+              icon={GraduationCap}
+            >
+              Profesor
+            </BaseButton>
           )}
 
           {canAccessAdmin && (
-            <button onClick={() => navigate('/admin')} className="nav-btn">
-              <Crown size={18} strokeWidth={2} className="inline-icon" /> Admin
-            </button>
+            <BaseButton
+              onClick={() => navigate('/admin')}
+              variant="ghost"
+              size="sm"
+              icon={Crown}
+            >
+              Admin
+            </BaseButton>
           )}
 
           <div className="nav-user">
@@ -72,9 +88,14 @@ function Navigation({ user, userRole }) {
             <span className="user-role-badge">{userRole}</span>
           </div>
 
-          <button onClick={handleLogout} className="nav-btn logout-btn">
-            <LogOut size={18} strokeWidth={2} className="inline-icon" /> Cerrar Sesión
-          </button>
+          <BaseButton
+            onClick={handleLogout}
+            variant="danger"
+            size="sm"
+            icon={LogOut}
+          >
+            Cerrar Sesión
+          </BaseButton>
         </div>
       </div>
     </nav>
