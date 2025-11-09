@@ -14,6 +14,7 @@ import {
   updateSessionStatus
 } from '../firebase/classSessions';
 import { getGroupsByTeacher } from '../firebase/groups';
+import { BaseButton } from './common';
 import './ClassManagement.css';
 
 /**
@@ -441,13 +442,14 @@ function ClassManagement({ user }) {
                         </a>
                       )}
                       {session.status === 'scheduled' && (
-                        <button
-                          className="btn-session-action danger"
+                        <BaseButton
+                          variant="danger"
+                          size="sm"
                           onClick={() => handleCancelSession(session.id)}
                           title="Cancelar sesión"
-                        >
-                          <X size={16} strokeWidth={2} />
-                        </button>
+                          icon={X}
+                          className="btn-session-action danger"
+                        />
                       )}
                     </div>
                   </div>
