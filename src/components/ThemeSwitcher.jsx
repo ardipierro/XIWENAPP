@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Palette, Check } from 'lucide-react';
 import { useTheme, THEMES, THEME_INFO } from '../contexts/ThemeContext';
-import './ThemeSwitcher.css';
 
 function ThemeSwitcher() {
   const { currentTheme, setTheme } = useTheme();
@@ -33,9 +32,9 @@ function ThemeSwitcher() {
   const currentThemeInfo = THEME_INFO[currentTheme];
 
   return (
-    <div className="theme-switcher" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       <button
-        className="theme-switcher-trigger"
+        className="flex items-center justify-center p-2 bg-transparent border-none rounded-md text-zinc-900 dark:text-zinc-100 cursor-pointer transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Cambiar tema"
         title={`Tema actual: ${currentThemeInfo.name}`}
@@ -44,8 +43,8 @@ function ThemeSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="dropdown theme-switcher-dropdown">
-          <div className="dropdown-options theme-switcher-options">
+        <div className="dropdown">
+          <div className="dropdown-options">
             {Object.values(THEMES).map((theme) => {
               const info = THEME_INFO[theme];
               const isSelected = currentTheme === theme;
@@ -53,15 +52,15 @@ function ThemeSwitcher() {
               return (
                 <button
                   key={theme}
-                  className={`dropdown-option theme-option ${isSelected ? 'selected' : ''}`}
+                  className={`dropdown-option ${isSelected ? 'selected' : ''}`}
                   onClick={() => handleThemeSelect(theme)}
                 >
-                  <div className="dropdown-option-content theme-option-info">
-                    <div className="dropdown-option-title theme-option-name">{info.name}</div>
-                    <div className="dropdown-option-description theme-option-description">{info.description}</div>
+                  <div className="dropdown-option-content">
+                    <div className="dropdown-option-title">{info.name}</div>
+                    <div className="dropdown-option-description">{info.description}</div>
                   </div>
                   {isSelected && (
-                    <Check size={18} strokeWidth={2} className="dropdown-check theme-option-check" />
+                    <Check size={18} strokeWidth={2} className="dropdown-check" />
                   )}
                 </button>
               );
