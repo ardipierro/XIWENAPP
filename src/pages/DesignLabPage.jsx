@@ -355,28 +355,28 @@ export function DesignLabPage() {
         phrases: [
           {
             text: 'La jirafa jaranera jugaba en el jardín',
-            aiAudioUrl: '/audio/ai/jirafa.mp3',
+            aiAudioUrl: '/audio/ai/jirafa.wav',
             phonetic: 'la xi.ˈɾa.fa xa.ɾa.ˈne.ɾa xu.ˈɣa.βa en el xaɾ.ˈdin',
             difficulty: 'hard',
             tips: 'La "j" en español es un sonido gutural. Coloca la lengua en el fondo de la boca y exhala aire.'
           },
           {
             text: 'Tres tristes tigres tragaban trigo en un trigal',
-            aiAudioUrl: '/audio/ai/tigres.mp3',
+            aiAudioUrl: '/audio/ai/tigres.wav',
             phonetic: 'tɾes ˈtɾis.tes ˈti.ɣɾes tɾa.ˈɣa.βan ˈtɾi.ɣo en un tɾi.ˈɣal',
             difficulty: 'hard',
             tips: 'El sonido "tr" requiere que la lengua toque rápidamente el paladar. Practica lentamente al principio.'
           },
           {
             text: 'El perro de Rosa corrió por la carretera',
-            aiAudioUrl: '/audio/ai/perro.mp3',
+            aiAudioUrl: '/audio/ai/perro.wav',
             phonetic: 'el ˈpe.ro de ˈro.sa ko.ˈrjo poɾ la ka.re.ˈte.ɾa',
             difficulty: 'medium',
             tips: 'La "rr" es un sonido vibrante múltiple. Haz vibrar la lengua contra el paladar.'
           },
           {
             text: 'Buenos días, ¿cómo está usted?',
-            aiAudioUrl: '/audio/ai/buenos-dias.mp3',
+            aiAudioUrl: '/audio/ai/buenos-dias.wav',
             phonetic: 'ˈbwe.nos ˈdi.as ˈko.mo es.ˈta us.ˈteð',
             difficulty: 'easy',
             tips: 'Esta es una frase común y formal. Nota la entonación ascendente en la pregunta.'
