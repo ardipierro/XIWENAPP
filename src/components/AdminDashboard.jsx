@@ -86,7 +86,8 @@ import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import UnifiedCalendar from './UnifiedCalendar';
 import AIService from '../services/AIService';
-import './AdminDashboard.css';
+// TODO: Migrar AdminDashboard.css a 100% Tailwind CSS (PR separado - componente muy extenso 1400+ líneas)
+// import './AdminDashboard.css';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
