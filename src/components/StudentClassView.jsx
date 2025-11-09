@@ -9,6 +9,7 @@ import { getInstancesForStudent } from '../firebase/classInstances';
 import { getStudentAttendance, markAttendanceByLink } from '../firebase/attendance';
 import { getStudentGroups } from '../firebase/groups';
 import { getUserCredits } from '../firebase/credits';
+import { BaseButton } from './common';
 import './StudentClassView.css';
 
 // Helper: verificar si el link de una instancia está activo
@@ -311,22 +312,16 @@ function StudentClassView({ student }) {
                   </div>
 
                   {instanceStatus.canJoin && (
-                    <button
-                      className="btn-join-class"
+                    <BaseButton
+                      variant="primary"
                       onClick={() => handleJoinClass(instance)}
                       disabled={isProcessing}
+                      loading={isProcessing}
+                      icon={Video}
+                      className="btn-join-class"
                     >
-                      {isProcessing ? (
-                        <>
-                          <span className="spinner-small"></span>
-                          Procesando...
-                        </>
-                      ) : (
-                        <>
-                          <Video size={18} strokeWidth={2} className="inline-icon" /> Unirse a la clase
-                        </>
-                      )}
-                    </button>
+                      {isProcessing ? 'Procesando...' : 'Unirse a la clase'}
+                    </BaseButton>
                   )}
 
                   {instanceStatus.status === 'attended' && (
