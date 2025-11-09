@@ -13,7 +13,7 @@ import {
   getCreditStats,
   updateCreditNotes
 } from '../firebase/credits';
-import './CreditManager.css';
+import { BaseButton, BaseInput, BaseTextarea, BaseModal } from './common';
 
 function CreditManager({ userId, currentUser, onUpdate }) {
   const [loading, setLoading] = useState(true);
@@ -178,163 +178,175 @@ function CreditManager({ userId, currentUser, onUpdate }) {
 
   if (loading) {
     return (
-      <div className="credit-manager loading">
+      <div className="flex items-center justify-center p-8">
         <div className="spinner"></div>
-        <p>Cargando información de créditos...</p>
+        <p className="ml-4 text-gray-600 dark:text-gray-400">Cargando información de créditos...</p>
       </div>
     );
   }
 
   return (
-    <div className="credit-manager">
+    <div className="p-6">
       {/* Message */}
       {message.text && (
-        <div className={`credit-message ${message.type}`}>
+        <div className={`mb-4 p-3 rounded-lg border ${
+          message.type === 'success'
+            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-300'
+            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300'
+        }`}>
           {message.type === 'success' ? (
-            <CheckCircle size={18} strokeWidth={2} className="inline-icon" />
+            <CheckCircle size={18} strokeWidth={2} className="inline mr-2" />
           ) : (
-            <AlertTriangle size={18} strokeWidth={2} className="inline-icon" />
+            <AlertTriangle size={18} strokeWidth={2} className="inline mr-2" />
           )} {message.text}
         </div>
       )}
 
       {/* Stats Cards */}
-      <div className="credit-stats-grid">
-        <div className="credit-stat-card">
-          <div className="stat-icon">
-            <CreditCard size={20} strokeWidth={2} />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+              <CreditCard size={20} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.availableCredits}</div>
           </div>
-          <div className="stat-value">{stats.availableCredits}</div>
-          <div className="stat-label">Disponibles</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Disponibles</div>
         </div>
 
-        <div className="credit-stat-card">
-          <div className="stat-icon">
-            <ShoppingCart size={20} strokeWidth={2} />
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+              <ShoppingCart size={20} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalPurchased}</div>
           </div>
-          <div className="stat-value">{stats.totalPurchased}</div>
-          <div className="stat-label">Comprados</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Comprados</div>
         </div>
 
-        <div className="credit-stat-card">
-          <div className="stat-icon">
-            <BarChart3 size={20} strokeWidth={2} />
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+              <BarChart3 size={20} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalUsed}</div>
           </div>
-          <div className="stat-value">{stats.totalUsed}</div>
-          <div className="stat-label">Usados</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Usados</div>
         </div>
 
-        <div className="credit-stat-card">
-          <div className="stat-icon">
-            <TrendingUp size={20} strokeWidth={2} />
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+              <TrendingUp size={20} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.usagePercentage}%</div>
           </div>
-          <div className="stat-value">{stats.usagePercentage}%</div>
-          <div className="stat-label">Uso</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Uso</div>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="credit-actions">
-        <button
-          className="btn btn-primary"
+      <div className="flex gap-3 mb-6">
+        <BaseButton
+          variant="primary"
+          icon={Plus}
           onClick={() => handleOpenModal('add')}
         >
-          <Plus size={18} strokeWidth={2} />
           Agregar Créditos
-        </button>
-        <button
-          className="btn btn-secondary"
+        </BaseButton>
+        <BaseButton
+          variant="secondary"
+          icon={Minus}
           onClick={() => handleOpenModal('deduct')}
         >
-          <Minus size={18} strokeWidth={2} />
           Quitar Créditos
-        </button>
+        </BaseButton>
       </div>
 
       {/* Notes */}
-      <div className="credit-notes-section">
-        <div className="notes-header">
-          <h3 className="notes-title flex items-center gap-2">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <FileText size={20} strokeWidth={2} /> Notas
           </h3>
           {!editingNotes ? (
-            <button
-              className="btn btn-ghost btn-sm"
+            <BaseButton
+              variant="ghost"
+              size="sm"
+              icon={Edit}
               onClick={() => setEditingNotes(true)}
             >
-              <Edit size={16} strokeWidth={2} className="inline-icon" /> Editar
-            </button>
+              Editar
+            </BaseButton>
           ) : (
-            <div className="btn-group-sm">
-              <button
-                className="btn btn-ghost btn-sm"
+            <div className="flex gap-2">
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   setEditingNotes(false);
                   loadData();
                 }}
               >
                 Cancelar
-              </button>
-              <button
-                className="btn btn-primary btn-sm"
+              </BaseButton>
+              <BaseButton
+                variant="primary"
+                size="sm"
+                icon={Save}
                 onClick={handleSaveNotes}
               >
-                <Save size={16} strokeWidth={2} className="inline-icon" /> Guardar
-              </button>
+                Guardar
+              </BaseButton>
             </div>
           )}
         </div>
         {editingNotes ? (
-          <textarea
+          <BaseTextarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="notes-textarea"
             placeholder="Notas sobre los créditos del usuario..."
-            rows="4"
+            rows={4}
           />
         ) : (
-          <div className="notes-display">
+          <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
             {notes || '(Sin notas)'}
           </div>
         )}
       </div>
 
       {/* Transaction History */}
-      <div className="transactions-section">
-        <h3 className="section-title flex items-center gap-2">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
           <ClipboardList size={20} strokeWidth={2} /> Historial de Transacciones
         </h3>
 
         {transactions.length === 0 ? (
-          <div className="empty-transactions">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <p>No hay transacciones registradas</p>
           </div>
         ) : (
-          <div className="transactions-list">
+          <div className="space-y-3">
             {transactions.map(transaction => (
-              <div key={transaction.id} className={`transaction-item ${transaction.type}`}>
-                <div className="transaction-icon">
+              <div key={transaction.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                   {getTransactionIcon(transaction.type)}
                 </div>
-                <div className="transaction-content">
-                  <div className="transaction-header">
-                    <span className="transaction-type">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {getTransactionLabel(transaction.type)}
                     </span>
-                    <span className={`transaction-amount ${transaction.type === 'purchase' ? 'positive' : 'negative'}`}>
+                    <span className={`text-lg font-bold ${transaction.type === 'purchase' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {transaction.type === 'purchase' ? '+' : '-'}{transaction.amount}
                     </span>
                   </div>
-                  <div className="transaction-reason">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                     {transaction.reason}
                   </div>
-                  <div className="transaction-footer">
-                    <span className="transaction-date">
-                      {formatDate(transaction.createdAt)}
-                    </span>
-                    <span className="transaction-balance">
-                      Saldo: {transaction.balanceAfter}
-                    </span>
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
+                    <span>{formatDate(transaction.createdAt)}</span>
+                    <span>Saldo: {transaction.balanceAfter}</span>
                   </div>
                 </div>
               </div>
@@ -344,96 +356,70 @@ function CreditManager({ userId, currentUser, onUpdate }) {
       </div>
 
       {/* Modal */}
-      {showModal && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">
-                {modalType === 'add' ? (
-                  <><Plus size={20} strokeWidth={2} className="inline-icon" /> Agregar Créditos</>
-                ) : (
-                  <><Minus size={20} strokeWidth={2} className="inline-icon" /> Quitar Créditos</>
-                )}
-              </h2>
-              <button
-                className="modal-close-btn"
-                onClick={handleCloseModal}
-                disabled={processing}
-                aria-label="Cerrar modal"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-
-            <div className="modal-content">
-              <form onSubmit={handleModalSubmit} className="space-y-4">
-                <div className="form-group">
-                  <label className="label">Cantidad</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={modalForm.amount}
-                    onChange={(e) => setModalForm({ ...modalForm, amount: e.target.value })}
-                    className="input"
-                    placeholder="Ej: 10"
-                    required
-                    disabled={processing}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="label">Razón</label>
-                  <textarea
-                    value={modalForm.reason}
-                    onChange={(e) => setModalForm({ ...modalForm, reason: e.target.value })}
-                    className="input"
-                    placeholder="Describe el motivo de esta operación..."
-                    rows="3"
-                    required
-                    disabled={processing}
-                  />
-                </div>
-
-                {modalType === 'deduct' && stats.availableCredits < parseInt(modalForm.amount || 0) && (
-                  <div className="alert alert-warning">
-                    <AlertTriangle size={18} strokeWidth={2} /> El usuario no tiene suficientes créditos disponibles
-                  </div>
-                )}
-              </form>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={handleCloseModal}
-                disabled={processing}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={processing}
-                onClick={handleModalSubmit}
-              >
-                {processing ? (
-                  <><Loader size={18} strokeWidth={2} className="inline-icon animate-spin" /> Procesando...</>
-                ) : (
-                  modalType === 'add' ? (
-                    <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Agregar</>
-                  ) : (
-                    <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Quitar</>
-                  )
-                )}
-              </button>
-            </div>
+      <BaseModal
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        title={modalType === 'add' ? 'Agregar Créditos' : 'Quitar Créditos'}
+        icon={modalType === 'add' ? Plus : Minus}
+        size="md"
+      >
+        <form onSubmit={handleModalSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Cantidad
+            </label>
+            <BaseInput
+              type="number"
+              min="1"
+              value={modalForm.amount}
+              onChange={(e) => setModalForm({ ...modalForm, amount: e.target.value })}
+              placeholder="Ej: 10"
+              required
+              disabled={processing}
+            />
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Razón
+            </label>
+            <BaseTextarea
+              value={modalForm.reason}
+              onChange={(e) => setModalForm({ ...modalForm, reason: e.target.value })}
+              placeholder="Describe el motivo de esta operación..."
+              rows={3}
+              required
+              disabled={processing}
+            />
+          </div>
+
+          {modalType === 'deduct' && stats.availableCredits < parseInt(modalForm.amount || 0) && (
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-300">
+              <AlertTriangle size={18} strokeWidth={2} className="inline mr-2" />
+              El usuario no tiene suficientes créditos disponibles
+            </div>
+          )}
+
+          <div className="flex gap-2 justify-end pt-4">
+            <BaseButton
+              type="button"
+              variant="outline"
+              onClick={handleCloseModal}
+              disabled={processing}
+            >
+              Cancelar
+            </BaseButton>
+            <BaseButton
+              type="submit"
+              variant="primary"
+              loading={processing}
+              icon={processing ? undefined : CheckCircle}
+            >
+              {processing ? 'Procesando...' : (modalType === 'add' ? 'Agregar' : 'Quitar')}
+            </BaseButton>
+          </div>
+        </form>
+      </BaseModal>
     </div>
   );
 }
