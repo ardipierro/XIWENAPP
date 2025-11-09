@@ -905,6 +905,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             placeholder={isAdmin ? "Buscar usuarios..." : "Buscar alumnos..."}
             viewMode={navigation.studentsViewMode}
             onViewModeChange={navigation.setStudentsViewMode}
+            viewModes={['table', 'grid', 'list']}
             className="mb-6"
           />
 

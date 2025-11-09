@@ -1481,5 +1481,27 @@ input:-webkit-autofill:active {
 }
 
 /* ============================================
+   GRID/LIST LAYOUTS
+   ============================================ */
+
+/* Quick Access Grid - 3 columnas en desktop, responsive */
+.quick-access-grid {
+  @apply grid gap-6;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* Quick Access List - Una columna */
+.quick-access-list {
+  @apply flex flex-col gap-4;
+}
+
+/* Responsive: En móvil, siempre 1 columna */
+@media (max-width: 768px) {
+  .quick-access-grid {
+    @apply grid-cols-1;
+  }
+}
+
+/* ============================================
    FIN DEL ARCHIVO - TODO CENTRALIZADO EN TAILWIND
    ============================================ */
