@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import {
   Calendar, CalendarDays, CheckCircle, AlertTriangle, RefreshCw,
   Repeat, Trash2, Clock, Video, CreditCard, BarChart3, AlarmClock,
-  MapPin, Loader, X, Info
+  MapPin, Loader, X, Info, Plus
 } from 'lucide-react';
 import {
   createScheduledClass,
@@ -17,6 +17,7 @@ import {
   checkAndAutoRenewSessions
 } from '../firebase/scheduledClasses';
 import { generateSessionsForScheduledClass, getScheduledClassStats } from '../firebase/classSessions';
+import { BaseButton } from './common';
 import './ClassScheduleManager.css';
 
 /**
@@ -260,12 +261,13 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
             Grupo: {group.name}
           </p>
         </div>
-        <button
+        <BaseButton
           onClick={() => setShowModal(true)}
-          className="btn btn-primary"
+          variant="primary"
+          icon={Plus}
         >
-          + Agregar Horario
-        </button>
+          Agregar Horario
+        </BaseButton>
       </div>
 
       {/* Message */}
@@ -313,30 +315,33 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                   </div>
                   <div className="schedule-actions">
                     {(isLowSessions || hasNoSessions) && (
-                      <button
+                      <BaseButton
                         onClick={() => handleGenerateMoreSessions(schedule)}
-                        className="btn-icon btn-primary-action"
+                        variant="primary"
+                        size="sm"
+                        icon={RefreshCw}
                         title="¡Generar más sesiones!"
-                      >
-                        <RefreshCw size={16} strokeWidth={2} />
-                      </button>
+                        className="btn-icon btn-primary-action"
+                      />
                     )}
                     {!isLowSessions && !hasNoSessions && (
-                      <button
+                      <BaseButton
                         onClick={() => handleGenerateMoreSessions(schedule)}
-                        className="btn-icon"
+                        variant="ghost"
+                        size="sm"
+                        icon={RefreshCw}
                         title="Generar más sesiones"
-                      >
-                        <RefreshCw size={16} strokeWidth={2} />
-                      </button>
+                        className="btn-icon"
+                      />
                     )}
-                    <button
+                    <BaseButton
                       onClick={() => handleDelete(schedule.id)}
-                      className="btn-icon btn-danger"
+                      variant="danger"
+                      size="sm"
+                      icon={Trash2}
                       title="Eliminar horario"
-                    >
-                      <Trash2 size={16} strokeWidth={2} />
-                    </button>
+                      className="btn-icon btn-danger"
+                    />
                   </div>
                 </div>
 
@@ -640,25 +645,22 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
               </div>
 
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
-                  className="btn btn-ghost"
+                  variant="ghost"
                   onClick={() => setShowModal(false)}
                   disabled={processing}
                 >
                   Cancelar
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   type="submit"
-                  className="btn btn-primary"
+                  variant="primary"
                   disabled={processing}
+                  icon={processing ? Loader : CheckCircle}
                 >
-                  {processing ? (
-                    <><Loader size={16} strokeWidth={2} className="inline-icon" /> Creando...</>
-                  ) : (
-                    <><CheckCircle size={16} strokeWidth={2} className="inline-icon" /> Crear Horario</>
-                  )}
-                </button>
+                  {processing ? 'Creando...' : 'Crear Horario'}
+                </BaseButton>
               </div>
             </form>
           </div>
