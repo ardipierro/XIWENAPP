@@ -3,7 +3,15 @@
  * Integrates with existing aiConfig.js module
  */
 
-import { getAIConfig, callAI, AI_PROVIDERS } from '../firebase/aiConfig';
+import { getAIConfig, callAI } from '../firebase/aiConfig';
+
+// AI Provider metadata
+const AI_PROVIDERS = [
+  { id: 'openai', name: 'OpenAI', icon: '🤖' },
+  { id: 'grok', name: 'Grok', icon: '🚀' },
+  { id: 'google', name: 'Google Gemini', icon: '✨' },
+  { id: 'claude', name: 'Claude', icon: '🧠' }
+];
 
 class AIService {
   constructor() {
