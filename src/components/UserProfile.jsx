@@ -42,7 +42,7 @@ import CreditManager from './CreditManager';
 import StudentClassView from './StudentClassView';
 import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
-import './UserProfile.css';
+import { BaseAlert } from './common';
 
 // Icon mapping for role icons from roleConfig
 const ICON_MAP = {
@@ -374,44 +374,88 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
       {/* Message */}
       {message.text && (
-        <div className={`profile-message ${message.type}`}>
-          {message.type === 'success' ? <CheckCircle size={18} strokeWidth={2} /> : <AlertTriangle size={18} strokeWidth={2} />} {message.text}
-        </div>
+        <BaseAlert
+          variant={message.type === 'success' ? 'success' : 'danger'}
+          dismissible
+          onDismiss={() => setMessage({ type: '', text: '' })}
+        >
+          {message.text}
+        </BaseAlert>
       )}
 
-      {/* Tabs */}
-      <div className="modal-tabs-container">
-        <div className="modal-tabs">
+      {/* Tabs - Mobile First: Scroll horizontal */}
+      <div className="border-b border-zinc-200 dark:border-zinc-700">
+        <div className="flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide px-4 md:px-0">
           <button
-            className={activeTab === 'info' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('info')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'info'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
           >
-            <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> Información
+            <BarChart3 size={18} strokeWidth={2} />
+            <span>Información</span>
           </button>
           <button
-            className={activeTab === 'courses' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('courses')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'courses'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
           >
-            <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos
+            <BookOpen size={18} strokeWidth={2} />
+            <span>Cursos</span>
           </button>
           <button
-            className={activeTab === 'credits' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('credits')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'credits'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
           >
-            <CreditCard size={18} strokeWidth={2} className="inline-icon" /> Créditos
+            <CreditCard size={18} strokeWidth={2} />
+            <span>Créditos</span>
           </button>
           <button
-            className={activeTab === 'classes' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('classes')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'classes'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
           >
-            <Calendar size={18} strokeWidth={2} className="inline-icon" /> Clases
+            <Calendar size={18} strokeWidth={2} />
+            <span>Clases</span>
           </button>
           {(['student', 'listener', 'trial'].includes(selectedUser?.role)) && (
             <button
-              className={activeTab === 'guardians' ? 'tab-active' : 'tab'}
               onClick={() => setActiveTab('guardians')}
+              className={`
+                flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+                border-b-2 font-medium text-sm transition-colors
+                ${activeTab === 'guardians'
+                  ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                  : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+                }
+              `}
             >
-              <UsersRound size={18} strokeWidth={2} className="inline-icon" /> Tutores
+              <UsersRound size={18} strokeWidth={2} />
+              <span>Tutores</span>
             </button>
           )}
         </div>
