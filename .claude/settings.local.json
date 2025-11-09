@@ -92,7 +92,17 @@
       "Bash(src/contexts/ThemeContext.jsx)",
       "Bash(src/components/interactive-book/DialogueBubble.jsx)",
       "Bash(src/components/interactive-book/ViewCustomizer.jsx)",
-      "Bash(src/services/enhancedTTSService.js)"
+      "Bash(src/services/enhancedTTSService.js)",
+      "Bash(src/components/InteractiveBookViewer.jsx)",
+      "Bash(src/pages/ExerciseBuilder.jsx)",
+      "Bash(git ls-tree:*)",
+      "Bash(src/components/exercisebuilder/exercises/VerbIdentificationExercise.jsx)",
+      "Bash(src/components/exercisebuilder/exercises/InteractiveReadingExercise.jsx)",
+      "Bash(src/components/exercisebuilder/exercises/AIAudioPronunciationExercise.jsx)",
+      "Bash(src/components/exercisebuilder/exercises/FreeDragDropExercise.jsx)",
+      "Bash(for file in VerbIdentificationExercise.jsx InteractiveReadingExercise.jsx AIAudioPronunciationExercise.jsx FreeDragDropExercise.jsx)",
+      "Bash(do sed -i 's/useDesignLabConfig/useExerciseBuilderConfig/g' \"src/components/exercisebuilder/exercises/$file\")",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

@@ -40,6 +40,7 @@ export function VerbIdentificationExercise({
   const targetCount = verbsToFind || verbs.length;
 
   const validateSelection = (selected, correct) => {
+    if (!selected || !(selected instanceof Set)) return false;
     const selectedArray = Array.from(selected);
     return (
       selectedArray.length === targetCount &&
@@ -75,7 +76,7 @@ export function VerbIdentificationExercise({
   };
 
   const handleCheck = () => {
-    const result = checkAnswer();
+    const result = checkAnswer(selectedWords);
     logger.info('Verb Identification Exercise checked:', result);
 
     if (onComplete) {
