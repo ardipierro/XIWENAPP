@@ -53,7 +53,7 @@ export const THEME_INFO = {
 };
 
 export function ThemeProvider({ children }) {
-  // Estado del tema actual
+  // Estado del tema actual - Dark por defecto
   const [currentTheme, setCurrentTheme] = useState(() => {
     const saved = localStorage.getItem('theme');
     if (saved && Object.values(THEMES).includes(saved)) {
