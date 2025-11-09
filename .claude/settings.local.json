@@ -111,7 +111,15 @@
       "Bash(public/audio/ai/buenos-dias.wav)",
       "Bash(public/audio/ai/jirafa.wav)",
       "Bash(public/audio/ai/perro.wav)",
-      "Bash(public/audio/ai/tigres.wav)"
+      "Bash(public/audio/ai/tigres.wav)",
+      "Bash(src/components/shared/ExerciseMakerModal.jsx)",
+      "Bash(src/services/AIService.js)",
+      "Bash(src/components/LiveClassRoom.jsx)",
+      "Bash(src/components/ProfilePanel.jsx)",
+      "Bash(src/components/VoiceRecorder.jsx)",
+      "Bash(src/components/QuickAccessCard.jsx)",
+      "Bash(src/components/StudentCard.jsx)",
+      "Bash(src/components/ViewAsBanner.jsx)"
     ],
     "deny": [],
     "ask": []
