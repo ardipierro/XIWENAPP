@@ -86,6 +86,10 @@ function ClassSessionModal({
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Debug: Log cuando cambia el tipo de sesión
+    if (field === 'type') {
+      logger.info(`📅 Tipo de sesión cambiado a: ${value}`);
+    }
     // Limpiar error del campo
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }));
@@ -177,6 +181,9 @@ function ClassSessionModal({
   };
 
   const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+  // Debug: Log del estado actual
+  logger.debug(`🔧 ClassSessionModal render - type: ${formData.type}, selectedDays: ${formData.selectedDays.length}`);
 
   return (
     <BaseModal
