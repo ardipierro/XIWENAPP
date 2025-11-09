@@ -36,7 +36,8 @@ import {
   FillInBlankExercise,
   MultipleChoiceExercise,
   VocabularyMatchingExercise,
-  DragDropMenuExercise
+  DragDropMenuExercise,
+  TTSSettings
 } from './interactive-book';
 
 /**
@@ -644,6 +645,9 @@ function InteractiveBookViewer() {
           <>
             {/* Metadata */}
             {renderMetadata()}
+
+            {/* Configuración TTS */}
+            <TTSSettings />
 
             {/* Unidades */}
             <div className="space-y-4">
