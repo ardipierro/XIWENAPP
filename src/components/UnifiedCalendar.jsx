@@ -1,13 +1,20 @@
 /**
  * @fileoverview Unified Calendar component showing classes, assignments, and events
  * @module components/UnifiedCalendar
+ *
+ * Mobile First:
+ * - Vista de lista en móvil (<md)
+ * - Grid de calendario solo en desktop (≥md)
+ * - BaseButton y BaseSelect
+ * - Touch targets ≥ 48px
+ * - Header responsive
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import logger from '../utils/logger';
 import { useCalendar, useCalendarNavigation } from '../hooks/useCalendar';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Plus, Video } from 'lucide-react';
-import { BaseLoading } from './common';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Plus, Video, List, Grid } from 'lucide-react';
+import { BaseLoading, BaseButton, BaseSelect } from './common';
 import EventDetailModal from './EventDetailModal';
 import { startClassSession, endClassSession } from '../firebase/classSessions';
 
@@ -17,6 +24,14 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
   const { events, loading, error, createEvent, refresh } = useCalendar(userId, userRole, start, end);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [mobileView, setMobileView] = useState('list'); // 'list' | 'calendar'
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleStartSession = async (event) => {
     try {
@@ -97,78 +112,236 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Calendario</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white">
+            Calendario
+          </h1>
+          <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 mt-1">
             {getDisplayText()}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {userRole === 'teacher' && onCreateSession && (
-            <button
+            <BaseButton
               onClick={onCreateSession}
-              className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2 hover:bg-primary-dark transition-colors"
+              variant="primary"
+              icon={Plus}
+              size={isMobile ? 'md' : 'md'}
+              className={isMobile ? 'flex-1' : ''}
             >
-              <Plus size={20} />
-              Nueva Sesión
-            </button>
+              {isMobile ? 'Nueva' : 'Nueva Sesión'}
+            </BaseButton>
           )}
-          <select
-            value={view}
-            onChange={(e) => setView(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          >
-            <option value="month">Mes</option>
-            <option value="week">Semana</option>
-            <option value="day">Día</option>
-          </select>
+
+          {/* Mobile: List/Calendar toggle */}
+          {isMobile && (
+            <BaseButton
+              onClick={() => setMobileView(mobileView === 'list' ? 'calendar' : 'list')}
+              variant="ghost"
+              icon={mobileView === 'list' ? Grid : List}
+              size="md"
+            />
+          )}
+
+          {/* Desktop: View selector */}
+          {!isMobile && (
+            <BaseSelect
+              value={view}
+              onChange={(e) => setView(e.target.value)}
+              options={[
+                { value: 'month', label: 'Mes' },
+                { value: 'week', label: 'Semana' },
+                { value: 'day', label: 'Día' }
+              ]}
+              className="w-auto"
+            />
+          )}
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <button
+      <div className="flex items-center justify-between gap-2">
+        <BaseButton
           onClick={goToPrevious}
-          className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-        >
-          <ChevronLeft size={20} />
-        </button>
+          variant="ghost"
+          icon={ChevronLeft}
+          size={isMobile ? 'sm' : 'md'}
+          className="min-w-tap-md"
+        />
 
-        <button
+        <BaseButton
           onClick={goToToday}
-          className="px-4 py-2 bg-primary  text-white rounded-lg font-medium"
+          variant="primary"
+          size={isMobile ? 'sm' : 'md'}
         >
           Hoy
-        </button>
+        </BaseButton>
 
-        <button
+        <BaseButton
           onClick={goToNext}
-          className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-        >
-          <ChevronRight size={20} />
-        </button>
+          variant="ghost"
+          icon={ChevronRight}
+          size={isMobile ? 'sm' : 'md'}
+          className="min-w-tap-md"
+        />
       </div>
 
-      {/* Calendar Views */}
-      {view === 'month' && <MonthView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
-      {view === 'week' && <WeekView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
-      {view === 'day' && <DayView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
+      {/* Mobile: List or Simplified Calendar */}
+      {isMobile && mobileView === 'list' && (
+        <MobileListView events={events} onEventClick={setSelectedEvent} />
+      )}
+      {isMobile && mobileView === 'calendar' && (
+        <DayView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />
+      )}
+
+      {/* Desktop: Calendar Views */}
+      {!isMobile && (
+        <>
+          {view === 'month' && <MonthView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
+          {view === 'week' && <WeekView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
+          {view === 'day' && <DayView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
+        </>
+      )}
 
       {/* Event Detail Modal */}
-      {selectedEvent && (
-        <EventDetailModal
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          onJoinSession={handleJoinSession}
-          onStartSession={handleStartSession}
-          onEndSession={handleEndSession}
-          userRole={userRole}
-        />
-      )}
+      <EventDetailModal
+        event={selectedEvent}
+        isOpen={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        onJoinSession={handleJoinSession}
+        onStartSession={handleStartSession}
+        onEndSession={handleEndSession}
+        userRole={userRole}
+      />
     </div>
+  );
+}
+
+/**
+ * Mobile List View - Shows all upcoming events in a list
+ */
+function MobileListView({ events, onEventClick }) {
+  const now = new Date();
+  const sortedEvents = [...events]
+    .filter(event => {
+      const eventDate = event.startDate?.toDate?.();
+      return eventDate >= now || event.status === 'live';
+    })
+    .sort((a, b) => {
+      const dateA = a.startDate?.toDate?.() || new Date(0);
+      const dateB = b.startDate?.toDate?.() || new Date(0);
+      return dateA - dateB;
+    });
+
+  if (sortedEvents.length === 0) {
+    return (
+      <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+        <CalendarIcon className="mx-auto text-zinc-400 dark:text-zinc-600 mb-4" size={48} strokeWidth={2} />
+        <p className="text-zinc-600 dark:text-zinc-400">No hay eventos próximos</p>
+      </div>
+    );
+  }
+
+  // Group by date
+  const groupedEvents = {};
+  sortedEvents.forEach(event => {
+    const eventDate = event.startDate?.toDate?.();
+    if (eventDate) {
+      const dateKey = eventDate.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      });
+      if (!groupedEvents[dateKey]) groupedEvents[dateKey] = [];
+      groupedEvents[dateKey].push(event);
+    }
+  });
+
+  return (
+    <div className="space-y-6">
+      {Object.entries(groupedEvents).map(([date, dateEvents]) => (
+        <div key={date}>
+          <h3 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 uppercase mb-3">
+            {date}
+          </h3>
+          <div className="space-y-2">
+            {dateEvents.map((event, index) => (
+              <MobileEventCard key={index} event={event} onClick={() => onEventClick(event)} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Mobile Event Card - Touch-optimized event card
+ */
+function MobileEventCard({ event, onClick }) {
+  const typeColors = {
+    session: event.status === 'live'
+      ? 'bg-red-100 dark:bg-red-900 border-red-500'
+      : 'bg-blue-100 dark:bg-blue-900 border-blue-500',
+    class: 'bg-zinc-100 dark:bg-zinc-800 border-zinc-400',
+    assignment: 'bg-amber-100 dark:bg-amber-900 border-amber-500',
+    event: 'bg-green-100 dark:bg-green-900 border-green-500'
+  };
+
+  const color = typeColors[event.type] || typeColors.event;
+
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        w-full min-h-tap-md p-4 text-left
+        rounded-lg border-l-4 ${color}
+        active:opacity-80 transition-opacity
+      `}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2 flex-1">
+          {event.type === 'session' && event.status === 'live' && (
+            <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+          )}
+          {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
+            <Video size={16} strokeWidth={2} />
+          )}
+          <h4 className="font-semibold text-zinc-900 dark:text-white text-base">
+            {event.title}
+          </h4>
+        </div>
+        {event.type === 'session' && event.status === 'live' && (
+          <span className="text-xs px-2 py-1 bg-red-500 text-white rounded-full font-medium shrink-0">
+            EN VIVO
+          </span>
+        )}
+      </div>
+
+      {event.description && (
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2 line-clamp-2">
+          {event.description}
+        </p>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+        {event.startDate && (
+          <div className="flex items-center gap-1">
+            <Clock size={14} strokeWidth={2} />
+            <span>{event.startDate.toDate().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        )}
+        {event.location && (
+          <div className="flex items-center gap-1">
+            <MapPin size={14} strokeWidth={2} />
+            <span className="truncate">{event.location}</span>
+          </div>
+        )}
+      </div>
+    </button>
   );
 }
 
