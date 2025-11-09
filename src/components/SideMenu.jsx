@@ -33,7 +33,8 @@ import {
   Palette,
   Layers,
   Sparkles,
-  FlaskConical
+  FlaskConical,
+  BookMarked
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -94,6 +95,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: Layers, label: 'Exercise Builder', path: '/admin', action: 'exerciseBuilder' },
               { icon: FlaskConical, label: 'Design Lab', path: '/admin', action: 'designLab' },
               { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
+              { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo', action: 'contentReader' },
               // Juego en Vivo movido a dashboard como acceso rápido
             ]
           }
@@ -117,6 +119,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: Layers, label: 'Exercise Builder', path: '/teacher', action: 'exerciseBuilder' },
           { icon: FlaskConical, label: 'Design Lab', path: '/teacher', action: 'designLab' },
           { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
+          { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo', action: 'contentReader' },
           // Juego en Vivo movido a dashboard como acceso rápido
         ]
       };
