@@ -29,7 +29,10 @@ import {
   Shield,
   Settings,
   Lightbulb,
-  UsersRound
+  UsersRound,
+  Palette,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -86,6 +89,9 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             id: 'ensenanza',
             label: 'Herramientas de Enseñanza',
             items: [
+              { icon: Palette, label: 'Theme Builder', path: '/admin', action: 'themeBuilder' },
+              { icon: Layers, label: 'Exercise Builder', path: '/admin', action: 'exerciseBuilder' },
+              { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
               // Juego en Vivo movido a dashboard como acceso rápido
             ]
           }
@@ -105,6 +111,9 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
+          { icon: Palette, label: 'Theme Builder', path: '/teacher', action: 'themeBuilder' },
+          { icon: Layers, label: 'Exercise Builder', path: '/teacher', action: 'exerciseBuilder' },
+          { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
           // Juego en Vivo movido a dashboard como acceso rápido
         ]
       };

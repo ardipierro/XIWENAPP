@@ -27,7 +27,6 @@ const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
 const GuardianDashboard = lazy(() => import('./components/GuardianDashboard'));
 const TestPage = lazy(() => import('./TestPage'));
 const PaymentResult = lazy(() => import('./components/PaymentResult'));
-const DesignLab = lazy(() => import('./components/DesignLab'));
 
 import './App.css';
 
@@ -139,12 +138,6 @@ function App() {
           <Route
             path="/test"
             element={<TestPage />}
-          />
-
-          {/* Design Lab - Design System Tester */}
-          <Route
-            path="/design-lab"
-            element={<DesignLab />}
           />
 
           {/* Protected Routes - requieren autenticación */}

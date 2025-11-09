@@ -85,6 +85,9 @@ import AICredentialsModal from './AICredentialsModal';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import UnifiedCalendar from './UnifiedCalendar';
+import ThemeBuilder from './ThemeBuilder';
+import ExerciseBuilder from '../pages/ExerciseBuilder';
+import InteractiveBookViewer from './InteractiveBookViewer';
 import AIService from '../services/AIService';
 import ThemeCustomizer from './ThemeCustomizer';
 import './AdminDashboard.css';
@@ -534,6 +537,33 @@ function AdminDashboard({ user, userRole, onLogout }) {
           </button>
           <AIConfigPanel />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Theme Builder - WITH Layout
+  if (navigation.currentScreen === 'themeBuilder') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ThemeBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Exercise Builder - WITH Layout
+  if (navigation.currentScreen === 'exerciseBuilder') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ExerciseBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Interactive Book Viewer - WITH Layout
+  if (navigation.currentScreen === 'interactiveBook') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <InteractiveBookViewer />
       </DashboardLayout>
     );
   }

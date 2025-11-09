@@ -1,0 +1,954 @@
+{
+  "metadata": {
+    "bookId": "ADE1_2026_enriched",
+    "title": "Aula de Español 1 - Edición Interactiva Porteña",
+    "description": "Libro de español rioplatense con ejercicios interactivos, audio y actividades gamificadas",
+    "language": "es-AR",
+    "targetLanguage": "zh-CN",
+    "cefrLevel": "A1-A2",
+    "version": "1.0.0",
+    "createdAt": "2025-11-08",
+    "features": {
+      "interactiveExercises": true,
+      "audioPlayback": true,
+      "darkMode": true,
+      "offlineMode": true,
+      "progressTracking": true,
+      "adaptiveSpeed": true
+    },
+    "author": "XIWEN - Transformado con IA"
+  },
+
+  "globalSettings": {
+    "theme": {
+      "type": "string",
+      "options": ["light", "dark", "auto"],
+      "default": "light",
+      "storageKey": "xiwen_theme_preference"
+    },
+    "audioSpeed": {
+      "type": "number",
+      "min": 0.5,
+      "max": 1.5,
+      "step": 0.25,
+      "default": 1.0,
+      "storageKey": "xiwen_audio_speed"
+    },
+    "fontSize": {
+      "type": "number",
+      "min": 14,
+      "max": 24,
+      "step": 2,
+      "default": 16,
+      "storageKey": "xiwen_font_size"
+    },
+    "subtitles": {
+      "type": "boolean",
+      "default": true,
+      "storageKey": "xiwen_subtitles_enabled"
+    },
+    "viewMode": {
+      "type": "string",
+      "options": ["scroll", "tabs", "slides"],
+      "default": "scroll",
+      "storageKey": "xiwen_view_mode"
+    }
+  },
+
+  "units": [
+    {
+      "unitId": "unit_255",
+      "unitNumber": 255,
+      "title": "Diálogo en un Restaurante",
+      "type": "interactive_dialogue",
+      "cefrLevel": "A2",
+      "tags": ["restaurante", "comida", "pedido", "conversación"],
+      "estimatedDuration": 15,
+
+      "content": {
+        "introduction": {
+          "type": "text",
+          "text": "Sofía y Andrés van a un restaurante. Escuchá atentamente el diálogo y después vas a poder practicar.",
+          "audioUrl": "/audio/unit255/intro_rioplatense.mp3",
+          "audioTranscript": "Sofía y Andrés van a un restaurante. Escuchá atentamente el diálogo y después vas a poder practicar."
+        },
+
+        "dialogue": {
+          "type": "interactive_dialogue",
+          "dialogueId": "restaurant_conversation_1",
+          "characters": [
+            {
+              "id": "mozo",
+              "name": "Mozo",
+              "avatar": "/avatars/waiter_male.svg",
+              "voice": "es-AR-male-1"
+            },
+            {
+              "id": "sofia",
+              "name": "Sofía",
+              "avatar": "/avatars/sofia.svg",
+              "voice": "es-AR-female-1"
+            },
+            {
+              "id": "andres",
+              "name": "Andrés",
+              "avatar": "/avatars/andres.svg",
+              "voice": "es-AR-male-2"
+            }
+          ],
+
+          "lines": [
+            {
+              "lineId": "dl1",
+              "character": "mozo",
+              "text": "Buenas noches. ¿Tienen reserva?",
+              "translation": "晚上好。你们有预订吗?",
+              "audioUrl": "/audio/unit255/line1_mozo.mp3",
+              "timestamp": 0,
+              "notes": [
+                {
+                  "word": "reserva",
+                  "definition": "Acción de guardar un lugar con anticipación",
+                  "example": "Hicimos una reserva para cuatro personas"
+                }
+              ]
+            },
+            {
+              "lineId": "dl2",
+              "character": "sofia",
+              "text": "Sí, a nombre de Sofía Torres.",
+              "translation": "是的，以索菲亚·托雷斯的名字。",
+              "audioUrl": "/audio/unit255/line2_sofia.mp3",
+              "timestamp": 3.5,
+              "interactiveType": "fill_in_blank",
+              "exercise": {
+                "type": "fill_in_blank",
+                "exerciseId": "ex255_1",
+                "prompt": "Completá la frase del diálogo:",
+                "sentence": "Sí, a nombre de _____.",
+                "blanks": [
+                  {
+                    "position": 0,
+                    "correctAnswers": ["Sofía Torres", "Sofia Torres"],
+                    "hint": "El nombre completo de la persona que hizo la reserva",
+                    "points": 10
+                  }
+                ],
+                "feedback": {
+                  "correct": "¡Genial! En Argentina se dice 'a nombre de' para indicar la reserva.",
+                  "incorrect": "Probá de nuevo. Pensá en el nombre completo de Sofía."
+                }
+              }
+            },
+            {
+              "lineId": "dl3",
+              "character": "mozo",
+              "text": "Ah, sí. Por acá, por favor.",
+              "translation": "啊，是的。这边请。",
+              "audioUrl": "/audio/unit255/line3_mozo.mp3",
+              "timestamp": 7.2,
+              "notes": [
+                {
+                  "word": "Por acá",
+                  "definition": "Expresión porteña para 'por aquí' o 'this way'",
+                  "rioplatenseNote": "En Buenos Aires decimos 'por acá' en lugar de 'por aquí'",
+                  "example": "Venite por acá que te muestro algo"
+                }
+              ]
+            },
+            {
+              "lineId": "dl4",
+              "character": "sofia",
+              "text": "Gracias. La mesa está re linda.",
+              "translation": "谢谢。桌子很漂亮。",
+              "audioUrl": "/audio/unit255/line4_sofia.mp3",
+              "timestamp": 10.8,
+              "notes": [
+                {
+                  "word": "re linda",
+                  "definition": "Muy bonita (intensificador porteño)",
+                  "rioplatenseNote": "En rioplatense usamos 'RE' como intensificador: re lindo, re bueno, re copado",
+                  "example": "Esa película está re buena"
+                }
+              ],
+              "interactiveType": "multiple_choice",
+              "exercise": {
+                "type": "multiple_choice",
+                "exerciseId": "ex255_2",
+                "prompt": "¿Qué significa 'RE linda' en porteño?",
+                "options": [
+                  {
+                    "id": "a",
+                    "text": "Un poco linda",
+                    "isCorrect": false
+                  },
+                  {
+                    "id": "b",
+                    "text": "Muy linda",
+                    "isCorrect": true
+                  },
+                  {
+                    "id": "c",
+                    "text": "No tan linda",
+                    "isCorrect": false
+                  },
+                  {
+                    "id": "d",
+                    "text": "Linda otra vez",
+                    "isCorrect": false
+                  }
+                ],
+                "correctAnswer": "b",
+                "explanation": "'RE' es un intensificador muy usado en Buenos Aires que significa 'muy'. Otros ejemplos: re copado, re zarpado, re groso.",
+                "points": 15
+              }
+            },
+            {
+              "lineId": "dl5",
+              "character": "mozo",
+              "text": "Acá tienen el menú. ¿Quieren tomar algo mientras deciden?",
+              "translation": "这是菜单。您想边决定边喝点什么吗?",
+              "audioUrl": "/audio/unit255/line5_mozo.mp3",
+              "timestamp": 15.5,
+              "notes": [
+                {
+                  "word": "Acá",
+                  "definition": "Aquí (forma porteña)",
+                  "rioplatenseNote": "Siempre decimos 'acá' en lugar de 'aquí'",
+                  "example": "Vení para acá"
+                }
+              ]
+            },
+            {
+              "lineId": "dl6",
+              "character": "andres",
+              "text": "Sí, para mí, un jugo de naranja, porfa.",
+              "translation": "是的，请给我一杯橙汁。",
+              "audioUrl": "/audio/unit255/line6_andres.mp3",
+              "timestamp": 20.3,
+              "notes": [
+                {
+                  "word": "porfa",
+                  "definition": "Por favor (versión coloquial)",
+                  "rioplatenseNote": "Los porteños decimos 'porfa' de forma informal",
+                  "example": "Pasame la sal, porfa"
+                }
+              ]
+            },
+            {
+              "lineId": "dl7",
+              "character": "sofia",
+              "text": "Y para mí, una botella de agua mineral.",
+              "translation": "我要一瓶矿泉水。",
+              "audioUrl": "/audio/unit255/line7_sofia.mp3",
+              "timestamp": 24.8
+            },
+            {
+              "lineId": "dl8",
+              "character": "mozo",
+              "text": "Enseguida se los traigo.",
+              "translation": "我马上给您拿来。",
+              "audioUrl": "/audio/unit255/line8_mozo.mp3",
+              "timestamp": 28.2,
+              "interactiveType": "audio_comprehension",
+              "exercise": {
+                "type": "audio_comprehension",
+                "exerciseId": "ex255_3",
+                "prompt": "Escuchá el audio y escribí lo que dice el mozo:",
+                "audioUrl": "/audio/unit255/line8_mozo.mp3",
+                "correctAnswers": [
+                  "Enseguida se los traigo",
+                  "Enseguida se los traigo.",
+                  "enseguida se los traigo"
+                ],
+                "hint": "Empieza con 'Enseguida...'",
+                "allowedAttempts": 3,
+                "speedControl": true,
+                "points": 20
+              }
+            }
+          ],
+
+          "fullAudioUrl": "/audio/unit255/dialogue_complete.mp3",
+          "totalDuration": 32
+        },
+
+        "exercises": [
+          {
+            "type": "vocabulary_matching",
+            "exerciseId": "ex255_vocab",
+            "title": "Vocabulario del Restaurante",
+            "instructions": "Arrastrá las palabras en español a su traducción en chino",
+            "difficulty": "beginner",
+            "points": 50,
+            "pairs": [
+              {
+                "id": "p1",
+                "spanish": "Mozo / Camarero",
+                "chinese": "服务员",
+                "image": "/images/vocab/waiter.jpg",
+                "audioUrl": "/audio/vocab/mozo.mp3",
+                "rioplatenseNote": "En Argentina decimos MOZO, no camarero"
+              },
+              {
+                "id": "p2",
+                "spanish": "Reserva",
+                "chinese": "预订",
+                "image": "/images/vocab/reservation.jpg",
+                "audioUrl": "/audio/vocab/reserva.mp3"
+              },
+              {
+                "id": "p3",
+                "spanish": "Mesa",
+                "chinese": "桌子",
+                "image": "/images/vocab/table.jpg",
+                "audioUrl": "/audio/vocab/mesa.mp3"
+              },
+              {
+                "id": "p4",
+                "spanish": "Menú / Carta",
+                "chinese": "菜单",
+                "image": "/images/vocab/menu.jpg",
+                "audioUrl": "/audio/vocab/menu.mp3"
+              },
+              {
+                "id": "p5",
+                "spanish": "Jugo",
+                "chinese": "果汁",
+                "image": "/images/vocab/juice.jpg",
+                "audioUrl": "/audio/vocab/jugo.mp3",
+                "rioplatenseNote": "Decimos JUGO, no zumo"
+              },
+              {
+                "id": "p6",
+                "spanish": "Agua mineral",
+                "chinese": "矿泉水",
+                "image": "/images/vocab/water.jpg",
+                "audioUrl": "/audio/vocab/agua.mp3"
+              }
+            ],
+            "feedback": {
+              "allCorrect": "¡Bárbaro! Ya conocés todo el vocabulario del restaurante.",
+              "someCorrect": "Bien, pero revisá las que te quedaron. Dale otra oportunidad.",
+              "noneCorrect": "No te preocupes, che. Escuchá los audios y probá de nuevo."
+            }
+          },
+
+          {
+            "type": "conjugation_fill_blank",
+            "exerciseId": "ex255_conjugation",
+            "title": "Conjugación: Presente de Indicativo",
+            "instructions": "Completá las frases con la conjugación correcta del verbo",
+            "difficulty": "intermediate",
+            "points": 40,
+            "questions": [
+              {
+                "id": "q1",
+                "sentence": "¿Ustedes _____ (tener) reserva?",
+                "verb": "tener",
+                "correctAnswers": ["tienen"],
+                "hint": "Recuerda que 'ustedes' se conjuga como 'ellos'",
+                "audioExample": "/audio/conjugation/tienen.mp3",
+                "points": 10
+              },
+              {
+                "id": "q2",
+                "sentence": "Nosotros _____ (querer) pedir ahora.",
+                "verb": "querer",
+                "correctAnswers": ["queremos"],
+                "hint": "Es un verbo irregular en primera persona plural",
+                "audioExample": "/audio/conjugation/queremos.mp3",
+                "points": 10
+              },
+              {
+                "id": "q3",
+                "sentence": "Yo _____ (pedir) un jugo de naranja.",
+                "verb": "pedir",
+                "correctAnswers": ["pido"],
+                "hint": "En porteño: 'Yo pido...'",
+                "audioExample": "/audio/conjugation/pido.mp3",
+                "rioplatenseNote": "Usamos el pronombre 'yo' menos que en España",
+                "points": 10
+              },
+              {
+                "id": "q4",
+                "sentence": "Vos _____ (ir) a tomar vino?",
+                "verb": "ir",
+                "correctAnswers": ["vas", "vas a"],
+                "hint": "Con VOS, no TÚ",
+                "audioExample": "/audio/conjugation/vas_vos.mp3",
+                "rioplatenseNote": "En Argentina usamos VOS: vos vas, vos tenés, vos comés",
+                "points": 10
+              }
+            ]
+          },
+
+          {
+            "type": "role_play_creator",
+            "exerciseId": "ex255_roleplay",
+            "title": "Creá tu Propio Diálogo",
+            "instructions": "Imaginá que estás en un restaurante porteño. Escribí tu propio pedido usando las frases que aprendiste.",
+            "difficulty": "advanced",
+            "points": 60,
+            "prompts": [
+              "¿Qué le dirías al mozo cuando llegás?",
+              "¿Qué bebida vas a pedir?",
+              "¿Qué comida te gustaría ordenar?",
+              "¿Cómo le pedirías la cuenta?"
+            ],
+            "examplePhrases": [
+              "Hola, ¿tienen mesa para dos?",
+              "¿Me traés la carta, porfa?",
+              "Para mí, un vaso de agua, porfa",
+              "Quiero pedir el bife de chorizo",
+              "¿Me traés la cuenta cuando puedas?",
+              "¿Cuánto sale todo?"
+            ],
+            "rioplatenseGuidelines": {
+              "useTu": false,
+              "useVos": true,
+              "useUstedes": true,
+              "avoidSpanishisms": [
+                "vale → dale",
+                "tomar el autobús → tomar el bondi/colectivo",
+                "ordenar → pedir",
+                "zumo → jugo"
+              ]
+            },
+            "evaluationCriteria": [
+              "Uso correcto del voseo",
+              "Vocabulario porteño apropiado",
+              "Frases naturales en contexto de restaurante",
+              "Conjugaciones correctas"
+            ]
+          }
+        ],
+
+        "culturalNotes": {
+          "title": "Cultura Porteña: Comer Afuera",
+          "icon": "🇦🇷",
+          "content": [
+            {
+              "topic": "El Mozo",
+              "text": "En Argentina siempre decimos 'mozo', nunca 'camarero' o 'mesero'. Y cuando querés llamarlo, le decís '¡Disculpá!' o levantás la mano.",
+              "image": "/images/culture/mozo_argentina.jpg"
+            },
+            {
+              "topic": "La Propina",
+              "text": "En Buenos Aires se deja propina del 10%. No es obligatoria pero es de buena educación. Podés decirle al mozo: 'Quedate con el vuelto' o 'Esto es para vos'.",
+              "image": "/images/culture/propina.jpg"
+            },
+            {
+              "topic": "Horarios",
+              "text": "Los porteños cenamos tarde: entre las 21:00 y 23:00 hs. Si vas a las 19:00, el restaurante puede estar vacío.",
+              "image": "/images/culture/dinner_time.jpg"
+            },
+            {
+              "topic": "Expresiones Útiles",
+              "text": "- 'Porfa' = por favor\n- 'Re' = muy (re bueno, re lindo)\n- 'Acá' = aquí\n- '¿Cuánto sale?' = ¿Cuánto cuesta?\n- 'Dale' = OK / de acuerdo",
+              "audioUrl": "/audio/culture/expresiones_utiles.mp3"
+            }
+          ]
+        }
+      },
+
+      "sessionState": {
+        "storageType": "localStorage",
+        "storageKey": "xiwen_unit255_state",
+        "schema": {
+          "completed": "boolean",
+          "startedAt": "timestamp",
+          "completedAt": "timestamp",
+          "dialogueProgress": {
+            "listenedLines": "array",
+            "completedExercises": "array",
+            "notes": "array"
+          },
+          "exerciseResults": {
+            "ex255_1": {
+              "attempts": "number",
+              "correct": "boolean",
+              "points": "number",
+              "timestamp": "timestamp"
+            },
+            "ex255_2": {
+              "attempts": "number",
+              "selectedAnswer": "string",
+              "correct": "boolean",
+              "points": "number",
+              "timestamp": "timestamp"
+            },
+            "ex255_vocab": {
+              "matchedPairs": "array",
+              "attempts": "number",
+              "timeSpent": "number",
+              "points": "number",
+              "timestamp": "timestamp"
+            },
+            "ex255_conjugation": {
+              "answers": "object",
+              "correct": "number",
+              "total": "number",
+              "points": "number",
+              "timestamp": "timestamp"
+            },
+            "ex255_roleplay": {
+              "dialogue": "array",
+              "feedback": "object",
+              "points": "number",
+              "timestamp": "timestamp"
+            }
+          },
+          "highlights": "array",
+          "personalNotes": "array",
+          "audioPlaybackSettings": {
+            "speed": "number",
+            "subtitlesEnabled": "boolean"
+          },
+          "totalPoints": "number",
+          "totalTimeSpent": "number"
+        }
+      }
+    },
+
+    {
+      "unitId": "unit_256",
+      "unitNumber": 256,
+      "title": "Diálogo en un Restaurante - Parte 2",
+      "type": "interactive_dialogue",
+      "cefrLevel": "A2",
+      "tags": ["restaurante", "comida", "menú", "conversación"],
+      "estimatedDuration": 12,
+
+      "content": {
+        "introduction": {
+          "type": "text",
+          "text": "Ahora Sofía y Andrés están mirando el menú. Escuchá cómo piden la comida.",
+          "audioUrl": "/audio/unit256/intro.mp3"
+        },
+
+        "dialogue": {
+          "type": "interactive_dialogue",
+          "dialogueId": "restaurant_conversation_2",
+          "characters": [
+            {
+              "id": "mozo",
+              "name": "Mozo",
+              "avatar": "/avatars/waiter_male.svg",
+              "voice": "es-AR-male-1"
+            },
+            {
+              "id": "sofia",
+              "name": "Sofía",
+              "avatar": "/avatars/sofia.svg",
+              "voice": "es-AR-female-1"
+            },
+            {
+              "id": "andres",
+              "name": "Andrés",
+              "avatar": "/avatars/andres.svg",
+              "voice": "es-AR-male-2"
+            }
+          ],
+
+          "lines": [
+            {
+              "lineId": "dl1",
+              "character": "sofia",
+              "text": "(Mirando el menú) ¿Qué vas a pedir, Andrés?",
+              "translation": "(看着菜单) 安德烈斯，你要点什么?",
+              "audioUrl": "/audio/unit256/line1_sofia.mp3",
+              "timestamp": 0,
+              "interactiveType": "voseo_practice",
+              "exercise": {
+                "type": "fill_in_blank",
+                "exerciseId": "ex256_voseo_1",
+                "prompt": "Convertí esta pregunta a la forma VOSeante correcta:",
+                "original": "¿Qué VAS a pedir? (vos)",
+                "sentence": "¿Qué _____ a pedir, Andrés?",
+                "correctAnswers": ["vas"],
+                "explanation": "Con VOS usamos: vos VAS (no 'vas a ir' sino 'vas'). Otros: vos tenés, vos comés, vos sabés.",
+                "audioExample": "/audio/voseo/vas.mp3",
+                "points": 10
+              }
+            },
+            {
+              "lineId": "dl2",
+              "character": "andres",
+              "text": "Creo que el salmón. Y vos, ¿qué vas a comer?",
+              "translation": "我想要三文鱼。你呢，你要吃什么?",
+              "audioUrl": "/audio/unit256/line2_andres.mp3",
+              "timestamp": 4.2,
+              "notes": [
+                {
+                  "word": "Y vos",
+                  "definition": "Y tú (forma rioplatense)",
+                  "rioplatenseNote": "SIEMPRE usamos VOS, nunca TÚ en Argentina",
+                  "examples": [
+                    "¿Y vos cómo estás?",
+                    "Vos sabés mucho",
+                    "¿Vos querés venir?"
+                  ]
+                }
+              ]
+            },
+            {
+              "lineId": "dl3",
+              "character": "sofia",
+              "text": "Yo quiero la sopa de tomate y después la pasta con queso.",
+              "translation": "我想要番茄汤，然后要奶酪意面。",
+              "audioUrl": "/audio/unit256/line3_sofia.mp3",
+              "timestamp": 8.5
+            },
+            {
+              "lineId": "dl4",
+              "character": "mozo",
+              "text": "(Volviendo) Acá tienen las bebidas. ¿Ya saben qué van a pedir?",
+              "translation": "(回来) 这是您的饮料。你们知道要点什么了吗?",
+              "audioUrl": "/audio/unit256/line4_mozo.mp3",
+              "timestamp": 13.8
+            },
+            {
+              "lineId": "dl5",
+              "character": "sofia",
+              "text": "Sí, yo quiero la sopa de tomate y la pasta con queso.",
+              "translation": "是的，我要番茄汤和奶酪意面。",
+              "audioUrl": "/audio/unit256/line5_sofia.mp3",
+              "timestamp": 18.2,
+              "interactiveType": "ordering_practice",
+              "exercise": {
+                "type": "role_play_input",
+                "exerciseId": "ex256_order",
+                "prompt": "Ahora vos: ¿Cómo pedirías tu comida favorita?",
+                "exampleStructures": [
+                  "Yo quiero + [comida]",
+                  "Para mí, + [comida]",
+                  "Me traés + [comida] + porfa?"
+                ],
+                "vocabulary": [
+                  "bife de chorizo",
+                  "milanesa con papas fritas",
+                  "ensalada mixta",
+                  "pizza de muzzarella",
+                  "empanadas de carne"
+                ],
+                "feedback": {
+                  "checkVoseo": true,
+                  "checkVocabulary": true,
+                  "checkPoliteness": true
+                },
+                "points": 25
+              }
+            },
+            {
+              "lineId": "dl6",
+              "character": "andres",
+              "text": "Y yo, el salmón, porfa.",
+              "translation": "我要三文鱼，谢谢。",
+              "audioUrl": "/audio/unit256/line6_andres.mp3",
+              "timestamp": 22.4
+            },
+            {
+              "lineId": "dl7",
+              "character": "mozo",
+              "text": "Perfecto. En un toque les traigo los platos. ¡Buen provecho!",
+              "translation": "好的。我马上给您拿来菜。祝您用餐愉快!",
+              "audioUrl": "/audio/unit256/line7_mozo.mp3",
+              "timestamp": 25.8,
+              "notes": [
+                {
+                  "word": "En un toque",
+                  "definition": "En un momento / rápidamente",
+                  "rioplatenseNote": "Expresión súper porteña para decir 'enseguida' o 'en un momento'",
+                  "examples": [
+                    "Ya te lo traigo en un toque",
+                    "Esperame un toque",
+                    "En un toque arranco"
+                  ],
+                  "audioUrl": "/audio/expressions/en_un_toque.mp3"
+                }
+              ]
+            }
+          ],
+
+          "fullAudioUrl": "/audio/unit256/dialogue_complete.mp3",
+          "totalDuration": 30
+        },
+
+        "exercises": [
+          {
+            "type": "listening_comprehension",
+            "exerciseId": "ex256_listening",
+            "title": "Comprensión Auditiva",
+            "instructions": "Escuchá el diálogo completo y respondé las preguntas",
+            "audioUrl": "/audio/unit256/dialogue_complete.mp3",
+            "speedControl": true,
+            "subtitlesToggle": true,
+            "points": 40,
+            "questions": [
+              {
+                "id": "q1",
+                "question": "¿Qué va a pedir Andrés?",
+                "type": "multiple_choice",
+                "options": [
+                  {"id": "a", "text": "La pasta con queso", "isCorrect": false},
+                  {"id": "b", "text": "El salmón", "isCorrect": true},
+                  {"id": "c", "text": "La sopa de tomate", "isCorrect": false},
+                  {"id": "d", "text": "La ensalada", "isCorrect": false}
+                ],
+                "audioTimestamp": 4.2,
+                "points": 10
+              },
+              {
+                "id": "q2",
+                "question": "¿Qué dice el mozo al final?",
+                "type": "multiple_choice",
+                "options": [
+                  {"id": "a", "text": "Enseguida se los traigo", "isCorrect": false},
+                  {"id": "b", "text": "En un toque les traigo los platos", "isCorrect": true},
+                  {"id": "c", "text": "Ya vuelvo con su pedido", "isCorrect": false},
+                  {"id": "d", "text": "Un momento por favor", "isCorrect": false}
+                ],
+                "audioTimestamp": 25.8,
+                "rioplatenseNote": "'En un toque' es MUY argentino",
+                "points": 10
+              },
+              {
+                "id": "q3",
+                "question": "Completá: Sofía quiere la sopa de tomate y después _____.",
+                "type": "fill_in_blank",
+                "correctAnswers": ["la pasta con queso", "pasta con queso"],
+                "audioTimestamp": 8.5,
+                "points": 10
+              },
+              {
+                "id": "q4",
+                "question": "¿Cómo le pregunta Sofía a Andrés qué va a pedir?",
+                "type": "fill_in_blank",
+                "correctAnswers": ["¿Qué vas a pedir?", "Qué vas a pedir", "que vas a pedir"],
+                "hint": "Recordá usar VOS",
+                "audioTimestamp": 0,
+                "points": 10
+              }
+            ]
+          },
+
+          {
+            "type": "drag_and_drop_menu",
+            "exerciseId": "ex256_menu_creation",
+            "title": "Armá tu Menú Porteño",
+            "instructions": "Arrastrá los platos a la categoría correcta del menú",
+            "difficulty": "intermediate",
+            "points": 50,
+            "categories": [
+              {
+                "id": "entradas",
+                "name": "Entradas",
+                "translation": "开胃菜"
+              },
+              {
+                "id": "platos_principales",
+                "name": "Platos Principales",
+                "translation": "主菜"
+              },
+              {
+                "id": "postres",
+                "name": "Postres",
+                "translation": "甜点"
+              },
+              {
+                "id": "bebidas",
+                "name": "Bebidas",
+                "translation": "饮料"
+              }
+            ],
+            "items": [
+              {
+                "id": "i1",
+                "name": "Empanadas",
+                "category": "entradas",
+                "image": "/images/food/empanadas.jpg",
+                "audioUrl": "/audio/food/empanadas.mp3",
+                "info": "Plato típico argentino - masa rellena de carne, pollo o verduras"
+              },
+              {
+                "id": "i2",
+                "name": "Bife de chorizo",
+                "category": "platos_principales",
+                "image": "/images/food/bife.jpg",
+                "audioUrl": "/audio/food/bife.mp3",
+                "info": "El corte de carne más famoso en Argentina"
+              },
+              {
+                "id": "i3",
+                "name": "Milanesa con papas fritas",
+                "category": "platos_principales",
+                "image": "/images/food/milanesa.jpg",
+                "audioUrl": "/audio/food/milanesa.mp3",
+                "info": "Carne empanada y frita, con papas fritas"
+              },
+              {
+                "id": "i4",
+                "name": "Flan con dulce de leche",
+                "category": "postres",
+                "image": "/images/food/flan.jpg",
+                "audioUrl": "/audio/food/flan.mp3",
+                "info": "Postre clásico argentino"
+              },
+              {
+                "id": "i5",
+                "name": "Fernet con Coca",
+                "category": "bebidas",
+                "image": "/images/drinks/fernet.jpg",
+                "audioUrl": "/audio/drinks/fernet.mp3",
+                "info": "Bebida típica de Córdoba, muy popular en todo el país"
+              },
+              {
+                "id": "i6",
+                "name": "Vino Malbec",
+                "category": "bebidas",
+                "image": "/images/drinks/malbec.jpg",
+                "audioUrl": "/audio/drinks/malbec.mp3",
+                "info": "Vino argentino por excelencia"
+              },
+              {
+                "id": "i7",
+                "name": "Provoleta",
+                "category": "entradas",
+                "image": "/images/food/provoleta.jpg",
+                "audioUrl": "/audio/food/provoleta.mp3",
+                "info": "Queso provolone a la parrilla con orégano"
+              },
+              {
+                "id": "i8",
+                "name": "Ensalada mixta",
+                "category": "entradas",
+                "image": "/images/food/ensalada.jpg",
+                "audioUrl": "/audio/food/ensalada.mp3",
+                "info": "Lechuga, tomate, cebolla"
+              },
+              {
+                "id": "i9",
+                "name": "Helado",
+                "category": "postres",
+                "image": "/images/food/helado.jpg",
+                "audioUrl": "/audio/food/helado.mp3",
+                "info": "Argentina tiene el mejor helado del mundo"
+              },
+              {
+                "id": "i10",
+                "name": "Salmón",
+                "category": "platos_principales",
+                "image": "/images/food/salmon.jpg",
+                "audioUrl": "/audio/food/salmon.mp3",
+                "info": "Como en el diálogo"
+              }
+            ],
+            "feedback": {
+              "allCorrect": "¡Genial! Ahora sabés armar un menú porteño de primera.",
+              "someCorrect": "Bien, pero revisá algunas categorías.",
+              "noneCorrect": "No pasa nada, che. Escuchá los audios y probá de nuevo."
+            }
+          }
+        ],
+
+        "culturalNotes": {
+          "title": "Expresiones Porteñas del Restaurante",
+          "icon": "🍽️",
+          "content": [
+            {
+              "topic": "En un toque",
+              "text": "Significa 'en un momento' o 'rápido'. Super usado en Buenos Aires: 'Ya te lo traigo en un toque', 'Esperame un toque'.",
+              "audioUrl": "/audio/culture/en_un_toque.mp3"
+            },
+            {
+              "topic": "Porfa",
+              "text": "Versión corta de 'por favor'. Es informal pero súper común: 'Pasame la sal, porfa', 'Un café, porfa'.",
+              "audioUrl": "/audio/culture/porfa.mp3"
+            },
+            {
+              "topic": "La Cuenta",
+              "text": "Para pedir la cuenta podés decir: '¿Me traés la cuenta, porfa?', '¿Cuánto sale?', '¿Cuánto es?'. Y para dejar propina: 'Quedate con el vuelto'.",
+              "audioUrl": "/audio/culture/cuenta.mp3"
+            }
+          ]
+        }
+      },
+
+      "sessionState": {
+        "storageType": "localStorage",
+        "storageKey": "xiwen_unit256_state",
+        "schema": {
+          "completed": "boolean",
+          "dialogueProgress": {
+            "listenedLines": "array",
+            "completedExercises": "array"
+          },
+          "exerciseResults": {
+            "ex256_voseo_1": {
+              "attempts": "number",
+              "correct": "boolean",
+              "points": "number"
+            },
+            "ex256_order": {
+              "userInput": "string",
+              "feedback": "object",
+              "points": "number"
+            },
+            "ex256_listening": {
+              "answers": "object",
+              "correct": "number",
+              "points": "number"
+            },
+            "ex256_menu_creation": {
+              "placements": "array",
+              "attempts": "number",
+              "points": "number"
+            }
+          },
+          "totalPoints": "number",
+          "totalTimeSpent": "number"
+        }
+      }
+    }
+  ],
+
+  "progressTracking": {
+    "storageType": "IndexedDB",
+    "databaseName": "xiwen_ade1_progress",
+    "schema": {
+      "userId": "string",
+      "bookProgress": {
+        "completedUnits": "array",
+        "currentUnit": "number",
+        "totalPoints": "number",
+        "totalTimeSpent": "number",
+        "lastAccessed": "timestamp"
+      },
+      "unitProgress": {
+        "[unitId]": {
+          "completed": "boolean",
+          "points": "number",
+          "timeSpent": "number",
+          "exercises": "object",
+          "highlights": "array",
+          "notes": "array"
+        }
+      },
+      "userPreferences": {
+        "theme": "string",
+        "audioSpeed": "number",
+        "fontSize": "number",
+        "subtitles": "boolean",
+        "viewMode": "string"
+      },
+      "achievements": "array",
+      "statistics": {
+        "totalExercisesCompleted": "number",
+        "averageScore": "number",
+        "streakDays": "number",
+        "lastStudyDate": "timestamp"
+      }
+    }
+  }
+}

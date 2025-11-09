@@ -1,6 +1,6 @@
 /**
- * @fileoverview Design System Tester PRO - Integrado con temas reales de la app
- * @module components/DesignLab
+ * @fileoverview Theme Builder - Laboratorio de diseño integrado con temas reales de XIWEN
+ * @module components/ThemeBuilder
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -239,9 +239,9 @@ function generatePalette(baseColor) {
 }
 
 /**
- * Design Lab integrado con temas reales de la app
+ * Theme Builder integrado con temas reales de la app
  */
-function DesignLab() {
+function ThemeBuilder() {
   const { currentTheme, setTheme } = useTheme();
   const [selectedTheme, setSelectedTheme] = useState(currentTheme);
   const [customColors, setCustomColors] = useState({});
@@ -886,4 +886,4 @@ function ComponentShowcase({ isDark }) {
   );
 }
 
-export default DesignLab;
+export default ThemeBuilder;

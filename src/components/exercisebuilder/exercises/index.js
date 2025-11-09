@@ -1,0 +1,16 @@
+/**
+ * @fileoverview Barrel exports para componentes de ejercicios del Exercise Builder
+ * @module components/exercisebuilder/exercises
+ */
+
+// Basic Exercises
+export { MultipleChoiceExercise } from './MultipleChoiceExercise';
+export { FillInBlankExercise } from './FillInBlankExercise';
+export { MatchingExercise } from './MatchingExercise';
+export { TrueFalseExercise } from './TrueFalseExercise';
+
+// Advanced Exercises
+export { AudioListeningExercise } from './AudioListeningExercise';
+export { DialogueRolePlayExercise } from './DialogueRolePlayExercise';
+export { DragDropOrderExercise } from './DragDropOrderExercise';
+export { TextSelectionExercise } from './TextSelectionExercise';

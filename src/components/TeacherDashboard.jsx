@@ -79,6 +79,9 @@ import UnifiedCalendar from './UnifiedCalendar';
 import MessagesPanel from './MessagesPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
+import ThemeBuilder from './ThemeBuilder';
+import ExerciseBuilder from '../pages/ExerciseBuilder';
+import InteractiveBookViewer from './InteractiveBookViewer';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -1481,6 +1484,33 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <MessagesPanel user={user} />
+      </DashboardLayout>
+    );
+  }
+
+  // Theme Builder Screen
+  if (navigation.currentScreen === 'themeBuilder') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ThemeBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Exercise Builder Screen
+  if (navigation.currentScreen === 'exerciseBuilder') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ExerciseBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Interactive Book Viewer Screen
+  if (navigation.currentScreen === 'interactiveBook') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <InteractiveBookViewer />
       </DashboardLayout>
     );
   }
