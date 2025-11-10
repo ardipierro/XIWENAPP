@@ -112,7 +112,8 @@ export default defineConfig({
     // Rollup optimizations
     rollupOptions: {
       output: {
-        // Chunking estratégico - Mobile First + Fix circular deps
+        // Chunking automático - Dejar que Vite optimice
+        // Solo excluir Excalidraw para evitar circular deps
         manualChunks: (id) => {
           // Excalidraw - NO incluir en ningún chunk manual
           // Dejar que Vite lo maneje automáticamente para evitar circular deps
@@ -120,42 +121,8 @@ export default defineConfig({
             return; // undefined = dejar que Vite decida
           }
 
-          // React core + React ecosystem juntos (evita problemas de forwardRef)
-          if (id.includes('node_modules/react') ||
-              id.includes('node_modules/react-dom') ||
-              id.includes('node_modules/react-router') ||
-              id.includes('node_modules/scheduler') ||
-              id.includes('node_modules/recharts') ||
-              id.includes('node_modules/@reduxjs/toolkit') ||
-              id.includes('node_modules/react-redux') ||
-              id.includes('node_modules/use-sync-external-store')) {
-            return 'react-vendor';
-          }
-
-          // Firebase completo (evitar split que causa circular deps)
-          if (id.includes('firebase') || id.includes('@firebase')) {
-            return 'firebase-vendor';
-          }
-
-          // LiveKit - Chunk separado (también es grande)
-          if (id.includes('@livekit') || id.includes('livekit-client')) {
-            return 'livekit-vendor';
-          }
-
-          // UI Libraries (lazy load)
-          if (id.includes('lucide-react')) {
-            return 'icons';
-          }
-
-          // D3 separado si no es parte de recharts
-          if (id.includes('d3-') && !id.includes('recharts')) {
-            return 'charts';
-          }
-
-          // Otras librerías node_modules (EXCEPTO Excalidraw)
-          if (id.includes('node_modules/') && !id.includes('@excalidraw')) {
-            return 'vendor';
-          }
+          // Dejar que Vite maneje el resto automáticamente
+          // Esto evita problemas de dependencias circulares y referencias
         },
 
         // Naming strategy optimizado
