@@ -877,9 +877,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
           <ThemeCustomizer />
         </div>
       )}
-      </div>
+          </div>
+        </div>
 
-      {/* AI Credentials Modal */}
+        {/* AI Credentials Modal */}
         <AICredentialsModal
           isOpen={showAICredentialsModal}
           onClose={() => {
