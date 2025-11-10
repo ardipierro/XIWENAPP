@@ -171,6 +171,13 @@ function ContentReaderDemo() {
                       <strong>Texto:</strong> Añade texto flotante con fuente y color personalizables
                     </div>
                   </div>
+
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">✏️</span>
+                    <div>
+                      <strong>Editar:</strong> Edita el contenido directamente, agrega texto en párrafos, separa líneas
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -208,16 +215,33 @@ function ContentReaderDemo() {
                       <strong>Exportar/Importar:</strong> Descarga o sube tus anotaciones en JSON
                     </div>
                   </div>
+
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">👁️</span>
+                    <div>
+                      <strong>Vista Original:</strong> Alterna entre versión editada y original en modo edición
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🔄</span>
+                    <div>
+                      <strong>Restaurar:</strong> Vuelve al contenido original eliminando todas las ediciones
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div className="mt-3 pt-3 border-t border-accent-200 dark:border-accent-700">
-                <div className="grid md:grid-cols-2 gap-2 text-xs text-primary-600 dark:text-primary-400">
+                <div className="grid md:grid-cols-3 gap-2 text-xs text-primary-600 dark:text-primary-400">
                   <p>
                     <strong>💡 Tip Notas:</strong> Arrastra desde el ícono de mover. Redimensiona desde la esquina.
                   </p>
                   <p>
                     <strong>💡 Tip Texto:</strong> Click en modo Texto para agregar texto personalizado en cualquier lugar.
+                  </p>
+                  <p>
+                    <strong>💡 Tip Editar:</strong> Modo Editar permite modificar el texto original. Usa "Guardar" para confirmar cambios.
                   </p>
                 </div>
               </div>
