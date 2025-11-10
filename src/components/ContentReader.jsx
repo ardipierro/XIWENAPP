@@ -209,20 +209,25 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
    * Aplicar highlight al texto seleccionado
    */
   const applyHighlight = (range, text) => {
-    const span = document.createElement('span');
     const colorClasses = COLORS[selectedColor];
     const styleClasses = HIGHLIGHTER_STYLES[highlighterStyle].class;
-
-    span.className = `${colorClasses.bg} ${colorClasses.text} ${styleClasses} transition-colors cursor-pointer hover:opacity-80`;
-    span.setAttribute('data-highlight-id', Date.now().toString());
-    span.setAttribute('data-color', selectedColor);
-    span.setAttribute('data-style', highlighterStyle);
+    const highlightId = Date.now().toString();
 
     try {
-      range.surroundContents(span);
+      // Usar extractContents y wrap para evitar el error de surroundContents
+      const contents = range.extractContents();
+      const span = document.createElement('span');
+
+      span.className = `${colorClasses.bg} ${colorClasses.text} ${styleClasses} transition-colors cursor-pointer hover:opacity-80`;
+      span.setAttribute('data-highlight-id', highlightId);
+      span.setAttribute('data-color', selectedColor);
+      span.setAttribute('data-style', highlighterStyle);
+
+      span.appendChild(contents);
+      range.insertNode(span);
 
       const newHighlight = {
-        id: span.getAttribute('data-highlight-id'),
+        id: highlightId,
         text,
         color: selectedColor,
         style: highlighterStyle,
@@ -233,6 +238,8 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
         ...prev,
         highlights: [...prev.highlights, newHighlight]
       }));
+
+      logger.info('Highlight aplicado exitosamente', 'ContentReader');
     } catch (error) {
       logger.error('Error applying highlight:', error, 'ContentReader');
     }
