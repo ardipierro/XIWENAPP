@@ -581,19 +581,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Settings Panel - WITH Layout (Theme Customizer)
-  if (navigation.currentScreen === 'settings') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Inicio
-          </button>
-          <ThemeCustomizer />
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   // Live Game Setup - WITH Layout
   if (navigation.currentScreen === 'liveGame') {
