@@ -147,14 +147,28 @@ function ContentReaderDemo() {
                   <div className="flex items-start gap-2">
                     <span className="text-lg">✏️</span>
                     <div>
-                      <strong>Subrayar:</strong> Selecciona el texto que quieres resaltar
+                      <strong>Subrayar:</strong> 5 estilos (clásico, subrayado, doble, ondulado, cuadro)
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
                     <span className="text-lg">📝</span>
                     <div>
-                      <strong>Nota:</strong> Selecciona texto y agrega una nota relacionada
+                      <strong>Notas:</strong> Arrastrables y redimensionables. Click para mover
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🎨</span>
+                    <div>
+                      <strong>Dibujar:</strong> 4 grosores (fino, medio, grueso, marcador)
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">✍️</span>
+                    <div>
+                      <strong>Texto:</strong> Añade texto flotante con fuente y color personalizables
                     </div>
                   </div>
                 </div>
@@ -163,14 +177,21 @@ function ContentReaderDemo() {
                   <div className="flex items-start gap-2">
                     <span className="text-lg">🎨</span>
                     <div>
-                      <strong>Dibujar:</strong> Dibuja directamente sobre el contenido
+                      <strong>Colores:</strong> 8 colores disponibles para todas las herramientas
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">🎨</span>
+                    <span className="text-lg">⚙️</span>
                     <div>
-                      <strong>Colores:</strong> Elige entre 6 colores para tus anotaciones
+                      <strong>Configuración:</strong> Cambia tamaño y fuente del contenido
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🔍</span>
+                    <div>
+                      <strong>Zoom:</strong> Ajusta tamaño de texto entre 12-32px
                     </div>
                   </div>
 
@@ -180,13 +201,25 @@ function ContentReaderDemo() {
                       <strong>Guardar:</strong> Guarda tus anotaciones en Firebase
                     </div>
                   </div>
+
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">📥</span>
+                    <div>
+                      <strong>Exportar/Importar:</strong> Descarga o sube tus anotaciones en JSON
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div className="mt-3 pt-3 border-t border-accent-200 dark:border-accent-700">
-                <p className="text-xs text-primary-600 dark:text-primary-400">
-                  <strong>Tip:</strong> Puedes exportar e importar tus anotaciones usando los botones de descarga y carga.
-                </p>
+                <div className="grid md:grid-cols-2 gap-2 text-xs text-primary-600 dark:text-primary-400">
+                  <p>
+                    <strong>💡 Tip Notas:</strong> Arrastra desde el ícono de mover. Redimensiona desde la esquina.
+                  </p>
+                  <p>
+                    <strong>💡 Tip Texto:</strong> Click en modo Texto para agregar texto personalizado en cualquier lugar.
+                  </p>
+                </div>
               </div>
             </div>
           )}
