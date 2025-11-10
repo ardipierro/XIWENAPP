@@ -112,7 +112,7 @@ export default defineConfig({
     // Rollup optimizations
     rollupOptions: {
       output: {
-        // Chunking estratégico - Mobile First (simplificado para evitar circular deps)
+        // Chunking estratégico - Mobile First + Fix vendor size
         manualChunks: (id) => {
           // React core + recharts juntos (recharts necesita React en el mismo contexto)
           if (id.includes('node_modules/react') ||
@@ -131,10 +131,14 @@ export default defineConfig({
             return 'firebase-vendor';
           }
 
-          // Excalidraw - INCLUIDO en vendor para evitar circular deps
-          // (era chunk separado pero causaba: "Cannot access 't' before initialization")
+          // Excalidraw - Chunk separado para reducir vendor.js (7MB -> reasonable size)
           if (id.includes('@excalidraw/excalidraw')) {
-            return 'vendor'; // Incluir en vendor general
+            return 'excalidraw-vendor';
+          }
+
+          // LiveKit - Chunk separado (también es grande)
+          if (id.includes('@livekit') || id.includes('livekit-client')) {
+            return 'livekit-vendor';
           }
 
           // UI Libraries (lazy load)
