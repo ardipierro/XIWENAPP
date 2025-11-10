@@ -185,57 +185,75 @@ function AudioPlayer({
       });
 
       if (result.audioUrl) {
-        // Si se generó un archivo de audio, reproducirlo
-        const audio = new Audio(result.audioUrl);
-        audio.onloadedmetadata = () => {
-          setDuration(audio.duration);
-        };
-        audio.ontimeupdate = () => {
-          setCurrentTime(audio.currentTime);
-          setProgress((audio.currentTime / audio.duration) * 100);
-        };
-        audio.onended = () => {
-          setIsPlaying(false);
-          setProgress(100);
-          premiumTTSService.cleanup(result.audioUrl);
-          if (onComplete) {
-            onComplete();
-          }
-        };
+        try {
+          // Si se generó un archivo de audio, reproducirlo
+          await new Promise((resolve, reject) => {
+            const audio = new Audio(result.audioUrl);
 
-        await audio.play();
-      } else {
-        // Fallback a Web Speech API (navegador)
-        const estimatedDuration = estimateDuration(text);
-        const startTime = Date.now();
+            audio.onloadedmetadata = () => {
+              setDuration(audio.duration);
+            };
 
-        ttsIntervalRef.current = setInterval(() => {
-          const elapsed = (Date.now() - startTime) / 1000;
-          const currentProgress = (elapsed / estimatedDuration) * 100;
+            audio.ontimeupdate = () => {
+              setCurrentTime(audio.currentTime);
+              setProgress((audio.currentTime / audio.duration) * 100);
+            };
 
-          if (currentProgress >= 100) {
-            clearInterval(ttsIntervalRef.current);
-            setProgress(100);
-            setCurrentTime(estimatedDuration);
-            setTimeout(() => {
+            audio.onended = () => {
               setIsPlaying(false);
-              setProgress(0);
-              setCurrentTime(0);
+              setProgress(100);
+              premiumTTSService.cleanup(result.audioUrl);
               if (onComplete) {
                 onComplete();
               }
-            }, 100);
-          } else {
-            setProgress(currentProgress);
-            setCurrentTime(elapsed);
-          }
-        }, 100);
+              resolve();
+            };
 
-        await ttsService.speak(text, {
-          rate: 0.9,
-          volume: isMuted ? 0 : 1.0
-        });
+            audio.onerror = (error) => {
+              reject(new Error('Audio file failed to load'));
+            };
+
+            audio.play().catch(reject);
+          });
+
+          return; // Exit successfully if audio plays
+        } catch (audioError) {
+          // Si falla el audio, hacer fallback a Web Speech
+          logger.warn('Audio playback failed, falling back to Web Speech:', audioError);
+          premiumTTSService.cleanup(result.audioUrl);
+        }
       }
+
+      // Fallback a Web Speech API (navegador) - ejecuta si no hay audioUrl o si falla
+      const estimatedDuration = estimateDuration(text);
+      const startTime = Date.now();
+
+      ttsIntervalRef.current = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const currentProgress = (elapsed / estimatedDuration) * 100;
+
+        if (currentProgress >= 100) {
+          clearInterval(ttsIntervalRef.current);
+          setProgress(100);
+          setCurrentTime(estimatedDuration);
+          setTimeout(() => {
+            setIsPlaying(false);
+            setProgress(0);
+            setCurrentTime(0);
+            if (onComplete) {
+              onComplete();
+            }
+          }, 100);
+        } else {
+          setProgress(currentProgress);
+          setCurrentTime(elapsed);
+        }
+      }, 100);
+
+      await ttsService.speak(text, {
+        rate: 0.9,
+        volume: isMuted ? 0 : 1.0
+      });
     } catch (err) {
       logger.error('Error en TTS:', err);
       if (ttsIntervalRef.current) {

@@ -44,9 +44,18 @@ function FullDialoguePlayer({ dialogue, onComplete }) {
         });
 
         if (result.audioUrl) {
-          // Reproducir archivo de audio
-          await playAudioFile(result.audioUrl);
-          premiumTTSService.cleanup(result.audioUrl);
+          try {
+            // Reproducir archivo de audio
+            await playAudioFile(result.audioUrl);
+            premiumTTSService.cleanup(result.audioUrl);
+          } catch (audioError) {
+            // Si falla el audio, hacer fallback a Web Speech
+            logger.warn('Audio playback failed, falling back to Web Speech:', audioError);
+            await ttsService.speak(line.text, {
+              rate: 0.9,
+              volume: 1.0
+            });
+          }
         } else {
           // Fallback a Web Speech
           await ttsService.speak(line.text, {
@@ -61,6 +70,7 @@ function FullDialoguePlayer({ dialogue, onComplete }) {
         }
       } catch (err) {
         logger.error('Error reproduciendo línea:', err);
+        // Intentar continuar con la siguiente línea
       }
     }
 
