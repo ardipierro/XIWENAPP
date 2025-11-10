@@ -122,7 +122,14 @@
       "Bash(src/components/ViewAsBanner.jsx)",
       "Bash(/tmp/teacher_dashboard_with_viewmode.jsx)",
       "Bash(\"src/components/EventDetailModal.jsx\")",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(vercel project:*)",
+      "WebFetch(domain:xiwenapp.vercel.app)",
+      "Bash(vercel logs:*)",
+      "Bash(vercel git connect:*)",
+      "Bash(vercel ls:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
