@@ -84,12 +84,6 @@ export default defineConfig({
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
 
-  // Optimizaciones de dependencias
-  optimizeDeps: {
-    // Excluir Excalidraw de pre-bundling para evitar circular deps
-    exclude: ['@excalidraw/excalidraw']
-  },
-
   // Optimizaciones de build - Mobile First
   build: {
     // Target móviles modernos (2020+)
@@ -118,16 +112,18 @@ export default defineConfig({
     // Rollup optimizations
     rollupOptions: {
       output: {
-        // Chunking estratégico - Excalidraw en chunk separado, resto normal
+        // Chunking estratégico - Mobile First + Fix circular deps
         manualChunks: (id) => {
-          // Excalidraw en su propio chunk - Vite manejará sus deps internas
+          // Excalidraw - NO incluir en ningún chunk manual
+          // Dejar que Vite lo maneje automáticamente para evitar circular deps
           if (id.includes('@excalidraw/excalidraw')) {
-            return 'excalidraw';
+            return; // undefined = dejar que Vite decida
           }
 
-          // React en su chunk
+          // React core juntos
           if (id.includes('node_modules/react') ||
               id.includes('node_modules/react-dom') ||
+              id.includes('node_modules/react-router') ||
               id.includes('node_modules/scheduler')) {
             return 'react';
           }
@@ -137,8 +133,8 @@ export default defineConfig({
             return 'firebase';
           }
 
-          // Resto de node_modules en vendor
-          if (id.includes('node_modules/')) {
+          // Resto de node_modules (EXCEPTO Excalidraw)
+          if (id.includes('node_modules/') && !id.includes('@excalidraw')) {
             return 'vendor';
           }
         },
