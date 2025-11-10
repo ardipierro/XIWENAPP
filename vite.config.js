@@ -131,10 +131,11 @@ export default defineConfig({
             return 'firebase-vendor';
           }
 
-          // Excalidraw - INCLUIR en vendor general (separarlo causa circular deps)
-          // if (id.includes('@excalidraw/excalidraw')) {
-          //   return 'excalidraw-vendor';
-          // }
+          // Excalidraw - NO incluir en ningún chunk manual
+          // Dejar que Vite lo maneje automáticamente para evitar circular deps
+          if (id.includes('@excalidraw/excalidraw')) {
+            return; // undefined = dejar que Vite decida
+          }
 
           // LiveKit - Chunk separado (también es grande)
           if (id.includes('@livekit') || id.includes('livekit-client')) {
@@ -151,8 +152,8 @@ export default defineConfig({
             return 'charts';
           }
 
-          // Otras librerías node_modules
-          if (id.includes('node_modules/')) {
+          // Otras librerías node_modules (EXCEPTO Excalidraw)
+          if (id.includes('node_modules/') && !id.includes('@excalidraw')) {
             return 'vendor';
           }
         },
