@@ -84,6 +84,12 @@ export default defineConfig({
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
 
+  // Optimizaciones de dependencias
+  optimizeDeps: {
+    // Excluir Excalidraw de pre-bundling para evitar circular deps
+    exclude: ['@excalidraw/excalidraw']
+  },
+
   // Optimizaciones de build - Mobile First
   build: {
     // Target móviles modernos (2020+)
@@ -112,48 +118,27 @@ export default defineConfig({
     // Rollup optimizations
     rollupOptions: {
       output: {
-        // Chunking estratégico - Mobile First + Fix vendor size
+        // Chunking estratégico - Excalidraw en chunk separado, resto normal
         manualChunks: (id) => {
-          // React core + recharts juntos (recharts necesita React en el mismo contexto)
+          // Excalidraw en su propio chunk - Vite manejará sus deps internas
+          if (id.includes('@excalidraw/excalidraw')) {
+            return 'excalidraw';
+          }
+
+          // React en su chunk
           if (id.includes('node_modules/react') ||
               id.includes('node_modules/react-dom') ||
-              id.includes('node_modules/react-router') ||
-              id.includes('node_modules/scheduler') ||
-              id.includes('node_modules/recharts') ||
-              id.includes('node_modules/@reduxjs/toolkit') ||
-              id.includes('node_modules/react-redux') ||
-              id.includes('node_modules/use-sync-external-store')) {
-            return 'react-vendor';
+              id.includes('node_modules/scheduler')) {
+            return 'react';
           }
 
-          // Firebase completo (evitar split que causa circular deps)
+          // Firebase en su chunk
           if (id.includes('firebase') || id.includes('@firebase')) {
-            return 'firebase-vendor';
+            return 'firebase';
           }
 
-          // Excalidraw - NO incluir en ningún chunk manual
-          // Dejar que Vite lo maneje automáticamente para evitar circular deps
-          if (id.includes('@excalidraw/excalidraw')) {
-            return; // undefined = dejar que Vite decida
-          }
-
-          // LiveKit - Chunk separado (también es grande)
-          if (id.includes('@livekit') || id.includes('livekit-client')) {
-            return 'livekit-vendor';
-          }
-
-          // UI Libraries (lazy load)
-          if (id.includes('lucide-react')) {
-            return 'icons';
-          }
-
-          // D3 separado si no es parte de recharts
-          if (id.includes('d3-') && !id.includes('recharts')) {
-            return 'charts';
-          }
-
-          // Otras librerías node_modules (EXCEPTO Excalidraw)
-          if (id.includes('node_modules/') && !id.includes('@excalidraw')) {
+          // Resto de node_modules en vendor
+          if (id.includes('node_modules/')) {
             return 'vendor';
           }
         },
