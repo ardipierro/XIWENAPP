@@ -128,6 +128,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   // Estados de drag & resize
   const [draggingNote, setDraggingNote] = useState(null);
   const [resizingNote, setResizingNote] = useState(null);
+  const [resizeDirection, setResizeDirection] = useState(null); // 'horizontal', 'vertical', 'diagonal'
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   // Referencias
@@ -252,7 +253,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       selectedText,
       position: currentNote.position,
       width: 250,
-      height: 'auto',
+      height: 150,
       timestamp: Date.now()
     };
 
@@ -350,12 +351,23 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       if (!note) return;
 
       const containerRect = containerRef.current.getBoundingClientRect();
-      const newWidth = Math.max(200, e.clientX - containerRect.left - note.position.x);
+
+      let updates = {};
+
+      if (resizeDirection === 'horizontal' || resizeDirection === 'diagonal') {
+        const newWidth = Math.max(200, e.clientX - containerRect.left - note.position.x);
+        updates.width = newWidth;
+      }
+
+      if (resizeDirection === 'vertical' || resizeDirection === 'diagonal') {
+        const newHeight = Math.max(100, e.clientY - containerRect.top - note.position.y);
+        updates.height = newHeight;
+      }
 
       setAnnotations(prev => ({
         ...prev,
         notes: prev.notes.map(n =>
-          n.id === resizingNote ? { ...n, width: newWidth } : n
+          n.id === resizingNote ? { ...n, ...updates } : n
         )
       }));
     }
@@ -364,6 +376,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const handleMouseUp = () => {
     setDraggingNote(null);
     setResizingNote(null);
+    setResizeDirection(null);
   };
 
   useEffect(() => {
@@ -380,10 +393,11 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   /**
    * RESIZE para notas
    */
-  const handleResizeStart = (e, noteId) => {
+  const handleResizeStart = (e, noteId, direction) => {
     e.preventDefault();
     e.stopPropagation();
     setResizingNote(noteId);
+    setResizeDirection(direction);
   };
 
   /**
@@ -635,7 +649,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             </button>
 
             {showColorPicker && (
-              <div className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-50 min-w-[200px]">
+              <div className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999] min-w-[200px]">
                 <div className="grid grid-cols-4 gap-2">
                   {Object.keys(COLORS).map(color => (
                     <button
@@ -781,11 +795,6 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
         <div
           ref={containerRef}
           className="relative max-w-4xl mx-auto p-8"
-          onClick={(e) => {
-            if (selectedTool === 'text' && e.target === e.currentTarget) {
-              handleOpenTextForm(e);
-            }
-          }}
         >
           {/* Canvas */}
           <canvas
@@ -799,6 +808,39 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             }`}
             style={{ zIndex: selectedTool === 'draw' ? 10 : 1 }}
           />
+
+          {/* Overlay transparente para herramienta de texto */}
+          {selectedTool === 'text' && (
+            <div
+              className="absolute inset-0 cursor-text"
+              style={{ zIndex: 15 }}
+              onClick={handleOpenTextForm}
+            />
+          )}
+
+          {/* Overlay para crear notas sin seleccionar texto */}
+          {selectedTool === 'note' && (
+            <div
+              className="absolute inset-0 cursor-copy"
+              style={{ zIndex: 15 }}
+              onClick={(e) => {
+                // Si no hay texto seleccionado, crear nota en la posición del click
+                const selection = window.getSelection();
+                if (!selection.toString().trim()) {
+                  const containerRect = containerRef.current.getBoundingClientRect();
+                  setCurrentNote({
+                    text: '',
+                    position: {
+                      x: e.clientX - containerRect.left,
+                      y: e.clientY - containerRect.top
+                    }
+                  });
+                  setSelectedText('');
+                  setShowNoteForm(true);
+                }
+              }}
+            />
+          )}
 
           {/* Content */}
           <div
@@ -853,14 +895,15 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 left: note.position?.x || 0,
                 top: note.position?.y || 0,
                 width: note.width || 250,
+                height: note.height || 150,
                 zIndex: draggingNote === note.id ? 30 : 20
               }}
             >
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2 h-full">
                 {!readOnly && (
                   <Move className="w-4 h-4 text-yellow-700 dark:text-yellow-300 flex-shrink-0 mt-1" />
                 )}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 overflow-auto">
                   {note.selectedText && (
                     <p className="text-xs text-yellow-800 dark:text-yellow-200 italic mb-2 break-words">
                       "{note.selectedText}"
@@ -879,13 +922,33 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                   </button>
                 )}
               </div>
+
+              {/* Resize Handles */}
               {!readOnly && (
-                <div
-                  className="absolute bottom-0 right-0 w-4 h-4 cursor-ew-resize resize-handle"
-                  onMouseDown={(e) => handleResizeStart(e, note.id)}
-                >
-                  <GripHorizontal className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                </div>
+                <>
+                  {/* Handle horizontal (derecha) */}
+                  <div
+                    className="absolute top-1/2 right-0 -translate-y-1/2 w-2 h-8 cursor-ew-resize resize-handle hover:bg-yellow-500/30 rounded-l transition-colors"
+                    onMouseDown={(e) => handleResizeStart(e, note.id, 'horizontal')}
+                    title="Redimensionar ancho"
+                  />
+
+                  {/* Handle vertical (abajo) */}
+                  <div
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 h-2 w-8 cursor-ns-resize resize-handle hover:bg-yellow-500/30 rounded-t transition-colors"
+                    onMouseDown={(e) => handleResizeStart(e, note.id, 'vertical')}
+                    title="Redimensionar alto"
+                  />
+
+                  {/* Handle diagonal (esquina inferior derecha) */}
+                  <div
+                    className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize resize-handle hover:bg-yellow-500/50 rounded-tl transition-colors"
+                    onMouseDown={(e) => handleResizeStart(e, note.id, 'diagonal')}
+                    title="Redimensionar ambos"
+                  >
+                    <GripHorizontal className="w-4 h-4 text-yellow-600 dark:text-yellow-400 rotate-45" />
+                  </div>
+                </>
               )}
             </div>
           ))}
