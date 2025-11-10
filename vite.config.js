@@ -131,10 +131,10 @@ export default defineConfig({
             return 'firebase-vendor';
           }
 
-          // Excalidraw - Chunk separado para reducir vendor.js (7MB -> reasonable size)
-          if (id.includes('@excalidraw/excalidraw')) {
-            return 'excalidraw-vendor';
-          }
+          // Excalidraw - INCLUIR en vendor general (separarlo causa circular deps)
+          // if (id.includes('@excalidraw/excalidraw')) {
+          //   return 'excalidraw-vendor';
+          // }
 
           // LiveKit - Chunk separado (también es grande)
           if (id.includes('@livekit') || id.includes('livekit-client')) {
