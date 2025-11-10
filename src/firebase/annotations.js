@@ -49,6 +49,7 @@ class AnnotationsRepository extends BaseRepository {
         highlights: annotationsData.highlights || [],
         notes: annotationsData.notes || [],
         drawings: annotationsData.drawings || [],
+        floatingTexts: annotationsData.floatingTexts || [],
         updatedAt: new Date()
       };
 
@@ -127,11 +128,13 @@ class AnnotationsRepository extends BaseRepository {
       let totalHighlights = 0;
       let totalNotes = 0;
       let totalDrawings = 0;
+      let totalFloatingTexts = 0;
 
       annotations.forEach(annotation => {
         totalHighlights += (annotation.highlights || []).length;
         totalNotes += (annotation.notes || []).length;
         totalDrawings += (annotation.drawings || []).length;
+        totalFloatingTexts += (annotation.floatingTexts || []).length;
       });
 
       return {
@@ -139,6 +142,7 @@ class AnnotationsRepository extends BaseRepository {
         totalHighlights,
         totalNotes,
         totalDrawings,
+        totalFloatingTexts,
         contentCount: annotations.length
       };
     } catch (error) {

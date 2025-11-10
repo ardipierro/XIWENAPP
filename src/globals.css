@@ -519,6 +519,13 @@
     @apply bg-red-600;
   }
 
+  /* Icon Button - Para el Content Reader */
+  .icon-btn {
+    @apply p-2 bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300;
+    @apply rounded-lg hover:bg-primary-200 dark:hover:bg-primary-700 transition-all;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
   .btn-outline {
     @apply bg-transparent text-primary;
     border: 1px solid var(--color-border);
@@ -1478,28 +1485,6 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 30px var(--color-bg-tertiary) inset !important;
   -webkit-text-fill-color: var(--color-text-primary) !important;
-}
-
-/* ============================================
-   GRID/LIST LAYOUTS
-   ============================================ */
-
-/* Quick Access Grid - 3 columnas en desktop, responsive */
-.quick-access-grid {
-  @apply grid gap-6;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-}
-
-/* Quick Access List - Una columna */
-.quick-access-list {
-  @apply flex flex-col gap-4;
-}
-
-/* Responsive: En móvil, siempre 1 columna */
-@media (max-width: 768px) {
-  .quick-access-grid {
-    @apply grid-cols-1;
-  }
 }
 
 /* ============================================
