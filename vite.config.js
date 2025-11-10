@@ -120,20 +120,39 @@ export default defineConfig({
             return; // undefined = dejar que Vite decida
           }
 
-          // React core juntos
+          // React core + React ecosystem juntos (evita problemas de forwardRef)
           if (id.includes('node_modules/react') ||
               id.includes('node_modules/react-dom') ||
               id.includes('node_modules/react-router') ||
-              id.includes('node_modules/scheduler')) {
-            return 'react';
+              id.includes('node_modules/scheduler') ||
+              id.includes('node_modules/recharts') ||
+              id.includes('node_modules/@reduxjs/toolkit') ||
+              id.includes('node_modules/react-redux') ||
+              id.includes('node_modules/use-sync-external-store')) {
+            return 'react-vendor';
           }
 
-          // Firebase en su chunk
+          // Firebase completo (evitar split que causa circular deps)
           if (id.includes('firebase') || id.includes('@firebase')) {
-            return 'firebase';
+            return 'firebase-vendor';
           }
 
-          // Resto de node_modules (EXCEPTO Excalidraw)
+          // LiveKit - Chunk separado (también es grande)
+          if (id.includes('@livekit') || id.includes('livekit-client')) {
+            return 'livekit-vendor';
+          }
+
+          // UI Libraries (lazy load)
+          if (id.includes('lucide-react')) {
+            return 'icons';
+          }
+
+          // D3 separado si no es parte de recharts
+          if (id.includes('d3-') && !id.includes('recharts')) {
+            return 'charts';
+          }
+
+          // Otras librerías node_modules (EXCEPTO Excalidraw)
           if (id.includes('node_modules/') && !id.includes('@excalidraw')) {
             return 'vendor';
           }
