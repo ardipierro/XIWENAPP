@@ -34,7 +34,9 @@ function ClassSessionModal({
     // Recurring fields
     selectedDays: [],
     recurringStartTime: '10:00',
-    recurringEndTime: '11:00'
+    recurringEndTime: '11:00',
+    recurringWeeks: 4, // Número de semanas para clases recurrentes
+    recurringStartDate: '' // Fecha de inicio para clases recurrentes
   });
 
   const [errors, setErrors] = useState({});
@@ -78,7 +80,9 @@ function ClassSessionModal({
         meetingLink: '',
         selectedDays: [],
         recurringStartTime: '10:00',
-        recurringEndTime: '11:00'
+        recurringEndTime: '11:00',
+        recurringWeeks: 4,
+        recurringStartDate: ''
       });
     }
     setErrors({});
@@ -124,6 +128,12 @@ function ClassSessionModal({
     if (formData.type === 'recurring') {
       if (formData.selectedDays.length === 0) {
         newErrors.selectedDays = 'Seleccione al menos un día';
+      }
+      if (!formData.recurringStartDate) {
+        newErrors.recurringStartDate = 'La fecha de inicio es requerida';
+      }
+      if (!formData.recurringWeeks || formData.recurringWeeks < 1) {
+        newErrors.recurringWeeks = 'Ingrese un número válido de semanas';
       }
     }
 
@@ -416,6 +426,15 @@ function ClassSessionModal({
             </div>
           ) : (
             <div className="space-y-4">
+              <BaseInput
+                label="Fecha de inicio"
+                type="date"
+                value={formData.recurringStartDate}
+                onChange={(e) => handleChange('recurringStartDate', e.target.value)}
+                error={errors.recurringStartDate}
+                required
+              />
+
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                   Días de la semana
@@ -457,6 +476,35 @@ function ClassSessionModal({
                   onChange={(e) => handleChange('recurringEndTime', e.target.value)}
                 />
               </div>
+
+              <BaseInput
+                label="Número de semanas"
+                type="number"
+                value={formData.recurringWeeks}
+                onChange={(e) => handleChange('recurringWeeks', parseInt(e.target.value))}
+                error={errors.recurringWeeks}
+                min="1"
+                max="52"
+                required
+                helperText="Cuántas semanas se repetirán las clases"
+              />
+
+              {/* Mostrar cuántas clases se crearán */}
+              {formData.selectedDays.length > 0 && formData.recurringWeeks > 0 && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <Users className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        Se crearán {formData.selectedDays.length * formData.recurringWeeks} clases
+                      </p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                        {formData.selectedDays.length} día{formData.selectedDays.length !== 1 ? 's' : ''} por semana × {formData.recurringWeeks} semana{formData.recurringWeeks !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
