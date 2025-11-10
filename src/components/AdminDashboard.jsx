@@ -1,6 +1,6 @@
 import logger from '../utils/logger';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Crown,
@@ -70,7 +70,8 @@ import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
-import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
+// Lazy load Excalidraw to prevent vendor bundle issues
+const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
@@ -438,13 +439,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // Excalidraw Whiteboard - NO Layout (fullscreen)
   if (navigation.currentScreen === 'excalidrawWhiteboard') {
     return (
-      <ExcalidrawWhiteboard
-        onBack={() => {
-          navigation.setExcalidrawManagerKey(prev => prev + 1);
-          navigation.setCurrentScreen('excalidrawSessions');
-        }}
-        initialSession={navigation.selectedExcalidrawSession}
-      />
+      <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Cargando pizarra...</div>}>
+        <ExcalidrawWhiteboard
+          onBack={() => {
+            navigation.setExcalidrawManagerKey(prev => prev + 1);
+            navigation.setCurrentScreen('excalidrawSessions');
+          }}
+          initialSession={navigation.selectedExcalidrawSession}
+        />
+      </Suspense>
     );
   }
 
