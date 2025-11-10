@@ -39,7 +39,9 @@ import {
   TrendingUp,
   ClipboardList,
   DollarSign,
-  Zap
+  Zap,
+  Key,
+  Palette
 } from 'lucide-react';
 import {
   loadStudents,
@@ -132,6 +134,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAICredentialsModal, setShowAICredentialsModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
+  const [settingsTab, setSettingsTab] = useState('credentials'); // 'credentials' | 'theme'
   const [aiCredentials, setAiCredentials] = useState({
     claude: true,
     openai: true,
@@ -715,8 +718,43 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </p>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
+            {/* Tabs */}
+            <div className="border-b border-gray-200 dark:border-gray-700">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setSettingsTab('credentials')}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
+                    ${settingsTab === 'credentials'
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }
+                  `}
+                >
+                  <Key className="w-5 h-5" />
+                  Credenciales IA
+                </button>
+                <button
+                  onClick={() => setSettingsTab('theme')}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
+                    ${settingsTab === 'theme'
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }
+                  `}
+                >
+                  <Palette className="w-5 h-5" />
+                  Editor de Temas
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content: Credentials */}
+            {settingsTab === 'credentials' && (
+              <>
+                <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
+                  <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
               <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
                 <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
                   <span className="font-medium">Application Version</span>
@@ -830,8 +868,18 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
           </div>
         </div>
+        </>
+      )}
 
-        {/* AI Credentials Modal */}
+      {/* Tab Content: Theme */}
+      {settingsTab === 'theme' && (
+        <div className="space-y-6">
+          <ThemeCustomizer />
+        </div>
+      )}
+      </div>
+
+      {/* AI Credentials Modal */}
         <AICredentialsModal
           isOpen={showAICredentialsModal}
           onClose={() => {

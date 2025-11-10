@@ -7,10 +7,10 @@ import { getAIConfig, callAI } from '../firebase/aiConfig';
 
 // AI Provider metadata
 const AI_PROVIDERS = [
-  { id: 'openai', name: 'OpenAI', icon: '🤖' },
-  { id: 'grok', name: 'Grok', icon: '🚀' },
-  { id: 'google', name: 'Google Gemini', icon: '✨' },
-  { id: 'claude', name: 'Claude', icon: '🧠' }
+  { id: 'openai', name: 'openai', label: 'ChatGPT', icon: '🤖', model: 'gpt-4' },
+  { id: 'grok', name: 'grok', label: 'Grok', icon: '⚡', model: 'grok-2' },
+  { id: 'gemini', name: 'gemini', label: 'Google Gemini', icon: '🔮', model: 'gemini-1.5-pro' },
+  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet' }
 ];
 
 class AIService {
@@ -58,13 +58,12 @@ class AIService {
    * Get list of available configured providers
    */
   getAvailableProviders() {
-    if (!this.config) return [];
-
     return AI_PROVIDERS.map(provider => ({
-      name: provider.id,
-      label: provider.name,
+      name: provider.name,
+      label: provider.label,
       icon: provider.icon,
-      configured: this.config[provider.id]?.enabled && !!this.config[provider.id]?.apiKey,
+      model: provider.model,
+      configured: this.config ? (this.config[provider.id]?.enabled && !!this.config[provider.id]?.apiKey) : false,
       active: this.currentProvider === provider.id
     }));
   }
