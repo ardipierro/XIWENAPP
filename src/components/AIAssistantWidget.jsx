@@ -4,10 +4,11 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Mic, Send, X, Loader, Sparkles, AlertCircle, CheckCircle } from 'lucide-react';
+import { MessageCircle, Mic, Send, X, Loader, Sparkles, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import AIAssistantService from '../services/AIAssistantService';
 import logger from '../utils/logger';
+import { BaseButton, BaseInput } from './common';
 
 function AIAssistantWidget() {
   const { user } = useAuth();
@@ -222,14 +223,15 @@ function AIAssistantWidget() {
     <>
       {/* Floating Button */}
       {!isOpen && (
-        <button
+        <BaseButton
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 z-50 group"
+          variant="primary"
+          className="!fixed !bottom-6 !right-6 !w-14 !h-14 !rounded-full !p-0 !shadow-lg hover:!shadow-xl !z-50 group"
           aria-label="Abrir asistente de IA"
         >
           <Sparkles size={24} className="group-hover:scale-110 transition-transform" />
           <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-zinc-900"></span>
-        </button>
+        </BaseButton>
       )}
 
       {/* Chat Widget */}
@@ -249,21 +251,25 @@ function AIAssistantWidget() {
             </div>
             <div className="flex items-center gap-2">
               {messages.length > 1 && (
-                <button
+                <BaseButton
                   onClick={handleClear}
-                  className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                  variant="ghost"
+                  size="sm"
+                  className="!p-1.5 !text-white hover:!bg-white/20"
                   title="Limpiar conversación"
                 >
                   <X size={16} />
-                </button>
+                </BaseButton>
               )}
-              <button
+              <BaseButton
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                variant="ghost"
+                size="sm"
+                className="!p-1.5 !text-white hover:!bg-white/20"
                 title="Cerrar"
               >
                 <X size={20} />
-              </button>
+              </BaseButton>
             </div>
           </div>
 
@@ -321,13 +327,14 @@ function AIAssistantWidget() {
               <div className="space-y-2">
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Sugerencias:</p>
                 {suggestions.map((suggestion, index) => (
-                  <button
+                  <BaseButton
                     key={index}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full text-left p-3 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-700 transition-colors text-sm text-zinc-700 dark:text-zinc-300"
+                    variant="outline"
+                    className="!w-full !text-left !justify-start !p-3 text-sm"
                   >
                     {suggestion}
-                  </button>
+                  </BaseButton>
                 ))}
               </div>
             )}
@@ -338,36 +345,36 @@ function AIAssistantWidget() {
           {/* Input */}
           <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
             <div className="flex gap-2">
-              <input
+              <BaseInput
                 ref={inputRef}
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendText()}
                 placeholder={isListening ? 'Escuchando...' : 'Escribe tu pregunta...'}
-                className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm disabled:opacity-50"
                 disabled={isLoading || isListening}
+                className="!text-sm"
               />
-              <button
+              <BaseButton
                 onClick={handleVoiceClick}
-                className={`p-2 rounded-lg transition-all ${
-                  isListening
-                    ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
-                    : 'bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
-                }`}
+                variant={isListening ? 'danger' : 'secondary'}
+                size="sm"
                 disabled={isLoading}
                 title="Comando de voz"
+                className={`!p-2 ${isListening ? '!animate-pulse' : ''}`}
               >
                 <Mic size={20} />
-              </button>
-              <button
+              </BaseButton>
+              <BaseButton
                 onClick={handleSendText}
-                className="p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="primary"
+                size="sm"
                 disabled={isLoading || !inputText.trim() || isListening}
                 title="Enviar"
+                className="!p-2"
               >
                 <Send size={20} />
-              </button>
+              </BaseButton>
             </div>
             <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-2 text-center">
               Presiona el micrófono y habla para usar comandos de voz
