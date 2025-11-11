@@ -19,10 +19,10 @@ import {
   TrendingDown
 } from 'lucide-react';
 import {
-  BaseBaseButton,
-  BaseBaseCard,
-  BaseBaseModal,
-  BaseBaseBadge,
+  BaseButton,
+  BaseCard,
+  BaseModal,
+  BaseBadge,
   BaseLoading,
   BaseEmptyState
 } from './common';
@@ -43,7 +43,7 @@ import logger from '../utils/logger';
 export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showDetailBaseModal, setShowDetailBaseModal] = useState(false);
+  const [showDetailModal, setShowDetailBaseModal] = useState(false);
   const [editingFeedback, setEditingFeedback] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState('');
   const [editedGrade, setEditedGrade] = useState(0);
@@ -122,23 +122,23 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
 
   if (loading) {
     return (
-      <BaseBaseCard>
+      <BaseCard>
         <div className="flex items-center justify-center py-8">
           <BaseLoading variant="spinner" size="md" />
         </div>
-      </BaseBaseCard>
+      </BaseCard>
     );
   }
 
   if (!review) {
     return (
-      <BaseBaseCard>
+      <BaseCard>
         <BaseEmptyState
           icon={AlertCircle}
           title="Sin análisis"
           description="Esta tarea aún no ha sido analizada por la IA"
         />
-      </BaseBaseCard>
+      </BaseCard>
     );
   }
 
@@ -215,27 +215,27 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
               Resumen de Errores
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              <ErrorTypeBaseCard
+              <ErrorTypeCard
                 label="Ortografía"
                 count={review.errorSummary.spelling}
                 color="red"
               />
-              <ErrorTypeBaseCard
+              <ErrorTypeCard
                 label="Gramática"
                 count={review.errorSummary.grammar}
                 color="orange"
               />
-              <ErrorTypeBaseCard
+              <ErrorTypeCard
                 label="Puntuación"
                 count={review.errorSummary.punctuation}
                 color="yellow"
               />
-              <ErrorTypeBaseCard
+              <ErrorTypeCard
                 label="Vocabulario"
                 count={review.errorSummary.vocabulary}
                 color="blue"
               />
-              <ErrorTypeBaseCard
+              <ErrorTypeCard
                 label="Total"
                 count={review.errorSummary.total}
                 color="purple"
@@ -369,8 +369,8 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
       )}
 
       {/* Detail BaseModal */}
-      {showDetailBaseModal && (
-        <HomeworkDetailBaseModal
+      {showDetailModal && (
+        <HomeworkDetailModal
           review={review}
           onClose={() => setShowDetailBaseModal(false)}
         />
@@ -382,7 +382,7 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
 /**
  * Error Type BaseCard Component
  */
-function ErrorTypeBaseCard({ label, count, color, highlight }) {
+function ErrorTypeCard({ label, count, color, highlight }) {
   const colorClasses = {
     red: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300',
     orange: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
@@ -408,7 +408,7 @@ function ErrorTypeBaseCard({ label, count, color, highlight }) {
 /**
  * Homework Detail BaseModal Component
  */
-function HomeworkDetailBaseModal({ review, onClose }) {
+function HomeworkDetailModal({ review, onClose }) {
   const [activeTab, setActiveTab] = useState('transcription');
 
   const errorTypeLabels = {

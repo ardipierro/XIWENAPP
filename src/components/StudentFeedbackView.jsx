@@ -16,10 +16,10 @@ import {
   Lightbulb
 } from 'lucide-react';
 import {
-  BaseBaseButton,
-  BaseBaseCard,
-  BaseBaseModal,
-  BaseBaseBadge,
+  BaseButton,
+  BaseCard,
+  BaseModal,
+  BaseBadge,
   BaseLoading,
   BaseEmptyState
 } from './common';
@@ -38,7 +38,7 @@ import logger from '../utils/logger';
 export default function StudentFeedbackView({ submission, studentId }) {
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showDetailBaseModal, setShowDetailBaseModal] = useState(false);
+  const [showDetailModal, setShowDetailBaseModal] = useState(false);
 
   useEffect(() => {
     loadReview();
@@ -233,8 +233,8 @@ export default function StudentFeedbackView({ submission, studentId }) {
       )}
 
       {/* Detail BaseModal */}
-      {showDetailBaseModal && (
-        <StudentFeedbackDetailBaseModal
+      {showDetailModal && (
+        <StudentFeedbackDetailModal
           review={review}
           onClose={() => setShowDetailBaseModal(false)}
         />
@@ -270,7 +270,7 @@ function ErrorMetric({ label, count, total, color }) {
 /**
  * Student Feedback Detail BaseModal
  */
-function StudentFeedbackDetailBaseModal({ review, onClose }) {
+function StudentFeedbackDetailModal({ review, onClose }) {
   const errorTypeLabels = {
     spelling: 'Ortografía',
     grammar: 'Gramática',
