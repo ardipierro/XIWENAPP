@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { LiveKitRoom, VideoConference, RoomAudioRenderer, useToken } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { generateLiveKitToken, LIVEKIT_URL, joinLiveClass, leaveLiveClass, startLiveClass, endLiveClass } from '../firebase/liveClasses';
-import { PhoneOff, Users, Clock } from 'lucide-react';
-import './LiveClassRoom.css';
+import { PhoneOff, Users, Clock, ArrowLeft } from 'lucide-react';
+import { BaseButton } from './common';
 
 /**
  * LiveClassRoom - Sala de video conferencia para clases en vivo
@@ -89,13 +89,13 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
 
   if (error) {
     return (
-      <div className="live-class-error">
-        <div className="error-content">
-          <h2>Error al unirse a la clase</h2>
-          <p>{error}</p>
-          <button onClick={onLeave} className="btn btn-primary">
+      <div className="flex items-center justify-center h-screen bg-white dark:bg-zinc-950 p-6">
+        <div className="text-center max-w-md">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-3">Error al unirse a la clase</h2>
+          <p className="text-base text-zinc-600 dark:text-zinc-400 mb-6">{error}</p>
+          <BaseButton onClick={onLeave} variant="primary" icon={ArrowLeft}>
             Volver
-          </button>
+          </BaseButton>
         </div>
       </div>
     );
@@ -103,46 +103,47 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
 
   if (!token) {
     return (
-      <div className="live-class-loading">
+      <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-zinc-950 gap-5">
         <div className="spinner"></div>
-        <p>Conectando a la clase...</p>
+        <p className="text-base text-zinc-600 dark:text-zinc-400">Conectando a la clase...</p>
       </div>
     );
   }
 
   return (
-    <div className="live-class-room">
+    <div className="flex flex-col h-screen bg-white dark:bg-zinc-950">
       {/* Header de la clase */}
-      <div className="live-class-header">
-        <div className="class-info">
-          <h2 className="class-title">{liveClass.title}</h2>
-          <div className="class-meta">
-            <span className="meta-item">
+      <div className="flex md:flex-row flex-col md:items-center items-start justify-between px-4 md:px-6 py-3 md:py-4 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0 md:gap-0 gap-3">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-lg md:text-xl font-bold text-zinc-900 dark:text-zinc-50 m-0">{liveClass.title}</h2>
+          <div className="flex items-center gap-3 md:gap-4 flex-wrap">
+            <span className="flex items-center gap-1.5 text-sm md:text-sm text-zinc-600 dark:text-zinc-400">
               <Users size={16} />
               {liveClass.participants?.length || 0} / {liveClass.maxParticipants}
             </span>
-            <span className="meta-item">
+            <span className="flex items-center gap-1.5 text-sm md:text-sm text-zinc-600 dark:text-zinc-400">
               <Clock size={16} />
               {liveClass.duration} min
             </span>
             {isTeacher && (
-              <span className="teacher-badge">Profesor</span>
+              <span className="px-3 py-1 bg-teacher text-white rounded-md text-xs font-semibold">Profesor</span>
             )}
           </div>
         </div>
 
-        <button
+        <BaseButton
           onClick={handleLeave}
-          className="btn-leave"
+          variant="danger"
+          icon={PhoneOff}
           title="Salir de la clase"
+          className="md:self-auto self-end [&>span]:md:inline [&>span]:hidden md:px-5 px-4"
         >
-          <PhoneOff size={20} />
-          Salir
-        </button>
+          <span>Salir</span>
+        </BaseButton>
       </div>
 
       {/* Sala de video LiveKit */}
-      <div className="live-class-video">
+      <div className="flex-1 overflow-hidden relative [&_.lk-room-container]:!bg-white dark:[&_.lk-room-container]:!bg-zinc-950 [&_.lk-control-bar]:!bg-white dark:[&_.lk-control-bar]:!bg-zinc-900 [&_.lk-control-bar]:!border-t [&_.lk-control-bar]:!border-zinc-200 dark:[&_.lk-control-bar]:!border-zinc-800 [&_.lk-button]:!rounded-lg [&_.lk-participant-tile]:!rounded-xl [&_.lk-participant-tile]:!overflow-hidden dark:[&_.lk-room-container]:--lk-bg-zinc-950 dark:[&_.lk-room-container]:--lk-bg2-zinc-900 dark:[&_.lk-room-container]:--lk-fg-zinc-200 dark:[&_.lk-room-container]:--lk-fg2-zinc-400">
         <LiveKitRoom
           video={true}
           audio={true}

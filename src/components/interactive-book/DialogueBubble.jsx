@@ -14,9 +14,23 @@ import { BaseBadge } from '../common';
 /**
  * Componente de burbuja de diálogo estilo WhatsApp/iMessage
  */
-function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
+function DialogueBubble({ line, index, totalLines, characters = [], onExerciseComplete, viewSettings }) {
   const [showExtras, setShowExtras] = useState(false);
   const [showTranslation, setShowTranslation] = useState(false);
+
+  // Aplicar configuraciones de vista
+  const settings = viewSettings || {
+    bubbleStyle: 'rounded',
+    colorScheme: 'default',
+    fontSize: 'medium',
+    spacing: 'comfortable',
+    showAvatars: true,
+    showBadges: true
+  };
+
+  // Obtener la voz del personaje
+  const character = characters.find(c => c.id === line.character);
+  const characterVoice = character?.voice || null;
 
   // Alternar entre derecha (par) e izquierda (impar) basado en el personaje
   const isRight = index % 2 === 0;
@@ -26,11 +40,13 @@ function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
   return (
     <div className={`flex gap-3 mb-4 ${isRight ? 'flex-row-reverse' : 'flex-row'}`}>
       {/* Avatar */}
-      <div className="flex-shrink-0">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-md">
-          <User size={24} className="text-gray-700 dark:text-gray-300" />
+      {settings.showAvatars && (
+        <div className="flex-shrink-0">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-md">
+            <User size={24} className="text-gray-700 dark:text-gray-300" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Burbuja de diálogo */}
       <div className={`flex-1 max-w-[75%] ${isRight ? 'items-end' : 'items-start'} flex flex-col`}>
@@ -63,26 +79,28 @@ function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
           </p>
 
           {/* Badges de interacción */}
-          <div className="flex gap-1 mt-2 flex-wrap">
-            {line.audioUrl && (
-              <BaseBadge variant="info" size="sm">
-                <Volume2 size={10} className="mr-1" />
-                Audio
-              </BaseBadge>
-            )}
-            {line.translation && (
-              <BaseBadge variant="default" size="sm">
-                <Languages size={10} className="mr-1" />
-                中文
-              </BaseBadge>
-            )}
-            {hasExercise && (
-              <BaseBadge variant="success" size="sm">
-                <HelpCircle size={10} className="mr-1" />
-                Ejercicio
-              </BaseBadge>
-            )}
-          </div>
+          {settings.showBadges && (
+            <div className="flex gap-1 mt-2 flex-wrap">
+              {line.audioUrl && (
+                <BaseBadge variant="info" size="sm">
+                  <Volume2 size={10} className="mr-1" />
+                  Audio
+                </BaseBadge>
+              )}
+              {line.translation && (
+                <BaseBadge variant="default" size="sm">
+                  <Languages size={10} className="mr-1" />
+                  中文
+                </BaseBadge>
+              )}
+              {hasExercise && (
+                <BaseBadge variant="success" size="sm">
+                  <HelpCircle size={10} className="mr-1" />
+                  Ejercicio
+                </BaseBadge>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Botón para expandir extras */}
@@ -113,6 +131,7 @@ function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
               <AudioPlayer
                 audioUrl={line.audioUrl}
                 text={line.text}
+                voice={characterVoice}
                 showText={false}
                 className="text-xs"
               />
@@ -203,7 +222,22 @@ DialogueBubble.propTypes = {
   }).isRequired,
   index: PropTypes.number.isRequired,
   totalLines: PropTypes.number.isRequired,
-  onExerciseComplete: PropTypes.func
+  characters: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      voice: PropTypes.string
+    })
+  ),
+  onExerciseComplete: PropTypes.func,
+  viewSettings: PropTypes.shape({
+    bubbleStyle: PropTypes.string,
+    colorScheme: PropTypes.string,
+    fontSize: PropTypes.string,
+    spacing: PropTypes.string,
+    showAvatars: PropTypes.bool,
+    showBadges: PropTypes.bool
+  })
 };
 
 export default DialogueBubble;

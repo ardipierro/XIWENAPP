@@ -1,6 +1,6 @@
 import logger from '../utils/logger';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Target,
@@ -67,7 +67,8 @@ import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
-import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
+// Lazy load Excalidraw to prevent vendor bundle issues
+const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 // REMOVED: LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
@@ -81,6 +82,7 @@ import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
+import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
 
 // Custom hooks
@@ -674,13 +676,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   // Renderizar Excalidraw Whiteboard - SIN Layout, pantalla completa
   if (navigation.currentScreen === 'excalidrawWhiteboard') {
     return (
-      <ExcalidrawWhiteboard
-        onBack={() => {
-          navigation.setExcalidrawManagerKey(prev => prev + 1);
-          navigation.setCurrentScreen('excalidrawSessions');
-        }}
-        initialSession={navigation.selectedExcalidrawSession}
-      />
+      <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Cargando pizarra...</div>}>
+        <ExcalidrawWhiteboard
+          onBack={() => {
+            navigation.setExcalidrawManagerKey(prev => prev + 1);
+            navigation.setCurrentScreen('excalidrawSessions');
+          }}
+          initialSession={navigation.selectedExcalidrawSession}
+        />
+      </Suspense>
     );
   }
 
@@ -752,8 +756,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ClassSessionManager
           user={user}
+          initialEditSessionId={navigation.editSessionId}
+          onClearEditSession={() => navigation.setEditSessionId(null)}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
+            navigation.setEditSessionId(null); // Clear edit state when joining
             navigation.setCurrentScreen('classSessionRoom');
           }}
         />
@@ -902,6 +909,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             value={userManagement.searchTerm}
             onChange={userManagement.setSearchTerm}
             placeholder={isAdmin ? "Buscar usuarios..." : "Buscar alumnos..."}
+            viewMode={navigation.studentsViewMode}
+            onViewModeChange={navigation.setStudentsViewMode}
+            viewModes={['table', 'grid', 'list']}
             className="mb-6"
           />
 
@@ -926,7 +936,38 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <div className="no-users">
                 <p>No se encontraron usuarios con los filtros seleccionados</p>
               </div>
+            ) : navigation.studentsViewMode === 'grid' ? (
+              /* Vista de grilla con StudentCard */
+              <div className="quick-access-grid">
+                {userManagement.filteredUsers.map(userItem => (
+                  <StudentCard
+                    key={userItem.id}
+                    student={userItem}
+                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
+                    onView={handleViewUserProfile}
+                    onDelete={isAdmin ? handleDeleteUser : null}
+                    isAdmin={isAdmin}
+                    viewMode="grid"
+                  />
+                ))}
+              </div>
+            ) : navigation.studentsViewMode === 'list' ? (
+              /* Vista de lista con StudentCard */
+              <div className="flex flex-col gap-4">
+                {userManagement.filteredUsers.map(userItem => (
+                  <StudentCard
+                    key={userItem.id}
+                    student={userItem}
+                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
+                    onView={handleViewUserProfile}
+                    onDelete={isAdmin ? handleDeleteUser : null}
+                    isAdmin={isAdmin}
+                    viewMode="list"
+                  />
+                ))}
+              </div>
             ) : (
+              /* Vista de tabla (default) */
               <div className="users-table-container">
                 <table className="users-table">
                   <thead>
@@ -1468,11 +1509,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           userId={user?.uid}
           userRole="teacher"
           onCreateSession={() => {
+            navigation.setEditSessionId(null); // Clear any edit state
             navigation.setCurrentScreen('classSessions');
           }}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
             navigation.setCurrentScreen('classSessionRoom');
+          }}
+          onEditSession={(sessionId) => {
+            navigation.setEditSessionId(sessionId);
+            navigation.setCurrentScreen('classSessions');
           }}
         />
       </DashboardLayout>
@@ -1502,6 +1548,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ExerciseBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Design Lab - Theme Tester Screen
+  if (navigation.currentScreen === 'designLab') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <DesignLab />
       </DashboardLayout>
     );
   }

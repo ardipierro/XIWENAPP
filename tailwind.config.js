@@ -6,6 +6,15 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    // Mobile First Breakpoints
+    screens: {
+      'xs': '320px',   // Small mobile devices
+      'sm': '640px',   // Large mobile devices
+      'md': '768px',   // Tablets
+      'lg': '1024px',  // Laptops
+      'xl': '1280px',  // Desktops
+      '2xl': '1536px', // Large desktops
+    },
     extend: {
       // Colores personalizados de XIWENAPP - Dark Gray Theme
       colors: {
@@ -71,14 +80,19 @@ export default {
         info: '#a1a1aa',           // zinc-400 (gris neutral, NO azul)
       },
       
-      // Espaciado personalizado
+      // Espaciado personalizado (Mobile First)
       spacing: {
-        'xs': '0.25rem',
-        'sm': '0.5rem',
-        'md': '1rem',
-        'lg': '1.5rem',
-        'xl': '2rem',
-        '2xl': '3rem',
+        'xs': '0.25rem',   // 4px
+        'sm': '0.5rem',    // 8px
+        'md': '1rem',      // 16px
+        'lg': '1.5rem',    // 24px
+        'xl': '2rem',      // 32px
+        '2xl': '3rem',     // 48px
+        '3xl': '4rem',     // 64px
+        // Touch targets for mobile
+        'tap-sm': '44px',  // Minimum recommended tap target
+        'tap-md': '48px',  // Standard tap target
+        'tap-lg': '56px',  // Comfortable tap target
       },
       
       // Radios de borde
@@ -98,17 +112,17 @@ export default {
         'elevated': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
       },
       
-      // Tipografía
+      // Tipografía (Mobile First - optimizada para legibilidad móvil)
       fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
-        '2xl': ['1.5rem', { lineHeight: '2rem' }],
-        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
-        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
-        '5xl': ['3rem', { lineHeight: '1' }],
+        'xs': ['0.75rem', { lineHeight: '1.5' }],      // 12px
+        'sm': ['0.875rem', { lineHeight: '1.5' }],     // 14px
+        'base': ['1rem', { lineHeight: '1.6' }],       // 16px - Base móvil
+        'lg': ['1.125rem', { lineHeight: '1.6' }],     // 18px
+        'xl': ['1.25rem', { lineHeight: '1.5' }],      // 20px
+        '2xl': ['1.5rem', { lineHeight: '1.4' }],      // 24px
+        '3xl': ['1.875rem', { lineHeight: '1.3' }],    // 30px
+        '4xl': ['2.25rem', { lineHeight: '1.2' }],     // 36px
+        '5xl': ['3rem', { lineHeight: '1.1' }],        // 48px
       },
       
       // Fuentes

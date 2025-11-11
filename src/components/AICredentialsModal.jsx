@@ -1,10 +1,16 @@
 /**
  * @fileoverview Modal para configurar credenciales de proveedores de IA
  * @module components/AICredentialsModal
+ *
+ * Mobile First:
+ * - BaseInput con touch targets ≥ 48px
+ * - Botones full-width en móvil
+ * - Modal size responsive
+ * - 100% BaseComponents
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Key, Eye, EyeOff } from 'lucide-react';
+import { Save, Key } from 'lucide-react';
 import { BaseModal, BaseButton, BaseInput, BaseAlert } from './common';
 import logger from '../utils/logger';
 
@@ -13,10 +19,16 @@ import logger from '../utils/logger';
  */
 function AICredentialsModal({ isOpen, onClose, provider, onSave, isConfigured = false }) {
   const [apiKey, setApiKey] = useState('');
-  const [showKey, setShowKey] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (isOpen && provider) {
@@ -88,13 +100,15 @@ function AICredentialsModal({ isOpen, onClose, provider, onSave, isConfigured = 
       onClose={onClose}
       title={`Configurar credenciales: ${provider.label}`}
       icon={Key}
-      size="md"
+      size={isMobile ? 'full' : 'md'}
       footer={
-        <>
+        <div className="flex flex-col-reverse md:flex-row gap-2 w-full">
           <BaseButton
-            variant="secondary"
+            variant="ghost"
             onClick={onClose}
             disabled={saving}
+            fullWidth
+            className="md:w-auto"
           >
             Cancelar
           </BaseButton>
@@ -103,6 +117,8 @@ function AICredentialsModal({ isOpen, onClose, provider, onSave, isConfigured = 
               variant="danger"
               onClick={handleDelete}
               disabled={saving}
+              fullWidth
+              className="md:w-auto"
             >
               Eliminar
             </BaseButton>
@@ -112,10 +128,12 @@ function AICredentialsModal({ isOpen, onClose, provider, onSave, isConfigured = 
             icon={Save}
             onClick={handleSave}
             loading={saving}
+            fullWidth
+            className="md:w-auto"
           >
             Guardar
           </BaseButton>
-        </>
+        </div>
       }
     >
       <div className="space-y-6">
@@ -152,31 +170,17 @@ function AICredentialsModal({ isOpen, onClose, provider, onSave, isConfigured = 
         </div>
 
         {/* API Key Input */}
-        <div className="relative">
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-            API Key
-          </label>
-          <div className="relative">
-            <input
-              type={showKey ? 'text' : 'password'}
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-..."
-              className="input w-full pr-12"
-              autoComplete="off"
-            />
-            <button
-              type="button"
-              onClick={() => setShowKey(!showKey)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors"
-            >
-              {showKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
-            Tu API key se guarda de forma segura en el navegador
-          </p>
-        </div>
+        <BaseInput
+          type="password"
+          label="API Key"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          placeholder="sk-..."
+          icon={Key}
+          helperText="Tu API key se guarda de forma segura en el navegador"
+          autoComplete="off"
+          className="text-sm md:text-base"
+        />
 
         {/* Info Box */}
         {isConfigured ? (

@@ -113,6 +113,7 @@ export async function getCalendarEventsForUser(userId, startDate, endDate) {
  */
 export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
   try {
+    logger.info(`📅 getUnifiedCalendar called - userId: ${userId}, userRole: ${userRole}, range: ${startDate.toISOString()} to ${endDate.toISOString()}`, 'Calendar');
     const events = [];
     const startTimestamp = Timestamp.fromDate(startDate);
     const endTimestamp = Timestamp.fromDate(endDate);
@@ -120,21 +121,24 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
     // 1. Get class sessions (live/async sessions from class_sessions collection)
     const sessionsRef = collection(db, 'class_sessions');
 
-    if (userRole === 'teacher') {
-      // Teacher: get their sessions
+    if (userRole === 'admin') {
+      // Admin: get ALL sessions
       const sessionsQuery = query(
         sessionsRef,
-        where('teacherId', '==', userId),
         where('active', '==', true)
       );
       const sessionsSnap = await getDocs(sessionsQuery);
+      logger.info(`📊 Found ${sessionsSnap.docs.length} sessions for admin`, 'Calendar');
       sessionsSnap.docs.forEach(doc => {
         const data = doc.data();
+        logger.debug(`🔍 Processing session "${data.name}" - type: ${data.type}, active: ${data.active}`, 'Calendar');
 
         // Handle single sessions
         if (data.type === 'single' && data.scheduledStart) {
           const sessionDate = data.scheduledStart;
+          logger.debug(`🔍 Single session "${data.name}" - scheduledStart: ${sessionDate.toDate().toISOString()}, range: ${startTimestamp.toDate().toISOString()} to ${endTimestamp.toDate().toISOString()}`, 'Calendar');
           if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
+            logger.info(`✅ Adding single session to calendar: "${data.name}"`, 'Calendar');
             events.push({
               id: doc.id,
               title: data.name,
@@ -156,10 +160,21 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
 
         // Handle recurring sessions - expand schedules
         if (data.type === 'recurring' && data.schedules && data.schedules.length > 0) {
+          // Calculate end date based on recurringWeeks and recurringStartDate
+          const recurringStart = data.recurringStartDate?.toDate() || new Date();
+          const recurringWeeks = data.recurringWeeks || 4;
+          const recurringEnd = new Date(recurringStart);
+          recurringEnd.setDate(recurringEnd.getDate() + (recurringWeeks * 7));
+
           data.schedules.forEach(schedule => {
             // Generate instances for each day in the date range
-            const currentDate = new Date(startDate);
-            while (currentDate <= endDate) {
+            // Start from the recurring start date or the calendar start date, whichever is later
+            const currentDate = new Date(Math.max(recurringStart, startDate));
+
+            // End at the recurring end date or the calendar end date, whichever is earlier
+            const effectiveEndDate = new Date(Math.min(recurringEnd, endDate));
+
+            while (currentDate <= effectiveEndDate) {
               if (currentDate.getDay() === schedule.day) {
                 const [hours, minutes] = schedule.startTime.split(':');
                 const sessionDate = new Date(currentDate);
@@ -181,7 +196,95 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
                   participants: data.participants || [],
                   color: data.status === 'live' ? 'red' : 'blue',
                   sessionData: data,
-                  isRecurring: true
+                  isRecurring: true,
+                  recurringStartDate: recurringStart,
+                  recurringEndDate: recurringEnd
+                });
+              }
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+          });
+        }
+      });
+    } else if (userRole === 'teacher') {
+      // Teacher: get their sessions
+      const sessionsQuery = query(
+        sessionsRef,
+        where('teacherId', '==', userId),
+        where('active', '==', true)
+      );
+      const sessionsSnap = await getDocs(sessionsQuery);
+      logger.info(`📊 Found ${sessionsSnap.docs.length} sessions for teacher ${userId}`, 'Calendar');
+      sessionsSnap.docs.forEach(doc => {
+        const data = doc.data();
+        logger.debug(`🔍 Processing session "${data.name}" - type: ${data.type}, active: ${data.active}`, 'Calendar');
+
+        // Handle single sessions
+        if (data.type === 'single' && data.scheduledStart) {
+          const sessionDate = data.scheduledStart;
+          logger.debug(`🔍 Single session "${data.name}" - scheduledStart: ${sessionDate.toDate().toISOString()}, range: ${startTimestamp.toDate().toISOString()} to ${endTimestamp.toDate().toISOString()}`, 'Calendar');
+          if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
+            logger.info(`✅ Adding single session to calendar: "${data.name}"`, 'Calendar');
+            events.push({
+              id: doc.id,
+              title: data.name,
+              type: 'session',
+              subtype: data.mode, // 'live' or 'async'
+              startDate: data.scheduledStart,
+              endDate: data.scheduledStart,
+              description: data.description,
+              status: data.status, // 'scheduled', 'live', 'ended', 'cancelled'
+              mode: data.mode,
+              whiteboardType: data.whiteboardType,
+              roomName: data.roomName,
+              participants: data.participants || [],
+              color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : 'blue',
+              sessionData: data // Store full data for modal
+            });
+          }
+        }
+
+        // Handle recurring sessions - expand schedules
+        if (data.type === 'recurring' && data.schedules && data.schedules.length > 0) {
+          // Calculate end date based on recurringWeeks and recurringStartDate
+          const recurringStart = data.recurringStartDate?.toDate() || new Date();
+          const recurringWeeks = data.recurringWeeks || 4;
+          const recurringEnd = new Date(recurringStart);
+          recurringEnd.setDate(recurringEnd.getDate() + (recurringWeeks * 7));
+
+          data.schedules.forEach(schedule => {
+            // Generate instances for each day in the date range
+            // Start from the recurring start date or the calendar start date, whichever is later
+            const currentDate = new Date(Math.max(recurringStart, startDate));
+
+            // End at the recurring end date or the calendar end date, whichever is earlier
+            const effectiveEndDate = new Date(Math.min(recurringEnd, endDate));
+
+            while (currentDate <= effectiveEndDate) {
+              if (currentDate.getDay() === schedule.day) {
+                const [hours, minutes] = schedule.startTime.split(':');
+                const sessionDate = new Date(currentDate);
+                sessionDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+                events.push({
+                  id: `${doc.id}_${currentDate.toISOString()}`,
+                  sessionId: doc.id,
+                  title: data.name,
+                  type: 'session',
+                  subtype: data.mode,
+                  startDate: Timestamp.fromDate(sessionDate),
+                  endDate: Timestamp.fromDate(sessionDate),
+                  description: data.description,
+                  status: data.status,
+                  mode: data.mode,
+                  whiteboardType: data.whiteboardType,
+                  roomName: data.roomName,
+                  participants: data.participants || [],
+                  color: data.status === 'live' ? 'red' : 'blue',
+                  sessionData: data,
+                  isRecurring: true,
+                  recurringStartDate: recurringStart,
+                  recurringEndDate: recurringEnd
                 });
               }
               currentDate.setDate(currentDate.getDate() + 1);
@@ -225,9 +328,21 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
 
         // Handle recurring sessions
         if (data.type === 'recurring' && data.schedules && data.schedules.length > 0) {
+          // Calculate end date based on recurringWeeks and recurringStartDate
+          const recurringStart = data.recurringStartDate?.toDate() || new Date();
+          const recurringWeeks = data.recurringWeeks || 4;
+          const recurringEnd = new Date(recurringStart);
+          recurringEnd.setDate(recurringEnd.getDate() + (recurringWeeks * 7));
+
           data.schedules.forEach(schedule => {
-            const currentDate = new Date(startDate);
-            while (currentDate <= endDate) {
+            // Generate instances for each day in the date range
+            // Start from the recurring start date or the calendar start date, whichever is later
+            const currentDate = new Date(Math.max(recurringStart, startDate));
+
+            // End at the recurring end date or the calendar end date, whichever is earlier
+            const effectiveEndDate = new Date(Math.min(recurringEnd, endDate));
+
+            while (currentDate <= effectiveEndDate) {
               if (currentDate.getDay() === schedule.day) {
                 const [hours, minutes] = schedule.startTime.split(':');
                 const sessionDate = new Date(currentDate);
@@ -249,7 +364,9 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
                   participants: data.participants || [],
                   color: data.status === 'live' ? 'red' : 'blue',
                   sessionData: data,
-                  isRecurring: true
+                  isRecurring: true,
+                  recurringStartDate: recurringStart,
+                  recurringEndDate: recurringEnd
                 });
               }
               currentDate.setDate(currentDate.getDate() + 1);
@@ -262,7 +379,28 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
     // 2. Get scheduled classes - SIMPLIFIED to avoid complex indexes
     const classesRef = collection(db, 'scheduledClasses');
 
-    if (userRole === 'teacher') {
+    if (userRole === 'admin') {
+      // Admin: get ALL classes
+      const classesSnap = await getDocs(classesRef);
+      classesSnap.docs.forEach(doc => {
+        const data = doc.data();
+        const classDate = data.date;
+        // Filter by date range in memory
+        if (classDate && classDate >= startTimestamp && classDate <= endTimestamp) {
+          events.push({
+            id: doc.id,
+            title: data.title || 'Clase',
+            type: 'class',
+            startDate: data.date,
+            endDate: data.endDate || data.date,
+            description: data.description,
+            courseId: data.courseId,
+            location: data.location || 'Online',
+            color: 'blue'
+          });
+        }
+      });
+    } else if (userRole === 'teacher') {
       // Teacher: get their classes and filter by date in memory
       const classesQuery = query(
         classesRef,
@@ -324,10 +462,31 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
       }
     }
 
-    // 2. Get assignment deadlines - SIMPLIFIED
+    // 3. Get assignment deadlines - SIMPLIFIED
     const assignmentsRef = collection(db, 'assignments');
 
-    if (userRole === 'teacher') {
+    if (userRole === 'admin') {
+      // Admin: get ALL assignments
+      const assignmentsSnap = await getDocs(assignmentsRef);
+      assignmentsSnap.docs.forEach(doc => {
+        const data = doc.data();
+        const deadline = data.deadline;
+        // Filter by date range in memory
+        if (deadline && deadline >= startTimestamp && deadline <= endTimestamp) {
+          events.push({
+            id: doc.id,
+            title: data.title,
+            type: 'assignment',
+            startDate: data.deadline,
+            endDate: data.deadline,
+            description: data.description,
+            courseId: data.courseId,
+            points: data.points,
+            color: 'red'
+          });
+        }
+      });
+    } else if (userRole === 'teacher') {
       // Teacher: get their assignments and filter by date in memory
       const assignmentsQuery = query(
         assignmentsRef,

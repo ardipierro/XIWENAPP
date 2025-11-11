@@ -206,7 +206,12 @@ export async function getStudentGuardians(studentId) {
     logger.info('Student guardians loaded', { studentId, count: guardians.length });
     return guardians;
   } catch (error) {
-    logger.error('Error getting student guardians', error);
+    // Si es un error de permisos, loguear en info en vez de error
+    if (error.code === 'permission-denied') {
+      logger.info('Guardian permissions not configured - returning empty list', { studentId });
+    } else {
+      logger.error('Error getting student guardians', error);
+    }
     return [];
   }
 }

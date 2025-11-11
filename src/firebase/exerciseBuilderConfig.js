@@ -8,24 +8,147 @@ import { db } from './config';
 import logger from '../utils/logger';
 
 /**
+ * Temas predefinidos con paletas de colores completas
+ * @constant
+ */
+export const PRESET_THEMES = {
+  light: {
+    name: 'Claro',
+    colors: {
+      bg: '#ffffff',
+      bgSecondary: '#f5f5f5',
+      text: '#18181b',
+      textSecondary: '#71717a',
+      border: '#e4e4e7',
+      accent: '#3b82f6'
+    }
+  },
+  dark: {
+    name: 'Oscuro',
+    colors: {
+      bg: '#18181b',
+      bgSecondary: '#27272a',
+      text: '#fafafa',
+      textSecondary: '#a1a1aa',
+      border: '#3f3f46',
+      accent: '#60a5fa'
+    }
+  },
+  ocean: {
+    name: 'Océano',
+    colors: {
+      bg: '#f0f9ff',
+      bgSecondary: '#e0f2fe',
+      text: '#0c4a6e',
+      textSecondary: '#075985',
+      border: '#bae6fd',
+      accent: '#0ea5e9'
+    }
+  },
+  forest: {
+    name: 'Bosque',
+    colors: {
+      bg: '#f0fdf4',
+      bgSecondary: '#dcfce7',
+      text: '#14532d',
+      textSecondary: '#166534',
+      border: '#bbf7d0',
+      accent: '#22c55e'
+    }
+  },
+  sunset: {
+    name: 'Atardecer',
+    colors: {
+      bg: '#fff7ed',
+      bgSecondary: '#ffedd5',
+      text: '#7c2d12',
+      textSecondary: '#9a3412',
+      border: '#fed7aa',
+      accent: '#f97316'
+    }
+  }
+};
+
+/**
+ * Packs de sonidos disponibles
+ * @constant
+ */
+export const SOUND_PACKS = {
+  classic: {
+    name: 'Clásico',
+    correct: '/sounds/classic-correct.mp3',
+    incorrect: '/sounds/classic-incorrect.mp3',
+    click: '/sounds/classic-click.mp3'
+  },
+  playful: {
+    name: 'Divertido',
+    correct: '/sounds/playful-correct.mp3',
+    incorrect: '/sounds/playful-incorrect.mp3',
+    click: '/sounds/playful-click.mp3'
+  },
+  minimal: {
+    name: 'Minimalista',
+    correct: '/sounds/minimal-correct.mp3',
+    incorrect: '/sounds/minimal-incorrect.mp3',
+    click: '/sounds/minimal-click.mp3'
+  },
+  nature: {
+    name: 'Naturaleza',
+    correct: '/sounds/nature-correct.mp3',
+    incorrect: '/sounds/nature-incorrect.mp3',
+    click: '/sounds/nature-click.mp3'
+  },
+  futuristic: {
+    name: 'Futurista',
+    correct: '/sounds/futuristic-correct.mp3',
+    incorrect: '/sounds/futuristic-incorrect.mp3',
+    click: '/sounds/futuristic-click.mp3'
+  }
+};
+
+/**
  * Configuración por defecto del Exercise Builder
  * @constant
  */
 export const DEFAULT_CONFIG = {
-  theme: 'light',
-  fontSize: 16,
+  // VISUAL
+  theme: 'light', // light|dark|ocean|forest|sunset
+  fontSize: 16, // 12-24px
+  fontFamily: 'system', // system|inter|merriweather|opendyslexic
+  lineHeight: 1.5, // 1.2|1.5|1.8|2.0
   feedbackColors: {
     correct: '#10b981', // green-500
     incorrect: '#ef4444', // red-500
     neutral: '#71717a' // zinc-500
   },
+
+  // ANIMACIONES Y SONIDO
   animations: true,
+  animationSpeed: 'normal', // slow|normal|fast|off
   soundEffects: true,
+  soundPack: 'classic', // classic|playful|minimal|nature|futuristic
+
+  // PEDAGOGÍA
   autoCorrect: false,
   showHints: true,
-  difficultyLevel: 'intermediate', // beginner, intermediate, advanced
+  progressiveHints: true, // Pistas progresivas de 3 niveles
+  difficultyLevel: 'intermediate', // beginner|intermediate|advanced
   language: 'es',
-  cefrLevel: 'A1' // A1, A2, B1, B2, C1, C2
+  cefrLevel: 'A1', // A1|A2|B1|B2|C1|C2
+
+  // MODO DE PRÁCTICA/EVALUACIÓN
+  practiceMode: true, // true = práctica (ilimitado), false = evaluación (limitado)
+  maxAttempts: 3, // Intentos permitidos en modo evaluación
+
+  // TEMPORIZADOR
+  timerMode: 'off', // off|soft|hard
+  timeLimit: 300, // Tiempo límite en segundos (5 min)
+  showTimer: true, // Mostrar temporizador visible
+
+  // FEEDBACK
+  feedbackDetail: 'detailed', // minimal|medium|detailed|extensive
+  showCorrectAnswer: true, // Mostrar respuesta correcta si falla
+  showExplanation: true // Mostrar explicación pedagógica
 };
 
 /**

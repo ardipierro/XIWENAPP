@@ -1,7 +1,7 @@
 import { Eye, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useViewAs } from '../contexts/ViewAsContext';
-import './ViewAsBanner.css';
+import { BaseButton } from './common';
 
 /**
  * Banner que indica que estás viendo la app como otro usuario
@@ -37,25 +37,25 @@ function ViewAsBanner() {
   };
 
   return (
-    <div className="view-as-banner">
-      <div className="banner-content">
-        <div className="banner-icon">
+    <div className="fixed top-[64px] left-0 right-0 z-[900] flex justify-between items-center px-4 sm:px-5 py-2 h-[38px] sm:h-11 bg-orange-500 text-white shadow-[0_2px_8px_rgba(251,146,60,0.3)] gap-3 sm:gap-4 flex-nowrap animate-slide-down">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <div className="text-[22px] sm:text-[28px] animate-pulse">
           <Eye size={20} strokeWidth={2} />
         </div>
-        <div className="banner-text">
-          <strong className="banner-label">Modo Visualización:</strong> Viendo como {viewAsUser?.name || viewAsUser?.email}
+        <div className="text-sm sm:text-[15px] font-semibold tracking-wide whitespace-nowrap sm:whitespace-normal overflow-hidden text-ellipsis">
+          <strong className="font-extrabold mr-1 hidden sm:inline">Modo Visualización:</strong> Viendo como {viewAsUser?.name || viewAsUser?.email}
         </div>
       </div>
-      <button
+      <BaseButton
         onClick={handleExitViewAs}
-        className="banner-button"
+        variant="ghost"
+        size="sm"
+        icon={ArrowLeft}
+        className="bg-orange-600 hover:bg-orange-700 text-white border-none"
       >
-        <div className="banner-button-icon">
-          <ArrowLeft size={20} strokeWidth={2} />
-        </div>
-        <span className="banner-button-full">Volver a Admin</span>
-        <span className="banner-button-short">Admin</span>
-      </button>
+        <span className="hidden sm:inline">Volver a Admin</span>
+        <span className="sm:hidden">Admin</span>
+      </BaseButton>
     </div>
   );
 }

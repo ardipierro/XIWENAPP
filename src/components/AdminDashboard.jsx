@@ -1,6 +1,6 @@
 import logger from '../utils/logger';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Crown,
@@ -39,7 +39,9 @@ import {
   TrendingUp,
   ClipboardList,
   DollarSign,
-  Zap
+  Zap,
+  Key,
+  Palette
 } from 'lucide-react';
 import {
   loadStudents,
@@ -51,6 +53,7 @@ import { deleteUser } from '../firebase/users';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
 import { getClassesByTeacher } from '../firebase/classes';
+import { getTeacherSessions } from '../firebase/classSessions';
 import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
@@ -70,12 +73,14 @@ import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
-import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
+// Lazy load Excalidraw to prevent vendor bundle issues
+const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
-import LiveClassManager from './LiveClassManager';
-import LiveClassRoom from './LiveClassRoom';
+// REMOVED: Old LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
+// import LiveClassManager from './LiveClassManager';
+// import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 import MessagesPanel from './MessagesPanel';
@@ -84,10 +89,13 @@ import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
+import ClassSessionModal from './ClassSessionModal';
 import UnifiedCalendar from './UnifiedCalendar';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
-import AIService from '../services/AIService';
+import DesignLab from './DesignLab';
+import InteractiveBookViewer from './InteractiveBookViewer';
+import AIService from '../services/aiService';
 import ThemeCustomizer from './ThemeCustomizer';
 import './AdminDashboard.css';
 
@@ -129,12 +137,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAICredentialsModal, setShowAICredentialsModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
+  const [settingsTab, setSettingsTab] = useState('credentials'); // 'credentials' | 'theme'
+  const [credentialsRefresh, setCredentialsRefresh] = useState(0); // Para forzar re-render
   const [aiCredentials, setAiCredentials] = useState({
     claude: true,
     openai: true,
     gemini: true,
     grok: true
   });
+  const [calendarEditSession, setCalendarEditSession] = useState(null); // Para modal de edición desde calendario
 
   // Admin-specific stats (extended from userManagement.stats)
   const [adminStats, setAdminStats] = useState({
@@ -150,6 +161,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [allContent, setAllContent] = useState([]);
   const [allExercises, setAllExercises] = useState([]);
   const [allClasses, setAllClasses] = useState([]);
+  const [classSessions, setClassSessions] = useState([]); // New unified class sessions
 
   // Load dashboard data on mount
   useEffect(() => {
@@ -200,13 +212,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const startTime = performance.now();
 
       // Load all data in parallel
-      const [students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
+      const [students, games, categories, allCourses, teacherContent, teacherClasses, sessions] = await Promise.all([
         loadStudents(),
         loadGameHistory(),
         loadCategories(),
         loadCourses(),
         getContentByTeacher(user.uid),
         getClassesByTeacher(user.uid),
+        getTeacherSessions(user.uid), // New unified sessions
         userManagement.loadUsers() // Load users with credits via hook
       ]);
 
@@ -216,6 +229,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       setCourses(activeCourses);
       setAllContent(teacherContent);
       setAllClasses(teacherClasses);
+      setClassSessions(sessions); // Store new unified sessions
 
       // Calculate top students
       const studentGameCounts = {};
@@ -436,13 +450,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // Excalidraw Whiteboard - NO Layout (fullscreen)
   if (navigation.currentScreen === 'excalidrawWhiteboard') {
     return (
-      <ExcalidrawWhiteboard
-        onBack={() => {
-          navigation.setExcalidrawManagerKey(prev => prev + 1);
-          navigation.setCurrentScreen('excalidrawSessions');
-        }}
-        initialSession={navigation.selectedExcalidrawSession}
-      />
+      <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Cargando pizarra...</div>}>
+        <ExcalidrawWhiteboard
+          onBack={() => {
+            navigation.setExcalidrawManagerKey(prev => prev + 1);
+            navigation.setCurrentScreen('excalidrawSessions');
+          }}
+          initialSession={navigation.selectedExcalidrawSession}
+        />
+      </Suspense>
     );
   }
 
@@ -458,20 +474,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Live Class Room - NO Layout (fullscreen)
-  if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
-    return (
-      <LiveClassRoom
-        liveClass={navigation.selectedLiveClass}
-        user={user}
-        userRole={userRole}
-        onLeave={() => {
-          navigation.setSelectedLiveClass(null);
-          navigation.setCurrentScreen('liveClasses');
-        }}
-      />
-    );
-  }
+  // REMOVED: Old Live Class Room - Replaced by ClassSessionRoom
+  // if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
+  //   return (
+  //     <LiveClassRoom
+  //       liveClass={navigation.selectedLiveClass}
+  //       user={user}
+  //       userRole={userRole}
+  //       onLeave={() => {
+  //         navigation.setSelectedLiveClass(null);
+  //         navigation.setCurrentScreen('liveClasses');
+  //       }}
+  //     />
+  //   );
+  // }
 
   // Class Session Manager (Sistema Unificado) - WITH Layout
   if (navigation.currentScreen === 'classSessions') {
@@ -479,8 +495,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ClassSessionManager
           user={user}
+          initialEditSessionId={navigation.editSessionId}
+          onClearEditSession={() => navigation.setEditSessionId(null)}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
+            navigation.setEditSessionId(null); // Clear edit state when joining
             navigation.setCurrentScreen('classSessionRoom');
           }}
         />
@@ -515,13 +534,47 @@ function AdminDashboard({ user, userRole, onLogout }) {
           userId={user?.uid}
           userRole="admin"
           onCreateSession={() => {
+            navigation.setEditSessionId(null); // Clear any edit state
             navigation.setCurrentScreen('classSessions');
           }}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
             navigation.setCurrentScreen('classSessionRoom');
           }}
+          onEditSession={async (sessionId) => {
+            // Cargar la sesión completa para pasarla al modal
+            try {
+              const { getClassSession } = await import('../firebase/classSessions');
+              const sessionData = await getClassSession(sessionId);
+              if (sessionData) {
+                setCalendarEditSession({ id: sessionId, ...sessionData });
+              }
+            } catch (error) {
+              logger.error('Error loading session for edit:', error);
+            }
+          }}
         />
+
+        {/* Modal de edición de sesión desde calendario */}
+        {calendarEditSession && (
+          <ClassSessionModal
+            isOpen={true}
+            session={calendarEditSession}
+            onClose={() => setCalendarEditSession(null)}
+            onSubmit={async (formData) => {
+              try {
+                const { updateClassSession } = await import('../firebase/classSessions');
+                await updateClassSession(calendarEditSession.id, formData);
+                setCalendarEditSession(null);
+                logger.info('Session updated successfully from calendar');
+              } catch (error) {
+                logger.error('Error updating session:', error);
+              }
+            }}
+            courses={[]} // TODO: Load courses if needed
+            loading={false}
+          />
+        )}
       </DashboardLayout>
     );
   }
@@ -558,19 +611,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Settings Panel - WITH Layout (Theme Customizer)
-  if (navigation.currentScreen === 'settings') {
+  // Design Lab - Theme Tester - WITH Layout
+  if (navigation.currentScreen === 'designLab') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Inicio
-          </button>
-          <ThemeCustomizer />
-        </div>
+        <DesignLab />
       </DashboardLayout>
     );
   }
+
+  // Interactive Book Viewer - WITH Layout
+  if (navigation.currentScreen === 'interactiveBook') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <InteractiveBookViewer />
+      </DashboardLayout>
+    );
+  }
+
 
   // Live Game Setup - WITH Layout
   if (navigation.currentScreen === 'liveGame') {
@@ -628,14 +686,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Class Manager - WITH Layout
-  if (navigation.currentScreen === 'classes') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
-      </DashboardLayout>
-    );
-  }
+  // REMOVED: Old Class Manager (without LiveKit/Whiteboards) - Replaced by ClassSessionManager
+  // if (navigation.currentScreen === 'classes') {
+  //   return (
+  //     <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+  //       <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
+  //     </DashboardLayout>
+  //   );
+  // }
 
   // Analytics Dashboard - WITH Layout
   if (navigation.currentScreen === 'analytics') {
@@ -692,7 +750,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'settings') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1000px] mx-auto">
+        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
           <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-6">
             ← Back to Home
           </button>
@@ -705,8 +763,43 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </p>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
+            {/* Tabs */}
+            <div className="border-b border-gray-200 dark:border-gray-700">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setSettingsTab('credentials')}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
+                    ${settingsTab === 'credentials'
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }
+                  `}
+                >
+                  <Key className="w-5 h-5" />
+                  Credenciales IA
+                </button>
+                <button
+                  onClick={() => setSettingsTab('theme')}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
+                    ${settingsTab === 'theme'
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }
+                  `}
+                >
+                  <Palette className="w-5 h-5" />
+                  Editor de Temas
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content: Credentials */}
+            {settingsTab === 'credentials' && (
+              <div className="space-y-6">
+                <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
+                  <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
               <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
                 <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
                   <span className="font-medium">Application Version</span>
@@ -737,10 +830,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
                 Configura las API keys de los proveedores de IA para usar funciones inteligentes en la plataforma
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" key={credentialsRefresh}>
                 {AIService.getAvailableProviders().map((provider) => {
-                  // Check credentials from Firebase Secret Manager
-                  const isConfigured = aiCredentials[provider.name] || false;
+                  // Check credentials from Firebase Secret Manager OR localStorage
+                  const hasFirebaseCredential = aiCredentials[provider.name] || false;
+                  const hasLocalStorageCredential = provider.name === 'elevenlabs'
+                    ? !!localStorage.getItem('ai_credentials_elevenlabs')
+                    : false;
+                  const isConfigured = hasFirebaseCredential || hasLocalStorageCredential;
 
                   return (
                     <button
@@ -751,6 +848,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           docsUrl: provider.name === 'openai' ? 'https://platform.openai.com/api-keys' :
                                    provider.name === 'gemini' ? 'https://aistudio.google.com/app/apikey' :
                                    provider.name === 'grok' ? 'https://console.x.ai/' :
+                                   provider.name === 'elevenlabs' ? 'https://elevenlabs.io/app/settings/api-keys' :
                                    'https://console.anthropic.com/settings/keys'
                         });
                         setShowAICredentialsModal(true);
@@ -818,6 +916,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
                 </div>
               </div>
             </div>
+              </div>
+            )}
+
+            {/* Tab Content: Theme */}
+            {settingsTab === 'theme' && (
+              <div className="space-y-6">
+                <ThemeCustomizer />
+              </div>
+            )}
           </div>
         </div>
 
@@ -832,6 +939,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
           isConfigured={selectedProvider ? aiCredentials[selectedProvider.name] : false}
           onSave={async (providerName, apiKey) => {
             logger.info('API Key saved for provider:', providerName);
+            // Forzar re-render para actualizar el estado visual
+            setCredentialsRefresh(prev => prev + 1);
             // Reload providers to update configured status
             setTimeout(() => {
               window.location.reload();
@@ -902,21 +1011,21 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Live Class Manager - WITH Layout
-  if (navigation.currentScreen === 'liveClasses') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <LiveClassManager
-          user={user}
-          onBack={navigation.handleBackToDashboard}
-          onStartClass={(liveClass) => {
-            navigation.setSelectedLiveClass(liveClass);
-            navigation.setCurrentScreen('liveClassRoom');
-          }}
-        />
-      </DashboardLayout>
-    );
-  }
+  // REMOVED: Old Live Class Manager - Replaced by ClassSessionManager
+  // if (navigation.currentScreen === 'liveClasses') {
+  //   return (
+  //     <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+  //       <LiveClassManager
+  //         user={user}
+  //         onBack={navigation.handleBackToDashboard}
+  //         onStartClass={(liveClass) => {
+  //           navigation.setSelectedLiveClass(liveClass);
+  //           navigation.setCurrentScreen('liveClassRoom');
+  //         }}
+  //       />
+  //     </DashboardLayout>
+  //   );
+  // }
 
   // Students Panel -> REDIRECT to Users with filter
   if (navigation.currentScreen === 'students') {
@@ -1420,13 +1529,12 @@ function AdminDashboard({ user, userRole, onLogout }) {
       id: 'classes',
       icon: Calendar,
       title: "Classes",
-      count: allClasses.length,
-      countLabel: allClasses.length === 1 ? "class" : "classes",
-      onClick: () => navigation.setCurrentScreen('classes'),
-      createLabel: "New Class",
+      count: classSessions.length,
+      countLabel: classSessions.length === 1 ? "session" : "sessions",
+      onClick: () => navigation.setCurrentScreen('classSessions'),
+      createLabel: "New Session",
       onCreateClick: () => {
-        navigation.setOpenClassModal(true);
-        navigation.setCurrentScreen('classes');
+        navigation.setCurrentScreen('classSessions');
       }
     },
     {

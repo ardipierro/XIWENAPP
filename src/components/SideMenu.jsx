@@ -30,9 +30,9 @@ import {
   Settings,
   Lightbulb,
   UsersRound,
-  Palette,
   Layers,
-  Sparkles
+  Sparkles,
+  BookMarked
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -89,10 +89,10 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             id: 'ensenanza',
             label: 'Herramientas de Enseñanza',
             items: [
-              { icon: Palette, label: 'Theme Builder', path: '/admin', action: 'themeBuilder' },
               { icon: Layers, label: 'Exercise Builder', path: '/admin', action: 'exerciseBuilder' },
               { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
-              // Juego en Vivo movido a dashboard como acceso rápido
+              { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
+              // Theme Builder y Design Lab desactivados temporalmente
             ]
           }
         ]
@@ -111,10 +111,10 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
-          { icon: Palette, label: 'Theme Builder', path: '/teacher', action: 'themeBuilder' },
           { icon: Layers, label: 'Exercise Builder', path: '/teacher', action: 'exerciseBuilder' },
           { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
-          // Juego en Vivo movido a dashboard como acceso rápido
+          { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
+          // Theme Builder y Design Lab desactivados temporalmente
         ]
       };
     }

@@ -13,6 +13,7 @@ export function useScreenNavigation() {
   const [selectedExcalidrawSession, setSelectedExcalidrawSession] = useState(null);
   const [selectedLiveClass, setSelectedLiveClass] = useState(null);
   const [liveGameSessionId, setLiveGameSessionId] = useState(null);
+  const [editSessionId, setEditSessionId] = useState(null); // For editing session from calendar
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserProfile, setSelectedUserProfile] = useState(null);
 
@@ -75,6 +76,8 @@ export function useScreenNavigation() {
     'settings': 'settings', // Settings (Admin)
     'themeBuilder': 'themeBuilder', // Theme Builder (Admin/Teacher)
     'exerciseBuilder': 'exerciseBuilder', // Exercise Builder (Admin/Teacher)
+    'designLab': 'designLab', // Design Lab - Theme Tester (Admin/Teacher)
+    'interactiveBook': 'interactiveBook', // Interactive Book Viewer (Admin/Teacher)
   };
 
   /**
@@ -207,6 +210,7 @@ export function useScreenNavigation() {
     selectedExcalidrawSession,
     selectedLiveClass,
     liveGameSessionId,
+    editSessionId,
     showUserProfile,
     selectedUserProfile,
 
@@ -244,6 +248,7 @@ export function useScreenNavigation() {
     setSelectedExcalidrawSession,
     setSelectedLiveClass,
     setLiveGameSessionId,
+    setEditSessionId,
     setShowUserProfile,
     setSelectedUserProfile,
     setOpenCourseModal,
