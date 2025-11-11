@@ -14,6 +14,7 @@ import {
 import logger from '../utils/logger.js';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
+import BaseButton from './common/BaseButton';
 
 /**
  * Componente para gestión de ejercicios
@@ -387,12 +388,12 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               : 'Intenta con otros filtros de búsqueda'}
           </p>
           {exercises.length === 0 && (
-            <button
-              className="btn btn-primary"
+            <BaseButton
+              variant="primary"
               onClick={() => setShowCreateModal(true)}
             >
               Crear Primer Ejercicio
-            </button>
+            </BaseButton>
           )}
         </div>
       ) : viewMode === 'grid' ? (
@@ -448,12 +449,14 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
                 {/* Botones */}
                 <div className="card-actions">
-                  <button
-                    className="btn btn-primary flex-1"
+                  <BaseButton
+                    variant="primary"
+                    icon={Settings}
                     onClick={() => handleEdit(exercise.id)}
+                    className="flex-1"
                   >
-                    <Settings size={16} strokeWidth={2} /> Gestionar
-                  </button>
+                    Gestionar
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -514,12 +517,13 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
                 {/* Botones */}
                 <div className="card-actions-list">
-                  <button
-                    className="btn btn-primary"
+                  <BaseButton
+                    variant="primary"
+                    icon={Settings}
                     onClick={() => handleEdit(exercise.id)}
                   >
-                    <Settings size={16} strokeWidth={2} /> Gestionar
-                  </button>
+                    Gestionar
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -665,16 +669,16 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               </div>
 
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
-                  className="btn btn-outline"
+                  variant="outline"
                   onClick={() => setShowCreateModal(false)}
                 >
                   Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
+                </BaseButton>
+                <BaseButton type="submit" variant="primary">
                   Crear Ejercicio
-                </button>
+                </BaseButton>
               </div>
             </form>
           </div>
@@ -852,16 +856,16 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               </div>
 
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
-                  className="btn btn-outline"
+                  variant="outline"
                   onClick={() => setShowEditModal(false)}
                 >
                   Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
+                </BaseButton>
+                <BaseButton type="submit" variant="primary">
                   Guardar Cambios
-                </button>
+                </BaseButton>
               </div>
             </form>
           </div>
@@ -970,21 +974,21 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
             </div>
 
             <div className="modal-footer">
-              <button
-                className="btn btn-outline"
+              <BaseButton
+                variant="outline"
                 onClick={() => setShowViewModal(false)}
               >
                 Cerrar
-              </button>
-              <button
-                className="btn btn-primary"
+              </BaseButton>
+              <BaseButton
+                variant="primary"
                 onClick={() => {
                   setShowViewModal(false);
                   handleEdit(selectedExercise.id);
                 }}
               >
                 Editar
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>

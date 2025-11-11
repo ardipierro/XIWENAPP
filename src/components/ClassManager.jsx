@@ -31,6 +31,7 @@ import { uploadImage, deleteImage } from '../firebase/storage';
 import ConfirmModal from './ConfirmModal';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
+import BaseButton from './common/BaseButton';
 import './ClassManager.css';
 
 /**
@@ -532,9 +533,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
       <div className="class-manager">
         {/* Botón Volver */}
         {onBack && (
-          <button onClick={onBack} className="btn btn-ghost mb-4">
+          <BaseButton onClick={onBack} variant="ghost" className="mb-4">
             ← Volver a Inicio
-          </button>
+          </BaseButton>
         )}
 
         {/* Header */}
@@ -565,9 +566,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
           <div className="empty-state">
             <p>{searchTerm ? 'No se encontraron clases' : 'No hay clases creadas aún'}</p>
             {!searchTerm && (
-              <button onClick={handleCreateClass} className="btn btn-primary">
+              <BaseButton onClick={handleCreateClass} variant="primary">
                 Crear primera clase
-              </button>
+              </BaseButton>
             )}
           </div>
         ) : viewMode === 'grid' ? (
@@ -896,9 +897,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                           </div>
                         </div>
 
-                        <button onClick={handleAddSchedule} className="btn btn-outline">
+                        <BaseButton onClick={handleAddSchedule} variant="outline">
                           + Agregar Horario
-                        </button>
+                        </BaseButton>
                         <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                           <Lightbulb size={14} strokeWidth={2} className="inline-icon" /> Selecciona varios días para crear horarios múltiples a la vez
                         </p>
@@ -909,12 +910,12 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                 {/* Footer - Fixed */}
                 <div className="modal-footer">
-                  <button onClick={() => setShowModal(false)} className="btn btn-outline">
+                  <BaseButton onClick={() => setShowModal(false)} variant="outline">
                     Cancelar
-                  </button>
-                  <button onClick={handleSaveClass} className="btn btn-primary">
+                  </BaseButton>
+                  <BaseButton onClick={handleSaveClass} variant="primary">
                     {editingClass ? 'Guardar Cambios' : 'Crear Clase'}
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -1098,14 +1099,15 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               alt="Preview"
                               className="w-full h-48 object-cover rounded-lg mb-2"
                             />
-                            <button
+                            <BaseButton
                               type="button"
                               onClick={handleImageDelete}
                               disabled={uploadingImage}
-                              className="btn btn-danger btn-sm"
+                              variant="danger"
+                              size="sm"
                             >
                               {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                            </button>
+                            </BaseButton>
                           </div>
                         ) : (
                           <div>
@@ -1168,12 +1170,13 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                       ({upcomingForSchedule.length} {upcomingForSchedule.length === 1 ? 'sesión pendiente' : 'sesiones pendientes'})
                                     </span>
                                   </div>
-                                  <button
-                                    className="btn btn-sm btn-danger"
+                                  <BaseButton
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => handleRemoveSchedule(idx)}
                                   >
                                     Eliminar
-                                  </button>
+                                  </BaseButton>
                                 </div>
                               );
                             })}
@@ -1298,9 +1301,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               </select>
                             </div>
                             <div className="flex items-end">
-                              <button onClick={handleAddSchedule} className="btn btn-success">
-                                <Plus size={16} strokeWidth={2} /> Agregar
-                              </button>
+                              <BaseButton onClick={handleAddSchedule} variant="success" icon={Plus}>
+                                Agregar
+                              </BaseButton>
                             </div>
                           </div>
 
@@ -1340,15 +1343,16 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                   {courses.find(c => c.id === formData.courseId)?.name || 'Curso no encontrado'}
                                 </span>
                               </div>
-                              <button
-                                className="btn btn-sm btn-danger"
+                              <BaseButton
+                                variant="danger"
+                                size="sm"
                                 onClick={() => {
                                   setFormData({ ...formData, courseId: '' });
                                   handleSaveClassChanges();
                                 }}
                               >
                                 Eliminar
-                              </button>
+                              </BaseButton>
                             </div>
                           </div>
                         ) : (
@@ -1384,8 +1388,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 </option>
                               ))}
                             </select>
-                            <button
-                              className="btn btn-success"
+                            <BaseButton
+                              variant="success"
+                              icon={Plus}
                               onClick={() => {
                                 const select = document.querySelector('.select');
                                 if (select && select.value) {
@@ -1395,8 +1400,8 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 }
                               }}
                             >
-                              <Plus size={16} strokeWidth={2} /> Agregar
-                            </button>
+                              Agregar
+                            </BaseButton>
                           </div>
                         )}
                       </div>
@@ -1420,12 +1425,13 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                   <div className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{student.name}</div>
                                   <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{student.email}</div>
                                 </div>
-                                <button
-                                  className="btn btn-sm btn-danger"
+                                <BaseButton
+                                  variant="danger"
+                                  size="sm"
                                   onClick={() => handleUnassignStudent(student.id)}
                                 >
                                   Eliminar
-                                </button>
+                                </BaseButton>
                               </div>
                             ))}
                           </div>
@@ -1458,8 +1464,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 </option>
                               ))}
                             </select>
-                            <button
-                              className="btn btn-success"
+                            <BaseButton
+                              variant="success"
+                              icon={Plus}
                               onClick={() => {
                                 const select = document.querySelector('.select');
                                 if (select.value) {
@@ -1468,8 +1475,8 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 }
                               }}
                             >
-                              <Plus size={16} strokeWidth={2} /> Agregar
-                            </button>
+                              Agregar
+                            </BaseButton>
                           </div>
                         )}
                       </div>
@@ -1479,27 +1486,29 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                 {/* Footer con botones */}
                 <div className="modal-footer">
-                  <button
+                  <BaseButton
                     type="button"
-                    className="btn btn-danger"
+                    variant="danger"
+                    icon={Trash2}
                     onClick={() => setShowConfirmDelete(true)}
                   >
-                    <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
-                  </button>
-                  <button
+                    Eliminar
+                  </BaseButton>
+                  <BaseButton
                     type="button"
-                    className="btn btn-outline"
+                    variant="outline"
                     onClick={() => setShowDetailsModal(false)}
                   >
                     Cancelar
-                  </button>
-                  <button
+                  </BaseButton>
+                  <BaseButton
                     type="button"
-                    className="btn btn-primary"
+                    variant="primary"
+                    icon={Save}
                     onClick={handleSaveClassChanges}
                   >
-                    <Save size={18} strokeWidth={2} className="inline-icon" /> Guardar Cambios
-                  </button>
+                    Guardar Cambios
+                  </BaseButton>
                 </div>
 
               </div>

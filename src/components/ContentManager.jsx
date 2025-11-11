@@ -18,6 +18,7 @@ import logger from '../utils/logger.js';
 import ConfirmModal from './ConfirmModal';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
+import BaseButton from './common/BaseButton';
 
 /**
  * Componente para gestión de contenido educativo
@@ -378,9 +379,9 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
     <div className="content-manager">
       {/* Botón Volver */}
       {onBack && (
-        <button onClick={onBack} className="btn btn-ghost mb-4">
+        <BaseButton onClick={onBack} variant="ghost" className="mb-4">
           ← Volver a Inicio
-        </button>
+        </BaseButton>
       )}
 
       {/* Header */}
@@ -418,12 +419,12 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
               : 'Intenta con otros filtros de búsqueda'}
           </p>
           {contents.length === 0 && (
-            <button
-              className="btn btn-primary"
+            <BaseButton
+              variant="primary"
               onClick={() => setShowCreateModal(true)}
             >
               Crear Primer Contenido
-            </button>
+            </BaseButton>
           )}
         </div>
       ) : viewMode === 'grid' ? (
@@ -652,14 +653,15 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                             alt="Vista previa de la imagen del contenido"
                             className="w-full h-48 object-cover rounded-lg mb-2"
                           />
-                          <button
+                          <BaseButton
                             type="button"
                             onClick={handleRemoveImage}
                             disabled={uploadingImage}
-                            className="btn btn-danger btn-sm"
+                            variant="danger"
+                            size="sm"
                           >
                             {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                          </button>
+                          </BaseButton>
                         </div>
                       ) : (
                         <div>
@@ -704,20 +706,22 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
               {/* Footer con botones (sin zona de peligro en crear) */}
               <div className="px-6 pt-4 pb-4 flex-shrink-0">
                 <div className="flex gap-2">
-                  <button
+                  <BaseButton
                     type="button"
-                    className="btn btn-outline flex-1"
+                    variant="outline"
                     onClick={() => setShowCreateModal(false)}
+                    className="flex-1"
                   >
                     Cancelar
-                  </button>
-                  <button
+                  </BaseButton>
+                  <BaseButton
                     type="button"
-                    className="btn btn-primary flex-1"
+                    variant="primary"
                     onClick={handleCreate}
+                    className="flex-1"
                   >
                     Crear Contenido
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -845,14 +849,15 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                             alt="Vista previa de la imagen del contenido"
                             className="w-full h-48 object-cover rounded-lg mb-2"
                           />
-                          <button
+                          <BaseButton
                             type="button"
                             onClick={handleRemoveImage}
                             disabled={uploadingImage}
-                            className="btn btn-danger btn-sm"
+                            variant="danger"
+                            size="sm"
                           >
                             {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                          </button>
+                          </BaseButton>
                         </div>
                       ) : (
                         <div>
@@ -896,30 +901,31 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
 
               {/* Footer con botones */}
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
-                  className="btn btn-danger"
+                  variant="danger"
                   onClick={() => setShowConfirmDelete(true)}
+                  icon={Trash2}
                 >
-                  <Trash2 size={16} strokeWidth={2} /> Eliminar
-                </button>
-                <button
+                  Eliminar
+                </BaseButton>
+                <BaseButton
                   type="button"
-                  className="btn btn-outline"
+                  variant="outline"
                   onClick={() => setShowEditModal(false)}
                 >
                   Cancelar
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   type="button"
-                  className="btn btn-primary"
+                  variant="primary"
                   onClick={(e) => {
                     e.preventDefault();
                     handleUpdate(e);
                   }}
                 >
                   Guardar Cambios
-                </button>
+                </BaseButton>
               </div>
             </div>
           </div>
@@ -1005,21 +1011,21 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
             </div>
 
             <div className="modal-footer">
-                <button
-                  className="btn btn-outline"
+                <BaseButton
+                  variant="outline"
                   onClick={() => setShowViewModal(false)}
                 >
                   Cerrar
-                </button>
-                <button
-                  className="btn btn-primary"
+                </BaseButton>
+                <BaseButton
+                  variant="primary"
                   onClick={() => {
                     setShowViewModal(false);
                     handleEdit(selectedContent.id);
                   }}
                 >
                   Editar
-                </button>
+                </BaseButton>
               </div>
           </div>
         </div>

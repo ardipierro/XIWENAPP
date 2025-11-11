@@ -79,6 +79,7 @@ const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
+import BaseButton from './common/BaseButton';
 // REMOVED: Old LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
 // import LiveClassManager from './LiveClassManager';
 // import LiveClassRoom from './LiveClassRoom';
@@ -601,9 +602,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AIConfigPanel />
         </div>
       </DashboardLayout>
@@ -717,9 +718,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AnalyticsDashboard user={user} />
         </div>
       </DashboardLayout>
@@ -740,9 +741,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AdminPaymentsPanel user={user} />
         </div>
       </DashboardLayout>
@@ -754,9 +755,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AttendanceView teacher={user} />
         </div>
       </DashboardLayout>
@@ -768,9 +769,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-6">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-6">
             ← Back to Home
-          </button>
+          </BaseButton>
 
           <div className="space-y-6">
             <div>
@@ -1138,9 +1139,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
       <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
@@ -1148,12 +1149,12 @@ function AdminDashboard({ user, userRole, onLogout }) {
               <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>User Management</h1>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary w-full sm:w-auto">
-                <Plus size={18} strokeWidth={2} /> New User
-              </button>
-              <button onClick={userManagement.loadUsers} className="btn btn-primary w-full sm:w-auto" style={{ backgroundColor: 'var(--color-success)' }} title="Refresh user list">
-                <RefreshCw size={18} strokeWidth={2} /> Refresh
-              </button>
+              <BaseButton onClick={() => setShowAddUserModal(true)} variant="primary" fullWidth className="sm:w-auto" icon={Plus}>
+                New User
+              </BaseButton>
+              <BaseButton onClick={userManagement.loadUsers} variant="success" fullWidth className="sm:w-auto" icon={RefreshCw} title="Refresh user list">
+                Refresh
+              </BaseButton>
             </div>
           </div>
 

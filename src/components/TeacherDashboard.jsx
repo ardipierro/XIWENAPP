@@ -71,6 +71,7 @@ import WhiteboardManager from './WhiteboardManager';
 const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
+import BaseButton from './common/BaseButton';
 // REMOVED: LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
@@ -620,9 +621,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="analytics-section">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Volver a Inicio
-          </button>
+          </BaseButton>
           <AnalyticsDashboard user={user} />
         </div>
       </DashboardLayout>
@@ -634,9 +635,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="attendance-section">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Volver a Inicio
-          </button>
+          </BaseButton>
           <AttendanceView teacher={user} />
         </div>
       </DashboardLayout>
@@ -795,9 +796,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-0">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Volver a Inicio
-          </button>
+          </BaseButton>
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
@@ -805,12 +806,12 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Alumnos</h1>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
-                <Plus size={18} strokeWidth={2} /> Agregar Alumno
-              </button>
-              <button onClick={userManagement.loadUsers} className="btn btn-primary" style={{ backgroundColor: 'var(--color-success)' }} title="Actualizar lista">
-                <RefreshCw size={18} strokeWidth={2} /> Actualizar
-              </button>
+              <BaseButton onClick={() => setShowAddUserModal(true)} variant="primary" icon={Plus}>
+                Agregar Alumno
+              </BaseButton>
+              <BaseButton onClick={userManagement.loadUsers} variant="success" icon={RefreshCw} title="Actualizar lista">
+                Actualizar
+              </BaseButton>
             </div>
           </div>
 
@@ -877,9 +878,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-0">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Volver a Inicio
-          </button>
+          </BaseButton>
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
@@ -896,12 +897,12 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               )}
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary w-full sm:w-auto">
-                <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
-              </button>
-              <button onClick={userManagement.loadUsers} className="btn btn-primary w-full sm:w-auto" style={{ backgroundColor: 'var(--color-success)' }} title="Actualizar lista de usuarios">
-                <RefreshCw size={18} strokeWidth={2} /> Actualizar
-              </button>
+              <BaseButton onClick={() => setShowAddUserModal(true)} variant="primary" icon={Plus} className="w-full sm:w-auto">
+                {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
+              </BaseButton>
+              <BaseButton onClick={userManagement.loadUsers} variant="success" icon={RefreshCw} className="w-full sm:w-auto" title="Actualizar lista de usuarios">
+                Actualizar
+              </BaseButton>
             </div>
           </div>
 
@@ -1194,13 +1195,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                         </span>
                                       </div>
                                     </div>
-                                    <button
-                                      className="btn-unenroll"
+                                    <BaseButton
+                                      variant="danger"
+                                      size="sm"
                                       onClick={() => handleUnenrollCourse(enrollment.course.id)}
                                       title="Desasignar curso"
                                     >
                                       ✕ Desasignar
-                                    </button>
+                                    </BaseButton>
                                   </div>
                                 ))}
                               </div>
@@ -1236,13 +1238,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                           )}
                                         </div>
                                       </div>
-                                      <button
-                                        className="btn-enroll"
+                                      <BaseButton
+                                        variant="primary"
+                                        size="sm"
                                         onClick={() => handleEnrollCourse(course.id)}
                                         title="Asignar curso"
                                       >
                                         + Asignar
-                                      </button>
+                                      </BaseButton>
                                     </div>
                                   ))}
                                 {courses.filter(course => !resourceAssignment.isEnrolled(course.id)).length === 0 && (
@@ -1287,13 +1290,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                           )}
                                         </div>
                                       </div>
-                                      <button
-                                        className="btn-unenroll"
+                                      <BaseButton
+                                        variant="danger"
+                                        size="sm"
                                         onClick={() => handleRemoveContent(content.id)}
                                         title="Desasignar contenido"
                                       >
                                         ✕ Desasignar
-                                      </button>
+                                      </BaseButton>
                                     </div>
                                   );
                                 })}
@@ -1330,13 +1334,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                           )}
                                         </div>
                                       </div>
-                                      <button
-                                        className="btn-enroll"
+                                      <BaseButton
+                                        variant="primary"
+                                        size="sm"
                                         onClick={() => handleAssignContent(content.id)}
                                         title="Asignar contenido"
                                       >
                                         + Asignar
-                                      </button>
+                                      </BaseButton>
                                     </div>
                                   ))}
                                 {allContent.filter(c => !resourceAssignment.isContentAssigned(c.id)).length === 0 && (
@@ -1379,13 +1384,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                           </span>
                                         </div>
                                       </div>
-                                      <button
-                                        className="btn-unenroll"
+                                      <BaseButton
+                                        variant="danger"
+                                        size="sm"
                                         onClick={() => handleRemoveExercise(exercise.id)}
                                         title="Desasignar ejercicio"
                                       >
                                         ✕ Desasignar
-                                      </button>
+                                      </BaseButton>
                                     </div>
                                   );
                                 })}
@@ -1420,13 +1426,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                                           </span>
                                         </div>
                                       </div>
-                                      <button
-                                        className="btn-enroll"
+                                      <BaseButton
+                                        variant="primary"
+                                        size="sm"
                                         onClick={() => handleAssignExercise(exercise.id)}
                                         title="Asignar ejercicio"
                                       >
                                         + Asignar
-                                      </button>
+                                      </BaseButton>
                                     </div>
                                   ))}
                                 {allExercises.filter(e => !resourceAssignment.isExerciseAssigned(e.id)).length === 0 && (
@@ -1447,9 +1454,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                 </div>
 
                 <div className="modal-footer">
-                  <button className="btn btn-ghost" onClick={resourceAssignment.handleCloseResourceModal}>
+                  <BaseButton variant="ghost" onClick={resourceAssignment.handleCloseResourceModal}>
                     Cerrar
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             </div>
