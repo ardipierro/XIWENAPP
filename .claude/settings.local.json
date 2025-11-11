@@ -132,7 +132,11 @@
       "Bash(rm:*)",
       "Bash(timeout /t 3 /nobreak)",
       "Bash(git rm:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(npx eslint:*)",
+      "Bash(ping:*)",
+      "Bash(NUL)"
     ],
     "deny": [],
     "ask": []

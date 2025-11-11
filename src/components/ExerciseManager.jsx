@@ -337,18 +337,18 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
   const getDifficultyColor = (difficulty) => {
     const colors = {
-      easy: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
-      medium: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
-      hard: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+      easy: { backgroundColor: 'var(--color-success-light, #dcfce7)', color: 'var(--color-success)' },
+      medium: { backgroundColor: 'var(--color-warning-light, #fef3c7)', color: 'var(--color-warning)' },
+      hard: { backgroundColor: 'var(--color-danger-light, #fee2e2)', color: 'var(--color-danger)' }
     };
-    return colors[difficulty] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+    return colors[difficulty] || { backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' };
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="spinner"></div>
-        <p className="ml-4 text-gray-600 dark:text-gray-300">Cargando ejercicios...</p>
+        <p className="ml-4" style={{ color: 'var(--color-text-secondary)' }}>Cargando ejercicios...</p>
       </div>
     );
   }
@@ -376,12 +376,12 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
       {filteredExercises.length === 0 ? (
         <div className="card text-center py-12">
           <div className="empty-icon mb-4">
-            <FileText size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500 mx-auto" />
+            <FileText size={64} strokeWidth={2} className="mx-auto" style={{ color: 'var(--color-text-secondary)' }} />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             {exercises.length === 0 ? 'No hay ejercicios creados' : 'No se encontraron ejercicios'}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
             {exercises.length === 0
               ? 'Crea tu primer ejercicio para empezar'
               : 'Intenta con otros filtros de búsqueda'}
@@ -401,8 +401,8 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
           {filteredExercises.map((exercise) => (
             <div key={exercise.id} className="card card-grid-item flex flex-col overflow-hidden" style={{ padding: 0 }}>
               {/* Placeholder con icono - Mitad superior sin bordes */}
-              <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                <Gamepad2 size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500" />
+              <div className="w-full h-48 flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                <Gamepad2 size={64} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
               </div>
 
               <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
@@ -416,7 +416,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                 <div className="card-badges">
                 <span className="badge badge-info">{getTypeLabel(exercise.type)}</span>
                 {exercise.difficulty && (
-                  <span className={`badge ${getDifficultyColor(exercise.difficulty)}`}>
+                  <span className="badge" style={getDifficultyColor(exercise.difficulty)}>
                     {exercise.difficulty === 'easy' && 'Fácil'}
                     {exercise.difficulty === 'medium' && 'Medio'}
                     {exercise.difficulty === 'hard' && 'Difícil'}
@@ -497,7 +497,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                 <div className="card-badges-list">
                   <span className="badge badge-info">{getTypeLabel(exercise.type)}</span>
                   {exercise.difficulty && (
-                    <span className={`badge ${getDifficultyColor(exercise.difficulty)}`}>
+                    <span className="badge" style={getDifficultyColor(exercise.difficulty)}>
                       {exercise.difficulty === 'easy' && 'Fácil'}
                       {exercise.difficulty === 'medium' && 'Medio'}
                       {exercise.difficulty === 'hard' && 'Difícil'}
@@ -627,12 +627,12 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
                 <div className="form-group">
                   <label className="form-label">Asignar a Cursos (opcional)</label>
-                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
+                  <div className="rounded-lg p-2 max-h-40 overflow-y-auto" style={{ border: '1px solid var(--color-border)' }}>
                     {courses.length === 0 ? (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">No hay cursos disponibles</p>
+                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>No hay cursos disponibles</p>
                     ) : (
                       courses.map(course => (
-                        <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-1 rounded">
+                        <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer p-1 rounded" style={{ ':hover': { backgroundColor: 'var(--color-bg-secondary)' } }}>
                           <input
                             type="checkbox"
                             checked={formData.courseIds.includes(course.id)}
@@ -645,20 +645,20 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                             }}
                             className="w-4 h-4"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{course.name}</span>
+                          <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{course.name}</span>
                         </label>
                       ))
                     )}
                   </div>
                   {formData.courseIds.length > 0 && (
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
                       {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
                     </p>
                   )}
                 </div>
 
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: 'var(--color-warning-light, #fef3c7)', border: '1px solid var(--color-warning)' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-warning)' }}>
                     ℹ️ Las preguntas del ejercicio se pueden agregar después de crear el ejercicio, usando el botón "Editar".
                   </p>
                 </div>
@@ -781,12 +781,12 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
                 <div className="form-group">
                   <label className="form-label">Asignar a Cursos (opcional)</label>
-                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-2 max-h-40 overflow-y-auto">
+                  <div className="rounded-lg p-2 max-h-40 overflow-y-auto" style={{ border: '1px solid var(--color-border)' }}>
                     {courses.length === 0 ? (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">No hay cursos disponibles</p>
+                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>No hay cursos disponibles</p>
                     ) : (
                       courses.map(course => (
-                        <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-1 rounded">
+                        <label key={course.id} className="flex items-center gap-2 mb-1 cursor-pointer p-1 rounded" style={{ ':hover': { backgroundColor: 'var(--color-bg-secondary)' } }}>
                           <input
                             type="checkbox"
                             checked={formData.courseIds.includes(course.id)}
@@ -799,34 +799,34 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                             }}
                             className="w-4 h-4"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{course.name}</span>
+                          <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{course.name}</span>
                         </label>
                       ))
                     )}
                   </div>
                   {formData.courseIds.length > 0 && (
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
                       {formData.courseIds.length} curso{formData.courseIds.length !== 1 ? 's' : ''} seleccionado{formData.courseIds.length !== 1 ? 's' : ''}
                     </p>
                   )}
                 </div>
 
                 {/* Sección de Preguntas */}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                <div className="pt-4 mt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
                   <div className="form-group">
                     <label className="form-label">
                       Preguntas (Formato: 1 pregunta + 4 opciones por línea)
                     </label>
-                    <div className="mb-2 p-3 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded">
-                      <p className="text-sm text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <div className="mb-2 p-3 rounded" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+                      <p className="text-sm mb-2 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
                         <FileText size={18} strokeWidth={2} className="inline-icon" /> <strong>Formato:</strong>
                       </p>
-                      <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1 ml-4">
+                      <ul className="text-xs space-y-1 ml-4" style={{ color: 'var(--color-text-primary)' }}>
                         <li>• Línea 1: Pregunta</li>
                         <li>• Líneas 2-5: Opciones (marca con "1." la respuesta correcta)</li>
                         <li>• Deja una línea en blanco entre preguntas</li>
                       </ul>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                      <p className="text-xs mt-2" style={{ color: 'var(--color-text-secondary)' }}>
                         Ejemplo:<br/>
                         ¿Cuál es la capital de Argentina?<br/>
                         1. Buenos Aires<br/>
@@ -843,7 +843,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                       placeholder="Ingresa las preguntas en el formato indicado..."
                     />
                     {questionsText.trim() && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
+                      <p className="text-sm mt-2 flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
                         <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> {parseQuestions(questionsText).length} pregunta(s) detectada(s)
                       </p>
                     )}
@@ -893,7 +893,7 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                   {getTypeLabel(selectedExercise.type)}
                 </span>
                 {selectedExercise.difficulty && (
-                  <span className={`badge ${getDifficultyColor(selectedExercise.difficulty)}`}>
+                  <span className="badge" style={getDifficultyColor(selectedExercise.difficulty)}>
                     {selectedExercise.difficulty === 'easy' && 'Fácil'}
                     {selectedExercise.difficulty === 'medium' && 'Medio'}
                     {selectedExercise.difficulty === 'hard' && 'Difícil'}
@@ -908,14 +908,14 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
 
               {selectedExercise.description && (
                 <div className="mb-4">
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Descripción:</h4>
-                  <p className="text-gray-700 dark:text-gray-300">{selectedExercise.description}</p>
+                  <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Descripción:</h4>
+                  <p style={{ color: 'var(--color-text-primary)' }}>{selectedExercise.description}</p>
                 </div>
               )}
 
               {selectedExercise.tags && selectedExercise.tags.length > 0 && (
                 <div className="mb-4">
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Etiquetas:</h4>
+                  <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Etiquetas:</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedExercise.tags.map((tag, index) => (
                       <span key={index} className="badge badge-outline">
@@ -927,20 +927,20 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
               )}
 
               <div className="mb-4">
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <h4 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
                   Preguntas: {selectedExercise.questions?.length || 0}
                 </h4>
                 {selectedExercise.questions && selectedExercise.questions.length > 0 ? (
                   <div className="space-y-4">
                     {selectedExercise.questions.map((question, index) => (
-                      <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <p className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      <div key={index} className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                        <p className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
                           {index + 1}. {question.question || question.text || 'Sin pregunta'}
                         </p>
                         {question.options && (
                           <div className="ml-4 space-y-1">
                             {question.options.map((option, optIndex) => (
-                              <p key={optIndex} className="text-sm text-gray-600 dark:text-gray-400">
+                              <p key={optIndex} className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                                 {optIndex === question.correctAnswer && '✓ '}
                                 {option}
                               </p>
@@ -951,18 +951,18 @@ function ExerciseManager({ user, onPlayExercise, courses = [] }) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
                     No hay preguntas agregadas aún. Edita el ejercicio para agregar preguntas.
                   </p>
                 )}
               </div>
 
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--color-border)' }}>
+                <p className="text-sm flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
                   <Calendar size={14} strokeWidth={2} /> Creado: {selectedExercise.createdAt && new Date(selectedExercise.createdAt.seconds * 1000).toLocaleString('es-AR')}
                 </p>
                 {selectedExercise.updatedAt && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                  <p className="text-sm mt-1 flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
                     <Edit size={14} strokeWidth={2} /> Actualizado: {new Date(selectedExercise.updatedAt.seconds * 1000).toLocaleString('es-AR')}
                   </p>
                 )}

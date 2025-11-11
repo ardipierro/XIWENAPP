@@ -369,7 +369,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="spinner"></div>
-        <p className="ml-4 text-gray-600 dark:text-gray-300">Cargando contenido...</p>
+        <p className="ml-4" style={{ color: 'var(--color-text-secondary)' }}>Cargando contenido...</p>
       </div>
     );
   }
@@ -407,12 +407,12 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       {filteredContents.length === 0 ? (
         <div className="card text-center py-12">
           <div className="empty-icon mb-4">
-            <FileText size={64} strokeWidth={2} className="text-gray-400 dark:text-gray-500 mx-auto" />
+            <FileText size={64} strokeWidth={2} className="mx-auto" style={{ color: 'var(--color-text-secondary)' }} />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             {contents.length === 0 ? 'No hay contenido creado' : 'No se encontró contenido'}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
             {contents.length === 0
               ? 'Crea tu primer contenido para empezar'
               : 'Intenta con otros filtros de búsqueda'}
@@ -432,8 +432,12 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
           {filteredContents.map((content) => (
             <div
               key={content.id}
-              className="card card-grid-item flex flex-col cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300 overflow-hidden"
-              style={{ padding: 0 }}
+              className="card card-grid-item flex flex-col cursor-pointer transition-all duration-300 overflow-hidden"
+              style={{
+                padding: 0,
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-border-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}
               onClick={() => handleEdit(content.id)}
               title="Click para editar contenido"
             >
@@ -482,7 +486,9 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
           {filteredContents.map((content) => (
             <div
               key={content.id}
-              className="card card-list cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300"
+              className="card card-list cursor-pointer transition-all duration-300"
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-border-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}
               onClick={() => handleEdit(content.id)}
               title="Click para editar contenido"
             >
@@ -552,21 +558,33 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                 <div className="modal-tabs">
                 <button
                   onClick={() => setActiveTab('general')}
-                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === 'general'
-                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
+                  className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                  style={{
+                    borderColor: activeTab === 'general' ? 'var(--color-border)' : 'transparent',
+                    color: activeTab === 'general' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== 'general') e.currentTarget.style.color = 'var(--color-text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== 'general') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                  }}
                 >
                   <FileText size={18} strokeWidth={2} className="inline-icon" /> General
                 </button>
                 <button
                   onClick={() => setActiveTab('config')}
-                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === 'config'
-                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
+                  className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                  style={{
+                    borderColor: activeTab === 'config' ? 'var(--color-border)' : 'transparent',
+                    color: activeTab === 'config' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== 'config') e.currentTarget.style.color = 'var(--color-text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== 'config') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                  }}
                 >
                   <Settings size={18} strokeWidth={2} className="inline-icon" /> Configuración
                 </button>
@@ -650,21 +668,22 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                             accept="image/*"
                             onChange={handleImageUpload}
                             disabled={uploadingImage}
-                            className="block w-full text-sm text-gray-900 dark:text-gray-100
+                            className="block w-full text-sm
                               file:mr-4 file:py-2 file:px-4
                               file:rounded-md file:border-0
                               file:text-sm file:font-semibold
                               file:bg-primary file:text-white
                               hover:file:bg-primary-light
                               file:cursor-pointer cursor-pointer"
+                            style={{ color: 'var(--color-text-primary)' }}
                           />
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                             PNG, JPG, GIF o WEBP (máx. 5MB)
                           </p>
                         </div>
                       )}
                       {uploadingImage && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
+                        <p className="text-sm mt-2 flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
                           <Clock size={14} strokeWidth={2} /> Subiendo imagen...
                         </p>
                       )}
@@ -675,7 +694,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                 {/* TAB: CONFIGURACIÓN */}
                 {activeTab === 'config' && (
                   <div className="space-y-6 pt-6">
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       Próximamente: Configuraciones avanzadas del contenido
                     </p>
                   </div>
@@ -732,21 +751,33 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                 <div className="modal-tabs">
                 <button
                   onClick={() => setActiveTab('general')}
-                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === 'general'
-                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
+                  className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                  style={{
+                    borderColor: activeTab === 'general' ? 'var(--color-border)' : 'transparent',
+                    color: activeTab === 'general' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== 'general') e.currentTarget.style.color = 'var(--color-text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== 'general') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                  }}
                 >
                   <FileText size={18} strokeWidth={2} className="inline-icon" /> General
                 </button>
                 <button
                   onClick={() => setActiveTab('config')}
-                  className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === 'config'
-                      ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
+                  className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                  style={{
+                    borderColor: activeTab === 'config' ? 'var(--color-border)' : 'transparent',
+                    color: activeTab === 'config' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== 'config') e.currentTarget.style.color = 'var(--color-text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== 'config') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                  }}
                 >
                   <Settings size={18} strokeWidth={2} className="inline-icon" /> Configuración
                 </button>
@@ -830,21 +861,22 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                             accept="image/*"
                             onChange={handleImageUpload}
                             disabled={uploadingImage}
-                            className="block w-full text-sm text-gray-900 dark:text-gray-100
+                            className="block w-full text-sm
                               file:mr-4 file:py-2 file:px-4
                               file:rounded-md file:border-0
                               file:text-sm file:font-semibold
                               file:bg-primary file:text-white
                               hover:file:bg-primary-light
                               file:cursor-pointer cursor-pointer"
+                            style={{ color: 'var(--color-text-primary)' }}
                           />
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                             PNG, JPG, GIF o WEBP (máx. 5MB)
                           </p>
                         </div>
                       )}
                       {uploadingImage && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
+                        <p className="text-sm mt-2 flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
                           <Clock size={14} strokeWidth={2} /> Subiendo imagen...
                         </p>
                       )}
@@ -855,7 +887,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                 {/* TAB: CONFIGURACIÓN */}
                 {activeTab === 'config' && (
                   <div className="space-y-6 pt-6">
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       Próximamente: Configuraciones avanzadas del contenido
                     </p>
                   </div>
@@ -942,13 +974,14 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                   ></iframe>
                 </div>
               ) : selectedContent.type === 'link' ? (
-                <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Enlace:</p>
+                <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                  <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>Enlace:</p>
                   <a
                     href={selectedContent.body}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-700 dark:text-gray-300 hover:underline break-all"
+                    className="hover:underline break-all"
+                    style={{ color: 'var(--color-text-primary)' }}
                   >
                     {selectedContent.body}
                   </a>
@@ -959,12 +992,12 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                 </div>
               )}
 
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+              <div className="mt-6 pt-6 border-t" style={{ borderColor: 'var(--color-border)' }}>
+                <p className="text-sm flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
                   <Calendar size={14} strokeWidth={2} /> Creado: {selectedContent.createdAt && new Date(selectedContent.createdAt.seconds * 1000).toLocaleString('es-AR')}
                 </p>
                 {selectedContent.updatedAt && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                  <p className="text-sm mt-1 flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
                     <Edit size={14} strokeWidth={2} /> Actualizado: {new Date(selectedContent.updatedAt.seconds * 1000).toLocaleString('es-AR')}
                   </p>
                 )}
