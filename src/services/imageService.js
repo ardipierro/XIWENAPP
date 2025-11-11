@@ -5,6 +5,7 @@
  * Servicio para generar imágenes usando DALL-E y Stability AI
  */
 
+import logger from '../utils/logger';
 import { getAIConfig, callAI } from '../firebase/aiConfig';
 import { getProviderById } from '../constants/aiFunctions';
 
@@ -93,7 +94,7 @@ class ImageService {
         model: functionConfig.model
       };
     } catch (error) {
-      console.error('Error generating image with DALL-E:', error);
+      logger.error('Error generating image with DALL-E:', error);
       return {
         success: false,
         error: error.message || 'Error al generar imagen con DALL-E'
@@ -151,7 +152,7 @@ class ImageService {
         model: functionConfig.model
       };
     } catch (error) {
-      console.error('Error generating image with Stability:', error);
+      logger.error('Error generating image with Stability:', error);
       return {
         success: false,
         error: error.message || 'Error al generar imagen con Stability AI'

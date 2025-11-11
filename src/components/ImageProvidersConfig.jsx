@@ -6,12 +6,13 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Image, Palette, Sparkles, Check, X, Loader, Download, Play } from 'lucide-react';
+import { Image, Palette, Sparkles, Check, X, Download, Play } from 'lucide-react';
+import logger from '../utils/logger';
 import imageService from '../services/imageService';
 import { getAIConfig } from '../firebase/aiConfig';
 import { AI_FUNCTIONS, getProviderById } from '../constants/aiFunctions';
 import ImageGenerationDemo from './ImageGenerationDemo';
-import './ImageProvidersConfig.css';
+import { BaseButton, BaseCard, BaseLoading, BaseBadge } from './common';
 
 function ImageProvidersConfig() {
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,7 @@ function ImageProvidersConfig() {
       const aiConfig = await getAIConfig();
       setConfig(aiConfig);
     } catch (error) {
-      console.error('Error loading config:', error);
+      logger.error('Error loading config:', error);
     } finally {
       setLoading(false);
     }
@@ -81,6 +82,7 @@ function ImageProvidersConfig() {
       }
     } catch (error) {
       setTestResults(prev => ({ ...prev, [functionId]: 'error' }));
+      logger.error('Error generating test image:', error);
       alert(`Error al generar imagen: ${error.message}`);
     }
   };
@@ -114,6 +116,7 @@ function ImageProvidersConfig() {
       }
     } catch (error) {
       setTestResults(prev => ({ ...prev, [functionId]: 'error' }));
+      logger.error('Error generating custom image:', error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -128,65 +131,69 @@ function ImageProvidersConfig() {
 
   const getStatusBadge = (status) => {
     const badges = {
-      unconfigured: { label: 'Sin configurar', className: 'status-unconfigured' },
-      configured: { label: 'Configurado', className: 'status-configured' },
-      active: { label: 'Activo', className: 'status-active' }
+      unconfigured: { variant: 'danger', label: 'Sin configurar' },
+      configured: { variant: 'default', label: 'Configurado' },
+      active: { variant: 'success', label: 'Activo' }
     };
     return badges[status] || badges.unconfigured;
   };
 
   if (loading) {
-    return (
-      <div className="image-providers-loading">
-        <Loader className="spinner" size={32} />
-        <p>Cargando configuración...</p>
-      </div>
-    );
+    return <BaseLoading variant="fullscreen" text="Cargando configuración..." />;
   }
 
   // Si está en modo demo, mostrar el componente de demostración
   if (showDemo) {
     return (
-      <div className="image-providers-container">
-        <button
+      <div className="p-4 md:p-6 lg:p-8">
+        <BaseButton
+          variant="outline"
           onClick={() => setShowDemo(false)}
-          className="btn-back"
+          className="mb-6"
         >
           ← Volver a Configuración
-        </button>
+        </BaseButton>
         <ImageGenerationDemo />
       </div>
     );
   }
 
   return (
-    <div className="image-providers-container">
-      <div className="image-providers-header">
-        <div className="header-content">
-          <Palette size={32} />
+    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 md:gap-6 mb-8">
+        <div className="flex items-center gap-4 md:gap-6 flex-1">
+          <Palette size={32} className="text-primary-600 dark:text-primary-400 flex-shrink-0" />
           <div>
-            <h1>Proveedores de Imágenes IA</h1>
-            <p>Configura DALL-E y Stability AI para generar imágenes educativas</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white m-0">
+              Proveedores de Imágenes IA
+            </h1>
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1 m-0">
+              Configura DALL-E y Stability AI para generar imágenes educativas
+            </p>
           </div>
         </div>
-        <button
-          className="btn-demo"
+        <BaseButton
+          variant="primary"
+          icon={Play}
           onClick={() => setShowDemo(true)}
+          className="w-full md:w-auto whitespace-nowrap"
         >
-          <Play size={20} />
           Tareas de Demostración
-        </button>
+        </BaseButton>
       </div>
 
-      <div className="providers-info-banner">
-        <Sparkles size={20} />
-        <div>
+      {/* Info Banner */}
+      <div className="flex items-start gap-3 md:gap-4 p-4 md:p-5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl mb-8 shadow-lg">
+        <Sparkles size={20} className="flex-shrink-0 mt-0.5" />
+        <div className="text-sm md:text-base">
           <strong>Nota importante:</strong> Para configurar las API keys, ve a{' '}
           <strong>Tareas IA</strong> en el menú lateral y configura las funciones de imagen.
         </div>
       </div>
 
-      <div className="image-functions-grid">
+      {/* Image Functions Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 mb-12">
         {imageFunctions.map((fn) => {
           const status = getFunctionStatus(fn.id);
           const statusBadge = getStatusBadge(status);
@@ -197,31 +204,44 @@ function ImageProvidersConfig() {
           const generatedImage = generatedImages[fn.id];
 
           return (
-            <div key={fn.id} className="image-function-card">
-              <div className="card-header">
-                <div className="card-icon">
+            <BaseCard
+              key={fn.id}
+              hover
+              className="flex flex-col h-full"
+            >
+              {/* Card Header */}
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-primary-600 to-indigo-600 rounded-xl text-white flex-shrink-0">
                   <IconComponent size={24} />
                 </div>
-                <div className="card-title">
-                  <h3>{fn.name}</h3>
-                  <span className={`status-badge ${statusBadge.className}`}>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 m-0">
+                    {fn.name}
+                  </h3>
+                  <BaseBadge variant={statusBadge.variant}>
                     {statusBadge.label}
-                  </span>
+                  </BaseBadge>
                 </div>
               </div>
 
-              <p className="card-description">{fn.description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 m-0">
+                {fn.description}
+              </p>
 
-              <div className="card-provider">
-                <ProviderIcon size={16} />
-                <span>{provider?.name || 'Unknown'}</span>
-                <span className="provider-model">
+              {/* Provider Info */}
+              <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4 text-sm">
+                <ProviderIcon size={16} className="text-primary-600 dark:text-primary-400" />
+                <span className="text-gray-700 dark:text-gray-300">{provider?.name || 'Unknown'}</span>
+                <span className="ml-auto text-xs font-mono text-gray-500 dark:text-gray-400">
                   {fn.defaultConfig.model}
                 </span>
               </div>
 
-              <div className="card-prompt">
-                <label>Descripción de la imagen:</label>
+              {/* Prompt Input */}
+              <div className="mb-4 flex-grow">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Descripción de la imagen:
+                </label>
                 <textarea
                   placeholder="Ej: Un gato jugando con una pelota, estilo cartoon colorido"
                   value={customPrompts[fn.id]}
@@ -233,66 +253,53 @@ function ImageProvidersConfig() {
                   }
                   disabled={status === 'unconfigured'}
                   rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm resize-vertical focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 />
               </div>
 
-              <div className="card-actions">
-                <button
-                  className="btn-secondary"
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                <BaseButton
+                  variant="outline"
+                  size="sm"
+                  icon={Sparkles}
                   onClick={() => handleTestGeneration(fn.id)}
                   disabled={status === 'unconfigured' || testState === 'loading'}
+                  loading={testState === 'loading'}
+                  className="flex-1"
                 >
-                  {testState === 'loading' ? (
-                    <>
-                      <Loader className="spinner" size={16} />
-                      Generando...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={16} />
-                      Prueba Rápida
-                    </>
-                  )}
-                </button>
-
-                <button
-                  className="btn-primary"
+                  Prueba Rápida
+                </BaseButton>
+                <BaseButton
+                  variant="primary"
+                  size="sm"
+                  icon={Image}
                   onClick={() => handleCustomGeneration(fn.id)}
                   disabled={
                     status === 'unconfigured' ||
                     testState === 'loading' ||
                     !customPrompts[fn.id]?.trim()
                   }
+                  loading={testState === 'loading'}
+                  className="flex-1"
                 >
-                  {testState === 'loading' ? (
-                    <>
-                      <Loader className="spinner" size={16} />
-                      Generando...
-                    </>
-                  ) : (
-                    <>
-                      <Image size={16} />
-                      Generar
-                    </>
-                  )}
-                </button>
+                  Generar
+                </BaseButton>
               </div>
 
+              {/* Generated Image Preview */}
               {testState === 'success' && generatedImage && (
-                <div className="generated-image-preview">
+                <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 group">
                   <img
-                    src={
-                      generatedImage.startsWith('data:')
-                        ? generatedImage
-                        : generatedImage
-                    }
+                    src={generatedImage}
                     alt="Generated"
+                    className="w-full h-auto block"
                   />
-                  <div className="image-overlay">
+                  <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <a
                       href={generatedImage}
                       download={`${fn.id}-${Date.now()}.png`}
-                      className="download-btn"
+                      className="w-12 h-12 flex items-center justify-center bg-white rounded-full text-primary-600 hover:scale-110 transition-transform"
                     >
                       <Download size={20} />
                     </a>
@@ -300,47 +307,61 @@ function ImageProvidersConfig() {
                 </div>
               )}
 
+              {/* Result Messages */}
               {testState === 'success' && !generatedImage && (
-                <div className="test-result success">
-                  <Check size={20} />
-                  <span>Generación exitosa</span>
+                <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm">
+                  <Check size={20} className="text-green-600 dark:text-green-400" />
+                  <span className="text-green-700 dark:text-green-300 font-medium">
+                    Generación exitosa
+                  </span>
                 </div>
               )}
 
               {testState === 'error' && (
-                <div className="test-result error">
-                  <X size={20} />
-                  <span>Error en la generación</span>
+                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm">
+                  <X size={20} className="text-red-600 dark:text-red-400" />
+                  <span className="text-red-700 dark:text-red-300 font-medium">
+                    Error en la generación
+                  </span>
                 </div>
               )}
-            </div>
+            </BaseCard>
           );
         })}
       </div>
 
-      <div className="providers-guide">
-        <h2>Guía de Uso</h2>
-        <div className="guide-grid">
-          <div className="guide-card">
-            <Image size={24} />
-            <h3>Generador de Imágenes</h3>
-            <p>
+      {/* Guide Section */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 md:p-8">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 m-0">
+          Guía de Uso
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+            <Image size={24} className="text-primary-600 dark:text-primary-400 mb-4" />
+            <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 m-0">
+              Generador de Imágenes
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 m-0 leading-relaxed">
               Usa DALL-E para crear imágenes educativas simples y claras. Ideal
               para ilustrar conceptos básicos y vocabulario.
             </p>
           </div>
-          <div className="guide-card">
-            <Palette size={24} />
-            <h3>Creador de Ilustraciones</h3>
-            <p>
+          <div className="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+            <Palette size={24} className="text-primary-600 dark:text-primary-400 mb-4" />
+            <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 m-0">
+              Creador de Ilustraciones
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 m-0 leading-relaxed">
               Usa Stability AI para ilustraciones artísticas más complejas. Gran
               control sobre estilo y detalles.
             </p>
           </div>
-          <div className="guide-card">
-            <Sparkles size={24} />
-            <h3>Vocabulario Visual</h3>
-            <p>
+          <div className="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+            <Sparkles size={24} className="text-primary-600 dark:text-primary-400 mb-4" />
+            <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 m-0">
+              Vocabulario Visual
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 m-0 leading-relaxed">
               Genera imágenes específicas para enseñar palabras. Cada imagen debe
               mostrar claramente el concepto sin ambigüedad.
             </p>
