@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Loader2, Wand2 } from 'lucide-react';
 import { BaseModal, BaseButton } from '../base';
-import AIService from '../../services/aiService';
+import aiService from '../../services/aiService';
 
 /**
  * ExerciseMakerModal - AI-powered Exercise Generator
@@ -41,11 +41,11 @@ function ExerciseMakerModal({ isOpen, onClose, onSave }) {
   const initializeAI = async () => {
     setLoading(true);
     try {
-      const hasConfig = await AIService.initialize();
-      const availableProviders = AIService.getAvailableProviders();
+      const hasConfig = await aiService.initialize();
+      const availableProviders = aiService.getAvailableProviders();
 
       setProviders(availableProviders);
-      setSelectedProvider(AIService.getCurrentProvider());
+      setSelectedProvider(aiService.getCurrentProvider());
       setInitialized(true);
 
       if (!hasConfig) {
@@ -63,7 +63,7 @@ function ExerciseMakerModal({ isOpen, onClose, onSave }) {
     setResult(null);
 
     try {
-      const response = await AIService.generateExercises(form);
+      const response = await aiService.generateExercises(form);
 
       if (response.success) {
         setResult(response.data);
@@ -78,7 +78,7 @@ function ExerciseMakerModal({ isOpen, onClose, onSave }) {
   };
 
   const handleProviderChange = (providerId) => {
-    AIService.setProvider(providerId);
+    aiService.setProvider(providerId);
     setSelectedProvider(providerId);
   };
 

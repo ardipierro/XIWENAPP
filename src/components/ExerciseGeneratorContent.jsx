@@ -10,7 +10,7 @@ import BaseSelect from './common/BaseSelect';
 import BaseTextarea from './common/BaseTextarea';
 import BaseAlert from './common/BaseAlert';
 import BaseInput from './common/BaseInput';
-import AIService from '../services/aiService';
+import aiService from '../services/aiService';
 import { AI_PROVIDERS } from '../constants/aiFunctions';
 import { callAI, getAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
@@ -490,7 +490,7 @@ const ExerciseGeneratorContent = ({ onNavigateToAIConfig, onExercisesGenerated }
   });
 
   // AI Provider state
-  const [selectedProvider, setSelectedProvider] = useState(AIService.getCurrentProvider() || 'openai');
+  const [selectedProvider, setSelectedProvider] = useState(aiService.getCurrentProvider() || 'openai');
   const [availableProviders, setAvailableProviders] = useState([]);
 
   // AI Configuration state
@@ -510,7 +510,7 @@ const ExerciseGeneratorContent = ({ onNavigateToAIConfig, onExercisesGenerated }
 
   // Load available providers on mount
   useEffect(() => {
-    const providers = AIService.getAvailableProviders();
+    const providers = aiService.getAvailableProviders();
     setAvailableProviders(providers);
   }, []);
 
@@ -518,7 +518,7 @@ const ExerciseGeneratorContent = ({ onNavigateToAIConfig, onExercisesGenerated }
   const handleProviderChange = (e) => {
     const providerName = e.target.value;
     setSelectedProvider(providerName);
-    AIService.setProvider(providerName);
+    aiService.setProvider(providerName);
     setError(null);
   };
 
