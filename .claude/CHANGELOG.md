@@ -4,7 +4,28 @@
 
 ---
 
-## [2025-11-11] - Reorganización completa de documentación
+## [2025-11-11-b] - Clarificación sobre feature changelogs
+
+### 🎯 Cambios
+- Movido `CHANGELOG_HOMEWORK_CORRECTION.md` de `.claude/` al directorio raíz
+- Actualizado `INDEX.md` para clarificar que feature changelogs viven en root
+- Actualizado `GUIDE.md` con nota sobre ubicación de feature changelogs
+
+### 📁 Estructura de Changelogs
+
+**`.claude/CHANGELOG.md`** (este archivo):
+- Solo para cambios en la documentación de `.claude/`
+- Reorganizaciones, actualizaciones de archivos de docs, etc.
+
+**Root directory** (`CHANGELOG_*.md`):
+- Changelogs de features implementadas
+- `CHANGELOG_HOMEWORK_CORRECTION.md` - Sistema de corrección automática
+- `CHANGELOG_NOCTURNO.md` - PWA, dark mode, gestión de ejercicios
+- `CHANGELOG_EXERCISE_BUILDER_*.md` - Fases del exercise builder
+
+---
+
+## [2025-11-11-a] - Reorganización completa de documentación
 
 ### 🎯 Resumen
 Consolidación de 10 archivos fragmentados en 6 archivos organizados y actualizados.

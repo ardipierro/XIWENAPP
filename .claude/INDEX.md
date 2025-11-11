@@ -28,7 +28,9 @@ Esta carpeta contiene **6 archivos principales** de documentación actualizados:
 | **DESIGN_SYSTEM.md** | 18 KB | Colores, responsive, UI components | Antes de crear UI |
 | **EXERCISE_BUILDER.md** | 17 KB | Sistema de ejercicios ELE | Al trabajar con ejercicios |
 | **CONTENT_SCHEMA.md** | 7 KB | Arquitectura de datos | Al trabajar con contenidos |
-| **CHANGELOG.md** | 6 KB | Historial de cambios | Para ver cambios recientes |
+| **CHANGELOG.md** | 6 KB | Historial de cambios en documentación | Para ver cambios en docs |
+
+> 📝 **Nota:** Los changelogs de **features** están en el directorio raíz (ej: `CHANGELOG_HOMEWORK_CORRECTION.md`, `CHANGELOG_NOCTURNO.md`), no en `.claude/`.
 
 ---
 
@@ -72,16 +74,21 @@ Para verificar que estos archivos existen, ejecuta:
 ls -la .claude/
 ```
 
-Deberías ver:
+Deberías ver (en `.claude/`):
 - ✅ GUIDE.md
 - ✅ CODING_STANDARDS.md
 - ✅ DESIGN_SYSTEM.md
 - ✅ EXERCISE_BUILDER.md
 - ✅ CONTENT_SCHEMA.md
-- ✅ CHANGELOG.md
+- ✅ CHANGELOG.md (solo cambios de documentación)
 - ✅ INDEX.md (este archivo)
 - ✅ README.txt
 - ✅ settings.local.json
+
+Y en el directorio raíz encontrarás:
+- 📝 CHANGELOG_HOMEWORK_CORRECTION.md (feature: corrección automática)
+- 📝 CHANGELOG_NOCTURNO.md (features: PWA, dark mode, etc.)
+- 📝 CHANGELOG_EXERCISE_BUILDER_*.md (features: exercise builder)
 
 ---
 
