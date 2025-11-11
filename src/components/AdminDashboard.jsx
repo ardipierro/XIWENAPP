@@ -41,7 +41,8 @@ import {
   DollarSign,
   Zap,
   Key,
-  Palette
+  Palette,
+  Info
 } from 'lucide-react';
 import {
   loadStudents,
@@ -137,7 +138,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAICredentialsModal, setShowAICredentialsModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
-  const [settingsTab, setSettingsTab] = useState('credentials'); // 'credentials' | 'theme'
+  const [settingsTab, setSettingsTab] = useState('general'); // 'general' | 'credentials' | 'theme'
   const [credentialsRefresh, setCredentialsRefresh] = useState(0); // Para forzar re-render
   const [aiCredentials, setAiCredentials] = useState({
     claude: true,
@@ -767,6 +768,19 @@ function AdminDashboard({ user, userRole, onLogout }) {
             <div className="border-b border-gray-200 dark:border-gray-700">
               <div className="flex gap-4">
                 <button
+                  onClick={() => setSettingsTab('general')}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
+                    ${settingsTab === 'general'
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }
+                  `}
+                >
+                  <Info className="w-5 h-5" />
+                  General
+                </button>
+                <button
                   onClick={() => setSettingsTab('credentials')}
                   className={`
                     flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
@@ -795,32 +809,37 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
-            {/* Tab Content: Credentials */}
-            {settingsTab === 'credentials' && (
+            {/* Tab Content: General */}
+            {settingsTab === 'general' && (
               <div className="space-y-6">
                 <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
                   <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
-              <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
-                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
-                  <span className="font-medium">Application Version</span>
-                  <span>v1.0.0</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
-                  <span className="font-medium">Environment</span>
-                  <span>{import.meta.env.MODE}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
-                  <span className="font-medium">Admin Email</span>
-                  <span>{user.email}</span>
-                </div>
-                <div className="flex justify-between py-2">
-                  <span className="font-medium">Firebase Project</span>
-                  <span>xiwen-app-2026</span>
+                  <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
+                    <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                      <span className="font-medium">Application Version</span>
+                      <span>v1.0.0</span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                      <span className="font-medium">Environment</span>
+                      <span>{import.meta.env.MODE}</span>
+                    </div>
+                    <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                      <span className="font-medium">Admin Email</span>
+                      <span>{user.email}</span>
+                    </div>
+                    <div className="flex justify-between py-2">
+                      <span className="font-medium">Firebase Project</span>
+                      <span>xiwen-app-2026</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* AI Credentials Section */}
+            {/* Tab Content: Credentials */}
+            {settingsTab === 'credentials' && (
+              <div className="space-y-6">
+                {/* AI Credentials Section */}
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <Settings className="w-5 h-5" />
