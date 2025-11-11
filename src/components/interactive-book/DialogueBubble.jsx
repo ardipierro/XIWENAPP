@@ -23,19 +23,6 @@ function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
   const hasExtras = line.notes?.length > 0 || line.translation || line.audioUrl;
   const hasExercise = line.interactiveType && line.exercise;
 
-  // Colores por personaje (puedes personalizarlos)
-  const getCharacterColor = (character) => {
-    const colors = {
-      'mozo': 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700',
-      'sofia': 'bg-pink-100 dark:bg-pink-900/30 border-pink-300 dark:border-pink-700',
-      'andres': 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700',
-      'default': 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700'
-    };
-    return colors[character.toLowerCase()] || colors.default;
-  };
-
-  const bubbleColor = getCharacterColor(line.character);
-
   return (
     <div className={`flex gap-3 mb-4 ${isRight ? 'flex-row-reverse' : 'flex-row'}`}>
       {/* Avatar */}
@@ -53,9 +40,25 @@ function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
         </div>
 
         {/* Burbuja principal */}
-        <div className={`relative rounded-2xl border-2 ${bubbleColor} px-4 py-3 shadow-sm ${isRight ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
+        <div
+          className={`relative ${isRight ? 'rounded-tr-none' : 'rounded-tl-none'}`}
+          style={{
+            backgroundColor: isRight ? 'var(--bubble-bg-right)' : 'var(--bubble-bg-left)',
+            color: isRight ? 'var(--bubble-text-right)' : 'var(--bubble-text-left)',
+            borderRadius: 'var(--bubble-border-radius)',
+            borderWidth: 'var(--bubble-border-width)',
+            borderStyle: 'var(--bubble-border-style)',
+            borderColor: 'var(--bubble-border-color)',
+            padding: 'var(--bubble-padding)',
+            fontFamily: 'var(--book-font-family)',
+            fontSize: 'var(--book-font-size)',
+            lineHeight: 'var(--book-line-height)',
+            fontWeight: 'var(--book-font-weight)',
+            boxShadow: 'var(--card-shadow)'
+          }}
+        >
           {/* Texto del diálogo */}
-          <p className="text-base text-gray-900 dark:text-white leading-relaxed">
+          <p style={{ margin: 0 }}>
             {line.text}
           </p>
 

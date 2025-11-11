@@ -28,24 +28,35 @@ function BaseBadge({
   children,
   className = '',
 }) {
-  // Variant styles
-  const variants = {
-    default: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-    primary: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300',
-    success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    warning: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-    danger: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-    info: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-  };
-
-  // Dot colors (para dot indicator)
-  const dotColors = {
-    default: 'bg-gray-400 dark:bg-gray-500',
-    primary: 'bg-zinc-500 dark:bg-zinc-400',
-    success: 'bg-green-500 dark:bg-green-400',
-    warning: 'bg-amber-500 dark:bg-amber-400',
-    danger: 'bg-red-500 dark:bg-red-400',
-    info: 'bg-gray-500 dark:bg-gray-400',
+  // Variant styles using CSS variables
+  const getVariantStyle = (variant) => {
+    const styles = {
+      default: {
+        backgroundColor: 'var(--badge-info-bg, #e5e7eb)',
+        color: 'var(--badge-info-text, #1f2937)'
+      },
+      primary: {
+        backgroundColor: 'var(--badge-primary-bg, #3b82f6)',
+        color: 'var(--badge-primary-text, #ffffff)'
+      },
+      success: {
+        backgroundColor: 'var(--badge-success-bg, #10b981)',
+        color: 'var(--badge-success-text, #ffffff)'
+      },
+      warning: {
+        backgroundColor: 'var(--badge-warning-bg, #f59e0b)',
+        color: 'var(--badge-warning-text, #ffffff)'
+      },
+      danger: {
+        backgroundColor: 'var(--badge-danger-bg, #ef4444)',
+        color: 'var(--badge-danger-text, #ffffff)'
+      },
+      info: {
+        backgroundColor: 'var(--badge-info-bg, #8b5cf6)',
+        color: 'var(--badge-info-text, #ffffff)'
+      }
+    };
+    return styles[variant] || styles.default;
   };
 
   // Size styles
@@ -61,19 +72,21 @@ function BaseBadge({
     lg: 16,
   };
 
+  const variantStyle = getVariantStyle(variant);
+
   return (
     <span
       className={`
         inline-flex items-center gap-1.5 font-medium
         ${rounded ? 'rounded-full' : 'rounded-md'}
-        ${variants[variant]}
         ${sizes[size]}
         ${className}
       `}
+      style={variantStyle}
     >
       {/* Dot indicator */}
       {dot && (
-        <span className={`w-1.5 h-1.5 rounded-full ${dotColors[variant]}`} />
+        <span className="w-1.5 h-1.5 rounded-full opacity-70" />
       )}
 
       {/* Icon */}

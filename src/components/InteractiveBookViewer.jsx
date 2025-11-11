@@ -23,6 +23,7 @@ import {
   Trophy
 } from 'lucide-react';
 import logger from '../utils/logger';
+import './interactive-book/styles.css';
 import {
   BaseCard,
   BaseButton,
