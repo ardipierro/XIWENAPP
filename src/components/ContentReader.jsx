@@ -22,7 +22,10 @@ import {
   ZoomOut,
   Settings,
   GripHorizontal,
-  Move
+  Move,
+  Edit3,
+  Eye,
+  RotateCcw
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import {
@@ -87,6 +90,7 @@ const FONTS = {
 function ContentReader({ contentId, initialContent, userId, readOnly = false }) {
   // Estados principales
   const [content, setContent] = useState(initialContent || '');
+  const [originalContent, setOriginalContent] = useState(initialContent || '');
   const [annotations, setAnnotations] = useState({
     highlights: [],
     notes: [],
@@ -100,19 +104,18 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const [highlighterStyle, setHighlighterStyle] = useState('classic');
   const [brushType, setBrushType] = useState('medium');
 
+  // Estados de edición de contenido
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedContent, setEditedContent] = useState('');
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
+
   // Estados de UI
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [showTextForm, setShowTextForm] = useState(false);
   const [currentNote, setCurrentNote] = useState({ text: '', position: null });
-  const [currentText, setCurrentText] = useState({
-    text: '',
-    position: null,
-    font: 'sans',
-    color: 'black',
-    size: 16
-  });
+  const [currentText, setCurrentText] = useState({ text: '', position: null });
   const [selectedText, setSelectedText] = useState('');
 
   // Estados de visualización
@@ -277,9 +280,9 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       id: Date.now().toString(),
       text: currentText.text,
       position: currentText.position,
-      font: currentText.font,
-      color: currentText.color,
-      size: currentText.size,
+      font: contentFont, // Usa el selector global
+      color: selectedColor, // Usa el selector global
+      size: fontSize, // Usa el selector global
       timestamp: Date.now()
     };
 
@@ -289,7 +292,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     }));
 
     setShowTextForm(false);
-    setCurrentText({ text: '', position: null, font: 'sans', color: 'black', size: 16 });
+    setCurrentText({ text: '', position: null });
   };
 
   /**
@@ -310,6 +313,49 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       ...prev,
       floatingTexts: prev.floatingTexts.filter(text => text.id !== textId)
     }));
+  };
+
+  /**
+   * EDIT MODE - Edición del contenido
+   */
+  const handleEnterEditMode = () => {
+    setIsEditMode(true);
+    setEditedContent(content);
+    setSelectedTool('select'); // Cambiar a modo selección al entrar en edit
+  };
+
+  const handleExitEditMode = () => {
+    setIsEditMode(false);
+    setShowOriginal(false);
+  };
+
+  const handleContentEdit = (e) => {
+    const newContent = e.currentTarget.innerHTML;
+    setEditedContent(newContent);
+    setHasUnsavedEdits(newContent !== content);
+  };
+
+  const handleSaveContentEdits = () => {
+    setContent(editedContent);
+    setHasUnsavedEdits(false);
+    logger.info('Content edits saved', 'ContentReader');
+    alert('✅ Ediciones guardadas en el contenido');
+  };
+
+  const handleDiscardContentEdits = () => {
+    setEditedContent(content);
+    setHasUnsavedEdits(false);
+    logger.info('Content edits discarded', 'ContentReader');
+  };
+
+  const handleResetToOriginal = () => {
+    if (confirm('¿Restaurar al contenido original? Se perderán todas las ediciones del texto.')) {
+      setContent(originalContent);
+      setEditedContent(originalContent);
+      setHasUnsavedEdits(false);
+      logger.info('Content reset to original', 'ContentReader');
+      alert('✅ Contenido restaurado al original');
+    }
   };
 
   /**
@@ -636,6 +682,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             onClick={() => setSelectedTool('text')}
             disabled={readOnly}
           />
+          <ToolButton
+            icon={<Edit3 className="w-5 h-5" />}
+            label="Editar"
+            active={isEditMode}
+            onClick={isEditMode ? handleExitEditMode : handleEnterEditMode}
+            disabled={readOnly}
+          />
 
           {/* Color picker */}
           <div className="relative">
@@ -649,7 +702,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             </button>
 
             {showColorPicker && (
-              <div className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999] min-w-[200px]">
+              <div className="absolute bottom-full left-0 mb-2 p-3 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999] min-w-[200px]">
                 <div className="grid grid-cols-4 gap-2">
                   {Object.keys(COLORS).map(color => (
                     <button
@@ -671,18 +724,50 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             )}
           </div>
 
-          {/* Settings */}
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className={`p-2 rounded-lg transition-all ${
-              showSettings
-                ? 'bg-accent-500 text-white'
-                : 'bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-700'
-            }`}
-            title="Configuración"
+          {/* Zoom control - Always visible */}
+          <div className="flex items-center gap-1 border-l border-primary-300 dark:border-primary-700 pl-2">
+            <button
+              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+              className="icon-btn"
+              title="Reducir zoom"
+            >
+              <ZoomOut className="w-4 h-4" />
+            </button>
+            <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
+              {fontSize}px
+            </span>
+            <button
+              onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+              className="icon-btn"
+              title="Aumentar zoom"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Font selector - Always visible */}
+          <select
+            value={contentFont}
+            onChange={(e) => setContentFont(e.target.value)}
+            className="px-2 py-1.5 text-sm bg-primary-100 dark:bg-primary-800 text-primary-900 dark:text-primary-100 rounded-lg border border-primary-300 dark:border-primary-700 focus:ring-2 focus:ring-accent-500"
+            title="Fuente del contenido"
           >
-            <Settings className="w-5 h-5" />
-          </button>
+            {Object.entries(FONTS).map(([key, { name }]) => (
+              <option key={key} value={key}>{name}</option>
+            ))}
+          </select>
+
+          {/* Highlighter style - Always visible */}
+          <select
+            value={highlighterStyle}
+            onChange={(e) => setHighlighterStyle(e.target.value)}
+            className="px-2 py-1.5 text-sm bg-primary-100 dark:bg-primary-800 text-primary-900 dark:text-primary-100 rounded-lg border border-primary-300 dark:border-primary-700 focus:ring-2 focus:ring-accent-500"
+            title="Estilo de resaltador"
+          >
+            {Object.entries(HIGHLIGHTER_STYLES).map(([key, { name }]) => (
+              <option key={key} value={key}>{name}</option>
+            ))}
+          </select>
         </div>
 
         {/* Canvas tools */}
@@ -710,6 +795,43 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           </div>
         )}
 
+        {/* Edit mode controls */}
+        {isEditMode && (
+          <div className="flex items-center gap-2 border-l border-primary-300 dark:border-primary-700 pl-2">
+            <button
+              onClick={handleSaveContentEdits}
+              disabled={!hasUnsavedEdits}
+              className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              title="Guardar ediciones"
+            >
+              <Save className="w-4 h-4" />
+              <span className="hidden sm:inline">Guardar</span>
+            </button>
+            <button
+              onClick={handleDiscardContentEdits}
+              disabled={!hasUnsavedEdits}
+              className="icon-btn bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 disabled:opacity-50"
+              title="Descartar cambios"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setShowOriginal(!showOriginal)}
+              className={`icon-btn ${showOriginal ? 'bg-blue-500 text-white' : ''}`}
+              title={showOriginal ? 'Mostrar versión editada' : 'Mostrar versión original'}
+            >
+              <Eye className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleResetToOriginal}
+              className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300"
+              title="Restaurar al original"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex items-center gap-2 border-l border-primary-300 dark:border-primary-700 pl-2">
           <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar">
@@ -728,64 +850,21 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
         </div>
       </div>
 
-      {/* Settings Panel */}
-      {showSettings && (
-        <div className="p-4 bg-primary-100 dark:bg-primary-800 border-b border-primary-200 dark:border-primary-700">
-          <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-4">
-            {/* Highlighter Style */}
-            <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-primary-100 mb-2">
-                Estilo de Resaltador
-              </label>
-              <select
-                value={highlighterStyle}
-                onChange={(e) => setHighlighterStyle(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-primary-900 text-primary-900 dark:text-primary-100 rounded-lg border border-primary-300 dark:border-primary-700 focus:ring-2 focus:ring-accent-500"
-              >
-                {Object.entries(HIGHLIGHTER_STYLES).map(([key, { name }]) => (
-                  <option key={key} value={key}>{name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Font Size */}
-            <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-primary-100 mb-2">
-                Tamaño de Texto ({fontSize}px)
-              </label>
-              <div className="flex items-center gap-2">
-                <button onClick={() => setFontSize(Math.max(12, fontSize - 2))} className="icon-btn">
-                  <ZoomOut className="w-5 h-5" />
-                </button>
-                <input
-                  type="range"
-                  min="12"
-                  max="32"
-                  value={fontSize}
-                  onChange={(e) => setFontSize(Number(e.target.value))}
-                  className="flex-1"
-                />
-                <button onClick={() => setFontSize(Math.min(32, fontSize + 2))} className="icon-btn">
-                  <ZoomIn className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Content Font */}
-            <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-primary-100 mb-2">
-                Fuente del Contenido
-              </label>
-              <select
-                value={contentFont}
-                onChange={(e) => setContentFont(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-primary-900 text-primary-900 dark:text-primary-100 rounded-lg border border-primary-300 dark:border-primary-700 focus:ring-2 focus:ring-accent-500"
-              >
-                {Object.entries(FONTS).map(([key, { name }]) => (
-                  <option key={key} value={key}>{name}</option>
-                ))}
-              </select>
-            </div>
+      {/* Edit Mode Banner */}
+      {isEditMode && (
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 text-center shadow-md">
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <Edit3 className="w-4 h-4" />
+            <span className="font-medium">
+              {showOriginal
+                ? '👁️ Viendo versión original (edición deshabilitada)'
+                : '✏️ Modo edición activo - Click en el texto para editar'}
+            </span>
+            {hasUnsavedEdits && (
+              <span className="ml-2 px-2 py-0.5 bg-yellow-400 text-yellow-900 rounded-full text-xs font-bold">
+                Cambios sin guardar
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -843,17 +922,37 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           )}
 
           {/* Content */}
-          <div
-            ref={contentRef}
-            onMouseUp={handleTextSelection}
-            className={`relative bg-white dark:bg-primary-900 rounded-lg shadow-lg p-8 prose prose-lg dark:prose-invert max-w-none ${FONTS[contentFont].class || ''}`}
-            style={{
-              zIndex: 5,
-              fontSize: `${fontSize}px`,
-              fontFamily: FONTS[contentFont].style || undefined
-            }}
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+          {isEditMode ? (
+            <div
+              ref={contentRef}
+              contentEditable={!showOriginal}
+              onInput={handleContentEdit}
+              onMouseUp={handleTextSelection}
+              suppressContentEditableWarning
+              className={`relative bg-white dark:bg-primary-900 rounded-lg shadow-lg p-8 prose prose-lg dark:prose-invert max-w-none ${FONTS[contentFont].class || ''} ${
+                !showOriginal ? 'ring-2 ring-blue-500' : 'opacity-75'
+              }`}
+              style={{
+                zIndex: 5,
+                fontSize: `${fontSize}px`,
+                fontFamily: FONTS[contentFont].style || undefined,
+                outline: 'none'
+              }}
+              dangerouslySetInnerHTML={{ __html: showOriginal ? content : editedContent }}
+            />
+          ) : (
+            <div
+              ref={contentRef}
+              onMouseUp={handleTextSelection}
+              className={`relative bg-white dark:bg-primary-900 rounded-lg shadow-lg p-8 prose prose-lg dark:prose-invert max-w-none ${FONTS[contentFont].class || ''}`}
+              style={{
+                zIndex: 5,
+                fontSize: `${fontSize}px`,
+                fontFamily: FONTS[contentFont].style || undefined
+              }}
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          )}
 
           {/* Floating Texts */}
           {annotations.floatingTexts.map(floatingText => (
@@ -923,32 +1022,15 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 )}
               </div>
 
-              {/* Resize Handles */}
+              {/* Resize Handle - Solo diagonal */}
               {!readOnly && (
-                <>
-                  {/* Handle horizontal (derecha) */}
-                  <div
-                    className="absolute top-1/2 right-0 -translate-y-1/2 w-2 h-8 cursor-ew-resize resize-handle hover:bg-yellow-500/30 rounded-l transition-colors"
-                    onMouseDown={(e) => handleResizeStart(e, note.id, 'horizontal')}
-                    title="Redimensionar ancho"
-                  />
-
-                  {/* Handle vertical (abajo) */}
-                  <div
-                    className="absolute bottom-0 left-1/2 -translate-x-1/2 h-2 w-8 cursor-ns-resize resize-handle hover:bg-yellow-500/30 rounded-t transition-colors"
-                    onMouseDown={(e) => handleResizeStart(e, note.id, 'vertical')}
-                    title="Redimensionar alto"
-                  />
-
-                  {/* Handle diagonal (esquina inferior derecha) */}
-                  <div
-                    className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize resize-handle hover:bg-yellow-500/50 rounded-tl transition-colors"
-                    onMouseDown={(e) => handleResizeStart(e, note.id, 'diagonal')}
-                    title="Redimensionar ambos"
-                  >
-                    <GripHorizontal className="w-4 h-4 text-yellow-600 dark:text-yellow-400 rotate-45" />
-                  </div>
-                </>
+                <div
+                  className="absolute bottom-0 right-0 w-5 h-5 cursor-nwse-resize resize-handle hover:bg-yellow-500/50 rounded-tl transition-colors flex items-center justify-center"
+                  onMouseDown={(e) => handleResizeStart(e, note.id, 'diagonal')}
+                  title="Redimensionar"
+                >
+                  <GripHorizontal className="w-4 h-4 text-yellow-600 dark:text-yellow-400 rotate-45" />
+                </div>
               )}
             </div>
           ))}
@@ -1068,7 +1150,7 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }
 }
 
 /**
- * Floating Text Form Component
+ * Floating Text Form Component - Usa selectores globales del toolbar
  */
 function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
   return (
@@ -1088,59 +1170,23 @@ function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
         </button>
       </div>
 
-      <div className="space-y-3">
-        <input
-          type="text"
-          value={currentText.text}
-          onChange={(e) => setCurrentText({ ...currentText, text: e.target.value })}
-          placeholder="Escribe el texto..."
-          className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-primary-100 focus:ring-2 focus:ring-accent-500"
-          autoFocus
-        />
+      <input
+        type="text"
+        value={currentText.text}
+        onChange={(e) => setCurrentText({ ...currentText, text: e.target.value })}
+        placeholder="Escribe el texto..."
+        className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-primary-100 focus:ring-2 focus:ring-accent-500"
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onAdd();
+          }
+        }}
+      />
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">Fuente</label>
-            <select
-              value={currentText.font}
-              onChange={(e) => setCurrentText({ ...currentText, font: e.target.value })}
-              className="w-full px-2 py-1.5 text-sm border border-primary-300 dark:border-primary-600 rounded bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-primary-100"
-            >
-              {Object.entries(FONTS).map(([key, { name }]) => (
-                <option key={key} value={key}>{name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">Tamaño</label>
-            <input
-              type="number"
-              min="12"
-              max="48"
-              value={currentText.size}
-              onChange={(e) => setCurrentText({ ...currentText, size: Number(e.target.value) })}
-              className="w-full px-2 py-1.5 text-sm border border-primary-300 dark:border-primary-600 rounded bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-primary-100"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-primary-700 dark:text-primary-300 mb-1">Color</label>
-          <div className="grid grid-cols-4 gap-1">
-            {Object.entries(COLORS).map(([key, color]) => (
-              <button
-                key={key}
-                onClick={() => setCurrentText({ ...currentText, color: key })}
-                className={`w-8 h-8 rounded ${color.bg} border-2 ${
-                  currentText.color === key ? 'border-accent-500' : 'border-primary-300 dark:border-primary-600'
-                }`}
-                title={color.name}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      <p className="mt-2 text-xs text-primary-600 dark:text-primary-400">
+        Usa los selectores del toolbar para cambiar fuente, tamaño y color
+      </p>
 
       <button
         onClick={onAdd}
