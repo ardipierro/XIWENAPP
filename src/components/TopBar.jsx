@@ -24,6 +24,7 @@ import { useUnreadMessages } from '../hooks/useUnreadMessages.js';
 import logger from '../utils/logger.js';
 
 /**
+ * TopBar - 100% Tailwind CSS (sin archivo CSS)
  * Barra superior del dashboard
  * Incluye toggle del sidebar, notificaciones, mensajes y menú de usuario
  *

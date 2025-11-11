@@ -1,5 +1,5 @@
 /**
- * @fileoverview Componente de Login/Registro refactorizado
+ * @fileoverview Componente de Login/Registro refactorizado - 100% Tailwind CSS
  * Usa useAuth hook para toda la lógica de autenticación
  * @module components/Login
  */
@@ -8,7 +8,6 @@ import { useState } from 'react';
 import { LogIn, UserPlus, AlertCircle, CheckCircle, Loader, Lock } from 'lucide-react';
 import useAuth from '../hooks/useAuth.js';
 import { PASSWORD_RESET_NOTIFICATION_DURATION } from '../constants/auth.js';
-import './Login.css';
 
 /**
  * Componente de Login y Registro
@@ -129,12 +128,35 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
+    <div className="min-h-screen
+                    flex justify-center items-center sm:items-stretch sm:items-center
+                    bg-[var(--color-bg-primary)]
+                    p-0 sm:p-6">
+      <div className="bg-[var(--color-bg-secondary)]
+                     rounded-none sm:rounded-2xl
+                     border-0 sm:border sm:border-[var(--color-border)]
+                     shadow-none sm:shadow-[var(--shadow-2xl)]
+                     w-full sm:max-w-[450px]
+                     h-screen sm:h-auto
+                     p-8 sm:p-12
+                     animate-[slideUp_0.3s_ease-out]
+                     flex flex-col justify-center">
         {/* Header */}
-        <div className="login-header">
-          <h1 onClick={() => window.location.href = '/'} style={{ cursor: 'pointer' }}>XIWEN</h1>
-          <p className="login-subtitle">
+        <div className="text-center mb-8">
+          <h1
+            onClick={() => window.location.href = '/'}
+            className="text-3xl sm:text-[32px]
+                      font-bold
+                      text-[var(--color-text-primary)]
+                      m-0 mb-2
+                      tracking-[-0.02em]
+                      cursor-pointer"
+          >
+            XIWEN
+          </h1>
+          <p className="text-sm
+                       text-[var(--color-text-secondary)]
+                       m-0">
             {isRegistering ? 'Crear cuenta de profesor' : 'Plataforma Educativa'}
           </p>
         </div>
@@ -143,7 +165,9 @@ function Login() {
         <form onSubmit={isRegistering ? handleRegister : handleLogin}>
           {/* Email */}
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+              Email
+            </label>
             <input
               id="email"
               type="email"
@@ -152,12 +176,12 @@ function Login() {
               placeholder="profesor@escuela.com"
               required
               disabled={loading}
-              className={hasFieldError('email') ? 'input input-error' : 'input'}
+              className={`input ${hasFieldError('email') ? 'input-error' : ''}`}
               aria-invalid={hasFieldError('email')}
               aria-describedby={hasFieldError('email') ? 'email-error' : undefined}
             />
             {hasFieldError('email') && (
-              <span id="email-error" className="field-error">
+              <span id="email-error" className="block text-[var(--color-error-light)] text-xs mt-1 font-medium">
                 {fieldErrors.email}
               </span>
             )}
@@ -165,7 +189,9 @@ function Login() {
 
           {/* Contraseña */}
           <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
+            <label htmlFor="password" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+              Contraseña
+            </label>
             <input
               id="password"
               type="password"
@@ -174,12 +200,12 @@ function Login() {
               placeholder="Mínimo 6 caracteres"
               required
               disabled={loading}
-              className={hasFieldError('password') ? 'input input-error' : 'input'}
+              className={`input ${hasFieldError('password') ? 'input-error' : ''}`}
               aria-invalid={hasFieldError('password')}
               aria-describedby={hasFieldError('password') ? 'password-error' : undefined}
             />
             {hasFieldError('password') && (
-              <span id="password-error" className="field-error">
+              <span id="password-error" className="block text-[var(--color-error-light)] text-xs mt-1 font-medium">
                 {fieldErrors.password}
               </span>
             )}
@@ -188,7 +214,9 @@ function Login() {
           {/* Confirmar contraseña (solo en registro) */}
           {isRegistering && (
             <div className="form-group">
-              <label htmlFor="confirmPassword">Confirmar contraseña</label>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+                Confirmar contraseña
+              </label>
               <input
                 id="confirmPassword"
                 type="password"
@@ -197,12 +225,12 @@ function Login() {
                 placeholder="Repite tu contraseña"
                 required
                 disabled={loading}
-                className={hasFieldError('confirmPassword') ? 'input input-error' : 'input'}
+                className={`input ${hasFieldError('confirmPassword') ? 'input-error' : ''}`}
                 aria-invalid={hasFieldError('confirmPassword')}
                 aria-describedby={hasFieldError('confirmPassword') ? 'confirm-password-error' : undefined}
               />
               {hasFieldError('confirmPassword') && (
-                <span id="confirm-password-error" className="field-error">
+                <span id="confirm-password-error" className="block text-[var(--color-error-light)] text-xs mt-1 font-medium">
                   {fieldErrors.confirmPassword}
                 </span>
               )}
@@ -211,7 +239,15 @@ function Login() {
 
           {/* Mensajes de error */}
           {error && (
-            <div className="error-message" role="alert">
+            <div className="bg-[var(--color-error-bg)]
+                           border border-[var(--color-error-border)]
+                           rounded-lg
+                           p-3 px-4
+                           mb-6
+                           text-[var(--color-error-light)]
+                           text-sm
+                           flex items-center gap-2"
+                 role="alert">
               <AlertCircle size={16} />
               <span>{error}</span>
             </div>
@@ -219,17 +255,29 @@ function Login() {
 
           {/* Mensaje de éxito (reseteo de contraseña) */}
           {resetEmailSent && (
-            <div className="success-message" role="status">
+            <div className="bg-[var(--color-success-bg)]
+                           border border-[var(--color-success-border)]
+                           rounded-lg
+                           p-3 px-4
+                           mb-6
+                           text-[var(--color-success)]
+                           text-sm
+                           flex items-center gap-2"
+                 role="status">
               <CheckCircle size={16} />
               <span>Email enviado. Revisa tu bandeja de entrada</span>
             </div>
           )}
 
           {/* Botón principal */}
-          <button type="submit" className="btn btn-primary" disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-primary w-full mb-2"
+            disabled={loading}
+          >
             {loading ? (
               <>
-                <Loader size={16} className="spinner" />
+                <Loader size={16} className="animate-[spin_1s_linear_infinite]" />
                 <span>Cargando...</span>
               </>
             ) : isRegistering ? (
@@ -249,7 +297,14 @@ function Login() {
           {!isRegistering && (
             <button
               type="button"
-              className="btn-link"
+              className="bg-transparent border-none
+                        text-[var(--color-text-secondary)]
+                        cursor-pointer text-sm
+                        py-2 px-2 my-2 w-full
+                        no-underline
+                        transition-all duration-200
+                        hover:text-[var(--color-text-primary)] hover:underline
+                        disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleResetPassword}
               disabled={loading}
             >
@@ -258,18 +313,41 @@ function Login() {
           )}
 
           {/* Toggle entre login/registro */}
-          <div className="toggle-mode">
+          <div className="text-center mt-6 pt-6
+                         border-t border-[var(--color-border)]">
             {isRegistering ? (
-              <p>
+              <p className="text-[var(--color-text-secondary)] text-sm m-0">
                 ¿Ya tienes cuenta?{' '}
-                <button type="button" onClick={toggleMode} disabled={loading}>
+                <button
+                  type="button"
+                  onClick={toggleMode}
+                  disabled={loading}
+                  className="bg-transparent border-none
+                            text-[var(--color-text-secondary)]
+                            font-semibold cursor-pointer text-sm
+                            no-underline p-0
+                            transition-all duration-200
+                            hover:text-[var(--color-text-primary)] hover:underline
+                            disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Inicia sesión
                 </button>
               </p>
             ) : (
-              <p>
+              <p className="text-[var(--color-text-secondary)] text-sm m-0">
                 ¿Primera vez?{' '}
-                <button type="button" onClick={toggleMode} disabled={loading}>
+                <button
+                  type="button"
+                  onClick={toggleMode}
+                  disabled={loading}
+                  className="bg-transparent border-none
+                            text-[var(--color-text-secondary)]
+                            font-semibold cursor-pointer text-sm
+                            no-underline p-0
+                            transition-all duration-200
+                            hover:text-[var(--color-text-primary)] hover:underline
+                            disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Crear cuenta
                 </button>
               </p>
@@ -278,12 +356,15 @@ function Login() {
         </form>
 
         {/* Footer */}
-        <div className="login-footer">
-          <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+        <div className="mt-6 pt-6
+                       text-center
+                       border-t border-[var(--color-border)]">
+          <p className="text-[var(--color-text-muted)] text-sm my-2 font-medium
+                       flex items-center justify-center gap-1.5">
             <Lock size={14} />
             <span>Acceso exclusivo para profesores</span>
           </p>
-          <p className="info-text">
+          <p className="text-[var(--color-text-muted)] text-xs my-2 font-normal">
             Todas las preguntas, alumnos e historial son compartidos entre profesores
           </p>
         </div>

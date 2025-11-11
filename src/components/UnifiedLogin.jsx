@@ -1,3 +1,7 @@
+/**
+ * UnifiedLogin - 100% Tailwind CSS (sin archivo CSS)
+ * Login unificado con dark mode permanente
+ */
 import { useState } from 'react';
 import {
   signInWithEmailAndPassword,
@@ -10,7 +14,6 @@ import { auth } from '../firebase/config';
 import { createUserProfile, getUserRole } from '../firebase/firestore';
 import { isAdminEmail, getDefaultRole, ROLE_INFO } from '../firebase/roleConfig';
 import logger from '../utils/logger';
-import './UnifiedLogin.css';
 
 function UnifiedLogin() {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -100,28 +103,28 @@ function UnifiedLogin() {
     try {
       // Crear usuario en Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
+
       // Determinar rol automáticamente
       const role = getDefaultRole(email);
-      
+
       // Crear perfil en Firestore
       await createUserProfile(userCredential.user.uid, {
         email: email,
         name: name,
         role: role
       });
-      
+
       logger.debug(`✅ Usuario registrado con rol: ${role}`);
-      
+
       // Mostrar mensaje especial si es admin
       if (isAdminEmail(email)) {
         logger.debug('👑 ¡Bienvenido Administrador!');
       }
-      
+
       // App.jsx se encargará de redirigir según el rol
     } catch (error) {
       logger.error('Error al registrarse:', error);
-      
+
       if (error.code === 'auth/email-already-in-use') {
         setError('Ya existe una cuenta con este email');
       } else if (error.code === 'auth/invalid-email') {
@@ -151,7 +154,7 @@ function UnifiedLogin() {
       setTimeout(() => setResetEmailSent(false), 5000);
     } catch (error) {
       logger.error('Error al enviar email:', error);
-      
+
       if (error.code === 'auth/user-not-found') {
         setError('No existe una cuenta con este email');
       } else if (error.code === 'auth/invalid-email') {
@@ -165,22 +168,44 @@ function UnifiedLogin() {
   };
 
   return (
-    <div className="unified-login-container">
-      <div className="unified-login-box">
-        <div className="unified-login-header">
-          <div className="unified-login-brand">
-            <GraduationCap size={32} strokeWidth={2} />
-            <h1>XIWEN</h1>
+    <div className="min-h-screen
+                    flex justify-center items-center
+                    bg-[#09090b]
+                    p-5">
+      <div className="bg-[#18181b]
+                     rounded-2xl
+                     border border-[#27272a]
+                     shadow-[0_25px_50px_-12px_rgba(0,0,0,0.75)]
+                     p-8 sm:p-10
+                     w-full max-w-[450px]">
+
+        {/* Header */}
+        <div className="text-center mb-7">
+          <div className="flex items-center justify-center gap-3 mb-2.5">
+            <GraduationCap size={32} strokeWidth={2} className="text-blue-500" />
+            <h1 className="text-3xl sm:text-[28px]
+                          font-bold
+                          text-zinc-100
+                          m-0
+                          tracking-[-0.02em]">
+              XIWEN
+            </h1>
           </div>
-          <p className="unified-login-subtitle">
+          <p className="text-sm
+                       text-zinc-400
+                       m-0">
             {isRegistering ? 'Crear nueva cuenta' : 'Iniciar sesión'}
           </p>
         </div>
 
+        {/* Form */}
         <form onSubmit={isRegistering ? handleRegister : handleLogin}>
+          {/* Name (only register) */}
           {isRegistering && (
-            <div className="form-group">
-              <label htmlFor="name">Nombre completo</label>
+            <div className="mb-4">
+              <label htmlFor="name" className="block text-[13px] font-medium text-zinc-100 mb-1.5">
+                Nombre completo
+              </label>
               <input
                 id="name"
                 type="text"
@@ -189,12 +214,31 @@ function UnifiedLogin() {
                 placeholder="Tu nombre"
                 required
                 disabled={loading}
+                className="w-full
+                          py-3 px-3.5
+                          text-sm
+                          border border-zinc-700
+                          rounded-lg
+                          transition-all duration-200
+                          box-border
+                          bg-[#0a0a0a]
+                          text-zinc-100
+                          placeholder:text-zinc-600
+                          focus:outline-none
+                          focus:border-zinc-600
+                          focus:bg-[#18181b]
+                          disabled:bg-[#18181b]
+                          disabled:cursor-not-allowed
+                          disabled:opacity-50"
               />
             </div>
           )}
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+          {/* Email */}
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-[13px] font-medium text-zinc-100 mb-1.5">
+              Email
+            </label>
             <input
               id="email"
               type="email"
@@ -203,11 +247,30 @@ function UnifiedLogin() {
               placeholder="tu@email.com"
               required
               disabled={loading}
+              className="w-full
+                        py-3 px-3.5
+                        text-sm
+                        border border-zinc-700
+                        rounded-lg
+                        transition-all duration-200
+                        box-border
+                        bg-[#0a0a0a]
+                        text-zinc-100
+                        placeholder:text-zinc-600
+                        focus:outline-none
+                        focus:border-zinc-600
+                        focus:bg-[#18181b]
+                        disabled:bg-[#18181b]
+                        disabled:cursor-not-allowed
+                        disabled:opacity-50"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
+          {/* Password */}
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-[13px] font-medium text-zinc-100 mb-1.5">
+              Contraseña
+            </label>
             <input
               id="password"
               type="password"
@@ -216,12 +279,31 @@ function UnifiedLogin() {
               placeholder="Mínimo 6 caracteres"
               required
               disabled={loading}
+              className="w-full
+                        py-3 px-3.5
+                        text-sm
+                        border border-zinc-700
+                        rounded-lg
+                        transition-all duration-200
+                        box-border
+                        bg-[#0a0a0a]
+                        text-zinc-100
+                        placeholder:text-zinc-600
+                        focus:outline-none
+                        focus:border-zinc-600
+                        focus:bg-[#18181b]
+                        disabled:bg-[#18181b]
+                        disabled:cursor-not-allowed
+                        disabled:opacity-50"
             />
           </div>
 
+          {/* Confirm Password (only register) */}
           {isRegistering && (
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirmar contraseña</label>
+            <div className="mb-4">
+              <label htmlFor="confirmPassword" className="block text-[13px] font-medium text-zinc-100 mb-1.5">
+                Confirmar contraseña
+              </label>
               <input
                 id="confirmPassword"
                 type="password"
@@ -230,32 +312,84 @@ function UnifiedLogin() {
                 placeholder="Repite tu contraseña"
                 required
                 disabled={loading}
+                className="w-full
+                          py-3 px-3.5
+                          text-sm
+                          border border-zinc-700
+                          rounded-lg
+                          transition-all duration-200
+                          box-border
+                          bg-[#0a0a0a]
+                          text-zinc-100
+                          placeholder:text-zinc-600
+                          focus:outline-none
+                          focus:border-zinc-600
+                          focus:bg-[#18181b]
+                          disabled:bg-[#18181b]
+                          disabled:cursor-not-allowed
+                          disabled:opacity-50"
               />
             </div>
           )}
 
+          {/* Error Message */}
           {error && (
-            <div className="error-message">
+            <div className="bg-red-500/10
+                           border border-red-500/30
+                           rounded-lg
+                           py-3 px-3.5
+                           mb-4
+                           text-red-300
+                           text-[13px]
+                           flex items-center gap-2">
               <AlertCircle size={16} />
               <span>{error}</span>
             </div>
           )}
 
+          {/* Success Message */}
           {resetEmailSent && (
-            <div className="success-message">
+            <div className="bg-emerald-500/10
+                           border border-emerald-500/30
+                           rounded-lg
+                           py-3 px-3.5
+                           mb-4
+                           text-emerald-300
+                           text-[13px]
+                           flex items-center gap-2">
               <CheckCircle size={16} />
               <span>Email enviado. Revisa tu bandeja de entrada</span>
             </div>
           )}
 
+          {/* Submit Button */}
           <button
             type="submit"
-            className="btn btn-primary"
+            className="w-full
+                      py-3.5 px-5
+                      text-sm font-semibold
+                      text-zinc-100
+                      bg-[#27272a]
+                      border border-zinc-700
+                      rounded-lg
+                      cursor-pointer
+                      transition-all duration-200
+                      mb-3
+                      flex items-center justify-center gap-2
+                      hover:not(:disabled):bg-zinc-700
+                      hover:not(:disabled):border-zinc-600
+                      hover:not(:disabled):-translate-y-px
+                      hover:not(:disabled):shadow-[0_4px_12px_rgba(0,0,0,0.4)]
+                      active:not(:disabled):bg-[#27272a]
+                      active:not(:disabled):translate-y-0
+                      active:not(:disabled):shadow-none
+                      disabled:opacity-50
+                      disabled:cursor-not-allowed"
             disabled={loading}
           >
             {loading ? (
               <>
-                <Loader size={16} className="spinner" />
+                <Loader size={16} className="animate-[spin_1s_linear_infinite]" />
                 <span>Cargando...</span>
               </>
             ) : isRegistering ? (
@@ -271,10 +405,23 @@ function UnifiedLogin() {
             )}
           </button>
 
+          {/* Reset Password Link (only login) */}
           {!isRegistering && (
             <button
               type="button"
-              className="btn-link"
+              className="w-full
+                        py-2.5
+                        text-[13px]
+                        text-zinc-400
+                        bg-transparent
+                        border-none
+                        cursor-pointer
+                        transition-colors duration-200
+                        mb-4
+                        hover:not(:disabled):text-zinc-100
+                        hover:not(:disabled):underline
+                        disabled:opacity-50
+                        disabled:cursor-not-allowed"
               onClick={handleResetPassword}
               disabled={loading}
             >
@@ -282,9 +429,10 @@ function UnifiedLogin() {
             </button>
           )}
 
-          <div className="toggle-mode">
+          {/* Toggle Mode */}
+          <div className="text-center pt-5 border-t border-[#27272a]">
             {isRegistering ? (
-              <p>
+              <p className="m-0 text-zinc-400 text-[13px]">
                 ¿Ya tienes cuenta?{' '}
                 <button
                   type="button"
@@ -295,12 +443,23 @@ function UnifiedLogin() {
                     setConfirmPassword('');
                   }}
                   disabled={loading}
+                  className="bg-transparent border-none
+                            text-zinc-300
+                            font-semibold
+                            cursor-pointer
+                            p-0
+                            no-underline
+                            transition-colors duration-200
+                            hover:not(:disabled):text-zinc-100
+                            hover:not(:disabled):underline
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed"
                 >
                   Inicia sesión
                 </button>
               </p>
             ) : (
-              <p>
+              <p className="m-0 text-zinc-400 text-[13px]">
                 ¿Primera vez?{' '}
                 <button
                   type="button"
@@ -309,6 +468,17 @@ function UnifiedLogin() {
                     setError('');
                   }}
                   disabled={loading}
+                  className="bg-transparent border-none
+                            text-zinc-300
+                            font-semibold
+                            cursor-pointer
+                            p-0
+                            no-underline
+                            transition-colors duration-200
+                            hover:not(:disabled):text-zinc-100
+                            hover:not(:disabled):underline
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed"
                 >
                   Crear cuenta
                 </button>
@@ -317,10 +487,13 @@ function UnifiedLogin() {
           </div>
         </form>
 
-        <div className="unified-login-footer">
-          <p>Aprende jugando con Xiwen</p>
+        {/* Footer */}
+        <div className="text-center mt-6 pt-5 border-t border-[#27272a]">
+          <p className="my-2 text-zinc-500 text-[13px] font-medium">
+            Aprende jugando con Xiwen
+          </p>
           {isRegistering && (
-            <p className="info-text">
+            <p className="my-2 text-zinc-600 text-xs font-normal">
               Tu rol será asignado automáticamente al registrarte
             </p>
           )}
