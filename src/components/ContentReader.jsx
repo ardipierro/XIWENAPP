@@ -645,7 +645,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   return (
     <div className="flex flex-col h-screen bg-primary-50 dark:bg-primary-950">
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-2 p-3 bg-white dark:bg-primary-900 border-b border-primary-200 dark:border-primary-800 shadow-sm overflow-x-auto">
+      <div className="flex items-center justify-between gap-2 p-3 bg-primary-50 dark:bg-primary-900 border-b border-primary-200 dark:border-primary-800 shadow-sm overflow-x-auto">
         {/* Herramientas principales */}
         <div className="flex items-center gap-2">
           <ToolButton
@@ -702,7 +702,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             </button>
 
             {showColorPicker && (
-              <div className="absolute bottom-full left-0 mb-2 p-3 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999] min-w-[200px]">
+              <div className="absolute bottom-full left-0 mb-2 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999] min-w-[200px]">
                 <div className="grid grid-cols-4 gap-2">
                   {Object.keys(COLORS).map(color => (
                     <button
@@ -929,8 +929,8 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
               onInput={handleContentEdit}
               onMouseUp={handleTextSelection}
               suppressContentEditableWarning
-              className={`relative bg-white dark:bg-primary-900 rounded-lg shadow-lg p-8 prose prose-lg dark:prose-invert max-w-none ${FONTS[contentFont].class || ''} ${
-                !showOriginal ? 'ring-2 ring-blue-500' : 'opacity-75'
+              className={`relative bg-primary-50 dark:bg-primary-900 rounded-lg shadow-lg p-8 prose prose-lg dark:prose-invert max-w-none ${FONTS[contentFont].class || ''} ${
+                !showOriginal ? 'ring-2 ring-accent-500' : 'opacity-75'
               }`}
               style={{
                 zIndex: 5,
@@ -944,7 +944,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             <div
               ref={contentRef}
               onMouseUp={handleTextSelection}
-              className={`relative bg-white dark:bg-primary-900 rounded-lg shadow-lg p-8 prose prose-lg dark:prose-invert max-w-none ${FONTS[contentFont].class || ''}`}
+              className={`relative bg-primary-50 dark:bg-primary-900 rounded-lg shadow-lg p-8 prose prose-lg dark:prose-invert max-w-none ${FONTS[contentFont].class || ''}`}
               style={{
                 zIndex: 5,
                 fontSize: `${fontSize}px`,

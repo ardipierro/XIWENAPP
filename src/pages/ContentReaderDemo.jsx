@@ -9,6 +9,7 @@ import { ArrowLeft, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ContentReader from '../components/ContentReader';
 import useAuth from '../hooks/useAuth';
+import { useTheme } from '../contexts/ThemeContext';
 
 /**
  * Contenido de ejemplo en HTML
@@ -86,6 +87,7 @@ const DEMO_CONTENT = `
 function ContentReaderDemo() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { currentTheme } = useTheme();
   const [showInstructions, setShowInstructions] = useState(true);
 
   return (

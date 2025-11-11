@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Loader2, Wand2 } from 'lucide-react';
 import { BaseModal, BaseButton } from '../base';
-import AIService from '../../services/AIService';
+import AIService from '../../services/aiService';
 
 /**
  * ExerciseMakerModal - AI-powered Exercise Generator
