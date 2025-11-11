@@ -59,19 +59,11 @@ function InteractiveBookViewer() {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [totalPoints, setTotalPoints] = useState(0);
   const [exerciseResults, setExerciseResults] = useState({});
+  const [viewSettings, setViewSettings] = useState({ spacing: 'normal' }); // View settings for layout
   const settingsModal = useModal();
 
   useEffect(() => {
     loadBookData();
-    // Cargar configuración de vista guardada
-    const savedSettings = localStorage.getItem('xiwen_view_settings');
-    if (savedSettings) {
-      try {
-        setViewSettings(JSON.parse(savedSettings));
-      } catch (err) {
-        logger.error('Error loading view settings:', err);
-      }
-    }
   }, []);
 
   const loadBookData = async () => {
