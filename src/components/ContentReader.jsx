@@ -25,7 +25,11 @@ import {
   Move,
   Edit3,
   Eye,
-  RotateCcw
+  RotateCcw,
+  HelpCircle,
+  Bold,
+  Italic,
+  Underline as UnderlineIcon
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import {
@@ -77,6 +81,7 @@ const FONTS = {
   sans: { name: 'Sans Serif', class: 'font-sans' },
   serif: { name: 'Serif', class: 'font-serif' },
   mono: { name: 'Monospace', class: 'font-mono' },
+  montserrat: { name: 'Montserrat', style: 'Montserrat, sans-serif' },
   arial: { name: 'Arial', style: 'Arial, sans-serif' },
   times: { name: 'Times New Roman', style: 'Times New Roman, serif' },
   georgia: { name: 'Georgia', style: 'Georgia, serif' },
@@ -114,6 +119,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [showTextForm, setShowTextForm] = useState(false);
+  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
   const [currentNote, setCurrentNote] = useState({ text: '', position: null });
   const [currentText, setCurrentText] = useState({ text: '', position: null });
   const [selectedText, setSelectedText] = useState('');
@@ -121,6 +127,10 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   // Estados de visualización
   const [fontSize, setFontSize] = useState(16);
   const [contentFont, setContentFont] = useState('sans');
+
+  // Estados de edición rica
+  const [textColor, setTextColor] = useState('#000000');
+  const [showTextColorPicker, setShowTextColorPicker] = useState(false);
 
   // Estados de canvas
   const [isDrawing, setIsDrawing] = useState(false);
@@ -130,6 +140,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
   // Estados de drag & resize
   const [draggingNote, setDraggingNote] = useState(null);
+  const [draggingText, setDraggingText] = useState(null);
   const [resizingNote, setResizingNote] = useState(null);
   const [resizeDirection, setResizeDirection] = useState(null); // 'horizontal', 'vertical', 'diagonal'
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -322,6 +333,12 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     setIsEditMode(true);
     setEditedContent(content);
     setSelectedTool('select'); // Cambiar a modo selección al entrar en edit
+    // Establecer el contenido inicial en el elemento
+    setTimeout(() => {
+      if (contentRef.current && !contentRef.current.innerHTML) {
+        contentRef.current.innerHTML = content;
+      }
+    }, 0);
   };
 
   const handleExitEditMode = () => {
@@ -334,6 +351,34 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     setEditedContent(newContent);
     setHasUnsavedEdits(newContent !== content);
   };
+
+  // Fix: Prevent cursor jump by only setting innerHTML when necessary
+  useEffect(() => {
+    if (isEditMode && contentRef.current && !showOriginal) {
+      // Only update if the content has actually changed (e.g., from external source)
+      if (contentRef.current.innerHTML !== editedContent) {
+        const selection = window.getSelection();
+        const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        const cursorPosition = range ? range.startOffset : 0;
+        const activeNode = range ? range.startContainer : null;
+
+        contentRef.current.innerHTML = editedContent;
+
+        // Restore cursor position
+        if (activeNode && contentRef.current.contains(activeNode)) {
+          try {
+            const newRange = document.createRange();
+            newRange.setStart(activeNode, Math.min(cursorPosition, activeNode.length || 0));
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          } catch (e) {
+            // Si falla, simplemente no restauramos el cursor
+          }
+        }
+      }
+    }
+  }, [isEditMode, editedContent, showOriginal]);
 
   const handleSaveContentEdits = () => {
     setContent(editedContent);
@@ -359,6 +404,23 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   };
 
   /**
+   * Herramientas de edición rica
+   */
+  const applyFormatting = (command, value = null) => {
+    document.execCommand(command, false, value);
+    contentRef.current?.focus();
+  };
+
+  const handleBold = () => applyFormatting('bold');
+  const handleItalic = () => applyFormatting('italic');
+  const handleUnderline = () => applyFormatting('underline');
+  const handleTextColorChange = (color) => {
+    applyFormatting('foreColor', color);
+    setTextColor(color);
+    setShowTextColorPicker(false);
+  };
+
+  /**
    * DRAG & DROP para notas
    */
   const handleNoteMouseDown = (e, noteId) => {
@@ -378,6 +440,24 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     });
   };
 
+  /**
+   * DRAG & DROP para textos flotantes
+   */
+  const handleFloatingTextMouseDown = (e, textId) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const text = annotations.floatingTexts.find(t => t.id === textId);
+    if (!text) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDraggingText(textId);
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
   const handleMouseMove = (e) => {
     if (draggingNote) {
       const containerRect = containerRef.current.getBoundingClientRect();
@@ -390,6 +470,19 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           note.id === draggingNote
             ? { ...note, position: { x: Math.max(0, newX), y: Math.max(0, newY) } }
             : note
+        )
+      }));
+    } else if (draggingText) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newX = e.clientX - containerRect.left - dragOffset.x;
+      const newY = e.clientY - containerRect.top - dragOffset.y;
+
+      setAnnotations(prev => ({
+        ...prev,
+        floatingTexts: prev.floatingTexts.map(text =>
+          text.id === draggingText
+            ? { ...text, position: { x: Math.max(0, newX), y: Math.max(0, newY) } }
+            : text
         )
       }));
     } else if (resizingNote) {
@@ -421,12 +514,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
   const handleMouseUp = () => {
     setDraggingNote(null);
+    setDraggingText(null);
     setResizingNote(null);
     setResizeDirection(null);
   };
 
   useEffect(() => {
-    if (draggingNote || resizingNote) {
+    if (draggingNote || draggingText || resizingNote) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       return () => {
@@ -434,7 +528,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [draggingNote, resizingNote, dragOffset, annotations.notes]);
+  }, [draggingNote, draggingText, resizingNote, dragOffset, annotations.notes, annotations.floatingTexts]);
 
   /**
    * RESIZE para notas
@@ -832,8 +926,45 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           </div>
         )}
 
+        {/* Rich Text Editing Tools (only in edit mode) */}
+        {isEditMode && !showOriginal && (
+          <div className="flex items-center gap-1 border-l border-primary-300 dark:border-primary-700 pl-2">
+            <button onClick={handleBold} className="icon-btn" title="Negrita">
+              <Bold className="w-4 h-4" />
+            </button>
+            <button onClick={handleItalic} className="icon-btn" title="Cursiva">
+              <Italic className="w-4 h-4" />
+            </button>
+            <button onClick={handleUnderline} className="icon-btn" title="Subrayado">
+              <UnderlineIcon className="w-4 h-4" />
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowTextColorPicker(!showTextColorPicker)}
+                className="icon-btn"
+                title="Color de texto"
+              >
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: textColor }} />
+              </button>
+              {showTextColorPicker && (
+                <div className="absolute bottom-full left-0 mb-2 p-2 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999]">
+                  <input
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => handleTextColorChange(e.target.value)}
+                    className="w-20 h-8 cursor-pointer"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex items-center gap-2 border-l border-primary-300 dark:border-primary-700 pl-2">
+          <button onClick={() => setShowInstructionsModal(true)} className="icon-btn" title="Ayuda">
+            <HelpCircle className="w-5 h-5" />
+          </button>
           <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar">
             <Download className="w-5 h-5" />
           </button>
@@ -873,7 +1004,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       <div className="flex-1 overflow-auto">
         <div
           ref={containerRef}
-          className="relative max-w-4xl mx-auto p-8"
+          className="relative w-full p-8"
         >
           {/* Canvas */}
           <canvas
@@ -938,7 +1069,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 fontFamily: FONTS[contentFont].style || undefined,
                 outline: 'none'
               }}
-              dangerouslySetInnerHTML={{ __html: showOriginal ? content : editedContent }}
+              {...(showOriginal ? { dangerouslySetInnerHTML: { __html: content } } : {})}
             />
           ) : (
             <div
@@ -958,22 +1089,26 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           {annotations.floatingTexts.map(floatingText => (
             <div
               key={floatingText.id}
-              className="absolute cursor-move"
+              onMouseDown={(e) => !readOnly && handleFloatingTextMouseDown(e, floatingText.id)}
+              className={`absolute ${!readOnly ? 'cursor-move' : ''}`}
               style={{
                 left: floatingText.position?.x || 0,
                 top: floatingText.position?.y || 0,
-                zIndex: 20,
+                zIndex: draggingText === floatingText.id ? 30 : 20,
                 fontSize: `${floatingText.size}px`,
                 color: COLORS[floatingText.color]?.hex || '#000',
                 fontFamily: FONTS[floatingText.font]?.style || 'inherit'
               }}
             >
-              <div className="flex items-start gap-1">
+              <div className="flex items-start gap-1 bg-white/80 dark:bg-primary-900/80 px-2 py-1 rounded shadow-md">
+                {!readOnly && (
+                  <Move className="w-3 h-3 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
+                )}
                 <span>{floatingText.text}</span>
                 {!readOnly && (
                   <button
                     onClick={() => handleDeleteFloatingText(floatingText.id)}
-                    className="p-0.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded"
+                    className="p-0.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded flex-shrink-0"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -1078,6 +1213,171 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           </div>
         </div>
       </div>
+
+      {/* Instructions Modal */}
+      {showInstructionsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowInstructionsModal(false)}>
+          <div className="bg-white dark:bg-primary-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-gradient-to-r from-accent-500 to-accent-600 text-white px-6 py-4 flex items-center justify-between rounded-t-xl">
+              <div className="flex items-center gap-3">
+                <HelpCircle className="w-6 h-6" />
+                <h2 className="text-xl font-bold">Instrucciones del Lector de Contenido</h2>
+              </div>
+              <button onClick={() => setShowInstructionsModal(false)} className="p-2 hover:bg-white/20 rounded-lg transition-all">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="grid md:grid-cols-2 gap-6 text-sm text-primary-700 dark:text-primary-300">
+                {/* Columna 1 - Herramientas */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-bold text-primary-900 dark:text-primary-100 mb-3 border-b border-primary-200 dark:border-primary-700 pb-2">
+                    🛠️ Herramientas
+                  </h3>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">👆</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Seleccionar:</strong>
+                      <p className="text-xs mt-1">Modo por defecto para leer el texto sin modificarlo</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">✏️</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Subrayar:</strong>
+                      <p className="text-xs mt-1">5 estilos: clásico, subrayado, doble, ondulado y cuadro. Selecciona texto y aplica el resaltador.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">📝</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Notas:</strong>
+                      <p className="text-xs mt-1">Click para crear notas. Arrastra desde el ícono de mover. Redimensiona desde la esquina.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">🎨</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Dibujar:</strong>
+                      <p className="text-xs mt-1">4 grosores disponibles: fino, medio, grueso y marcador. Dibuja directamente sobre el contenido.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">✍️</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Texto Flotante:</strong>
+                      <p className="text-xs mt-1">Click para agregar texto personalizado. Puedes moverlo arrastrándolo a cualquier posición.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-accent-50 dark:bg-accent-900/30 rounded-lg border border-accent-200 dark:border-accent-700">
+                    <span className="text-2xl">✏️</span>
+                    <div>
+                      <strong className="text-accent-700 dark:text-accent-300">Editar:</strong>
+                      <p className="text-xs mt-1">Edita el contenido directamente. Agrega texto, separa líneas, aplica formato. Usa las herramientas de edición rica (negrita, cursiva, color).</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Columna 2 - Opciones y Controles */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-bold text-primary-900 dark:text-primary-100 mb-3 border-b border-primary-200 dark:border-primary-700 pb-2">
+                    ⚙️ Opciones y Controles
+                  </h3>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">🎨</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Colores:</strong>
+                      <p className="text-xs mt-1">8 colores disponibles para todas las herramientas de anotación</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">🔍</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Zoom:</strong>
+                      <p className="text-xs mt-1">Ajusta el tamaño del texto de 12px a 32px usando los botones +/-</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">🔤</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Fuentes:</strong>
+                      <p className="text-xs mt-1">9 fuentes disponibles incluyendo Montserrat, Arial, Georgia y más</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">💾</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Guardar:</strong>
+                      <p className="text-xs mt-1">Guarda todas tus anotaciones en Firebase. Se mantienen entre sesiones.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                    <span className="text-2xl">📥</span>
+                    <div>
+                      <strong className="text-primary-900 dark:text-primary-100">Exportar/Importar:</strong>
+                      <p className="text-xs mt-1">Descarga o sube tus anotaciones en formato JSON</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <span className="text-2xl">👁️</span>
+                    <div>
+                      <strong className="text-blue-700 dark:text-blue-300">Vista Original:</strong>
+                      <p className="text-xs mt-1">En modo edición, alterna entre versión editada y original</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-700">
+                    <span className="text-2xl">🔄</span>
+                    <div>
+                      <strong className="text-red-700 dark:text-red-300">Restaurar:</strong>
+                      <p className="text-xs mt-1">Vuelve al contenido original eliminando todas las ediciones</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tips adicionales */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-accent-50 to-primary-50 dark:from-accent-900/20 dark:to-primary-800/20 rounded-lg border border-accent-200 dark:border-accent-700">
+                <h3 className="font-bold text-primary-900 dark:text-primary-100 mb-2 flex items-center gap-2">
+                  <span className="text-xl">💡</span>
+                  Tips Importantes
+                </h3>
+                <div className="grid md:grid-cols-3 gap-3 text-xs text-primary-600 dark:text-primary-400">
+                  <p>
+                    <strong>Notas:</strong> Arrastra desde el ícono de mover. Redimensiona desde la esquina inferior derecha.
+                  </p>
+                  <p>
+                    <strong>Textos:</strong> Los textos flotantes se pueden mover a cualquier posición arrastrándolos.
+                  </p>
+                  <p>
+                    <strong>Edición:</strong> En modo Editar usa las herramientas de formato (negrita, cursiva, color) para enriquecer el texto.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowInstructionsModal(false)}
+                className="mt-6 w-full px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all font-medium shadow-md"
+              >
+                ¡Entendido!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
