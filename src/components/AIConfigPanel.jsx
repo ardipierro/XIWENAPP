@@ -60,16 +60,22 @@ function AIConfigPanel() {
       const firebaseCredentials = await checkAICredentials();
       logger.info('[AIConfigPanel] Firebase credentials loaded:', firebaseCredentials);
 
-      // PASO 2: Verificar localStorage para Google/Gemini
-      const localGoogleCred = localStorage.getItem('ai_credentials_google');
-      const localGeminiCred = localStorage.getItem('ai_credentials_gemini');
+      // PASO 2: Verificar localStorage para todos los proveedores
+      // IMPORTANTE: localStorage usa provider.name (ej: "Google") no provider.id (ej: "google")
+      const localGoogleCred = localStorage.getItem('ai_credentials_Google');
+      const localClaudeCred = localStorage.getItem('ai_credentials_Claude');
+      const localOpenAICred = localStorage.getItem('ai_credentials_OpenAI');
+      const localGrokCred = localStorage.getItem('ai_credentials_Grok');
 
       // PASO 3: Combinar ambas fuentes
+      // Provider ID en config (minúscula) -> localStorage key (PascalCase)
       const combinedCredentials = {
         ...firebaseCredentials,
-        // Si hay credenciales en localStorage, marcar como true
-        google: firebaseCredentials.google || !!localGoogleCred || !!localGeminiCred,
-        gemini: firebaseCredentials.gemini || !!localGoogleCred || !!localGeminiCred
+        // Si hay credenciales en localStorage O en Firebase, marcar como true
+        google: firebaseCredentials.google || !!localGoogleCred,
+        claude: firebaseCredentials.claude || !!localClaudeCred,
+        openai: firebaseCredentials.openai || !!localOpenAICred,
+        grok: firebaseCredentials.grok || !!localGrokCred
       };
 
       logger.info('[AIConfigPanel] Combined credentials:', combinedCredentials);
@@ -80,15 +86,16 @@ function AIConfigPanel() {
       logger.error('Failed to load credentials status:', err);
 
       // FALLBACK: Verificar al menos localStorage
-      const localGoogleCred = localStorage.getItem('ai_credentials_google');
-      const localGeminiCred = localStorage.getItem('ai_credentials_gemini');
+      const localGoogleCred = localStorage.getItem('ai_credentials_Google');
+      const localClaudeCred = localStorage.getItem('ai_credentials_Claude');
+      const localOpenAICred = localStorage.getItem('ai_credentials_OpenAI');
+      const localGrokCred = localStorage.getItem('ai_credentials_Grok');
 
       setCredentials({
-        claude: false,
-        openai: false,
-        gemini: !!localGoogleCred || !!localGeminiCred,
-        google: !!localGoogleCred || !!localGeminiCred,
-        grok: false
+        claude: !!localClaudeCred,
+        openai: !!localOpenAICred,
+        google: !!localGoogleCred,
+        grok: !!localGrokCred
       });
       logger.info('[AIConfigPanel] Using localStorage fallback credentials');
       logger.info('Using localStorage fallback credentials status');
