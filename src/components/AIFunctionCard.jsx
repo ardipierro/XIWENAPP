@@ -11,7 +11,7 @@ import logger from '../utils/logger';
 /**
  * Card de función de IA - soporta vista grid y list
  */
-function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', credentials = null }) {
+function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) {
   // Usar defaultConfig si no hay config guardada
   const activeConfig = config || aiFunction.defaultConfig;
 
@@ -19,33 +19,16 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', cr
   const isEnabled = activeConfig?.enabled || false;
   const provider = activeConfig?.provider ? getProviderById(activeConfig.provider) : null;
 
-  // Check if credentials are configured for this provider
-  const hasCredentials = credentials && activeConfig?.provider
-    ? credentials[activeConfig.provider] || false
-    : false;
-
-  // Debug logging
-  console.log(`🔍 [AIFunctionCard] ${aiFunction.name}:`, {
-    isConfigured,
-    isEnabled,
-    hasCredentials,
-    provider: activeConfig?.provider,
-    'credentials[provider]': credentials ? credentials[activeConfig?.provider] : 'NO CREDENTIALS OBJECT',
-    allCredentials: credentials
-  });
-
   logger.debug(`[AIFunctionCard] ${aiFunction.name}:`, {
     isConfigured,
     isEnabled,
-    hasCredentials,
-    provider: activeConfig?.provider,
-    credentials
+    provider: activeConfig?.provider
   });
 
   const FunctionIcon = aiFunction.icon;
   const ProviderIcon = provider?.icon;
 
-  // Determinar badge de estado
+  // Determinar badge de estado (simplificado)
   const getStatusBadge = () => {
     if (!isConfigured) {
       return (
@@ -55,27 +38,17 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', cr
       );
     }
 
-    // Check credentials status - PRIORITY: If configured with credentials, show green
-    if (isConfigured && hasCredentials) {
+    if (isEnabled) {
       return (
         <BaseBadge variant="success" size="sm" icon={CheckCircle}>
-          {isEnabled ? 'Activo' : 'Listo'}
-        </BaseBadge>
-      );
-    }
-
-    // If configured but no credentials
-    if (isConfigured && !hasCredentials) {
-      return (
-        <BaseBadge variant="warning" size="sm" icon={AlertCircle}>
-          Sin credenciales
+          Activo
         </BaseBadge>
       );
     }
 
     return (
-      <BaseBadge variant="warning" size="sm" icon={AlertCircle}>
-        Inactivo
+      <BaseBadge variant="default" size="sm" icon={CheckCircle}>
+        Configurado
       </BaseBadge>
     );
   };
@@ -129,12 +102,6 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', cr
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 truncate">
                   {activeConfig.model}
                 </p>
-                {hasCredentials && (
-                  <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1 mt-1">
-                    <CheckCircle size={12} />
-                    Credenciales OK
-                  </p>
-                )}
               </div>
             </div>
           )}
@@ -197,12 +164,6 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', cr
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">
                   {provider.name} · {activeConfig.model}
                 </span>
-                {hasCredentials && (
-                  <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-                    <CheckCircle size={12} />
-                    Credenciales OK
-                  </span>
-                )}
               </div>
             )}
           </div>

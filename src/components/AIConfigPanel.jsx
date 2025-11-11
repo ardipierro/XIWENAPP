@@ -6,7 +6,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Lightbulb, Filter, Settings } from 'lucide-react';
-import { getAIConfig, saveAIConfig, checkAICredentials } from '../firebase/aiConfig';
+import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 import {
   BaseButton,
@@ -33,90 +33,13 @@ function AIConfigPanel() {
   const [viewMode, setViewMode] = useState('grid');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [credentials, setCredentials] = useState({
-    claude: true,
-    openai: true,
-    gemini: true,
-    grok: true
-  });
-
 
   // ============================================================================
   // EFECTOS - Cargar config al montar
   // ============================================================================
   useEffect(() => {
     loadConfig();
-    loadCredentials();
   }, []);
-
-  /**
-   * Cargar estado de credenciales desde Secret Manager Y localStorage
-   */
-  const loadCredentials = async () => {
-    try {
-      logger.info('[AIConfigPanel] Loading credentials...');
-
-      // PASO 1: Cargar desde Firebase Secret Manager
-      const firebaseCredentials = await checkAICredentials();
-      logger.info('[AIConfigPanel] Firebase credentials loaded:', firebaseCredentials);
-
-      // PASO 2: Verificar localStorage para todos los proveedores
-      // IMPORTANTE: localStorage usa provider.name (ej: "Google") no provider.id (ej: "google")
-      // DEBUG: Imprimir TODAS las keys de localStorage que empiecen con ai_credentials_
-      console.log('🔍 [DEBUG] All localStorage keys:', Object.keys(localStorage));
-      const allAIKeys = Object.keys(localStorage).filter(k => k.startsWith('ai_credentials_'));
-      console.log('🔍 [DEBUG] AI credential keys found:', allAIKeys);
-
-      const localGoogleCred = localStorage.getItem('ai_credentials_Google');
-      const localClaudeCred = localStorage.getItem('ai_credentials_Claude');
-      const localOpenAICred = localStorage.getItem('ai_credentials_OpenAI');
-      const localGrokCred = localStorage.getItem('ai_credentials_Grok');
-
-      console.log('🔍 [DEBUG] localStorage values:', {
-        'ai_credentials_Google': localGoogleCred ? '✅ EXISTS' : '❌ NULL',
-        'ai_credentials_Claude': localClaudeCred ? '✅ EXISTS' : '❌ NULL',
-        'ai_credentials_OpenAI': localOpenAICred ? '✅ EXISTS' : '❌ NULL',
-        'ai_credentials_Grok': localGrokCred ? '✅ EXISTS' : '❌ NULL'
-      });
-
-      // PASO 3: Combinar ambas fuentes
-      // Provider ID en config (minúscula) -> localStorage key (PascalCase)
-      const combinedCredentials = {
-        ...firebaseCredentials,
-        // Si hay credenciales en localStorage O en Firebase, marcar como true
-        google: firebaseCredentials.google || !!localGoogleCred,
-        claude: firebaseCredentials.claude || !!localClaudeCred,
-        openai: firebaseCredentials.openai || !!localOpenAICred,
-        grok: firebaseCredentials.grok || !!localGrokCred
-      };
-
-      console.log('🔍 [DEBUG] Combined credentials:', combinedCredentials);
-      logger.info('[AIConfigPanel] Combined credentials:', combinedCredentials);
-      setCredentials(combinedCredentials);
-      logger.info('AI credentials status loaded:', combinedCredentials);
-    } catch (err) {
-      logger.error('[AIConfigPanel] Failed to load credentials:', err);
-      logger.error('Failed to load credentials status:', err);
-
-      // FALLBACK: Verificar al menos localStorage
-      const localGoogleCred = localStorage.getItem('ai_credentials_Google');
-      const localClaudeCred = localStorage.getItem('ai_credentials_Claude');
-      const localOpenAICred = localStorage.getItem('ai_credentials_OpenAI');
-      const localGrokCred = localStorage.getItem('ai_credentials_Grok');
-
-      const fallbackCreds = {
-        claude: !!localClaudeCred,
-        openai: !!localOpenAICred,
-        google: !!localGoogleCred,
-        grok: !!localGrokCred
-      };
-
-      console.log('🔍 [DEBUG] Fallback credentials:', fallbackCreds);
-      setCredentials(fallbackCreds);
-      logger.info('[AIConfigPanel] Using localStorage fallback credentials');
-      logger.info('Using localStorage fallback credentials status');
-    }
-  };
 
   // ============================================================================
   // FUNCIONES - Lógica de negocio
@@ -424,7 +347,6 @@ function AIConfigPanel() {
               config={config.functions[func.id]}
               onConfigure={() => handleConfigureFunction(func.id)}
               viewMode="grid"
-              credentials={credentials}
             />
           ))}
         </div>
@@ -438,7 +360,6 @@ function AIConfigPanel() {
               config={config.functions[func.id]}
               onConfigure={() => handleConfigureFunction(func.id)}
               viewMode="list"
-              credentials={credentials}
             />
           ))}
         </div>
