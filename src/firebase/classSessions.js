@@ -56,7 +56,9 @@ export async function createClassSession(sessionData) {
 
       // Meta
       creditCost = 1,
-      meetingLink = '',
+      meetingLink = '', // deprecated
+      meetLink = '',
+      zoomLink = '',
       imageUrl = ''
     } = sessionData;
 
@@ -120,7 +122,9 @@ export async function createClassSession(sessionData) {
 
       // Meta
       creditCost,
-      meetingLink,
+      meetingLink, // deprecated
+      meetLink,
+      zoomLink,
       imageUrl,
       active: true,
       createdAt: serverTimestamp(),

@@ -10,7 +10,8 @@ const AI_PROVIDERS = [
   { id: 'openai', name: 'openai', label: 'ChatGPT', icon: '🤖', model: 'gpt-4' },
   { id: 'grok', name: 'grok', label: 'Grok', icon: '⚡', model: 'grok-2' },
   { id: 'gemini', name: 'gemini', label: 'Google Gemini', icon: '🔮', model: 'gemini-1.5-pro' },
-  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet' }
+  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet' },
+  { id: 'elevenlabs', name: 'elevenlabs', label: 'ElevenLabs TTS', icon: '🎤', model: 'eleven_multilingual_v2' }
 ];
 
 class AIService {

@@ -18,7 +18,7 @@ import { BaseLoading, BaseButton, BaseSelect } from './common';
 import EventDetailModal from './EventDetailModal';
 import { startClassSession, endClassSession } from '../firebase/classSessions';
 
-export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJoinSession }) {
+export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJoinSession, onEditSession }) {
   const { currentDate, view, setView, goToToday, goToNext, goToPrevious, getDateRange, getDisplayText } = useCalendarNavigation();
   const { start, end } = getDateRange();
   const { events, loading, error, createEvent, refresh } = useCalendar(userId, userRole, start, end);
@@ -86,6 +86,19 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
     if (onJoinSession) {
       onJoinSession(event);
       setSelectedEvent(null);
+    }
+  };
+
+  // Manejar click en evento
+  const handleEventClick = (event) => {
+    // Si es una sesión de clase y hay callback de edición, abrir modal de edición
+    if (event.type === 'session' && onEditSession) {
+      // Obtener el ID de la sesión real (no el ID de instancia recurrente)
+      const sessionId = event.sessionId || event.id;
+      onEditSession(sessionId);
+    } else {
+      // Para otros tipos de eventos, mostrar modal de detalles
+      setSelectedEvent(event);
     }
   };
 
@@ -191,18 +204,18 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
 
       {/* Mobile: List or Simplified Calendar */}
       {isMobile && mobileView === 'list' && (
-        <MobileListView events={events} onEventClick={setSelectedEvent} />
+        <MobileListView events={events} onEventClick={handleEventClick} />
       )}
       {isMobile && mobileView === 'calendar' && (
-        <DayView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />
+        <DayView currentDate={currentDate} events={events} onEventClick={handleEventClick} />
       )}
 
       {/* Desktop: Calendar Views */}
       {!isMobile && (
         <>
-          {view === 'month' && <MonthView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
-          {view === 'week' && <WeekView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
-          {view === 'day' && <DayView currentDate={currentDate} events={events} onEventClick={setSelectedEvent} />}
+          {view === 'month' && <MonthView currentDate={currentDate} events={events} onEventClick={handleEventClick} />}
+          {view === 'week' && <WeekView currentDate={currentDate} events={events} onEventClick={handleEventClick} />}
+          {view === 'day' && <DayView currentDate={currentDate} events={events} onEventClick={handleEventClick} />}
         </>
       )}
 

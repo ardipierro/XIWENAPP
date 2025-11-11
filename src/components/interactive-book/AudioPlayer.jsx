@@ -17,6 +17,7 @@ import logger from '../../utils/logger';
 function AudioPlayer({
   audioUrl,
   text,
+  voice = null,          // Voz específica del personaje (ej: 'es-AR-male-1')
   autoPlay = false,
   showText = true,
   className = '',
@@ -180,8 +181,9 @@ function AudioPlayer({
     try {
       // Intentar generar con servicio premium (mejor calidad)
       const result = await premiumTTSService.generateSpeech(text, {
-        gender: 'female',
-        preferPremium: false // Cambiar a true si tienes API key de ElevenLabs
+        voice: voice,      // Usar voz específica del personaje si está disponible
+        gender: 'female',  // Fallback si no hay voice
+        preferPremium: true // Usar ElevenLabs si está configurado
       });
 
       if (result.audioUrl) {
@@ -351,6 +353,7 @@ function AudioPlayer({
 AudioPlayer.propTypes = {
   audioUrl: PropTypes.string.isRequired,
   text: PropTypes.string,
+  voice: PropTypes.string,  // Voz específica (ej: 'es-AR-male-1', 'es-AR-female-2')
   autoPlay: PropTypes.bool,
   showText: PropTypes.bool,
   className: PropTypes.string,

@@ -37,10 +37,15 @@ function FullDialoguePlayer({ dialogue, onComplete }) {
       setProgress(((i + 1) / totalLines) * 100);
 
       try {
-        // Generar y reproducir cada línea
+        // Buscar el personaje en la lista de characters para obtener su voz
+        const character = dialogue.characters?.find(c => c.id === line.character);
+        const characterVoice = character?.voice || null;
+
+        // Generar y reproducir cada línea con la voz del personaje
         const result = await premiumTTSService.generateSpeech(line.text, {
-          gender: 'female', // Podrías determinar basado en el personaje
-          preferPremium: false
+          voice: characterVoice,  // Usar voz específica del personaje
+          gender: 'female',       // Fallback
+          preferPremium: true     // Usar ElevenLabs si está configurado
         });
 
         if (result.audioUrl) {

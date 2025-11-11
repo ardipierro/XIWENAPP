@@ -15,14 +15,23 @@ class PremiumTTSService {
     // Voices configuradas
     this.voices = {
       elevenLabs: {
-        // Vos premium (requiere API key)
-        'es-AR-female': 'EXAVITQu4vr4xnSDxMaL', // Sarah - puede entrenarse para argentino
-        'es-AR-male': '21m00Tcm4TlvDq8ikWAM', // Rachel - voz neutral
+        // Voces premium para personajes (requiere API key)
+        'es-AR-female-1': 'EXAVITQu4vr4xnSDxMaL', // Sarah - Voz femenina principal (Sofía)
+        'es-AR-female-2': 'XrExE9yKIg1WjnnlVkGX', // Matilda - Voz femenina alternativa
+        'es-AR-male-1': 'pNInz6obpgDQGcFmaJgB',   // Adam - Voz masculina grave (Mozo)
+        'es-AR-male-2': 'ErXwobaYiN019PkySvjV',   // Antoni - Voz masculina versátil (Andrés)
+        // Fallbacks genéricos
+        'es-AR-female': 'EXAVITQu4vr4xnSDxMaL',
+        'es-AR-male': 'pNInz6obpgDQGcFmaJgB',
       },
       free: {
         // API gratuita de Text-to-Speech
+        'es-AR-female-1': 'es-AR-Standard-A',
+        'es-AR-female-2': 'es-AR-Standard-B',
+        'es-AR-male-1': 'es-AR-Standard-C',
+        'es-AR-male-2': 'es-AR-Standard-D',
         'es-AR-female': 'es-AR-Standard-A',
-        'es-AR-male': 'es-AR-Standard-B'
+        'es-AR-male': 'es-AR-Standard-C'
       }
     };
 
@@ -30,6 +39,9 @@ class PremiumTTSService {
       name: 'es-AR-Wavenet',
       provider: 'google-cloud'
     };
+
+    // Load API key from localStorage on initialization
+    this.loadApiKeyFromStorage();
   }
 
   /**
@@ -38,7 +50,28 @@ class PremiumTTSService {
   setApiKey(key) {
     this.apiKey = key;
     this.useElevenLabs = !!key;
-    logger.info('🔑 ElevenLabs API configurada');
+
+    // Persist to localStorage
+    if (key && key.trim()) {
+      localStorage.setItem('ai_credentials_elevenlabs', key.trim());
+      logger.info('🔑 ElevenLabs API configurada y guardada');
+    }
+  }
+
+  /**
+   * Carga la API key desde localStorage
+   */
+  loadApiKeyFromStorage() {
+    try {
+      const storedKey = localStorage.getItem('ai_credentials_elevenlabs');
+      if (storedKey && storedKey.trim()) {
+        this.apiKey = storedKey.trim();
+        this.useElevenLabs = true;
+        logger.info('🔑 ElevenLabs API key cargada desde localStorage');
+      }
+    } catch (err) {
+      logger.warn('⚠️ No se pudo cargar la API key de ElevenLabs:', err);
+    }
   }
 
   /**
@@ -178,15 +211,23 @@ class PremiumTTSService {
    */
   async generateSpeech(text, options = {}) {
     const {
-      gender = 'female',
+      voice = null,        // Voz específica (ej: 'es-AR-male-1', 'es-AR-female-2')
+      gender = 'female',   // Fallback si no hay voice
       preferPremium = false
     } = options;
+
+    // Determinar la voz a usar
+    let targetVoice = voice;
+    if (!targetVoice) {
+      targetVoice = `es-AR-${gender}`;
+    }
 
     // 1. Intentar ElevenLabs si está configurado
     if (preferPremium && this.useElevenLabs && this.apiKey) {
       try {
-        logger.info('🎤 Generando con ElevenLabs (Premium)...');
-        return await this.generateWithElevenLabs(text, this.voices.elevenLabs[`es-AR-${gender}`]);
+        logger.info(`🎤 Generando con ElevenLabs (Premium) - Voz: ${targetVoice}...`);
+        const voiceId = this.voices.elevenLabs[targetVoice] || this.voices.elevenLabs[`es-AR-${gender}`];
+        return await this.generateWithElevenLabs(text, voiceId);
       } catch (err) {
         logger.warn('⚠️ ElevenLabs falló, probando alternativas...');
       }
