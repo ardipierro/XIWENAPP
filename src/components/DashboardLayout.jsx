@@ -15,7 +15,6 @@ import BottomNavigation from './BottomNavigation.jsx';
 import ViewAsBanner from './ViewAsBanner.jsx';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { isAdminEmail } from '../firebase/roleConfig.js';
-import './DashboardLayout.css';
 
 /**
  * Layout del Dashboard
@@ -55,7 +54,7 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
   };
 
   return (
-    <div className={`dashboard-layout ${isAdmin ? 'admin-theme' : ''} ${isViewingAs ? 'has-banner' : ''}`}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-none">
       {/* Banner "Ver como" (solo visible cuando está activo) */}
       <ViewAsBanner />
 
@@ -80,8 +79,19 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
       />
 
       {/* Contenido Principal */}
-      <main className={`dashboard-main ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <div className="dashboard-main-content">{children}</div>
+      <main
+        className={`
+          ${isViewingAs ? 'mt-[108px] h-[calc(100vh-108px)] md:mt-[102px] md:h-[calc(100vh-102px)]' : 'mt-16 h-[calc(100vh-64px)]'}
+          ${sidebarOpen ? 'ml-0 lg:ml-[200px]' : 'ml-0'}
+          overflow-y-auto overflow-x-hidden
+          transition-[margin-left] duration-200 ease-in-out
+          scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-gray-300/30 dark:hover:scrollbar-thumb-gray-600/20
+          scrollbar-track-transparent
+        `}
+      >
+        <div className="px-4 py-3 md:px-6 md:py-3 max-w-[1400px] mx-auto">
+          {children}
+        </div>
       </main>
 
       {/* Bottom Navigation - Solo móvil (<md) */}
