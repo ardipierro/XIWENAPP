@@ -50,21 +50,48 @@ function AIConfigPanel() {
   }, []);
 
   /**
-   * Cargar estado de credenciales desde Secret Manager
+   * Cargar estado de credenciales desde Secret Manager Y localStorage
    */
   const loadCredentials = async () => {
     try {
       logger.info('[AIConfigPanel] Loading credentials...');
-      const credStatus = await checkAICredentials();
-      logger.info('[AIConfigPanel] Credentials loaded:', credStatus);
-      setCredentials(credStatus);
-      logger.info('AI credentials status loaded:', credStatus);
+
+      // PASO 1: Cargar desde Firebase Secret Manager
+      const firebaseCredentials = await checkAICredentials();
+      logger.info('[AIConfigPanel] Firebase credentials loaded:', firebaseCredentials);
+
+      // PASO 2: Verificar localStorage para Google/Gemini
+      const localGoogleCred = localStorage.getItem('ai_credentials_google');
+      const localGeminiCred = localStorage.getItem('ai_credentials_gemini');
+
+      // PASO 3: Combinar ambas fuentes
+      const combinedCredentials = {
+        ...firebaseCredentials,
+        // Si hay credenciales en localStorage, marcar como true
+        google: firebaseCredentials.google || !!localGoogleCred || !!localGeminiCred,
+        gemini: firebaseCredentials.gemini || !!localGoogleCred || !!localGeminiCred
+      };
+
+      logger.info('[AIConfigPanel] Combined credentials:', combinedCredentials);
+      setCredentials(combinedCredentials);
+      logger.info('AI credentials status loaded:', combinedCredentials);
     } catch (err) {
       logger.error('[AIConfigPanel] Failed to load credentials:', err);
       logger.error('Failed to load credentials status:', err);
-      // Keep default values on error (already set in useState)
-      logger.info('[AIConfigPanel] Using default credentials');
-      logger.info('Using default credentials status');
+
+      // FALLBACK: Verificar al menos localStorage
+      const localGoogleCred = localStorage.getItem('ai_credentials_google');
+      const localGeminiCred = localStorage.getItem('ai_credentials_gemini');
+
+      setCredentials({
+        claude: false,
+        openai: false,
+        gemini: !!localGoogleCred || !!localGeminiCred,
+        google: !!localGoogleCred || !!localGeminiCred,
+        grok: false
+      });
+      logger.info('[AIConfigPanel] Using localStorage fallback credentials');
+      logger.info('Using localStorage fallback credentials status');
     }
   };
 
