@@ -116,7 +116,6 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
 
   // Estados de UI
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [showTextForm, setShowTextForm] = useState(false);
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
@@ -738,247 +737,330 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
   return (
     <div className="flex flex-col h-screen bg-primary-50 dark:bg-primary-950">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-2 p-3 bg-white dark:bg-primary-900 border-b border-primary-200 dark:border-primary-800 shadow-sm overflow-x-auto">
-        {/* Herramientas principales */}
-        <div className="flex items-center gap-2">
-          <ToolButton
-            icon="👆"
-            label="Seleccionar"
-            active={selectedTool === 'select'}
-            onClick={() => setSelectedTool('select')}
-          />
-          <ToolButton
-            icon={<Highlighter className="w-5 h-5" />}
-            label="Subrayar"
-            active={selectedTool === 'highlight'}
-            onClick={() => setSelectedTool('highlight')}
-            disabled={readOnly}
-          />
-          <ToolButton
-            icon={<StickyNote className="w-5 h-5" />}
-            label="Nota"
-            active={selectedTool === 'note'}
-            onClick={() => setSelectedTool('note')}
-            disabled={readOnly}
-          />
-          <ToolButton
-            icon={<Pen className="w-5 h-5" />}
-            label="Dibujar"
-            active={selectedTool === 'draw'}
-            onClick={() => setSelectedTool('draw')}
-            disabled={readOnly}
-          />
-          <ToolButton
-            icon={<Type className="w-5 h-5" />}
-            label="Texto"
-            active={selectedTool === 'text'}
-            onClick={() => setSelectedTool('text')}
-            disabled={readOnly}
-          />
-          <ToolButton
-            icon={<Edit3 className="w-5 h-5" />}
-            label="Editar"
-            active={isEditMode}
-            onClick={isEditMode ? handleExitEditMode : handleEnterEditMode}
-            disabled={readOnly}
-          />
-
-          {/* Color picker */}
-          <div className="relative">
-            <button
-              onClick={() => setShowColorPicker(!showColorPicker)}
-              className="flex items-center gap-2 px-3 py-2 bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-700 transition-all"
+      {/* Toolbar Principal */}
+      <div className="bg-white dark:bg-primary-900 border-b border-primary-200 dark:border-primary-800 shadow-sm">
+        <div className="flex items-center justify-between gap-2 p-3">
+          {/* Herramientas principales */}
+          <div className="flex items-center gap-2">
+            <ToolButton
+              icon="👆"
+              label="Seleccionar"
+              active={selectedTool === 'select'}
+              onClick={() => setSelectedTool('select')}
+            />
+            <ToolButton
+              icon={<Highlighter className="w-5 h-5" />}
+              label="Subrayar"
+              active={selectedTool === 'highlight'}
+              onClick={() => setSelectedTool('highlight')}
               disabled={readOnly}
-            >
-              <Palette className="w-5 h-5" />
-              <div className={`w-6 h-6 rounded-full border-2 border-primary-300 dark:border-primary-700 ${COLORS[selectedColor].bg}`} />
-            </button>
+            />
+            <ToolButton
+              icon={<StickyNote className="w-5 h-5" />}
+              label="Nota"
+              active={selectedTool === 'note'}
+              onClick={() => setSelectedTool('note')}
+              disabled={readOnly}
+            />
+            <ToolButton
+              icon={<Pen className="w-5 h-5" />}
+              label="Dibujar"
+              active={selectedTool === 'draw'}
+              onClick={() => setSelectedTool('draw')}
+              disabled={readOnly}
+            />
+            <ToolButton
+              icon={<Type className="w-5 h-5" />}
+              label="Texto"
+              active={selectedTool === 'text'}
+              onClick={() => setSelectedTool('text')}
+              disabled={readOnly}
+            />
+            <ToolButton
+              icon={<Edit3 className="w-5 h-5" />}
+              label="Editar"
+              active={isEditMode}
+              onClick={isEditMode ? handleExitEditMode : handleEnterEditMode}
+              disabled={readOnly}
+            />
+          </div>
 
-            {showColorPicker && (
-              <div className="absolute bottom-full left-0 mb-2 p-3 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999] min-w-[200px]">
-                <div className="grid grid-cols-4 gap-2">
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowInstructionsModal(true)} className="icon-btn" title="Ayuda">
+              <HelpCircle className="w-5 h-5" />
+            </button>
+            <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar">
+              <Download className="w-5 h-5" />
+            </button>
+            <label className="icon-btn cursor-pointer" title="Importar">
+              <Upload className="w-5 h-5" />
+              <input type="file" accept=".json" onChange={handleImportAnnotations} className="hidden" />
+            </label>
+            {!readOnly && (
+              <button onClick={handleSaveAnnotations} className="flex items-center gap-2 px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all shadow-md">
+                <Save className="w-5 h-5" />
+                <span className="hidden sm:inline">Guardar</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Panel de opciones por herramienta */}
+        {selectedTool === 'select' && (
+          <div className="px-3 py-2 bg-primary-50 dark:bg-primary-800 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Zoom:</span>
+                <button onClick={() => setFontSize(Math.max(12, fontSize - 2))} className="icon-btn text-xs p-1">
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
+                  {fontSize}px
+                </span>
+                <button onClick={() => setFontSize(Math.min(32, fontSize + 2))} className="icon-btn text-xs p-1">
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Fuente:</span>
+                <select
+                  value={contentFont}
+                  onChange={(e) => setContentFont(e.target.value)}
+                  className="px-2 py-1 text-xs bg-white dark:bg-primary-900 text-primary-900 dark:text-primary-100 rounded border border-primary-300 dark:border-primary-600 focus:ring-2 focus:ring-accent-500"
+                >
+                  {Object.entries(FONTS).map(([key, { name }]) => (
+                    <option key={key} value={key}>{name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedTool === 'highlight' && (
+          <div className="px-3 py-2 bg-primary-50 dark:bg-primary-800 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Color:</span>
+                <div className="flex gap-1">
                   {Object.keys(COLORS).map(color => (
                     <button
                       key={color}
-                      onClick={() => {
-                        setSelectedColor(color);
-                        setShowColorPicker(false);
-                      }}
-                      className={`w-10 h-10 rounded-full ${COLORS[color].bg} border-2 ${
-                        selectedColor === color
-                          ? 'border-accent-500 scale-110'
-                          : 'border-primary-300 dark:border-primary-600'
+                      onClick={() => setSelectedColor(color)}
+                      className={`w-8 h-8 rounded-full ${COLORS[color].bg} border-2 ${
+                        selectedColor === color ? 'border-accent-500 scale-110' : 'border-primary-300 dark:border-primary-600'
                       } transition-all hover:scale-110`}
                       title={COLORS[color].name}
                     />
                   ))}
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Zoom control - Always visible */}
-          <div className="flex items-center gap-1 border-l border-primary-300 dark:border-primary-700 pl-2">
-            <button
-              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-              className="icon-btn"
-              title="Reducir zoom"
-            >
-              <ZoomOut className="w-4 h-4" />
-            </button>
-            <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
-              {fontSize}px
-            </span>
-            <button
-              onClick={() => setFontSize(Math.min(32, fontSize + 2))}
-              className="icon-btn"
-              title="Aumentar zoom"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Font selector - Always visible */}
-          <select
-            value={contentFont}
-            onChange={(e) => setContentFont(e.target.value)}
-            className="px-2 py-1.5 text-sm bg-primary-100 dark:bg-primary-800 text-primary-900 dark:text-primary-100 rounded-lg border border-primary-300 dark:border-primary-700 focus:ring-2 focus:ring-accent-500"
-            title="Fuente del contenido"
-          >
-            {Object.entries(FONTS).map(([key, { name }]) => (
-              <option key={key} value={key}>{name}</option>
-            ))}
-          </select>
-
-          {/* Highlighter style - Always visible */}
-          <select
-            value={highlighterStyle}
-            onChange={(e) => setHighlighterStyle(e.target.value)}
-            className="px-2 py-1.5 text-sm bg-primary-100 dark:bg-primary-800 text-primary-900 dark:text-primary-100 rounded-lg border border-primary-300 dark:border-primary-700 focus:ring-2 focus:ring-accent-500"
-            title="Estilo de resaltador"
-          >
-            {Object.entries(HIGHLIGHTER_STYLES).map(([key, { name }]) => (
-              <option key={key} value={key}>{name}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Canvas tools */}
-        {selectedTool === 'draw' && (
-          <div className="flex items-center gap-2 border-l border-primary-300 dark:border-primary-700 pl-2">
-            <select
-              value={brushType}
-              onChange={(e) => setBrushType(e.target.value)}
-              className="px-3 py-2 bg-primary-100 dark:bg-primary-800 text-primary-900 dark:text-primary-100 rounded-lg border border-primary-300 dark:border-primary-700 focus:ring-2 focus:ring-accent-500"
-            >
-              {Object.entries(BRUSH_TYPES).map(([key, { name }]) => (
-                <option key={key} value={key}>{name}</option>
-              ))}
-            </select>
-
-            <button onClick={handleUndo} disabled={historyIndex <= 0} className="icon-btn" title="Deshacer">
-              <Undo className="w-5 h-5" />
-            </button>
-            <button onClick={handleRedo} disabled={historyIndex >= canvasHistory.length - 1} className="icon-btn" title="Rehacer">
-              <Redo className="w-5 h-5" />
-            </button>
-            <button onClick={handleClearCanvas} className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300" title="Limpiar">
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        )}
-
-        {/* Edit mode controls */}
-        {isEditMode && (
-          <div className="flex items-center gap-2 border-l border-primary-300 dark:border-primary-700 pl-2">
-            <button
-              onClick={handleSaveContentEdits}
-              disabled={!hasUnsavedEdits}
-              className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              title="Guardar ediciones"
-            >
-              <Save className="w-4 h-4" />
-              <span className="hidden sm:inline">Guardar</span>
-            </button>
-            <button
-              onClick={handleDiscardContentEdits}
-              disabled={!hasUnsavedEdits}
-              className="icon-btn bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 disabled:opacity-50"
-              title="Descartar cambios"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setShowOriginal(!showOriginal)}
-              className={`icon-btn ${showOriginal ? 'bg-blue-500 text-white' : ''}`}
-              title={showOriginal ? 'Mostrar versión editada' : 'Mostrar versión original'}
-            >
-              <Eye className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleResetToOriginal}
-              className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300"
-              title="Restaurar al original"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </button>
-          </div>
-        )}
-
-        {/* Rich Text Editing Tools (only in edit mode) */}
-        {isEditMode && !showOriginal && (
-          <div className="flex items-center gap-1 border-l border-primary-300 dark:border-primary-700 pl-2">
-            <button onClick={handleBold} className="icon-btn" title="Negrita">
-              <Bold className="w-4 h-4" />
-            </button>
-            <button onClick={handleItalic} className="icon-btn" title="Cursiva">
-              <Italic className="w-4 h-4" />
-            </button>
-            <button onClick={handleUnderline} className="icon-btn" title="Subrayado">
-              <UnderlineIcon className="w-4 h-4" />
-            </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowTextColorPicker(!showTextColorPicker)}
-                className="icon-btn"
-                title="Color de texto"
-              >
-                <div className="w-4 h-4 rounded" style={{ backgroundColor: textColor }} />
-              </button>
-              {showTextColorPicker && (
-                <div className="absolute bottom-full left-0 mb-2 p-2 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999]">
-                  <input
-                    type="color"
-                    value={textColor}
-                    onChange={(e) => handleTextColorChange(e.target.value)}
-                    className="w-20 h-8 cursor-pointer"
-                  />
-                </div>
-              )}
+              <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Estilo:</span>
+                <select
+                  value={highlighterStyle}
+                  onChange={(e) => setHighlighterStyle(e.target.value)}
+                  className="px-2 py-1 text-xs bg-white dark:bg-primary-900 text-primary-900 dark:text-primary-100 rounded border border-primary-300 dark:border-primary-600 focus:ring-2 focus:ring-accent-500"
+                >
+                  {Object.entries(HIGHLIGHTER_STYLES).map(([key, { name }]) => (
+                    <option key={key} value={key}>{name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 border-l border-primary-300 dark:border-primary-700 pl-2">
-          <button onClick={() => setShowInstructionsModal(true)} className="icon-btn" title="Ayuda">
-            <HelpCircle className="w-5 h-5" />
-          </button>
-          <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar">
-            <Download className="w-5 h-5" />
-          </button>
-          <label className="icon-btn cursor-pointer">
-            <Upload className="w-5 h-5" />
-            <input type="file" accept=".json" onChange={handleImportAnnotations} className="hidden" />
-          </label>
-          {!readOnly && (
-            <button onClick={handleSaveAnnotations} className="flex items-center gap-2 px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all shadow-md">
-              <Save className="w-5 h-5" />
-              <span className="hidden sm:inline">Guardar</span>
-            </button>
-          )}
-        </div>
+        {selectedTool === 'note' && (
+          <div className="px-3 py-2 bg-primary-50 dark:bg-primary-800 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center gap-2">
+              <StickyNote className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+              <span className="text-xs text-primary-700 dark:text-primary-300">
+                Selecciona texto o haz click en cualquier parte para agregar una nota
+              </span>
+            </div>
+          </div>
+        )}
+
+        {selectedTool === 'draw' && (
+          <div className="px-3 py-2 bg-primary-50 dark:bg-primary-800 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Color:</span>
+                <div className="flex gap-1">
+                  {Object.keys(COLORS).map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`w-8 h-8 rounded-full ${COLORS[color].bg} border-2 ${
+                        selectedColor === color ? 'border-accent-500 scale-110' : 'border-primary-300 dark:border-primary-600'
+                      } transition-all hover:scale-110`}
+                      title={COLORS[color].name}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Grosor:</span>
+                <select
+                  value={brushType}
+                  onChange={(e) => setBrushType(e.target.value)}
+                  className="px-2 py-1 text-xs bg-white dark:bg-primary-900 text-primary-900 dark:text-primary-100 rounded border border-primary-300 dark:border-primary-600 focus:ring-2 focus:ring-accent-500"
+                >
+                  {Object.entries(BRUSH_TYPES).map(([key, { name }]) => (
+                    <option key={key} value={key}>{name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+              <div className="flex items-center gap-1">
+                <button onClick={handleUndo} disabled={historyIndex <= 0} className="icon-btn text-xs p-1" title="Deshacer">
+                  <Undo className="w-4 h-4" />
+                </button>
+                <button onClick={handleRedo} disabled={historyIndex >= canvasHistory.length - 1} className="icon-btn text-xs p-1" title="Rehacer">
+                  <Redo className="w-4 h-4" />
+                </button>
+                <button onClick={handleClearCanvas} className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs p-1" title="Limpiar">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedTool === 'text' && (
+          <div className="px-3 py-2 bg-primary-50 dark:bg-primary-800 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Color:</span>
+                <div className="flex gap-1">
+                  {Object.keys(COLORS).map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`w-8 h-8 rounded-full ${COLORS[color].bg} border-2 ${
+                        selectedColor === color ? 'border-accent-500 scale-110' : 'border-primary-300 dark:border-primary-600'
+                      } transition-all hover:scale-110`}
+                      title={COLORS[color].name}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Fuente:</span>
+                <select
+                  value={contentFont}
+                  onChange={(e) => setContentFont(e.target.value)}
+                  className="px-2 py-1 text-xs bg-white dark:bg-primary-900 text-primary-900 dark:text-primary-100 rounded border border-primary-300 dark:border-primary-600 focus:ring-2 focus:ring-accent-500"
+                >
+                  {Object.entries(FONTS).map(([key, { name }]) => (
+                    <option key={key} value={key}>{name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Tamaño:</span>
+                <button onClick={() => setFontSize(Math.max(12, fontSize - 2))} className="icon-btn text-xs p-1">
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
+                  {fontSize}px
+                </span>
+                <button onClick={() => setFontSize(Math.min(32, fontSize + 2))} className="icon-btn text-xs p-1">
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isEditMode && (
+          <div className="px-3 py-2 bg-primary-50 dark:bg-primary-800 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {!showOriginal && (
+                  <>
+                    <div className="flex items-center gap-1">
+                      <button onClick={handleBold} className="icon-btn text-xs p-1" title="Negrita">
+                        <Bold className="w-4 h-4" />
+                      </button>
+                      <button onClick={handleItalic} className="icon-btn text-xs p-1" title="Cursiva">
+                        <Italic className="w-4 h-4" />
+                      </button>
+                      <button onClick={handleUnderline} className="icon-btn text-xs p-1" title="Subrayado">
+                        <UnderlineIcon className="w-4 h-4" />
+                      </button>
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowTextColorPicker(!showTextColorPicker)}
+                          className="icon-btn text-xs p-1"
+                          title="Color de texto"
+                        >
+                          <div className="w-4 h-4 rounded border border-primary-300" style={{ backgroundColor: textColor }} />
+                        </button>
+                        {showTextColorPicker && (
+                          <div className="absolute bottom-full left-0 mb-2 p-2 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999]">
+                            <input
+                              type="color"
+                              value={textColor}
+                              onChange={(e) => handleTextColorChange(e.target.value)}
+                              className="w-20 h-8 cursor-pointer"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+                  </>
+                )}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={handleSaveContentEdits}
+                    disabled={!hasUnsavedEdits}
+                    className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Guardar ediciones"
+                  >
+                    <Save className="w-3 h-3" />
+                    <span>Guardar</span>
+                  </button>
+                  <button
+                    onClick={handleDiscardContentEdits}
+                    disabled={!hasUnsavedEdits}
+                    className="icon-btn bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 disabled:opacity-50 text-xs p-1"
+                    title="Descartar cambios"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setShowOriginal(!showOriginal)}
+                    className={`icon-btn text-xs p-1 ${showOriginal ? 'bg-blue-500 text-white' : ''}`}
+                    title={showOriginal ? 'Mostrar versión editada' : 'Mostrar versión original'}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleResetToOriginal}
+                    className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs p-1"
+                    title="Restaurar al original"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              {hasUnsavedEdits && (
+                <span className="px-2 py-1 bg-yellow-400 text-yellow-900 rounded-full text-xs font-bold">
+                  Cambios sin guardar
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Edit Mode Banner */}
