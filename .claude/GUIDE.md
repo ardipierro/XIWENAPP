@@ -18,7 +18,7 @@
 | **GUIDE.md** (este archivo) | Estructura del proyecto, inicio rápido | Siempre primero |
 | **CODING_STANDARDS.md** | Reglas de código, componentes base | Antes de escribir código |
 | **DESIGN_SYSTEM.md** | Sistema de diseño, colores, responsive | Antes de crear/modificar UI |
-| **DESIGN_LAB.md** | Sistema de ejercicios ELE | Al trabajar con ejercicios |
+| **EXERCISE_BUILDER.md** | Sistema de ejercicios ELE | Al trabajar con ejercicios |
 | **CONTENT_SCHEMA.md** | Arquitectura de contenidos | Al trabajar con contenidos/cursos |
 
 ---
@@ -46,7 +46,7 @@
 
 ### Si vas a trabajar con ejercicios:
 
-1. **Lee:** `DESIGN_LAB.md` → Sistema de Ejercicios
+1. **Lee:** `EXERCISE_BUILDER.md` → Sistema de Ejercicios
 2. **Consulta:** Parser de texto y tipos de ejercicios
 
 ### Si vas a trabajar con contenidos/cursos:
@@ -64,7 +64,7 @@ XIWENAPP/
 │   ├── GUIDE.md                    ← Este archivo
 │   ├── CODING_STANDARDS.md         ← Código y componentes
 │   ├── DESIGN_SYSTEM.md            ← Diseño y UI
-│   ├── DESIGN_LAB.md               ← Ejercicios ELE
+│   ├── EXERCISE_BUILDER.md         ← Ejercicios ELE
 │   ├── CONTENT_SCHEMA.md           ← Arquitectura de datos
 │   └── settings.local.json         ← Configuración
 │
@@ -84,7 +84,7 @@ XIWENAPP/
 │   │   │   ├── BaseDropdown.jsx
 │   │   │   └── BaseEmptyState.jsx
 │   │   │
-│   │   ├── designlab/              ← Sistema de ejercicios ELE
+│   │   ├── exercisebuilder/        ← Sistema de ejercicios ELE
 │   │   │   ├── exercises/
 │   │   │   ├── TextToExerciseParser.jsx
 │   │   │   └── SettingsPanel.jsx
@@ -112,8 +112,8 @@ XIWENAPP/
 │   │   └── ThemeContext.jsx        ← Dark mode
 │   │
 │   ├── hooks/
-│   │   ├── useDesignLabConfig.js   ← Config del Design Lab
-│   │   └── useExerciseState.js     ← Estado de ejercicios
+│   │   ├── useExerciseBuilderConfig.js ← Config del Exercise Builder
+│   │   └── useExerciseState.js         ← Estado de ejercicios
 │   │
 │   ├── firebase/
 │   │   ├── config.js
@@ -123,7 +123,7 @@ XIWENAPP/
 │   │   ├── exercises.js
 │   │   ├── groups.js
 │   │   ├── storage.js
-│   │   └── designLabConfig.js
+│   │   └── exerciseBuilderConfig.js
 │   │
 │   └── utils/
 │       └── logger.js               ← ⭐ USAR EN LUGAR DE console.*
@@ -324,7 +324,7 @@ GUIDE.md (estás aquí)
     ├─→ DESIGN_SYSTEM.md
     │   └─→ Colores, responsive, componentes UI
     │
-    ├─→ DESIGN_LAB.md
+    ├─→ EXERCISE_BUILDER.md
     │   └─→ Sistema de ejercicios ELE
     │
     └─→ CONTENT_SCHEMA.md
@@ -422,7 +422,7 @@ export default MyComponent;
 
 1. **Reglas de código** → `CODING_STANDARDS.md`
 2. **Diseño y UI** → `DESIGN_SYSTEM.md`
-3. **Ejercicios ELE** → `DESIGN_LAB.md`
+3. **Ejercicios ELE** → `EXERCISE_BUILDER.md`
 4. **Contenidos** → `CONTENT_SCHEMA.md`
 5. **Estructura del proyecto** → Este archivo (GUIDE.md)
 
