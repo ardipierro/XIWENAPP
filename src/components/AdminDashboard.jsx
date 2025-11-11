@@ -96,6 +96,7 @@ import ExerciseBuilder from '../pages/ExerciseBuilder';
 import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import ThemeCustomizer from './ThemeCustomizer';
+import aiService from '../services/aiService';
 import './AdminDashboard.css';
 
 // Custom hooks
@@ -830,7 +831,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4" key={credentialsRefresh}>
-                {AIService.getAvailableProviders().map((provider) => {
+                {aiService.getAvailableProviders().map((provider) => {
                   // Check credentials from Firebase Secret Manager OR localStorage
                   const hasFirebaseCredential = aiCredentials[provider.name] || false;
                   const hasLocalStorageCredential = provider.name === 'elevenlabs'
