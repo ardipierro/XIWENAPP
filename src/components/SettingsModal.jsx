@@ -21,12 +21,14 @@ import {
   ZoomIn,
   ZoomOut,
   Eye,
-  EyeOff
+  EyeOff,
+  Image
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge } from './common';
 import ViewCustomizer from './interactive-book/ViewCustomizer';
 import TTSSettings from './interactive-book/TTSSettings';
+import AIImageGenerator from './interactive-book/AIImageGenerator';
 
 /**
  * Modal de configuración completo con tabs
@@ -109,6 +111,12 @@ function SettingsModal({ isOpen, onClose }) {
       label: 'Voz IA',
       icon: Volume2,
       description: 'Text-to-Speech'
+    },
+    {
+      id: 'images',
+      label: 'Imágenes IA',
+      icon: Image,
+      description: 'Generación de imágenes'
     },
     {
       id: 'display',
@@ -260,6 +268,11 @@ function SettingsModal({ isOpen, onClose }) {
           {/* TAB: TTS (directo, sin botón) */}
           {activeTab === 'tts' && (
             <TTSSettings alwaysOpen={true} />
+          )}
+
+          {/* TAB: IMAGES IA */}
+          {activeTab === 'images' && (
+            <AIImageGenerator alwaysOpen={true} />
           )}
 
           {/* TAB: DISPLAY */}
