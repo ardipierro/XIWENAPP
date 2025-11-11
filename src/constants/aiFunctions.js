@@ -20,7 +20,10 @@ import {
   GraduationCap,
   BarChart3,
   Wrench,
-  ClipboardList
+  ClipboardList,
+  Image,
+  Palette,
+  Sparkles
 } from 'lucide-react';
 
 /**
@@ -85,6 +88,53 @@ export const AI_PROVIDERS = [
     supportsTemperature: true,
     supportsTopP: true,
     supportsMaxTokens: true
+  },
+  {
+    id: 'dalle',
+    name: 'DALL-E',
+    icon: Image,
+    description: 'Generación de imágenes con DALL-E de OpenAI. Ideal para ilustraciones educativas.',
+    models: [
+      { value: 'dall-e-3', label: 'DALL-E 3 (Mejor calidad)' },
+      { value: 'dall-e-2', label: 'DALL-E 2 (Más rápido)' }
+    ],
+    supportsTemperature: false,
+    supportsTopP: false,
+    supportsMaxTokens: false,
+    supportsImageSize: true,
+    supportsImageQuality: true,
+    imageSizes: [
+      { value: '1024x1024', label: '1024x1024 (Cuadrado)' },
+      { value: '1024x1792', label: '1024x1792 (Vertical)' },
+      { value: '1792x1024', label: '1792x1024 (Horizontal)' }
+    ],
+    imageQualities: [
+      { value: 'standard', label: 'Estándar' },
+      { value: 'hd', label: 'HD (Mayor detalle)' }
+    ]
+  },
+  {
+    id: 'stability',
+    name: 'Stability AI',
+    icon: Palette,
+    description: 'Stable Diffusion para imágenes artísticas y realistas. Gran control creativo.',
+    models: [
+      { value: 'stable-diffusion-xl-1024-v1-0', label: 'SDXL 1.0 (Mejor calidad)' },
+      { value: 'stable-diffusion-v1-6', label: 'SD 1.6 (Equilibrado)' },
+      { value: 'stable-diffusion-512-v2-1', label: 'SD 2.1 (Rápido)' }
+    ],
+    supportsTemperature: false,
+    supportsTopP: false,
+    supportsMaxTokens: false,
+    supportsImageSize: true,
+    supportsSteps: true,
+    supportsCfgScale: true,
+    imageSizes: [
+      { value: '1024x1024', label: '1024x1024 (Cuadrado)' },
+      { value: '512x512', label: '512x512 (Cuadrado pequeño)' },
+      { value: '768x1344', label: '768x1344 (Vertical)' },
+      { value: '1344x768', label: '1344x768 (Horizontal)' }
+    ]
   }
 ];
 
@@ -243,6 +293,63 @@ export const AI_FUNCTIONS = [
         topP: 1
       }
     }
+  },
+  {
+    id: 'image_generator',
+    name: 'Generador de Imágenes',
+    description: 'Crea imágenes educativas para lecciones y ejercicios',
+    icon: Image,
+    category: 'content',
+    defaultConfig: {
+      enabled: false,
+      provider: 'dalle',
+      model: 'dall-e-3',
+      apiKey: '',
+      systemPrompt: 'Genera imágenes educativas claras y apropiadas para estudiantes de español. Las imágenes deben ser simples, coloridas y fáciles de entender.',
+      parameters: {
+        size: '1024x1024',
+        quality: 'standard',
+        n: 1
+      }
+    }
+  },
+  {
+    id: 'illustration_creator',
+    name: 'Creador de Ilustraciones',
+    description: 'Genera ilustraciones artísticas para contenido educativo',
+    icon: Palette,
+    category: 'content',
+    defaultConfig: {
+      enabled: false,
+      provider: 'stability',
+      model: 'stable-diffusion-xl-1024-v1-0',
+      apiKey: '',
+      systemPrompt: 'Crea ilustraciones artísticas y atractivas para material educativo. Estilo amigable, colorido y apropiado para todas las edades.',
+      parameters: {
+        size: '1024x1024',
+        steps: 30,
+        cfg_scale: 7
+      }
+    }
+  },
+  {
+    id: 'visual_vocabulary',
+    name: 'Vocabulario Visual',
+    description: 'Genera imágenes para enseñar vocabulario con contexto visual',
+    icon: Sparkles,
+    category: 'content',
+    defaultConfig: {
+      enabled: false,
+      provider: 'dalle',
+      model: 'dall-e-3',
+      apiKey: '',
+      systemPrompt: 'Crea imágenes claras y didácticas para enseñar vocabulario en español. Cada imagen debe mostrar claramente el objeto, acción o concepto de forma inequívoca.',
+      parameters: {
+        size: '1024x1024',
+        quality: 'hd',
+        n: 1
+      }
+    }
   }
 ];
 
@@ -254,7 +361,8 @@ export const AI_CATEGORIES = [
   { id: 'teaching', label: 'Enseñanza', icon: GraduationCap },
   { id: 'grading', label: 'Evaluación', icon: BarChart3 },
   { id: 'tools', label: 'Herramientas', icon: Wrench },
-  { id: 'planning', label: 'Planificación', icon: ClipboardList }
+  { id: 'planning', label: 'Planificación', icon: ClipboardList },
+  { id: 'images', label: 'Imágenes', icon: Image }
 ];
 
 /**
