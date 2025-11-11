@@ -62,10 +62,22 @@ function AIConfigPanel() {
 
       // PASO 2: Verificar localStorage para todos los proveedores
       // IMPORTANTE: localStorage usa provider.name (ej: "Google") no provider.id (ej: "google")
+      // DEBUG: Imprimir TODAS las keys de localStorage que empiecen con ai_credentials_
+      console.log('🔍 [DEBUG] All localStorage keys:', Object.keys(localStorage));
+      const allAIKeys = Object.keys(localStorage).filter(k => k.startsWith('ai_credentials_'));
+      console.log('🔍 [DEBUG] AI credential keys found:', allAIKeys);
+
       const localGoogleCred = localStorage.getItem('ai_credentials_Google');
       const localClaudeCred = localStorage.getItem('ai_credentials_Claude');
       const localOpenAICred = localStorage.getItem('ai_credentials_OpenAI');
       const localGrokCred = localStorage.getItem('ai_credentials_Grok');
+
+      console.log('🔍 [DEBUG] localStorage values:', {
+        'ai_credentials_Google': localGoogleCred ? '✅ EXISTS' : '❌ NULL',
+        'ai_credentials_Claude': localClaudeCred ? '✅ EXISTS' : '❌ NULL',
+        'ai_credentials_OpenAI': localOpenAICred ? '✅ EXISTS' : '❌ NULL',
+        'ai_credentials_Grok': localGrokCred ? '✅ EXISTS' : '❌ NULL'
+      });
 
       // PASO 3: Combinar ambas fuentes
       // Provider ID en config (minúscula) -> localStorage key (PascalCase)
@@ -78,6 +90,7 @@ function AIConfigPanel() {
         grok: firebaseCredentials.grok || !!localGrokCred
       };
 
+      console.log('🔍 [DEBUG] Combined credentials:', combinedCredentials);
       logger.info('[AIConfigPanel] Combined credentials:', combinedCredentials);
       setCredentials(combinedCredentials);
       logger.info('AI credentials status loaded:', combinedCredentials);
@@ -91,12 +104,15 @@ function AIConfigPanel() {
       const localOpenAICred = localStorage.getItem('ai_credentials_OpenAI');
       const localGrokCred = localStorage.getItem('ai_credentials_Grok');
 
-      setCredentials({
+      const fallbackCreds = {
         claude: !!localClaudeCred,
         openai: !!localOpenAICred,
         google: !!localGoogleCred,
         grok: !!localGrokCred
-      });
+      };
+
+      console.log('🔍 [DEBUG] Fallback credentials:', fallbackCreds);
+      setCredentials(fallbackCreds);
       logger.info('[AIConfigPanel] Using localStorage fallback credentials');
       logger.info('Using localStorage fallback credentials status');
     }

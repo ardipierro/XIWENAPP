@@ -25,6 +25,15 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid', cr
     : false;
 
   // Debug logging
+  console.log(`🔍 [AIFunctionCard] ${aiFunction.name}:`, {
+    isConfigured,
+    isEnabled,
+    hasCredentials,
+    provider: activeConfig?.provider,
+    'credentials[provider]': credentials ? credentials[activeConfig?.provider] : 'NO CREDENTIALS OBJECT',
+    allCredentials: credentials
+  });
+
   logger.debug(`[AIFunctionCard] ${aiFunction.name}:`, {
     isConfigured,
     isEnabled,
