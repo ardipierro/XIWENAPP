@@ -84,6 +84,7 @@ import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
 import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
+import AIAssistantWidget from './AIAssistantWidget';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -1689,6 +1690,9 @@ function TeacherDashboard({ user, userRole, onLogout }) {
         userRole={userRole}
         isAdmin={isAdmin}
       />
+
+      {/* AI Assistant Widget */}
+      <AIAssistantWidget />
     </>
   );
 }
