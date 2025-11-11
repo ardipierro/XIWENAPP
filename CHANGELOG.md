@@ -36,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Estudiantes con pocos créditos
 
 - **Documentation**:
-  - `docs/AI_ASSISTANT_GUIDE.md` - Guía completa de uso del sistema
+  - `.claude/AI_ASSISTANT.md` - Documentación técnica completa del sistema (nuevo)
+  - `docs/AI_ASSISTANT_GUIDE.md` - Guía completa de uso para usuarios finales
 
 ### Changed - 2025-11-11
 
@@ -51,6 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 
 **Commits**:
+- `28cca1f` - docs: Add AI_ASSISTANT.md to .claude/ with complete system documentation
+- `ba275fd` - docs: Add main CHANGELOG.md with AI Assistant System documentation
 - `0ea4783` - refactor: Remove shadow classes from AIAssistantWidget
 - `e342b10` - refactor: AIAssistantWidget to comply with .claude standards
 - `3de734f` - feat: Implement AI Assistant System with Voice Commands
