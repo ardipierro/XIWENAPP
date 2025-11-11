@@ -30,6 +30,7 @@ function AudioPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [useTTS, setUseTTS] = useState(false);
   const [ttsSupported, setTtsSupported] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0); // 0.5 - 2.0
   const audioRef = useRef(null);
   const ttsIntervalRef = useRef(null);
 
@@ -74,6 +75,13 @@ function AudioPlayer({
       playAudio();
     }
   }, [autoPlay]);
+
+  // Aplicar velocidad de reproducción cuando cambie
+  useEffect(() => {
+    if (audioRef.current && !useTTS) {
+      audioRef.current.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed, useTTS]);
 
   useEffect(() => {
     return () => {
@@ -236,7 +244,7 @@ function AudioPlayer({
         }, 100);
 
         await ttsService.speak(text, {
-          rate: 0.9,
+          rate: playbackSpeed * 0.9, // Ajustar rate según velocidad seleccionada
           volume: isMuted ? 0 : 1.0
         });
       }
@@ -349,6 +357,21 @@ function AudioPlayer({
           >
             <RotateCcw size={16} className="text-gray-600 dark:text-gray-400" />
           </button>
+
+          {/* Control de velocidad */}
+          <select
+            value={playbackSpeed}
+            onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
+            className="px-2 py-1 text-xs bg-white dark:bg-gray-700 border border-blue-300 dark:border-blue-700 rounded text-blue-900 dark:text-blue-100"
+            title="Velocidad de reproducción"
+          >
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1.0">1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2.0">2x</option>
+          </select>
 
           {/* Indicador TTS */}
           {useTTS && (
