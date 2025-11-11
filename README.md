@@ -41,7 +41,7 @@ Aplicación educativa web para la gestión de cursos, estudiantes y lecciones co
 - **VideoChat** integrado con LiveKit
 
 ### 🎨 Interfaz y Diseño
-- **100% Tailwind CSS** siguiendo MASTER_STANDARDS.md
+- **100% Tailwind CSS** siguiendo estándares de código
 - **Modo oscuro** completo
 - **Diseño responsivo** para mobile, tablet y desktop
 - **Componentes reutilizables** (Base Components)
@@ -60,7 +60,15 @@ Aplicación educativa web para la gestión de cursos, estudiantes y lecciones co
 
 ## 📚 Documentación
 
-- **[MASTER_STANDARDS.md](./.claude/MASTER_STANDARDS.md)** - Estándares de código y diseño
+### Documentación para Desarrollo
+- **[.claude/GUIDE.md](./.claude/GUIDE.md)** - 🚀 **EMPEZAR AQUÍ** - Guía principal del proyecto
+- **[.claude/CODING_STANDARDS.md](./.claude/CODING_STANDARDS.md)** - Estándares de código y componentes base
+- **[.claude/DESIGN_SYSTEM.md](./.claude/DESIGN_SYSTEM.md)** - Sistema de diseño y responsive
+- **[.claude/EXERCISE_BUILDER.md](./.claude/EXERCISE_BUILDER.md)** - Sistema de ejercicios ELE
+- **[.claude/CONTENT_SCHEMA.md](./.claude/CONTENT_SCHEMA.md)** - Arquitectura de contenidos
+- **[.claude/CHANGELOG.md](./.claude/CHANGELOG.md)** - Historial de cambios en documentación
+
+### Documentación Técnica
 - **[PAYMENT_SYSTEM_SETUP.md](./PAYMENT_SYSTEM_SETUP.md)** - Guía completa de configuración del sistema de pagos
 - **[FIRESTORE_COLLECTIONS.md](./FIRESTORE_COLLECTIONS.md)** - Esquema de base de datos y colecciones
 - **[TestPage Component](./src/components/TestPage.jsx)** - Página de prueba para nuevos componentes
@@ -166,8 +174,13 @@ XIWENAPP/
 ├── public/                  # Archivos estáticos
 │   ├── manifest.json        # PWA manifest
 │   └── icons/               # Iconos de la app
-├── .claude/                 # Configuración de Claude Code
-│   └── MASTER_STANDARDS.md  # Estándares de código
+├── .claude/                 # Documentación del proyecto
+│   ├── GUIDE.md             # 🚀 Guía principal (EMPEZAR AQUÍ)
+│   ├── CHANGELOG.md         # Historial de cambios
+│   ├── CODING_STANDARDS.md  # Estándares de código
+│   ├── DESIGN_SYSTEM.md     # Sistema de diseño
+│   ├── EXERCISE_BUILDER.md  # Sistema de ejercicios
+│   └── CONTENT_SCHEMA.md    # Arquitectura de contenidos
 ├── firebase.json            # Configuración de Firebase
 ├── firestore.rules          # Reglas de seguridad Firestore
 ├── firestore.indexes.json   # Índices de Firestore
