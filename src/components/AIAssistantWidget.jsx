@@ -226,7 +226,7 @@ function AIAssistantWidget() {
         <BaseButton
           onClick={() => setIsOpen(true)}
           variant="primary"
-          className="!fixed !bottom-6 !right-6 !w-14 !h-14 !rounded-full !p-0 !shadow-lg hover:!shadow-xl !z-50 group"
+          className="!fixed !bottom-6 !right-6 !w-14 !h-14 !rounded-full !p-0 !z-50 group"
           aria-label="Abrir asistente de IA"
         >
           <Sparkles size={24} className="group-hover:scale-110 transition-transform" />
@@ -236,7 +236,7 @@ function AIAssistantWidget() {
 
       {/* Chat Widget */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-[400px] h-[600px] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col z-50 border border-zinc-200 dark:border-zinc-800 animate-[slideUp_0.3s_ease]">
+        <div className="fixed bottom-6 right-6 w-[400px] h-[600px] bg-white dark:bg-zinc-900 rounded-2xl flex flex-col z-50 border border-zinc-200 dark:border-zinc-800 animate-[slideUp_0.3s_ease]">
           {/* Header */}
           <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-t-2xl">
             <div className="flex items-center gap-3">
@@ -293,7 +293,7 @@ function AIAssistantWidget() {
                         : msg.isError
                         ? 'bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-100 rounded-2xl rounded-bl-md border border-red-200 dark:border-red-800'
                         : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-2xl rounded-bl-md'
-                    } p-3 shadow-sm`}
+                    } p-3`}
                   >
                     {msg.isError && (
                       <div className="flex items-center gap-2 mb-2 text-red-600 dark:text-red-400">
@@ -313,7 +313,7 @@ function AIAssistantWidget() {
 
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded-2xl rounded-bl-md shadow-sm">
+                <div className="bg-zinc-100 dark:bg-zinc-800 p-3 rounded-2xl rounded-bl-md">
                   <div className="flex items-center gap-2">
                     <Loader size={16} className="animate-spin text-primary-600 dark:text-primary-400" />
                     <span className="text-sm text-zinc-600 dark:text-zinc-400">Pensando...</span>
