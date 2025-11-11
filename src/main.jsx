@@ -5,7 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
+import App from './App.v2.jsx'; // ✅ V2 Architecture activated
 import './globals.css';
 
 // Contexts

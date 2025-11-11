@@ -1,7 +1,5 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
 import { BaseLoading } from './components/base';
 
 /**
@@ -13,6 +11,8 @@ import { BaseLoading } from './components/base';
  * - Suspense boundaries for loading states
  * - Protected routes by role
  * - Clean URL structure
+ *
+ * Note: ThemeProvider, AuthProvider, and ViewAsProvider are injected by main.jsx
  *
  * Route Structure:
  * /student/*        → Student screens
@@ -70,57 +70,53 @@ function LoadingFallback() {
 function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider>
-        <AuthProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/login" element={<LoginScreen />} />
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginScreen />} />
 
-              {/* Student routes */}
-              <Route path="/student" element={<StudentLayout />}>
-                <Route index element={<StudentDashboard />} />
-                <Route path="courses" element={<StudentCourses />} />
-                <Route path="assignments" element={<StudentAssignments />} />
-                <Route path="classes" element={<StudentClasses />} />
-                <Route path="gamification" element={<StudentGamification />} />
-                <Route path="calendar" element={<StudentCalendar />} />
-                <Route path="content/:contentId" element={<StudentContentPlayer />} />
-                <Route path="payments" element={<StudentPayments />} />
-              </Route>
+          {/* Student routes */}
+          <Route path="/student" element={<StudentLayout />}>
+            <Route index element={<StudentDashboard />} />
+            <Route path="courses" element={<StudentCourses />} />
+            <Route path="assignments" element={<StudentAssignments />} />
+            <Route path="classes" element={<StudentClasses />} />
+            <Route path="gamification" element={<StudentGamification />} />
+            <Route path="calendar" element={<StudentCalendar />} />
+            <Route path="content/:contentId" element={<StudentContentPlayer />} />
+            <Route path="payments" element={<StudentPayments />} />
+          </Route>
 
-              {/* Teacher routes */}
-              <Route path="/teacher" element={<TeacherLayout />}>
-                <Route index element={<TeacherDashboard />} />
-                <Route path="courses" element={<TeacherCourses />} />
-                <Route path="students" element={<TeacherStudents />} />
-                <Route path="classes" element={<TeacherClasses />} />
-                <Route path="assignments" element={<TeacherAssignments />} />
-                <Route path="analytics" element={<TeacherAnalytics />} />
-                <Route path="content" element={<TeacherContent />} />
-                <Route path="games" element={<TeacherGames />} />
-                <Route path="calendar" element={<TeacherCalendar />} />
-              </Route>
+          {/* Teacher routes */}
+          <Route path="/teacher" element={<TeacherLayout />}>
+            <Route index element={<TeacherDashboard />} />
+            <Route path="courses" element={<TeacherCourses />} />
+            <Route path="students" element={<TeacherStudents />} />
+            <Route path="classes" element={<TeacherClasses />} />
+            <Route path="assignments" element={<TeacherAssignments />} />
+            <Route path="analytics" element={<TeacherAnalytics />} />
+            <Route path="content" element={<TeacherContent />} />
+            <Route path="games" element={<TeacherGames />} />
+            <Route path="calendar" element={<TeacherCalendar />} />
+          </Route>
 
-              {/* Admin routes */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="courses" element={<AdminCourses />} />
-                <Route path="content" element={<AdminContent />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="payments" element={<AdminPayments />} />
-                <Route path="ai-config" element={<AdminAIConfig />} />
-                <Route path="settings" element={<AdminSettings />} />
-              </Route>
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="courses" element={<AdminCourses />} />
+            <Route path="content" element={<AdminContent />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="payments" element={<AdminPayments />} />
+            <Route path="ai-config" element={<AdminAIConfig />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
 
-              {/* Default redirect */}
-              <Route path="/" element={<Navigate to="/student" replace />} />
-              <Route path="*" element={<Navigate to="/student" replace />} />
-            </Routes>
-          </Suspense>
-        </AuthProvider>
-      </ThemeProvider>
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/student" replace />} />
+          <Route path="*" element={<Navigate to="/student" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
