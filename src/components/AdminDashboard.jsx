@@ -50,7 +50,7 @@ import {
   loadCategories,
   loadCourses
 } from '../firebase/firestore';
-import { deleteUser } from '../firebase/users';
+import { deleteUser, createUser } from '../firebase/users';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
 import { getClassesByTeacher } from '../firebase/classes';
@@ -320,12 +320,28 @@ function AdminDashboard({ user, userRole, onLogout }) {
     userManagement.loadUsers();
   }, []);
 
-  // User created
-  const handleUserCreated = useCallback(() => {
-    setShowAddUserModal(false);
-    userManagement.loadUsers();
-    showSuccess('User created successfully');
-  }, []);
+  // Create user function for modal
+  const handleCreateUser = useCallback(async (userData) => {
+    try {
+      logger.debug('📝 Creating user:', userData);
+      const result = await createUser({
+        ...userData,
+        createdBy: user.uid
+      });
+      logger.debug('✅ User creation result:', result);
+
+      if (result.success) {
+        // Reload users list
+        await userManagement.loadUsers();
+        showSuccess('User created successfully');
+      }
+
+      return result;
+    } catch (error) {
+      logger.error('❌ Error creating user:', error);
+      return { success: false, error: error.message };
+    }
+  }, [user, userManagement]);
 
   const showSuccess = (message) => {
     setSuccessMessage(message);
@@ -1069,13 +1085,17 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
     // Filter users by role (using regular variables instead of useMemo to avoid hook order issues)
     let roleFilteredUsers = userManagement.users;
+    logger.debug(`🔍 [Users Filter] Total users: ${userManagement.users.length}, Role filter: ${navigation.usersRoleFilter}`);
 
     if (navigation.usersRoleFilter === 'students') {
       roleFilteredUsers = roleFilteredUsers.filter(u => ['student', 'listener', 'trial'].includes(u.role));
+      logger.debug(`🔍 [Users Filter] After students filter: ${roleFilteredUsers.length}`);
     } else if (navigation.usersRoleFilter === 'teachers') {
       roleFilteredUsers = roleFilteredUsers.filter(u => ['teacher', 'trial_teacher'].includes(u.role));
+      logger.debug(`🔍 [Users Filter] After teachers filter: ${roleFilteredUsers.length}`);
     } else if (navigation.usersRoleFilter === 'admins') {
       roleFilteredUsers = roleFilteredUsers.filter(u => u.role === 'admin');
+      logger.debug(`🔍 [Users Filter] After admins filter: ${roleFilteredUsers.length}`);
     }
 
     // Filter by search term
@@ -1084,6 +1104,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       user.email?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
       user.role?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase())
     );
+    logger.debug(`🔍 [Users Filter] After search filter (term: "${navigation.usersSearchTerm}"): ${filteredUsers.length}`);
 
     // Apply sorting
     filteredUsers = [...filteredUsers].sort((a, b) => {
@@ -1219,6 +1240,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
           {/* TABLE VIEW */}
           {navigation.usersViewMode === 'table' && (
             <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl overflow-hidden">
+              {(() => {
+                logger.debug(`🔍 [Users Render] View mode: ${navigation.usersViewMode}, Rendering ${filteredUsers.length} users`);
+                return null;
+              })()}
               {sessionStorage.getItem('viewAsReturnUserId') && !navigation.hasProcessedReturn && userManagement.users.length === 0 ? (
                 <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
                   <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
@@ -1465,8 +1490,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
       {showAddUserModal && (
         <AddUserModal
+          isOpen={showAddUserModal}
           onClose={() => setShowAddUserModal(false)}
-          onUserCreated={handleUserCreated}
+          onUserCreated={handleCreateUser}
           currentUser={user}
           isAdmin={isAdmin}
         />
@@ -1703,8 +1729,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
       {showAddUserModal && (
         <AddUserModal
+          isOpen={showAddUserModal}
           onClose={() => setShowAddUserModal(false)}
-          onUserCreated={handleUserCreated}
+          onUserCreated={handleCreateUser}
           currentUser={user}
           isAdmin={isAdmin}
         />

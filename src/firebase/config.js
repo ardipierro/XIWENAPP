@@ -3,7 +3,7 @@
  * @module firebase/config
  */
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp, deleteApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
@@ -142,5 +142,17 @@ export const config = {
   isDevelopment: import.meta.env.DEV,
   isProduction: import.meta.env.PROD
 };
+
+/**
+ * Crear una instancia secundaria de Firebase App
+ * Útil para crear usuarios sin afectar la sesión actual del admin
+ * @returns {{app: import('firebase/app').FirebaseApp, auth: import('firebase/auth').Auth}}
+ */
+export function createSecondaryApp() {
+  const secondaryApp = initializeApp(firebaseConfig, `secondary-${Date.now()}`);
+  const secondaryAuth = getAuth(secondaryApp);
+  logger.debug('Created secondary Firebase app for user creation');
+  return { app: secondaryApp, auth: secondaryAuth };
+}
 
 export default app;

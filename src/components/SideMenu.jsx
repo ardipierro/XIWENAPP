@@ -81,7 +81,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
               { icon: ClipboardList, label: 'Asistencias', path: '/admin', action: 'attendance' },
-              { icon: Lightbulb, label: 'Configuración IA', path: '/admin', action: 'aiConfig' },
+              { icon: Lightbulb, label: 'Tareas IA', path: '/admin', action: 'aiConfig' },
               { icon: Settings, label: 'Configuración', path: '/admin', action: 'settings' },
             ]
           },

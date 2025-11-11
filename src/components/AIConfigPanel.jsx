@@ -230,7 +230,7 @@ function AIConfigPanel() {
       {/* Header */}
       <PageHeader
         icon={Lightbulb}
-        title="Configuración de IA"
+        title="Tareas IA"
         actionLabel="+ Crear Nueva Configuración"
         onAction={() => {
           const newFunction = {
