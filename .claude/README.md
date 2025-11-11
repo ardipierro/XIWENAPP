@@ -30,6 +30,13 @@ Este archivo unifica:
 .claude/BASE_COMPONENTS.md         ← 11 COMPONENTES (versión corta)
 ```
 
+**Módulos y Features:**
+```
+.claude/DESIGN_LAB.md              ← Sistema de Ejercicios Interactivos
+.claude/AI_ASSISTANT.md            ← Asistente Virtual con Comandos de Voz
+.claude/UNIFIED_CONTENT_SCHEMA.md  ← Arquitectura de Contenido
+```
+
 ### Archivos Importantes del Proyecto:
 
 **Documentación de Estándares:**
