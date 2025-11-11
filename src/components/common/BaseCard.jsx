@@ -50,25 +50,49 @@ function BaseCard({
 }) {
   const isClickable = !!onClick;
 
-  // Variant styles
-  const variants = {
-    default: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-    elevated: 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600',
-    bordered: 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600',
-    flat: 'bg-gray-50 dark:bg-gray-900'
+  // Variant styles usando CSS variables
+  const getVariantStyle = () => {
+    const baseStyle = {
+      backgroundColor: 'var(--color-bg-primary)',
+      border: '1px solid var(--color-border)'
+    };
+
+    switch (variant) {
+      case 'elevated':
+        return {
+          ...baseStyle,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        };
+      case 'bordered':
+        return {
+          ...baseStyle,
+          borderWidth: '2px'
+        };
+      case 'flat':
+        return {
+          backgroundColor: 'var(--color-bg-secondary)',
+          border: 'none'
+        };
+      default:
+        return baseStyle;
+    }
+  };
+
+  const cardStyle = {
+    ...getVariantStyle(),
+    ...(borderColor ? { borderLeft: `3px solid ${borderColor}` } : {})
   };
 
   return (
     <div
       className={`
         rounded-xl overflow-hidden flex flex-col
-        ${variants[variant]}
         ${isClickable ? 'cursor-pointer' : ''}
-        ${hover ? 'transition-all hover:border-zinc-500 dark:hover:border-zinc-400' : ''}
+        ${hover ? 'transition-all duration-200' : ''}
         ${className}
       `}
       onClick={onClick}
-      style={borderColor ? { borderLeft: `3px solid ${borderColor}` } : {}}
+      style={cardStyle}
     >
       {/* Imagen superior (full width) */}
       {image && (
@@ -87,7 +111,7 @@ function BaseCard({
 
       {/* Header con icono o avatar */}
       {(Icon || avatar) && !image && (
-        <div className="p-6 pb-0">
+        <div className="p-5 pb-0">
           {Icon && (
             <div className="w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300 flex items-center justify-center">
               <Icon size={24} strokeWidth={2} />
@@ -105,15 +129,21 @@ function BaseCard({
       )}
 
       {/* Contenido principal */}
-      <div className="p-6 flex-1 flex flex-col">
+      <div className="p-5 flex-1 flex flex-col">
         {/* Título y subtítulo */}
         {title && (
           <div className="mb-3">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+            <h3
+              className="text-xl font-bold mb-1"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
               {title}
             </h3>
             {subtitle && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p
+                className="text-sm"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 {subtitle}
               </p>
             )}
@@ -131,14 +161,20 @@ function BaseCard({
 
         {/* Descripción/contenido */}
         {children && (
-          <div className="text-gray-600 dark:text-gray-300 mb-4 flex-1">
+          <div
+            className="mb-4 flex-1"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
             {children}
           </div>
         )}
 
         {/* Estadísticas */}
         {stats && (
-          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+          <div
+            className="flex items-center gap-4 text-sm mb-4"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
             {stats}
           </div>
         )}

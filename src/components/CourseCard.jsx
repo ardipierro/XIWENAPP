@@ -3,8 +3,16 @@ import { Users, BookOpen, Edit, Trash2 } from 'lucide-react';
 function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
   return (
     <div
-      className="card overflow-hidden flex flex-col"
-      style={{ borderLeft: `3px solid #3f3f46`, padding: 0 }}
+      className="overflow-hidden flex flex-col rounded-xl transition-all duration-200"
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        border: '1px solid var(--color-border)',
+        borderLeft: `3px solid var(--color-primary)`,
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+        padding: 0
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)'}
+      onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'}
     >
       {/* Imagen del curso - Mitad superior sin bordes */}
       {course.imageUrl ? (
@@ -22,14 +30,23 @@ function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
       )}
 
       {/* Contenido de la tarjeta */}
-      <div className="p-6 flex-1 flex flex-col">
+      <div className="p-5 flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex-1">
+          <h3
+            className="text-2xl font-bold flex-1"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
             {course.name}
           </h3>
           {course.level && (
-            <span className="badge badge-info ml-2">
+            <span
+              className="ml-2 px-2 py-1 text-xs font-semibold rounded-lg"
+              style={{
+                backgroundColor: 'var(--color-info-bg)',
+                color: 'var(--color-info)'
+              }}
+            >
               {course.level}
             </span>
           )}
@@ -37,13 +54,19 @@ function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
 
         {/* Descripción */}
         {course.description && (
-          <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+          <p
+            className="mb-4 line-clamp-2"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
             {course.description}
           </p>
         )}
 
         {/* Estadísticas */}
-        <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <div
+          className="flex items-center gap-4 mb-4 text-sm"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           <span className="flex items-center gap-1">
             <Users size={16} strokeWidth={2} /> {course.students?.length || 0} alumnos
           </span>

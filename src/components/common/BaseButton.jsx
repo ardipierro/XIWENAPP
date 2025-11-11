@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -38,23 +39,69 @@ function BaseButton({
   className = '',
   ...rest
 }) {
-  // Variant styles
-  const variants = {
-    primary: 'bg-zinc-800 hover:bg-zinc-900 text-white dark:bg-zinc-700 dark:hover:bg-zinc-600',
-    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white',
-    success: 'bg-green-600 hover:bg-green-700 text-white dark:bg-green-600 dark:hover:bg-green-700',
-    danger: 'bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700',
-    warning: 'bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700',
-    ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300',
-    outline: 'border-2 border-gray-300 hover:border-gray-400 bg-transparent text-gray-700 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50',
+  // Variant styles usando CSS variables
+  const getVariantStyles = () => {
+    const baseStyles = {
+      primary: {
+        backgroundColor: 'var(--color-primary)',
+        color: 'white',
+        hover: { backgroundColor: 'var(--color-primary-dark)' }
+      },
+      secondary: {
+        backgroundColor: 'var(--color-bg-tertiary)',
+        color: 'var(--color-text-primary)',
+        border: '1px solid var(--color-border)',
+        hover: {
+          backgroundColor: 'var(--color-bg-hover)',
+          borderColor: 'var(--color-border-focus)'
+        }
+      },
+      success: {
+        backgroundColor: 'var(--color-success)',
+        color: 'white',
+        hover: { backgroundColor: 'var(--color-success-dark)' }
+      },
+      danger: {
+        backgroundColor: 'var(--color-danger)',
+        color: 'white',
+        hover: { backgroundColor: 'var(--color-danger-dark)' }
+      },
+      warning: {
+        backgroundColor: 'var(--color-warning)',
+        color: 'white',
+        hover: { backgroundColor: 'var(--color-warning-dark)' }
+      },
+      ghost: {
+        backgroundColor: 'transparent',
+        color: 'var(--color-text-primary)',
+        border: '1px solid transparent',
+        hover: {
+          backgroundColor: 'var(--color-bg-tertiary)',
+          borderColor: 'var(--color-border)'
+        }
+      },
+      outline: {
+        backgroundColor: 'transparent',
+        color: 'var(--color-text-primary)',
+        border: '2px solid var(--color-border)',
+        hover: {
+          backgroundColor: 'var(--color-bg-tertiary)',
+          borderColor: 'var(--color-border-focus)'
+        }
+      }
+    };
+    return baseStyles[variant] || baseStyles.primary;
   };
+
+  const variantStyles = getVariantStyles();
+  const [isHovered, setIsHovered] = useState(false);
 
   // Size styles
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
-    xl: 'px-8 py-4 text-xl',
+    sm: { padding: '0.375rem 0.75rem', fontSize: '0.875rem' },
+    md: { padding: '0.5rem 1rem', fontSize: '1rem' },
+    lg: { padding: '0.75rem 1.5rem', fontSize: '1.125rem' },
+    xl: { padding: '1rem 2rem', fontSize: '1.25rem' },
   };
 
   // Icon sizes
@@ -67,23 +114,35 @@ function BaseButton({
 
   const isDisabled = disabled || loading;
 
+  // Construir el estilo completo del botón
+  const buttonStyle = {
+    ...variantStyles,
+    ...(variantStyles.hover && isHovered && !isDisabled ? variantStyles.hover : {}),
+    ...sizes[size],
+    width: fullWidth ? '100%' : 'auto',
+    opacity: isDisabled ? 0.5 : 1,
+    cursor: isDisabled ? 'not-allowed' : 'pointer',
+    transform: !isDisabled && isHovered ? 'scale(0.98)' : 'scale(1)',
+    transition: 'all 0.2s ease'
+  };
+
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={isDisabled}
+      onMouseEnter={() => !isDisabled && setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`
         inline-flex items-center justify-center gap-2
         font-medium rounded-lg
-        transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500
-        active:scale-[0.98]
-        disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
-        ${variants[variant]}
-        ${sizes[size]}
-        ${fullWidth ? 'w-full' : ''}
+        focus:outline-none focus:ring-2 focus:ring-offset-2
         ${className}
       `}
+      style={{
+        ...buttonStyle,
+        boxShadow: isHovered && !isDisabled ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+      }}
       {...rest}
     >
       {/* Loading spinner */}

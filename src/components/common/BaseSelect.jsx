@@ -48,9 +48,14 @@ function BaseSelect({
     <div className={`w-full ${className}`}>
       {/* Label */}
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label
+          className="block text-sm font-medium mb-1.5"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && (
+            <span className="ml-1" style={{ color: 'var(--color-danger)' }}>*</span>
+          )}
         </label>
       )}
 
@@ -71,18 +76,20 @@ function BaseSelect({
           required={required}
           className={`
             w-full rounded-lg border transition-all appearance-none
-            bg-white dark:bg-gray-800
-            text-gray-900 dark:text-white
-            focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent
-            disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60
-            ${error
-              ? 'border-red-500 dark:border-red-600 focus:ring-red-500'
-              : 'border-gray-300 dark:border-gray-600'
-            }
-            ${sizes[size]}
+            focus:outline-none focus:ring-2 focus:border-transparent
             ${Icon ? 'pl-10' : ''}
             pr-10
           `}
+          style={{
+            backgroundColor: disabled ? 'var(--color-bg-tertiary)' : 'var(--color-bg-primary)',
+            color: 'var(--color-text-primary)',
+            borderColor: error ? 'var(--color-danger)' : 'var(--color-border)',
+            padding: sizes[size].split(' ').map(s => s.replace('px-', '').replace('py-', '')).join(' '),
+            fontSize: sizes[size].includes('text-sm') ? '0.875rem' : sizes[size].includes('text-lg') ? '1.125rem' : '1rem',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.6 : 1,
+            paddingRight: '2.5rem'
+          }}
           {...rest}
         >
           {placeholder && (
