@@ -50,6 +50,8 @@ import {
   BaseEmptyState
 } from './common';
 import CreateContentModal from './CreateContentModal';
+import { BaseModal } from './common';
+import { FillGap, MultipleChoice } from './ExerciseGeneratorContent';
 
 // ============================================
 // CONSTANTS
@@ -122,7 +124,7 @@ const DIFFICULTY_OPTIONS = [
 // COMPONENT
 // ============================================
 
-function UnifiedContentManager({ user, onBack }) {
+function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   // Estados
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,6 +135,8 @@ function UnifiedContentManager({ user, onBack }) {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingContent, setViewingContent] = useState(null);
 
   // Cargar contenidos
   useEffect(() => {
@@ -242,8 +246,9 @@ function UnifiedContentManager({ user, onBack }) {
   };
 
   const handleView = (content) => {
-    // TODO: Abrir modal de vista previa
-    logger.info('View content:', content);
+    setViewingContent(content);
+    setShowViewModal(true);
+    logger.info('Viewing content:', content);
   };
 
   // Render
@@ -394,7 +399,107 @@ function UnifiedContentManager({ user, onBack }) {
         onSave={handleSave}
         initialData={selectedContent}
         userId={user.uid}
+        onNavigateToAIConfig={onNavigateToAIConfig}
       />
+
+      {/* View Content Modal */}
+      <BaseModal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setViewingContent(null);
+        }}
+        title={viewingContent?.title || 'Ver Contenido'}
+        icon={Eye}
+        size="xl"
+      >
+        {viewingContent && (
+          <div className="space-y-4">
+            {/* Metadata */}
+            <div className="grid grid-cols-2 gap-4 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Tipo</p>
+                <p className="text-base font-semibold text-zinc-900 dark:text-white">
+                  {CONTENT_TYPE_CONFIG[viewingContent.type]?.label || viewingContent.type}
+                </p>
+              </div>
+              {viewingContent.metadata?.difficulty && (
+                <div>
+                  <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Dificultad</p>
+                  <p className="text-base font-semibold text-zinc-900 dark:text-white">
+                    {viewingContent.metadata.difficulty}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            {viewingContent.description && (
+              <div>
+                <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Descripción</h4>
+                <p className="text-zinc-600 dark:text-zinc-400">{viewingContent.description}</p>
+              </div>
+            )}
+
+            {/* Content Body */}
+            <div>
+              <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Ejercicios</h4>
+              {viewingContent.type === CONTENT_TYPES.EXERCISE ? (
+                <div className="space-y-4">
+                  {(() => {
+                    try {
+                      const exercises = JSON.parse(viewingContent.body);
+                      return exercises.map((ex, idx) => (
+                        <div key={idx} className="p-6 bg-white dark:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-600">
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-600 text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                              {idx + 1}
+                            </span>
+                            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+                              {ex.type}
+                            </span>
+                          </div>
+
+                          {/* Render interactive exercise */}
+                          {ex.type === 'gap-fill' && (
+                            <FillGap
+                              sentence={ex.sentence}
+                              answer={ex.answer}
+                            />
+                          )}
+
+                          {ex.type === 'multiple-choice' && (
+                            <MultipleChoice
+                              question={ex.question}
+                              options={ex.options}
+                              correctIndex={ex.correctIndex}
+                            />
+                          )}
+
+                          {/* For other types, show JSON for now */}
+                          {!['gap-fill', 'multiple-choice'].includes(ex.type) && (
+                            <pre className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                              {JSON.stringify(ex, null, 2)}
+                            </pre>
+                          )}
+                        </div>
+                      ));
+                    } catch (e) {
+                      return <p className="text-red-600 dark:text-red-400">Error al parsear ejercicios: {e.message}</p>;
+                    }
+                  })()}
+                </div>
+              ) : (
+                <div className="p-4 bg-white dark:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-600">
+                  <pre className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                    {viewingContent.body || 'Sin contenido'}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </BaseModal>
     </div>
   );
 }
@@ -468,7 +573,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView }) {
   }
 
   return (
-    <BaseCard className="group hover:shadow-lg transition-all">
+    <BaseCard className="group hover:border-zinc-500 dark:hover:border-zinc-400 transition-all">
       <div className="relative">
         {/* Icon Header */}
         <div className={`absolute top-4 right-4 p-2 bg-${config.color}-100 dark:bg-${config.color}-900/20 rounded-lg`}>

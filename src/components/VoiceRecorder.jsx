@@ -5,7 +5,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Send, X, Play, Pause } from 'lucide-react';
-import './VoiceRecorder.css';
+import logger from '../utils/logger';
+import { BaseButton } from './common';
 
 /**
  * Voice Recorder Component
@@ -74,7 +75,7 @@ function VoiceRecorder({ onSend, onCancel }) {
       setIsRecording(true);
       startTimer();
     } catch (error) {
-      console.error('Error starting recording:', error);
+      logger.error('Error starting recording:', error);
       alert('No se pudo acceder al micrófono. Por favor, verifica los permisos.');
       onCancel();
     }
@@ -179,70 +180,63 @@ function VoiceRecorder({ onSend, onCancel }) {
   };
 
   return (
-    <div className="voice-recorder">
-      <div className="voice-recorder-content">
+    <div className="p-4 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 animate-[slideUp_0.3s_ease]">
+      <div className="flex items-center gap-4">
         {/* Recording indicator */}
-        <div className={`recording-indicator ${isRecording ? 'active' : ''}`}>
+        <div className={`w-10 h-10 rounded-full ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'} flex items-center justify-center transition-all duration-300`}>
           <Mic size={20} />
         </div>
 
         {/* Timer */}
-        <div className="recording-timer">
+        <div className="text-lg font-bold text-zinc-900 dark:text-zinc-50 min-w-[60px] font-mono">
           {formatTime(recordingTime)}
         </div>
 
         {/* Waveform visualization (simplified) */}
-        <div className="recording-waveform">
+        <div className="flex-1 h-10 flex items-center justify-center gap-1">
           {isRecording && !isPaused && (
             <>
-              <span className="wave-bar"></span>
-              <span className="wave-bar"></span>
-              <span className="wave-bar"></span>
-              <span className="wave-bar"></span>
-              <span className="wave-bar"></span>
+              <span className="w-1 bg-primary-900 rounded-sm animate-[wave_1s_ease-in-out_infinite] [animation-delay:0s]"></span>
+              <span className="w-1 bg-primary-900 rounded-sm animate-[wave_1s_ease-in-out_infinite] [animation-delay:0.1s]"></span>
+              <span className="w-1 bg-primary-900 rounded-sm animate-[wave_1s_ease-in-out_infinite] [animation-delay:0.2s]"></span>
+              <span className="w-1 bg-primary-900 rounded-sm animate-[wave_1s_ease-in-out_infinite] [animation-delay:0.3s]"></span>
+              <span className="w-1 bg-primary-900 rounded-sm animate-[wave_1s_ease-in-out_infinite] [animation-delay:0.4s]"></span>
             </>
           )}
         </div>
 
         {/* Controls */}
-        <div className="recording-controls">
+        <div className="flex gap-2">
           {isRecording ? (
             <>
-              {isPaused ? (
-                <button
-                  className="control-btn resume"
-                  onClick={resumeRecording}
-                  title="Reanudar"
-                >
-                  <Play size={20} />
-                </button>
-              ) : (
-                <button
-                  className="control-btn pause"
-                  onClick={pauseRecording}
-                  title="Pausar"
-                >
-                  <Pause size={20} />
-                </button>
-              )}
+              <BaseButton
+                onClick={isPaused ? resumeRecording : pauseRecording}
+                variant="primary"
+                size="sm"
+                icon={isPaused ? Play : Pause}
+                title={isPaused ? "Reanudar" : "Pausar"}
+                className="!w-10 !h-10 !rounded-full !p-0"
+              />
 
-              <button
-                className="control-btn stop"
+              <BaseButton
                 onClick={stopRecording}
+                variant="warning"
+                size="sm"
+                icon={Square}
                 title="Detener"
-              >
-                <Square size={20} />
-              </button>
+                className="!w-10 !h-10 !rounded-full !p-0"
+              />
             </>
           ) : audioBlob ? (
             <>
-              <button
-                className="control-btn play"
+              <BaseButton
                 onClick={togglePlayback}
+                variant="primary"
+                size="sm"
+                icon={isPlaying ? Pause : Play}
                 title={isPlaying ? 'Pausar' : 'Reproducir'}
-              >
-                {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-              </button>
+                className="!w-10 !h-10 !rounded-full !p-0"
+              />
 
               <audio
                 ref={audioPlayerRef}
@@ -251,23 +245,25 @@ function VoiceRecorder({ onSend, onCancel }) {
                 style={{ display: 'none' }}
               />
 
-              <button
-                className="control-btn send"
+              <BaseButton
                 onClick={handleSend}
+                variant="success"
+                size="sm"
+                icon={Send}
                 title="Enviar"
-              >
-                <Send size={20} />
-              </button>
+                className="!w-10 !h-10 !rounded-full !p-0"
+              />
             </>
           ) : null}
 
-          <button
-            className="control-btn cancel"
+          <BaseButton
             onClick={onCancel}
+            variant="danger"
+            size="sm"
+            icon={X}
             title="Cancelar"
-          >
-            <X size={20} />
-          </button>
+            className="!w-10 !h-10 !rounded-full !p-0"
+          />
         </div>
       </div>
     </div>

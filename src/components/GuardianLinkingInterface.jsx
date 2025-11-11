@@ -157,7 +157,7 @@ export default function GuardianLinkingInterface({ adminId }) {
         {/* Guardians List */}
         {guardians.length === 0 ? (
           <BaseEmptyState
-            icon={<Users size={64} strokeWidth={2} />}
+            icon={Users}
             title="No hay tutores registrados"
             description="Crea un nuevo tutor para comenzar a vincular estudiantes"
           />
@@ -492,7 +492,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <BaseSelect
-          label="Seleccionar Tutor *"
+          label="Tutor *"
           value={selectedGuardian}
           onChange={(e) => setSelectedGuardian(e.target.value)}
           options={[
@@ -506,7 +506,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
         />
 
         <BaseSelect
-          label="Seleccionar Estudiante *"
+          label="Estudiante *"
           value={selectedStudent}
           onChange={(e) => setSelectedStudent(e.target.value)}
           options={[
@@ -541,7 +541,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
                 type="checkbox"
                 checked={permissions.canViewGrades}
                 onChange={(e) => setPermissions({ ...permissions, canViewGrades: e.target.checked })}
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Ver calificaciones
@@ -553,7 +553,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
                 type="checkbox"
                 checked={permissions.canViewAttendance}
                 onChange={(e) => setPermissions({ ...permissions, canViewAttendance: e.target.checked })}
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Ver asistencia
@@ -565,7 +565,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
                 type="checkbox"
                 checked={permissions.canViewBehavior}
                 onChange={(e) => setPermissions({ ...permissions, canViewBehavior: e.target.checked })}
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Ver comportamiento
@@ -577,7 +577,7 @@ function LinkGuardianModal({ guardians, students, adminId, onClose, onSuccess, s
                 type="checkbox"
                 checked={permissions.canReceiveNotifications}
                 onChange={(e) => setPermissions({ ...permissions, canReceiveNotifications: e.target.checked })}
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                className="w-4 h-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 Recibir notificaciones

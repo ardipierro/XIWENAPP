@@ -1,6 +1,6 @@
 import logger from '../utils/logger';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Crown,
@@ -39,7 +39,9 @@ import {
   TrendingUp,
   ClipboardList,
   DollarSign,
-  Zap
+  Zap,
+  Key,
+  Palette
 } from 'lucide-react';
 import {
   loadStudents,
@@ -70,7 +72,8 @@ import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
-import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
+// Lazy load Excalidraw to prevent vendor bundle issues
+const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
@@ -81,8 +84,16 @@ import LiveGameSetup from './LiveGameSetup';
 import MessagesPanel from './MessagesPanel';
 import AdminPaymentsPanel from './AdminPaymentsPanel';
 import AIConfigPanel from './AIConfigPanel';
+import AICredentialsModal from './AICredentialsModal';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
+import UnifiedCalendar from './UnifiedCalendar';
+import ThemeBuilder from './ThemeBuilder';
+import ExerciseBuilder from '../pages/ExerciseBuilder';
+import DesignLab from './DesignLab';
+import InteractiveBookViewer from './InteractiveBookViewer';
+import AIService from '../services/AIService';
+import ThemeCustomizer from './ThemeCustomizer';
 import './AdminDashboard.css';
 
 // Custom hooks
@@ -121,6 +132,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showAICredentialsModal, setShowAICredentialsModal] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [settingsTab, setSettingsTab] = useState('credentials'); // 'credentials' | 'theme'
+  const [credentialsRefresh, setCredentialsRefresh] = useState(0); // Para forzar re-render
+  const [aiCredentials, setAiCredentials] = useState({
+    claude: true,
+    openai: true,
+    gemini: true,
+    grok: true
+  });
 
   // Admin-specific stats (extended from userManagement.stats)
   const [adminStats, setAdminStats] = useState({
@@ -422,13 +443,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // Excalidraw Whiteboard - NO Layout (fullscreen)
   if (navigation.currentScreen === 'excalidrawWhiteboard') {
     return (
-      <ExcalidrawWhiteboard
-        onBack={() => {
-          navigation.setExcalidrawManagerKey(prev => prev + 1);
-          navigation.setCurrentScreen('excalidrawSessions');
-        }}
-        initialSession={navigation.selectedExcalidrawSession}
-      />
+      <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Cargando pizarra...</div>}>
+        <ExcalidrawWhiteboard
+          onBack={() => {
+            navigation.setExcalidrawManagerKey(prev => prev + 1);
+            navigation.setCurrentScreen('excalidrawSessions');
+          }}
+          initialSession={navigation.selectedExcalidrawSession}
+        />
+      </Suspense>
     );
   }
 
@@ -465,8 +488,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ClassSessionManager
           user={user}
+          initialEditSessionId={navigation.editSessionId}
+          onClearEditSession={() => navigation.setEditSessionId(null)}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
+            navigation.setEditSessionId(null); // Clear edit state when joining
             navigation.setCurrentScreen('classSessionRoom');
           }}
         />
@@ -493,6 +519,30 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // RENDER SPECIFIC SCREENS (WITH LAYOUT)
   // ==========================================
 
+  // Unified Calendar Screen - WITH Layout
+  if (navigation.currentScreen === 'calendar') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <UnifiedCalendar
+          userId={user?.uid}
+          userRole="admin"
+          onCreateSession={() => {
+            navigation.setEditSessionId(null); // Clear any edit state
+            navigation.setCurrentScreen('classSessions');
+          }}
+          onJoinSession={(session) => {
+            navigation.setSelectedLiveClass(session);
+            navigation.setCurrentScreen('classSessionRoom');
+          }}
+          onEditSession={(sessionId) => {
+            navigation.setEditSessionId(sessionId);
+            navigation.setCurrentScreen('classSessions');
+          }}
+        />
+      </DashboardLayout>
+    );
+  }
+
   // AI Configuration Panel - WITH Layout
   if (navigation.currentScreen === 'aiConfig') {
     return (
@@ -506,6 +556,43 @@ function AdminDashboard({ user, userRole, onLogout }) {
       </DashboardLayout>
     );
   }
+
+  // Theme Builder - WITH Layout
+  if (navigation.currentScreen === 'themeBuilder') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ThemeBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Exercise Builder - WITH Layout
+  if (navigation.currentScreen === 'exerciseBuilder') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <ExerciseBuilder />
+      </DashboardLayout>
+    );
+  }
+
+  // Design Lab - Theme Tester - WITH Layout
+  if (navigation.currentScreen === 'designLab') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <DesignLab />
+      </DashboardLayout>
+    );
+  }
+
+  // Interactive Book Viewer - WITH Layout
+  if (navigation.currentScreen === 'interactiveBook') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <InteractiveBookViewer />
+      </DashboardLayout>
+    );
+  }
+
 
   // Live Game Setup - WITH Layout
   if (navigation.currentScreen === 'liveGame') {
@@ -527,7 +614,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'unifiedContent') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <UnifiedContentManager user={user} onBack={navigation.handleBackToDashboard} />
+        <UnifiedContentManager
+          user={user}
+          onBack={navigation.handleBackToDashboard}
+          onNavigateToAIConfig={() => navigation.handleMenuAction('aiConfig')}
+        />
       </DashboardLayout>
     );
   }
@@ -636,8 +727,43 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </p>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
+            {/* Tabs */}
+            <div className="border-b border-gray-200 dark:border-gray-700">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setSettingsTab('credentials')}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
+                    ${settingsTab === 'credentials'
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }
+                  `}
+                >
+                  <Key className="w-5 h-5" />
+                  Credenciales IA
+                </button>
+                <button
+                  onClick={() => setSettingsTab('theme')}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
+                    ${settingsTab === 'theme'
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }
+                  `}
+                >
+                  <Palette className="w-5 h-5" />
+                  Editor de Temas
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content: Credentials */}
+            {settingsTab === 'credentials' && (
+              <div className="space-y-6">
+                <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
+                  <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
               <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
                 <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
                   <span className="font-medium">Application Version</span>
@@ -658,17 +784,94 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            {/* AI Credentials Section */}
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Credenciales de IA
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Configura las API keys de los proveedores de IA para usar funciones inteligentes en la plataforma
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" key={credentialsRefresh}>
+                {AIService.getAvailableProviders().map((provider) => {
+                  // Check credentials from Firebase Secret Manager OR localStorage
+                  const hasFirebaseCredential = aiCredentials[provider.name] || false;
+                  const hasLocalStorageCredential = provider.name === 'elevenlabs'
+                    ? !!localStorage.getItem('ai_credentials_elevenlabs')
+                    : false;
+                  const isConfigured = hasFirebaseCredential || hasLocalStorageCredential;
+
+                  return (
+                    <button
+                      key={provider.name}
+                      onClick={() => {
+                        setSelectedProvider({
+                          ...provider,
+                          docsUrl: provider.name === 'openai' ? 'https://platform.openai.com/api-keys' :
+                                   provider.name === 'gemini' ? 'https://aistudio.google.com/app/apikey' :
+                                   provider.name === 'grok' ? 'https://console.x.ai/' :
+                                   provider.name === 'elevenlabs' ? 'https://elevenlabs.io/app/settings/api-keys' :
+                                   'https://console.anthropic.com/settings/keys'
+                        });
+                        setShowAICredentialsModal(true);
+                      }}
+                      className={`
+                        relative flex items-center gap-4 p-4 rounded-xl border-2
+                        transition-all duration-200
+                        ${isConfigured
+                          ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+                        }
+                        hover:border-zinc-500 dark:hover:border-zinc-400 active:scale-[0.98]
+                      `}
+                    >
+                      <div className="text-3xl">{provider.icon}</div>
+                      <div className="flex-1 text-left">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {provider.label}
+                        </h3>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {provider.model}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        {isConfigured ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
+                            <CheckCircle className="w-3 h-3" />
+                            Configurado
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-semibold">
+                            <Settings className="w-3 h-3" />
+                            Configurar
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                  <strong>Nota:</strong> Las credenciales se guardan de forma segura en el navegador local. No se comparten con otros usuarios.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
               <div className="flex items-start gap-3">
-                <Settings className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1" size={20} />
+                <Settings className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-1" size={20} />
                 <div>
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                     Additional Settings Coming Soon
                   </h3>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     More configuration options will be available in future updates, including:
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm text-blue-700 dark:text-blue-300">
+                  <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
                     <li>• Email notifications preferences</li>
                     <li>• System-wide defaults</li>
                     <li>• Backup and restore options</li>
@@ -677,8 +880,37 @@ function AdminDashboard({ user, userRole, onLogout }) {
                 </div>
               </div>
             </div>
+              </div>
+            )}
+
+            {/* Tab Content: Theme */}
+            {settingsTab === 'theme' && (
+              <div className="space-y-6">
+                <ThemeCustomizer />
+              </div>
+            )}
           </div>
         </div>
+
+        {/* AI Credentials Modal */}
+        <AICredentialsModal
+          isOpen={showAICredentialsModal}
+          onClose={() => {
+            setShowAICredentialsModal(false);
+            setSelectedProvider(null);
+          }}
+          provider={selectedProvider}
+          isConfigured={selectedProvider ? aiCredentials[selectedProvider.name] : false}
+          onSave={async (providerName, apiKey) => {
+            logger.info('API Key saved for provider:', providerName);
+            // Forzar re-render para actualizar el estado visual
+            setCredentialsRefresh(prev => prev + 1);
+            // Reload providers to update configured status
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          }}
+        />
       </DashboardLayout>
     );
   }
@@ -846,7 +1078,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <Shield size={32} strokeWidth={2} className="text-indigo-600 dark:text-indigo-400" />
+              <Shield size={32} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
               <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h1>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -865,7 +1097,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
               onClick={() => navigation.setUsersRoleFilter('all')}
               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                 navigation.usersRoleFilter === 'all'
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-gray-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
@@ -876,7 +1108,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
               onClick={() => navigation.setUsersRoleFilter('students')}
               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                 navigation.usersRoleFilter === 'students'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gray-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
@@ -887,7 +1119,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
               onClick={() => navigation.setUsersRoleFilter('teachers')}
               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                 navigation.usersRoleFilter === 'teachers'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-gray-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
@@ -1066,7 +1298,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                             onClick={() => handleViewUserProfile(userItem)}
                             title="View full profile"
                           >
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center text-white flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-white flex-shrink-0">
                               {(() => {
                                 const iconName = ROLE_INFO[userItem.role]?.icon || 'User';
                                 const IconComponent = ICON_MAP[iconName] || User;
@@ -1081,17 +1313,17 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           </div>
                         </td>
                         <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <div className="inline-block px-3 py-1 rounded-xl bg-gradient-to-r from-warning-500 to-warning-700 text-white font-semibold text-[13px]">
+                          <div className="inline-block px-3 py-1 rounded-xl bg-amber-600 text-white font-semibold text-[13px]">
                             {userItem.credits || 0}
                           </div>
                         </td>
                         <td className="p-4 text-primary-900 dark:text-primary-100">
                           <span className={`inline-block px-3 py-1 rounded-xl font-semibold text-xs uppercase tracking-wide text-white ${
                             userItem.role === 'admin'
-                              ? 'bg-gradient-to-r from-warning-500 to-warning-700'
+                              ? 'bg-amber-600'
                               : userItem.role === 'teacher' || userItem.role === 'trial_teacher'
-                              ? 'bg-gradient-to-r from-purple-500 to-purple-700'
-                              : 'bg-gradient-to-r from-blue-500 to-blue-700'
+                              ? 'bg-zinc-800'
+                              : 'bg-gray-600'
                           }`}>
                             {ROLE_INFO[userItem.role]?.name || userItem.role}
                           </span>
@@ -1322,14 +1554,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
           <div className="mb-12 text-center">
             <div className="flex items-center gap-3 mb-2 justify-center">
-              <Crown size={40} strokeWidth={2} className="text-indigo-600 dark:text-indigo-400" />
+              <Crown size={40} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
             </div>
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 mb-12">
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-accent-500 to-accent-700">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
                 <Users size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1338,8 +1570,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-warning-500 to-warning-700">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-amber-600">
                 <Crown size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1348,8 +1580,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-purple-500 to-purple-700">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
                 <UserCog size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1358,8 +1590,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-blue-500 to-blue-700">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gray-600">
                 <GraduationCap size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1368,8 +1600,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-success-500 to-success-700">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-green-600">
                 <CheckCircle size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
@@ -1378,8 +1610,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:shadow-xl">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gradient-to-br from-error-500 to-error-700">
+            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-red-600">
                 <Ban size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">

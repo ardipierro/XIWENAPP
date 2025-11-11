@@ -13,7 +13,10 @@
     "test:local": "npm run test:seed && npm run test:functions",
     "functions:install": "cd functions && npm install",
     "functions:deploy": "firebase deploy --only functions",
-    "migrate:unified-content": "node scripts/migrateToUnifiedContent.js"
+    "migrate:unified-content": "node scripts/migrateToUnifiedContent.js",
+    "lighthouse:mobile": "lighthouse http://localhost:5173 --preset=mobile --only-categories=performance,accessibility,best-practices,pwa --view",
+    "lighthouse:desktop": "lighthouse http://localhost:5173 --preset=desktop --only-categories=performance,accessibility,best-practices,pwa --view",
+    "lighthouse:ci": "lighthouse http://localhost:5173 --preset=mobile --only-categories=performance,accessibility,best-practices,pwa --output=html --output-path=./lighthouse-mobile-report.html && lighthouse http://localhost:5173 --preset=desktop --only-categories=performance,accessibility,best-practices,pwa --output=html --output-path=./lighthouse-desktop-report.html"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0",
@@ -25,8 +28,8 @@
     "lucide-react": "^0.552.0",
     "perfect-freehand": "^1.2.2",
     "prop-types": "^15.8.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-router-dom": "^7.9.5",
     "recharts": "^3.3.0",
     "zod": "^4.1.12"

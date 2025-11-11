@@ -70,7 +70,7 @@ function BaseModal({
         className={`
           relative w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
           bg-white dark:bg-gray-800
-          rounded-xl shadow-2xl
+          rounded-xl border border-gray-200 dark:border-gray-700
           flex flex-col
           animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
           ${loading ? 'pointer-events-none opacity-70' : ''}
@@ -81,7 +81,7 @@ function BaseModal({
         {/* Loading spinner overlay */}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="w-10 h-10 border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-gray-200 dark:border-gray-700 border-t-zinc-800 rounded-full animate-spin" />
           </div>
         )}
 
@@ -95,7 +95,7 @@ function BaseModal({
                   flex items-center justify-center w-10 h-10 rounded-lg shrink-0
                   ${isDanger
                     ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300'}
                 `}>
                   <Icon size={24} strokeWidth={2} />
                 </div>

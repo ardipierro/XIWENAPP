@@ -1,6 +1,24 @@
 {
   "indexes": [
     {
+      "collectionGroup": "student_enrollments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "class_sessions",
       "queryScope": "COLLECTION",
       "fields": [

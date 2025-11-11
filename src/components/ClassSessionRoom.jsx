@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { X, Video, Presentation, PenTool, Maximize2, Minimize2 } from 'lucide-react';
 import logger from '../utils/logger';
 import LiveClassRoom from './LiveClassRoom';
 import Whiteboard from './Whiteboard';
-import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
+const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import { BaseButton, BaseLoading, BaseAlert } from './common';
 import { getClassSession } from '../firebase/classSessions';
 import { createWhiteboardSession } from '../firebase/whiteboard';
@@ -159,11 +159,13 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
     if (sessionData.whiteboardType === 'excalidraw') {
       return (
         <div className="h-full">
-          <ExcalidrawWhiteboard
-            sessionId={whiteboardSessionId}
-            isReadOnly={sessionData.teacherId !== user.uid}
-            mode="embedded"
-          />
+          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Cargando pizarra...</div>}>
+            <ExcalidrawWhiteboard
+              sessionId={whiteboardSessionId}
+              isReadOnly={sessionData.teacherId !== user.uid}
+              mode="embedded"
+            />
+          </Suspense>
         </div>
       );
     }
@@ -184,7 +186,7 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
           size="sm"
           icon={layout === 'split' ? Minimize2 : Maximize2}
           onClick={() => setLayout(layout === 'split' ? 'video-only' : 'split')}
-          className="bg-white dark:bg-gray-800 shadow-lg"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
         >
           {layout === 'split' ? 'Solo Video' : 'Dividir'}
         </BaseButton>
@@ -194,7 +196,7 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
           size="sm"
           icon={X}
           onClick={onLeave}
-          className="bg-white dark:bg-gray-800 shadow-lg"
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
         >
           Salir
         </BaseButton>
@@ -267,7 +269,7 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
             size="sm"
             icon={X}
             onClick={onLeave}
-            className="bg-white dark:bg-gray-800 shadow-lg"
+            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
           >
             Salir
           </BaseButton>

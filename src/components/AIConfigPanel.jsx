@@ -1,72 +1,81 @@
 /**
- * @fileoverview AI Configuration Panel for Admin
+ * @fileoverview AI Configuration Panel - Panel principal de configuración de IA
  * @module components/AIConfigPanel
  */
 
-import { useState, useEffect } from 'react';
-import { Lightbulb, Save, MessageSquare } from 'lucide-react';
-import { getAIConfig, saveAIConfig, callAI } from '../firebase/aiConfig';
+import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import { Lightbulb, Filter, Settings } from 'lucide-react';
+import { getAIConfig, saveAIConfig, checkAICredentials } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 import {
   BaseButton,
-  BaseCard,
-  BaseInput,
-  BaseTextarea,
-  BaseSelect,
+  BaseAlert,
   BaseBadge,
-  BaseLoading,
-  BaseAlert
+  BaseEmptyState
 } from './common';
-
-const AI_PROVIDERS = [
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    icon: '🤖',
-    description: 'GPT-4 - El más avanzado y versátil'
-  },
-  {
-    id: 'grok',
-    name: 'Grok',
-    icon: '🚀',
-    description: 'X.AI - Rápido y directo'
-  },
-  {
-    id: 'google',
-    name: 'Google',
-    icon: '🔍',
-    description: 'Gemini - Multimodal y potente'
-  },
-  {
-    id: 'claude',
-    name: 'Claude',
-    icon: '🧠',
-    description: 'Anthropic - Razonamiento avanzado'
-  }
-];
-
-const TONES = [
-  { value: 'professional', label: 'Profesional' },
-  { value: 'friendly', label: 'Amigable' },
-  { value: 'formal', label: 'Formal' },
-  { value: 'casual', label: 'Casual' },
-  { value: 'enthusiastic', label: 'Entusiasta' }
-];
+import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
+import AIFunctionCard from './AIFunctionCard';
+import AIFunctionConfigModal from './AIFunctionConfigModal';
+import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
 
 function AIConfigPanel() {
+  // ============================================================================
+  // ESTADO - Definir TODO el estado al principio
+  // ============================================================================
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [testingProvider, setTestingProvider] = useState(null);
-  const [testPrompt, setTestPrompt] = useState('Explica qué es la fotosíntesis en términos simples.');
-  const [testResponse, setTestResponse] = useState('');
+  const [selectedFunction, setSelectedFunction] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [credentials, setCredentials] = useState({
+    claude: true,
+    openai: true,
+    gemini: true,
+    grok: true
+  });
 
+
+  // ============================================================================
+  // EFECTOS - Cargar config al montar
+  // ============================================================================
   useEffect(() => {
     loadConfig();
+    loadCredentials();
   }, []);
 
+  /**
+   * Cargar estado de credenciales desde Secret Manager
+   */
+  const loadCredentials = async () => {
+    try {
+      logger.info('[AIConfigPanel] Loading credentials...');
+      const credStatus = await checkAICredentials();
+      logger.info('[AIConfigPanel] Credentials loaded:', credStatus);
+      setCredentials(credStatus);
+      logger.info('AI credentials status loaded:', credStatus);
+    } catch (err) {
+      logger.error('[AIConfigPanel] Failed to load credentials:', err);
+      logger.error('Failed to load credentials status:', err);
+      // Keep default values on error (already set in useState)
+      logger.info('[AIConfigPanel] Using default credentials');
+      logger.info('Using default credentials status');
+    }
+  };
+
+  // ============================================================================
+  // FUNCIONES - Lógica de negocio
+  // ============================================================================
+
+  /**
+   * Cargar configuración desde Firebase
+   * CRÍTICO: Siempre inicializar con estructura válida
+   */
   const loadConfig = async () => {
     try {
       setLoading(true);
@@ -74,147 +83,157 @@ function AIConfigPanel() {
 
       const result = await getAIConfig();
 
-      if (result) {
-        setConfig(result);
-        logger.info('AI config loaded successfully');
-      } else {
-        // Initialize with default config if none exists
-        const defaultConfig = {
-          openai: {
-            enabled: false,
-            apiKey: '',
-            basePrompt: 'Eres un asistente educativo amigable y paciente.',
-            tone: 'friendly'
-          },
-          claude: {
-            enabled: false,
-            apiKey: '',
-            basePrompt: 'Eres un asistente educativo reflexivo y preciso.',
-            tone: 'professional'
-          },
-          grok: {
-            enabled: false,
-            apiKey: '',
-            basePrompt: 'Eres un asistente educativo directo y eficiente.',
-            tone: 'professional'
-          },
-          google: {
-            enabled: false,
-            apiKey: '',
-            basePrompt: 'Eres un asistente educativo versátil y conocedor.',
-            tone: 'professional'
+      // PASO 1: Crear config default con todas las funciones
+      const defaultConfig = { functions: {} };
+      AI_FUNCTIONS.forEach(func => {
+        defaultConfig.functions[func.id] = func.defaultConfig;
+      });
+
+      // PASO 2: Mergear con config de Firebase si existe
+      if (result && result.functions) {
+        const mergedConfig = {
+          functions: {
+            ...defaultConfig.functions,
+            ...result.functions
           }
         };
+        setConfig(mergedConfig);
+        logger.info('AI config loaded and merged');
+      } else {
+        // Si no hay config en Firebase, usar default
         setConfig(defaultConfig);
-        logger.info('Initialized with default AI config');
+        logger.info('Using default AI config');
       }
     } catch (err) {
       logger.error('Failed to load AI config:', err);
-      setError('Error al cargar la configuración. Usando configuración predeterminada.');
+      setError('Error al cargar configuración');
 
-      // Initialize with default config on error
-      const defaultConfig = {
-        openai: {
-          enabled: false,
-          apiKey: '',
-          basePrompt: 'Eres un asistente educativo amigable y paciente.',
-          tone: 'friendly'
-        },
-        claude: {
-          enabled: false,
-          apiKey: '',
-          basePrompt: 'Eres un asistente educativo reflexivo y preciso.',
-          tone: 'professional'
-        },
-        grok: {
-          enabled: false,
-          apiKey: '',
-          basePrompt: 'Eres un asistente educativo directo y eficiente.',
-          tone: 'professional'
-        },
-        google: {
-          enabled: false,
-          apiKey: '',
-          basePrompt: 'Eres un asistente educativo versátil y conocedor.',
-          tone: 'professional'
-        }
-      };
+      // FALLBACK: Usar config default incluso en error
+      const defaultConfig = { functions: {} };
+      AI_FUNCTIONS.forEach(func => {
+        defaultConfig.functions[func.id] = func.defaultConfig;
+      });
       setConfig(defaultConfig);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
+  /**
+   * Abrir modal de configuración
+   */
+  const handleConfigureFunction = (functionId) => {
+    const func = AI_FUNCTIONS.find(f => f.id === functionId);
+    if (func) {
+      setSelectedFunction(func);
+      setModalOpen(true);
+    }
+  };
+
+  /**
+   * Guardar configuración de función
+   * CRÍTICO: Actualizar estado inmediatamente después de guardar en Firebase
+   */
+  const handleSaveFunction = async (functionId, functionConfig) => {
     try {
-      setSaving(true);
-      setError(null);
-      setSuccess(null);
+      // PASO 1: Crear nuevo config con la función actualizada
+      const updatedConfig = {
+        ...config,
+        functions: {
+          ...config.functions,
+          [functionId]: functionConfig
+        }
+      };
 
-      await saveAIConfig(config);
+      // PASO 2: Guardar en Firebase
+      await saveAIConfig(updatedConfig);
 
-      setSuccess('Configuración guardada correctamente');
-      logger.info('AI config saved successfully');
+      // PASO 3: Actualizar estado local INMEDIATAMENTE
+      // Esto previene que las cards desaparezcan
+      setConfig(updatedConfig);
+
+      setSuccess('Configuración guardada exitosamente');
+      logger.info('AI function config saved:', functionId);
+
+      // Limpiar mensaje de éxito después de 3 segundos
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      logger.error('Failed to save AI config:', err);
-      setError('Error al guardar la configuración');
-    } finally {
-      setSaving(false);
+      logger.error('Failed to save AI function config:', err);
+      setError(`Error al guardar: ${err.message}`);
+      throw err;
     }
   };
 
-  const handleToggle = (providerId) => {
-    setConfig({
-      ...config,
-      [providerId]: {
-        ...config[providerId],
-        enabled: !config[providerId].enabled
-      }
-    });
+  /**
+   * Cerrar modal
+   * CRÍTICO: NO modificar config aquí, solo cerrar
+   */
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedFunction(null);
+    setSearchTerm(''); // Limpiar búsqueda al cerrar modal
   };
 
-  const handleFieldChange = (providerId, field, value) => {
-    setConfig({
-      ...config,
-      [providerId]: {
-        ...config[providerId],
-        [field]: value
-      }
-    });
-  };
+  /**
+   * Filtrar funciones por categoría y búsqueda
+   */
+  const getFilteredFunctions = () => {
+    let filtered = [...AI_FUNCTIONS];
 
-  const handleTest = async (providerId) => {
-    if (!config[providerId].apiKey) {
-      setError('Por favor, ingresa una clave API primero');
-      return;
+    // Filtrar por categoría
+    if (selectedCategory) {
+      filtered = filtered.filter(f => f.category === selectedCategory);
     }
 
-    try {
-      setTestingProvider(providerId);
-      setTestResponse('');
-      setError(null);
-
-      const result = await callAI(providerId, testPrompt, config[providerId]);
-
-      if (result) {
-        setTestResponse(result);
-        logger.info('AI test successful for provider:', providerId);
-      }
-    } catch (err) {
-      logger.error('Failed to test AI:', err);
-      setError(`Error al probar la IA: ${err.message}`);
-    } finally {
-      setTestingProvider(null);
+    // Filtrar por búsqueda
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(f =>
+        f.name.toLowerCase().includes(search) ||
+        f.description.toLowerCase().includes(search)
+      );
     }
+
+    return filtered;
   };
 
+  /**
+   * Stats helpers
+   */
+  const getEnabledCount = () => {
+    if (!config || !config.functions) return 0;
+    return Object.values(config.functions).filter(f => f.enabled).length;
+  };
+
+  const getConfiguredCount = () => {
+    if (!config || !config.functions) return 0;
+    return Object.values(config.functions).filter(f => f.provider && f.model).length;
+  };
+
+  // ============================================================================
+  // HOOKS MEMOIZADOS - ANTES de returns condicionales
+  // ============================================================================
+  const filteredFunctions = useMemo(() => {
+    return getFilteredFunctions();
+  }, [selectedCategory, searchTerm]);
+
+  // ============================================================================
+  // RENDERS CONDICIONALES - Después de todos los hooks
+  // ============================================================================
   if (loading) {
-    return <BaseLoading variant="fullscreen" text="Cargando configuración..." />;
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="spinner"></div>
+        <p className="ml-4 text-zinc-600 dark:text-zinc-300">
+          Cargando configuración de IA...
+        </p>
+      </div>
+    );
   }
 
   if (!config) {
     return (
-      <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
+      <div>
         <BaseAlert variant="danger" title="Error">
           No se pudo cargar la configuración de IA. Por favor, recarga la página.
         </BaseAlert>
@@ -222,19 +241,57 @@ function AIConfigPanel() {
     );
   }
 
+  // ============================================================================
+  // RENDER PRINCIPAL
+  // ============================================================================
   return (
-    <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
+    <div className="ai-config-panel">
       {/* Header */}
+      <PageHeader
+        icon={Lightbulb}
+        title="Configuración de IA"
+        actionLabel="+ Crear Nueva Configuración"
+        onAction={() => {
+          const newFunction = {
+            id: `custom_${Date.now()}`,
+            name: 'Nueva Función de IA',
+            description: 'Configura esta función personalizada',
+            icon: Settings,
+            category: 'content',
+            defaultConfig: {
+              enabled: false,
+              provider: '',
+              model: '',
+              apiKey: '',
+              systemPrompt: '',
+              parameters: {
+                temperature: 0.7,
+                maxTokens: 2000,
+                topP: 1
+              }
+            }
+          };
+          setSelectedFunction(newFunction);
+          setModalOpen(true);
+        }}
+      />
+
+      {/* Description and Stats */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Lightbulb className="w-8 h-8 text-amber-500" strokeWidth={2} />
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-            Configuración de IA
-          </h1>
-        </div>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Configura los asistentes de IA para ayudar a estudiantes y profesores
+        <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+          Configura diferentes funciones de IA para tu plataforma educativa
         </p>
+
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex gap-4">
+            <BaseBadge variant="success" size="lg">
+              {getEnabledCount()} funciones activas
+            </BaseBadge>
+            <BaseBadge variant="default" size="lg">
+              {getConfiguredCount()} de {AI_FUNCTIONS.length} configuradas
+            </BaseBadge>
+          </div>
+        </div>
       </div>
 
       {/* Alerts */}
@@ -262,128 +319,93 @@ function AIConfigPanel() {
         </BaseAlert>
       )}
 
-      {/* Save Button */}
-      <div className="mb-6 flex justify-end">
+      {/* Search Bar */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar funciones de IA..."
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        className="mb-6"
+      />
+
+      {/* Category Filter */}
+      <div className="mb-6 flex flex-wrap gap-2 items-center">
+        <Filter className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
         <BaseButton
-          variant="primary"
-          icon={Save}
-          onClick={handleSave}
-          loading={saving}
+          variant={selectedCategory === null ? 'primary' : 'secondary'}
+          size="sm"
+          onClick={() => setSelectedCategory(null)}
         >
-          Guardar Configuración
+          Todas ({AI_FUNCTIONS.length})
         </BaseButton>
+        {AI_CATEGORIES.map(category => {
+          const count = AI_FUNCTIONS.filter(f => f.category === category.id).length;
+          const CategoryIcon = category.icon;
+          return (
+            <BaseButton
+              key={category.id}
+              variant={selectedCategory === category.id ? 'primary' : 'secondary'}
+              size="sm"
+              icon={CategoryIcon}
+              onClick={() => setSelectedCategory(category.id)}
+            >
+              {category.label} ({count})
+            </BaseButton>
+          );
+        })}
       </div>
 
-      {/* Provider Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {AI_PROVIDERS.map((provider) => (
-          <BaseCard
-            key={provider.id}
-            variant="bordered"
-          >
-            <div className="space-y-4">
-              {/* Provider Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl">{provider.icon}</span>
-                  <div>
-                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
-                      {provider.name}
-                    </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {provider.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Enable Toggle */}
-              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-                <span className="font-medium text-zinc-700 dark:text-zinc-300 text-sm">
-                  Activar
-                </span>
-                <button
-                  onClick={() => handleToggle(provider.id)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    config[provider.id].enabled
-                      ? 'bg-green-500'
-                      : 'bg-zinc-300 dark:bg-zinc-600'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      config[provider.id].enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {/* API Key */}
-              <BaseInput
-                type="password"
-                label="Clave API"
-                value={config[provider.id].apiKey}
-                onChange={(e) => handleFieldChange(provider.id, 'apiKey', e.target.value)}
-                placeholder="sk-..."
-              />
-
-              {/* Base Prompt */}
-              <BaseTextarea
-                label="Prompt Base"
-                value={config[provider.id].basePrompt}
-                onChange={(e) => handleFieldChange(provider.id, 'basePrompt', e.target.value)}
-                rows={4}
-              />
-
-              {/* Tone Selector */}
-              <BaseSelect
-                label="Tono"
-                value={config[provider.id].tone}
-                onChange={(e) => handleFieldChange(provider.id, 'tone', e.target.value)}
-                options={TONES}
-              />
-
-              {/* Test Button */}
-              <BaseButton
-                variant="success"
-                icon={MessageSquare}
-                onClick={() => handleTest(provider.id)}
-                loading={testingProvider === provider.id}
-                disabled={!config[provider.id].apiKey}
-                fullWidth
-              >
-                {testingProvider === provider.id ? 'Probando...' : 'Hablar ahora con este tono'}
-              </BaseButton>
-            </div>
-          </BaseCard>
-        ))}
-      </div>
-
-      {/* Test Section */}
-      <BaseCard
-        title="Prueba tu IA"
-        className="mt-6"
-      >
-        <div className="space-y-4">
-          <BaseTextarea
-            label="Pregunta de prueba"
-            value={testPrompt}
-            onChange={(e) => setTestPrompt(e.target.value)}
-            rows={2}
-          />
-
-          {testResponse && (
-            <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-              <h4 className="font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
-                Respuesta:
-              </h4>
-              <p className="text-zinc-900 dark:text-white whitespace-pre-wrap">
-                {testResponse}
-              </p>
-            </div>
-          )}
+      {/* Functions Grid/List or Empty State */}
+      {filteredFunctions.length === 0 ? (
+        <BaseEmptyState
+          icon={Settings}
+          title={searchTerm ? "No se encontraron funciones" : "No hay funciones en esta categoría"}
+          description={searchTerm ? "Intenta con otros términos de búsqueda" : "Selecciona otra categoría"}
+          size="lg"
+        />
+      ) : viewMode === 'grid' ? (
+        /* Vista Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+          {filteredFunctions.map(func => (
+            <AIFunctionCard
+              key={func.id}
+              aiFunction={func}
+              config={config.functions[func.id]}
+              onConfigure={() => handleConfigureFunction(func.id)}
+              viewMode="grid"
+              credentials={credentials}
+            />
+          ))}
         </div>
-      </BaseCard>
+      ) : (
+        /* Vista List */
+        <div className="flex flex-col gap-3 mb-6">
+          {filteredFunctions.map(func => (
+            <AIFunctionCard
+              key={func.id}
+              aiFunction={func}
+              config={config.functions[func.id]}
+              onConfigure={() => handleConfigureFunction(func.id)}
+              viewMode="list"
+              credentials={credentials}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Configuration Modal - Portal */}
+      {modalOpen && selectedFunction && createPortal(
+        <AIFunctionConfigModal
+          key={selectedFunction.id}
+          isOpen={modalOpen}
+          onClose={handleCloseModal}
+          aiFunction={selectedFunction}
+          initialConfig={config.functions[selectedFunction.id] || selectedFunction.defaultConfig}
+          onSave={handleSaveFunction}
+        />,
+        document.body
+      )}
     </div>
   );
 }

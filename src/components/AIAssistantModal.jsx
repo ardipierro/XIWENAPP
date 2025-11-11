@@ -4,10 +4,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, Send, Loader, Lightbulb } from 'lucide-react';
+import { Send, Lightbulb, Sparkles } from 'lucide-react';
 import { getActiveAIProvider, getAIConfig, callAI } from '../firebase/aiConfig';
 import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
+import { BaseModal, BaseButton, BaseTextarea, BaseBadge, BaseCard } from './common';
 
 const AI_MODES = [
   {
@@ -44,10 +45,44 @@ function AIAssistantModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       loadAIProvider();
+    } else {
+      // Reset on close
+      setSelectedMode(null);
+      setInputText('');
+      setResponse('');
     }
   }, [isOpen]);
 
   const loadAIProvider = async () => {
+    const config = await safeAsync(getAIConfig, {
+      context: 'AIAssistantModal'
+    });
+
+    if (!config) {
+      alert('No hay ninguna IA configurada. Contacta al administrador.');
+      onClose();
+      return;
+    }
+
+    // Check if there's a function configured (new structure)
+    if (config.functions) {
+      const chatAssistant = config.functions.chat_assistant;
+      if (chatAssistant && chatAssistant.enabled) {
+        setActiveProvider(chatAssistant.provider);
+        setProviderConfig(chatAssistant);
+        return;
+      }
+
+      // If chat_assistant is not enabled, try to find any enabled function
+      const enabledFunction = Object.values(config.functions).find(f => f.enabled);
+      if (enabledFunction) {
+        setActiveProvider(enabledFunction.provider);
+        setProviderConfig(enabledFunction);
+        return;
+      }
+    }
+
+    // Legacy structure - check individual providers
     const provider = await safeAsync(getActiveAIProvider, {
       context: 'AIAssistantModal'
     });
@@ -60,12 +95,28 @@ function AIAssistantModal({ isOpen, onClose }) {
 
     setActiveProvider(provider);
 
-    const config = await safeAsync(getAIConfig, {
-      context: 'AIAssistantModal'
-    });
+    // Build a config object with defaults for legacy structure
+    const legacyConfig = {
+      provider: provider,
+      model: getDefaultModel(provider),
+      systemPrompt: config[provider]?.basePrompt || 'Eres un asistente educativo experto.',
+      parameters: {
+        temperature: 0.7,
+        maxTokens: 2000,
+        topP: 1
+      }
+    };
 
-    if (config) {
-      setProviderConfig(config[provider]);
+    setProviderConfig(legacyConfig);
+  };
+
+  const getDefaultModel = (provider) => {
+    switch (provider) {
+      case 'openai': return 'gpt-4';
+      case 'claude': return 'claude-sonnet-4-5';
+      case 'grok': return 'grok-2';
+      case 'google': return 'gemini-pro';
+      default: return 'gpt-4';
     }
   };
 
@@ -113,45 +164,38 @@ function AIAssistantModal({ isOpen, onClose }) {
     setResponse('');
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <Lightbulb className="w-6 h-6 text-yellow-500" />
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Asistente IA
-            </h2>
-            {activeProvider && (
-              <span className="px-3 py-1 text-xs font-semibold bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full">
-                {activeProvider.toUpperCase()}
-              </span>
-            )}
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-          </button>
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <div className="flex items-center gap-3">
+          <Lightbulb className="w-6 h-6 text-amber-500" />
+          <span>Asistente IA</span>
+          {activeProvider && (
+            <BaseBadge variant="default" size="sm">
+              {activeProvider.toUpperCase()}
+            </BaseBadge>
+          )}
         </div>
+      }
+      size="xl"
+      icon={Sparkles}
+    >
+      <div className="space-y-6">
+        {!selectedMode ? (
+          // Mode Selection
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              ¿En qué puedo ayudarte hoy?
+            </p>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {!selectedMode ? (
-            // Mode Selection
-            <div className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                ¿En qué puedo ayudarte hoy?
-              </p>
+            <div className="grid gap-4">
               {AI_MODES.map((mode) => (
                 <button
                   key={mode.id}
                   onClick={() => setSelectedMode(mode)}
-                  className="w-full p-4 text-left bg-gray-50 dark:bg-gray-900 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-2 border-transparent hover:border-indigo-500"
+                  className="w-full p-4 text-left bg-gray-50 dark:bg-gray-900 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-2 border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500"
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-3xl">{mode.icon}</span>
@@ -165,77 +209,70 @@ function AIAssistantModal({ isOpen, onClose }) {
                 </button>
               ))}
             </div>
-          ) : (
-            // Input & Response
-            <div className="space-y-4">
-              {/* Mode Header */}
-              <div className="flex items-center gap-3 p-4 bg-indigo-50 dark:bg-indigo-900 rounded-xl">
-                <span className="text-2xl">{selectedMode.icon}</span>
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white">
-                    {selectedMode.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {selectedMode.description}
-                  </p>
-                </div>
-                <button
-                  onClick={handleReset}
-                  className="ml-auto text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
-                >
-                  Cambiar
-                </button>
+          </div>
+        ) : (
+          // Input & Response
+          <div className="space-y-4">
+            {/* Mode Header */}
+            <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+              <span className="text-2xl">{selectedMode.icon}</span>
+              <div className="flex-1">
+                <h3 className="font-bold text-gray-900 dark:text-white">
+                  {selectedMode.title}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {selectedMode.description}
+                </p>
               </div>
-
-              {/* Input */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Tu consulta
-                </label>
-                <textarea
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder={selectedMode.placeholder}
-                  rows={6}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <button
-                onClick={handleSubmit}
-                disabled={!inputText.trim() || loading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              <BaseButton
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
               >
-                {loading ? (
-                  <>
-                    <Loader className="w-5 h-5 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-5 h-5" />
-                    Enviar
-                  </>
-                )}
-              </button>
-
-              {/* Response */}
-              {response && (
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    Respuesta:
-                  </h4>
-                  <div className="text-gray-900 dark:text-white whitespace-pre-wrap leading-relaxed">
-                    {response}
-                  </div>
-                </div>
-              )}
+                Cambiar
+              </BaseButton>
             </div>
-          )}
-        </div>
+
+            {/* Input */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Tu consulta
+              </label>
+              <BaseTextarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder={selectedMode.placeholder}
+                rows={6}
+              />
+            </div>
+
+            {/* Submit Button */}
+            <BaseButton
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={!inputText.trim() || loading}
+              loading={loading}
+              icon={Send}
+              fullWidth
+            >
+              {loading ? 'Procesando...' : 'Enviar'}
+            </BaseButton>
+
+            {/* Response */}
+            {response && (
+              <BaseCard
+                title="Respuesta"
+                variant="bordered"
+              >
+                <div className="text-gray-900 dark:text-white whitespace-pre-wrap leading-relaxed">
+                  {response}
+                </div>
+              </BaseCard>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </BaseModal>
   );
 }
 

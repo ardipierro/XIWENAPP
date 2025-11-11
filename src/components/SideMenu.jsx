@@ -28,7 +28,11 @@ import {
   DollarSign,
   Shield,
   Settings,
-  Lightbulb
+  Lightbulb,
+  UsersRound,
+  Layers,
+  Sparkles,
+  BookMarked
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -72,6 +76,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: Users, label: 'Usuarios', path: '/admin', action: 'users' },
               { icon: BookOpen, label: 'Contenidos', path: '/admin', action: 'unifiedContent' },
               { icon: Calendar, label: 'Clases', path: '/admin', action: 'classSessions' },
+              { icon: CalendarDays, label: 'Calendario', path: '/admin', action: 'calendar' },
               { icon: MessageCircle, label: 'Mensajes', path: '/admin', action: 'messages' },
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
@@ -84,7 +89,10 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             id: 'ensenanza',
             label: 'Herramientas de Enseñanza',
             items: [
-              // Juego en Vivo movido a dashboard como acceso rápido
+              { icon: Layers, label: 'Exercise Builder', path: '/admin', action: 'exerciseBuilder' },
+              { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
+              { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
+              // Theme Builder y Design Lab desactivados temporalmente
             ]
           }
         ]
@@ -103,7 +111,10 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
-          // Juego en Vivo movido a dashboard como acceso rápido
+          { icon: Layers, label: 'Exercise Builder', path: '/teacher', action: 'exerciseBuilder' },
+          { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
+          { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
+          // Theme Builder y Design Lab desactivados temporalmente
         ]
       };
     }

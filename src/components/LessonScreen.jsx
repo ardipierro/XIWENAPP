@@ -352,7 +352,7 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: '#71717a',
     padding: '40px 20px',
   },
   loadingContainer: {
@@ -361,7 +361,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: '#71717a',
   },
   spinner: {
     fontSize: '48px',
@@ -469,7 +469,7 @@ const styles = {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    background: '#667eea',
+    background: '#71717a',
     color: 'white',
     display: 'flex',
     alignItems: 'center',
@@ -496,8 +496,8 @@ const styles = {
   },
   typeBadge: {
     padding: '4px 12px',
-    background: '#e0e7ff',
-    color: '#667eea',
+    background: '#e4e4e7',
+    color: '#71717a',
     borderRadius: '20px',
     fontSize: '12px',
     fontWeight: '600',
@@ -521,7 +521,7 @@ const styles = {
   editButton: {
     flex: 1,
     padding: '10px',
-    background: '#667eea',
+    background: '#71717a',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',

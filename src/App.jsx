@@ -27,6 +27,9 @@ const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
 const GuardianDashboard = lazy(() => import('./components/GuardianDashboard'));
 const TestPage = lazy(() => import('./TestPage'));
 const PaymentResult = lazy(() => import('./components/PaymentResult'));
+const DesignLab = lazy(() => import('./components/DesignLab'));
+const ContentReaderPage = lazy(() => import('./pages/ContentReaderPage'));
+const ContentReaderDemo = lazy(() => import('./pages/ContentReaderDemo'));
 
 import './App.css';
 
@@ -138,6 +141,32 @@ function App() {
           <Route
             path="/test"
             element={<TestPage />}
+          />
+
+          {/* Design Lab - Design System Tester */}
+          <Route
+            path="/design-lab"
+            element={<DesignLab />}
+          />
+
+          {/* Content Reader Demo - Demostración del lector */}
+          <Route
+            path="/content-reader-demo"
+            element={<ContentReaderDemo />}
+          />
+
+          {/* Content Reader - Lector de contenido con anotaciones */}
+          <Route
+            path="/content-reader/:contentId"
+            element={
+              <ProtectedRoute
+                user={user}
+                userRole={effectiveRole}
+                allowedRoles={[...STUDENT_ROLES, ...TEACHER_ROLES, ...ADMIN_ROLES]}
+              >
+                <ContentReaderPage />
+              </ProtectedRoute>
+            }
           />
 
           {/* Protected Routes - requieren autenticación */}

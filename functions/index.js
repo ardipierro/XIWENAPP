@@ -131,3 +131,12 @@ exports.applyScholarship = applyScholarship;
 exports.mercadopagoWebhook = mercadopagoWebhook;
 exports.checkSubscriptionStatus = checkSubscriptionStatus;
 exports.getPaymentHistory = getPaymentHistory;
+
+// ============================================================================
+// AI PROVIDERS
+// ============================================================================
+
+// Export AI provider functions
+const { callAI, checkAICredentials } = require('./aiProviders');
+exports.callAI = callAI;
+exports.checkAICredentials = checkAICredentials;

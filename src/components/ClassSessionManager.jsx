@@ -39,7 +39,7 @@ import {
  * Gestor de Sesiones de Clase Unificadas
  * Integra: LiveKit + Pizarras + Programación
  */
-function ClassSessionManager({ user, onJoinSession }) {
+function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClearEditSession }) {
   const [sessions, setSessions] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +55,18 @@ function ClassSessionManager({ user, onJoinSession }) {
     loadData();
   }, [user]);
 
+  // Effect to handle initial session editing from calendar
+  useEffect(() => {
+    if (initialEditSessionId && sessions.length > 0 && !showModal) {
+      const sessionToEdit = sessions.find(s => s.id === initialEditSessionId);
+      if (sessionToEdit) {
+        setEditingSession(sessionToEdit);
+        setShowModal(true);
+        logger.info('Opening edit modal for session from calendar:', initialEditSessionId);
+      }
+    }
+  }, [initialEditSessionId, sessions, showModal]);
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -66,6 +78,22 @@ function ClassSessionManager({ user, onJoinSession }) {
       setSessions(sessionsData);
       setCourses(coursesData);
       logger.info('Sesiones y cursos cargados:', sessionsData.length, coursesData.length);
+
+      // Log para debug: ver estructura de sesiones recurrentes
+      const recurringSessions = sessionsData.filter(s => s.type === 'recurring');
+      if (recurringSessions.length > 0) {
+        logger.info('Sesiones recurrentes encontradas:', recurringSessions.map(s => ({
+          id: s.id,
+          name: s.name,
+          type: s.type,
+          hasRecurringStartDate: !!s.recurringStartDate,
+          recurringStartDate: s.recurringStartDate,
+          hasRecurringWeeks: !!s.recurringWeeks,
+          recurringWeeks: s.recurringWeeks,
+          hasSchedules: !!s.schedules,
+          schedules: s.schedules
+        })));
+      }
     } catch (error) {
       logger.error('Error cargando datos:', error);
       setMessage({ type: 'error', text: 'Error al cargar datos' });
@@ -204,6 +232,10 @@ function ClassSessionManager({ user, onJoinSession }) {
   const closeModal = () => {
     setShowModal(false);
     setEditingSession(null);
+    // Limpiar editSessionId si fue abierto desde el calendario
+    if (onClearEditSession) {
+      onClearEditSession();
+    }
   };
 
   // Filtrar sesiones
@@ -247,7 +279,7 @@ function ClassSessionManager({ user, onJoinSession }) {
   // Render badge por modo
   const renderModeBadge = (mode) => {
     return mode === 'live' ? (
-      <BaseBadge variant="info" icon={Video} size="sm">
+      <BaseBadge variant="default" icon={Video} size="sm">
         En Vivo
       </BaseBadge>
     ) : (
@@ -261,19 +293,58 @@ function ClassSessionManager({ user, onJoinSession }) {
   const renderWhiteboardBadge = (whiteboardType) => {
     if (whiteboardType === 'canvas') {
       return (
-        <BaseBadge variant="primary" icon={Presentation} size="sm">
+        <BaseBadge variant="default" icon={Presentation} size="sm">
           Canvas
         </BaseBadge>
       );
     }
     if (whiteboardType === 'excalidraw') {
       return (
-        <BaseBadge variant="primary" icon={PenTool} size="sm">
+        <BaseBadge variant="default" icon={PenTool} size="sm">
           Excalidraw
         </BaseBadge>
       );
     }
     return null;
+  };
+
+  // Calcular sesiones restantes para sesiones recurrentes
+  const calculateRemainingSessions = (session) => {
+    if (session.type !== 'recurring' || !session.schedules || !session.recurringStartDate || !session.recurringWeeks) {
+      logger.warn('Session missing required fields for remaining calculation:', {
+        id: session.id,
+        name: session.name,
+        type: session.type,
+        hasSchedules: !!session.schedules,
+        hasRecurringStartDate: !!session.recurringStartDate,
+        hasRecurringWeeks: !!session.recurringWeeks
+      });
+      return null;
+    }
+
+    const startDate = session.recurringStartDate.toDate();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + (session.recurringWeeks * 7));
+
+    const now = new Date();
+    let total = 0;
+    let remaining = 0;
+
+    // Contar total y restantes
+    session.schedules.forEach(schedule => {
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        if (currentDate.getDay() === schedule.day) {
+          total++;
+          if (currentDate > now) {
+            remaining++;
+          }
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+
+    return { total, remaining };
   };
 
   // Render información de programación
@@ -296,9 +367,23 @@ function ClassSessionManager({ user, onJoinSession }) {
     if (session.type === 'recurring' && session.schedules?.length > 0) {
       const days = session.schedules.map(s => getDayName(s.day)).join(', ');
       const time = session.schedules[0];
+      const sessionsInfo = calculateRemainingSessions(session);
+
       return (
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          {days} • {time.startTime} - {time.endTime}
+        <div className="space-y-1">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {days} • {time.startTime} - {time.endTime}
+          </div>
+          {session.recurringStartDate && (
+            <div className="text-xs text-gray-500 dark:text-gray-500">
+              Inicio: {session.recurringStartDate.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </div>
+          )}
+          {sessionsInfo && (
+            <div className="text-xs text-gray-500 dark:text-gray-500">
+              {sessionsInfo.remaining} de {sessionsInfo.total} sesiones restantes
+            </div>
+          )}
         </div>
       );
     }
@@ -446,7 +531,7 @@ function ClassSessionManager({ user, onJoinSession }) {
               className={`
                 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2
                 ${filterMode === 'live'
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
                   : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
                 }
               `}
