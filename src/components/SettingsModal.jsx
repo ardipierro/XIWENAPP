@@ -132,32 +132,32 @@ function SettingsModal({ isOpen, onClose }) {
       size="2xl"
       icon={Settings}
     >
-      <div className="flex gap-6">
-        {/* Sidebar con tabs */}
-        <div className="w-64 flex-shrink-0 space-y-2">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`
-                w-full flex items-start gap-3 p-3 rounded-lg text-left transition-all
-                ${activeTab === tab.id
-                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-900 dark:text-purple-100 border-2 border-purple-500'
-                  : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-750'
-                }
-              `}
-            >
-              <tab.icon size={20} className="mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="font-medium">{tab.label}</div>
-                <div className="text-xs opacity-75 truncate">{tab.description}</div>
-              </div>
-            </button>
-          ))}
+      <div className="flex flex-col h-full">
+        {/* Tabs horizontales arriba */}
+        <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+          <div className="flex gap-1 overflow-x-auto">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-all
+                  border-b-2 -mb-px
+                  ${activeTab === tab.id
+                    ? 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-50/50 dark:bg-purple-900/20'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
+                  }
+                `}
+              >
+                <tab.icon size={18} className="flex-shrink-0" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
+        {/* Content con altura mínima fija */}
+        <div className="flex-1 overflow-y-auto min-h-[500px]">
           {/* TAB: VISUAL (ViewCustomizer completo) */}
           {activeTab === 'visual' && (
             <div>
