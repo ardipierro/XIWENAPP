@@ -466,10 +466,62 @@ function removeAccents(str) {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
+/**
+ * Obtiene la lista de proveedores de IA disponibles
+ * @returns {Array} Lista de proveedores con nombre, descripción e ícono
+ */
+function getAvailableProviders() {
+  return [
+    {
+      name: 'openai',
+      label: 'OpenAI',
+      description: 'GPT-4, GPT-3.5 para generación de texto y análisis',
+      icon: '🤖',
+      configurable: true
+    },
+    {
+      name: 'elevenlabs',
+      label: 'ElevenLabs',
+      description: 'Text-to-Speech de alta calidad con voces realistas',
+      icon: '🎙️',
+      configurable: true
+    },
+    {
+      name: 'claude',
+      label: 'Anthropic (Claude)',
+      description: 'Claude para generación de contenido educativo',
+      icon: '🧠',
+      configurable: true
+    },
+    {
+      name: 'gemini',
+      label: 'Google Gemini',
+      description: 'Modelo multimodal de Google para análisis y generación',
+      icon: '✨',
+      configurable: true
+    },
+    {
+      name: 'huggingface',
+      label: 'Hugging Face',
+      description: 'Modelos open-source para NLP, visión y más',
+      icon: '🤗',
+      configurable: true
+    },
+    {
+      name: 'grok',
+      label: 'xAI (Grok)',
+      description: 'Grok AI de xAI para conversación y análisis',
+      icon: '𝕏',
+      configurable: true
+    }
+  ];
+}
+
 export default {
   generateExercisesFromText,
   generateIntelligentFeedback,
   flexibleValidation,
   generateDistractors,
-  generateSessionSummary
+  generateSessionSummary,
+  getAvailableProviders
 };

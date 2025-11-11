@@ -130,7 +130,8 @@
       "Bash(vercel git connect:*)",
       "Bash(vercel ls:*)",
       "Bash(rm:*)",
-      "Bash(timeout /t 3 /nobreak)"
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

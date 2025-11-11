@@ -10,7 +10,8 @@ import {
   saveExerciseBuilderConfig,
   updateExerciseBuilderConfigField,
   resetExerciseBuilderConfig,
-  DEFAULT_CONFIG
+  DEFAULT_CONFIG,
+  PRESET_THEMES
 } from '../firebase/exerciseBuilderConfig';
 import logger from '../utils/logger';
 
@@ -199,7 +200,6 @@ export function useExerciseBuilderConfig() {
     }
 
     // Aplicar colores de tema predefinido
-    const { PRESET_THEMES } = require('../firebase/exerciseBuilderConfig');
     const themeColors = PRESET_THEMES[config.theme]?.colors;
     if (themeColors) {
       root.style.setProperty('--theme-bg', themeColors.bg);
