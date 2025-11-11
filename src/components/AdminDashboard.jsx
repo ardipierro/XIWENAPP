@@ -95,7 +95,6 @@ import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
 import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
-import AIService from '../services/aiService';
 import ThemeCustomizer from './ThemeCustomizer';
 import './AdminDashboard.css';
 
