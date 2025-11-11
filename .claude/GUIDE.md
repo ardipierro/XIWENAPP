@@ -13,8 +13,11 @@
 
 ### 📚 Documentación Disponible
 
+> 💡 **Nota:** Si tienes problemas encontrando archivos, lee primero `INDEX.md` o `README.txt` en esta carpeta.
+
 | Archivo | Contenido | Cuándo Leer |
 |---------|-----------|-------------|
+| **INDEX.md** | Índice completo de documentación | Si no encuentras archivos |
 | **GUIDE.md** (este archivo) | Estructura del proyecto, inicio rápido | Siempre primero |
 | **CHANGELOG.md** | Historial de cambios en documentación | Para ver cambios recientes |
 | **CODING_STANDARDS.md** | Reglas de código, componentes base | Antes de escribir código |

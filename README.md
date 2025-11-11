@@ -61,6 +61,10 @@ Aplicación educativa web para la gestión de cursos, estudiantes y lecciones co
 ## 📚 Documentación
 
 ### Documentación para Desarrollo
+
+> 💡 **Nota:** Si usas Claude Code Web y no encuentras archivos, lee **[.claude/INDEX.md](./.claude/INDEX.md)** primero.
+
+- **[.claude/INDEX.md](./.claude/INDEX.md)** - 📚 Índice completo de documentación (si tienes problemas)
 - **[.claude/GUIDE.md](./.claude/GUIDE.md)** - 🚀 **EMPEZAR AQUÍ** - Guía principal del proyecto
 - **[.claude/CODING_STANDARDS.md](./.claude/CODING_STANDARDS.md)** - Estándares de código y componentes base
 - **[.claude/DESIGN_SYSTEM.md](./.claude/DESIGN_SYSTEM.md)** - Sistema de diseño y responsive
