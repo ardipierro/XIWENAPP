@@ -869,15 +869,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
             </div>
               </>
             )}
-          </div>
-        </div>
 
-      {/* Tab Content: Theme */}
-      {settingsTab === 'theme' && (
-        <div className="space-y-6">
-          <ThemeCustomizer />
-        </div>
-      )}
+            {/* Tab Content: Theme */}
+            {settingsTab === 'theme' && (
+              <div className="space-y-6">
+                <ThemeCustomizer />
+              </div>
+            )}
           </div>
         </div>
 
