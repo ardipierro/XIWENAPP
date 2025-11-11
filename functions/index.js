@@ -140,3 +140,11 @@ exports.getPaymentHistory = getPaymentHistory;
 const { callAI, checkAICredentials } = require('./aiProviders');
 exports.callAI = callAI;
 exports.checkAICredentials = checkAICredentials;
+
+// ============================================================================
+// HOMEWORK ANALYZER
+// ============================================================================
+
+// Export homework analyzer function
+const { analyzeHomeworkImage } = require('./homeworkAnalyzer');
+exports.analyzeHomeworkImage = analyzeHomeworkImage;

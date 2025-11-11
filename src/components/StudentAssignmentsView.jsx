@@ -14,9 +14,11 @@ import {
   AlertCircle,
   Upload,
   Send,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 import { BaseLoading } from './common';
+import StudentFeedbackView from './StudentFeedbackView';
 
 export default function StudentAssignmentsView({ studentId }) {
   const { assignments, loading } = useAssignments(studentId, 'student');
@@ -331,6 +333,22 @@ function SubmissionModal({ assignment, studentId, onClose }) {
               <p className="text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap">
                 {submission.feedback}
               </p>
+            </div>
+          )}
+
+          {/* AI Homework Correction */}
+          {isSubmitted && submission && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles size={20} className="text-primary-600 dark:text-primary-400" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Corrección Automática
+                </h3>
+              </div>
+              <StudentFeedbackView
+                submission={submission}
+                studentId={studentId}
+              />
             </div>
           )}
 

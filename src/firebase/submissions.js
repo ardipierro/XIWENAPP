@@ -19,6 +19,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './config';
 import logger from '../utils/logger';
+import { createHomeworkReview } from './homework_reviews';
 
 /**
  * Create or update a submission
@@ -313,6 +314,51 @@ export async function deleteSubmission(submissionId) {
   }
 }
 
+/**
+ * Trigger AI homework analysis for image attachments
+ * @param {string} submissionId - Submission ID
+ * @param {string} assignmentId - Assignment ID
+ * @param {string} studentId - Student ID
+ * @param {Array} attachments - Array of attachment objects
+ * @returns {Promise<Object>} Result with review ID(s)
+ */
+export async function triggerHomeworkAnalysis(submissionId, assignmentId, studentId, attachments) {
+  try {
+    // Filter image attachments
+    const imageAttachments = attachments.filter(att =>
+      att.type && att.type.startsWith('image/')
+    );
+
+    if (imageAttachments.length === 0) {
+      logger.info('No image attachments found for homework analysis', 'Submissions');
+      return { success: true, reviewIds: [] };
+    }
+
+    // Create homework review for each image
+    const reviewPromises = imageAttachments.map(async (image) => {
+      const reviewData = {
+        submissionId,
+        assignmentId,
+        studentId,
+        imageUrl: image.url,
+        filename: image.filename || 'homework.jpg',
+        imageSize: image.size || 0
+      };
+
+      const result = await createHomeworkReview(reviewData);
+      return result.id;
+    });
+
+    const reviewIds = await Promise.all(reviewPromises);
+
+    logger.info(`Created ${reviewIds.length} homework reviews for submission ${submissionId}`, 'Submissions');
+    return { success: true, reviewIds };
+  } catch (error) {
+    logger.error(`Error triggering homework analysis for ${submissionId}`, 'Submissions', error);
+    return { success: false, error: error.message };
+  }
+}
+
 export default {
   createSubmission,
   submitAssignment,
@@ -323,5 +369,6 @@ export default {
   gradeSubmission,
   returnSubmission,
   updateSubmission,
-  deleteSubmission
+  deleteSubmission,
+  triggerHomeworkAnalysis
 };
