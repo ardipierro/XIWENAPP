@@ -9,7 +9,7 @@ import { getInstancesForStudent } from '../firebase/classInstances';
 import { getStudentAttendance, markAttendanceByLink } from '../firebase/attendance';
 import { getStudentGroups } from '../firebase/groups';
 import { getUserCredits } from '../firebase/credits';
-import './StudentClassView.css';
+// StudentClassView.css removed - using Tailwind CSS
 
 // Helper: verificar si el link de una instancia está activo
 function isInstanceLinkActive(instance) {

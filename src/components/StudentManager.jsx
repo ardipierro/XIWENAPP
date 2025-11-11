@@ -10,7 +10,7 @@ import {
 } from '../firebase/firestore';
 import { GraduationCap, Settings, X, UserPlus, Users, RefreshCw } from 'lucide-react';
 import SearchBar from './common/SearchBar';
-import './StudentManager.css';
+// StudentManager.css removed - using Tailwind CSS
 
 function StudentManager({ onClose, onStudentSelect }) {
   const [students, setStudents] = useState([]);
