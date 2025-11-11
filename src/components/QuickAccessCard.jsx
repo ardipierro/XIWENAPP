@@ -14,8 +14,15 @@ function QuickAccessCard({ icon: Icon, title, description, count, countLabel, on
 
   return (
     <div
-      className="group relative flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.15)] hover:-translate-y-1 hover:border-gray-300 dark:hover:border-zinc-700 h-full cursor-pointer animate-fade-in"
+      className="group relative flex flex-col rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-1 h-full cursor-pointer animate-fade-in"
       onClick={onClick}
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        border: '1px solid var(--color-border)',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)'}
+      onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'}
     >
       {/* Icon Header - Similar a card-image-placeholder */}
       <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center text-gray-500 dark:text-zinc-500 flex-shrink-0">
@@ -24,25 +31,52 @@ function QuickAccessCard({ icon: Icon, title, description, count, countLabel, on
 
       {/* Content */}
       <div className="p-5 flex flex-col flex-1">
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-2">{title}</h3>
+        <h3
+          className="text-lg font-bold mb-2"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          {title}
+        </h3>
 
         {description && (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-0">{description}</p>
+          <p
+            className="text-sm mb-0"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            {description}
+          </p>
         )}
 
         {/* Stats */}
         {count !== undefined && (
-          <div className="flex items-baseline gap-2 my-4 py-3 border-t border-b border-gray-200 dark:border-zinc-800">
-            <span className="text-[28px] font-extrabold text-zinc-900 dark:text-zinc-50 leading-none">{count}</span>
-            <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">{countLabel}</span>
+          <div
+            className="flex items-baseline gap-2 my-4 py-3 border-t border-b"
+            style={{ borderColor: 'var(--color-border)' }}
+          >
+            <span
+              className="text-[28px] font-extrabold leading-none"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              {count}
+            </span>
+            <span
+              className="text-sm font-semibold"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              {countLabel}
+            </span>
           </div>
         )}
 
         {/* Action Badge */}
         <div
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 rounded-md text-[13px] font-semibold mt-auto w-fit"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold mt-auto w-fit"
           onClick={handleBadgeClick}
-          style={{ cursor: onCreateClick ? 'pointer' : 'default' }}
+          style={{
+            backgroundColor: 'var(--color-bg-secondary)',
+            color: 'var(--color-text-primary)',
+            cursor: onCreateClick ? 'pointer' : 'default'
+          }}
         >
           <Plus size={16} strokeWidth={2} />
           <span>{createLabel}</span>
