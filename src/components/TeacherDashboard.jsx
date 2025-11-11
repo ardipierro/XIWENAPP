@@ -518,10 +518,10 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     const isReturningFromViewAs = sessionStorage.getItem('viewAsReturning') === 'true';
 
     return (
-      <div className="min-h-screen bg-primary-50 dark:bg-primary-900">
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
         <div className="flex flex-col items-center justify-center py-15 px-5">
-          <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
-          <p className="text-primary-900 dark:text-primary-100">{isReturningFromViewAs ? 'Volviendo...' : 'Cargando...'}</p>
+          <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }}></div>
+          <p style={{ color: 'var(--color-text-primary)' }}>{isReturningFromViewAs ? 'Volviendo...' : 'Cargando...'}</p>
         </div>
       </div>
     );
@@ -801,14 +801,14 @@ function TeacherDashboard({ user, userRole, onLogout }) {
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <GraduationCap size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Alumnos</h1>
+              <GraduationCap size={32} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Alumnos</h1>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary">
                 <Plus size={18} strokeWidth={2} /> Agregar Alumno
               </button>
-              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700" title="Actualizar lista">
+              <button onClick={userManagement.loadUsers} className="btn btn-primary" style={{ backgroundColor: 'var(--color-success)' }} title="Actualizar lista">
                 <RefreshCw size={18} strokeWidth={2} /> Actualizar
               </button>
             </div>
@@ -824,18 +824,18 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           />
 
           {successMessage && (
-            <div className="bg-success-500/10 text-success-600 border border-success-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
+            <div className="p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2" style={{ backgroundColor: 'rgba(var(--color-success-rgb), 0.1)', color: 'var(--color-success)', border: '1px solid rgba(var(--color-success-rgb), 0.3)' }}>
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
             </div>
           )}
           {errorMessage && (
-            <div className="bg-error-500/10 text-error-600 border border-error-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
+            <div className="p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2" style={{ backgroundColor: 'rgba(var(--color-danger-rgb), 0.1)', color: 'var(--color-danger)', border: '1px solid rgba(var(--color-danger-rgb), 0.3)' }}>
               <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
             </div>
           )}
 
           {filteredStudents.length === 0 ? (
-            <div className="text-center py-15 px-5 text-secondary-600 dark:text-secondary-400 text-base">
+            <div className="text-center py-15 px-5 text-base" style={{ color: 'var(--color-text-secondary)' }}>
               <p>No se encontraron alumnos</p>
             </div>
           ) : (
@@ -885,13 +885,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             <div className="flex items-center gap-3">
               {isAdmin ? (
                 <>
-                  <Crown size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Usuarios</h1>
+                  <Crown size={32} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
+                  <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Usuarios</h1>
                 </>
               ) : (
                 <>
-                  <Users size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Alumnos</h1>
+                  <Users size={32} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
+                  <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Alumnos</h1>
                 </>
               )}
             </div>
@@ -899,7 +899,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary w-full sm:w-auto">
                 <Plus size={18} strokeWidth={2} /> {isAdmin ? 'Nuevo Usuario' : 'Agregar Alumno'}
               </button>
-              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full sm:w-auto" title="Actualizar lista de usuarios">
+              <button onClick={userManagement.loadUsers} className="btn btn-primary w-full sm:w-auto" style={{ backgroundColor: 'var(--color-success)' }} title="Actualizar lista de usuarios">
                 <RefreshCw size={18} strokeWidth={2} /> Actualizar
               </button>
             </div>
@@ -916,12 +916,12 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           />
 
           {successMessage && (
-            <div className="bg-success-500/10 text-success-600 border border-success-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
+            <div className="p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2" style={{ backgroundColor: 'rgba(var(--color-success-rgb), 0.1)', color: 'var(--color-success)', border: '1px solid rgba(var(--color-success-rgb), 0.3)' }}>
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
             </div>
           )}
           {errorMessage && (
-            <div className="bg-error-500/10 text-error-600 border border-error-500/30 p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2">
+            <div className="p-4 rounded-lg font-semibold mb-5 animate-slide-down flex items-center gap-2" style={{ backgroundColor: 'rgba(var(--color-danger-rgb), 0.1)', color: 'var(--color-danger)', border: '1px solid rgba(var(--color-danger-rgb), 0.3)' }}>
               <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
             </div>
           )}
@@ -1125,37 +1125,37 @@ function TeacherDashboard({ user, userRole, onLogout }) {
                   </button>
                 </div>
 
-                <div className="border-b border-gray-200 dark:border-gray-700 px-6">
+                <div className="px-6" style={{ borderBottom: '1px solid var(--color-border)' }}>
                   <div className="flex gap-4">
                     <button
                       onClick={() => resourceAssignment.setActiveResourceTab('courses')}
-                      className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                        resourceAssignment.activeResourceTab === 'courses'
-                          ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                      }`}
+                      className="py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2"
+                      style={{
+                        borderBottomColor: resourceAssignment.activeResourceTab === 'courses' ? 'var(--color-primary)' : 'transparent',
+                        color: resourceAssignment.activeResourceTab === 'courses' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                      }}
                     >
                       <BookOpen size={18} strokeWidth={2} />
                       Cursos ({resourceAssignment.studentEnrollments.length})
                     </button>
                     <button
                       onClick={() => resourceAssignment.setActiveResourceTab('content')}
-                      className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                        resourceAssignment.activeResourceTab === 'content'
-                          ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                      }`}
+                      className="py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2"
+                      style={{
+                        borderBottomColor: resourceAssignment.activeResourceTab === 'content' ? 'var(--color-primary)' : 'transparent',
+                        color: resourceAssignment.activeResourceTab === 'content' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                      }}
                     >
                       <FileText size={18} strokeWidth={2} />
                       Contenidos ({resourceAssignment.studentContent.length})
                     </button>
                     <button
                       onClick={() => resourceAssignment.setActiveResourceTab('exercises')}
-                      className={`py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                        resourceAssignment.activeResourceTab === 'exercises'
-                          ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                      }`}
+                      className="py-3 px-4 font-medium border-b-2 transition-colors flex items-center gap-2"
+                      style={{
+                        borderBottomColor: resourceAssignment.activeResourceTab === 'exercises' ? 'var(--color-primary)' : 'transparent',
+                        color: resourceAssignment.activeResourceTab === 'exercises' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                      }}
                     >
                       <Gamepad2 size={18} strokeWidth={2} />
                       Ejercicios ({resourceAssignment.studentExercises.length})

@@ -225,21 +225,21 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   // Error state - no student profile
   if (!student || !student.id) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="flex items-center justify-center min-h-screen p-4" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
         <div className="max-w-md w-full">
           <BaseCard className="text-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                <AlertTriangle size={32} className="text-red-600 dark:text-red-400" />
+              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-danger-light)' }}>
+                <AlertTriangle size={32} style={{ color: 'var(--color-danger)' }} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
                   Error de Configuración
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-2">
+                <p className="mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                   No se pudo cargar tu perfil de estudiante.
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-500">
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   Contacta al administrador si el problema persiste.
                 </p>
               </div>
@@ -482,7 +482,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       <div className="p-4 md:p-6 space-y-4 md:space-y-6">
         {/* Live Whiteboards - Priority Section */}
         {liveWhiteboards.length > 0 && (
-          <div className="bg-green-500 dark:bg-green-600 text-white rounded-xl p-4 md:p-6 shadow-lg">
+          <div className="text-white rounded-xl p-4 md:p-6 shadow-lg" style={{ backgroundColor: 'var(--color-success)' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg md:text-xl font-bold flex items-center gap-2">
                 <Presentation size={20} strokeWidth={2} />
@@ -513,7 +513,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                       variant="secondary"
                       size="sm"
                       onClick={() => handleJoinLiveWhiteboard(whiteboard)}
-                      className="bg-white dark:bg-gray-800 text-green-600 hover:bg-green-50 dark:hover:bg-gray-700 border-0 font-semibold w-full sm:w-auto"
+                      className="border-0 font-semibold w-full sm:w-auto"
+                      style={{
+                        backgroundColor: 'var(--color-bg-secondary)',
+                        color: 'var(--color-success)'
+                      }}
                     >
                       Unirse →
                     </BaseButton>
@@ -525,9 +529,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         )}
 
         {/* Próxima Clase - Quick Access */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
+        <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-lg md:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
               <Calendar size={20} strokeWidth={2} />
               Próxima Clase
             </h3>
@@ -564,18 +568,19 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 return (
                   <div
                     key={instance.id}
-                    className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+                    className="rounded-lg p-4"
+                    style={{ backgroundColor: 'var(--color-bg-tertiary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <div className="font-semibold text-gray-900 dark:text-white">
+                      <div className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                         {instance.className}
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                         <CreditCard size={14} strokeWidth={2} />
                         {instance.creditCost}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       <Clock size={14} strokeWidth={2} />
                       <span>{dateLabel}</span>
                     </div>
@@ -585,7 +590,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
                 No tienes clases programadas próximamente
               </p>
               <BaseButton variant="outline" onClick={() => setCurrentView('classes')}>
@@ -596,22 +601,22 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         </div>
 
         {/* Progress Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
+        <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
             <div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Puntos totales</span>
-              <div className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Puntos totales</span>
+              <div className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
                 {points} pts
               </div>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               {pointsToNextLevel} pts para nivel {level + 1}
             </div>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+          <div className="w-full rounded-full h-3" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
             <div
-              className="bg-green-500 dark:bg-green-600 h-3 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
+              className="h-3 rounded-full transition-all duration-300"
+              style={{ backgroundColor: 'var(--color-success)', width: `${progressPercentage}%` }}
             ></div>
           </div>
         </div>
@@ -620,10 +625,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <BaseCard variant="elevated" icon={Gamepad2}>
             <div className="flex flex-col items-center text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
                 {stats.totalGames}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Ejercicios completados
               </div>
             </div>
@@ -631,10 +636,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
           <BaseCard variant="elevated" icon={Target}>
             <div className="flex flex-col items-center text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
                 {stats.averageScore}%
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Promedio
               </div>
             </div>
@@ -642,10 +647,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
           <BaseCard variant="elevated" icon={Target}>
             <div className="flex flex-col items-center text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
                 {stats.bestScore}%
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Mejor puntaje
               </div>
             </div>
@@ -653,10 +658,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
           <BaseCard variant="elevated" icon={Target}>
             <div className="flex flex-col items-center text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
                 {stats.totalCorrect}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Respuestas correctas
               </div>
             </div>
@@ -664,9 +669,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         </div>
 
         {/* Mis Cursos - Quick Access */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
+        <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-lg md:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
               <BookOpen size={20} strokeWidth={2} />
               Mis Cursos
             </h3>
@@ -681,10 +686,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               {enrolledCourses.slice(0, 3).map((enrollment) => (
                 <div
                   key={enrollment.enrollmentId}
-                  className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+                  className="rounded-lg p-4"
+                  style={{ backgroundColor: 'var(--color-bg-tertiary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
                 >
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
-                    <div className="font-semibold text-gray-900 dark:text-white">
+                    <div className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                       {enrollment.course.name}
                     </div>
                     {enrollment.course.level && (
@@ -694,13 +700,13 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="flex-1 rounded-full h-2" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
                       <div
-                        className="bg-green-500 dark:bg-green-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${enrollment.progress?.percentComplete || 0}%` }}
+                        className="h-2 rounded-full transition-all duration-300"
+                        style={{ backgroundColor: 'var(--color-success)', width: `${enrollment.progress?.percentComplete || 0}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
                       {enrollment.progress?.percentComplete || 0}%
                     </span>
                   </div>
@@ -714,7 +720,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
                 No tienes cursos asignados aún
               </p>
               <BaseButton variant="primary" onClick={handleViewMyCourses}>
@@ -725,9 +731,9 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         </div>
 
         {/* Asignado a Mí - Quick Access */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
+        <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-lg md:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
               <ClipboardList size={20} strokeWidth={2} />
               Asignado a Mí
             </h3>
@@ -736,7 +742,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             </BaseButton>
           </div>
           <div className="text-center py-4">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
               Contenidos y ejercicios asignados directamente por tu profesor para práctica adicional
             </p>
             <BaseButton variant="primary" onClick={handleViewMyAssignments}>
@@ -747,8 +753,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
         {/* Game History */}
         {gameHistory.length > 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+          <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
+            <h3 className="text-lg md:text-xl font-bold flex items-center gap-2 mb-4" style={{ color: 'var(--color-text-primary)' }}>
               <ScrollText size={20} strokeWidth={2} />
               Historial Reciente
             </h3>
@@ -756,27 +762,28 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               {gameHistory.slice(0, 5).map((game, index) => (
                 <div
                   key={index}
-                  className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+                  className="rounded-lg p-4"
+                  style={{ backgroundColor: 'var(--color-bg-tertiary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
                 >
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                     <div className="flex-1">
-                      <div className="font-semibold text-gray-900 dark:text-white">
+                      <div className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                         {game.category}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                         {new Date(game.date).toLocaleDateString('es-AR')}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <span className="font-semibold text-gray-900 dark:text-white">
+                        <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                           {game.score} pts
                         </span>
-                        <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
+                        <span className="text-sm ml-1" style={{ color: 'var(--color-text-secondary)' }}>
                           ({game.percentage}%)
                         </span>
                       </div>
-                      <div className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-sm font-medium text-gray-900 dark:text-white">
+                      <div className="px-2 py-1 rounded text-sm font-medium" style={{ backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}>
                         #{game.position}
                       </div>
                     </div>
@@ -786,7 +793,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
+          <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
             <BaseEmptyState
               icon={Target}
               title="¡Aún no has completado ejercicios!"
