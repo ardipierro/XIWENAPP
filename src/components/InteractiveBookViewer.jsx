@@ -30,7 +30,8 @@ import {
   BaseBadge,
   BaseLoading,
   BaseAlert,
-  BaseEmptyState
+  BaseEmptyState,
+  useModal
 } from './common';
 import {
   AudioPlayer,
@@ -40,11 +41,10 @@ import {
   DragDropMenuExercise,
   ConjugationExercise,
   ListeningComprehensionExercise,
-  TTSSettings,
   DialogueBubble,
-  ViewCustomizer,
   FullDialoguePlayer
 } from './interactive-book';
+import SettingsModal from './SettingsModal';
 
 /**
  * Visualizador del libro interactivo ADE1
@@ -59,7 +59,7 @@ function InteractiveBookViewer() {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [totalPoints, setTotalPoints] = useState(0);
   const [exerciseResults, setExerciseResults] = useState({});
-  const [viewSettings, setViewSettings] = useState(null);
+  const settingsModal = useModal();
 
   useEffect(() => {
     loadBookData();
@@ -519,8 +519,8 @@ function InteractiveBookViewer() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="app-container min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="content-container interactive-book-container p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -585,11 +585,23 @@ function InteractiveBookViewer() {
             {/* Metadata */}
             {renderMetadata()}
 
-            {/* Configuración TTS */}
-            <TTSSettings />
+            {/* Botón de Configuración */}
+            <div className="mb-6">
+              <BaseButton
+                variant="primary"
+                icon={Settings}
+                onClick={settingsModal.open}
+                className="w-full"
+              >
+                ⚙️ Abrir Configuración (Voz, Visual, Pantalla y más)
+              </BaseButton>
+            </div>
 
-            {/* Configuración de Vista */}
-            <ViewCustomizer onSettingsChange={setViewSettings} />
+            {/* Modal de Configuración */}
+            <SettingsModal
+              isOpen={settingsModal.isOpen}
+              onClose={settingsModal.close}
+            />
 
             {/* Unidades */}
             <div className="space-y-4">

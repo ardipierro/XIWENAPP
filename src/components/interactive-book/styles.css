@@ -1,12 +1,31 @@
 /**
  * Estilos globales para el libro interactivo
- * Usa CSS variables definidas por ViewCustomizer
+ * Usa CSS variables definidas por ViewCustomizer y SettingsModal
  */
+
+/* Variables globales de display (zoom, width, etc) */
+:root {
+  --app-zoom: 1;
+  --container-max-width: 1200px;
+  --font-scale: 1;
+}
+
+/* Aplicar zoom global */
+.app-container {
+  zoom: var(--app-zoom);
+}
+
+/* Aplicar ancho máximo del contenedor */
+.content-container {
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
 
 /* Aplicar variables a contenedores de libro */
 .interactive-book-container {
   font-family: var(--book-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
-  font-size: var(--book-font-size, 16px);
+  font-size: calc(var(--book-font-size, 16px) * var(--font-scale, 1));
   line-height: var(--book-line-height, 1.6);
   font-weight: var(--book-font-weight, 400);
 }
