@@ -164,20 +164,53 @@ export function useExerciseBuilderConfig() {
 
     const root = document.documentElement;
 
-    // Aplicar variables CSS
+    // Aplicar variables CSS de tipografía
     root.style.setProperty('--font-size-base', `${config.fontSize}px`);
+    root.style.setProperty('--line-height-base', `${config.lineHeight}`);
+
+    // Aplicar fuente
+    const fontFamilyMap = {
+      system: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      inter: '"Inter", sans-serif',
+      merriweather: '"Merriweather", serif',
+      opendyslexic: '"OpenDyslexic", sans-serif'
+    };
+    root.style.setProperty('--font-family-base', fontFamilyMap[config.fontFamily] || fontFamilyMap.system);
+
+    // Aplicar colores de feedback
     root.style.setProperty('--color-correct', config.feedbackColors.correct);
     root.style.setProperty('--color-incorrect', config.feedbackColors.incorrect);
     root.style.setProperty('--color-neutral', config.feedbackColors.neutral);
 
-    // Aplicar tema si es necesario (aunque usamos dark mode de Tailwind)
+    // Aplicar velocidad de animación
+    const animationSpeedMap = {
+      slow: '500ms',
+      normal: '300ms',
+      fast: '150ms',
+      off: '0ms'
+    };
+    root.style.setProperty('--animation-speed', animationSpeedMap[config.animationSpeed] || '300ms');
+
+    // Aplicar tema (dark mode de Tailwind)
     if (config.theme === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
 
-    logger.debug('CSS variables applied');
+    // Aplicar colores de tema predefinido
+    const { PRESET_THEMES } = require('../firebase/exerciseBuilderConfig');
+    const themeColors = PRESET_THEMES[config.theme]?.colors;
+    if (themeColors) {
+      root.style.setProperty('--theme-bg', themeColors.bg);
+      root.style.setProperty('--theme-bg-secondary', themeColors.bgSecondary);
+      root.style.setProperty('--theme-text', themeColors.text);
+      root.style.setProperty('--theme-text-secondary', themeColors.textSecondary);
+      root.style.setProperty('--theme-border', themeColors.border);
+      root.style.setProperty('--theme-accent', themeColors.accent);
+    }
+
+    logger.debug('CSS variables applied', { theme: config.theme, fontSize: config.fontSize });
   }, [config]);
 
   return {

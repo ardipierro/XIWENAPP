@@ -18,3 +18,10 @@ export { VerbIdentificationExercise } from './VerbIdentificationExercise';
 export { InteractiveReadingExercise } from './InteractiveReadingExercise';
 export { AIAudioPronunciationExercise } from './AIAudioPronunciationExercise';
 export { FreeDragDropExercise } from './FreeDragDropExercise';
+
+// New Exercises (Phase 2)
+export { ClozeTestExercise } from './ClozeTestExercise';
+export { SentenceBuilderExercise } from './SentenceBuilderExercise';
+export { DictationExercise } from './DictationExercise';
+export { ErrorDetectionExercise } from './ErrorDetectionExercise';
+export { CollocationMatchingExercise } from './CollocationMatchingExercise';
