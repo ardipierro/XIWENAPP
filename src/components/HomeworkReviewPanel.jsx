@@ -19,10 +19,10 @@ import {
   TrendingDown
 } from 'lucide-react';
 import {
-  Button,
-  Card,
-  Modal,
-  Badge,
+  BaseBaseButton,
+  BaseBaseCard,
+  BaseBaseModal,
+  BaseBaseBadge,
   BaseLoading,
   BaseEmptyState
 } from './common';
@@ -43,7 +43,7 @@ import logger from '../utils/logger';
 export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDetailBaseModal, setShowDetailBaseModal] = useState(false);
   const [editingFeedback, setEditingFeedback] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState('');
   const [editedGrade, setEditedGrade] = useState(0);
@@ -122,23 +122,23 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
 
   if (loading) {
     return (
-      <Card>
+      <BaseBaseCard>
         <div className="flex items-center justify-center py-8">
           <BaseLoading variant="spinner" size="md" />
         </div>
-      </Card>
+      </BaseBaseCard>
     );
   }
 
   if (!review) {
     return (
-      <Card>
+      <BaseBaseCard>
         <BaseEmptyState
           icon={AlertCircle}
           title="Sin análisis"
           description="Esta tarea aún no ha sido analizada por la IA"
         />
-      </Card>
+      </BaseBaseCard>
     );
   }
 
@@ -165,8 +165,8 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
 
   return (
     <div className="space-y-4">
-      {/* Header Card */}
-      <Card>
+      {/* Header BaseCard */}
+      <BaseCard>
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-primary-100 dark:bg-primary-900/20 rounded-lg">
@@ -177,75 +177,75 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
                 Corrección Automática
               </h3>
               <div className="flex items-center gap-2 mt-1">
-                <Badge color={statusInfo.color}>
+                <BaseBadge color={statusInfo.color}>
                   {statusInfo.icon}
                   {statusInfo.label}
-                </Badge>
+                </BaseBadge>
                 {review.aiProvider && (
-                  <Badge color="secondary">
+                  <BaseBadge color="secondary">
                     {review.aiProvider.toUpperCase()}
-                  </Badge>
+                  </BaseBadge>
                 )}
                 {review.teacherReviewed && (
-                  <Badge color="success">
+                  <BaseBadge color="success">
                     <Check size={14} strokeWidth={2} />
                     Revisado
-                  </Badge>
+                  </BaseBadge>
                 )}
               </div>
             </div>
           </div>
 
-          <Button
+          <BaseButton
             variant="outline"
-            onClick={() => setShowDetailModal(true)}
+            onClick={() => setShowDetailBaseModal(true)}
           >
             <Eye size={16} strokeWidth={2} />
             Ver Detalles
-          </Button>
+          </BaseButton>
         </div>
-      </Card>
+      </BaseCard>
 
       {/* Analysis Summary */}
       {review.status === 'completed' && (
         <>
-          {/* Error Summary Card */}
-          <Card>
+          {/* Error Summary BaseCard */}
+          <BaseCard>
             <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
               Resumen de Errores
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              <ErrorTypeCard
+              <ErrorTypeBaseCard
                 label="Ortografía"
                 count={review.errorSummary.spelling}
                 color="red"
               />
-              <ErrorTypeCard
+              <ErrorTypeBaseCard
                 label="Gramática"
                 count={review.errorSummary.grammar}
                 color="orange"
               />
-              <ErrorTypeCard
+              <ErrorTypeBaseCard
                 label="Puntuación"
                 count={review.errorSummary.punctuation}
                 color="yellow"
               />
-              <ErrorTypeCard
+              <ErrorTypeBaseCard
                 label="Vocabulario"
                 count={review.errorSummary.vocabulary}
                 color="blue"
               />
-              <ErrorTypeCard
+              <ErrorTypeBaseCard
                 label="Total"
                 count={review.errorSummary.total}
                 color="purple"
                 highlight
               />
             </div>
-          </Card>
+          </BaseCard>
 
-          {/* Grade Card */}
-          <Card>
+          {/* Grade BaseCard */}
+          <BaseCard>
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
@@ -278,24 +278,24 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
                 </div>
               )}
             </div>
-          </Card>
+          </BaseCard>
 
-          {/* Feedback Card */}
-          <Card>
+          {/* Feedback BaseCard */}
+          <BaseCard>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   Retroalimentación General
                 </h4>
                 {!review.teacherReviewed && (
-                  <Button
+                  <BaseButton
                     variant="ghost"
                     size="sm"
                     onClick={() => setEditingFeedback(!editingFeedback)}
                   >
                     <Edit3 size={14} strokeWidth={2} />
                     {editingFeedback ? 'Cancelar' : 'Editar'}
-                  </Button>
+                  </BaseButton>
                 )}
               </div>
 
@@ -307,10 +307,10 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
                     className="textarea min-h-[120px]"
                     placeholder="Escribe tu retroalimentación..."
                   />
-                  <Button variant="primary" size="sm" onClick={handleSaveEdits}>
+                  <BaseButton variant="primary" size="sm" onClick={handleSaveEdits}>
                     <Check size={14} strokeWidth={2} />
                     Guardar Cambios
-                  </Button>
+                  </BaseButton>
                 </div>
               ) : (
                 <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
@@ -318,11 +318,11 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
                 </p>
               )}
             </div>
-          </Card>
+          </BaseCard>
 
-          {/* Approve Button */}
+          {/* Approve BaseButton */}
           {!review.teacherReviewed && (
-            <Card>
+            <BaseCard>
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -332,7 +332,7 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
                     Una vez aprobado, el estudiante podrá ver la corrección
                   </p>
                 </div>
-                <Button
+                <BaseButton
                   variant="primary"
                   onClick={handleApprove}
                   disabled={approving}
@@ -348,16 +348,16 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
                       Aprobar Revisión
                     </>
                   )}
-                </Button>
+                </BaseButton>
               </div>
-            </Card>
+            </BaseCard>
           )}
         </>
       )}
 
       {/* Failed State */}
       {review.status === 'failed' && (
-        <Card>
+        <BaseCard>
           <div className="flex items-start gap-3 text-red-600 dark:text-red-400">
             <XCircle size={20} strokeWidth={2} />
             <div>
@@ -365,14 +365,14 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
               <p className="text-sm mt-1">{review.errorMessage}</p>
             </div>
           </div>
-        </Card>
+        </BaseCard>
       )}
 
-      {/* Detail Modal */}
-      {showDetailModal && (
-        <HomeworkDetailModal
+      {/* Detail BaseModal */}
+      {showDetailBaseModal && (
+        <HomeworkDetailBaseModal
           review={review}
-          onClose={() => setShowDetailModal(false)}
+          onClose={() => setShowDetailBaseModal(false)}
         />
       )}
     </div>
@@ -380,9 +380,9 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
 }
 
 /**
- * Error Type Card Component
+ * Error Type BaseCard Component
  */
-function ErrorTypeCard({ label, count, color, highlight }) {
+function ErrorTypeBaseCard({ label, count, color, highlight }) {
   const colorClasses = {
     red: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300',
     orange: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
@@ -406,9 +406,9 @@ function ErrorTypeCard({ label, count, color, highlight }) {
 }
 
 /**
- * Homework Detail Modal Component
+ * Homework Detail BaseModal Component
  */
-function HomeworkDetailModal({ review, onClose }) {
+function HomeworkDetailBaseModal({ review, onClose }) {
   const [activeTab, setActiveTab] = useState('transcription');
 
   const errorTypeLabels = {
@@ -426,7 +426,7 @@ function HomeworkDetailModal({ review, onClose }) {
   };
 
   return (
-    <Modal
+    <BaseModal
       isOpen={true}
       onClose={onClose}
       title="Análisis Detallado de la Tarea"
@@ -471,25 +471,25 @@ function HomeworkDetailModal({ review, onClose }) {
         {/* Tab Content */}
         <div className="max-h-[500px] overflow-y-auto">
           {activeTab === 'transcription' && (
-            <Card>
+            <BaseCard>
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 Texto Extraído de la Imagen
               </h4>
               <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                 {review.transcription}
               </p>
-            </Card>
+            </BaseCard>
           )}
 
           {activeTab === 'corrections' && (
             <div className="space-y-3">
               {review.detailedCorrections && review.detailedCorrections.length > 0 ? (
                 review.detailedCorrections.map((correction, index) => (
-                  <Card key={index}>
+                  <BaseCard key={index}>
                     <div className="flex items-start gap-3">
-                      <Badge color={errorTypeColors[correction.type] || 'secondary'}>
+                      <BaseBadge color={errorTypeColors[correction.type] || 'secondary'}>
                         {errorTypeLabels[correction.type] || correction.type}
-                      </Badge>
+                      </BaseBadge>
                       <div className="flex-1 space-y-2">
                         <div>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -510,7 +510,7 @@ function HomeworkDetailModal({ review, onClose }) {
                         </p>
                       </div>
                     </div>
-                  </Card>
+                  </BaseCard>
                 ))
               ) : (
                 <BaseEmptyState
@@ -523,6 +523,6 @@ function HomeworkDetailModal({ review, onClose }) {
           )}
         </div>
       </div>
-    </Modal>
+    </BaseModal>
   );
 }

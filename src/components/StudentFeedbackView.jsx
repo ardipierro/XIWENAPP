@@ -16,10 +16,10 @@ import {
   Lightbulb
 } from 'lucide-react';
 import {
-  Button,
-  Card,
-  Modal,
-  Badge,
+  BaseBaseButton,
+  BaseBaseCard,
+  BaseBaseModal,
+  BaseBaseBadge,
   BaseLoading,
   BaseEmptyState
 } from './common';
@@ -38,7 +38,7 @@ import logger from '../utils/logger';
 export default function StudentFeedbackView({ submission, studentId }) {
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDetailBaseModal, setShowDetailBaseModal] = useState(false);
 
   useEffect(() => {
     loadReview();
@@ -62,23 +62,23 @@ export default function StudentFeedbackView({ submission, studentId }) {
 
   if (loading) {
     return (
-      <Card>
+      <BaseCard>
         <div className="flex items-center justify-center py-8">
           <BaseLoading variant="spinner" size="md" />
         </div>
-      </Card>
+      </BaseCard>
     );
   }
 
   if (!review) {
     return (
-      <Card>
+      <BaseCard>
         <BaseEmptyState
           icon={AlertCircle}
           title="Corrección Pendiente"
           description="Tu profesor aún está revisando esta tarea. Recibirás notificación cuando esté lista."
         />
-      </Card>
+      </BaseCard>
     );
   }
 
@@ -117,8 +117,8 @@ export default function StudentFeedbackView({ submission, studentId }) {
 
   return (
     <div className="space-y-4">
-      {/* Grade Card */}
-      <Card>
+      {/* Grade BaseCard */}
+      <BaseCard>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className={`p-3 rounded-lg ${performance.bgColor}`}>
@@ -145,10 +145,10 @@ export default function StudentFeedbackView({ submission, studentId }) {
             </div>
           </div>
         </div>
-      </Card>
+      </BaseCard>
 
-      {/* Error Summary Card */}
-      <Card>
+      {/* Error Summary BaseCard */}
+      <BaseCard>
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
           Áreas de Mejora
         </h4>
@@ -190,10 +190,10 @@ export default function StudentFeedbackView({ submission, studentId }) {
             </div>
           </div>
         )}
-      </Card>
+      </BaseCard>
 
-      {/* Feedback Card */}
-      <Card>
+      {/* Feedback BaseCard */}
+      <BaseCard>
         <div className="flex items-start gap-3">
           <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
             <Lightbulb size={20} strokeWidth={2} className="text-purple-600 dark:text-purple-400" />
@@ -207,11 +207,11 @@ export default function StudentFeedbackView({ submission, studentId }) {
             </p>
           </div>
         </div>
-      </Card>
+      </BaseCard>
 
-      {/* View Details Button */}
+      {/* View Details BaseButton */}
       {review.detailedCorrections && review.detailedCorrections.length > 0 && (
-        <Card>
+        <BaseCard>
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -221,22 +221,22 @@ export default function StudentFeedbackView({ submission, studentId }) {
                 {review.detailedCorrections.length} correcciones encontradas
               </p>
             </div>
-            <Button
+            <BaseButton
               variant="outline"
-              onClick={() => setShowDetailModal(true)}
+              onClick={() => setShowDetailBaseModal(true)}
             >
               <Eye size={16} strokeWidth={2} />
               Ver Detalles
-            </Button>
+            </BaseButton>
           </div>
-        </Card>
+        </BaseCard>
       )}
 
-      {/* Detail Modal */}
-      {showDetailModal && (
-        <StudentFeedbackDetailModal
+      {/* Detail BaseModal */}
+      {showDetailBaseModal && (
+        <StudentFeedbackDetailBaseModal
           review={review}
-          onClose={() => setShowDetailModal(false)}
+          onClose={() => setShowDetailBaseModal(false)}
         />
       )}
     </div>
@@ -268,9 +268,9 @@ function ErrorMetric({ label, count, total, color }) {
 }
 
 /**
- * Student Feedback Detail Modal
+ * Student Feedback Detail BaseModal
  */
-function StudentFeedbackDetailModal({ review, onClose }) {
+function StudentFeedbackDetailBaseModal({ review, onClose }) {
   const errorTypeLabels = {
     spelling: 'Ortografía',
     grammar: 'Gramática',
@@ -302,7 +302,7 @@ function StudentFeedbackDetailModal({ review, onClose }) {
   }, {});
 
   return (
-    <Modal
+    <BaseModal
       isOpen={true}
       onClose={onClose}
       title="Correcciones Detalladas"
@@ -327,12 +327,12 @@ function StudentFeedbackDetailModal({ review, onClose }) {
             </h4>
             <div className="space-y-3">
               {corrections.map((correction, index) => (
-                <Card key={index}>
+                <BaseCard key={index}>
                   <div className="space-y-2">
                     <div className="flex items-start gap-2">
-                      <Badge color={errorTypeColors[type]}>
+                      <BaseBadge color={errorTypeColors[type]}>
                         Línea {correction.line}
-                      </Badge>
+                      </BaseBadge>
                     </div>
 
                     {/* Before and After */}
@@ -365,14 +365,14 @@ function StudentFeedbackDetailModal({ review, onClose }) {
                       </div>
                     </div>
                   </div>
-                </Card>
+                </BaseCard>
               ))}
             </div>
           </div>
         ))}
 
         {/* Tips Section */}
-        <Card>
+        <BaseCard>
           <div className="flex items-start gap-3">
             <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
               <Target size={20} strokeWidth={2} className="text-purple-600 dark:text-purple-400" />
@@ -409,9 +409,9 @@ function StudentFeedbackDetailModal({ review, onClose }) {
               </ul>
             </div>
           </div>
-        </Card>
+        </BaseCard>
       </div>
-    </Modal>
+    </BaseModal>
   );
 }
 
@@ -460,13 +460,13 @@ export function StudentReviewsList({ studentId }) {
   return (
     <div className="grid gap-4">
       {reviews.map(review => (
-        <Card key={review.id}>
+        <BaseCard key={review.id}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <Badge color={review.suggestedGrade >= 70 ? 'success' : 'warning'}>
+                <BaseBadge color={review.suggestedGrade >= 70 ? 'success' : 'warning'}>
                   {review.suggestedGrade}/100
-                </Badge>
+                </BaseBadge>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
                   {review.analyzedAt?.toDate?.().toLocaleDateString('es-ES', {
                     day: 'numeric',
@@ -485,7 +485,7 @@ export function StudentReviewsList({ studentId }) {
               className="w-20 h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
             />
           </div>
-        </Card>
+        </BaseCard>
       ))}
     </div>
   );
