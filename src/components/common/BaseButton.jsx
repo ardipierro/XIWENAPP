@@ -48,9 +48,13 @@ function BaseButton({
         hover: { backgroundColor: 'var(--color-primary-dark)' }
       },
       secondary: {
-        backgroundColor: 'var(--color-bg-secondary)',
+        backgroundColor: 'var(--color-bg-tertiary)',
         color: 'var(--color-text-primary)',
-        hover: { backgroundColor: 'var(--color-bg-tertiary)' }
+        border: '1px solid var(--color-border)',
+        hover: {
+          backgroundColor: 'var(--color-bg-hover)',
+          borderColor: 'var(--color-border-focus)'
+        }
       },
       success: {
         backgroundColor: 'var(--color-success)',
@@ -70,15 +74,19 @@ function BaseButton({
       ghost: {
         backgroundColor: 'transparent',
         color: 'var(--color-text-primary)',
-        hover: { backgroundColor: 'var(--color-bg-secondary)' }
+        border: '1px solid transparent',
+        hover: {
+          backgroundColor: 'var(--color-bg-tertiary)',
+          borderColor: 'var(--color-border)'
+        }
       },
       outline: {
         backgroundColor: 'transparent',
         color: 'var(--color-text-primary)',
         border: '2px solid var(--color-border)',
         hover: {
-          backgroundColor: 'var(--color-bg-secondary)',
-          borderColor: 'var(--color-border-hover)'
+          backgroundColor: 'var(--color-bg-tertiary)',
+          borderColor: 'var(--color-border-focus)'
         }
       }
     };
