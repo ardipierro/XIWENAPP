@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { CheckCircle, XCircle, Lightbulb, RefreshCw, ArrowRightLeft } from 'lucide-react';
 import { BaseButton, BaseCard, BaseBadge } from '../../common';
 import { useExerciseState } from '../../../hooks/useExerciseState';
-import { flexibleValidation } from '../../../services/aiService';
+// import { flexibleValidation } from '../../../services/aiService'; // Función no disponible actualmente
 
 /**
  * Ejercicio de Transformación Gramatical
