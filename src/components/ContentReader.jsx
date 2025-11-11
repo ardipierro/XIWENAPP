@@ -40,6 +40,7 @@ import {
   deleteAnnotations
 } from '../firebase/annotations';
 import logger from '../utils/logger';
+import BaseButton from './common/BaseButton';
 
 /**
  * Colores disponibles para anotaciones
@@ -746,14 +747,14 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
           <div className="flex items-center gap-2">
             {/* Botón Volver */}
             {onBack && (
-              <button
+              <BaseButton
                 onClick={onBack}
-                className="flex items-center gap-2 px-3 py-2 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800 rounded-lg transition-all border border-primary-300 dark:border-primary-700"
+                variant="outline"
+                icon={<Home />}
                 title="Volver al dashboard"
               >
-                <Home className="w-5 h-5" />
                 <span className="hidden sm:inline text-sm font-medium">Volver</span>
-              </button>
+              </BaseButton>
             )}
 
             {/* Separador vertical si hay botón volver */}
@@ -807,21 +808,30 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowInstructionsModal(true)} className="icon-btn" title="Ayuda">
-              <HelpCircle className="w-5 h-5" />
-            </button>
-            <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar">
-              <Download className="w-5 h-5" />
-            </button>
+            <BaseButton
+              onClick={() => setShowInstructionsModal(true)}
+              variant="ghost"
+              icon={<HelpCircle />}
+              title="Ayuda"
+            />
+            <BaseButton
+              onClick={handleExportAnnotations}
+              variant="ghost"
+              icon={<Download />}
+              title="Exportar"
+            />
             <label className="icon-btn cursor-pointer" title="Importar">
               <Upload className="w-5 h-5" />
               <input type="file" accept=".json" onChange={handleImportAnnotations} className="hidden" />
             </label>
             {!readOnly && (
-              <button onClick={handleSaveAnnotations} className="flex items-center gap-2 px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all shadow-md">
-                <Save className="w-5 h-5" />
+              <BaseButton
+                onClick={handleSaveAnnotations}
+                variant="primary"
+                icon={<Save />}
+              >
                 <span className="hidden sm:inline">Guardar</span>
-              </button>
+              </BaseButton>
             )}
           </div>
         </div>
@@ -832,15 +842,21 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Zoom:</span>
-                <button onClick={() => setFontSize(Math.max(12, fontSize - 2))} className="icon-btn text-xs p-1">
-                  <ZoomOut className="w-4 h-4" />
-                </button>
+                <BaseButton
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  variant="ghost"
+                  size="sm"
+                  icon={<ZoomOut className="w-4 h-4" />}
+                />
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
                   {fontSize}px
                 </span>
-                <button onClick={() => setFontSize(Math.min(32, fontSize + 2))} className="icon-btn text-xs p-1">
-                  <ZoomIn className="w-4 h-4" />
-                </button>
+                <BaseButton
+                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                  variant="ghost"
+                  size="sm"
+                  icon={<ZoomIn className="w-4 h-4" />}
+                />
               </div>
               <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
               <div className="flex items-center gap-2">
@@ -938,15 +954,29 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
               </div>
               <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
               <div className="flex items-center gap-1">
-                <button onClick={handleUndo} disabled={historyIndex <= 0} className="icon-btn text-xs p-1" title="Deshacer">
-                  <Undo className="w-4 h-4" />
-                </button>
-                <button onClick={handleRedo} disabled={historyIndex >= canvasHistory.length - 1} className="icon-btn text-xs p-1" title="Rehacer">
-                  <Redo className="w-4 h-4" />
-                </button>
-                <button onClick={handleClearCanvas} className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs p-1" title="Limpiar">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <BaseButton
+                  onClick={handleUndo}
+                  disabled={historyIndex <= 0}
+                  variant="ghost"
+                  size="sm"
+                  icon={<Undo className="w-4 h-4" />}
+                  title="Deshacer"
+                />
+                <BaseButton
+                  onClick={handleRedo}
+                  disabled={historyIndex >= canvasHistory.length - 1}
+                  variant="ghost"
+                  size="sm"
+                  icon={<Redo className="w-4 h-4" />}
+                  title="Rehacer"
+                />
+                <BaseButton
+                  onClick={handleClearCanvas}
+                  variant="danger"
+                  size="sm"
+                  icon={<Trash2 className="w-4 h-4" />}
+                  title="Limpiar"
+                />
               </div>
             </div>
           </div>
@@ -986,15 +1016,21 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
               <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Tamaño:</span>
-                <button onClick={() => setFontSize(Math.max(12, fontSize - 2))} className="icon-btn text-xs p-1">
-                  <ZoomOut className="w-4 h-4" />
-                </button>
+                <BaseButton
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  variant="ghost"
+                  size="sm"
+                  icon={<ZoomOut className="w-4 h-4" />}
+                />
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
                   {fontSize}px
                 </span>
-                <button onClick={() => setFontSize(Math.min(32, fontSize + 2))} className="icon-btn text-xs p-1">
-                  <ZoomIn className="w-4 h-4" />
-                </button>
+                <BaseButton
+                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                  variant="ghost"
+                  size="sm"
+                  icon={<ZoomIn className="w-4 h-4" />}
+                />
               </div>
             </div>
           </div>
@@ -1007,23 +1043,36 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                 {!showOriginal && (
                   <>
                     <div className="flex items-center gap-1">
-                      <button onClick={handleBold} className="icon-btn text-xs p-1" title="Negrita">
-                        <Bold className="w-4 h-4" />
-                      </button>
-                      <button onClick={handleItalic} className="icon-btn text-xs p-1" title="Cursiva">
-                        <Italic className="w-4 h-4" />
-                      </button>
-                      <button onClick={handleUnderline} className="icon-btn text-xs p-1" title="Subrayado">
-                        <UnderlineIcon className="w-4 h-4" />
-                      </button>
+                      <BaseButton
+                        onClick={handleBold}
+                        variant="ghost"
+                        size="sm"
+                        icon={<Bold className="w-4 h-4" />}
+                        title="Negrita"
+                      />
+                      <BaseButton
+                        onClick={handleItalic}
+                        variant="ghost"
+                        size="sm"
+                        icon={<Italic className="w-4 h-4" />}
+                        title="Cursiva"
+                      />
+                      <BaseButton
+                        onClick={handleUnderline}
+                        variant="ghost"
+                        size="sm"
+                        icon={<UnderlineIcon className="w-4 h-4" />}
+                        title="Subrayado"
+                      />
                       <div className="relative">
-                        <button
+                        <BaseButton
                           onClick={() => setShowTextColorPicker(!showTextColorPicker)}
-                          className="icon-btn text-xs p-1"
+                          variant="ghost"
+                          size="sm"
                           title="Color de texto"
                         >
                           <div className="w-4 h-4 rounded border border-primary-300" style={{ backgroundColor: textColor }} />
-                        </button>
+                        </BaseButton>
                         {showTextColorPicker && (
                           <div className="absolute bottom-full left-0 mb-2 p-2 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 z-[9999]">
                             <input
@@ -1040,37 +1089,38 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   </>
                 )}
                 <div className="flex items-center gap-1">
-                  <button
+                  <BaseButton
                     onClick={handleSaveContentEdits}
                     disabled={!hasUnsavedEdits}
-                    className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="success"
+                    size="sm"
+                    icon={<Save className="w-3 h-3" />}
                     title="Guardar ediciones"
                   >
-                    <Save className="w-3 h-3" />
                     <span>Guardar</span>
-                  </button>
-                  <button
+                  </BaseButton>
+                  <BaseButton
                     onClick={handleDiscardContentEdits}
                     disabled={!hasUnsavedEdits}
-                    className="icon-btn bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 disabled:opacity-50 text-xs p-1"
+                    variant="ghost"
+                    size="sm"
+                    icon={<X className="w-4 h-4" />}
                     title="Descartar cambios"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <button
+                  />
+                  <BaseButton
                     onClick={() => setShowOriginal(!showOriginal)}
-                    className={`icon-btn text-xs p-1 ${showOriginal ? 'bg-blue-500 text-white' : ''}`}
+                    variant={showOriginal ? 'primary' : 'ghost'}
+                    size="sm"
+                    icon={<Eye className="w-4 h-4" />}
                     title={showOriginal ? 'Mostrar versión editada' : 'Mostrar versión original'}
-                  >
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  <button
+                  />
+                  <BaseButton
                     onClick={handleResetToOriginal}
-                    className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs p-1"
+                    variant="danger"
+                    size="sm"
+                    icon={<RotateCcw className="w-4 h-4" />}
                     title="Restaurar al original"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
+                  />
                 </div>
               </div>
               {hasUnsavedEdits && (
@@ -1208,12 +1258,12 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                 )}
                 <span>{floatingText.text}</span>
                 {!readOnly && (
-                  <button
+                  <BaseButton
                     onClick={() => handleDeleteFloatingText(floatingText.id)}
-                    className="p-0.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded flex-shrink-0"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
+                    variant="danger"
+                    size="sm"
+                    icon={<X className="w-3 h-3" />}
+                  />
                 )}
               </div>
             </div>
@@ -1250,12 +1300,12 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   </p>
                 </div>
                 {!readOnly && (
-                  <button
+                  <BaseButton
                     onClick={() => handleDeleteNote(note.id)}
-                    className="p-1 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-800 rounded flex-shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                    variant="ghost"
+                    size="sm"
+                    icon={<X className="w-4 h-4" />}
+                  />
                 )}
               </div>
 
@@ -1325,9 +1375,11 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                 <HelpCircle className="w-6 h-6" />
                 <h2 className="text-xl font-bold">Instrucciones del Lector de Contenido</h2>
               </div>
-              <button onClick={() => setShowInstructionsModal(false)} className="p-2 hover:bg-white/20 rounded-lg transition-all">
-                <X className="w-6 h-6" />
-              </button>
+              <BaseButton
+                onClick={() => setShowInstructionsModal(false)}
+                variant="ghost"
+                icon={<X className="w-6 h-6" />}
+              />
             </div>
 
             <div className="p-6">
@@ -1470,12 +1522,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                 </div>
               </div>
 
-              <button
+              <BaseButton
                 onClick={() => setShowInstructionsModal(false)}
-                className="mt-6 w-full px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all font-medium shadow-md"
+                variant="primary"
+                fullWidth
               >
                 ¡Entendido!
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -1521,9 +1574,12 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }
         <h4 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
           Agregar Nota
         </h4>
-        <button onClick={onCancel} className="p-1 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-700 rounded">
-          <X className="w-4 h-4" />
-        </button>
+        <BaseButton
+          onClick={onCancel}
+          variant="ghost"
+          size="sm"
+          icon={<X className="w-4 h-4" />}
+        />
       </div>
 
       {selectedText && (
@@ -1541,12 +1597,13 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }
         autoFocus
       />
 
-      <button
+      <BaseButton
         onClick={onAdd}
-        className="mt-3 w-full px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all font-medium"
+        variant="primary"
+        fullWidth
       >
         Agregar Nota
-      </button>
+      </BaseButton>
     </div>
   );
 }
@@ -1567,9 +1624,12 @@ function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
         <h4 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
           Agregar Texto
         </h4>
-        <button onClick={onCancel} className="p-1 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-700 rounded">
-          <X className="w-4 h-4" />
-        </button>
+        <BaseButton
+          onClick={onCancel}
+          variant="ghost"
+          size="sm"
+          icon={<X className="w-4 h-4" />}
+        />
       </div>
 
       <input
@@ -1590,12 +1650,13 @@ function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
         Usa los selectores del toolbar para cambiar fuente, tamaño y color
       </p>
 
-      <button
+      <BaseButton
         onClick={onAdd}
-        className="mt-3 w-full px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all font-medium"
+        variant="primary"
+        fullWidth
       >
         Agregar Texto
-      </button>
+      </BaseButton>
     </div>
   );
 }

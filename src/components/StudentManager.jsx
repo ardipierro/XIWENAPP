@@ -10,6 +10,7 @@ import {
 } from '../firebase/firestore';
 import { GraduationCap, Settings, X, UserPlus, Users, RefreshCw } from 'lucide-react';
 import SearchBar from './common/SearchBar';
+import BaseButton from './common/BaseButton';
 // StudentManager.css removed - using Tailwind CSS
 
 function StudentManager({ onClose, onStudentSelect }) {
@@ -181,9 +182,7 @@ function StudentManager({ onClose, onStudentSelect }) {
           <h2 className="flex items-center gap-2">
             <Users size={24} strokeWidth={2} /> Alumnos
           </h2>
-          <button className="close-btn" onClick={onClose}>
-            <X size={24} strokeWidth={2} />
-          </button>
+          <BaseButton variant="ghost" icon={X} onClick={onClose} />
         </div>
 
         {/* Search Bar */}
@@ -195,15 +194,16 @@ function StudentManager({ onClose, onStudentSelect }) {
         />
 
         <div className="manager-actions">
-          <button
-            className="btn btn-primary"
+          <BaseButton
+            variant="primary"
+            icon={UserPlus}
             onClick={() => {
               resetForm();
               setShowAddForm(true);
             }}
           >
-            <UserPlus size={16} strokeWidth={2} /> Agregar Alumno
-          </button>
+            Agregar Alumno
+          </BaseButton>
           <div className="student-count">
             Total: {students.length} alumno{students.length !== 1 ? 's' : ''}
           </div>
@@ -258,21 +258,25 @@ function StudentManager({ onClose, onStudentSelect }) {
                     placeholder="ABC123 (opcional, se genera auto)"
                     maxLength={6}
                   />
-                  <button type="button" onClick={handleGenerateManual} className="btn-generate">
+                  <BaseButton
+                    type="button"
+                    variant="secondary"
+                    onClick={handleGenerateManual}
+                  >
                     🎲 Generar
-                  </button>
+                  </BaseButton>
                 </div>
                 {codeError && <p className="error">{codeError}</p>}
               </div>
             </div>
 
             <div className="form-actions">
-              <button type="submit" className="btn-save">
+              <BaseButton type="submit" variant="primary">
                 {editingStudent ? '💾 Guardar Cambios' : '✅ Agregar'}
-              </button>
-              <button type="button" className="btn-cancel" onClick={resetForm}>
+              </BaseButton>
+              <BaseButton type="button" variant="secondary" onClick={resetForm}>
                 Cancelar
-              </button>
+              </BaseButton>
             </div>
           </form>
         )}
@@ -294,15 +298,16 @@ function StudentManager({ onClose, onStudentSelect }) {
                   : 'Intenta con otros términos de búsqueda'}
               </p>
               {students.length === 0 && (
-                <button
-                  className="btn btn-primary"
+                <BaseButton
+                  variant="primary"
+                  icon={UserPlus}
                   onClick={() => {
                     resetForm();
                     setShowAddForm(true);
                   }}
                 >
-                  <UserPlus size={16} strokeWidth={2} /> Agregar Primer Alumno
-                </button>
+                  Agregar Primer Alumno
+                </BaseButton>
               )}
             </div>
           ) : viewMode === 'grid' ? (
@@ -346,19 +351,23 @@ function StudentManager({ onClose, onStudentSelect }) {
                     {/* Botones */}
                     <div className="card-actions">
                       {onStudentSelect ? (
-                        <button
-                          className="btn btn-primary flex-1"
+                        <BaseButton
+                          variant="primary"
+                          icon={Settings}
                           onClick={() => handleSelectStudent(student)}
+                          fullWidth
                         >
-                          <Settings size={16} strokeWidth={2} /> Seleccionar
-                        </button>
+                          Seleccionar
+                        </BaseButton>
                       ) : (
-                        <button
-                          className="btn btn-primary flex-1"
+                        <BaseButton
+                          variant="primary"
+                          icon={Settings}
                           onClick={() => setSelectedStudent(student)}
+                          fullWidth
                         >
-                          <Settings size={16} strokeWidth={2} /> Gestionar
-                        </button>
+                          Gestionar
+                        </BaseButton>
                       )}
                     </div>
                   </div>
@@ -406,19 +415,21 @@ function StudentManager({ onClose, onStudentSelect }) {
                     {/* Botones */}
                     <div className="card-actions-list">
                       {onStudentSelect ? (
-                        <button
-                          className="btn btn-primary"
+                        <BaseButton
+                          variant="primary"
+                          icon={Settings}
                           onClick={() => handleSelectStudent(student)}
                         >
-                          <Settings size={16} strokeWidth={2} /> Seleccionar
-                        </button>
+                          Seleccionar
+                        </BaseButton>
                       ) : (
-                        <button
-                          className="btn btn-primary"
+                        <BaseButton
+                          variant="primary"
+                          icon={Settings}
                           onClick={() => setSelectedStudent(student)}
                         >
-                          <Settings size={16} strokeWidth={2} /> Gestionar
-                        </button>
+                          Gestionar
+                        </BaseButton>
                       )}
                     </div>
                   </div>
@@ -440,12 +451,11 @@ function StudentManager({ onClose, onStudentSelect }) {
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">{selectedStudent.name}</p>
                 </div>
-                <button
+                <BaseButton
+                  variant="ghost"
+                  icon={X}
                   onClick={() => setSelectedStudent(null)}
-                  className="btn btn-ghost"
-                >
-                  <X size={18} strokeWidth={2} />
-                </button>
+                />
               </div>
 
               {/* Student Info */}
@@ -491,40 +501,43 @@ function StudentManager({ onClose, onStudentSelect }) {
                       className="input flex-1"
                       disabled
                     />
-                    <button
+                    <BaseButton
+                      variant="outline"
+                      icon={RefreshCw}
                       onClick={() => {
                         handleRegenerateCode(selectedStudent);
                         setSelectedStudent(null);
                       }}
-                      className="btn btn-outline"
                       title="Regenerar código"
                     >
-                      <RefreshCw size={16} strokeWidth={2} /> Regenerar
-                    </button>
+                      Regenerar
+                    </BaseButton>
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button
+                <BaseButton
+                  variant="primary"
                   onClick={() => {
                     handleEdit(selectedStudent);
                     setSelectedStudent(null);
                   }}
-                  className="btn btn-primary flex-1"
+                  fullWidth
                 >
                   Editar Alumno
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
+                  variant="danger"
                   onClick={() => {
                     handleDelete(selectedStudent.id, selectedStudent.name);
                     setSelectedStudent(null);
                   }}
-                  className="btn btn-danger flex-1"
+                  fullWidth
                 >
                   Eliminar
-                </button>
+                </BaseButton>
               </div>
             </div>
           </div>

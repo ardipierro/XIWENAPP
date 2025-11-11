@@ -8,6 +8,7 @@ import {
 import { getTeacherSessions, getClassSession } from '../firebase/classSessions';
 import { getSessionAttendance, markBulkAttendance, updateAttendanceStatus } from '../firebase/attendance';
 import { getGroupMembers } from '../firebase/groups';
+import BaseButton from './common/BaseButton';
 import './AttendanceView.css';
 
 /**
@@ -304,12 +305,13 @@ function AttendanceView({ teacher }) {
                     {selectedSession.groupName} • {formatDate(selectedSession.date)}
                   </p>
                 </div>
-                <button
-                  className="btn btn-primary"
+                <BaseButton
+                  variant="primary"
+                  icon={CheckCircle}
                   onClick={handleMarkAllPresent}
                 >
-                  <CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Marcar Todos Presentes
-                </button>
+                  Marcar Todos Presentes
+                </BaseButton>
               </div>
 
               <div className="students-list">

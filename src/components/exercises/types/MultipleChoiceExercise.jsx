@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Check, X, PartyPopper, Frown } from 'lucide-react';
+import BaseButton from '../../common/BaseButton';
 import './MultipleChoiceExercise.css';
 
 function MultipleChoiceExercise({ questions, onComplete, studentName }) {
@@ -168,20 +169,24 @@ function MultipleChoiceExercise({ questions, onComplete, studentName }) {
         {/* Botones de acción */}
         <div className="action-buttons">
           {!isAnswered ? (
-            <button
-              className="btn btn-primary btn-large"
+            <BaseButton
+              variant="primary"
+              size="lg"
               onClick={handleSubmitAnswer}
               disabled={selectedAnswer === null}
+              fullWidth
             >
               Verificar Respuesta
-            </button>
+            </BaseButton>
           ) : (
-            <button
-              className="btn btn-primary btn-large"
+            <BaseButton
+              variant="primary"
+              size="lg"
               onClick={handleNextQuestion}
+              fullWidth
             >
               {currentQuestionIndex < totalQuestions - 1 ? 'Siguiente Pregunta →' : 'Ver Resultados'}
-            </button>
+            </BaseButton>
           )}
         </div>
       </div>

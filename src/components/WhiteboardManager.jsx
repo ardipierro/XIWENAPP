@@ -11,7 +11,8 @@ import {
   Trash2,
   Edit,
   Calendar,
-  Download
+  Download,
+  ArrowLeft
 } from 'lucide-react';
 import {
   getUserWhiteboardSessions,
@@ -23,6 +24,7 @@ import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import ConfirmModal from './ConfirmModal';
 import WhiteboardAssignmentModal from './WhiteboardAssignmentModal';
+import BaseButton from './common/BaseButton';
 
 /**
  * Componente para gestión de pizarras guardadas
@@ -126,9 +128,14 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
     return (
       <div className="class-manager">
         {/* Botón Volver */}
-        <button onClick={onBack} className="btn btn-ghost mb-4">
-          ← Volver a Inicio
-        </button>
+        <BaseButton
+          variant="ghost"
+          onClick={onBack}
+          icon={ArrowLeft}
+          className="mb-4"
+        >
+          Volver a Inicio
+        </BaseButton>
 
         <PageHeader
           icon={Presentation}
@@ -147,9 +154,14 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
   return (
     <div className="class-manager">
       {/* Botón Volver */}
-      <button onClick={onBack} className="btn btn-ghost mb-4">
-        ← Volver a Inicio
-      </button>
+      <BaseButton
+        variant="ghost"
+        onClick={onBack}
+        icon={ArrowLeft}
+        className="mb-4"
+      >
+        Volver a Inicio
+      </BaseButton>
 
       {/* Header */}
       <PageHeader
@@ -174,9 +186,12 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
         <div className="empty-state">
           <p>{searchTerm ? 'No se encontraron pizarras' : 'No hay pizarras guardadas aún'}</p>
           {!searchTerm && (
-            <button onClick={onOpenWhiteboard} className="btn btn-primary">
+            <BaseButton
+              variant="primary"
+              onClick={onOpenWhiteboard}
+            >
               Crear primera pizarra
-            </button>
+            </BaseButton>
           )}
         </div>
       ) : viewMode === 'grid' ? (
@@ -231,37 +246,37 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
 
                 {/* Actions */}
                 <div className="card-actions">
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Download}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDownload(session);
                     }}
                     title="Descargar"
-                  >
-                    <Download size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  />
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Edit}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEdit(session);
                     }}
                     title="Editar y asignar"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm text-red-600"
+                  />
+                  <BaseButton
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedSession(session);
                       setShowConfirmDelete(true);
                     }}
                     title="Eliminar"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  />
                 </div>
               </div>
             );
@@ -320,37 +335,37 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
 
                 {/* Actions */}
                 <div className="card-actions-inline">
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Download}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDownload(session);
                     }}
                     title="Descargar"
-                  >
-                    <Download size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  />
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Edit}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEdit(session);
                     }}
                     title="Editar"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm text-red-600"
+                  />
+                  <BaseButton
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedSession(session);
                       setShowConfirmDelete(true);
                     }}
                     title="Eliminar"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  />
                 </div>
               </div>
             );

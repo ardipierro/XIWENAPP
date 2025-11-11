@@ -315,15 +315,11 @@ function QuestionScreen({
             </div>
           </div>
           <div className="overflow-x-auto pb-2">
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${validStudents.length}, minmax(200px, 1fr))`,
-              gap: '12px'
-            }}>
+            <div className="flex gap-3">
             {validStudents.map(student => (
               <div
                 key={student}
-                className={`p-3 rounded-lg relative ${
+                className={`p-3 rounded-lg relative min-w-[200px] w-[200px] flex-shrink-0 ${
                   student === currentStudent
                     ? 'bg-gray-200 dark:bg-gray-700 border-4 border-gray-500 dark:border-gray-400 transform scale-105'
                     : 'bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600'

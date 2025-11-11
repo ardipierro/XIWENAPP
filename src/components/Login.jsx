@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { LogIn, UserPlus, AlertCircle, CheckCircle, Loader, Lock } from 'lucide-react';
 import useAuth from '../hooks/useAuth.js';
 import { PASSWORD_RESET_NOTIFICATION_DURATION } from '../constants/auth.js';
+import BaseButton from './common/BaseButton';
 import './Login.css';
 
 /**
@@ -226,24 +227,16 @@ function Login() {
           )}
 
           {/* Botón principal */}
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader size={16} className="spinner" />
-                <span>Cargando...</span>
-              </>
-            ) : isRegistering ? (
-              <>
-                <UserPlus size={16} />
-                <span>Crear cuenta</span>
-              </>
-            ) : (
-              <>
-                <LogIn size={16} />
-                <span>Ingresar</span>
-              </>
-            )}
-          </button>
+          <BaseButton
+            type="submit"
+            variant="primary"
+            disabled={loading}
+            loading={loading}
+            icon={loading ? undefined : (isRegistering ? UserPlus : LogIn)}
+            fullWidth
+          >
+            {loading ? 'Cargando...' : (isRegistering ? 'Crear cuenta' : 'Ingresar')}
+          </BaseButton>
 
           {/* Botón de resetear contraseña (solo en login) */}
           {!isRegistering && (

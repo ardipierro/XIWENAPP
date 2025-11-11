@@ -13,6 +13,7 @@ import {
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import ConfirmModal from './ConfirmModal';
+import BaseButton from './common/BaseButton';
 
 /**
  * Componente para gestión de pizarras Excalidraw guardadas
@@ -156,9 +157,9 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
     return (
       <div className="class-manager">
         {/* Botón Volver */}
-        <button onClick={onBack} className="btn btn-ghost mb-4">
+        <BaseButton onClick={onBack} variant="ghost" className="mb-4">
           ← Volver a Inicio
-        </button>
+        </BaseButton>
 
         <PageHeader
           icon={PenTool}
@@ -177,9 +178,9 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
   return (
     <div className="class-manager">
       {/* Botón Volver */}
-      <button onClick={onBack} className="btn btn-ghost mb-4">
+      <BaseButton onClick={onBack} variant="ghost" className="mb-4">
         ← Volver a Inicio
-      </button>
+      </BaseButton>
 
       {/* Header */}
       <PageHeader
@@ -204,9 +205,9 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
         <div className="empty-state">
           <p>{searchTerm ? 'No se encontraron pizarras' : 'No hay pizarras Excalidraw guardadas aún'}</p>
           {!searchTerm && (
-            <button onClick={onCreateNew} className="btn btn-primary">
+            <BaseButton onClick={onCreateNew} variant="primary">
               Crear primera pizarra
-            </button>
+            </BaseButton>
           )}
         </div>
       ) : viewMode === 'grid' ? (
@@ -261,47 +262,47 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
 
                 {/* Actions */}
                 <div className="card-actions">
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Download}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDownload(session);
                     }}
                     title="Descargar"
-                  >
-                    <Download size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  />
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Edit}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEdit(session);
                     }}
                     title="Editar título"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  />
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Copy}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDuplicate(session.id);
                     }}
                     title="Duplicar"
-                  >
-                    <Copy size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm text-red-600"
+                  />
+                  <BaseButton
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedSession(session);
                       setShowConfirmDelete(true);
                     }}
                     title="Eliminar"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  />
                 </div>
               </div>
             );
@@ -362,47 +363,47 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
 
                 {/* Actions */}
                 <div className="card-actions-inline">
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Download}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDownload(session);
                     }}
                     title="Descargar"
-                  >
-                    <Download size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  />
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Edit}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEdit(session);
                     }}
                     title="Editar"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm"
+                  />
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    icon={Copy}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDuplicate(session.id);
                     }}
                     title="Duplicar"
-                  >
-                    <Copy size={16} />
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm text-red-600"
+                  />
+                  <BaseButton
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedSession(session);
                       setShowConfirmDelete(true);
                     }}
                     title="Eliminar"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  />
                 </div>
               </div>
             );
@@ -432,12 +433,12 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
               />
             </div>
             <div className="modal-footer">
-              <button onClick={() => setShowEditModal(false)} className="btn btn-secondary">
+              <BaseButton onClick={() => setShowEditModal(false)} variant="secondary">
                 Cancelar
-              </button>
-              <button onClick={handleSaveEdit} className="btn btn-primary">
+              </BaseButton>
+              <BaseButton onClick={handleSaveEdit} variant="primary">
                 Guardar
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>

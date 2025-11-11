@@ -11,6 +11,7 @@ import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { getUserCredits } from '../firebase/credits';
 import Navigation from './Navigation';
 import SearchBar from './common/SearchBar';
+import BaseButton from './common/BaseButton';
 import './AdminPanel.css';
 
 function AdminPanel({ user, userRole, onBack }) {
@@ -287,12 +288,11 @@ function AdminPanel({ user, userRole, onBack }) {
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">{selectedUser.name}</p>
               </div>
-              <button
+              <BaseButton
                 onClick={() => setSelectedUser(null)}
-                className="btn btn-ghost"
-              >
-                <X size={18} strokeWidth={2} />
-              </button>
+                variant="ghost"
+                icon={X}
+              />
             </div>
 
             {/* User Info */}
@@ -362,12 +362,13 @@ function AdminPanel({ user, userRole, onBack }) {
 
             {/* Actions */}
             <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button
+              <BaseButton
                 onClick={() => setSelectedUser(null)}
-                className="btn btn-outline flex-1"
+                variant="outline"
+                fullWidth
               >
                 Cerrar
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>

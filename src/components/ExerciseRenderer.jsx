@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { EXERCISE_TYPES } from '../utils/exerciseParser';
+import BaseButton from './common/BaseButton';
 
 function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
   const [userAnswer, setUserAnswer] = useState(null);
@@ -97,9 +98,9 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
             disabled={showCorrectAnswer}
           />
           {!showCorrectAnswer && (
-            <button onClick={checkAnswer} className="btn btn-primary">
+            <BaseButton onClick={checkAnswer} variant="primary">
               Verificar
-            </button>
+            </BaseButton>
           )}
         </div>
         {showCorrectAnswer && (
@@ -119,34 +120,36 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
           {exercise.question}
         </h3>
         <div className="flex gap-4">
-          <button
+          <BaseButton
             onClick={() => {
               setUserAnswer(true);
               onAnswer && onAnswer(exercise.correct === true);
             }}
+            variant={userAnswer === true ? 'primary' : 'outline'}
             className={`
-              btn flex-1 py-6 text-lg
-              ${userAnswer === true ? 'btn-primary' : 'btn-outline'}
+              flex-1 py-6 text-lg
               ${showCorrectAnswer && exercise.correct === true ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : ''}
             `}
             disabled={showCorrectAnswer}
+            icon={<Check size={20} strokeWidth={2} />}
           >
-            <Check size={20} strokeWidth={2} className="inline-icon" /> Verdadero
-          </button>
-          <button
+            Verdadero
+          </BaseButton>
+          <BaseButton
             onClick={() => {
               setUserAnswer(false);
               onAnswer && onAnswer(exercise.correct === false);
             }}
+            variant={userAnswer === false ? 'primary' : 'outline'}
             className={`
-              btn flex-1 py-6 text-lg
-              ${userAnswer === false ? 'btn-primary' : 'btn-outline'}
+              flex-1 py-6 text-lg
               ${showCorrectAnswer && exercise.correct === false ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : ''}
             `}
             disabled={showCorrectAnswer}
+            icon={<X size={20} strokeWidth={2} />}
           >
-            <X size={20} strokeWidth={2} className="inline-icon" /> Falso
-          </button>
+            Falso
+          </BaseButton>
         </div>
       </div>
     );
@@ -243,28 +246,30 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
                 {item}
               </div>
               <div className="flex flex-col gap-1">
-                <button
+                <BaseButton
                   onClick={() => moveItem(idx, idx - 1)}
                   disabled={idx === 0 || showCorrectAnswer}
-                  className="btn btn-sm"
+                  variant="secondary"
+                  size="sm"
                 >
                   ↑
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   onClick={() => moveItem(idx, idx + 1)}
                   disabled={idx === items.length - 1 || showCorrectAnswer}
-                  className="btn btn-sm"
+                  variant="secondary"
+                  size="sm"
                 >
                   ↓
-                </button>
+                </BaseButton>
               </div>
             </div>
           ))}
         </div>
         {!showCorrectAnswer && (
-          <button onClick={checkOrder} className="btn btn-primary">
+          <BaseButton onClick={checkOrder} variant="primary">
             Verificar Orden
-          </button>
+          </BaseButton>
         )}
         {showCorrectAnswer && (
           <div className="mt-3 p-3 rounded bg-gray-100 dark:bg-gray-800/50 text-gray-800 dark:text-gray-200">
@@ -339,7 +344,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
           {exercise.options.map((optGroup, idx) => (
             <div key={idx} className="flex gap-2 flex-wrap">
               {optGroup.map((opt, optIdx) => (
-                <button
+                <BaseButton
                   key={optIdx}
                   onClick={() => {
                     const newAnswers = [...dragAnswers];
@@ -351,14 +356,12 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
                       onAnswer && onAnswer(isCorrect);
                     }
                   }}
-                  className={`
-                    btn btn-sm
-                    ${dragAnswers[idx] === opt ? 'btn-primary' : 'btn-outline'}
-                  `}
+                  variant={dragAnswers[idx] === opt ? 'primary' : 'outline'}
+                  size="sm"
                   disabled={showCorrectAnswer}
                 >
                   {opt}
-                </button>
+                </BaseButton>
               ))}
             </div>
           ))}

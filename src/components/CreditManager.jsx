@@ -13,6 +13,7 @@ import {
   getCreditStats,
   updateCreditNotes
 } from '../firebase/credits';
+import BaseButton from './common/BaseButton';
 import './CreditManager.css';
 
 function CreditManager({ userId, currentUser, onUpdate }) {
@@ -235,20 +236,20 @@ function CreditManager({ userId, currentUser, onUpdate }) {
 
       {/* Actions */}
       <div className="credit-actions">
-        <button
-          className="btn btn-primary"
+        <BaseButton
+          variant="primary"
+          icon={Plus}
           onClick={() => handleOpenModal('add')}
         >
-          <Plus size={18} strokeWidth={2} />
           Agregar Créditos
-        </button>
-        <button
-          className="btn btn-secondary"
+        </BaseButton>
+        <BaseButton
+          variant="secondary"
+          icon={Minus}
           onClick={() => handleOpenModal('deduct')}
         >
-          <Minus size={18} strokeWidth={2} />
           Quitar Créditos
-        </button>
+        </BaseButton>
       </div>
 
       {/* Notes */}
@@ -258,29 +259,34 @@ function CreditManager({ userId, currentUser, onUpdate }) {
             <FileText size={20} strokeWidth={2} /> Notas
           </h3>
           {!editingNotes ? (
-            <button
-              className="btn btn-ghost btn-sm"
+            <BaseButton
+              variant="ghost"
+              size="sm"
+              icon={Edit}
               onClick={() => setEditingNotes(true)}
             >
-              <Edit size={16} strokeWidth={2} className="inline-icon" /> Editar
-            </button>
+              Editar
+            </BaseButton>
           ) : (
             <div className="btn-group-sm">
-              <button
-                className="btn btn-ghost btn-sm"
+              <BaseButton
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   setEditingNotes(false);
                   loadData();
                 }}
               >
                 Cancelar
-              </button>
-              <button
-                className="btn btn-primary btn-sm"
+              </BaseButton>
+              <BaseButton
+                variant="primary"
+                size="sm"
+                icon={Save}
                 onClick={handleSaveNotes}
               >
-                <Save size={16} strokeWidth={2} className="inline-icon" /> Guardar
-              </button>
+                Guardar
+              </BaseButton>
             </div>
           )}
         </div>
@@ -406,30 +412,24 @@ function CreditManager({ userId, currentUser, onUpdate }) {
             </div>
 
             <div className="modal-footer">
-              <button
+              <BaseButton
                 type="button"
-                className="btn btn-outline"
+                variant="outline"
                 onClick={handleCloseModal}
                 disabled={processing}
               >
                 Cancelar
-              </button>
-              <button
+              </BaseButton>
+              <BaseButton
                 type="submit"
-                className="btn btn-primary"
+                variant="primary"
                 disabled={processing}
                 onClick={handleModalSubmit}
+                icon={processing ? Loader : CheckCircle}
+                iconClassName={processing ? "animate-spin" : ""}
               >
-                {processing ? (
-                  <><Loader size={18} strokeWidth={2} className="inline-icon animate-spin" /> Procesando...</>
-                ) : (
-                  modalType === 'add' ? (
-                    <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Agregar</>
-                  ) : (
-                    <><CheckCircle size={18} strokeWidth={2} className="inline-icon" /> Quitar</>
-                  )
-                )}
-              </button>
+                {processing ? 'Procesando...' : (modalType === 'add' ? 'Agregar' : 'Quitar')}
+              </BaseButton>
             </div>
           </div>
         </div>
