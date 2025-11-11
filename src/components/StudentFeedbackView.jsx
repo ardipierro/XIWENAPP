@@ -38,7 +38,7 @@ import logger from '../utils/logger';
 export default function StudentFeedbackView({ submission, studentId }) {
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showDetailModal, setShowDetailBaseModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     loadReview();
@@ -223,7 +223,7 @@ export default function StudentFeedbackView({ submission, studentId }) {
             </div>
             <BaseButton
               variant="outline"
-              onClick={() => setShowDetailBaseModal(true)}
+              onClick={() => setShowDetailModal(true)}
             >
               <Eye size={16} strokeWidth={2} />
               Ver Detalles
@@ -236,7 +236,7 @@ export default function StudentFeedbackView({ submission, studentId }) {
       {showDetailModal && (
         <StudentFeedbackDetailModal
           review={review}
-          onClose={() => setShowDetailBaseModal(false)}
+          onClose={() => setShowDetailModal(false)}
         />
       )}
     </div>

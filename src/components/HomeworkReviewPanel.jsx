@@ -43,7 +43,7 @@ import logger from '../utils/logger';
 export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showDetailModal, setShowDetailBaseModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [editingFeedback, setEditingFeedback] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState('');
   const [editedGrade, setEditedGrade] = useState(0);
@@ -198,7 +198,7 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
 
           <BaseButton
             variant="outline"
-            onClick={() => setShowDetailBaseModal(true)}
+            onClick={() => setShowDetailModal(true)}
           >
             <Eye size={16} strokeWidth={2} />
             Ver Detalles
@@ -372,7 +372,7 @@ export default function HomeworkReviewPanel({ submission, onReviewApproved }) {
       {showDetailModal && (
         <HomeworkDetailModal
           review={review}
-          onClose={() => setShowDetailBaseModal(false)}
+          onClose={() => setShowDetailModal(false)}
         />
       )}
     </div>
