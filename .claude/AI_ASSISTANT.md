@@ -1,9 +1,9 @@
 # 🤖 AI Assistant System - Sistema de Asistente Virtual con Comandos de Voz
 
-**✅ Claude Code Web**: Documentación completa del AI Assistant System para XIWENAPP
+**✅ Claude Code**: Documentación completa del AI Assistant System para XIWENAPP
 
-**Creado:** 2025-11-11
-**Versión:** 1.0
+**Última actualización:** 2025-11-11
+**Versión:** 2.0 - Actualizada
 
 ---
 
@@ -672,9 +672,9 @@ Antes de usar el AI Assistant:
 ## 📚 Recursos Adicionales
 
 - **User Guide:** `docs/AI_ASSISTANT_GUIDE.md`
-- **Coding Standards:** `.claude/MASTER_STANDARDS.md`
-- **Base Components:** `.claude/BASE_COMPONENTS.md`
-- **Design System:** `DESIGN_SYSTEM.md`
+- **Coding Standards:** `.claude/CODING_STANDARDS.md`
+- **Design System:** `.claude/DESIGN_SYSTEM.md`
+- **Exercise Builder:** `.claude/EXERCISE_BUILDER.md`
 - **Web Speech API:** https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
 - **Firestore Queries:** https://firebase.google.com/docs/firestore/query-data/queries
 
@@ -740,15 +740,3 @@ Antes de usar el AI Assistant:
    - Las consultas se envían a OpenAI/Claude/Gemini/Grok
    - No enviar información identificable en prompts
    - Usar análisis de intent genérico
-
----
-
-**Última actualización:** 2025-11-11
-**Versión:** 1.0
-**Autor:** Claude Code (Anthropic)
-**Branch:** `claude/ai-assistant-system-011CV2hBs59uscMLg1v1R3Ae`
-**Commits:**
-- `ba275fd` - docs: Add main CHANGELOG.md
-- `0ea4783` - refactor: Remove shadow classes from AIAssistantWidget
-- `e342b10` - refactor: AIAssistantWidget to comply with .claude standards
-- `3de734f` - feat: Implement AI Assistant System with Voice Commands
