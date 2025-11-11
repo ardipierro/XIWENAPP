@@ -1,24 +1,26 @@
-# 📘 XIWEN App - MASTER STANDARDS
+# 💻 XIWENAPP - Estándares de Código
 
-**✅ Claude Code Web**: Este es el archivo MAESTRO que unifica TODOS los estándares del proyecto.
-
-**📍 Fuentes:**
-- `CODING_STANDARDS.md` (22KB, Nov 6) - Reglas de código y arquitectura
-- `DESIGN_SYSTEM.md` (12KB, Nov 3) - Sistema de diseño visual
-- `src/config/designTokens.js` - Tokens de diseño
-- `tailwind.config.js` - Configuración Tailwind
-
-**Última actualización:** 2025-11-06
+**Última actualización:** 2025-11-11
+**Versión:** 2.0 - Consolidada
 
 ---
 
-## 🎯 PARTE 1: REGLAS DE CÓDIGO (8 REGLAS CORE)
+## 📋 Tabla de Contenidos
+
+1. [Las 8 Reglas Core](#-las-8-reglas-core)
+2. [Componentes Base](#-componentes-base)
+3. [Ejemplos Completos](#-ejemplos-completos)
+4. [Checklist para PRs](#-checklist-para-prs)
+
+---
+
+## 🎯 Las 8 Reglas Core
 
 ### REGLA #1: 100% Tailwind CSS - CERO CSS Custom
 
 **✅ HACER:**
 ```javascript
-<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200">
+<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
   Content
 </div>
 ```
@@ -31,6 +33,8 @@
 // ❌ Inline styles
 <div style={{ padding: '16px' }}>Content</div>
 ```
+
+**Razón:** Consistencia, mantenibilidad, dark mode automático con Tailwind.
 
 ---
 
@@ -57,6 +61,8 @@ import { BaseModal } from '../common';
   <div className="bg-white p-6">...</div>
 </div>
 ```
+
+**Razón:** Accesibilidad, z-index correcto, animaciones, responsive.
 
 ---
 
@@ -92,16 +98,20 @@ import {
 <BaseCard title="Card">...</BaseCard>
 ```
 
+**Razón:** Consistencia visual, comportamiento estandarizado, menos código.
+
 ---
 
 ### REGLA #4: Custom Hooks para lógica compartida
 
 **Extraer a `src/hooks/`:**
+
 ```javascript
 // ✅ useCourses.js
 export function useCourses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadCourses();
@@ -110,18 +120,46 @@ export function useCourses() {
   const loadCourses = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getCourses();
       setCourses(data);
+      logger.info('Courses loaded:', data.length);
     } catch (err) {
       logger.error('Error loading courses:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  return { courses, loading, loadCourses };
+  const createCourse = async (courseData) => {
+    try {
+      const newCourse = await addCourse(courseData);
+      setCourses(prev => [...prev, newCourse]);
+      return newCourse;
+    } catch (err) {
+      logger.error('Error creating course:', err);
+      throw err;
+    }
+  };
+
+  return { courses, loading, error, loadCourses, createCourse };
 }
 ```
+
+**Uso:**
+```javascript
+function CourseManager() {
+  const { courses, loading, error, createCourse } = useCourses();
+
+  if (loading) return <BaseLoading variant="fullscreen" />;
+  if (error) return <BaseAlert variant="danger">{error}</BaseAlert>;
+
+  return <div>{courses.map(...)}</div>;
+}
+```
+
+**Razón:** DRY, reutilización, testing más fácil.
 
 ---
 
@@ -132,8 +170,8 @@ Si se repite 2+ veces → Extraer componente
 **❌ Código repetido:**
 ```javascript
 // En 3 lugares diferentes:
-<div className="bg-blue-100 border border-blue-500 p-4">
-  <AlertCircle className="text-blue-500" />
+<div className="bg-blue-100 border border-blue-500 p-4 rounded-lg">
+  <AlertCircle className="text-blue-500" size={20} />
   <span>{message}</span>
 </div>
 ```
@@ -171,6 +209,8 @@ console.error('Error');
 console.warn('Warning');
 ```
 
+**Razón:** Control de logs, niveles, producción, debugging.
+
 ---
 
 ### REGLA #7: Async/Await con Try-Catch
@@ -182,9 +222,9 @@ const handleSubmit = async () => {
     setLoading(true);
     setError(null);
 
-    await saveData(formData);
+    const result = await saveData(formData);
 
-    logger.info('Data saved successfully');
+    logger.info('Data saved successfully', result);
     setSuccess(true);
   } catch (err) {
     logger.error('Error saving data:', err);
@@ -208,6 +248,8 @@ saveData(formData)
   .catch(err => setError(err));
 ```
 
+**Razón:** Manejo de errores robusto, loading states, UX mejor.
+
 ---
 
 ### REGLA #8: Siempre soportar Dark Mode
@@ -230,190 +272,11 @@ saveData(formData)
 </div>
 ```
 
----
-
-## 🎨 PARTE 2: SISTEMA DE DISEÑO VISUAL
-
-### 1. Paleta de Colores (MONOCROMÁTICA)
-
-**Colores Principales:**
-```javascript
-// De designTokens.js y DESIGN_SYSTEM.md
-
-Primary (Grises):
-  - zinc-50:  #fafafa   (Light backgrounds)
-  - zinc-100: #f4f4f5   (Card backgrounds)
-  - zinc-200: #e4e4e7   (Borders light)
-  - zinc-300: #d4d4d8   (Borders)
-  - zinc-400: #a1a1aa   (Text muted)
-  - zinc-500: #71717a   (Text secondary)
-  - zinc-600: #52525b   (Text)
-  - zinc-700: #3f3f46   (Text dark)
-  - zinc-800: #27272a   (Dark backgrounds)
-  - zinc-900: #18181b   (Primary dark)
-  - zinc-950: #09090b   (Darkest)
-
-Acentos:
-  - Success: #10b981 (green-500)
-  - Warning: #f59e0b (amber-500)
-  - Error:   #ef4444 (red-500)
-  - Info:    #3b82f6 (blue-500)
-```
-
-**⚠️ PROHIBIDO:**
-```
-❌ Azules brillantes (cyan, sky, blue pastel)
-❌ Violetas/Púrpuras (purple, fuchsia, pink)
-❌ Gradientes coloridos
-❌ Sombras de colores
-```
-
-**✅ PERMITIDO:**
-```
-✅ Grises (zinc, gray, slate)
-✅ Verde para éxito (#10b981)
-✅ Amarillo/Naranja para advertencias (#f59e0b)
-✅ Rojo para errores (#ef4444)
-✅ Azul info básico (#3b82f6) - solo para info
-```
+**Razón:** Accesibilidad, preferencias del usuario, UX moderna.
 
 ---
 
-### 2. Iconografía
-
-**Librería:** `lucide-react` EXCLUSIVAMENTE
-
-**Tamaños estandarizados:**
-```javascript
-import { Icon } from 'lucide-react';
-
-// Tamaños según contexto:
-<Icon size={64} strokeWidth={2} />  // Placeholders vacíos grandes
-<Icon size={48} strokeWidth={2} />  // Estados error/éxito
-<Icon size={40} strokeWidth={2} />  // Cards de estadísticas
-<Icon size={32} strokeWidth={2} />  // Iconos de tipo/categoría
-<Icon size={24} strokeWidth={2} />  // Encabezados de sección
-<Icon size={20} strokeWidth={2} />  // Listados
-<Icon size={18} strokeWidth={2} />  // Pestañas/tabs
-<Icon size={16} strokeWidth={2} />  // Botones pequeños
-```
-
-**Colores:**
-```javascript
-// Light mode
-<Icon className="text-gray-400" />
-
-// Dark mode
-<Icon className="text-gray-500" />
-
-// Estados (con color)
-<Icon className="text-green-500" />  // Success
-<Icon className="text-amber-500" />  // Warning
-<Icon className="text-red-500" />    // Error
-```
-
-**⚠️ SIEMPRE `strokeWidth={2}`**
-
----
-
-### 3. Tipografía
-
-**Títulos:**
-```javascript
-// ❌ NO mostrar títulos principales en paneles
-// Solo icono en menú lateral
-
-// ✅ Títulos de cards
-<h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-  Card Title
-</h2>
-
-// ✅ Títulos de modales
-<h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-  Modal Title
-</h1>
-```
-
-**Texto:**
-```javascript
-// Texto normal
-<p className="text-base text-gray-900 dark:text-gray-100">
-  Normal text
-</p>
-
-// Texto secundario
-<p className="text-sm text-gray-600 dark:text-gray-400">
-  Secondary text
-</p>
-
-// Texto deshabilitado
-<p className="text-sm text-gray-500 dark:text-gray-500">
-  Disabled text
-</p>
-```
-
----
-
-### 4. Espaciado
-
-**Sistema basado en rem:**
-```javascript
-// De designTokens.js
-
-spacing: {
-  xs: '0.25rem',  // 4px
-  sm: '0.5rem',   // 8px
-  md: '1rem',     // 16px
-  lg: '1.5rem',   // 24px
-  xl: '2rem',     // 32px
-  '2xl': '3rem',  // 48px
-  '3xl': '4rem',  // 64px
-}
-
-// Uso en Tailwind
-<div className="p-4">      // padding: 16px
-<div className="gap-6">    // gap: 24px
-<div className="space-y-4"> // vertical spacing: 16px
-```
-
----
-
-### 5. Bordes y Sombras
-
-**Bordes:**
-```javascript
-borderRadius: {
-  sm: '0.25rem',  // 4px
-  md: '0.375rem', // 6px
-  lg: '0.5rem',   // 8px
-  xl: '0.75rem',  // 12px
-  '2xl': '1rem',  // 16px
-  full: '9999px'  // Circular
-}
-
-// Uso
-<div className="rounded-lg border border-gray-200 dark:border-gray-700">
-```
-
-**Sombras:**
-```javascript
-// ⚠️ SIN SOMBRAS POR DEFECTO
-// Solo en casos especiales:
-
-shadows: {
-  sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-  md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-}
-
-// ❌ NO usar hover:shadow-lg
-// ✅ Solo cambio de borde en hover
-<div className="border border-gray-200 hover:border-primary">
-```
-
----
-
-## 🧩 PARTE 3: COMPONENTES BASE
+## 🧩 Componentes Base
 
 ### BaseButton
 
@@ -450,6 +313,11 @@ shadows: {
 // Ghost button
 <BaseButton variant="ghost" size="sm">
   Cancelar
+</BaseButton>
+
+// Full width
+<BaseButton variant="primary" fullWidth>
+  Continuar
 </BaseButton>
 ```
 
@@ -560,29 +428,122 @@ shadows: {
 
 ---
 
-### BaseLoading
-
-**Variants:** `spinner | dots | pulse | bars | fullscreen`
+### BaseInput
 
 **Props:**
 ```javascript
-<BaseLoading
-  variant="spinner"  // variant
-  size="md"         // sm | md | lg
-  text="Loading..."  // Loading text
+<BaseInput
+  type="text"               // text, email, password, number, etc.
+  label="Label"             // Label text
+  value={value}             // Controlled value
+  onChange={handleChange}   // Change handler
+  placeholder="..."         // Placeholder
+  icon={SearchIcon}         // Left icon (Lucide)
+  error={errorMessage}      // Error message
+  helperText="Hint"         // Helper text
+  disabled={false}          // Disabled state
+  required={false}          // Required field
+  size="md"                 // sm | md | lg
 />
 ```
 
 **Ejemplos:**
 ```javascript
-// Fullscreen loading
-<BaseLoading variant="fullscreen" text="Cargando datos..." />
+// Basic input
+<BaseInput
+  label="Nombre"
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  required
+/>
 
-// Inline spinner
-<BaseLoading variant="spinner" size="lg" />
+// With icon
+<BaseInput
+  type="email"
+  label="Email"
+  icon={Mail}
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  error={emailError}
+/>
 
-// Dots
-<BaseLoading variant="dots" text="Procesando..." />
+// Password with toggle
+<BaseInput
+  type="password"
+  label="Contraseña"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+/>
+```
+
+---
+
+### BaseSelect
+
+**Props:**
+```javascript
+<BaseSelect
+  label="Label"
+  value={value}
+  onChange={handleChange}
+  options={[
+    { value: 'option1', label: 'Option 1' },
+    { value: 'option2', label: 'Option 2' }
+  ]}
+  placeholder="Selecciona..."
+  error={errorMessage}
+  disabled={false}
+  required={false}
+  size="md"                 // sm | md | lg
+/>
+```
+
+**Ejemplo:**
+```javascript
+<BaseSelect
+  label="Rol"
+  value={role}
+  onChange={(e) => setRole(e.target.value)}
+  options={[
+    { value: 'student', label: 'Estudiante' },
+    { value: 'teacher', label: 'Profesor' },
+    { value: 'admin', label: 'Administrador' }
+  ]}
+  required
+/>
+```
+
+---
+
+### BaseTextarea
+
+**Props:**
+```javascript
+<BaseTextarea
+  label="Label"
+  value={value}
+  onChange={handleChange}
+  placeholder="..."
+  rows={4}
+  maxLength={500}           // Shows counter
+  error={errorMessage}
+  helperText="Hint"
+  disabled={false}
+  required={false}
+  resize={true}             // true | false | 'vertical' | 'horizontal'
+/>
+```
+
+**Ejemplo:**
+```javascript
+<BaseTextarea
+  label="Descripción"
+  value={description}
+  onChange={(e) => setDescription(e.target.value)}
+  maxLength={500}
+  rows={4}
+  helperText="Describe el curso brevemente"
+/>
 ```
 
 ---
@@ -598,7 +559,7 @@ shadows: {
   size="sm"         // sm | md | lg
   icon={Check}      // Lucide icon
   dot={false}       // Show dot
-  rounded={true}    // Rounded
+  rounded={true}    // Pill shape (default: true)
   onRemove={fn}     // Remove handler (shows X)
 >
   Badge Text
@@ -621,6 +582,101 @@ shadows: {
 <BaseBadge variant="primary" onRemove={handleRemove}>
   React
 </BaseBadge>
+```
+
+---
+
+### BaseLoading
+
+**Variants:** `spinner | dots | pulse | bars | fullscreen`
+
+**Props:**
+```javascript
+<BaseLoading
+  variant="spinner"  // variant
+  size="md"         // sm | md | lg | xl
+  text="Loading..."  // Loading text
+/>
+```
+
+**Ejemplos:**
+```javascript
+// Fullscreen loading
+<BaseLoading variant="fullscreen" text="Cargando datos..." />
+
+// Inline spinner
+<BaseLoading variant="spinner" size="lg" />
+
+// Dots
+<BaseLoading variant="dots" text="Procesando..." />
+```
+
+---
+
+### BaseAlert
+
+**Variants:** `success | danger | warning | info`
+
+**Props:**
+```javascript
+<BaseAlert
+  variant="success"      // variant
+  title="Title"          // Alert title
+  dismissible={false}    // Show close button
+  onDismiss={handleDismiss} // Dismiss callback
+  border={false}         // Left border accent
+>
+  Alert message
+</BaseAlert>
+```
+
+**Ejemplos:**
+```javascript
+// Success alert
+<BaseAlert variant="success" title="¡Éxito!">
+  Operación completada correctamente.
+</BaseAlert>
+
+// Dismissible error
+<BaseAlert
+  variant="danger"
+  title="Error"
+  dismissible
+  onDismiss={() => setError(null)}
+>
+  {error}
+</BaseAlert>
+```
+
+---
+
+### BaseDropdown
+
+**Props:**
+```javascript
+<BaseDropdown
+  trigger={<BaseButton />}  // Trigger element
+  items={[
+    { label: 'Item', icon: Icon, onClick: fn },
+    { divider: true },
+    { label: 'Delete', variant: 'danger', onClick: fn }
+  ]}
+  align="right"             // left | right | center
+/>
+```
+
+**Ejemplo:**
+```javascript
+<BaseDropdown
+  trigger={<BaseButton variant="ghost" icon={MoreVertical} />}
+  items={[
+    { label: 'Editar', icon: Edit, onClick: handleEdit },
+    { label: 'Duplicar', icon: Copy, onClick: handleDuplicate },
+    { divider: true },
+    { label: 'Eliminar', icon: Trash, variant: 'danger', onClick: handleDelete }
+  ]}
+  align="right"
+/>
 ```
 
 ---
@@ -655,71 +711,9 @@ shadows: {
 
 ---
 
-## ✅ CHECKLIST COMPLETO PARA PRs
-
-Antes de hacer commit, verifica:
-
-### Código:
-- [ ] ✅ 100% Tailwind CSS (sin archivos .css custom)
-- [ ] ✅ Todos los componentes usan Base Components
-- [ ] ✅ Dark mode funciona (`dark:` classes en todos los elementos)
-- [ ] ✅ Sin console.* (solo logger)
-- [ ] ✅ Custom hooks extraídos si hay lógica compartida
-- [ ] ✅ Async/await con try-catch
-- [ ] ✅ Imports organizados (React, third-party, local)
-
-### Diseño:
-- [ ] ✅ Solo colores de paleta monocromática (grises + acentos)
-- [ ] ✅ Sin azules/violetas prohibidos
-- [ ] ✅ Sin gradientes coloridos
-- [ ] ✅ Sin sombras (solo border hover)
-- [ ] ✅ Iconos de lucide-react con strokeWidth={2}
-- [ ] ✅ Tamaños de iconos según estándar
-- [ ] ✅ Espaciado consistente (p-4, gap-6, space-y-4)
-
-### Build:
-- [ ] ✅ `npm run build` pasa sin errores
-- [ ] ✅ `npm run dev` funciona correctamente
-
----
-
-## 📁 Estructura de Archivos
-
-```
-src/
-├── components/
-│   ├── common/              ← Componentes base
-│   │   ├── index.js         ← Barrel exports
-│   │   ├── BaseButton.jsx
-│   │   ├── BaseCard.jsx
-│   │   ├── BaseModal.jsx
-│   │   ├── BaseInput.jsx
-│   │   ├── BaseSelect.jsx
-│   │   ├── BaseTextarea.jsx
-│   │   ├── BaseBadge.jsx
-│   │   ├── BaseLoading.jsx
-│   │   ├── BaseAlert.jsx
-│   │   ├── BaseDropdown.jsx
-│   │   └── BaseEmptyState.jsx
-│   │
-│   ├── student/             ← Componentes de estudiante
-│   ├── teacher/             ← Componentes de profesor
-│   └── admin/               ← Componentes de admin
-│
-├── config/
-│   └── designTokens.js      ← Tokens de diseño
-│
-├── hooks/                   ← Custom hooks
-├── firebase/                ← Firebase services
-└── utils/
-    └── logger.js            ← Logger utility
-```
-
----
-
 ## 🎓 Ejemplos Completos
 
-### Componente Manager Típico
+### Ejemplo 1: Manager Component
 
 ```javascript
 import { useState, useEffect } from 'react';
@@ -783,11 +777,11 @@ function CourseManager() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
             Gestión de Cursos
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -844,7 +838,7 @@ function CourseManager() {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredCourses.map(course => (
             <BaseCard
               key={course.id}
@@ -927,8 +921,31 @@ export default CourseManager;
 
 ---
 
-**FIN DEL DOCUMENTO MAESTRO**
+## ✅ Checklist para PRs
 
-**Versión:** 1.0
-**Última actualización:** 2025-11-06
-**Archivos fuente:** CODING_STANDARDS.md, DESIGN_SYSTEM.md, designTokens.js
+Antes de hacer commit, verificar:
+
+### Código:
+- [ ] ✅ 100% Tailwind CSS (sin archivos .css custom)
+- [ ] ✅ Todos los componentes usan Base Components
+- [ ] ✅ Dark mode funciona (`dark:` classes en todos los elementos)
+- [ ] ✅ Sin console.* (solo logger)
+- [ ] ✅ Custom hooks extraídos si hay lógica compartida
+- [ ] ✅ Async/await con try-catch
+- [ ] ✅ Imports organizados (React, third-party, local)
+
+### Mobile First:
+- [ ] ✅ Diseño mobile-first (cols-1 primero, luego md:, lg:)
+- [ ] ✅ Touch targets mínimo 44px
+- [ ] ✅ Padding/margin responsive
+- [ ] ✅ Sin scroll horizontal en móvil
+
+### Build:
+- [ ] ✅ `npm run build` pasa sin errores
+- [ ] ✅ `npm run dev` funciona correctamente
+- [ ] ✅ Sin warnings en consola
+
+---
+
+**Mantenido por:** Claude Code
+**Última revisión:** 2025-11-11

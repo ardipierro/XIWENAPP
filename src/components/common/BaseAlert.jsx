@@ -28,68 +28,79 @@ function BaseAlert({
   border = true,
   className = '',
 }) {
-  // Variant styles
-  const variants = {
-    success: {
-      container: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
-      icon: 'text-green-600 dark:text-green-400',
-      title: 'text-green-900 dark:text-green-300',
-      text: 'text-green-800 dark:text-green-400',
-      border: 'border-l-green-600',
-      defaultIcon: CheckCircle,
-    },
-    danger: {
-      container: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
-      icon: 'text-red-600 dark:text-red-400',
-      title: 'text-red-900 dark:text-red-300',
-      text: 'text-red-800 dark:text-red-400',
-      border: 'border-l-red-600',
-      defaultIcon: AlertCircle,
-    },
-    warning: {
-      container: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
-      icon: 'text-amber-600 dark:text-amber-400',
-      title: 'text-amber-900 dark:text-amber-300',
-      text: 'text-amber-800 dark:text-amber-400',
-      border: 'border-l-amber-600',
-      defaultIcon: AlertTriangle,
-    },
-    info: {
-      container: 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700',
-      icon: 'text-gray-700 dark:text-gray-400',
-      title: 'text-gray-900 dark:text-gray-200',
-      text: 'text-gray-800 dark:text-gray-300',
-      border: 'border-l-gray-600',
-      defaultIcon: Info,
-    },
+  // Variant styles with CSS variables
+  const getVariantStyles = () => {
+    const variantStyles = {
+      success: {
+        containerBg: 'var(--color-success-light, #dcfce7)',
+        borderColor: 'var(--color-success, #10b981)',
+        borderLeft: 'var(--color-success-dark, #059669)',
+        iconColor: 'var(--color-success, #10b981)',
+        titleColor: 'var(--color-text-primary)',
+        textColor: 'var(--color-text-secondary)',
+        defaultIcon: CheckCircle,
+      },
+      danger: {
+        containerBg: 'var(--color-danger-light, #fee2e2)',
+        borderColor: 'var(--color-danger, #ef4444)',
+        borderLeft: 'var(--color-danger-dark, #dc2626)',
+        iconColor: 'var(--color-danger, #ef4444)',
+        titleColor: 'var(--color-text-primary)',
+        textColor: 'var(--color-text-secondary)',
+        defaultIcon: AlertCircle,
+      },
+      warning: {
+        containerBg: 'var(--color-warning-light, #fef3c7)',
+        borderColor: 'var(--color-warning, #f59e0b)',
+        borderLeft: 'var(--color-warning-dark, #d97706)',
+        iconColor: 'var(--color-warning, #f59e0b)',
+        titleColor: 'var(--color-text-primary)',
+        textColor: 'var(--color-text-secondary)',
+        defaultIcon: AlertTriangle,
+      },
+      info: {
+        containerBg: 'var(--color-bg-secondary)',
+        borderColor: 'var(--color-border)',
+        borderLeft: 'var(--color-primary)',
+        iconColor: 'var(--color-primary)',
+        titleColor: 'var(--color-text-primary)',
+        textColor: 'var(--color-text-secondary)',
+        defaultIcon: Info,
+      },
+    };
+    return variantStyles[variant] || variantStyles.info;
   };
 
-  const config = variants[variant] || variants.info; // Fallback to 'info' if invalid variant
+  const config = getVariantStyles();
   const IconComponent = CustomIcon || config.defaultIcon;
 
   return (
     <div
-      className={`
-        rounded-lg border p-4
-        ${config.container}
-        ${border ? `border-l-4 ${config.border}` : ''}
-        ${className}
-      `}
+      className={`rounded-lg border p-4 ${className}`}
+      style={{
+        backgroundColor: config.containerBg,
+        borderColor: config.borderColor,
+        borderLeftWidth: border ? '4px' : undefined,
+        borderLeftColor: border ? config.borderLeft : undefined
+      }}
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
-        <div className={`shrink-0 ${config.icon}`}>
+        <div className="shrink-0" style={{ color: config.iconColor }}>
           <IconComponent size={20} strokeWidth={2} />
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           {title && (
-            <h4 className={`font-semibold mb-1 ${config.title}`}>
+            <h4
+              className="font-semibold mb-1"
+              style={{ color: config.titleColor }}
+            >
               {title}
             </h4>
           )}
-          <div className={`text-sm ${config.text}`}>
+          <div className="text-sm" style={{ color: config.textColor }}>
             {children}
           </div>
         </div>
@@ -99,7 +110,8 @@ function BaseAlert({
           <button
             type="button"
             onClick={onDismiss}
-            className={`shrink-0 ${config.icon} hover:opacity-70 transition-opacity`}
+            className="shrink-0 hover:opacity-70 transition-opacity"
+            style={{ color: config.iconColor }}
           >
             <X size={18} />
           </button>
