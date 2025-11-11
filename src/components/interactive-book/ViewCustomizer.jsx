@@ -205,8 +205,8 @@ const hexToRgb = (hex) => {
 /**
  * Panel de personalización visual avanzado
  */
-function ViewCustomizer({ onSettingsChange }) {
-  const [isOpen, setIsOpen] = useState(false);
+function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
+  const [isOpen, setIsOpen] = useState(alwaysOpen);
   const [activeTab, setActiveTab] = useState('typography'); // 'typography' | 'colors' | 'layout' | 'effects'
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
@@ -955,7 +955,8 @@ function ViewCustomizer({ onSettingsChange }) {
 }
 
 ViewCustomizer.propTypes = {
-  onSettingsChange: PropTypes.func
+  onSettingsChange: PropTypes.func,
+  alwaysOpen: PropTypes.bool
 };
 
 export default ViewCustomizer;

@@ -138,10 +138,10 @@ function SettingsModal({ isOpen, onClose }) {
       size="lg"
       icon={Settings}
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col">
         {/* Tabs horizontales arriba */}
         <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-          <div className="flex gap-1 overflow-x-auto">
+          <div className="flex gap-1 flex-wrap">
             {tabs.map(tab => (
               <button
                 key={tab.id}
@@ -162,11 +162,11 @@ function SettingsModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Content con altura mínima fija */}
-        <div className="flex-1 overflow-y-auto min-h-[500px]">
+        {/* Content */}
+        <div className="overflow-y-auto max-h-[70vh]">
           {/* TAB: VISUAL (ViewCustomizer directo, sin botón) */}
           {activeTab === 'visual' && (
-            <ViewCustomizer />
+            <ViewCustomizer alwaysOpen={true} />
           )}
 
           {/* TAB: TYPOGRAPHY */}
@@ -259,7 +259,7 @@ function SettingsModal({ isOpen, onClose }) {
 
           {/* TAB: TTS (directo, sin botón) */}
           {activeTab === 'tts' && (
-            <TTSSettings />
+            <TTSSettings alwaysOpen={true} />
           )}
 
           {/* TAB: DISPLAY */}

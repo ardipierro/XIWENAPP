@@ -7,14 +7,15 @@ import { useState, useEffect } from 'react';
 import { Settings, Volume2, Zap, Languages } from 'lucide-react';
 import { BaseCard, BaseButton, BaseBadge } from '../common';
 import ttsService from '../../services/ttsService';
+import PropTypes from 'prop-types';
 
 /**
  * Panel de configuración de TTS
  */
-function TTSSettings() {
+function TTSSettings({ alwaysOpen = false }) {
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(alwaysOpen);
 
   useEffect(() => {
     loadVoices();
@@ -192,5 +193,9 @@ function TTSSettings() {
     </div>
   );
 }
+
+TTSSettings.propTypes = {
+  alwaysOpen: PropTypes.bool
+};
 
 export default TTSSettings;
