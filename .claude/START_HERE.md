@@ -24,7 +24,24 @@
 
 ---
 
-### 2️⃣ **MASTER_STANDARDS.md** (DOCUMENTO MAESTRO - LEER PRIMERO)
+### 2️⃣ **mobile-first.md** (GUÍA COMPLETA MOBILE FIRST)
+**Ruta:** `.claude/mobile-first.md`
+
+**⭐ GUÍA MOBILE FIRST EXHAUSTIVA:**
+- 📱 Breakpoints oficiales y dispositivos de referencia
+- ✅ Patrones correctos e incorrectos (con ejemplos)
+- 👆 Touch targets (44px+ WCAG)
+- 🎨 Componentes responsive (Cards, Nav, Tables, Forms)
+- ⚡ Performance mobile (lazy loading, code splitting)
+- 📏 Safe area para iPhone notch
+- ✅ Checklist completo mobile-first
+- 💡 2 ejemplos completos (CourseList, Dashboard)
+
+**Cuándo leer:** SIEMPRE antes de crear layouts o componentes responsive
+
+---
+
+### 3️⃣ **MASTER_STANDARDS.md** (DOCUMENTO MAESTRO - LEER PRIMERO)
 **Ruta:** `.claude/MASTER_STANDARDS.md`
 
 **⭐ Este es el archivo MAESTRO que unifica TODO:**
