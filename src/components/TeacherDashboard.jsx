@@ -78,6 +78,9 @@ import AssignmentManager from './AssignmentManager';
 import GradingInterface from './GradingInterface';
 import UnifiedCalendar from './UnifiedCalendar';
 import MessagesPanel from './MessagesPanel';
+import ClassCountdownBanner from './ClassCountdownBanner';
+import NotificationCenter from './NotificationCenter';
+import useRealtimeClassStatus from '../hooks/useRealtimeClassStatus';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ThemeBuilder from './ThemeBuilder';
@@ -112,6 +115,13 @@ function TeacherDashboard({ user, userRole, onLogout }) {
   const userManagement = useUserManagement(user, permissions);
   const resourceAssignment = useResourceAssignment();
   const navigation = useScreenNavigation();
+
+  // Upcoming classes hook (countdown banner)
+  const { upcomingSessions, getTimeUntilStart, shouldShowCountdown } = useRealtimeClassStatus(
+    user?.uid,
+    'teacher',
+    { minutesAhead: 10, includeScheduled: true }
+  );
 
   // Local states (teacher-specific)
   const [loading, setLoading] = useState(true);
@@ -1647,10 +1657,20 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     card.title.toLowerCase().includes(navigation.dashboardSearchTerm.toLowerCase())
   );
 
+  // Detectar próxima clase para countdown banner
+  const nextSession = upcomingSessions.find(s => shouldShowCountdown(s, 10));
+
   // Renderizar Dashboard Principal con el nuevo layout
   return (
     <>
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+      <DashboardLayout
+        user={user}
+        userRole={userRole}
+        onLogout={onLogout}
+        onMenuAction={navigation.handleMenuAction}
+        currentScreen={navigation.currentScreen}
+        headerContent={<NotificationCenter userId={user?.uid} showToasts={true} />}
+      >
         <div className="teacher-dashboard">
           <div className="dashboard-content mt-6">
             <SearchBar
@@ -1680,6 +1700,17 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           </div>
       </div>
       </DashboardLayout>
+
+      {/* Countdown Banner para clase próxima */}
+      {nextSession && (
+        <ClassCountdownBanner
+          session={nextSession}
+          onJoin={(session) => {
+            navigation.setSelectedLiveClass(session);
+            navigation.setCurrentScreen('classSessionRoom');
+          }}
+        />
+      )}
 
       {/* Modal para agregar nuevo usuario/alumno */}
       <AddUserModal

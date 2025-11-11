@@ -33,7 +33,9 @@ import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import LiveClassCard from './LiveClassCard';
 import NotificationCenter from './NotificationCenter';
+import ClassCountdownBanner from './ClassCountdownBanner';
 import { useStudentDashboard } from '../hooks/useStudentDashboard';
+import useRealtimeClassStatus from '../hooks/useRealtimeClassStatus';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -75,6 +77,13 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
   // Live classes state
   const [liveClassSessions, setLiveClassSessions] = useState([]);
+
+  // Upcoming classes hook (countdown banner)
+  const { upcomingSessions, shouldShowCountdown } = useRealtimeClassStatus(
+    user?.uid,
+    'student',
+    { minutesAhead: 10, includeScheduled: true }
+  );
 
   // Listener para clases en vivo asignadas al estudiante
   useEffect(() => {
@@ -514,13 +523,14 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
   // Main Dashboard view
   return (
-    <DashboardLayout
-      user={user}
-      userRole={userRole}
-      onLogout={onLogout}
-      onMenuAction={handleMenuAction}
-      headerContent={<NotificationCenter userId={user?.uid} showToasts={true} />}
-    >
+    <>
+      <DashboardLayout
+        user={user}
+        userRole={userRole}
+        onLogout={onLogout}
+        onMenuAction={handleMenuAction}
+        headerContent={<NotificationCenter userId={user?.uid} showToasts={true} />}
+      >
       <div className="p-4 md:p-6 space-y-4 md:space-y-6">
         {/* Live Classes - TOP PRIORITY */}
         {liveClassSessions.length > 0 && (
@@ -860,6 +870,15 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         )}
       </div>
     </DashboardLayout>
+
+      {/* Countdown Banner para clase próxima */}
+      {upcomingSessions.length > 0 && shouldShowCountdown(upcomingSessions[0], 10) && (
+        <ClassCountdownBanner
+          session={upcomingSessions[0]}
+          onJoin={handleJoinLiveClass}
+        />
+      )}
+    </>
   );
 }
 

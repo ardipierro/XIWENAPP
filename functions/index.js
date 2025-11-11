@@ -140,3 +140,15 @@ exports.getPaymentHistory = getPaymentHistory;
 const { callAI, checkAICredentials } = require('./aiProviders');
 exports.callAI = callAI;
 exports.checkAICredentials = checkAICredentials;
+
+// ============================================================================
+// CLASS SCHEDULER (Auto-start classes)
+// ============================================================================
+
+// Export class scheduler functions
+const {
+  scheduledClassStarter,
+  testScheduledClassStarter
+} = require('./classScheduler');
+exports.scheduledClassStarter = scheduledClassStarter;
+exports.testScheduledClassStarter = testScheduledClassStarter;
