@@ -135,6 +135,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [showAICredentialsModal, setShowAICredentialsModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [settingsTab, setSettingsTab] = useState('credentials'); // 'credentials' | 'theme'
+  const [credentialsRefresh, setCredentialsRefresh] = useState(0); // Para forzar re-render
   const [aiCredentials, setAiCredentials] = useState({
     claude: true,
     openai: true,
@@ -487,8 +488,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ClassSessionManager
           user={user}
+          initialEditSessionId={navigation.editSessionId}
+          onClearEditSession={() => navigation.setEditSessionId(null)}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
+            navigation.setEditSessionId(null); // Clear edit state when joining
             navigation.setCurrentScreen('classSessionRoom');
           }}
         />
@@ -523,11 +527,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
           userId={user?.uid}
           userRole="admin"
           onCreateSession={() => {
+            navigation.setEditSessionId(null); // Clear any edit state
             navigation.setCurrentScreen('classSessions');
           }}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
             navigation.setCurrentScreen('classSessionRoom');
+          }}
+          onEditSession={(sessionId) => {
+            navigation.setEditSessionId(sessionId);
+            navigation.setCurrentScreen('classSessions');
           }}
         />
       </DashboardLayout>
@@ -752,7 +761,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
             {/* Tab Content: Credentials */}
             {settingsTab === 'credentials' && (
-              <>
+              <div className="space-y-6">
                 <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
                   <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
               <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
@@ -785,10 +794,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
                 Configura las API keys de los proveedores de IA para usar funciones inteligentes en la plataforma
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" key={credentialsRefresh}>
                 {AIService.getAvailableProviders().map((provider) => {
-                  // Check credentials from Firebase Secret Manager
-                  const isConfigured = aiCredentials[provider.name] || false;
+                  // Check credentials from Firebase Secret Manager OR localStorage
+                  const hasFirebaseCredential = aiCredentials[provider.name] || false;
+                  const hasLocalStorageCredential = provider.name === 'elevenlabs'
+                    ? !!localStorage.getItem('ai_credentials_elevenlabs')
+                    : false;
+                  const isConfigured = hasFirebaseCredential || hasLocalStorageCredential;
 
                   return (
                     <button
@@ -867,7 +880,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                 </div>
               </div>
             </div>
-              </>
+              </div>
             )}
 
             {/* Tab Content: Theme */}
@@ -890,6 +903,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
           isConfigured={selectedProvider ? aiCredentials[selectedProvider.name] : false}
           onSave={async (providerName, apiKey) => {
             logger.info('API Key saved for provider:', providerName);
+            // Forzar re-render para actualizar el estado visual
+            setCredentialsRefresh(prev => prev + 1);
             // Reload providers to update configured status
             setTimeout(() => {
               window.location.reload();

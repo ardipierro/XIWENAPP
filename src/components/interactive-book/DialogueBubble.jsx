@@ -14,9 +14,13 @@ import { BaseBadge } from '../common';
 /**
  * Componente de burbuja de diálogo estilo WhatsApp/iMessage
  */
-function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
+function DialogueBubble({ line, index, totalLines, characters = [], onExerciseComplete }) {
   const [showExtras, setShowExtras] = useState(false);
   const [showTranslation, setShowTranslation] = useState(false);
+
+  // Obtener la voz del personaje
+  const character = characters.find(c => c.id === line.character);
+  const characterVoice = character?.voice || null;
 
   // Alternar entre derecha (par) e izquierda (impar) basado en el personaje
   const isRight = index % 2 === 0;
@@ -110,6 +114,7 @@ function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
               <AudioPlayer
                 audioUrl={line.audioUrl}
                 text={line.text}
+                voice={characterVoice}
                 showText={false}
                 className="text-xs"
               />
@@ -200,6 +205,13 @@ DialogueBubble.propTypes = {
   }).isRequired,
   index: PropTypes.number.isRequired,
   totalLines: PropTypes.number.isRequired,
+  characters: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      voice: PropTypes.string
+    })
+  ),
   onExerciseComplete: PropTypes.func
 };
 

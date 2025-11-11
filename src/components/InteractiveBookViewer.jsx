@@ -198,13 +198,14 @@ function InteractiveBookViewer() {
     );
   };
 
-  const renderDialogueLine = (line, index, totalLines) => {
+  const renderDialogueLine = (line, index, totalLines, characters = []) => {
     return (
       <DialogueBubble
         key={line.lineId}
         line={line}
         index={index}
         totalLines={totalLines}
+        characters={characters}
         onExerciseComplete={handleExerciseComplete}
       />
     );
@@ -396,7 +397,7 @@ function InteractiveBookViewer() {
 
                 <div className="space-y-1">
                   {unit.content.dialogue.lines.map((line, idx) =>
-                    renderDialogueLine(line, idx, unit.content.dialogue.lines.length)
+                    renderDialogueLine(line, idx, unit.content.dialogue.lines.length, unit.content.dialogue.characters)
                   )}
                 </div>
                 {unit.content.dialogue.fullAudioUrl && (

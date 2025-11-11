@@ -756,8 +756,11 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ClassSessionManager
           user={user}
+          initialEditSessionId={navigation.editSessionId}
+          onClearEditSession={() => navigation.setEditSessionId(null)}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
+            navigation.setEditSessionId(null); // Clear edit state when joining
             navigation.setCurrentScreen('classSessionRoom');
           }}
         />
@@ -1506,11 +1509,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           userId={user?.uid}
           userRole="teacher"
           onCreateSession={() => {
+            navigation.setEditSessionId(null); // Clear any edit state
             navigation.setCurrentScreen('classSessions');
           }}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
             navigation.setCurrentScreen('classSessionRoom');
+          }}
+          onEditSession={(sessionId) => {
+            navigation.setEditSessionId(sessionId);
+            navigation.setCurrentScreen('classSessions');
           }}
         />
       </DashboardLayout>
