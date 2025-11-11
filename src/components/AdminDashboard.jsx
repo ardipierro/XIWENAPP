@@ -799,6 +799,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           docsUrl: provider.name === 'openai' ? 'https://platform.openai.com/api-keys' :
                                    provider.name === 'gemini' ? 'https://aistudio.google.com/app/apikey' :
                                    provider.name === 'grok' ? 'https://console.x.ai/' :
+                                   provider.name === 'elevenlabs' ? 'https://elevenlabs.io/app/settings/api-keys' :
                                    'https://console.anthropic.com/settings/keys'
                         });
                         setShowAICredentialsModal(true);
@@ -866,10 +867,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                 </div>
               </div>
             </div>
+              </>
+            )}
           </div>
         </div>
-        </>
-      )}
 
       {/* Tab Content: Theme */}
       {settingsTab === 'theme' && (
