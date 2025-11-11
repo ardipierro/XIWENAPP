@@ -801,7 +801,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             <button
               onClick={handleSaveContentEdits}
               disabled={!hasUnsavedEdits}
-              className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               title="Guardar ediciones"
             >
               <Save className="w-4 h-4" />
@@ -1065,7 +1065,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       </div>
 
       {/* Footer */}
-      <div className="p-3 bg-white dark:bg-primary-900 border-t border-primary-200 dark:border-primary-800">
+      <div className="p-3 bg-primary-50 dark:bg-primary-900 border-t border-primary-200 dark:border-primary-800">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-sm text-primary-600 dark:text-primary-400">
           <div className="flex items-center gap-6">
             <span>{annotations.highlights.length} subrayados</span>
@@ -1109,7 +1109,7 @@ function ToolButton({ icon, label, active, onClick, disabled }) {
 function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }) {
   return (
     <div
-      className="absolute bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-700 p-4 rounded-lg shadow-xl max-w-sm z-30"
+      className="absolute bg-primary-50 dark:bg-primary-800 border border-primary-300 dark:border-primary-700 p-4 rounded-lg shadow-xl max-w-sm z-30"
       style={{
         left: currentNote.position?.x || 0,
         top: currentNote.position?.y || 0
@@ -1155,7 +1155,7 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }
 function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
   return (
     <div
-      className="absolute bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-700 p-4 rounded-lg shadow-xl max-w-sm z-30"
+      className="absolute bg-primary-50 dark:bg-primary-800 border border-primary-300 dark:border-primary-700 p-4 rounded-lg shadow-xl max-w-sm z-30"
       style={{
         left: currentText.position?.x || 0,
         top: currentText.position?.y || 0

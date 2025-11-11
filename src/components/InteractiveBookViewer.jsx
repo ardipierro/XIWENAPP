@@ -62,6 +62,15 @@ function InteractiveBookViewer() {
 
   useEffect(() => {
     loadBookData();
+    // Cargar configuración de vista guardada
+    const savedSettings = localStorage.getItem('xiwen_view_settings');
+    if (savedSettings) {
+      try {
+        setViewSettings(JSON.parse(savedSettings));
+      } catch (err) {
+        logger.error('Error loading view settings:', err);
+      }
+    }
   }, []);
 
   const loadBookData = async () => {
@@ -207,6 +216,7 @@ function InteractiveBookViewer() {
         totalLines={totalLines}
         characters={characters}
         onExerciseComplete={handleExerciseComplete}
+        viewSettings={viewSettings}
       />
     );
   };
@@ -395,7 +405,11 @@ function InteractiveBookViewer() {
                   onComplete={() => logger.info('Diálogo completo reproducido')}
                 />
 
-                <div className="space-y-1">
+                <div className={
+                  viewSettings?.spacing === 'compact' ? 'space-y-2' :
+                  viewSettings?.spacing === 'spacious' ? 'space-y-6' :
+                  'space-y-4'
+                }>
                   {unit.content.dialogue.lines.map((line, idx) =>
                     renderDialogueLine(line, idx, unit.content.dialogue.lines.length, unit.content.dialogue.characters)
                   )}

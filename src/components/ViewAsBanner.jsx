@@ -37,7 +37,7 @@ function ViewAsBanner() {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[1100] flex justify-between items-center px-4 sm:px-5 py-2 h-[38px] sm:h-11 bg-gradient-to-br from-orange-400 to-orange-500 text-white shadow-[0_2px_8px_rgba(251,146,60,0.2)] gap-3 sm:gap-4 flex-nowrap animate-slide-down">
+    <div className="fixed top-[64px] left-0 right-0 z-[900] flex justify-between items-center px-4 sm:px-5 py-2 h-[38px] sm:h-11 bg-orange-500 text-white shadow-[0_2px_8px_rgba(251,146,60,0.3)] gap-3 sm:gap-4 flex-nowrap animate-slide-down">
       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
         <div className="text-[22px] sm:text-[28px] animate-pulse">
           <Eye size={20} strokeWidth={2} />
@@ -48,9 +48,10 @@ function ViewAsBanner() {
       </div>
       <BaseButton
         onClick={handleExitViewAs}
-        variant="warning"
+        variant="ghost"
         size="sm"
         icon={ArrowLeft}
+        className="bg-orange-600 hover:bg-orange-700 text-white border-none"
       >
         <span className="hidden sm:inline">Volver a Admin</span>
         <span className="sm:hidden">Admin</span>

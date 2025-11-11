@@ -53,6 +53,7 @@ import { deleteUser } from '../firebase/users';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
 import { getClassesByTeacher } from '../firebase/classes';
+import { getTeacherSessions } from '../firebase/classSessions';
 import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
@@ -77,8 +78,9 @@ const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
-import LiveClassManager from './LiveClassManager';
-import LiveClassRoom from './LiveClassRoom';
+// REMOVED: Old LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
+// import LiveClassManager from './LiveClassManager';
+// import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 import MessagesPanel from './MessagesPanel';
@@ -87,6 +89,7 @@ import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
+import ClassSessionModal from './ClassSessionModal';
 import UnifiedCalendar from './UnifiedCalendar';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
@@ -142,6 +145,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     gemini: true,
     grok: true
   });
+  const [calendarEditSession, setCalendarEditSession] = useState(null); // Para modal de edición desde calendario
 
   // Admin-specific stats (extended from userManagement.stats)
   const [adminStats, setAdminStats] = useState({
@@ -157,6 +161,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [allContent, setAllContent] = useState([]);
   const [allExercises, setAllExercises] = useState([]);
   const [allClasses, setAllClasses] = useState([]);
+  const [classSessions, setClassSessions] = useState([]); // New unified class sessions
 
   // Load dashboard data on mount
   useEffect(() => {
@@ -207,13 +212,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const startTime = performance.now();
 
       // Load all data in parallel
-      const [students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
+      const [students, games, categories, allCourses, teacherContent, teacherClasses, sessions] = await Promise.all([
         loadStudents(),
         loadGameHistory(),
         loadCategories(),
         loadCourses(),
         getContentByTeacher(user.uid),
         getClassesByTeacher(user.uid),
+        getTeacherSessions(user.uid), // New unified sessions
         userManagement.loadUsers() // Load users with credits via hook
       ]);
 
@@ -223,6 +229,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       setCourses(activeCourses);
       setAllContent(teacherContent);
       setAllClasses(teacherClasses);
+      setClassSessions(sessions); // Store new unified sessions
 
       // Calculate top students
       const studentGameCounts = {};
@@ -467,20 +474,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Live Class Room - NO Layout (fullscreen)
-  if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
-    return (
-      <LiveClassRoom
-        liveClass={navigation.selectedLiveClass}
-        user={user}
-        userRole={userRole}
-        onLeave={() => {
-          navigation.setSelectedLiveClass(null);
-          navigation.setCurrentScreen('liveClasses');
-        }}
-      />
-    );
-  }
+  // REMOVED: Old Live Class Room - Replaced by ClassSessionRoom
+  // if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
+  //   return (
+  //     <LiveClassRoom
+  //       liveClass={navigation.selectedLiveClass}
+  //       user={user}
+  //       userRole={userRole}
+  //       onLeave={() => {
+  //         navigation.setSelectedLiveClass(null);
+  //         navigation.setCurrentScreen('liveClasses');
+  //       }}
+  //     />
+  //   );
+  // }
 
   // Class Session Manager (Sistema Unificado) - WITH Layout
   if (navigation.currentScreen === 'classSessions') {
@@ -534,11 +541,40 @@ function AdminDashboard({ user, userRole, onLogout }) {
             navigation.setSelectedLiveClass(session);
             navigation.setCurrentScreen('classSessionRoom');
           }}
-          onEditSession={(sessionId) => {
-            navigation.setEditSessionId(sessionId);
-            navigation.setCurrentScreen('classSessions');
+          onEditSession={async (sessionId) => {
+            // Cargar la sesión completa para pasarla al modal
+            try {
+              const { getClassSession } = await import('../firebase/classSessions');
+              const sessionData = await getClassSession(sessionId);
+              if (sessionData) {
+                setCalendarEditSession({ id: sessionId, ...sessionData });
+              }
+            } catch (error) {
+              logger.error('Error loading session for edit:', error);
+            }
           }}
         />
+
+        {/* Modal de edición de sesión desde calendario */}
+        {calendarEditSession && (
+          <ClassSessionModal
+            isOpen={true}
+            session={calendarEditSession}
+            onClose={() => setCalendarEditSession(null)}
+            onSubmit={async (formData) => {
+              try {
+                const { updateClassSession } = await import('../firebase/classSessions');
+                await updateClassSession(calendarEditSession.id, formData);
+                setCalendarEditSession(null);
+                logger.info('Session updated successfully from calendar');
+              } catch (error) {
+                logger.error('Error updating session:', error);
+              }
+            }}
+            courses={[]} // TODO: Load courses if needed
+            loading={false}
+          />
+        )}
       </DashboardLayout>
     );
   }
@@ -650,14 +686,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Class Manager - WITH Layout
-  if (navigation.currentScreen === 'classes') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
-      </DashboardLayout>
-    );
-  }
+  // REMOVED: Old Class Manager (without LiveKit/Whiteboards) - Replaced by ClassSessionManager
+  // if (navigation.currentScreen === 'classes') {
+  //   return (
+  //     <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+  //       <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
+  //     </DashboardLayout>
+  //   );
+  // }
 
   // Analytics Dashboard - WITH Layout
   if (navigation.currentScreen === 'analytics') {
@@ -714,7 +750,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'settings') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1000px] mx-auto">
+        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
           <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-6">
             ← Back to Home
           </button>
@@ -975,21 +1011,21 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Live Class Manager - WITH Layout
-  if (navigation.currentScreen === 'liveClasses') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <LiveClassManager
-          user={user}
-          onBack={navigation.handleBackToDashboard}
-          onStartClass={(liveClass) => {
-            navigation.setSelectedLiveClass(liveClass);
-            navigation.setCurrentScreen('liveClassRoom');
-          }}
-        />
-      </DashboardLayout>
-    );
-  }
+  // REMOVED: Old Live Class Manager - Replaced by ClassSessionManager
+  // if (navigation.currentScreen === 'liveClasses') {
+  //   return (
+  //     <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+  //       <LiveClassManager
+  //         user={user}
+  //         onBack={navigation.handleBackToDashboard}
+  //         onStartClass={(liveClass) => {
+  //           navigation.setSelectedLiveClass(liveClass);
+  //           navigation.setCurrentScreen('liveClassRoom');
+  //         }}
+  //       />
+  //     </DashboardLayout>
+  //   );
+  // }
 
   // Students Panel -> REDIRECT to Users with filter
   if (navigation.currentScreen === 'students') {
@@ -1493,13 +1529,12 @@ function AdminDashboard({ user, userRole, onLogout }) {
       id: 'classes',
       icon: Calendar,
       title: "Classes",
-      count: allClasses.length,
-      countLabel: allClasses.length === 1 ? "class" : "classes",
-      onClick: () => navigation.setCurrentScreen('classes'),
-      createLabel: "New Class",
+      count: classSessions.length,
+      countLabel: classSessions.length === 1 ? "session" : "sessions",
+      onClick: () => navigation.setCurrentScreen('classSessions'),
+      createLabel: "New Session",
       onCreateClick: () => {
-        navigation.setOpenClassModal(true);
-        navigation.setCurrentScreen('classes');
+        navigation.setCurrentScreen('classSessions');
       }
     },
     {

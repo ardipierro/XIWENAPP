@@ -43,6 +43,7 @@ import StudentClassView from './StudentClassView';
 import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { BaseAlert } from './common';
+import './UserProfile.css';
 
 // Icon mapping for role icons from roleConfig
 const ICON_MAP = {
@@ -151,7 +152,11 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       setGuardians(guardianLinks);
     } catch (error) {
       logger.error('Error al cargar tutores:', error);
-      showMessage('error', 'Error al cargar tutores');
+      // Si es un error de permisos, no mostrar mensaje de error
+      if (error.code !== 'permission-denied') {
+        showMessage('error', 'Error al cargar tutores');
+      }
+      setGuardians([]); // Establecer array vacío en caso de error
     } finally {
       setLoadingGuardians(false);
     }
@@ -715,13 +720,20 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 <p className="text-gray-600 dark:text-gray-400 mt-2">Cargando tutores...</p>
               </div>
             ) : guardians.length === 0 ? (
-              <div className="empty-state">
-                <UsersRound size={48} strokeWidth={1.5} className="empty-state-icon" />
-                <p className="empty-state-text">Este estudiante no tiene tutores vinculados</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  Los tutores pueden ser vinculados desde el panel de Gestión de Tutores
-                </p>
-              </div>
+              <BaseAlert variant="info" className="mb-4">
+                <div className="flex items-start gap-3">
+                  <UsersRound size={20} strokeWidth={2} className="flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-1">Sin tutores vinculados</p>
+                    <p className="text-sm">
+                      Este estudiante no tiene tutores asignados. La funcionalidad de tutores permite a padres o responsables acceder a información del estudiante.
+                    </p>
+                    <p className="text-xs mt-2 opacity-75">
+                      Nota: Esta función requiere configuración de permisos en Firebase.
+                    </p>
+                  </div>
+                </div>
+              </BaseAlert>
             ) : (
               <div className="space-y-3">
                 {guardians.map((guardian) => (
