@@ -58,7 +58,7 @@ function BaseModal({
     // Overlay con backdrop blur
     <div
       className={`
-        fixed inset-0 z-[9999] flex items-center justify-center p-4
+        fixed inset-0 z-[10000] flex items-center justify-center p-4
         bg-black/50 dark:bg-black/70 backdrop-blur-sm
         animate-in fade-in duration-200
         ${isDanger ? 'bg-red-500/10' : ''}

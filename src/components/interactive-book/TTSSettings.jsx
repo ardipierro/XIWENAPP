@@ -64,21 +64,23 @@ function TTSSettings({ alwaysOpen = false }) {
 
   return (
     <div className="space-y-4">
-      {/* Header compacto */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Settings size={18} className="text-purple-600 dark:text-purple-400" />
-          <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
-            Configuración de Voz IA
-          </span>
-        </div>
-        <BaseBadge variant="info" size="sm">
-          {voices.length} voces
-        </BaseBadge>
-      </button>
+      {/* Header compacto - solo si no es alwaysOpen */}
+      {!alwaysOpen && (
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Settings size={18} className="text-purple-600 dark:text-purple-400" />
+            <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
+              Configuración de Voz IA
+            </span>
+          </div>
+          <BaseBadge variant="info" size="sm">
+            {voices.length} voces
+          </BaseBadge>
+        </button>
+      )}
 
       {/* Panel expandible */}
       {isOpen && (

@@ -138,9 +138,9 @@ function SettingsModal({ isOpen, onClose }) {
       size="lg"
       icon={Settings}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col h-[600px]">
         {/* Tabs horizontales arriba */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+        <div className="border-b border-gray-200 dark:border-gray-700 mb-6 flex-shrink-0">
           <div className="flex gap-1 flex-wrap">
             {tabs.map(tab => (
               <button
@@ -163,7 +163,7 @@ function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[70vh]">
+        <div className="flex-1 overflow-y-auto">
           {/* TAB: VISUAL (ViewCustomizer directo, sin botón) */}
           {activeTab === 'visual' && (
             <ViewCustomizer alwaysOpen={true} />
