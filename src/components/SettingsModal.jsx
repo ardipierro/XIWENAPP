@@ -19,7 +19,9 @@ import {
   Maximize2,
   Minimize2,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge } from './common';
@@ -35,7 +37,8 @@ function SettingsModal({ isOpen, onClose }) {
     zoom: 100, // 50-200%
     width: 'normal', // 'narrow' | 'normal' | 'wide' | 'full'
     fullscreen: false,
-    fontScale: 100 // 80-150% (adicional al tamaño de fuente del ViewCustomizer)
+    fontScale: 100, // 80-150% (adicional al tamaño de fuente del ViewCustomizer)
+    showMetadataBadges: true // Mostrar/ocultar badges de metadata
   });
 
   // Cargar configuración de pantalla
@@ -56,6 +59,9 @@ function SettingsModal({ isOpen, onClose }) {
     setDisplaySettings(newSettings);
     localStorage.setItem('xiwen_display_settings', JSON.stringify(newSettings));
     applyDisplaySettings(newSettings);
+
+    // Disparar evento custom para notificar cambios en la misma pestaña
+    window.dispatchEvent(new Event('xiwen_settings_changed'));
   };
 
   // Aplicar configuración de pantalla
@@ -129,7 +135,7 @@ function SettingsModal({ isOpen, onClose }) {
       isOpen={isOpen}
       onClose={onClose}
       title="Configuración"
-      size="2xl"
+      size="lg"
       icon={Settings}
     >
       <div className="flex flex-col h-full">
@@ -158,14 +164,9 @@ function SettingsModal({ isOpen, onClose }) {
 
         {/* Content con altura mínima fija */}
         <div className="flex-1 overflow-y-auto min-h-[500px]">
-          {/* TAB: VISUAL (ViewCustomizer completo) */}
+          {/* TAB: VISUAL (ViewCustomizer directo, sin botón) */}
           {activeTab === 'visual' && (
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                Personalización Visual
-              </h3>
-              <ViewCustomizer />
-            </div>
+            <ViewCustomizer />
           )}
 
           {/* TAB: TYPOGRAPHY */}
@@ -256,14 +257,9 @@ function SettingsModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* TAB: TTS */}
+          {/* TAB: TTS (directo, sin botón) */}
           {activeTab === 'tts' && (
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                Configuración de Voz IA
-              </h3>
-              <TTSSettings />
-            </div>
+            <TTSSettings />
           )}
 
           {/* TAB: DISPLAY */}
@@ -362,6 +358,36 @@ function SettingsModal({ isOpen, onClose }) {
                   </div>
                   <BaseBadge variant={displaySettings.fullscreen ? 'success' : 'default'}>
                     {displaySettings.fullscreen ? 'Activado' : 'Desactivado'}
+                  </BaseBadge>
+                </button>
+              </div>
+
+              {/* Mostrar/Ocultar Badges de Metadata */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Mostrar información de metadata
+                </label>
+                <button
+                  onClick={() => updateDisplaySetting('showMetadataBadges', !displaySettings.showMetadataBadges)}
+                  className={`w-full p-4 border-2 rounded-lg flex items-center justify-between transition-all ${
+                    displaySettings.showMetadataBadges
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {displaySettings.showMetadataBadges ? <Eye size={20} /> : <EyeOff size={20} />}
+                    <div className="text-left">
+                      <div className="font-medium">
+                        {displaySettings.showMetadataBadges ? 'Ocultar badges' : 'Mostrar badges'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Badges de dificultad, tipo, nivel en títulos
+                      </div>
+                    </div>
+                  </div>
+                  <BaseBadge variant={displaySettings.showMetadataBadges ? 'success' : 'default'}>
+                    {displaySettings.showMetadataBadges ? 'Visible' : 'Oculto'}
                   </BaseBadge>
                 </button>
               </div>

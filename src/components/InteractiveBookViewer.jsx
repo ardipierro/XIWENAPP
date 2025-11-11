@@ -60,7 +60,47 @@ function InteractiveBookViewer() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [exerciseResults, setExerciseResults] = useState({});
   const [viewSettings, setViewSettings] = useState({ spacing: 'normal' }); // View settings for layout
+  const [showMetadataBadges, setShowMetadataBadges] = useState(true); // Mostrar/ocultar badges
   const settingsModal = useModal();
+
+  // Cargar configuración de badges desde localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('xiwen_display_settings');
+    if (saved) {
+      try {
+        const settings = JSON.parse(saved);
+        if (settings.showMetadataBadges !== undefined) {
+          setShowMetadataBadges(settings.showMetadataBadges);
+        }
+      } catch (err) {
+        console.error('Error loading display settings:', err);
+      }
+    }
+
+    // Escuchar cambios en localStorage (cuando se cambia en SettingsModal)
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('xiwen_display_settings');
+      if (saved) {
+        try {
+          const settings = JSON.parse(saved);
+          if (settings.showMetadataBadges !== undefined) {
+            setShowMetadataBadges(settings.showMetadataBadges);
+          }
+        } catch (err) {
+          console.error('Error loading display settings:', err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // También escuchar eventos custom para cambios en la misma pestaña
+    window.addEventListener('xiwen_settings_changed', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('xiwen_settings_changed', handleStorageChange);
+    };
+  }, []);
 
   useEffect(() => {
     loadBookData();
@@ -175,23 +215,25 @@ function InteractiveBookViewer() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          <BaseBadge variant={metadata.features.interactiveExercises ? 'success' : 'default'}>
-            Ejercicios Interactivos
-          </BaseBadge>
-          <BaseBadge variant={metadata.features.audioPlayback ? 'success' : 'default'}>
-            Audio
-          </BaseBadge>
-          <BaseBadge variant={metadata.features.darkMode ? 'success' : 'default'}>
-            Modo Oscuro
-          </BaseBadge>
-          <BaseBadge variant={metadata.features.offlineMode ? 'success' : 'default'}>
-            Offline
-          </BaseBadge>
-          <BaseBadge variant={metadata.features.progressTracking ? 'success' : 'default'}>
-            Seguimiento
-          </BaseBadge>
-        </div>
+        {showMetadataBadges && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            <BaseBadge variant={metadata.features.interactiveExercises ? 'success' : 'default'}>
+              Ejercicios Interactivos
+            </BaseBadge>
+            <BaseBadge variant={metadata.features.audioPlayback ? 'success' : 'default'}>
+              Audio
+            </BaseBadge>
+            <BaseBadge variant={metadata.features.darkMode ? 'success' : 'default'}>
+              Modo Oscuro
+            </BaseBadge>
+            <BaseBadge variant={metadata.features.offlineMode ? 'success' : 'default'}>
+              Offline
+            </BaseBadge>
+            <BaseBadge variant={metadata.features.progressTracking ? 'success' : 'default'}>
+              Seguimiento
+            </BaseBadge>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -276,7 +318,7 @@ function InteractiveBookViewer() {
             icon={ExerciseIcon}
             title={exercise.title}
             subtitle={exercise.instructions}
-            badges={[
+            badges={showMetadataBadges ? [
               <BaseBadge key="type" variant="primary">
                 {exercise.type}
               </BaseBadge>,
@@ -299,7 +341,7 @@ function InteractiveBookViewer() {
                   {exercise.points} pts
                 </BaseBadge>
               )
-            ].filter(Boolean)}
+            ].filter(Boolean) : []}
           >
             <div className="text-sm text-gray-600 dark:text-gray-400">
               {exercise.type === 'conjugation_fill_blank' && exercise.questions && (
@@ -348,12 +390,16 @@ function InteractiveBookViewer() {
                 Unidad {unit.unitNumber}: {unit.title}
               </h3>
               <div className="flex items-center gap-2 mt-1">
-                <BaseBadge variant="primary" size="sm">
-                  {unit.type}
-                </BaseBadge>
-                <BaseBadge variant="info" size="sm">
-                  {unit.cefrLevel}
-                </BaseBadge>
+                {showMetadataBadges && (
+                  <>
+                    <BaseBadge variant="primary" size="sm">
+                      {unit.type}
+                    </BaseBadge>
+                    <BaseBadge variant="info" size="sm">
+                      {unit.cefrLevel}
+                    </BaseBadge>
+                  </>
+                )}
                 <span className="text-xs text-gray-600 dark:text-gray-400">
                   {unit.estimatedDuration} min
                 </span>
@@ -472,7 +518,7 @@ function InteractiveBookViewer() {
             )}
 
             {/* Tags */}
-            {unit.tags && unit.tags.length > 0 && (
+            {showMetadataBadges && unit.tags && unit.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {unit.tags.map((tag, idx) => (
                   <BaseBadge key={idx} variant="default" size="sm">
