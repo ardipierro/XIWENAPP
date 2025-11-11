@@ -6,7 +6,25 @@
 
 ## 📚 Archivos de Documentación Disponibles
 
-### 1️⃣ **MASTER_STANDARDS.md** (DOCUMENTO MAESTRO - LEER PRIMERO)
+### 1️⃣ **design-system.md** (NUEVO - SISTEMA DE DISEÑO HÍBRIDO)
+**Ruta:** `.claude/design-system.md`
+
+**⭐ SISTEMA DE DISEÑO V2.0 - LEER PRIMERO AL CREAR UI:**
+- 🎨 Sistema híbrido (CSS Variables + Tailwind)
+- 🎯 Paleta Primary (zinc) consistente en TODA la app
+- 🧩 Componentes estandarizados: Modales, Cards, Botones, Inputs
+- 📏 Border radius, shadows, z-index, espaciado unificados
+- 🌙 Dark mode con CSS variables
+- ✅ Checklist de diseño para PRs
+- 💡 17 secciones con ejemplos de código
+
+**Fuentes:** Análisis exhaustivo de inconsistencias + tailwind.config + globals.css
+
+**Cuándo leer:** SIEMPRE antes de crear/modificar componentes de UI
+
+---
+
+### 2️⃣ **MASTER_STANDARDS.md** (DOCUMENTO MAESTRO - LEER PRIMERO)
 **Ruta:** `.claude/MASTER_STANDARDS.md`
 
 **⭐ Este es el archivo MAESTRO que unifica TODO:**
