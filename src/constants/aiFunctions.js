@@ -77,9 +77,10 @@ export const AI_PROVIDERS = [
     icon: Search,
     description: 'Modelos Gemini de Google. Soporta temperature y top_p.',
     models: [
-      { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash (Experimental)' },
-      { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
-      { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' }
+      { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (Latest)' },
+      { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (Best Price-Performance)' },
+      { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite (Fastest)' },
+      { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' }
     ],
     supportsTemperature: true,
     supportsTopP: true,
@@ -157,7 +158,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'google',
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash',
       apiKey: '',
       systemPrompt: 'Eres un creador de contenido educativo especializado en enseñanza de español. Generas lecciones bien estructuradas, lecturas apropiadas por nivel, y material didáctico efectivo.',
       parameters: {
@@ -233,7 +234,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'google',
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash',
       apiKey: '',
       systemPrompt: 'Eres un especialista en fonética española. Analizas transcripciones de audio y proporcionas feedback específico sobre pronunciación, entonación y ritmo.',
       parameters: {
