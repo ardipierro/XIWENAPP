@@ -29,7 +29,9 @@ import {
   HelpCircle,
   Bold,
   Italic,
-  Underline as UnderlineIcon
+  Underline as UnderlineIcon,
+  ArrowLeft,
+  Home
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import {
@@ -92,7 +94,7 @@ const FONTS = {
 /**
  * Enhanced Content Reader Component
  */
-function ContentReader({ contentId, initialContent, userId, readOnly = false }) {
+function ContentReader({ contentId, initialContent, userId, readOnly = false, onBack }) {
   // Estados principales
   const [content, setContent] = useState(initialContent || '');
   const [originalContent, setOriginalContent] = useState(initialContent || '');
@@ -740,8 +742,25 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       {/* Toolbar Principal */}
       <div className="bg-white dark:bg-primary-900 border-b border-primary-200 dark:border-primary-800 shadow-sm">
         <div className="flex items-center justify-between gap-2 p-3">
-          {/* Herramientas principales */}
+          {/* Botón Volver + Herramientas principales */}
           <div className="flex items-center gap-2">
+            {/* Botón Volver */}
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 px-3 py-2 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800 rounded-lg transition-all border border-primary-300 dark:border-primary-700"
+                title="Volver al dashboard"
+              >
+                <Home className="w-5 h-5" />
+                <span className="hidden sm:inline text-sm font-medium">Volver</span>
+              </button>
+            )}
+
+            {/* Separador vertical si hay botón volver */}
+            {onBack && <div className="h-8 w-px bg-primary-300 dark:bg-primary-700" />}
+
+            {/* Herramientas */}
+            <div className="flex items-center gap-2">
             <ToolButton
               icon="👆"
               label="Seleccionar"
@@ -783,6 +802,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
               onClick={isEditMode ? handleExitEditMode : handleEnterEditMode}
               disabled={readOnly}
             />
+            </div>
           </div>
 
           {/* Actions */}
@@ -1584,7 +1604,8 @@ ContentReader.propTypes = {
   contentId: PropTypes.string.isRequired,
   initialContent: PropTypes.string,
   userId: PropTypes.string.isRequired,
-  readOnly: PropTypes.bool
+  readOnly: PropTypes.bool,
+  onBack: PropTypes.func
 };
 
 ToolButton.propTypes = {
