@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { Palette, Check } from 'lucide-react';
 import { useTheme, THEMES, THEME_INFO } from '../contexts/ThemeContext';
-import './ThemeSwitcher.css';
 
+/**
+ * ThemeSwitcher - 100% Tailwind CSS (sin archivo CSS)
+ * Selector de temas visuales (light, dark, ocean, forest, sunset, midnight)
+ */
 function ThemeSwitcher() {
   const { currentTheme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -33,9 +36,13 @@ function ThemeSwitcher() {
   const currentThemeInfo = THEME_INFO[currentTheme];
 
   return (
-    <div className="theme-switcher" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       <button
-        className="theme-switcher-trigger"
+        className="flex items-center justify-center p-2
+                   bg-transparent border-none rounded-md
+                   text-gray-700 dark:text-gray-300
+                   hover:bg-gray-100 dark:hover:bg-gray-800
+                   transition-all duration-200 cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Cambiar tema"
         title={`Tema actual: ${currentThemeInfo.name}`}

@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { X, Video, Presentation, PenTool, Maximize2, Minimize2 } from 'lucide-react';
 import logger from '../utils/logger';
-import LiveClassRoom from './LiveClassRoom';
+// Lazy load LiveKit component (heavy ~300KB)
+const LiveClassRoom = lazy(() => import('./LiveClassRoom'));
 import Whiteboard from './Whiteboard';
 const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import { BaseButton, BaseLoading, BaseAlert } from './common';
@@ -123,17 +124,23 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
 
     return (
       <div className="h-full bg-gray-900">
-        <LiveClassRoom
-          liveClass={{
-            ...sessionData,
-            roomName: sessionData.roomName,
-            teacherId: sessionData.teacherId,
-            maxParticipants: sessionData.maxParticipants
-          }}
-          user={user}
-          userRole={userRole}
-          onLeave={onLeave}
-        />
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-full">
+            <BaseLoading text="Cargando sala de video..." />
+          </div>
+        }>
+          <LiveClassRoom
+            liveClass={{
+              ...sessionData,
+              roomName: sessionData.roomName,
+              teacherId: sessionData.teacherId,
+              maxParticipants: sessionData.maxParticipants
+            }}
+            user={user}
+            userRole={userRole}
+            onLeave={onLeave}
+          />
+        </Suspense>
       </div>
     );
   };

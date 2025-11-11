@@ -74,11 +74,12 @@ import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
 // Lazy load Excalidraw to prevent vendor bundle issues
 const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
+// Lazy load LiveKit component (heavy ~300KB)
+const LiveClassRoom = lazy(() => import('./LiveClassRoom'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
 import LiveClassManager from './LiveClassManager';
-import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 import MessagesPanel from './MessagesPanel';
@@ -470,15 +471,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // Live Class Room - NO Layout (fullscreen)
   if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
     return (
-      <LiveClassRoom
-        liveClass={navigation.selectedLiveClass}
-        user={user}
-        userRole={userRole}
-        onLeave={() => {
-          navigation.setSelectedLiveClass(null);
-          navigation.setCurrentScreen('liveClasses');
-        }}
-      />
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-screen bg-gray-900">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div>
+            <p className="text-white">Cargando sala de video...</p>
+          </div>
+        </div>
+      }>
+        <LiveClassRoom
+          liveClass={navigation.selectedLiveClass}
+          user={user}
+          userRole={userRole}
+          onLeave={() => {
+            navigation.setSelectedLiveClass(null);
+            navigation.setCurrentScreen('liveClasses');
+          }}
+        />
+      </Suspense>
     );
   }
 
