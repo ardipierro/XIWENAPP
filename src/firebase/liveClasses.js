@@ -65,7 +65,13 @@ export async function createLiveClass({
   description,
   scheduledStart,
   duration = 60,
-  maxParticipants = 30
+  maxParticipants = 30,
+  meetLink = '',
+  zoomLink = '',
+  whiteboardType = 'excalidraw',
+  assignedStudents = [],
+  assignedGroups = [],
+  assignedContent = []
 }) {
   try {
     const roomName = `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -87,6 +93,12 @@ export async function createLiveClass({
       maxParticipants,
       recordingEnabled: false,
       recordingUrl: null,
+      meetLink: meetLink || '',
+      zoomLink: zoomLink || '',
+      whiteboardType: whiteboardType || 'excalidraw',
+      assignedStudents: assignedStudents || [],
+      assignedGroups: assignedGroups || [],
+      assignedContent: assignedContent || [],
       createdAt: serverTimestamp()
     });
 
@@ -369,5 +381,213 @@ export async function updateClassRecording(classId, recordingUrl) {
   } catch (error) {
     logger.error('Error updating class recording:', error);
     throw error;
+  }
+}
+
+/**
+ * Asigna un estudiante a una clase en vivo
+ * @param {string} classId - ID de la clase
+ * @param {string} studentId - ID del estudiante
+ * @returns {Promise<object>}
+ */
+export async function assignStudentToLiveClass(classId, studentId) {
+  try {
+    const classRef = doc(db, 'live_classes', classId);
+    const classDoc = await getDoc(classRef);
+
+    if (!classDoc.exists()) {
+      throw new Error('Clase no encontrada');
+    }
+
+    const data = classDoc.data();
+    const assignedStudents = data.assignedStudents || [];
+
+    if (assignedStudents.includes(studentId)) {
+      return { success: true, message: 'Estudiante ya asignado' };
+    }
+
+    await updateDoc(classRef, {
+      assignedStudents: [...assignedStudents, studentId]
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Error assigning student to live class:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Desasigna un estudiante de una clase en vivo
+ * @param {string} classId - ID de la clase
+ * @param {string} studentId - ID del estudiante
+ * @returns {Promise<object>}
+ */
+export async function unassignStudentFromLiveClass(classId, studentId) {
+  try {
+    const classRef = doc(db, 'live_classes', classId);
+    const classDoc = await getDoc(classRef);
+
+    if (!classDoc.exists()) {
+      throw new Error('Clase no encontrada');
+    }
+
+    const data = classDoc.data();
+    const assignedStudents = data.assignedStudents || [];
+
+    await updateDoc(classRef, {
+      assignedStudents: assignedStudents.filter(id => id !== studentId)
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Error unassigning student from live class:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Asigna un grupo a una clase en vivo
+ * @param {string} classId - ID de la clase
+ * @param {string} groupId - ID del grupo
+ * @returns {Promise<object>}
+ */
+export async function assignGroupToLiveClass(classId, groupId) {
+  try {
+    const classRef = doc(db, 'live_classes', classId);
+    const classDoc = await getDoc(classRef);
+
+    if (!classDoc.exists()) {
+      throw new Error('Clase no encontrada');
+    }
+
+    const data = classDoc.data();
+    const assignedGroups = data.assignedGroups || [];
+
+    if (assignedGroups.includes(groupId)) {
+      return { success: true, message: 'Grupo ya asignado' };
+    }
+
+    await updateDoc(classRef, {
+      assignedGroups: [...assignedGroups, groupId]
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Error assigning group to live class:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Desasigna un grupo de una clase en vivo
+ * @param {string} classId - ID de la clase
+ * @param {string} groupId - ID del grupo
+ * @returns {Promise<object>}
+ */
+export async function unassignGroupFromLiveClass(classId, groupId) {
+  try {
+    const classRef = doc(db, 'live_classes', classId);
+    const classDoc = await getDoc(classRef);
+
+    if (!classDoc.exists()) {
+      throw new Error('Clase no encontrada');
+    }
+
+    const data = classDoc.data();
+    const assignedGroups = data.assignedGroups || [];
+
+    await updateDoc(classRef, {
+      assignedGroups: assignedGroups.filter(id => id !== groupId)
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Error unassigning group from live class:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Asigna contenido a una clase en vivo
+ * @param {string} classId - ID de la clase
+ * @param {string} contentId - ID del contenido
+ * @returns {Promise<object>}
+ */
+export async function assignContentToLiveClass(classId, contentId) {
+  try {
+    const classRef = doc(db, 'live_classes', classId);
+    const classDoc = await getDoc(classRef);
+
+    if (!classDoc.exists()) {
+      throw new Error('Clase no encontrada');
+    }
+
+    const data = classDoc.data();
+    const assignedContent = data.assignedContent || [];
+
+    if (assignedContent.includes(contentId)) {
+      return { success: true, message: 'Contenido ya asignado' };
+    }
+
+    await updateDoc(classRef, {
+      assignedContent: [...assignedContent, contentId]
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Error assigning content to live class:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Desasigna contenido de una clase en vivo
+ * @param {string} classId - ID de la clase
+ * @param {string} contentId - ID del contenido
+ * @returns {Promise<object>}
+ */
+export async function unassignContentFromLiveClass(classId, contentId) {
+  try {
+    const classRef = doc(db, 'live_classes', classId);
+    const classDoc = await getDoc(classRef);
+
+    if (!classDoc.exists()) {
+      throw new Error('Clase no encontrada');
+    }
+
+    const data = classDoc.data();
+    const assignedContent = data.assignedContent || [];
+
+    await updateDoc(classRef, {
+      assignedContent: assignedContent.filter(id => id !== contentId)
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Error unassigning content from live class:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Actualiza los datos generales de una clase en vivo
+ * @param {string} classId - ID de la clase
+ * @param {object} updates - Datos a actualizar
+ * @returns {Promise<object>}
+ */
+export async function updateLiveClass(classId, updates) {
+  try {
+    const classRef = doc(db, 'live_classes', classId);
+
+    await updateDoc(classRef, {
+      ...updates,
+      updatedAt: serverTimestamp()
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('Error updating live class:', error);
+    return { success: false, error: error.message };
   }
 }
