@@ -193,8 +193,20 @@ function InteractiveBookViewer() {
           </BaseBadge>
         </div>
 
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-semibold">Creado:</span> {metadata.createdAt}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="font-semibold">Creado:</span> {metadata.createdAt}
+          </div>
+
+          {/* Botón de Configuración */}
+          <BaseButton
+            variant="primary"
+            icon={Settings}
+            onClick={settingsModal.open}
+            size="sm"
+          >
+            Configuración
+          </BaseButton>
         </div>
       </BaseCard>
     );
@@ -591,18 +603,6 @@ function InteractiveBookViewer() {
           <>
             {/* Metadata */}
             {renderMetadata()}
-
-            {/* Botón de Configuración */}
-            <div className="mb-6">
-              <BaseButton
-                variant="primary"
-                icon={Settings}
-                onClick={settingsModal.open}
-                className="w-full"
-              >
-                ⚙️ Abrir Configuración (Voz, Visual, Pantalla y más)
-              </BaseButton>
-            </div>
 
             {/* Modal de Configuración */}
             <SettingsModal
