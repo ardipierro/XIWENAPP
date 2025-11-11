@@ -109,7 +109,7 @@ export function useStudentDashboard(user, studentProp) {
             const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
             return instanceDate >= now;
           });
-          setUpcomingClasses(futureInstances.slice(0, 1));
+          setUpcomingClasses(futureInstances.slice(0, 3)); // Show first 3 upcoming classes
         }
 
         logger.debug(`⏱️ [useStudentDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
