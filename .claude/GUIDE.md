@@ -16,6 +16,7 @@
 | Archivo | Contenido | Cuándo Leer |
 |---------|-----------|-------------|
 | **GUIDE.md** (este archivo) | Estructura del proyecto, inicio rápido | Siempre primero |
+| **CHANGELOG.md** | Historial de cambios en documentación | Para ver cambios recientes |
 | **CODING_STANDARDS.md** | Reglas de código, componentes base | Antes de escribir código |
 | **DESIGN_SYSTEM.md** | Sistema de diseño, colores, responsive | Antes de crear/modificar UI |
 | **EXERCISE_BUILDER.md** | Sistema de ejercicios ELE | Al trabajar con ejercicios |
@@ -61,7 +62,8 @@
 ```
 XIWENAPP/
 ├── .claude/                        ← Documentación
-│   ├── GUIDE.md                    ← Este archivo
+│   ├── GUIDE.md                    ← Este archivo (punto de entrada)
+│   ├── CHANGELOG.md                ← Historial de cambios
 │   ├── CODING_STANDARDS.md         ← Código y componentes
 │   ├── DESIGN_SYSTEM.md            ← Diseño y UI
 │   ├── EXERCISE_BUILDER.md         ← Ejercicios ELE
