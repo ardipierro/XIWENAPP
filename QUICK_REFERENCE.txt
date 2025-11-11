@@ -1,0 +1,169 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          GUÍA RÁPIDA DE REFERENCIA                           ║
+║                      Componentes Base vs HTML Nativo                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+MÉTRICAS GLOBALES:
+─────────────────────────────────────────────────────────────────────────────
+Cumplimiento Total:          36.8% (75 de 204 componentes)
+Archivos Analizados:         8
+Componentes Problemáticos:   128 instancias
+
+RANKING POR CUMPLIMIENTO:
+─────────────────────────────────────────────────────────────────────────────
+1. StudentDashboard          100% ✅  (0 problemas)        REFERENTE
+2. UnifiedContentManager      85% ⚠️  (1 problema)         CASI COMPLETO
+3. AssignmentManager          70% ⚠️  (4 problemas)        LEGACY
+4. TeacherDashboard           0% ❌  (23 problemas)        SIN BASE
+5. AdminPanel                 0% ❌  (7 problemas)         SIN BASE
+6. ExerciseManager            0% ❌  (27 problemas)        SIN BASE
+7. GroupManager               0% ❌  (19 problemas)        SIN BASE
+8. ClassManager               0% ❌  (47 problemas)        PEOR CASO
+
+PROBLEMAS POR TIPO:
+─────────────────────────────────────────────────────────────────────────────
+Modales:
+  BaseModal: 2 instancias (14.3%)
+  Custom modal-overlay: 12 instancias (85.7%)
+  Archivos afectados: TeacherDashboard, AdminPanel, ExerciseManager, GroupManager, ClassManager
+
+Botones:
+  BaseButton: 54 instancias (43.2%)
+  HTML <button>: 71 instancias (56.8%)
+  Peor archivo: ClassManager (23 botones HTML)
+
+Inputs:
+  BaseInput: 2 instancias (6.7%)
+  HTML <input>: 28 instancias (93.3%)
+  Peor archivo: ClassManager (14 inputs HTML)
+
+Selects:
+  BaseSelect: 3 instancias (14.3%)
+  HTML <select>: 18 instancias (85.7%)
+  Peor archivo: ClassManager (8 selects HTML)
+
+LÍNEAS CLAVE PROBLEMÁTICAS:
+─────────────────────────────────────────────────────────────────────────────
+TeacherDashboard.jsx:
+  1116  │ <div className="modal-overlay">
+  623   │ <button className="btn btn-ghost">
+  1070  │ <select className="role-select">
+
+AdminPanel.jsx:
+  280   │ <div className="fixed inset-0 bg-black...">
+  302   │ <input type="text" className="input">
+  312   │ <select className="input">
+
+ExerciseManager.jsx:
+  532   │ <div className="modal-overlay">
+  550+  │ <input> HTML múltiples
+  686   │ <select>
+
+GroupManager.jsx:
+  285   │ <div className="modal-overlay">
+  300+  │ <button> HTML múltiples
+
+ClassManager.jsx:
+  715   │ <div className="modal-overlay">
+  750+  │ <button> HTML (23 instancias)
+  800+  │ <input> HTML (14 instancias)
+  850+  │ <select> HTML (8 instancias)
+
+RECOMENDACIONES POR PRIORIDAD:
+─────────────────────────────────────────────────────────────────────────────
+CRÍTICA (Hacer primero):
+  □ ClassManager              │ 47 componentes │ 8-10 horas  │ Peor caso
+  □ Estándares de código     │ ESLint rules   │ 2-3 horas   │ Preventiva
+
+ALTA (Siguiente):
+  □ TeacherDashboard        │ 23 componentes │ 5-6 horas   │ Alto uso
+  □ ExerciseManager         │ 27 componentes │ 6-8 horas   │ Crítico
+
+MEDIA (Luego):
+  □ AdminPanel              │ 7 componentes  │ 1-2 horas   │ Rápido
+  □ GroupManager            │ 19 componentes │ 4-5 horas   │ Moderado
+  □ UnifiedContentManager   │ 1 componente   │ 0.5 horas   │ Casi hecho
+
+BAJA (Al final):
+  □ AssignmentManager       │ 4 componentes  │ 1-2 horas   │ Legacy
+
+TIEMPO TOTAL: 25-33 HORAS EN 2-3 SPRINTS
+
+PASOS PARA REFACTORIZAR:
+─────────────────────────────────────────────────────────────────────────────
+1. Abrir archivo problemático
+2. Importar componentes base: import { Base... } from './common'
+3. Buscar todos los <button> y reemplazarlos con <BaseButton>
+4. Buscar todos los <input> y reemplazarlos con <BaseInput>
+5. Buscar todos los <select> y reemplazarlos con <BaseSelect>
+6. Buscar todos los <div className="modal-overlay"> y reemplazarlos con <BaseModal>
+7. Verificar que los props se pasen correctamente
+8. Probar en diferentes resoluciones (mobile, tablet, desktop)
+9. Hacer commit con mensaje descriptivo
+10. Crear pull request para revisión
+
+COMPONENTES BASE DISPONIBLES:
+─────────────────────────────────────────────────────────────────────────────
+Elementos Interactivos:
+  • BaseButton    - Botones con variantes: primary, secondary, outline, ghost, danger
+  • BaseInput     - Inputs de texto con validación
+  • BaseSelect    - Selects con opciones personalizables
+  • BaseTextarea  - Áreas de texto multilínea
+
+Contenedores:
+  • BaseCard      - Tarjetas con variantes y estilos
+  • BaseModal     - Modales con header, body, footer
+
+Feedback:
+  • BaseBadge     - Insignias/badges
+  • BaseAlert     - Alertas
+  • BaseLoading   - Estados de carga
+  • BaseEmptyState - Estados vacíos
+
+Navegación:
+  • BaseDropdown  - Menús desplegables
+
+REFERENCIAS RÁPIDAS:
+─────────────────────────────────────────────────────────────────────────────
+Importar:
+  import { BaseButton, BaseInput, BaseSelect, BaseCard, BaseModal } from './common';
+
+BaseButton props:
+  variant="primary" | "secondary" | "outline" | "ghost" | "danger"
+  size="sm" | "md" | "lg" | "icon"
+  icon={IconComponent}
+  disabled={boolean}
+  fullWidth={boolean}
+
+BaseInput props:
+  type="text" | "email" | "password" | "number"
+  value={value}
+  onChange={handleChange}
+  placeholder="text"
+  label="text"
+  error="text"
+  disabled={boolean}
+
+BaseSelect props:
+  value={value}
+  onChange={handleChange}
+  options={[{value: 'x', label: 'X'}]}
+  label="text"
+  placeholder="text"
+
+BaseModal props:
+  isOpen={boolean}
+  onClose={handleClose}
+  title="text"
+  size="sm" | "md" | "lg" | "xl"
+
+ARCHIVOS GENERADOS:
+─────────────────────────────────────────────────────────────────────────────
+📄 COMPLIANCE_REPORT.md        - Reporte detallado (450 líneas)
+📊 compliance_data.json        - Datos estructurados
+🔧 EXAMPLES_BEFORE_AFTER.md    - Ejemplos de refactorización
+📋 QUICK_REFERENCE.txt         - Este archivo
+
+META: 100% CUMPLIMIENTO PARA Q1 2025
+
+Preguntas? Revisar COMPLIANCE_REPORT.md para análisis detallado.

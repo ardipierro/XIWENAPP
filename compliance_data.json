@@ -1,0 +1,253 @@
+{
+  "audit_date": "2025-11-11",
+  "scope": "8 componentes principales del dashboard",
+  "summary": {
+    "total_components_analyzed": 204,
+    "components_using_base": 75,
+    "components_using_native_html": 129,
+    "overall_compliance_percentage": 36.8,
+    "fully_compliant_files": 1,
+    "partially_compliant_files": 2,
+    "non_compliant_files": 5
+  },
+  "components": {
+    "TeacherDashboard": {
+      "file": "/home/user/XIWENAPP/src/components/TeacherDashboard.jsx",
+      "compliance_percentage": 0,
+      "status": "NON-COMPLIANT",
+      "components": {
+        "modals": { "base": 0, "native": 2, "compliance": "0%" },
+        "buttons": { "base": 0, "native": 19, "compliance": "0%" },
+        "inputs": { "base": 0, "native": 0, "compliance": "N/A" },
+        "selects": { "base": 0, "native": 2, "compliance": "0%" },
+        "cards": { "base": 0, "native": 0, "compliance": "N/A" }
+      },
+      "total_issues": 23,
+      "effort_hours": "5-6",
+      "priority": "HIGH",
+      "examples": [
+        {
+          "issue": "Custom modal-overlay",
+          "line": 1116,
+          "code": "<div className=\"modal-overlay\" onClick={...}>"
+        },
+        {
+          "issue": "HTML button",
+          "line": 623,
+          "code": "<button onClick={...} className=\"btn btn-ghost mb-4\">"
+        },
+        {
+          "issue": "HTML select",
+          "line": 1070,
+          "code": "<select value={userItem.role} onChange={...} className=\"role-select\">"
+        }
+      ]
+    },
+    "StudentDashboard": {
+      "file": "/home/user/XIWENAPP/src/components/StudentDashboard.jsx",
+      "compliance_percentage": 100,
+      "status": "COMPLIANT",
+      "components": {
+        "modals": { "base": 0, "native": 0, "compliance": "N/A" },
+        "buttons": { "base": 39, "native": 0, "compliance": "100%" },
+        "inputs": { "base": 0, "native": 0, "compliance": "N/A" },
+        "selects": { "base": 0, "native": 0, "compliance": "N/A" },
+        "cards": { "base": 11, "native": 0, "compliance": "100%" }
+      },
+      "total_issues": 0,
+      "effort_hours": "0",
+      "priority": "NONE",
+      "notes": "Reference implementation - follow this pattern"
+    },
+    "AdminPanel": {
+      "file": "/home/user/XIWENAPP/src/components/AdminPanel.jsx",
+      "compliance_percentage": 0,
+      "status": "NON-COMPLIANT",
+      "components": {
+        "modals": { "base": 0, "native": 1, "compliance": "0%" },
+        "buttons": { "base": 0, "native": 2, "compliance": "0%" },
+        "inputs": { "base": 0, "native": 2, "compliance": "0%" },
+        "selects": { "base": 0, "native": 2, "compliance": "0%" },
+        "cards": { "base": 0, "native": 0, "compliance": "N/A" }
+      },
+      "total_issues": 7,
+      "effort_hours": "1-2",
+      "priority": "MEDIUM"
+    },
+    "UnifiedContentManager": {
+      "file": "/home/user/XIWENAPP/src/components/UnifiedContentManager.jsx",
+      "compliance_percentage": 85,
+      "status": "PARTIALLY-COMPLIANT",
+      "components": {
+        "modals": { "base": 1, "native": 0, "compliance": "100%" },
+        "buttons": { "base": 15, "native": 1, "compliance": "94%" },
+        "inputs": { "base": 2, "native": 0, "compliance": "100%" },
+        "selects": { "base": 3, "native": 0, "compliance": "100%" },
+        "cards": { "base": 3, "native": 0, "compliance": "100%" }
+      },
+      "total_issues": 1,
+      "effort_hours": "0.5",
+      "priority": "LOW",
+      "notes": "Only 1 HTML button needs fixing"
+    },
+    "ExerciseManager": {
+      "file": "/home/user/XIWENAPP/src/components/ExerciseManager.jsx",
+      "compliance_percentage": 0,
+      "status": "NON-COMPLIANT",
+      "components": {
+        "modals": { "base": 0, "native": 3, "compliance": "0%" },
+        "buttons": { "base": 0, "native": 12, "compliance": "0%" },
+        "inputs": { "base": 0, "native": 8, "compliance": "0%" },
+        "selects": { "base": 0, "native": 4, "compliance": "0%" },
+        "cards": { "base": 0, "native": 0, "compliance": "N/A" }
+      },
+      "total_issues": 27,
+      "effort_hours": "6-8",
+      "priority": "HIGH"
+    },
+    "GroupManager": {
+      "file": "/home/user/XIWENAPP/src/components/GroupManager.jsx",
+      "compliance_percentage": 0,
+      "status": "NON-COMPLIANT",
+      "components": {
+        "modals": { "base": 0, "native": 2, "compliance": "0%" },
+        "buttons": { "base": 0, "native": 15, "compliance": "0%" },
+        "inputs": { "base": 0, "native": 2, "compliance": "0%" },
+        "selects": { "base": 0, "native": 0, "compliance": "N/A" },
+        "cards": { "base": 0, "native": 0, "compliance": "N/A" }
+      },
+      "total_issues": 19,
+      "effort_hours": "4-5",
+      "priority": "MEDIUM"
+    },
+    "ClassManager": {
+      "file": "/home/user/XIWENAPP/src/components/ClassManager.jsx",
+      "compliance_percentage": 0,
+      "status": "NON-COMPLIANT",
+      "components": {
+        "modals": { "base": 0, "native": 2, "compliance": "0%" },
+        "buttons": { "base": 0, "native": 23, "compliance": "0%" },
+        "inputs": { "base": 0, "native": 14, "compliance": "0%" },
+        "selects": { "base": 0, "native": 8, "compliance": "0%" },
+        "cards": { "base": 0, "native": 0, "compliance": "N/A" }
+      },
+      "total_issues": 47,
+      "effort_hours": "8-10",
+      "priority": "CRITICAL",
+      "notes": "Worst case - most components without base"
+    },
+    "AssignmentManager": {
+      "file": "/home/user/XIWENAPP/src/components/AssignmentManager.jsx",
+      "compliance_percentage": 70,
+      "status": "PARTIALLY-COMPLIANT",
+      "components": {
+        "modals": { "base": 1, "native": 0, "compliance": "100%" },
+        "buttons": { "base": 0, "native": 0, "compliance": "uses legacy" },
+        "inputs": { "base": 0, "native": 2, "compliance": "0%" },
+        "selects": { "base": 0, "native": 2, "compliance": "0%" },
+        "cards": { "base": 0, "native": 0, "compliance": "uses legacy" }
+      },
+      "total_issues": 4,
+      "effort_hours": "1-2",
+      "priority": "LOW",
+      "notes": "Uses legacy Components.jsx exports instead of Base* prefix"
+    }
+  },
+  "by_type": {
+    "modals": {
+      "base_modal": 2,
+      "custom_modal_overlay": 12,
+      "compliance": 14.3,
+      "worst_file": "ClassManager (2 custom)"
+    },
+    "buttons": {
+      "base_button": 54,
+      "html_button": 71,
+      "compliance": 43.2,
+      "worst_file": "ClassManager (23 HTML)"
+    },
+    "inputs": {
+      "base_input": 2,
+      "html_input": 28,
+      "compliance": 6.7,
+      "worst_file": "ClassManager (14 HTML)"
+    },
+    "selects": {
+      "base_select": 3,
+      "html_select": 18,
+      "compliance": 14.3,
+      "worst_file": "ClassManager (8 HTML)"
+    },
+    "cards": {
+      "base_card": 14,
+      "html_card": 0,
+      "compliance": 100,
+      "worst_file": "None"
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "CRITICAL",
+      "task": "Refactor ClassManager.jsx",
+      "components_to_fix": 47,
+      "effort_hours": "8-10",
+      "description": "Worst case file with 47 components using native HTML instead of Base*"
+    },
+    {
+      "priority": "CRITICAL",
+      "task": "Establish component standards",
+      "components_to_fix": "preventive",
+      "effort_hours": "2-3",
+      "description": "Setup ESLint rules to enforce Base* component usage"
+    },
+    {
+      "priority": "HIGH",
+      "task": "Migrate TeacherDashboard.jsx",
+      "components_to_fix": 23,
+      "effort_hours": "5-6",
+      "description": "High-visibility component with 23 native HTML components"
+    },
+    {
+      "priority": "HIGH",
+      "task": "Update ExerciseManager.jsx",
+      "components_to_fix": 27,
+      "effort_hours": "6-8",
+      "description": "Critical user-facing component with 27 native HTML components"
+    },
+    {
+      "priority": "MEDIUM",
+      "task": "Refactor AdminPanel.jsx",
+      "components_to_fix": 7,
+      "effort_hours": "1-2",
+      "description": "Quick win - only 7 components to fix"
+    },
+    {
+      "priority": "MEDIUM",
+      "task": "Review GroupManager.jsx",
+      "components_to_fix": 19,
+      "effort_hours": "4-5",
+      "description": "19 native HTML components with custom modals"
+    },
+    {
+      "priority": "LOW",
+      "task": "Complete UnifiedContentManager.jsx",
+      "components_to_fix": 1,
+      "effort_hours": "0.5",
+      "description": "Already 85% compliant - just 1 HTML button remaining"
+    },
+    {
+      "priority": "LOW",
+      "task": "Modernize AssignmentManager.jsx",
+      "components_to_fix": 4,
+      "effort_hours": "1-2",
+      "description": "Update legacy Button/Card imports to Base* prefix"
+    }
+  ],
+  "totals": {
+    "total_effort_hours": 33,
+    "total_effort_hours_min": 25,
+    "total_components_to_fix": 128,
+    "estimated_sprints": "2-3",
+    "target_date": "2025-Q1"
+  }
+}
