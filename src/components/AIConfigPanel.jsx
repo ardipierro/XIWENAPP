@@ -175,12 +175,20 @@ function AIConfigPanel() {
    */
   const getEnabledCount = () => {
     if (!config || !config.functions) return 0;
-    return Object.values(config.functions).filter(f => f.enabled).length;
+    // Solo contar funciones que están en AI_FUNCTIONS (no custom)
+    return AI_FUNCTIONS.filter(func => {
+      const funcConfig = config.functions[func.id];
+      return funcConfig?.enabled;
+    }).length;
   };
 
   const getConfiguredCount = () => {
     if (!config || !config.functions) return 0;
-    return Object.values(config.functions).filter(f => f.provider && f.model).length;
+    // Solo contar funciones que están en AI_FUNCTIONS (no custom)
+    return AI_FUNCTIONS.filter(func => {
+      const funcConfig = config.functions[func.id];
+      return funcConfig?.provider && funcConfig?.model;
+    }).length;
   };
 
   // ============================================================================
