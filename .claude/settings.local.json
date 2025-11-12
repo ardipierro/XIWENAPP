@@ -145,7 +145,8 @@
       "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/indexes\")",
       "Bash(powershell -Command \"(Get-Content ''src/constants/aiFunctions.js'') | Where-Object { $_-notmatch ''apiKey: '''''''','' } | Set-Content ''src/constants/aiFunctions.js.tmp'' && Move-Item -Force ''src/constants/aiFunctions.js.tmp'' ''src/constants/aiFunctions.js''\")",
       "Bash(powershell -Command \"(Get-Content ''src/constants/aiFunctions.js'') | Where-Object { $_-notmatch ''      apiKey:'' } | Set-Content ''src/constants/aiFunctions.js.tmp''; Move-Item -Force ''src/constants/aiFunctions.js.tmp'' ''src/constants/aiFunctions.js''\")",
-      "WebFetch(domain:platform.openai.com)"
+      "WebFetch(domain:platform.openai.com)",
+      "Bash(del \"src\\components\\common\\Components.jsx\" \"src\\components\\common\\LoadingSpinner.jsx\")"
     ],
     "deny": [],
     "ask": []
