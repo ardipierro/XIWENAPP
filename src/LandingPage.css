@@ -3,11 +3,11 @@
 /* Reset & Base */
 .landing-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+  background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -16,11 +16,12 @@
 .landing-nav {
   position: sticky;
   top: 0;
-  background: rgba(24, 24, 27, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(9, 9, 11, 0.95);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.4);
   z-index: 1000;
-  padding: 16px 0;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(244, 244, 245, 0.1);
 }
 
 .nav-container {
@@ -116,8 +117,21 @@
 
 /* Hero Section */
 .hero-section {
-  padding: 100px 0;
+  padding: 120px 0;
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(244, 244, 245, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .hero-content {
@@ -263,8 +277,9 @@
 
 /* Features Section */
 .features-section {
-  background: #f9fafb;
-  padding: 100px 0;
+  background: #fafafa;
+  padding: 120px 0;
+  position: relative;
 }
 
 .section-header {
@@ -286,8 +301,16 @@
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .feature-card {
@@ -324,9 +347,22 @@
 
 /* Benefits Section */
 .benefits-section {
-  padding: 100px 0;
-  background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+  padding: 120px 0;
+  background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.benefits-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(244, 244, 245, 0.02) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .benefits-grid {
@@ -437,8 +473,9 @@
 
 /* Pricing Section */
 .pricing-section {
-  background: #f9fafb;
-  padding: 100px 0;
+  background: #fafafa;
+  padding: 120px 0;
+  position: relative;
 }
 
 .pricing-grid {
@@ -533,7 +570,8 @@
 /* FAQ Section */
 .faq-section {
   background: white;
-  padding: 100px 0;
+  padding: 120px 0;
+  position: relative;
 }
 
 .faq-container {
@@ -595,10 +633,23 @@
 
 /* CTA Section */
 .cta-section {
-  background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
-  padding: 100px 0;
+  background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
+  padding: 120px 0;
   color: white;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(244, 244, 245, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .cta-title {
@@ -623,10 +674,10 @@
 
 /* Footer */
 .landing-footer {
-  background: #18181b;
+  background: #09090b;
   color: white;
   padding: 60px 0 30px;
-  border-top: 1px solid #27272a;
+  border-top: 1px solid rgba(244, 244, 245, 0.1);
 }
 
 .footer-content {
@@ -682,34 +733,73 @@
   .hero-content,
   .benefit-item {
     grid-template-columns: 1fr;
+    gap: 48px;
   }
 
-  .features-grid,
-  .pricing-grid {
+  .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .pricing-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
   .hero-title {
-    font-size: 42px;
+    font-size: 44px;
+  }
+
+  .section-title {
+    font-size: 40px;
   }
 }
 
 @media (max-width: 768px) {
-  .nav-links {
-    display: none; /* Mobile menu can be implemented */
+  .container {
+    padding: 0 20px;
   }
 
-  .hero-section {
-    padding: 60px 0;
+  .nav-links {
+    gap: 16px;
+  }
+
+  .nav-links a {
+    display: none;
+  }
+
+  .landing-nav {
+    padding: 16px 0;
+  }
+
+  .hero-section,
+  .features-section,
+  .benefits-section,
+  .pricing-section,
+  .faq-section,
+  .cta-section {
+    padding: 80px 0;
   }
 
   .hero-title {
     font-size: 36px;
   }
 
+  .hero-description {
+    font-size: 18px;
+  }
+
   .hero-stats {
-    flex-direction: column;
-    gap: 24px;
+    flex-direction: row;
+    gap: 16px;
+    justify-content: space-around;
+  }
+
+  .stat-number {
+    font-size: 28px;
+  }
+
+  .stat-label {
+    font-size: 12px;
   }
 
   .features-grid,
@@ -718,7 +808,11 @@
   }
 
   .section-title {
-    font-size: 36px;
+    font-size: 32px;
+  }
+
+  .section-subtitle {
+    font-size: 16px;
   }
 
   .footer-content {
@@ -733,5 +827,31 @@
 
   .btn {
     width: 100%;
+  }
+
+  .cta-title {
+    font-size: 36px;
+  }
+
+  .benefit-content h3 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 28px;
+  }
+
+  .section-title {
+    font-size: 28px;
+  }
+
+  .hero-stats {
+    gap: 12px;
+  }
+
+  .stat-number {
+    font-size: 24px;
   }
 }
