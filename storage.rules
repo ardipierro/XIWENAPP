@@ -44,6 +44,16 @@ service firebase.storage {
                    && isValidSize();
     }
 
+    // Carpeta de correcciones rápidas de tareas (Quick Homework Corrections)
+    // Students can upload homework images to their own folder
+    match /messages/quick-corrections/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && isImage()
+                   && isValidSize();
+    }
+
     // Bloquear todo lo demás por defecto
     match /{allPaths=**} {
       allow read: if false;

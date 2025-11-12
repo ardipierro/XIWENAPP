@@ -318,6 +318,18 @@ export const AI_FUNCTIONS = [
       enabled: false,
       provider: 'claude',
       model: 'claude-sonnet-4-5',
+      // Configuración de corrección
+      strictnessLevel: 'intermediate', // 'beginner' | 'intermediate' | 'advanced'
+      correctionTypes: {
+        spelling: true,
+        grammar: true,
+        punctuation: true,
+        vocabulary: true
+      },
+      feedbackStyle: 'encouraging', // 'encouraging' | 'neutral' | 'academic'
+      detailedExplanations: true,
+      includeSynonyms: false,
+      includeExamples: true,
       systemPrompt: `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
 
 INSTRUCCIONES:

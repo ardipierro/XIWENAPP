@@ -274,6 +274,115 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
           </div>
         )}
 
+        {/* Homework Analyzer Specific Configuration */}
+        {aiFunction.id === 'homework_analyzer' && (
+          <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+            <h4 className="font-semibold text-zinc-900 dark:text-white mb-4">
+              Opciones de Corrección
+            </h4>
+
+            {/* Strictness Level */}
+            <BaseSelect
+              label="Nivel de Exigencia"
+              value={config.strictnessLevel || 'intermediate'}
+              onChange={(e) => handleChange('strictnessLevel', e.target.value)}
+              options={[
+                { value: 'beginner', label: 'Principiante (Muy tolerante, solo errores básicos)' },
+                { value: 'intermediate', label: 'Intermedio (Equilibrado, errores comunes)' },
+                { value: 'advanced', label: 'Avanzado (Estricto, detecta matices sutiles)' }
+              ]}
+              helperText="Define qué tan estricta será la corrección según el nivel del estudiante"
+            />
+
+            {/* Correction Types */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
+                Tipos de Corrección Activos
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { key: 'spelling', label: 'Ortografía', icon: '📝' },
+                  { key: 'grammar', label: 'Gramática', icon: '📖' },
+                  { key: 'punctuation', label: 'Puntuación', icon: '✏️' },
+                  { key: 'vocabulary', label: 'Vocabulario', icon: '📚' }
+                ].map(({ key, label, icon }) => (
+                  <label key={key} className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={config.correctionTypes?.[key] !== false}
+                      onChange={(e) => handleChange('correctionTypes', {
+                        ...config.correctionTypes,
+                        [key]: e.target.checked
+                      })}
+                      className="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
+                    />
+                    <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                      {icon} {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Feedback Style */}
+            <BaseSelect
+              label="Estilo de Feedback"
+              value={config.feedbackStyle || 'encouraging'}
+              onChange={(e) => handleChange('feedbackStyle', e.target.value)}
+              options={[
+                { value: 'encouraging', label: 'Alentador (Positivo y motivador)' },
+                { value: 'neutral', label: 'Neutral (Directo y objetivo)' },
+                { value: 'academic', label: 'Académico (Formal y detallado)' }
+              ]}
+              helperText="Tono y estilo del feedback proporcionado al estudiante"
+              className="mt-4"
+            />
+
+            {/* Additional Options */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
+                Opciones Adicionales
+              </label>
+              <div className="space-y-2">
+                {[
+                  {
+                    key: 'detailedExplanations',
+                    label: 'Explicaciones Detalladas',
+                    desc: 'Incluir explicaciones pedagógicas extensas para cada error'
+                  },
+                  {
+                    key: 'includeSynonyms',
+                    label: 'Sugerir Sinónimos',
+                    desc: 'Recomendar sinónimos y vocabulario alternativo'
+                  },
+                  {
+                    key: 'includeExamples',
+                    label: 'Incluir Ejemplos',
+                    desc: 'Mostrar ejemplos de uso correcto para cada corrección'
+                  }
+                ].map(({ key, label, desc }) => (
+                  <label key={key} className="flex items-start gap-3 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={config[key] !== false}
+                      onChange={(e) => handleChange(key, e.target.checked)}
+                      className="mt-0.5 w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-zinc-900 dark:text-white">
+                        {label}
+                      </div>
+                      <div className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+                        {desc}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Test Section */}
         <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
           <h4 className="font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">

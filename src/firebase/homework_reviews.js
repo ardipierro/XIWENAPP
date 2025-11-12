@@ -210,34 +210,41 @@ export async function getReviewsByStudent(studentId, includeUnreviewed = false) 
  */
 export async function getPendingReviews(teacherId = null) {
   try {
+    console.log(`[getPendingReviews] Fetching reviews (teacherId: ${teacherId || 'ALL'})`);
     const reviewsRef = collection(db, 'homework_reviews');
     let q;
 
-    if (teacherId) {
-      q = query(
-        reviewsRef,
-        where('teacherReviewed', '==', false),
-        where('status', '==', 'completed'),
-        orderBy('createdAt', 'desc')
-      );
-    } else {
-      q = query(
-        reviewsRef,
-        where('teacherReviewed', '==', false),
-        where('status', '==', 'completed'),
-        orderBy('createdAt', 'desc')
-      );
-    }
+    // For now, always fetch all pending reviews regardless of teacher
+    // Free corrections don't have a specific teacher assigned
+    q = query(
+      reviewsRef,
+      where('teacherReviewed', '==', false),
+      where('status', '==', 'completed'),
+      orderBy('createdAt', 'desc')
+    );
 
+    console.log('[getPendingReviews] Executing query...');
     const snapshot = await getDocs(q);
+    console.log(`[getPendingReviews] Query returned ${snapshot.docs.length} documents`);
 
-    const reviews = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const reviews = snapshot.docs.map(doc => {
+      const data = doc.data();
+      console.log(`[getPendingReviews] Review ${doc.id}:`, {
+        status: data.status,
+        teacherReviewed: data.teacherReviewed,
+        studentId: data.studentId,
+        createdAt: data.createdAt
+      });
+      return {
+        id: doc.id,
+        ...data
+      };
+    });
 
+    console.log(`[getPendingReviews] ✅ Returning ${reviews.length} reviews`);
     return reviews;
   } catch (error) {
+    console.error('[getPendingReviews] ❌ Error:', error);
     logger.error('Error getting pending reviews', 'HomeworkReviews', error);
     return [];
   }

@@ -57,11 +57,14 @@ export default function HomeworkReviewPanel({ teacherId }) {
   const loadPendingReviews = async () => {
     try {
       setLoading(true);
+      logger.info(`Loading pending reviews (teacherId: ${teacherId || 'ALL'})`, 'HomeworkReviewPanel');
       const pendingReviews = await getPendingReviews(teacherId);
       setReviews(pendingReviews);
-      logger.info(`Loaded ${pendingReviews.length} pending homework reviews`, 'HomeworkReviewPanel');
+      logger.info(`✅ Loaded ${pendingReviews.length} pending homework reviews`, 'HomeworkReviewPanel');
+      console.log('📋 Pending reviews:', pendingReviews);
     } catch (error) {
-      logger.error('Error loading pending reviews', 'HomeworkReviewPanel', error);
+      logger.error('❌ Error loading pending reviews', 'HomeworkReviewPanel', error);
+      console.error('Error details:', error);
     } finally {
       setLoading(false);
     }

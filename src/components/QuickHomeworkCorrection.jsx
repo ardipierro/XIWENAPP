@@ -105,11 +105,15 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
         setUploadProgress(Math.round(((i + 0.5) / imageFiles.length) * 100));
 
         // Upload to Firebase Storage
-        const imageUrl = await uploadMessageAttachment(
+        const uploadResult = await uploadMessageAttachment(
           file,
           `quick-corrections/${studentId}`,
           studentId
         );
+
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error || 'Error uploading image');
+        }
 
         setUploadProgress(Math.round(((i + 0.8) / imageFiles.length) * 100));
 
@@ -117,7 +121,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
         const reviewData = {
           studentId,
           studentName: studentName || 'Estudiante',
-          imageUrl,
+          imageUrl: uploadResult.url, // Extract URL from upload result
           filename: file.name,
           imageSize: file.size,
           isFreeCorrection: true // Flag for free corrections
@@ -377,21 +381,21 @@ function ReviewCard({ review, onClick }) {
             })}
           </p>
         )}
-        {review.status === 'completed' && review.aiAnalysis && (
+        {review.status === 'completed' && review.errorSummary && (
           <div className="flex gap-2 mt-2 text-xs">
-            {review.aiAnalysis.spelling?.length > 0 && (
+            {review.errorSummary.spelling > 0 && (
               <span className="text-orange-600 dark:text-orange-400">
-                {review.aiAnalysis.spelling.length} ortografía
+                {review.errorSummary.spelling} ortografía
               </span>
             )}
-            {review.aiAnalysis.grammar?.length > 0 && (
+            {review.errorSummary.grammar > 0 && (
               <span className="text-red-600 dark:text-red-400">
-                {review.aiAnalysis.grammar.length} gramática
+                {review.errorSummary.grammar} gramática
               </span>
             )}
-            {review.aiAnalysis.punctuation?.length > 0 && (
+            {review.errorSummary.punctuation > 0 && (
               <span className="text-yellow-600 dark:text-yellow-400">
-                {review.aiAnalysis.punctuation.length} puntuación
+                {review.errorSummary.punctuation} puntuación
               </span>
             )}
           </div>
@@ -415,8 +419,53 @@ function ReviewDetailModal({ review, onClose }) {
     return () => unsubscribe();
   }, [review.id]);
 
-  const analysis = liveReview.aiAnalysis;
+  // Extract analysis data from the review document
+  // Cloud Function saves fields directly: transcription, errorSummary, detailedCorrections, etc.
+  const hasAnalysis = liveReview.status === 'completed' && liveReview.transcription;
   const createdDate = liveReview.createdAt?.toDate?.();
+
+  // Group detailed corrections by type
+  const getErrorsByType = (type) => {
+    if (!liveReview.detailedCorrections) return [];
+    return liveReview.detailedCorrections.filter(error => error.type === type);
+  };
+
+  // Generate highlighted text with <mark> tags
+  const getHighlightedText = () => {
+    if (!liveReview.transcription || !liveReview.detailedCorrections) {
+      return liveReview.transcription || '';
+    }
+
+    let highlightedText = liveReview.transcription;
+    const corrections = liveReview.detailedCorrections;
+
+    // Color mapping for different error types
+    const colorMap = {
+      spelling: 'bg-orange-200 dark:bg-orange-900/50 text-orange-900 dark:text-orange-100',
+      grammar: 'bg-red-200 dark:bg-red-900/50 text-red-900 dark:text-red-100',
+      punctuation: 'bg-yellow-200 dark:bg-yellow-900/50 text-yellow-900 dark:text-yellow-100',
+      vocabulary: 'bg-purple-200 dark:bg-purple-900/50 text-purple-900 dark:text-purple-100'
+    };
+
+    // Sort corrections by position (longest first to avoid nested replacements)
+    const sortedCorrections = [...corrections].sort((a, b) =>
+      (b.original?.length || 0) - (a.original?.length || 0)
+    );
+
+    // Replace each error with highlighted version
+    sortedCorrections.forEach((correction, index) => {
+      if (correction.original) {
+        const colorClass = colorMap[correction.type] || 'bg-gray-200 dark:bg-gray-700';
+        const marked = `<mark class="${colorClass} px-1 rounded" data-error-id="${index}" title="${correction.type}: ${correction.explanation}">${correction.original}</mark>`;
+
+        // Use regex to replace only whole word matches (case-sensitive)
+        const regex = new RegExp(`\\b${correction.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
+        highlightedText = highlightedText.replace(regex, marked);
+      }
+    });
+
+    return highlightedText;
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -475,56 +524,114 @@ function ReviewDetailModal({ review, onClose }) {
           </div>
 
           {/* Analysis Results */}
-          {liveReview.status === 'completed' && analysis && (
+          {hasAnalysis && (
             <div className="space-y-4">
-              {/* Extracted Text */}
-              {analysis.extractedText && (
+              {/* Extracted Text with Highlighting */}
+              {liveReview.transcription && (
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                    Texto Detectado (OCR)
-                  </h3>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                    {analysis.extractedText}
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                      Texto Detectado (OCR)
+                    </h3>
+                    <div className="flex gap-2 text-xs">
+                      <span className="flex items-center gap-1">
+                        <span className="w-3 h-3 bg-orange-200 dark:bg-orange-900/50 rounded"></span>
+                        Ortografía
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-3 h-3 bg-red-200 dark:bg-red-900/50 rounded"></span>
+                        Gramática
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-3 h-3 bg-yellow-200 dark:bg-yellow-900/50 rounded"></span>
+                        Puntuación
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-3 h-3 bg-purple-200 dark:bg-purple-900/50 rounded"></span>
+                        Vocabulario
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: getHighlightedText() }}
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 italic">
+                    💡 Pasá el mouse sobre las palabras resaltadas para ver la explicación del error
                   </p>
                 </div>
               )}
 
-              {/* Errors */}
-              {(analysis.spelling?.length > 0 || analysis.grammar?.length > 0 ||
-                analysis.punctuation?.length > 0 || analysis.vocabulary?.length > 0) && (
+              {/* Error Summary */}
+              {liveReview.errorSummary && liveReview.errorSummary.total > 0 && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    Resumen de Errores
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                        {liveReview.errorSummary.spelling || 0}
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400">Ortografía</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                        {liveReview.errorSummary.grammar || 0}
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400">Gramática</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                        {liveReview.errorSummary.punctuation || 0}
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400">Puntuación</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        {liveReview.errorSummary.vocabulary || 0}
+                      </div>
+                      <div className="text-gray-600 dark:text-gray-400">Vocabulario</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Detailed Corrections */}
+              {liveReview.detailedCorrections && liveReview.detailedCorrections.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Correcciones Sugeridas
                   </h3>
 
-                  {analysis.spelling?.length > 0 && (
+                  {getErrorsByType('spelling').length > 0 && (
                     <ErrorSection
                       title="Ortografía"
-                      errors={analysis.spelling}
+                      errors={getErrorsByType('spelling')}
                       color="orange"
                     />
                   )}
 
-                  {analysis.grammar?.length > 0 && (
+                  {getErrorsByType('grammar').length > 0 && (
                     <ErrorSection
                       title="Gramática"
-                      errors={analysis.grammar}
+                      errors={getErrorsByType('grammar')}
                       color="red"
                     />
                   )}
 
-                  {analysis.punctuation?.length > 0 && (
+                  {getErrorsByType('punctuation').length > 0 && (
                     <ErrorSection
                       title="Puntuación"
-                      errors={analysis.punctuation}
+                      errors={getErrorsByType('punctuation')}
                       color="yellow"
                     />
                   )}
 
-                  {analysis.vocabulary?.length > 0 && (
+                  {getErrorsByType('vocabulary').length > 0 && (
                     <ErrorSection
                       title="Vocabulario"
-                      errors={analysis.vocabulary}
+                      errors={getErrorsByType('vocabulary')}
                       color="blue"
                     />
                   )}
@@ -532,15 +639,27 @@ function ReviewDetailModal({ review, onClose }) {
               )}
 
               {/* Overall Feedback */}
-              {analysis.overallFeedback && (
+              {liveReview.overallFeedback && (
                 <div className="p-4 bg-primary-50 dark:bg-primary-900 border border-primary-200 dark:border-primary-700 rounded-lg">
                   <h3 className="text-sm font-medium text-primary-900 dark:text-primary-100 mb-2 flex items-center gap-2">
                     <Sparkles size={16} />
                     Comentario General
                   </h3>
                   <p className="text-sm text-primary-800 dark:text-primary-200">
-                    {analysis.overallFeedback}
+                    {liveReview.overallFeedback}
                   </p>
+                </div>
+              )}
+
+              {/* Suggested Grade */}
+              {liveReview.suggestedGrade !== undefined && (
+                <div className="p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg">
+                  <h3 className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                    Calificación Sugerida
+                  </h3>
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                    {liveReview.suggestedGrade}/100
+                  </div>
                 </div>
               )}
             </div>

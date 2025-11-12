@@ -240,18 +240,67 @@ exports.analyzeHomeworkImage = onDocumentCreated({
     const imageBase64 = await downloadImageAsBase64(reviewData.imageUrl);
     console.log('[analyzeHomeworkImage] Image downloaded successfully');
 
-    // Get system prompt from ai_config or use default
-    const systemPrompt = functionConfig.systemPrompt || `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
+    // Build dynamic system prompt based on configuration
+    const strictnessLevel = functionConfig.strictnessLevel || 'intermediate';
+    const correctionTypes = functionConfig.correctionTypes || {
+      spelling: true,
+      grammar: true,
+      punctuation: true,
+      vocabulary: true
+    };
+    const feedbackStyle = functionConfig.feedbackStyle || 'encouraging';
+    const detailedExplanations = functionConfig.detailedExplanations !== false;
+    const includeSynonyms = functionConfig.includeSynonyms === true;
+    const includeExamples = functionConfig.includeExamples !== false;
+
+    // Strictness instructions
+    const strictnessInstructions = {
+      beginner: 'Sé MUY tolerante. Solo detecta errores básicos y evidentes. Ignora errores menores de vocabulario o estilo. El objetivo es no desmotivar al estudiante principiante.',
+      intermediate: 'Sé equilibrado. Detecta errores comunes de ortografía, gramática, puntuación y vocabulario, pero no seas excesivamente crítico con matices sutiles.',
+      advanced: 'Sé estricto y minucioso. Detecta todos los errores, incluidos matices de vocabulario, estilo, registro formal/informal, y sutilezas gramaticales.'
+    };
+
+    // Feedback style instructions
+    const feedbackInstructions = {
+      encouraging: 'Usa un tono positivo, alentador y motivador. Destaca los aciertos antes de mencionar errores. Usa frases como "¡Muy bien!", "Excelente intento", "Vas por buen camino". Sé comprensivo y pedagógico.',
+      neutral: 'Usa un tono directo, objetivo y profesional. Sé claro y conciso en tus observaciones sin ser ni demasiado positivo ni negativo. Enfócate en los hechos.',
+      academic: 'Usa un tono formal y académico. Proporciona feedback detallado con terminología técnica apropiada. Sé preciso y exhaustivo en tus explicaciones.'
+    };
+
+    // Build error types to detect
+    const activeTypes = Object.keys(correctionTypes).filter(type => correctionTypes[type]);
+    const typesInstructions = activeTypes.length > 0
+      ? `Identifica SOLO estos tipos de errores: ${activeTypes.join(', ')}.`
+      : 'Identifica errores de ortografía, gramática, puntuación y vocabulario.';
+
+    // Optional features
+    const optionalFeatures = [];
+    if (includeSynonyms) {
+      optionalFeatures.push('- Para errores de vocabulario, sugiere sinónimos y alternativas más apropiadas.');
+    }
+    if (includeExamples) {
+      optionalFeatures.push('- Incluye ejemplos de uso correcto para cada corrección cuando sea útil.');
+    }
+
+    // Build final system prompt with dynamic configuration
+    const systemPrompt = `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
+
+NIVEL DE EXIGENCIA: ${strictnessLevel.toUpperCase()}
+${strictnessInstructions[strictnessLevel]}
+
+ESTILO DE FEEDBACK: ${feedbackStyle.toUpperCase()}
+${feedbackInstructions[feedbackStyle]}
 
 INSTRUCCIONES:
 1. Lee cuidadosamente el texto en la imagen (puede ser manuscrito o impreso)
-2. Identifica TODOS los errores: ortografía, gramática, puntuación, vocabulario
+2. ${typesInstructions}
 3. Clasifica cada error por tipo
 4. Para cada error, proporciona:
    - El texto original (con el error)
    - La corrección apropiada
-   - Una explicación clara y pedagógica del error
+   - ${detailedExplanations ? 'Una explicación clara, detallada y pedagógica del error' : 'Una explicación breve del error'}
    - El número de línea aproximado donde aparece
+${optionalFeatures.length > 0 ? optionalFeatures.join('\n') : ''}
 5. Genera un resumen ejecutivo con conteo de errores por categoría
 6. Proporciona feedback general constructivo
 7. Sugiere una calificación (0-100) basada en:
@@ -279,7 +328,7 @@ FORMATO DE RESPUESTA (JSON):
       "line": número
     }
   ],
-  "overallFeedback": "Comentario general constructivo y alentador",
+  "overallFeedback": "Comentario general constructivo",
   "suggestedGrade": número (0-100)
 }
 
