@@ -89,6 +89,7 @@ import MessagesPanel from './MessagesPanel';
 import AdminPaymentsPanel from './AdminPaymentsPanel';
 import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
+import ImageProvidersConfig from './ImageProvidersConfig';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ClassSessionModal from './ClassSessionModal';
@@ -606,6 +607,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
             ← Back to Home
           </BaseButton>
           <AIConfigPanel />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Image Providers Configuration - WITH Layout
+  if (navigation.currentScreen === 'imageProviders') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <div className="p-6 md:p-8">
+          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+            ← Back to Home
+          </button>
+          <ImageProvidersConfig />
         </div>
       </DashboardLayout>
     );
