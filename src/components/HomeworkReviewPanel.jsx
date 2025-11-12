@@ -35,7 +35,8 @@ import {
 import {
   getPendingReviews,
   approveReview,
-  subscribeToReview
+  subscribeToReview,
+  REVIEW_STATUS
 } from '../firebase/homework_reviews';
 import logger from '../utils/logger';
 
@@ -531,7 +532,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
             fullWidth
           >
             <CheckCircle size={18} strokeWidth={2} />
-            {isApproving ? 'Aprobando...' : isEditing ? 'Aprobar con Cambios' : 'Aprobar Corrección'}
+            {isApproving ? 'Aprobando' : isEditing ? 'Aprobar y Publicar' : 'Aprobar y Publicar'}
           </BaseButton>
         </div>
       </div>
