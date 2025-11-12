@@ -16,6 +16,8 @@ import {
   unassignGroupFromClass,
   assignStudentToClass,
   unassignStudentFromClass,
+  assignContentToClass,
+  unassignContentFromClass,
   getDayName
 } from '../firebase/classes';
 import {
@@ -28,6 +30,7 @@ import { getAllGroups } from '../firebase/groups';
 import { getAllUsers } from '../firebase/firestore';
 import { isAdminEmail } from '../firebase/roleConfig';
 import { uploadImage, deleteImage } from '../firebase/storage';
+import { getAllContent } from '../firebase/content';
 import ConfirmModal from './ConfirmModal';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
@@ -43,6 +46,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
+  const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(openCreateModal);
   const [editingClass, setEditingClass] = useState(null);
@@ -106,20 +110,22 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
     try {
       const startTime = performance.now();
 
-      const [classesData, groupsData, usersData, instancesData] = await Promise.all([
+      const [classesData, groupsData, usersData, instancesData, contentsData] = await Promise.all([
         isAdmin ? getAllClasses() : getClassesByTeacher(user.uid),
         getAllGroups(),
         getAllUsers(),
-        getUpcomingInstances(100)
+        getUpcomingInstances(100),
+        getAllContent()
       ]);
 
       logger.debug(`⏱️ [ClassManager] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
-      logger.debug(`⏱️ [ClassManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${classesData.length} clases, ${instancesData.length} instancias`);
+      logger.debug(`⏱️ [ClassManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${classesData.length} clases, ${instancesData.length} instancias, ${contentsData.length} contenidos`);
 
       setClasses(classesData);
       setGroups(groupsData);
       setStudents(usersData.filter(u => ['student', 'trial'].includes(u.role)));
       setInstances(instancesData);
+      setContents(contentsData);
     } catch (error) {
       logger.error('Error cargando datos:', error);
     } finally {
@@ -503,6 +509,36 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
     const result = await unassignStudentFromClass(selectedClass.id, studentId);
     if (result.success) {
       showMessage('success', ' Estudiante removido');
+      loadData();
+      const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
+      const updatedClass = updated.find(c => c.id === selectedClass.id);
+      setSelectedClass(updatedClass);
+    } else {
+      showMessage('error', 'Error: ' + result.error);
+    }
+  };
+
+  const handleAssignContent = async (contentId) => {
+    if (!selectedClass) return;
+
+    const result = await assignContentToClass(selectedClass.id, contentId);
+    if (result.success) {
+      showMessage('success', ' Contenido asignado');
+      loadData();
+      const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
+      const updatedClass = updated.find(c => c.id === selectedClass.id);
+      setSelectedClass(updatedClass);
+    } else {
+      showMessage('error', 'Error: ' + result.error);
+    }
+  };
+
+  const handleUnassignContent = async (contentId) => {
+    if (!selectedClass) return;
+
+    const result = await unassignContentFromClass(selectedClass.id, contentId);
+    if (result.success) {
+      showMessage('success', ' Contenido removido');
       loadData();
       const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
       const updatedClass = updated.find(c => c.id === selectedClass.id);
@@ -1021,6 +1057,22 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                     }}
                   >
                     <Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes
+                  </button>
+                  <button
+                    onClick={() => setDetailsTab('contenidos')}
+                    className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                    style={{
+                      borderColor: detailsTab === 'contenidos' ? 'var(--color-border)' : 'transparent',
+                      color: detailsTab === 'contenidos' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (detailsTab !== 'contenidos') e.currentTarget.style.color = 'var(--color-text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (detailsTab !== 'contenidos') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }}
+                  >
+                    <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Contenidos
                   </button>
                   </div>
                 </div>
