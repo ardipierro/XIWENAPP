@@ -7,8 +7,8 @@ import SpeechToTextService from './SpeechToTextService';
 import QueryAnalyzerService from './QueryAnalyzerService';
 import StudentAnalyticsService from './StudentAnalyticsService';
 import PaymentAnalyticsService from './PaymentAnalyticsService';
-import AIService from './AIService';
-import { createAssignment } from '../firebase/assignments';
+import TaskCreationService from './TaskCreationService';
+import ContentGenerationService from './ContentGenerationService';
 import { Timestamp } from 'firebase/firestore';
 import logger from '../utils/logger';
 
@@ -221,48 +221,27 @@ class AIAssistantService {
   }
 
   /**
-   * Handle create assignment request
+   * Handle create assignment request (Fase 2)
    * @private
    */
   async _handleCreateAssignment(data, teacherId) {
     try {
-      const { topic, target, due_date, difficulty } = data;
+      logger.info('Creating assignment with Fase 2 service', 'AIAssistantService', data);
 
-      // 1. Generate content using AIService
-      const contentResult = await AIService.generateExercises({
-        theme: topic,
-        type: 'multiple-choice',
-        difficulty: difficulty || 'intermediate',
-        quantity: 5
-      });
+      const result = await TaskCreationService.createAndAssignTask(data, teacherId);
 
-      if (!contentResult.success) {
+      if (!result.success) {
         return {
           success: false,
           data: null,
-          error: 'No pude generar el contenido de la tarea.'
+          error: result.error || 'No pude crear la tarea.'
         };
       }
 
-      // 2. Parse due date
-      const deadline = this._parseDueDate(due_date);
-
-      // 3. Prepare assignment data (preview)
-      const assignmentPreview = {
-        title: `Tarea: ${topic}`,
-        description: contentResult.data,
-        teacherId,
-        courseId: target, // TODO: Resolve "grupo B" to actual courseId
-        deadline,
-        type: 'ai_generated',
-        status: 'draft'
-      };
-
       return {
         success: true,
-        data: assignmentPreview,
-        requiresConfirmation: true,
-        message: 'He preparado la tarea. ¿Quieres que la cree?'
+        data: [result.assignment], // Wrap in array for consistency with other queries
+        message: result.message
       };
 
     } catch (error) {
@@ -276,44 +255,70 @@ class AIAssistantService {
   }
 
   /**
-   * Confirm and create assignment
-   */
-  async confirmCreateAssignment(assignmentData) {
-    try {
-      const result = await createAssignment(assignmentData);
-      return {
-        success: result.success,
-        data: result,
-        message: result.success ? '✅ Tarea creada exitosamente' : 'Error al crear la tarea'
-      };
-    } catch (error) {
-      logger.error('Error confirming assignment', 'AIAssistantService', error);
-      return {
-        success: false,
-        error: 'Error al confirmar la creación de la tarea'
-      };
-    }
-  }
-
-  /**
-   * Handle generate content request
+   * Handle generate content request (Fase 2)
    * @private
    */
   async _handleGenerateContent(data, userId) {
     try {
-      const { topic, difficulty, quantity, type } = data;
+      const { topic, difficulty, quantity, type, content_type } = data;
 
-      const result = await AIService.generateExercises({
-        theme: topic,
-        type: type || 'multiple-choice',
-        difficulty: difficulty || 'intermediate',
-        quantity: quantity || 5
-      });
+      logger.info('Generating content with Fase 2 service', 'AIAssistantService', data);
+
+      let result;
+
+      // Determine what type of content to generate
+      if (content_type === 'lesson' || type === 'lesson') {
+        // Generate lesson content
+        result = await ContentGenerationService.generateLesson({
+          topic,
+          difficulty,
+          focus: type || 'vocabulario y gramática'
+        });
+      } else if (content_type === 'vocabulary' || type === 'vocabulary') {
+        // Generate vocabulary list
+        result = await ContentGenerationService.generateVocabulary({
+          topic,
+          difficulty,
+          quantity
+        });
+      } else {
+        // Default: Generate exercises
+        result = await ContentGenerationService.generateExercises({
+          topic,
+          difficulty,
+          quantity,
+          type: type || 'multiple-choice'
+        });
+      }
+
+      if (!result.success) {
+        return {
+          success: false,
+          data: null,
+          error: result.error || 'No pude generar el contenido.'
+        };
+      }
+
+      // Format response based on content type
+      let formattedData = [];
+      let message = '';
+
+      if (result.exercises) {
+        formattedData = result.exercises;
+        message = `✅ Generé ${result.exercises.length} ejercicio(s) sobre ${topic}`;
+      } else if (result.lesson) {
+        formattedData = [result.lesson];
+        message = `✅ Generé una lección sobre ${topic}`;
+      } else if (result.vocabulary) {
+        formattedData = result.vocabulary;
+        message = `✅ Generé ${result.vocabulary.length} palabra(s) de vocabulario sobre ${topic}`;
+      }
 
       return {
-        success: result.success,
-        data: result.data,
-        message: result.success ? '✅ Contenido generado exitosamente' : 'Error al generar contenido'
+        success: true,
+        data: formattedData,
+        message,
+        metadata: result.metadata
       };
 
     } catch (error) {
@@ -421,7 +426,7 @@ class AIAssistantService {
   }
 
   /**
-   * Get quick suggestions for user
+   * Get quick suggestions for user (Fase 2 - Updated)
    */
   getSuggestions(userRole) {
     const suggestions = {
@@ -429,18 +434,23 @@ class AIAssistantService {
         '¿Cuántos alumnos no entregaron tareas esta semana?',
         '¿Qué estudiantes están en riesgo de abandonar?',
         '¿Cuántos pagos están vencidos?',
-        'Muéstrame estudiantes con bajo rendimiento'
+        'Muéstrame estudiantes con bajo rendimiento',
+        'Crea una tarea de HSK 4 para todos los estudiantes',
+        'Genera 10 palabras de vocabulario sobre comida'
       ],
       teacher: [
         '¿Quiénes no entregaron la tarea?',
         '¿Qué alumnos tienen bajo rendimiento?',
-        'Crea una tarea de vocabulario HSK 3 para el viernes',
-        'Genera 5 ejercicios de gramática nivel intermedio'
+        'Crea una tarea de gramática HSK 3 para el grupo A, entrega el viernes',
+        'Genera 5 ejercicios de vocabulario nivel básico sobre familia',
+        'Genera una lección sobre tonos en chino mandarín',
+        'Crea 8 ejercicios de completar espacios nivel intermedio'
       ],
       student: [
         '¿Cuántas tareas tengo pendientes?',
         '¿Cuál es mi promedio?',
-        '¿Cuándo vence mi próximo pago?'
+        '¿Cuándo vence mi próximo pago?',
+        'Genera 5 palabras de vocabulario sobre mi curso'
       ]
     };
 

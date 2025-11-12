@@ -215,14 +215,48 @@ Respuesta JSON:`;
 
     // Default responses
     if (intent === 'general') {
-      return '¡Hola! Puedo ayudarte con consultas sobre estudiantes, tareas, pagos, y generar contenido educativo. ¿Qué necesitas?';
+      return '¡Hola! Puedo ayudarte con:\n• Consultas sobre estudiantes y tareas\n• Información de pagos\n• Crear tareas y asignarlas\n• Generar contenido educativo\n\n¿Qué necesitas?';
     }
 
     if (!data || data.length === 0) {
+      if (intent === 'create_assignment' || intent === 'generate_content') {
+        return 'Ocurrió un error al procesar tu solicitud. Por favor, intenta de nuevo.';
+      }
       return 'No encontré resultados para tu consulta.';
     }
 
-    // Generate response based on intent
+    // Fase 2: Create assignment responses
+    if (intent === 'create_assignment') {
+      if (data[0]?.title) {
+        const assignment = data[0];
+        let response = `✅ **Tarea creada:** "${assignment.title}"\n\n📝 ${assignment.description}`;
+        if (assignment.assignedTo) {
+          response += `\n\n👥 Asignada a ${assignment.assignedTo} estudiante(s)`;
+        } else {
+          response += `\n\n📋 En borrador (sin asignar)`;
+        }
+        return response;
+      }
+      return '✅ Tarea creada exitosamente.';
+    }
+
+    // Fase 2: Generate content responses
+    if (intent === 'generate_content') {
+      if (entity === 'exercises') {
+        const count = data.length;
+        return `✅ **Generé ${count} ejercicio(s)**\n\nLos ejercicios están listos para revisar y usar en tus clases.`;
+      }
+      if (entity === 'lesson') {
+        return `✅ **Lección generada**\n\nIncluye vocabulario, gramática y notas culturales.`;
+      }
+      if (entity === 'vocabulary') {
+        const count = data.length;
+        return `✅ **Generé ${count} palabra(s) de vocabulario**\n\nCon pinyin, traducción y ejemplos de uso.`;
+      }
+      return '✅ Contenido generado exitosamente.';
+    }
+
+    // Fase 1: Student queries
     if (intent === 'query_students' && entity === 'submissions') {
       if (filters?.status === 'not_submitted') {
         const count = data.reduce((sum, item) => sum + (item.count || 0), 0);
@@ -237,6 +271,7 @@ Respuesta JSON:`;
       return `🚨 **${data.length} estudiante(s)** están en riesgo de abandono (inactivos o con bajo rendimiento sostenido).`;
     }
 
+    // Fase 1: Payment queries
     if (intent === 'query_payments') {
       if (filters?.status === 'overdue') {
         return `💰 **${data.length} pago(s)** están vencidos y pendientes de cobro.`;
