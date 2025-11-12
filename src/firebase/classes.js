@@ -398,6 +398,62 @@ export async function getClassesForStudent(studentId) {
 }
 
 /**
+ * Asignar un contenido a una clase
+ * @param {string} classId - ID de la clase
+ * @param {string} contentId - ID del contenido
+ * @returns {Promise<Object>} - {success: boolean, error?: string}
+ */
+export async function assignContentToClass(classId, contentId) {
+  try {
+    const classDoc = await getClassById(classId);
+    if (!classDoc) {
+      return { success: false, error: 'Clase no encontrada' };
+    }
+
+    const currentContents = classDoc.contentIds || [];
+    if (currentContents.includes(contentId)) {
+      return { success: false, error: 'Contenido ya asignado' };
+    }
+
+    await updateClass(classId, {
+      contentIds: [...currentContents, contentId]
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error asignando contenido:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Desasignar un contenido de una clase
+ * @param {string} classId - ID de la clase
+ * @param {string} contentId - ID del contenido
+ * @returns {Promise<Object>} - {success: boolean, error?: string}
+ */
+export async function unassignContentFromClass(classId, contentId) {
+  try {
+    const classDoc = await getClassById(classId);
+    if (!classDoc) {
+      return { success: false, error: 'Clase no encontrada' };
+    }
+
+    const currentContents = classDoc.contentIds || [];
+    const updatedContents = currentContents.filter(id => id !== contentId);
+
+    await updateClass(classId, {
+      contentIds: updatedContents
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error desasignando contenido:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Obtener día de la semana en número (0 = Domingo, 1 = Lunes, ...)
  * @param {string} dayName - Nombre del día en español
  * @returns {number} - Número del día

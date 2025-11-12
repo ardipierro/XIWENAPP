@@ -55,6 +55,7 @@ export async function createClassSession(sessionData) {
       // Asignación
       assignedGroups = [],
       assignedStudents = [],
+      contentIds = [],
 
       // Meta
       creditCost = 1,
@@ -115,6 +116,7 @@ export async function createClassSession(sessionData) {
       // Asignación
       assignedGroups,
       assignedStudents,
+      contentIds,
 
       // Estado
       status: 'scheduled', // 'scheduled' | 'live' | 'ended' | 'cancelled'
@@ -694,6 +696,70 @@ export async function removeParticipantFromSession(sessionId, userId) {
     return { success: true };
   } catch (error) {
     logger.error('❌ Error removiendo participante:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Asignar contenido a sesión
+ * @param {string} sessionId - ID de la sesión
+ * @param {string} contentId - ID del contenido
+ * @returns {Promise<Object>} - {success: boolean, error?: string}
+ */
+export async function assignContentToSession(sessionId, contentId) {
+  try {
+    const docRef = doc(db, 'class_sessions', sessionId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const currentContents = docSnap.data().contentIds || [];
+    if (currentContents.includes(contentId)) {
+      return { success: false, error: 'Contenido ya asignado' };
+    }
+
+    await updateDoc(docRef, {
+      contentIds: [...currentContents, contentId],
+      updatedAt: serverTimestamp()
+    });
+
+    logger.info('✅ Contenido asignado a sesión:', sessionId, contentId);
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error asignando contenido:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Desasignar contenido de sesión
+ * @param {string} sessionId - ID de la sesión
+ * @param {string} contentId - ID del contenido
+ * @returns {Promise<Object>} - {success: boolean, error?: string}
+ */
+export async function unassignContentFromSession(sessionId, contentId) {
+  try {
+    const docRef = doc(db, 'class_sessions', sessionId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const currentContents = docSnap.data().contentIds || [];
+    const updatedContents = currentContents.filter(id => id !== contentId);
+
+    await updateDoc(docRef, {
+      contentIds: updatedContents,
+      updatedAt: serverTimestamp()
+    });
+
+    logger.info('✅ Contenido desasignado de sesión:', sessionId, contentId);
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error desasignando contenido:', error);
     return { success: false, error: error.message };
   }
 }

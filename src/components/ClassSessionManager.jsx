@@ -24,7 +24,9 @@ import {
   endClassSession,
   getDayName
 } from '../firebase/classSessions';
-import { loadCourses } from '../firebase/firestore';
+import { loadCourses, getAllUsers } from '../firebase/firestore';
+import { getAllGroups } from '../firebase/groups';
+import { getAllContent } from '../firebase/content';
 import ClassSessionModal from './ClassSessionModal';
 import {
   BaseButton,
@@ -42,6 +44,9 @@ import {
 function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClearEditSession }) {
   const [sessions, setSessions] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
@@ -70,14 +75,26 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
   const loadData = async () => {
     try {
       setLoading(true);
-      const [sessionsData, coursesData] = await Promise.all([
+      const [sessionsData, coursesData, usersData, groupsData, contentsData] = await Promise.all([
         getTeacherSessions(user.uid),
-        loadCourses()
+        loadCourses(),
+        getAllUsers(),
+        getAllGroups(),
+        getAllContent()
       ]);
 
       setSessions(sessionsData);
       setCourses(coursesData);
-      logger.info('Sesiones y cursos cargados:', sessionsData.length, coursesData.length);
+      setStudents(usersData.filter(u => ['student', 'trial'].includes(u.role)));
+      setGroups(groupsData);
+      setContents(contentsData);
+      logger.info('Datos cargados:', {
+        sesiones: sessionsData.length,
+        cursos: coursesData.length,
+        estudiantes: usersData.filter(u => ['student', 'trial'].includes(u.role)).length,
+        grupos: groupsData.length,
+        contenidos: contentsData.length
+      });
 
       // Log para debug: ver estructura de sesiones recurrentes
       const recurringSessions = sessionsData.filter(s => s.type === 'recurring');
@@ -703,6 +720,9 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
         onSubmit={editingSession ? handleEdit : handleCreate}
         session={editingSession}
         courses={courses}
+        students={students}
+        groups={groups}
+        contents={contents}
         loading={actionLoading === 'create' || actionLoading === 'edit'}
       />
     </div>
