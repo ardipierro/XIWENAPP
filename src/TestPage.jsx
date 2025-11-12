@@ -6,7 +6,7 @@ import GamificationPanel from './components/GamificationPanel';
 import UnifiedCalendar from './components/UnifiedCalendar';
 import GuardianLinkingInterface from './components/GuardianLinkingInterface';
 import GuardianDashboard from './components/GuardianDashboard';
-import { Button } from './components/common';
+import { BaseButton } from './components/common';
 
 /**
  * Página de prueba para los nuevos componentes
@@ -56,9 +56,9 @@ export default function TestPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Gestión de tareas (vista profesor)
               </p>
-              <Button variant="primary" onClick={() => setCurrentView('assignments')}>
+              <BaseButton variant="primary" onClick={() => setCurrentView('assignments')}>
                 Probar
-              </Button>
+              </BaseButton>
             </div>
 
             <div className="card p-6">
@@ -68,9 +68,9 @@ export default function TestPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Vista de tareas (estudiante)
               </p>
-              <Button variant="primary" onClick={() => setCurrentView('student')}>
+              <BaseButton variant="primary" onClick={() => setCurrentView('student')}>
                 Probar
-              </Button>
+              </BaseButton>
             </div>
 
             <div className="card p-6">
@@ -80,9 +80,9 @@ export default function TestPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Interfaz de calificación
               </p>
-              <Button variant="primary" onClick={() => setCurrentView('grading')}>
+              <BaseButton variant="primary" onClick={() => setCurrentView('grading')}>
                 Probar
-              </Button>
+              </BaseButton>
             </div>
 
             <div className="card p-6">
@@ -92,9 +92,9 @@ export default function TestPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Sistema de gamificación (XP, badges, leaderboard)
               </p>
-              <Button variant="primary" onClick={() => setCurrentView('gamification')}>
+              <BaseButton variant="primary" onClick={() => setCurrentView('gamification')}>
                 Probar
-              </Button>
+              </BaseButton>
             </div>
 
             <div className="card p-6">
@@ -104,9 +104,9 @@ export default function TestPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Calendario unificado (clases + tareas + eventos)
               </p>
-              <Button variant="primary" onClick={() => setCurrentView('calendar')}>
+              <BaseButton variant="primary" onClick={() => setCurrentView('calendar')}>
                 Probar
-              </Button>
+              </BaseButton>
             </div>
 
             <div className="card p-6">
@@ -116,9 +116,9 @@ export default function TestPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Dashboard para tutores/padres
               </p>
-              <Button variant="primary" onClick={() => setCurrentView('guardian')}>
+              <BaseButton variant="primary" onClick={() => setCurrentView('guardian')}>
                 Probar
-              </Button>
+              </BaseButton>
             </div>
 
             <div className="card p-6">
@@ -128,9 +128,9 @@ export default function TestPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Vincular tutores a estudiantes (admin)
               </p>
-              <Button variant="primary" onClick={() => setCurrentView('guardian-linking')}>
+              <BaseButton variant="primary" onClick={() => setCurrentView('guardian-linking')}>
                 Probar
-              </Button>
+              </BaseButton>
             </div>
 
             <div className="card p-6 bg-gray-100 dark:bg-gray-800">
@@ -150,9 +150,9 @@ export default function TestPage() {
         {/* Back Button */}
         {currentView !== 'menu' && (
           <div className="mb-4">
-            <Button variant="ghost" onClick={() => setCurrentView('menu')}>
+            <BaseButton variant="ghost" onClick={() => setCurrentView('menu')}>
               ← Volver al Menú
-            </Button>
+            </BaseButton>
           </div>
         )}
 
