@@ -217,7 +217,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState(review.overallFeedback || '');
   const [editedGrade, setEditedGrade] = useState(review.suggestedGrade || 0);
-  const [updatedCorrections, setUpdatedCorrections] = useState(review.detailedCorrections || []);
+  const [updatedCorrections, setUpdatedCorrections] = useState(review.aiSuggestions || review.detailedCorrections || []);
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({
     errors: true,
