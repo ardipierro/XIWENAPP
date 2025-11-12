@@ -241,19 +241,20 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
     <>
       {/* Floating Button */}
       {!isOpen && (
-        <button
+        <BaseButton
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 group animate-[pulse_2s_ease-in-out_infinite]"
+          variant="primary"
+          className="!fixed !bottom-6 !right-6 !w-14 !h-14 !rounded-full !p-0 !shadow-lg hover:!shadow-xl !z-50 group !bg-gradient-to-br !from-primary-600 !to-primary-700 hover:!from-primary-700 hover:!to-primary-800 animate-pulse"
           aria-label="Abrir asistente AI"
         >
           <Sparkles size={24} className="group-hover:scale-110 transition-transform" />
           <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-zinc-900 animate-pulse"></span>
-        </button>
+        </BaseButton>
       )}
 
       {/* Chat Widget */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-[420px] h-[650px] bg-white dark:bg-zinc-900 rounded-2xl flex flex-col z-50 shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-[slideUp_0.3s_ease-out]">
+        <div className="fixed bottom-6 right-6 w-[420px] h-[650px] bg-white dark:bg-zinc-900 rounded-2xl flex flex-col z-50 shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
           {/* Header */}
           <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-t-2xl">
             <div className="flex items-center gap-3">
@@ -326,10 +327,11 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
                 </p>
                 <div className="grid gap-2">
                   {suggestions.map((suggestion, index) => (
-                    <button
+                    <BaseButton
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion.text)}
-                      className="text-left p-3 rounded-xl bg-white dark:bg-zinc-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 border border-zinc-200 dark:border-zinc-700 hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-200 group"
+                      variant="outline"
+                      className="!text-left !justify-start !p-3 !bg-white dark:!bg-zinc-800 hover:!bg-primary-50 dark:hover:!bg-primary-900/20 !border-zinc-200 dark:!border-zinc-700 hover:!border-primary-300 dark:hover:!border-primary-700 group"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-lg">{suggestion.icon}</span>
@@ -337,7 +339,7 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
                           {suggestion.text}
                         </span>
                       </div>
-                    </button>
+                    </BaseButton>
                   ))}
                 </div>
               </div>
@@ -386,20 +388,6 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
           </div>
         </div>
       )}
-
-      {/* CSS for animations */}
-      <style>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-      `}</style>
     </>
   );
 }
