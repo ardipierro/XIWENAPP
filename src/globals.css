@@ -1488,5 +1488,32 @@ input:-webkit-autofill:active {
 }
 
 /* ============================================
+   SOPORTE APPLE PENCIL Y STYLUS
+   ============================================ */
+
+/* Canvas para dibujo con Apple Pencil */
+canvas[style*="touchAction"] {
+  /* Prevenir scroll y zoom durante el dibujo */
+  touch-action: none;
+  /* Prevenir selección de texto */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Evitar efectos de tap highlight */
+  -webkit-tap-highlight-color: transparent;
+  /* Suavizar renderizado */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Mejorar rendimiento del canvas */
+canvas {
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: contents;
+}
+
+/* ============================================
    FIN DEL ARCHIVO - TODO CENTRALIZADO EN TAILWIND
    ============================================ */

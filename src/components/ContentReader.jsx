@@ -552,42 +552,61 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   }, []);
 
   /**
-   * Canvas - Dibujo
+   * Canvas - Dibujo con soporte Apple Pencil
    */
-  const handleCanvasMouseDown = (e) => {
+  const handleCanvasPointerDown = (e) => {
     if (selectedTool !== 'draw') return;
 
+    // Prevenir comportamiento por defecto
+    e.preventDefault();
+
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    // Capturar el puntero para seguir recibiendo eventos
+    canvas.setPointerCapture(e.pointerId);
+
+    // Obtener presión (0.0 - 1.0) - Apple Pencil la soporta
+    const pressure = e.pressure || 0.5; // Default 0.5 si no hay presión
 
     setIsDrawing(true);
-    setDrawingPoints([[x, y]]);
+    setDrawingPoints([[x, y, pressure]]);
   };
 
-  const handleCanvasMouseMove = (e) => {
+  const handleCanvasPointerMove = (e) => {
     if (!isDrawing || selectedTool !== 'draw') return;
+
+    e.preventDefault();
 
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    const pressure = e.pressure || 0.5;
 
-    setDrawingPoints(prev => [...prev, [x, y]]);
-    drawLine(x, y);
+    setDrawingPoints(prev => [...prev, [x, y, pressure]]);
+    drawLine(x, y, pressure);
   };
 
-  const handleCanvasMouseUp = () => {
+  const handleCanvasPointerUp = (e) => {
     if (!isDrawing) return;
+
+    const canvas = canvasRef.current;
+    if (canvas && e.pointerId !== undefined) {
+      canvas.releasePointerCapture(e.pointerId);
+    }
+
     setIsDrawing(false);
 
     const newDrawing = {
       id: Date.now().toString(),
-      points: drawingPoints,
+      points: drawingPoints, // Ahora incluye [x, y, pressure]
       color: selectedColor,
       brushType: brushType,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      pointerType: e.pointerType // 'pen', 'touch', 'mouse'
     };
 
     const newDrawings = [...annotations.drawings, newDrawing];
@@ -603,17 +622,23 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     setDrawingPoints([]);
   };
 
-  const drawLine = (x, y) => {
+  const drawLine = (x, y, pressure) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
     ctx.strokeStyle = COLORS[selectedColor].hex;
-    ctx.lineWidth = BRUSH_TYPES[brushType].width;
+
+    // Grosor dinámico basado en presión del Apple Pencil
+    const baseWidth = BRUSH_TYPES[brushType].width;
+    const pressureFactor = 0.5 + (pressure * 1.5); // Rango: 0.5x a 2x
+    ctx.lineWidth = baseWidth * pressureFactor;
+
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     if (drawingPoints.length > 0) {
-      const [lastX, lastY] = drawingPoints[drawingPoints.length - 1];
+      const lastPoint = drawingPoints[drawingPoints.length - 1];
+      const [lastX, lastY] = lastPoint;
       ctx.beginPath();
       ctx.moveTo(lastX, lastY);
       ctx.lineTo(x, y);
@@ -630,18 +655,26 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
     drawings.forEach(drawing => {
       ctx.strokeStyle = COLORS[drawing.color]?.hex || '#000000';
-      ctx.lineWidth = BRUSH_TYPES[drawing.brushType]?.width || 4;
+      const baseWidth = BRUSH_TYPES[drawing.brushType]?.width || 4;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
       if (drawing.points && drawing.points.length > 1) {
-        ctx.beginPath();
-        ctx.moveTo(drawing.points[0][0], drawing.points[0][1]);
-
+        // Dibujar con presión variable por segmento
         for (let i = 1; i < drawing.points.length; i++) {
-          ctx.lineTo(drawing.points[i][0], drawing.points[i][1]);
+          const [x1, y1, pressure1 = 0.5] = drawing.points[i - 1];
+          const [x2, y2, pressure2 = 0.5] = drawing.points[i];
+
+          // Grosor dinámico por segmento basado en presión promedio
+          const avgPressure = (pressure1 + pressure2) / 2;
+          const pressureFactor = 0.5 + (avgPressure * 1.5);
+          ctx.lineWidth = baseWidth * pressureFactor;
+
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
         }
-        ctx.stroke();
       }
     });
   };
@@ -1091,14 +1124,18 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           {/* Canvas */}
           <canvas
             ref={canvasRef}
-            onMouseDown={handleCanvasMouseDown}
-            onMouseMove={handleCanvasMouseMove}
-            onMouseUp={handleCanvasMouseUp}
-            onMouseLeave={handleCanvasMouseUp}
+            onPointerDown={handleCanvasPointerDown}
+            onPointerMove={handleCanvasPointerMove}
+            onPointerUp={handleCanvasPointerUp}
+            onPointerLeave={handleCanvasPointerUp}
+            onPointerCancel={handleCanvasPointerUp}
             className={`absolute inset-0 pointer-events-${selectedTool === 'draw' ? 'auto' : 'none'} ${
               selectedTool === 'draw' ? 'cursor-crosshair' : ''
             }`}
-            style={{ zIndex: selectedTool === 'draw' ? 10 : 1 }}
+            style={{
+              touchAction: 'none', // Prevenir scroll/zoom durante dibujo
+              zIndex: selectedTool === 'draw' ? 10 : 1
+            }}
           />
 
           {/* Overlay transparente para herramienta de texto */}
