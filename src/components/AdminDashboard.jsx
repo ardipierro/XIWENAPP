@@ -79,7 +79,14 @@ const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
-import BaseButton from './common/BaseButton';
+import {
+  BaseButton,
+  BaseCard,
+  BaseModal,
+  BaseLoading,
+  BaseAlert,
+  BaseBadge
+} from './common';
 // REMOVED: Old LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
 // import LiveClassManager from './LiveClassManager';
 // import LiveClassRoom from './LiveClassRoom';
@@ -101,7 +108,6 @@ import InteractiveBookViewer from './InteractiveBookViewer';
 import ThemeCustomizer from './ThemeCustomizer';
 import aiService from '../services/aiService';
 import AIAssistantWidget from './AIAssistantWidget';
-import './AdminDashboard.css';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -405,10 +411,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (loading) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="flex flex-col items-center justify-center min-h-[400px]" style={{ color: 'var(--color-text-secondary)' }}>
-          <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }}></div>
-          <p>Loading admin panel...</p>
-        </div>
+        <BaseLoading variant="fullscreen" text="Loading admin panel..." />
       </DashboardLayout>
     );
   }
@@ -470,7 +473,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // Excalidraw Whiteboard - NO Layout (fullscreen)
   if (navigation.currentScreen === 'excalidrawWhiteboard') {
     return (
-      <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Cargando pizarra...</div>}>
+      <Suspense fallback={<BaseLoading variant="fullscreen" text="Cargando pizarra..." />}>
         <ExcalidrawWhiteboard
           onBack={() => {
             navigation.setExcalidrawManagerKey(prev => prev + 1);
@@ -493,21 +496,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
       />
     );
   }
-
-  // REMOVED: Old Live Class Room - Replaced by ClassSessionRoom
-  // if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
-  //   return (
-  //     <LiveClassRoom
-  //       liveClass={navigation.selectedLiveClass}
-  //       user={user}
-  //       userRole={userRole}
-  //       onLeave={() => {
-  //         navigation.setSelectedLiveClass(null);
-  //         navigation.setCurrentScreen('liveClasses');
-  //       }}
-  //     />
-  //   );
-  // }
 
   // Class Session Manager (Sistema Unificado) - WITH Layout
   if (navigation.currentScreen === 'classSessions') {
@@ -603,7 +591,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'aiConfig') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
+        <div className="p-4 md:p-6 lg:p-8">
           <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
           </BaseButton>
@@ -617,10 +605,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'imageProviders') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+        <div className="p-4 md:p-6 lg:p-8">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <ImageProvidersConfig />
         </div>
       </DashboardLayout>
@@ -720,20 +708,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // REMOVED: Old Class Manager (without LiveKit/Whiteboards) - Replaced by ClassSessionManager
-  // if (navigation.currentScreen === 'classes') {
-  //   return (
-  //     <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-  //       <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
-  //     </DashboardLayout>
-  //   );
-  // }
-
   // Analytics Dashboard - WITH Layout
   if (navigation.currentScreen === 'analytics') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
+        <div className="p-4 md:p-6 lg:p-8">
           <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
           </BaseButton>
@@ -756,7 +735,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'payments') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
+        <div className="p-4 md:p-6 lg:p-8">
           <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
           </BaseButton>
@@ -770,7 +749,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'attendance') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
+        <div className="p-4 md:p-6 lg:p-8">
           <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
           </BaseButton>
@@ -784,82 +763,75 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'settings') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
+        <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto">
           <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-6">
             ← Back to Home
           </BaseButton>
 
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Settings</h1>
-              <p style={{ color: 'var(--color-text-secondary)' }}>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900 dark:text-white">Settings</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Manage system settings and preferences
               </p>
             </div>
 
             {/* Tabs */}
-            <div style={{ borderBottom: '1px solid var(--color-border)' }}>
+            <div className="border-b border-gray-200 dark:border-gray-700">
               <div className="flex gap-4">
-                <button
+                <BaseButton
                   onClick={() => setSettingsTab('general')}
-                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
-                  style={{
-                    borderColor: settingsTab === 'general' ? 'var(--color-primary)' : 'transparent',
-                    color: settingsTab === 'general' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                  }}
+                  variant={settingsTab === 'general' ? 'primary' : 'ghost'}
+                  icon={Info}
+                  size="sm"
+                  className="border-b-2 rounded-none"
                 >
-                  <Info className="w-5 h-5" />
                   General
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   onClick={() => setSettingsTab('credentials')}
-                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
-                  style={{
-                    borderColor: settingsTab === 'credentials' ? 'var(--color-primary)' : 'transparent',
-                    color: settingsTab === 'credentials' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                  }}
+                  variant={settingsTab === 'credentials' ? 'primary' : 'ghost'}
+                  icon={Key}
+                  size="sm"
+                  className="border-b-2 rounded-none"
                 >
-                  <Key className="w-5 h-5" />
                   Credenciales IA
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   onClick={() => setSettingsTab('theme')}
-                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
-                  style={{
-                    borderColor: settingsTab === 'theme' ? 'var(--color-primary)' : 'transparent',
-                    color: settingsTab === 'theme' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                  }}
+                  variant={settingsTab === 'theme' ? 'primary' : 'ghost'}
+                  icon={Palette}
+                  size="sm"
+                  className="border-b-2 rounded-none"
                 >
-                  <Palette className="w-5 h-5" />
                   Editor de Temas
-                </button>
+                </BaseButton>
               </div>
             </div>
 
             {/* Tab Content: General */}
             {settingsTab === 'general' && (
               <div className="space-y-6">
-                <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-                  <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>System Information</h2>
-                  <div className="space-y-3" style={{ color: 'var(--color-text-secondary)' }}>
-                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <span className="font-medium">Application Version</span>
-                      <span>v1.0.0</span>
+                <BaseCard title="System Information">
+                  <div className="space-y-3">
+                    <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                      <span className="font-medium text-gray-900 dark:text-white">Application Version</span>
+                      <span className="text-gray-600 dark:text-gray-400">v1.0.0</span>
                     </div>
-                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <span className="font-medium">Environment</span>
-                      <span>{import.meta.env.MODE}</span>
+                    <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                      <span className="font-medium text-gray-900 dark:text-white">Environment</span>
+                      <span className="text-gray-600 dark:text-gray-400">{import.meta.env.MODE}</span>
                     </div>
-                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <span className="font-medium">Admin Email</span>
-                      <span>{user.email}</span>
+                    <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                      <span className="font-medium text-gray-900 dark:text-white">Admin Email</span>
+                      <span className="text-gray-600 dark:text-gray-400">{user.email}</span>
                     </div>
                     <div className="flex justify-between py-2">
-                      <span className="font-medium">Firebase Project</span>
-                      <span>xiwen-app-2026</span>
+                      <span className="font-medium text-gray-900 dark:text-white">Firebase Project</span>
+                      <span className="text-gray-600 dark:text-gray-400">xiwen-app-2026</span>
                     </div>
                   </div>
-                </div>
+                </BaseCard>
               </div>
             )}
 
@@ -867,12 +839,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
             {settingsTab === 'credentials' && (
               <div className="space-y-6">
                 {/* AI Credentials Section */}
-            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-primary)', border: '1px solid var(--color-border)' }}>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-                <Settings className="w-5 h-5" />
-                Credenciales de IA
-              </h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+            <BaseCard
+              title="Credenciales de IA"
+              icon={Settings}
+            >
+              <p className="text-sm mb-6 text-gray-600 dark:text-gray-400">
                 Configura las API keys de los proveedores de IA para usar funciones inteligentes en la plataforma
               </p>
 
@@ -886,7 +857,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                   const isConfigured = hasFirebaseCredential || hasLocalStorageCredential;
 
                   return (
-                    <button
+                    <BaseButton
                       key={provider.name}
                       onClick={() => {
                         setSelectedProvider({
@@ -899,57 +870,45 @@ function AdminDashboard({ user, userRole, onLogout }) {
                         });
                         setShowAICredentialsModal(true);
                       }}
-                      className="relative flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200 active:scale-[0.98]"
-                      style={{
-                        borderColor: isConfigured ? 'var(--color-success)' : 'var(--color-border)',
-                        backgroundColor: isConfigured ? 'rgba(34, 197, 94, 0.1)' : 'var(--color-bg-primary)'
-                      }}
+                      variant={isConfigured ? 'success' : 'outline'}
+                      className="justify-start h-auto p-4"
+                      fullWidth
                     >
-                      <div className="text-3xl">{provider.icon}</div>
-                      <div className="flex-1 text-left">
-                        <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                          {provider.label}
-                        </h3>
-                        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                          {provider.model}
-                        </p>
+                      <div className="flex items-center gap-4 w-full">
+                        <div className="text-3xl">{provider.icon}</div>
+                        <div className="flex-1 text-left">
+                          <h3 className="font-semibold">{provider.label}</h3>
+                          <p className="text-xs opacity-70">{provider.model}</p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          {isConfigured ? (
+                            <BaseBadge variant="success" icon={CheckCircle}>Configurado</BaseBadge>
+                          ) : (
+                            <BaseBadge variant="default" icon={Settings}>Configurar</BaseBadge>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-shrink-0">
-                        {isConfigured ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: 'var(--color-success)', color: 'white' }}>
-                            <CheckCircle className="w-3 h-3" />
-                            Configurado
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                            <Settings className="w-3 h-3" />
-                            Configurar
-                          </span>
-                        )}
-                      </div>
-                    </button>
+                    </BaseButton>
                   );
                 })}
               </div>
 
-              <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-                <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                  <strong>Nota:</strong> Las credenciales se guardan de forma segura en el navegador local. No se comparten con otros usuarios.
-                </p>
-              </div>
-            </div>
+              <BaseAlert variant="info" className="mt-4">
+                <strong>Nota:</strong> Las credenciales se guardan de forma segura en el navegador local. No se comparten con otros usuarios.
+              </BaseAlert>
+            </BaseCard>
 
-            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <BaseCard icon={Settings}>
               <div className="flex items-start gap-3">
-                <Settings className="flex-shrink-0 mt-1" size={20} style={{ color: 'var(--color-text-secondary)' }} />
+                <Settings className="flex-shrink-0 mt-1 text-gray-600 dark:text-gray-400" size={20} />
                 <div>
-                  <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                  <h3 className="font-semibold mb-1 text-gray-900 dark:text-white">
                     Additional Settings Coming Soon
                   </h3>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     More configuration options will be available in future updates, including:
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  <ul className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400">
                     <li>• Email notifications preferences</li>
                     <li>• System-wide defaults</li>
                     <li>• Backup and restore options</li>
@@ -957,7 +916,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
                   </ul>
                 </div>
               </div>
-            </div>
+            </BaseCard>
               </div>
             )}
 
@@ -1053,22 +1012,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // REMOVED: Old Live Class Manager - Replaced by ClassSessionManager
-  // if (navigation.currentScreen === 'liveClasses') {
-  //   return (
-  //     <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-  //       <LiveClassManager
-  //         user={user}
-  //         onBack={navigation.handleBackToDashboard}
-  //         onStartClass={(liveClass) => {
-  //           navigation.setSelectedLiveClass(liveClass);
-  //           navigation.setCurrentScreen('liveClassRoom');
-  //         }}
-  //       />
-  //     </DashboardLayout>
-  //   );
-  // }
-
   // Students Panel -> REDIRECT to Users with filter
   if (navigation.currentScreen === 'students') {
     // Automatically redirect to users panel with students filter
@@ -1082,10 +1025,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
     if (sessionStorage.getItem('viewAsReturning') === 'true' && !navigation.hasProcessedReturn) {
       return (
         <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-          <div className="min-h-[60vh] flex flex-col justify-center items-center">
-            <div className="w-12 h-12 border-4 rounded-full animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }}></div>
-            <p>Returning...</p>
-          </div>
+          <BaseLoading variant="fullscreen" text="Returning..." />
         </DashboardLayout>
       );
     }
@@ -1154,15 +1094,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
+        <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto">
           <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
           </BaseButton>
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <Shield size={32} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>User Management</h1>
+              <Shield size={32} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <BaseButton onClick={() => setShowAddUserModal(true)} variant="primary" fullWidth className="sm:w-auto" icon={Plus}>
@@ -1176,50 +1116,38 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
           {/* Role Filter Tabs */}
           <div className="flex gap-2 mb-4 flex-wrap">
-            <button
+            <BaseButton
               onClick={() => navigation.setUsersRoleFilter('all')}
-              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-              style={{
-                backgroundColor: navigation.usersRoleFilter === 'all' ? 'var(--color-info)' : 'var(--color-bg-tertiary)',
-                color: navigation.usersRoleFilter === 'all' ? 'white' : 'var(--color-text-secondary)'
-              }}
+              variant={navigation.usersRoleFilter === 'all' ? 'primary' : 'ghost'}
+              icon={Users}
+              size="sm"
             >
-              <Users size={16} className="inline mr-2" strokeWidth={2} />
               All Users ({userManagement.users.length})
-            </button>
-            <button
+            </BaseButton>
+            <BaseButton
               onClick={() => navigation.setUsersRoleFilter('students')}
-              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-              style={{
-                backgroundColor: navigation.usersRoleFilter === 'students' ? 'var(--color-info)' : 'var(--color-bg-tertiary)',
-                color: navigation.usersRoleFilter === 'students' ? 'white' : 'var(--color-text-secondary)'
-              }}
+              variant={navigation.usersRoleFilter === 'students' ? 'primary' : 'ghost'}
+              icon={GraduationCap}
+              size="sm"
             >
-              <GraduationCap size={16} className="inline mr-2" strokeWidth={2} />
               Students ({stats.students})
-            </button>
-            <button
+            </BaseButton>
+            <BaseButton
               onClick={() => navigation.setUsersRoleFilter('teachers')}
-              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-              style={{
-                backgroundColor: navigation.usersRoleFilter === 'teachers' ? 'var(--color-info)' : 'var(--color-bg-tertiary)',
-                color: navigation.usersRoleFilter === 'teachers' ? 'white' : 'var(--color-text-secondary)'
-              }}
+              variant={navigation.usersRoleFilter === 'teachers' ? 'primary' : 'ghost'}
+              icon={UserCog}
+              size="sm"
             >
-              <UserCog size={16} className="inline mr-2" strokeWidth={2} />
               Teachers ({stats.teachers})
-            </button>
-            <button
+            </BaseButton>
+            <BaseButton
               onClick={() => navigation.setUsersRoleFilter('admins')}
-              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-              style={{
-                backgroundColor: navigation.usersRoleFilter === 'admins' ? 'var(--color-warning)' : 'var(--color-bg-tertiary)',
-                color: navigation.usersRoleFilter === 'admins' ? 'white' : 'var(--color-text-secondary)'
-              }}
+              variant={navigation.usersRoleFilter === 'admins' ? 'warning' : 'ghost'}
+              icon={Crown}
+              size="sm"
             >
-              <Crown size={16} className="inline mr-2" strokeWidth={2} />
               Admins ({stats.admins})
-            </button>
+            </BaseButton>
           </div>
 
           {/* Search Bar with View Mode Toggle */}
@@ -1234,44 +1162,38 @@ function AdminDashboard({ user, userRole, onLogout }) {
           />
 
           {successMessage && (
-            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 text-white animate-slide-down" style={{ backgroundColor: 'var(--color-success)' }}>
-              <CheckCircle size={18} strokeWidth={2} /> {successMessage}
-            </div>
+            <BaseAlert variant="success" className="mb-5 animate-slide-down" dismissible onDismiss={() => setSuccessMessage('')}>
+              {successMessage}
+            </BaseAlert>
           )}
           {errorMessage && (
-            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 text-white animate-slide-down" style={{ backgroundColor: 'var(--color-danger)' }}>
-              <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
-            </div>
+            <BaseAlert variant="danger" className="mb-5 animate-slide-down" dismissible onDismiss={() => setErrorMessage('')}>
+              {errorMessage}
+            </BaseAlert>
           )}
 
           {/* TABLE VIEW */}
           {navigation.usersViewMode === 'table' && (
-            <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               {(() => {
                 logger.debug(`🔍 [Users Render] View mode: ${navigation.usersViewMode}, Rendering ${filteredUsers.length} users`);
                 return null;
               })()}
               {sessionStorage.getItem('viewAsReturnUserId') && !navigation.hasProcessedReturn && userManagement.users.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[400px]" style={{ color: 'var(--color-text-secondary)' }}>
-                  <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }}></div>
-                  <p>Loading...</p>
-                </div>
+                <BaseLoading variant="spinner" text="Loading..." />
               ) : filteredUsers.length === 0 ? (
-                <div className="py-12 text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                <div className="py-12 text-center text-gray-600 dark:text-gray-400">
                   <p>No users found with selected filters</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
-                  <thead style={{ backgroundColor: 'var(--color-bg-tertiary)', borderBottom: '2px solid var(--color-border)' }}>
+                  <thead className="bg-gray-50 dark:bg-gray-700 border-b-2 border-gray-200 dark:border-gray-600">
                     <tr>
-                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide min-w-[200px]" style={{ color: 'var(--color-text-secondary)' }}>
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide min-w-[200px] text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('name')}
-                          className="flex items-center gap-2 cursor-pointer select-none"
-                          style={{
-                            color: userManagement.sortField === 'name' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                          }}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'name' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>User</span>
                           {userManagement.sortField === 'name' ? (
@@ -1281,13 +1203,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('credits')}
-                          className="flex items-center gap-2 cursor-pointer select-none"
-                          style={{
-                            color: userManagement.sortField === 'credits' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                          }}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'credits' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Credits</span>
                           {userManagement.sortField === 'credits' ? (
@@ -1297,13 +1216,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('role')}
-                          className="flex items-center gap-2 cursor-pointer select-none"
-                          style={{
-                            color: userManagement.sortField === 'role' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                          }}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'role' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Role</span>
                           {userManagement.sortField === 'role' ? (
@@ -1313,13 +1229,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('status')}
-                          className="flex items-center gap-2 cursor-pointer select-none"
-                          style={{
-                            color: userManagement.sortField === 'status' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                          }}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'status' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Status</span>
                           {userManagement.sortField === 'status' ? (
@@ -1329,13 +1242,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('createdAt')}
-                          className="flex items-center gap-2 cursor-pointer select-none"
-                          style={{
-                            color: userManagement.sortField === 'createdAt' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                          }}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'createdAt' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Registration</span>
                           {userManagement.sortField === 'createdAt' ? (
@@ -1345,13 +1255,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('email')}
-                          className="flex items-center gap-2 cursor-pointer select-none"
-                          style={{
-                            color: userManagement.sortField === 'email' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                          }}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'email' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Email</span>
                           {userManagement.sortField === 'email' ? (
@@ -1367,22 +1274,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
                     {filteredUsers.map(userItem => (
                       <tr
                         key={userItem.id}
-                        className="transition-colors"
-                        style={{
-                          borderBottom: '1px solid var(--color-border)',
-                          opacity: userItem.status !== 'active' ? 0.6 : 1,
-                          background: userItem.status !== 'active'
-                            ? 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.05) 10px, rgba(239, 68, 68, 0.05) 20px)'
-                            : 'transparent'
-                        }}
+                        className={`transition-colors border-b border-gray-200 dark:border-gray-700 ${userItem.status !== 'active' ? 'opacity-60 bg-red-50 dark:bg-red-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                       >
-                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
+                        <td className="p-4 text-gray-900 dark:text-white">
                           <div
                             className="flex items-center gap-3 cursor-pointer"
                             onClick={() => handleViewUserProfile(userItem)}
                             title="View full profile"
                           >
-                            <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-white flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-zinc-800 dark:bg-zinc-700 flex items-center justify-center text-white flex-shrink-0">
                               {(() => {
                                 const iconName = ROLE_INFO[userItem.role]?.icon || 'User';
                                 const IconComponent = ICON_MAP[iconName] || User;
@@ -1390,54 +1290,46 @@ function AdminDashboard({ user, userRole, onLogout }) {
                               })()}
                             </div>
                             <div className="flex-1 min-w-[150px]">
-                              <div className="font-semibold whitespace-nowrap hover:underline" style={{ color: 'var(--color-text-primary)' }}>
+                              <div className="font-semibold whitespace-nowrap hover:underline">
                                 {userItem.name || 'No name'}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
-                          <div className="inline-block px-3 py-1 rounded-xl text-white font-semibold text-[13px]" style={{ backgroundColor: 'var(--color-warning)' }}>
-                            {userItem.credits || 0}
-                          </div>
+                        <td className="p-4">
+                          <BaseBadge variant="warning">{userItem.credits || 0}</BaseBadge>
                         </td>
-                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
-                          <span
-                            className="inline-block px-3 py-1 rounded-xl font-semibold text-xs uppercase tracking-wide text-white"
-                            style={{
-                              backgroundColor: userItem.role === 'admin'
-                                ? 'var(--color-warning)'
-                                : (userItem.role === 'teacher' || userItem.role === 'trial_teacher')
-                                ? '#27272a'
-                                : 'var(--color-info)'
-                            }}
+                        <td className="p-4">
+                          <BaseBadge
+                            variant={
+                              userItem.role === 'admin' ? 'warning' :
+                              (userItem.role === 'teacher' || userItem.role === 'trial_teacher') ? 'default' :
+                              'info'
+                            }
                           >
                             {ROLE_INFO[userItem.role]?.name || userItem.role}
-                          </span>
+                          </BaseBadge>
                         </td>
-                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
-                          <span
-                            className="inline-block px-3 py-1 rounded-xl font-semibold text-xs text-white"
-                            style={{
-                              backgroundColor: userItem.status === 'active'
-                                ? 'var(--color-success)'
-                                : userItem.status === 'suspended'
-                                ? 'var(--color-danger)'
-                                : 'var(--color-warning)'
-                            }}
+                        <td className="p-4">
+                          <BaseBadge
+                            variant={
+                              userItem.status === 'active' ? 'success' :
+                              userItem.status === 'suspended' ? 'danger' :
+                              'warning'
+                            }
                           >
                             {userItem.status === 'active' ? 'Active' :
                              userItem.status === 'suspended' ? 'Suspended' :
                              'Pending'}
-                          </span>
+                          </BaseBadge>
                         </td>
-                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
-                          <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        <td className="p-4">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
                             {formatDate(userItem.createdAt)}
                           </span>
                         </td>
-                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
-                          <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        <td className="p-4">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
                             {userItem.email}
                           </span>
                         </td>
@@ -1453,11 +1345,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
           {/* GRID VIEW */}
           {navigation.usersViewMode === 'grid' && (
             filteredUsers.length === 0 ? (
-              <div className="py-12 text-center" style={{ color: 'var(--color-text-secondary)' }}>
+              <div className="py-12 text-center text-gray-600 dark:text-gray-400">
                 <p>No users found with selected filters</p>
               </div>
             ) : (
-              <div className="users-grid">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredUsers.map(userItem => (
                   <UserCard
                     key={userItem.id}
@@ -1475,11 +1367,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
           {/* LIST VIEW */}
           {navigation.usersViewMode === 'list' && (
             filteredUsers.length === 0 ? (
-              <div className="py-12 text-center" style={{ color: 'var(--color-text-secondary)' }}>
+              <div className="py-12 text-center text-gray-600 dark:text-gray-400">
                 <p>No users found with selected filters</p>
               </div>
             ) : (
-              <div className="users-list">
+              <div className="space-y-4">
                 {filteredUsers.map(userItem => (
                   <UserCard
                     key={userItem.id}
@@ -1509,17 +1401,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
       )}
 
       {navigation.showUserProfile && navigation.selectedUserProfile && (
-        <div className="modal-overlay" onClick={handleCloseUserProfile}>
-          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <UserProfile
-              selectedUser={navigation.selectedUserProfile}
-              currentUser={user}
-              onBack={handleCloseUserProfile}
-              onUpdate={userManagement.loadUsers}
-              isAdmin={isAdmin}
-            />
-          </div>
-        </div>
+        <BaseModal
+          isOpen={navigation.showUserProfile}
+          onClose={handleCloseUserProfile}
+          title="User Profile"
+          size="xl"
+        >
+          <UserProfile
+            selectedUser={navigation.selectedUserProfile}
+            currentUser={user}
+            onBack={handleCloseUserProfile}
+            onUpdate={userManagement.loadUsers}
+            isAdmin={isAdmin}
+          />
+        </BaseModal>
       )}
     </>
     );
@@ -1641,74 +1536,68 @@ function AdminDashboard({ user, userRole, onLogout }) {
   return (
     <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <div className="mb-12 text-center">
+        <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto">
+          <div className="mb-8 md:mb-12 text-center">
             <div className="flex items-center gap-3 mb-2 justify-center">
-              <Crown size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
-              <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Admin Panel</h1>
+              <Crown size={32} md:size={40} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Admin Panel</h1>
             </div>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 mb-12">
-            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
-                <Users size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.total}</div>
-                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Total Users</div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+            <BaseCard
+              icon={Users}
+              title="Total Users"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.total}</div>
+            </BaseCard>
 
-            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white" style={{ backgroundColor: 'var(--color-warning)' }}>
-                <Crown size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.admins}</div>
-                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Administrators</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={Crown}
+              title="Administrators"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.admins}</div>
+            </BaseCard>
 
-            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
-                <UserCog size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.teachers}</div>
-                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Teachers</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={UserCog}
+              title="Teachers"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.teachers}</div>
+            </BaseCard>
 
-            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white" style={{ backgroundColor: 'var(--color-info)' }}>
-                <GraduationCap size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.students}</div>
-                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Students</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={GraduationCap}
+              title="Students"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.students}</div>
+            </BaseCard>
 
-            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white" style={{ backgroundColor: 'var(--color-success)' }}>
-                <CheckCircle size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.active}</div>
-                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Active</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={CheckCircle}
+              title="Active"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.active}</div>
+            </BaseCard>
 
-            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white" style={{ backgroundColor: 'var(--color-danger)' }}>
-                <Ban size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.suspended}</div>
-                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Suspended</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={Ban}
+              title="Suspended"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.suspended}</div>
+            </BaseCard>
           </div>
 
           <SearchBar
@@ -1720,7 +1609,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
             className="mb-6"
           />
 
-          <div className={navigation.dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
+          <div className={navigation.dashboardViewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6' : 'space-y-4'}>
             {filteredDashboardCards.map(card => (
               <QuickAccessCard
                 key={card.id}
@@ -1748,17 +1637,20 @@ function AdminDashboard({ user, userRole, onLogout }) {
       )}
 
       {navigation.showUserProfile && navigation.selectedUserProfile && (
-        <div className="modal-overlay" onClick={handleCloseUserProfile}>
-          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <UserProfile
-              selectedUser={navigation.selectedUserProfile}
-              currentUser={user}
-              onBack={handleCloseUserProfile}
-              onUpdate={userManagement.loadUsers}
-              isAdmin={isAdmin}
-            />
-          </div>
-        </div>
+        <BaseModal
+          isOpen={navigation.showUserProfile}
+          onClose={handleCloseUserProfile}
+          title="User Profile"
+          size="xl"
+        >
+          <UserProfile
+            selectedUser={navigation.selectedUserProfile}
+            currentUser={user}
+            onBack={handleCloseUserProfile}
+            onUpdate={userManagement.loadUsers}
+            isAdmin={isAdmin}
+          />
+        </BaseModal>
       )}
 
       {/* AI Assistant Widget */}
