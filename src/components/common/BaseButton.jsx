@@ -53,7 +53,7 @@ function BaseButton({
         border: '1px solid var(--color-border)',
         hover: {
           backgroundColor: 'var(--color-bg-hover)',
-          borderColor: 'var(--color-border-focus)'
+          border: '1px solid var(--color-border-focus)'
         }
       },
       success: {
@@ -77,7 +77,7 @@ function BaseButton({
         border: '1px solid transparent',
         hover: {
           backgroundColor: 'var(--color-bg-tertiary)',
-          borderColor: 'var(--color-border)'
+          border: '1px solid var(--color-border)'
         }
       },
       outline: {
@@ -86,7 +86,7 @@ function BaseButton({
         border: '2px solid var(--color-border)',
         hover: {
           backgroundColor: 'var(--color-bg-tertiary)',
-          borderColor: 'var(--color-border-focus)'
+          border: '2px solid var(--color-border-focus)'
         }
       }
     };

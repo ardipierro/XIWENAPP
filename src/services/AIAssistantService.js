@@ -105,8 +105,14 @@ class AIAssistantService {
 
       const { analysis } = analysisResult;
 
+      logger.debug('Query analysis result:', analysis, 'AIAssistantService');
+      logger.info(`Analysis details - Intent: ${analysis.intent}, Entity: ${analysis.entity}`, 'AIAssistantService');
+
       // 2. Execute action based on intent
       const result = await this.executeAction(analysis, userId, userRole);
+
+      logger.debug('Action execution result:', result, 'AIAssistantService');
+      logger.info(`Result details - Success: ${result.success}, Data count: ${result.data?.length || 0}`, 'AIAssistantService');
 
       // 3. Generate natural language response
       const response = QueryAnalyzerService.generateResponse(analysis, result.data);
@@ -176,6 +182,19 @@ class AIAssistantService {
    */
   async _handleStudentQuery(filters) {
     const { status } = filters;
+
+    // Consulta general: contar todos los estudiantes
+    if (!status || status === 'all' || status === 'total') {
+      const { getUsersByRole } = await import('../firebase/users');
+      const students = await getUsersByRole('student');
+      return {
+        success: true,
+        data: [{
+          count: students.length,
+          message: `Total de estudiantes: ${students.length}`
+        }]
+      };
+    }
 
     if (status === 'not_submitted') {
       const data = await StudentAnalyticsService.getStudentsWithMissingSubmissions(filters);

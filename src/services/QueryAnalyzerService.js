@@ -36,10 +36,12 @@ ENTIDADES (entity):
 - "general": General
 
 FILTROS COMUNES (filters):
-- status: "not_submitted", "submitted", "graded", "low_performance", "at_risk", "overdue", "upcoming"
+- status: "all", "total", "not_submitted", "submitted", "graded", "low_performance", "at_risk", "overdue", "upcoming"
 - date_range: "today", "this_week", "this_month", "last_week"
 - course_id: ID del curso (si se menciona)
 - threshold: Umbral numérico (ej: "más de 3 errores")
+
+Para consultas de conteo general (ej: "¿cuántos alumnos hay?"), usa status: "all" o no incluyas filtros
 
 DATOS (data) para creación/generación:
 - topic: Tema de la tarea/contenido
@@ -125,6 +127,13 @@ Respuesta: {
   }
 }
 
+Usuario: "¿Cuántos alumnos hay?"
+Respuesta: {
+  "intent": "query_students",
+  "entity": "students",
+  "filters": {}
+}
+
 Usuario: "Hola, ¿cómo estás?"
 Respuesta: {
   "intent": "general",
@@ -149,17 +158,54 @@ IMPORTANTE: Devuelve SOLO el objeto JSON, sin texto adicional.`;
       const { getAIConfig } = await import('../firebase/aiConfig');
       const config = await getAIConfig();
 
+      // Debug: Log configuration
+      logger.debug('AI Config received:', config, 'QueryAnalyzerService');
+
       // Find first enabled provider
       let provider = null;
-      const providers = ['claude', 'openai', 'gemini', 'grok'];
-      for (const p of providers) {
-        if (config[p]?.enabled && config[p]?.apiKey) {
-          provider = p;
-          break;
+      let providerConfig = null;
+
+      // New structure: check functions
+      if (config.functions) {
+        logger.debug('Using new config structure (functions)', null, 'QueryAnalyzerService');
+
+        // Priority 1: Check for dashboard_assistant specifically
+        if (config.functions.dashboard_assistant?.enabled && config.functions.dashboard_assistant?.provider) {
+          provider = config.functions.dashboard_assistant.provider;
+          providerConfig = config.functions.dashboard_assistant;
+          logger.info(`Selected provider from dashboard_assistant: ${provider}`, 'QueryAnalyzerService');
+        } else {
+          // Priority 2: Find first enabled function
+          const functionKeys = Object.keys(config.functions);
+          for (const funcKey of functionKeys) {
+            const func = config.functions[funcKey];
+            if (func.enabled && func.provider) {
+              provider = func.provider;
+              providerConfig = func;
+              logger.info(`Selected provider from functions: ${provider} (function: ${funcKey})`, 'QueryAnalyzerService');
+              break;
+            }
+          }
+        }
+      } else {
+        // Legacy structure: check providers directly
+        logger.debug('Using legacy config structure (providers)', null, 'QueryAnalyzerService');
+
+        const providers = ['claude', 'openai', 'gemini', 'grok'];
+        for (const p of providers) {
+          logger.debug(`Checking provider ${p}: enabled=${config[p]?.enabled}`, null, 'QueryAnalyzerService');
+
+          if (config[p]?.enabled) {
+            provider = p;
+            providerConfig = config[p];
+            logger.info(`Selected provider: ${p}`, 'QueryAnalyzerService');
+            break;
+          }
         }
       }
 
       if (!provider) {
+        logger.error('No enabled provider found. Config:', config, 'QueryAnalyzerService');
         throw new Error('No hay proveedor de IA configurado');
       }
 
@@ -170,8 +216,8 @@ Usuario (rol: ${userRole}): "${queryText}"
 
 Respuesta JSON:`;
 
-      // Call AI
-      const response = await callAI(provider, prompt, config[provider]);
+      // Call AI with providerConfig
+      const response = await callAI(provider, prompt, providerConfig);
 
       // Parse JSON from response
       const jsonMatch = response.match(/\{[\s\S]*\}/);
@@ -190,11 +236,12 @@ Respuesta JSON:`;
 
     } catch (error) {
       logger.error('Error analyzing query', 'QueryAnalyzerService', error);
+      logger.error('Error stack:', error.stack, 'QueryAnalyzerService');
 
       // Return default analysis for errors
       return {
         success: false,
-        error: error.message,
+        error: error.message || 'Error desconocido al analizar consulta',
         analysis: {
           intent: 'general',
           entity: 'general',
@@ -223,18 +270,26 @@ Respuesta JSON:`;
     }
 
     // Generate response based on intent
-    if (intent === 'query_students' && entity === 'submissions') {
-      if (filters?.status === 'not_submitted') {
-        const count = data.reduce((sum, item) => sum + (item.count || 0), 0);
-        return `📚 Encontré **${count} estudiante(s)** que no han entregado tareas.`;
+    if (intent === 'query_students') {
+      // Conteo general de estudiantes
+      if (!filters || !filters.status || filters.status === 'all') {
+        const count = data[0]?.count || data.length;
+        return `👥 Actualmente hay **${count} estudiante(s)** registrados en la plataforma.`;
       }
-      if (filters?.status === 'low_performance') {
-        return `⚠️ **${data.length} estudiante(s)** tienen bajo rendimiento (menos de 60% en promedio).`;
-      }
-    }
 
-    if (intent === 'query_students' && filters?.status === 'at_risk') {
-      return `🚨 **${data.length} estudiante(s)** están en riesgo de abandono (inactivos o con bajo rendimiento sostenido).`;
+      if (entity === 'submissions') {
+        if (filters?.status === 'not_submitted') {
+          const count = data.reduce((sum, item) => sum + (item.count || 0), 0);
+          return `📚 Encontré **${count} estudiante(s)** que no han entregado tareas.`;
+        }
+        if (filters?.status === 'low_performance') {
+          return `⚠️ **${data.length} estudiante(s)** tienen bajo rendimiento (menos de 60% en promedio).`;
+        }
+      }
+
+      if (filters?.status === 'at_risk') {
+        return `🚨 **${data.length} estudiante(s)** están en riesgo de abandono (inactivos o con bajo rendimiento sostenido).`;
+      }
     }
 
     if (intent === 'query_payments') {

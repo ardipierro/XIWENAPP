@@ -20,19 +20,11 @@ function AIAssistantWidget() {
   const [showSuggestions, setShowSuggestions] = useState(true);
 
   const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // Focus input when widget opens
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isOpen]);
 
   // Add welcome message when widget opens for first time
   useEffect(() => {
@@ -145,6 +137,7 @@ function AIAssistantWidget() {
 
       setMessages(prev => [...prev, errorMessage]);
     } finally {
+      // Always reset listening state
       setIsListening(false);
     }
   };
@@ -155,10 +148,6 @@ function AIAssistantWidget() {
   const handleSuggestionClick = (suggestion) => {
     setInputText(suggestion);
     setShowSuggestions(false);
-    // Focus input
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
   };
 
   /**
@@ -346,7 +335,6 @@ function AIAssistantWidget() {
           <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
             <div className="flex gap-2">
               <BaseInput
-                ref={inputRef}
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}

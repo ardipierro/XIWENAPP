@@ -809,11 +809,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           </div>
         )}
       </div>
-    </DashboardLayout>
 
-    {/* AI Assistant Widget */}
-    <AIAssistantWidget />
-  </>;
+      {/* AI Assistant Widget */}
+      <AIAssistantWidget />
+    </DashboardLayout>
+  );
 }
 
 export default StudentDashboard;
