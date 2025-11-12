@@ -6,6 +6,7 @@ import {
   Repeat, Trash2, Clock, Video, CreditCard, BarChart3, AlarmClock,
   MapPin, Loader, X, Info
 } from 'lucide-react';
+import BaseButton from './common/BaseButton';
 import {
   createScheduledClass,
   createScheduledClassMultipleDays,
@@ -260,12 +261,12 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
             Grupo: {group.name}
           </p>
         </div>
-        <button
+        <BaseButton
           onClick={() => setShowModal(true)}
-          className="btn btn-primary"
+          variant="primary"
         >
           + Agregar Horario
-        </button>
+        </BaseButton>
       </div>
 
       {/* Message */}
@@ -640,25 +641,22 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
               </div>
 
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
-                  className="btn btn-ghost"
+                  variant="ghost"
                   onClick={() => setShowModal(false)}
                   disabled={processing}
                 >
                   Cancelar
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   type="submit"
-                  className="btn btn-primary"
+                  variant="primary"
                   disabled={processing}
+                  icon={processing ? Loader : CheckCircle}
                 >
-                  {processing ? (
-                    <><Loader size={16} strokeWidth={2} className="inline-icon" /> Creando...</>
-                  ) : (
-                    <><CheckCircle size={16} strokeWidth={2} className="inline-icon" /> Crear Horario</>
-                  )}
-                </button>
+                  {processing ? 'Creando...' : 'Crear Horario'}
+                </BaseButton>
               </div>
             </form>
           </div>

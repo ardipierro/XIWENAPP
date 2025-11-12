@@ -57,7 +57,7 @@ function AnalyticsDashboard({ user }) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="spinner"></div>
-        <p className="ml-4 text-gray-600 dark:text-gray-300">Cargando análisis...</p>
+        <p className="ml-4" style={{ color: 'var(--color-text-secondary)' }}>Cargando análisis...</p>
       </div>
     );
   }
@@ -66,38 +66,38 @@ function AnalyticsDashboard({ user }) {
     <div className="analytics-dashboard">
       {/* Activity by Day */}
       <div className="card mb-6">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
           <BarChart3 size={20} strokeWidth={2} /> Actividad de Juegos (Últimos 7 Días)
         </h3>
         {activityData.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+          <p className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
             No hay datos de actividad reciente
           </p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={activityData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis
                 dataKey="date"
-                stroke="#71717a"
+                stroke="var(--color-text-secondary)"
               />
-              <YAxis stroke="#71717a" />
+              <YAxis stroke="var(--color-text-secondary)" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#18181b',
-                  border: '1px solid #3f3f46',
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '8px',
-                  color: '#f4f4f5'
+                  color: 'var(--color-text-primary)'
                 }}
               />
               <Legend />
               <Line
                 type="monotone"
                 dataKey="games"
-                stroke="#6366f1"
+                stroke="var(--color-primary)"
                 strokeWidth={2}
                 name="Juegos jugados"
-                dot={{ fill: '#6366f1', r: 4 }}
+                dot={{ fill: 'var(--color-primary)', r: 4 }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>
@@ -109,33 +109,33 @@ function AnalyticsDashboard({ user }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Top Students */}
         <div className="card">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <Trophy size={20} strokeWidth={2} /> Top 10 Estudiantes
           </h3>
           {topStudents.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+            <p className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
               No hay datos de estudiantes
             </p>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={topStudents} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
-                <XAxis type="number" stroke="#71717a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis type="number" stroke="var(--color-text-secondary)" />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={100}
-                  stroke="#71717a"
+                  stroke="var(--color-text-secondary)"
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#18181b',
-                    border: '1px solid #3f3f46',
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
-                    color: '#f4f4f5'
+                    color: 'var(--color-text-primary)'
                   }}
                 />
-                <Bar dataKey="points" fill="#71717a" name="Puntos totales" />
+                <Bar dataKey="points" fill="var(--color-text-secondary)" name="Puntos totales" />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -143,11 +143,11 @@ function AnalyticsDashboard({ user }) {
 
         {/* Course Stats */}
         <div className="card">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <BookOpen size={20} strokeWidth={2} /> Rendimiento por Curso
           </h3>
           {courseStats.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+            <p className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
               No hay estadísticas de cursos
             </p>
           ) : (
@@ -169,10 +169,10 @@ function AnalyticsDashboard({ user }) {
                 <Tooltip
                   formatter={(value) => `${value}% de aciertos`}
                   contentStyle={{
-                    backgroundColor: '#18181b',
-                    border: '1px solid #3f3f46',
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
-                    color: '#f4f4f5'
+                    color: 'var(--color-text-primary)'
                   }}
                 />
               </PieChart>
@@ -183,35 +183,35 @@ function AnalyticsDashboard({ user }) {
 
       {/* Popular Exercises */}
       <div className="card">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
           <Gamepad2 size={20} strokeWidth={2} /> Ejercicios Más Jugados
         </h3>
         {popularExercises.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+          <p className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
             No hay datos de ejercicios
           </p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={popularExercises}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis
                 dataKey="name"
-                stroke="#71717a"
+                stroke="var(--color-text-secondary)"
                 angle={-45}
                 textAnchor="end"
                 height={100}
               />
-              <YAxis stroke="#71717a" />
+              <YAxis stroke="var(--color-text-secondary)" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#18181b',
-                  border: '1px solid #3f3f46',
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '8px',
-                  color: '#f4f4f5'
+                  color: 'var(--color-text-primary)'
                 }}
               />
               <Legend />
-              <Bar dataKey="plays" fill="#10b981" name="Veces jugado" />
+              <Bar dataKey="plays" fill="var(--color-success)" name="Veces jugado" />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -221,30 +221,30 @@ function AnalyticsDashboard({ user }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <div className="card text-center">
           <div className="text-4xl mb-2 flex justify-center">
-            <Target size={40} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+            <Target size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
           </div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {activityData.reduce((sum, d) => sum + d.games, 0)}
           </div>
-          <div className="text-gray-600 dark:text-gray-400">Juegos Totales (7 días)</div>
+          <div style={{ color: 'var(--color-text-secondary)' }}>Juegos Totales (7 días)</div>
         </div>
         <div className="card text-center">
           <div className="text-4xl mb-2 flex justify-center">
-            <Users size={40} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+            <Users size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
           </div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {topStudents.length}
           </div>
-          <div className="text-gray-600 dark:text-gray-400">Estudiantes Activos</div>
+          <div style={{ color: 'var(--color-text-secondary)' }}>Estudiantes Activos</div>
         </div>
         <div className="card text-center">
           <div className="text-4xl mb-2 flex justify-center">
-            <BookOpen size={40} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+            <BookOpen size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
           </div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {courseStats.length}
           </div>
-          <div className="text-gray-600 dark:text-gray-400">Cursos con Actividad</div>
+          <div style={{ color: 'var(--color-text-secondary)' }}>Cursos con Actividad</div>
         </div>
       </div>
     </div>

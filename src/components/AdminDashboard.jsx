@@ -79,6 +79,7 @@ const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
+import BaseButton from './common/BaseButton';
 // REMOVED: Old LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
 // import LiveClassManager from './LiveClassManager';
 // import LiveClassRoom from './LiveClassRoom';
@@ -88,6 +89,7 @@ import MessagesPanel from './MessagesPanel';
 import AdminPaymentsPanel from './AdminPaymentsPanel';
 import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
+import ImageProvidersConfig from './ImageProvidersConfig';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ClassSessionModal from './ClassSessionModal';
@@ -98,6 +100,7 @@ import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import ThemeCustomizer from './ThemeCustomizer';
 import aiService from '../services/aiService';
+import AIAssistantWidget from './AIAssistantWidget';
 import './AdminDashboard.css';
 
 // Custom hooks
@@ -402,8 +405,8 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (loading) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
-          <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
+        <div className="flex flex-col items-center justify-center min-h-[400px]" style={{ color: 'var(--color-text-secondary)' }}>
+          <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }}></div>
           <p>Loading admin panel...</p>
         </div>
       </DashboardLayout>
@@ -601,10 +604,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
+            ← Back to Home
+          </BaseButton>
+          <AIConfigPanel />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Image Providers Configuration - WITH Layout
+  if (navigation.currentScreen === 'imageProviders') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <div className="p-6 md:p-8">
           <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
             ← Back to Home
           </button>
-          <AIConfigPanel />
+          <ImageProvidersConfig />
         </div>
       </DashboardLayout>
     );
@@ -717,9 +734,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AnalyticsDashboard user={user} />
         </div>
       </DashboardLayout>
@@ -740,9 +757,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AdminPaymentsPanel user={user} />
         </div>
       </DashboardLayout>
@@ -754,9 +771,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AttendanceView teacher={user} />
         </div>
       </DashboardLayout>
@@ -768,56 +785,50 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-6">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-6">
             ← Back to Home
-          </button>
+          </BaseButton>
 
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-primary-900 dark:text-primary-100 mb-2">Settings</h1>
-              <p className="text-secondary-600 dark:text-secondary-400">
+              <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Settings</h1>
+              <p style={{ color: 'var(--color-text-secondary)' }}>
                 Manage system settings and preferences
               </p>
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-200 dark:border-gray-700">
+            <div style={{ borderBottom: '1px solid var(--color-border)' }}>
               <div className="flex gap-4">
                 <button
                   onClick={() => setSettingsTab('general')}
-                  className={`
-                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
-                    ${settingsTab === 'general'
-                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }
-                  `}
+                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
+                  style={{
+                    borderColor: settingsTab === 'general' ? 'var(--color-primary)' : 'transparent',
+                    color: settingsTab === 'general' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                  }}
                 >
                   <Info className="w-5 h-5" />
                   General
                 </button>
                 <button
                   onClick={() => setSettingsTab('credentials')}
-                  className={`
-                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
-                    ${settingsTab === 'credentials'
-                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }
-                  `}
+                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
+                  style={{
+                    borderColor: settingsTab === 'credentials' ? 'var(--color-primary)' : 'transparent',
+                    color: settingsTab === 'credentials' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                  }}
                 >
                   <Key className="w-5 h-5" />
                   Credenciales IA
                 </button>
                 <button
                   onClick={() => setSettingsTab('theme')}
-                  className={`
-                    flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors
-                    ${settingsTab === 'theme'
-                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }
-                  `}
+                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
+                  style={{
+                    borderColor: settingsTab === 'theme' ? 'var(--color-primary)' : 'transparent',
+                    color: settingsTab === 'theme' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                  }}
                 >
                   <Palette className="w-5 h-5" />
                   Editor de Temas
@@ -828,18 +839,18 @@ function AdminDashboard({ user, userRole, onLogout }) {
             {/* Tab Content: General */}
             {settingsTab === 'general' && (
               <div className="space-y-6">
-                <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
-                  <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
-                  <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
-                    <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+                  <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>System Information</h2>
+                  <div className="space-y-3" style={{ color: 'var(--color-text-secondary)' }}>
+                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
                       <span className="font-medium">Application Version</span>
                       <span>v1.0.0</span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
                       <span className="font-medium">Environment</span>
                       <span>{import.meta.env.MODE}</span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
+                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
                       <span className="font-medium">Admin Email</span>
                       <span>{user.email}</span>
                     </div>
@@ -856,12 +867,12 @@ function AdminDashboard({ user, userRole, onLogout }) {
             {settingsTab === 'credentials' && (
               <div className="space-y-6">
                 {/* AI Credentials Section */}
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-primary)', border: '1px solid var(--color-border)' }}>
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
                 <Settings className="w-5 h-5" />
                 Credenciales de IA
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Configura las API keys de los proveedores de IA para usar funciones inteligentes en la plataforma
               </p>
 
@@ -888,33 +899,29 @@ function AdminDashboard({ user, userRole, onLogout }) {
                         });
                         setShowAICredentialsModal(true);
                       }}
-                      className={`
-                        relative flex items-center gap-4 p-4 rounded-xl border-2
-                        transition-all duration-200
-                        ${isConfigured
-                          ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-                        }
-                        hover:border-zinc-500 dark:hover:border-zinc-400 active:scale-[0.98]
-                      `}
+                      className="relative flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200 active:scale-[0.98]"
+                      style={{
+                        borderColor: isConfigured ? 'var(--color-success)' : 'var(--color-border)',
+                        backgroundColor: isConfigured ? 'rgba(34, 197, 94, 0.1)' : 'var(--color-bg-primary)'
+                      }}
                     >
                       <div className="text-3xl">{provider.icon}</div>
                       <div className="flex-1 text-left">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                        <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                           {provider.label}
                         </h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                           {provider.model}
                         </p>
                       </div>
                       <div className="flex-shrink-0">
                         {isConfigured ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: 'var(--color-success)', color: 'white' }}>
                             <CheckCircle className="w-3 h-3" />
                             Configurado
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-semibold">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
                             <Settings className="w-3 h-3" />
                             Configurar
                           </span>
@@ -925,24 +932,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
                 })}
               </div>
 
-              <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
-                <p className="text-xs text-zinc-700 dark:text-zinc-300">
+              <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+                <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                   <strong>Nota:</strong> Las credenciales se guardan de forma segura en el navegador local. No se comparten con otros usuarios.
                 </p>
               </div>
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
+            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
               <div className="flex items-start gap-3">
-                <Settings className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-1" size={20} />
+                <Settings className="flex-shrink-0 mt-1" size={20} style={{ color: 'var(--color-text-secondary)' }} />
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
                     Additional Settings Coming Soon
                   </h3>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     More configuration options will be available in future updates, including:
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                  <ul className="mt-2 space-y-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     <li>• Email notifications preferences</li>
                     <li>• System-wide defaults</li>
                     <li>• Backup and restore options</li>
@@ -1076,7 +1083,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       return (
         <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
           <div className="min-h-[60vh] flex flex-col justify-center items-center">
-            <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin"></div>
+            <div className="w-12 h-12 border-4 rounded-full animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }}></div>
             <p>Returning...</p>
           </div>
         </DashboardLayout>
@@ -1148,22 +1155,22 @@ function AdminDashboard({ user, userRole, onLogout }) {
       <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <Shield size={32} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h1>
+              <Shield size={32} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>User Management</h1>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary w-full sm:w-auto">
-                <Plus size={18} strokeWidth={2} /> New User
-              </button>
-              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full sm:w-auto" title="Refresh user list">
-                <RefreshCw size={18} strokeWidth={2} /> Refresh
-              </button>
+              <BaseButton onClick={() => setShowAddUserModal(true)} variant="primary" fullWidth className="sm:w-auto" icon={Plus}>
+                New User
+              </BaseButton>
+              <BaseButton onClick={userManagement.loadUsers} variant="success" fullWidth className="sm:w-auto" icon={RefreshCw} title="Refresh user list">
+                Refresh
+              </BaseButton>
             </div>
           </div>
 
@@ -1171,44 +1178,44 @@ function AdminDashboard({ user, userRole, onLogout }) {
           <div className="flex gap-2 mb-4 flex-wrap">
             <button
               onClick={() => navigation.setUsersRoleFilter('all')}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                navigation.usersRoleFilter === 'all'
-                  ? 'bg-gray-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+              style={{
+                backgroundColor: navigation.usersRoleFilter === 'all' ? 'var(--color-info)' : 'var(--color-bg-tertiary)',
+                color: navigation.usersRoleFilter === 'all' ? 'white' : 'var(--color-text-secondary)'
+              }}
             >
               <Users size={16} className="inline mr-2" strokeWidth={2} />
               All Users ({userManagement.users.length})
             </button>
             <button
               onClick={() => navigation.setUsersRoleFilter('students')}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                navigation.usersRoleFilter === 'students'
-                  ? 'bg-gray-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+              style={{
+                backgroundColor: navigation.usersRoleFilter === 'students' ? 'var(--color-info)' : 'var(--color-bg-tertiary)',
+                color: navigation.usersRoleFilter === 'students' ? 'white' : 'var(--color-text-secondary)'
+              }}
             >
               <GraduationCap size={16} className="inline mr-2" strokeWidth={2} />
               Students ({stats.students})
             </button>
             <button
               onClick={() => navigation.setUsersRoleFilter('teachers')}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                navigation.usersRoleFilter === 'teachers'
-                  ? 'bg-gray-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+              style={{
+                backgroundColor: navigation.usersRoleFilter === 'teachers' ? 'var(--color-info)' : 'var(--color-bg-tertiary)',
+                color: navigation.usersRoleFilter === 'teachers' ? 'white' : 'var(--color-text-secondary)'
+              }}
             >
               <UserCog size={16} className="inline mr-2" strokeWidth={2} />
               Teachers ({stats.teachers})
             </button>
             <button
               onClick={() => navigation.setUsersRoleFilter('admins')}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                navigation.usersRoleFilter === 'admins'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+              style={{
+                backgroundColor: navigation.usersRoleFilter === 'admins' ? 'var(--color-warning)' : 'var(--color-bg-tertiary)',
+                color: navigation.usersRoleFilter === 'admins' ? 'white' : 'var(--color-text-secondary)'
+              }}
             >
               <Crown size={16} className="inline mr-2" strokeWidth={2} />
               Admins ({stats.admins})
@@ -1227,45 +1234,44 @@ function AdminDashboard({ user, userRole, onLogout }) {
           />
 
           {successMessage && (
-            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-success-500 text-white animate-slide-down">
+            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 text-white animate-slide-down" style={{ backgroundColor: 'var(--color-success)' }}>
               <CheckCircle size={18} strokeWidth={2} /> {successMessage}
             </div>
           )}
           {errorMessage && (
-            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-error-500 text-white animate-slide-down">
+            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 text-white animate-slide-down" style={{ backgroundColor: 'var(--color-danger)' }}>
               <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
             </div>
           )}
 
           {/* TABLE VIEW */}
           {navigation.usersViewMode === 'table' && (
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl overflow-hidden">
+            <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
               {(() => {
                 logger.debug(`🔍 [Users Render] View mode: ${navigation.usersViewMode}, Rendering ${filteredUsers.length} users`);
                 return null;
               })()}
               {sessionStorage.getItem('viewAsReturnUserId') && !navigation.hasProcessedReturn && userManagement.users.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
-                  <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
+                <div className="flex flex-col items-center justify-center min-h-[400px]" style={{ color: 'var(--color-text-secondary)' }}>
+                  <div className="w-12 h-12 border-4 rounded-full animate-spin mb-4" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }}></div>
                   <p>Loading...</p>
                 </div>
               ) : filteredUsers.length === 0 ? (
-                <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+                <div className="py-12 text-center" style={{ color: 'var(--color-text-secondary)' }}>
                   <p>No users found with selected filters</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
-                  <thead className="bg-tertiary-50 dark:bg-tertiary-900 border-b-2 border-primary-200 dark:border-primary-800">
+                  <thead style={{ backgroundColor: 'var(--color-bg-tertiary)', borderBottom: '2px solid var(--color-border)' }}>
                     <tr>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide min-w-[200px]">
+                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide min-w-[200px]" style={{ color: 'var(--color-text-secondary)' }}>
                         <div
                           onClick={() => userManagement.handleSort('name')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'name'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className="flex items-center gap-2 cursor-pointer select-none"
+                          style={{
+                            color: userManagement.sortField === 'name' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                          }}
                         >
                           <span>User</span>
                           {userManagement.sortField === 'name' ? (
@@ -1275,14 +1281,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
                         <div
                           onClick={() => userManagement.handleSort('credits')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'credits'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className="flex items-center gap-2 cursor-pointer select-none"
+                          style={{
+                            color: userManagement.sortField === 'credits' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                          }}
                         >
                           <span>Credits</span>
                           {userManagement.sortField === 'credits' ? (
@@ -1292,14 +1297,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
                         <div
                           onClick={() => userManagement.handleSort('role')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'role'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className="flex items-center gap-2 cursor-pointer select-none"
+                          style={{
+                            color: userManagement.sortField === 'role' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                          }}
                         >
                           <span>Role</span>
                           {userManagement.sortField === 'role' ? (
@@ -1309,14 +1313,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
                         <div
                           onClick={() => userManagement.handleSort('status')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'status'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className="flex items-center gap-2 cursor-pointer select-none"
+                          style={{
+                            color: userManagement.sortField === 'status' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                          }}
                         >
                           <span>Status</span>
                           {userManagement.sortField === 'status' ? (
@@ -1326,14 +1329,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
                         <div
                           onClick={() => userManagement.handleSort('createdAt')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'createdAt'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className="flex items-center gap-2 cursor-pointer select-none"
+                          style={{
+                            color: userManagement.sortField === 'createdAt' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                          }}
                         >
                           <span>Registration</span>
                           {userManagement.sortField === 'createdAt' ? (
@@ -1343,14 +1345,13 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-[13px] uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
                         <div
                           onClick={() => userManagement.handleSort('email')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'email'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className="flex items-center gap-2 cursor-pointer select-none"
+                          style={{
+                            color: userManagement.sortField === 'email' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                          }}
                         >
                           <span>Email</span>
                           {userManagement.sortField === 'email' ? (
@@ -1366,13 +1367,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
                     {filteredUsers.map(userItem => (
                       <tr
                         key={userItem.id}
-                        className={`border-b border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors ${
-                          userItem.status !== 'active'
-                            ? 'opacity-60 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(239,68,68,0.05)_10px,rgba(239,68,68,0.05)_20px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(239,68,68,0.1)_10px,rgba(239,68,68,0.1)_20px)]'
-                            : ''
-                        }`}
+                        className="transition-colors"
+                        style={{
+                          borderBottom: '1px solid var(--color-border)',
+                          opacity: userItem.status !== 'active' ? 0.6 : 1,
+                          background: userItem.status !== 'active'
+                            ? 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.05) 10px, rgba(239, 68, 68, 0.05) 20px)'
+                            : 'transparent'
+                        }}
                       >
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
+                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
                           <div
                             className="flex items-center gap-3 cursor-pointer"
                             onClick={() => handleViewUserProfile(userItem)}
@@ -1386,48 +1390,54 @@ function AdminDashboard({ user, userRole, onLogout }) {
                               })()}
                             </div>
                             <div className="flex-1 min-w-[150px]">
-                              <div className="font-semibold text-primary-900 dark:text-primary-100 whitespace-nowrap hover:text-accent-600 hover:underline">
+                              <div className="font-semibold whitespace-nowrap hover:underline" style={{ color: 'var(--color-text-primary)' }}>
                                 {userItem.name || 'No name'}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <div className="inline-block px-3 py-1 rounded-xl bg-amber-600 text-white font-semibold text-[13px]">
+                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
+                          <div className="inline-block px-3 py-1 rounded-xl text-white font-semibold text-[13px]" style={{ backgroundColor: 'var(--color-warning)' }}>
                             {userItem.credits || 0}
                           </div>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <span className={`inline-block px-3 py-1 rounded-xl font-semibold text-xs uppercase tracking-wide text-white ${
-                            userItem.role === 'admin'
-                              ? 'bg-amber-600'
-                              : userItem.role === 'teacher' || userItem.role === 'trial_teacher'
-                              ? 'bg-zinc-800'
-                              : 'bg-gray-600'
-                          }`}>
+                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
+                          <span
+                            className="inline-block px-3 py-1 rounded-xl font-semibold text-xs uppercase tracking-wide text-white"
+                            style={{
+                              backgroundColor: userItem.role === 'admin'
+                                ? 'var(--color-warning)'
+                                : (userItem.role === 'teacher' || userItem.role === 'trial_teacher')
+                                ? '#27272a'
+                                : 'var(--color-info)'
+                            }}
+                          >
                             {ROLE_INFO[userItem.role]?.name || userItem.role}
                           </span>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <span className={`inline-block px-3 py-1 rounded-xl font-semibold text-xs text-white ${
-                            userItem.status === 'active'
-                              ? 'bg-success-500'
-                              : userItem.status === 'suspended'
-                              ? 'bg-error-500'
-                              : 'bg-warning-500'
-                          }`}>
+                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
+                          <span
+                            className="inline-block px-3 py-1 rounded-xl font-semibold text-xs text-white"
+                            style={{
+                              backgroundColor: userItem.status === 'active'
+                                ? 'var(--color-success)'
+                                : userItem.status === 'suspended'
+                                ? 'var(--color-danger)'
+                                : 'var(--color-warning)'
+                            }}
+                          >
                             {userItem.status === 'active' ? 'Active' :
                              userItem.status === 'suspended' ? 'Suspended' :
                              'Pending'}
                           </span>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
+                          <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                             {formatDate(userItem.createdAt)}
                           </span>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <td className="p-4" style={{ color: 'var(--color-text-primary)' }}>
+                          <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                             {userItem.email}
                           </span>
                         </td>
@@ -1443,7 +1453,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
           {/* GRID VIEW */}
           {navigation.usersViewMode === 'grid' && (
             filteredUsers.length === 0 ? (
-              <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+              <div className="py-12 text-center" style={{ color: 'var(--color-text-secondary)' }}>
                 <p>No users found with selected filters</p>
               </div>
             ) : (
@@ -1465,7 +1475,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
           {/* LIST VIEW */}
           {navigation.usersViewMode === 'list' && (
             filteredUsers.length === 0 ? (
-              <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+              <div className="py-12 text-center" style={{ color: 'var(--color-text-secondary)' }}>
                 <p>No users found with selected filters</p>
               </div>
             ) : (
@@ -1634,69 +1644,69 @@ function AdminDashboard({ user, userRole, onLogout }) {
         <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
           <div className="mb-12 text-center">
             <div className="flex items-center gap-3 mb-2 justify-center">
-              <Crown size={40} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
+              <Crown size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
+              <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Admin Panel</h1>
             </div>
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 mb-12">
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
+            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
               <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
                 <Users size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.total}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Total Users</div>
+                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.total}</div>
+                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Total Users</div>
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-amber-600">
+            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white" style={{ backgroundColor: 'var(--color-warning)' }}>
                 <Crown size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.admins}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Administrators</div>
+                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.admins}</div>
+                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Administrators</div>
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
+            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
               <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
                 <UserCog size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.teachers}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Teachers</div>
+                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.teachers}</div>
+                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Teachers</div>
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gray-600">
+            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white" style={{ backgroundColor: 'var(--color-info)' }}>
                 <GraduationCap size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.students}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Students</div>
+                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.students}</div>
+                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Students</div>
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-green-600">
+            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white" style={{ backgroundColor: 'var(--color-success)' }}>
                 <CheckCircle size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.active}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Active</div>
+                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.active}</div>
+                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Active</div>
               </div>
             </div>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-red-600">
+            <div className="rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white" style={{ backgroundColor: 'var(--color-danger)' }}>
                 <Ban size={36} strokeWidth={2} />
               </div>
               <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.suspended}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Suspended</div>
+                <div className="text-[32px] font-bold leading-none mb-2" style={{ color: 'var(--color-text-primary)' }}>{stats.suspended}</div>
+                <div className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>Suspended</div>
               </div>
             </div>
           </div>
@@ -1750,6 +1760,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
           </div>
         </div>
       )}
+
+      {/* AI Assistant Widget */}
+      <AIAssistantWidget />
     </>
   );
 }

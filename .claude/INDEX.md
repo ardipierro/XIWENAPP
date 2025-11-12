@@ -4,16 +4,17 @@
 
 ---
 
-## ⚠️ IMPORTANTE PARA CLAUDE CODE WEB
+## ⚠️ IMPORTANTE PARA CLAUDE CODE
 
-Esta carpeta contiene **6 archivos principales** de documentación actualizados:
+Esta carpeta contiene **7 archivos principales** de documentación actualizados:
 
 1. **GUIDE.md** - 🚀 EMPEZAR AQUÍ SIEMPRE
 2. **CODING_STANDARDS.md** - Estándares de código
 3. **DESIGN_SYSTEM.md** - Sistema de diseño
 4. **EXERCISE_BUILDER.md** - Sistema de ejercicios
-5. **CONTENT_SCHEMA.md** - Arquitectura de contenidos
-6. **CHANGELOG.md** - Historial de cambios
+5. **AI_ASSISTANT.md** - Sistema de asistente virtual con voz
+6. **CONTENT_SCHEMA.md** - Arquitectura de contenidos
+7. **CHANGELOG.md** - Historial de cambios
 
 ---
 
@@ -27,6 +28,7 @@ Esta carpeta contiene **6 archivos principales** de documentación actualizados:
 | **CODING_STANDARDS.md** | 22 KB | Las 8 reglas, componentes base, ejemplos | Antes de escribir código |
 | **DESIGN_SYSTEM.md** | 18 KB | Colores, responsive, UI components | Antes de crear UI |
 | **EXERCISE_BUILDER.md** | 17 KB | Sistema de ejercicios ELE | Al trabajar con ejercicios |
+| **AI_ASSISTANT.md** | 19 KB | Sistema de asistente virtual con comandos de voz | Al trabajar con AI Assistant |
 | **CONTENT_SCHEMA.md** | 7 KB | Arquitectura de datos | Al trabajar con contenidos |
 | **CHANGELOG.md** | 6 KB | Historial de cambios | Para ver cambios recientes |
 
@@ -59,7 +61,9 @@ Estos archivos fueron **eliminados el 2025-11-11**. Si ves referencias a ellos, 
    ↓
 4. Si vas a trabajar con ejercicios → EXERCISE_BUILDER.md
    ↓
-5. Si vas a trabajar con contenidos → CONTENT_SCHEMA.md
+5. Si vas a trabajar con AI Assistant → AI_ASSISTANT.md
+   ↓
+6. Si vas a trabajar con contenidos → CONTENT_SCHEMA.md
 ```
 
 ---
@@ -77,6 +81,7 @@ Deberías ver:
 - ✅ CODING_STANDARDS.md
 - ✅ DESIGN_SYSTEM.md
 - ✅ EXERCISE_BUILDER.md
+- ✅ AI_ASSISTANT.md
 - ✅ CONTENT_SCHEMA.md
 - ✅ CHANGELOG.md
 - ✅ INDEX.md (este archivo)
@@ -93,6 +98,7 @@ Si necesitas las rutas absolutas:
 - `.claude/CODING_STANDARDS.md`
 - `.claude/DESIGN_SYSTEM.md`
 - `.claude/EXERCISE_BUILDER.md`
+- `.claude/AI_ASSISTANT.md`
 - `.claude/CONTENT_SCHEMA.md`
 - `.claude/CHANGELOG.md`
 

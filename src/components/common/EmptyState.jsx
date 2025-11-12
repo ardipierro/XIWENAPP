@@ -1,3 +1,5 @@
+import BaseButton from './BaseButton';
+
 /**
  * EmptyState - Estado vacío reutilizable
  * Muestra un ícono, título, descripción y opcionalmente un botón de acción
@@ -33,9 +35,9 @@ function EmptyState({
       )}
 
       {actionLabel && onAction && (
-        <button onClick={onAction} className="btn btn-primary">
+        <BaseButton onClick={onAction} variant="primary">
           {actionLabel}
-        </button>
+        </BaseButton>
       )}
     </div>
   );

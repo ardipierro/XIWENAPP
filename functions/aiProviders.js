@@ -58,8 +58,9 @@ async function callGemini(prompt, config) {
     throw new HttpsError('failed-precondition', 'Gemini API key not configured');
   }
 
-  const model = config.model || 'gemini-2.0-flash-exp';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // Use v1 API (stable) with gemini-pro or gemini-1.5-pro
+  const model = config.model || 'gemini-pro';
+  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
 
   const systemPrompt = config.systemPrompt || 'You are a helpful assistant.';
   const fullPrompt = `${systemPrompt}\n\n${prompt}`;

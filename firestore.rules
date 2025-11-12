@@ -68,10 +68,13 @@ service cloud.firestore {
     }
 
     // User credits - users can read/write their own, admins can manage all
-    match /user_credits/{userId} {
+    match /user_credits/{creditId} {
       allow read: if isAuthenticated() &&
-        (request.auth.uid == userId || isAdmin());
-      allow write: if request.auth.uid == userId || isAdmin();
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
     }
 
     // ============================================
@@ -229,7 +232,11 @@ service cloud.firestore {
 
     // Calendar events
     match /calendarEvents/{eventId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() &&
+        (resource.data.participants.hasAny([request.auth.uid]) ||
+         resource.data.createdBy == request.auth.uid ||
+         isAdmin() ||
+         isTeacher());
       allow write: if isTeacher() || isAdmin();
     }
 

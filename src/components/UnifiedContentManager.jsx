@@ -292,15 +292,15 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   }
 
   return (
-    <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
+    <div className="p-6 min-h-screen" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
               📚 Gestión de Contenidos
             </h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               Sistema unificado para todos tus recursos educativos
             </p>
           </div>
@@ -315,25 +315,25 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Total</p>
-            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.total}</p>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Total</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.total}</p>
           </div>
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Cursos</p>
-            <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{stats.courses}</p>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Cursos</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.courses}</p>
           </div>
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Lecciones</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.lessons}</p>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Lecciones</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-success)' }}>{stats.lessons}</p>
           </div>
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Ejercicios</p>
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.exercises}</p>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Ejercicios</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-warning)' }}>{stats.exercises}</p>
           </div>
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Juegos</p>
-            <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{stats.games}</p>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Juegos</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.games}</p>
           </div>
         </div>
 
@@ -468,17 +468,17 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         {viewingContent && (
           <div className="space-y-4">
             {/* Metadata */}
-            <div className="grid grid-cols-2 gap-4 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
               <div>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Tipo</p>
-                <p className="text-base font-semibold text-zinc-900 dark:text-white">
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Tipo</p>
+                <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                   {CONTENT_TYPE_CONFIG[viewingContent.type]?.label || viewingContent.type}
                 </p>
               </div>
               {viewingContent.metadata?.difficulty && (
                 <div>
-                  <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Dificultad</p>
-                  <p className="text-base font-semibold text-zinc-900 dark:text-white">
+                  <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Dificultad</p>
+                  <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     {viewingContent.metadata.difficulty}
                   </p>
                 </div>
@@ -488,8 +488,8 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
             {/* Description */}
             {viewingContent.description && (
               <div>
-                <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Descripción</h4>
-                <p className="text-zinc-600 dark:text-zinc-400">{viewingContent.description}</p>
+                <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Descripción</h4>
+                <p style={{ color: 'var(--color-text-secondary)' }}>{viewingContent.description}</p>
               </div>
             )}
 
@@ -498,7 +498,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               {/* Video Player */}
               {viewingContent.type === CONTENT_TYPES.VIDEO && viewingContent.url && (
                 <div className="mb-4 space-y-4">
-                  <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Video</h4>
+                  <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Video</h4>
 
                   {/* Video iframe player con thumbnail */}
                   <div className="relative w-full bg-black rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
@@ -519,7 +519,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                             className="group w-20 h-20 rounded-full bg-white/90 hover:bg-white hover:scale-110 transition-all flex items-center justify-center shadow-xl"
                             aria-label="Reproducir video"
                           >
-                            <Play className="w-10 h-10 text-zinc-900 ml-1 group-hover:text-blue-600 transition-colors" strokeWidth={2} fill="currentColor" />
+                            <Play className="w-10 h-10 ml-1 transition-colors" style={{ color: 'var(--color-text-primary)' }} strokeWidth={2} fill="currentColor" />
                           </button>
                         </div>
                       </>
@@ -546,16 +546,16 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      URL: <a href={viewingContent.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">{viewingContent.url}</a>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                      URL: <a href={viewingContent.url} target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: 'var(--color-primary)' }}>{viewingContent.url}</a>
                     </p>
 
                     {viewingContent.body && (
                       <details className="text-xs">
-                        <summary className="cursor-pointer text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                        <summary className="cursor-pointer" style={{ color: 'var(--color-text-secondary)' }}>
                           Ver código embed
                         </summary>
-                        <pre className="mt-2 p-2 bg-zinc-100 dark:bg-zinc-900 rounded text-[10px] overflow-x-auto">
+                        <pre className="mt-2 p-2 rounded text-[10px] overflow-x-auto" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
                           <code>{viewingContent.body}</code>
                         </pre>
                       </details>
@@ -564,8 +564,8 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
                   {/* Bunny.net Metadata */}
                   {viewingContent.videoData && (
-                    <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4 space-y-3">
-                      <h5 className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
+                    <div className="pt-4 space-y-3" style={{ borderTop: '1px solid var(--color-border)' }}>
+                      <h5 className="text-xs font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
                         <span className="text-orange-500">🐰</span>
                         Datos de Bunny.net
                       </h5>
@@ -573,11 +573,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                       {/* Thumbnail */}
                       {viewingContent.videoData.thumbnailUrl && (
                         <div>
-                          <p className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">Thumbnail:</p>
+                          <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Thumbnail:</p>
                           <img
                             src={viewingContent.videoData.thumbnailUrl}
                             alt="Video thumbnail"
-                            className="w-full max-w-sm rounded-lg border border-zinc-200 dark:border-zinc-700"
+                            className="w-full max-w-sm rounded-lg"
+                            style={{ border: '1px solid var(--color-border)' }}
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
                         </div>
@@ -586,11 +587,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                       {/* Preview Animation */}
                       {viewingContent.videoData.previewUrl && (
                         <div>
-                          <p className="text-xs text-zinc-600 dark:text-zinc-400 mb-1">Vista Previa Animada:</p>
+                          <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Vista Previa Animada:</p>
                           <img
                             src={viewingContent.videoData.previewUrl}
                             alt="Video preview animation"
-                            className="w-full max-w-sm rounded-lg border border-zinc-200 dark:border-zinc-700"
+                            className="w-full max-w-sm rounded-lg"
+                            style={{ border: '1px solid var(--color-border)' }}
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
                         </div>
@@ -600,14 +602,14 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         {viewingContent.videoData.videoGuid && (
                           <div>
-                            <span className="text-zinc-600 dark:text-zinc-400 font-medium">Video GUID:</span>
-                            <p className="text-zinc-700 dark:text-zinc-300 font-mono text-[10px] break-all">{viewingContent.videoData.videoGuid}</p>
+                            <span className="font-medium" style={{ color: 'var(--color-text-secondary)' }}>Video GUID:</span>
+                            <p className="font-mono text-[10px] break-all" style={{ color: 'var(--color-text-primary)' }}>{viewingContent.videoData.videoGuid}</p>
                           </div>
                         )}
                         {viewingContent.videoData.collectionId && (
                           <div>
-                            <span className="text-zinc-600 dark:text-zinc-400 font-medium">Collection ID:</span>
-                            <p className="text-zinc-700 dark:text-zinc-300 font-mono">{viewingContent.videoData.collectionId}</p>
+                            <span className="font-medium" style={{ color: 'var(--color-text-secondary)' }}>Collection ID:</span>
+                            <p className="font-mono" style={{ color: 'var(--color-text-primary)' }}>{viewingContent.videoData.collectionId}</p>
                           </div>
                         )}
                       </div>
@@ -619,12 +621,13 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               {/* Link */}
               {viewingContent.type === CONTENT_TYPES.LINK && viewingContent.url && (
                 <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Enlace</h4>
+                  <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Enlace</h4>
                   <a
                     href={viewingContent.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
                   >
                     Abrir enlace
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -635,7 +638,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               )}
 
               {/* Exercises */}
-              <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+              <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
                 {viewingContent.type === CONTENT_TYPES.EXERCISE ? 'Ejercicios' : 'Contenido'}
               </h4>
               {viewingContent.type === CONTENT_TYPES.EXERCISE ? (
@@ -644,12 +647,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                     try {
                       const exercises = JSON.parse(viewingContent.body);
                       return exercises.map((ex, idx) => (
-                        <div key={idx} className="p-6 bg-white dark:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-600">
+                        <div key={idx} className="p-6 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
                           <div className="flex items-center gap-2 mb-4">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-600 text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold" style={{ backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}>
                               {idx + 1}
                             </span>
-                            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+                            <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
                               {ex.type}
                             </span>
                           </div>
@@ -672,20 +675,20 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
                           {/* For other types, show JSON for now */}
                           {!['gap-fill', 'multiple-choice'].includes(ex.type) && (
-                            <pre className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                            <pre className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-text-secondary)' }}>
                               {JSON.stringify(ex, null, 2)}
                             </pre>
                           )}
                         </div>
                       ));
                     } catch (e) {
-                      return <p className="text-red-600 dark:text-red-400">Error al parsear ejercicios: {e.message}</p>;
+                      return <p style={{ color: 'var(--color-danger)' }}>Error al parsear ejercicios: {e.message}</p>;
                     }
                   })()}
                 </div>
               ) : (
-                <div className="p-4 bg-white dark:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-600">
-                  <pre className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+                  <pre className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-text-secondary)' }}>
                     {viewingContent.body || 'Sin contenido'}
                   </pre>
                 </div>
@@ -716,13 +719,26 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return variants[type] || 'default';
   };
 
-  const getDifficultyColor = (difficulty) => {
-    const colors = {
-      [DIFFICULTY_LEVELS.BEGINNER]: 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20',
-      [DIFFICULTY_LEVELS.INTERMEDIATE]: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20',
-      [DIFFICULTY_LEVELS.ADVANCED]: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+  const getDifficultyStyle = (difficulty) => {
+    const styles = {
+      [DIFFICULTY_LEVELS.BEGINNER]: { color: 'var(--color-success)', backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)' },
+      [DIFFICULTY_LEVELS.INTERMEDIATE]: { color: 'var(--color-warning)', backgroundColor: 'color-mix(in srgb, var(--color-warning) 10%, transparent)' },
+      [DIFFICULTY_LEVELS.ADVANCED]: { color: 'var(--color-danger)', backgroundColor: 'color-mix(in srgb, var(--color-danger) 10%, transparent)' }
     };
-    return colors[difficulty] || 'text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/20';
+    return styles[difficulty] || { color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-bg-tertiary)' };
+  };
+
+  const getIconColorStyle = (type) => {
+    const colorMap = {
+      [CONTENT_TYPES.LESSON]: { bg: 'color-mix(in srgb, var(--color-success) 10%, transparent)', icon: 'var(--color-success)' },
+      [CONTENT_TYPES.VIDEO]: { bg: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', icon: 'var(--color-danger)' },
+      [CONTENT_TYPES.EXERCISE]: { bg: 'color-mix(in srgb, var(--color-warning) 10%, transparent)', icon: 'var(--color-warning)' },
+      [CONTENT_TYPES.COURSE]: { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' },
+      [CONTENT_TYPES.READING]: { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' },
+      [CONTENT_TYPES.LINK]: { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' },
+      [CONTENT_TYPES.LIVE_GAME]: { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' }
+    };
+    return colorMap[type] || { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' };
   };
 
   // Determinar si tiene imagen (thumbnail de video u otra imagen)
@@ -744,7 +760,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           {/* Overlay con icono de play - solo visible en hover */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-all duration-300">
             <div className="w-16 h-16 rounded-full bg-white/0 group-hover:bg-white/90 flex items-center justify-center transition-all duration-300 scale-0 group-hover:scale-100">
-              <Play className="w-8 h-8 text-zinc-900 ml-1" strokeWidth={2} fill="currentColor" />
+              <Play className="w-8 h-8 ml-1" style={{ color: 'var(--color-text-primary)' }} strokeWidth={2} fill="currentColor" />
             </div>
           </div>
         </div>
@@ -752,9 +768,10 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     }
 
     // Fallback: Icono del tipo de contenido
+    const iconColors = getIconColorStyle(content.type);
     return (
-      <div className={`w-full h-full flex items-center justify-center bg-${config.color}-100 dark:bg-${config.color}-900/20`}>
-        <IconComponent className={`w-12 h-12 text-${config.color}-600 dark:text-${config.color}-400`} strokeWidth={1.5} />
+      <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: iconColors.bg }}>
+        <IconComponent className="w-12 h-12" style={{ color: iconColors.icon }} strokeWidth={1.5} />
       </div>
     );
   };
@@ -763,11 +780,12 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return (
       <div
         id={`content-${content.id}`}
-        className={`group bg-white dark:bg-zinc-800 rounded-lg border transition-all overflow-hidden ${
-          isNew
-            ? 'border-green-500 dark:border-green-400 shadow-lg shadow-green-500/20 animate-pulse'
-            : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
-        }`}
+        className="group rounded-lg transition-all overflow-hidden"
+        style={{
+          backgroundColor: 'var(--color-bg-secondary)',
+          border: isNew ? '1px solid var(--color-success)' : '1px solid var(--color-border)',
+          boxShadow: isNew ? '0 10px 15px -3px color-mix(in srgb, var(--color-success) 20%, transparent)' : 'none'
+        }}
       >
         <div className="flex items-stretch min-h-[140px]">
           {/* Imagen o Icono - Cuadrado que ocupa toda la altura */}
@@ -780,15 +798,22 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
                 onError={(e) => {
                   e.target.style.display = 'none';
                   // Mostrar ícono de fallback
+                  const iconColors = getIconColorStyle(content.type);
                   const fallback = document.createElement('div');
-                  fallback.className = `w-full h-full flex items-center justify-center bg-${config.color}-100 dark:bg-${config.color}-900/20`;
+                  fallback.className = 'w-full h-full flex items-center justify-center';
+                  fallback.style.backgroundColor = iconColors.bg;
                   e.target.parentElement.appendChild(fallback);
                 }}
               />
             ) : (
-              <div className={`w-full h-full flex items-center justify-center bg-${config.color}-100 dark:bg-${config.color}-900/20`}>
-                <IconComponent className={`w-10 h-10 text-${config.color}-600 dark:text-${config.color}-400`} strokeWidth={2} />
-              </div>
+              (() => {
+                const iconColors = getIconColorStyle(content.type);
+                return (
+                  <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: iconColors.bg }}>
+                    <IconComponent className="w-10 h-10" style={{ color: iconColors.icon }} strokeWidth={2} />
+                  </div>
+                );
+              })()
             )}
           </div>
 
@@ -800,29 +825,29 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
                 {config.label}
               </BaseBadge>
               {content.metadata?.difficulty && (
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyColor(content.metadata.difficulty)}`}>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={getDifficultyStyle(content.metadata.difficulty)}>
                   {content.metadata.difficulty}
                 </span>
               )}
               {content.metadata?.tags?.slice(0, 2).map((tag, idx) => (
-                <span key={idx} className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-700 px-2 py-0.5 rounded-full">
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full" style={{ color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-bg-tertiary)' }}>
                   {tag}
                 </span>
               ))}
             </div>
 
             {/* Título */}
-            <h3 className="text-base font-semibold text-zinc-900 dark:text-white truncate mb-1">
+            <h3 className="text-base font-semibold truncate mb-1" style={{ color: 'var(--color-text-primary)' }}>
               {content.title}
             </h3>
 
             {/* Descripción */}
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-1 mb-2">
+            <p className="text-sm line-clamp-1 mb-2" style={{ color: 'var(--color-text-secondary)' }}>
               {content.description || config.description}
             </p>
 
             {/* Metadata (fecha, duración, puntos) */}
-            <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
               {content.createdAt && (
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
@@ -859,11 +884,11 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   return (
     <BaseCard
       id={`content-${content.id}`}
-      className={`group transition-all ${
-        isNew
-          ? 'border-green-500 dark:border-green-400 shadow-lg shadow-green-500/20 animate-pulse'
-          : 'hover:border-zinc-500 dark:hover:border-zinc-400'
-      }`}
+      className="group transition-all"
+      style={{
+        border: isNew ? '1px solid var(--color-success)' : '1px solid var(--color-border)',
+        boxShadow: isNew ? '0 10px 15px -3px color-mix(in srgb, var(--color-success) 20%, transparent)' : 'none'
+      }}
       image={renderImageOrIcon()}
     >
       <div className="flex flex-col h-full">
@@ -873,25 +898,25 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
             {config.label}
           </BaseBadge>
           {content.metadata?.difficulty && (
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyColor(content.metadata.difficulty)}`}>
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={getDifficultyStyle(content.metadata.difficulty)}>
               {content.metadata.difficulty}
             </span>
           )}
         </div>
 
         {/* Título */}
-        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2 line-clamp-2">
+        <h3 className="text-lg font-semibold mb-2 line-clamp-2" style={{ color: 'var(--color-text-primary)' }}>
           {content.title}
         </h3>
 
         {/* Descripción */}
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-3 flex-grow">
+        <p className="text-sm mb-4 line-clamp-3 flex-grow" style={{ color: 'var(--color-text-secondary)' }}>
           {content.description || config.description}
         </p>
 
         {/* Metadata (fecha, duración, puntos, tags) */}
         <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 flex-wrap">
+          <div className="flex items-center gap-3 text-xs flex-wrap" style={{ color: 'var(--color-text-secondary)' }}>
             {content.createdAt && (
               <div className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
@@ -915,9 +940,9 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           {/* Tags */}
           {content.metadata?.tags?.length > 0 && (
             <div className="flex items-center gap-1 flex-wrap">
-              <Tag className="w-3.5 h-3.5 text-zinc-400" strokeWidth={2} />
+              <Tag className="w-3.5 h-3.5" style={{ color: 'var(--color-text-secondary)' }} strokeWidth={2} />
               {content.metadata.tags.slice(0, 3).map((tag, idx) => (
-                <span key={idx} className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-700 px-2 py-0.5 rounded-full">
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full" style={{ color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-bg-tertiary)' }}>
                   {tag}
                 </span>
               ))}
@@ -926,7 +951,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
         </div>
 
         {/* Footer - Action Buttons */}
-        <div className="flex gap-2 mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-700">
+        <div className="flex gap-2 mt-auto pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
           <BaseButton variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
             Ver
           </BaseButton>

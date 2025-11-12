@@ -1,9 +1,9 @@
-# 🎨 Design Lab - Sistema de Ejercicios Interactivos ELE
+# 🎨 Exercise Builder - Sistema de Ejercicios Interactivos ELE
 
-**✅ Claude Code Web**: Documentación completa del Design Lab para la app de ELE (Español como Lengua Extranjera)
+**✅ Claude Code**: Documentación completa del Exercise Builder para la app de ELE (Español como Lengua Extranjera)
 
-**Creado:** 2025-11-08
-**Versión:** 1.0
+**Última actualización:** 2025-11-11
+**Versión:** 2.0 - Actualizada
 
 ---
 
@@ -13,16 +13,16 @@
 2. [Arquitectura](#arquitectura)
 3. [Componentes Principales](#componentes-principales)
 4. [Parser de Texto](#parser-de-texto)
-5. [Configuración](#configuración)
-6. [Tipos de Ejercicios](#tipos-de-ejercicios)
+5. [Tipos de Ejercicios](#tipos-de-ejercicios)
+6. [Hooks Personalizados](#hooks-personalizados)
 7. [Guía de Uso](#guía-de-uso)
-8. [API Reference](#api-reference)
+8. [Cumplimiento de Estándares](#cumplimiento-de-estándares)
 
 ---
 
 ## 📖 Descripción General
 
-El **Design Lab** es un módulo completo para diseñar, probar y exportar ejercicios interactivos para enseñanza de ELE. Características principales:
+El **Exercise Builder** es un módulo completo para diseñar, probar y exportar ejercicios interactivos para enseñanza de ELE. Características principales:
 
 - ✅ **Parser de texto plano** a ejercicios React
 - ✅ **Configuración visual** guardada en Firestore
@@ -39,7 +39,7 @@ El **Design Lab** es un módulo completo para diseñar, probar y exportar ejerci
 ```
 src/
 ├── components/
-│   └── designlab/
+│   └── exercisebuilder/                    ← Exercise Builder
 │       ├── exercises/
 │       │   ├── MultipleChoiceExercise.jsx
 │       │   ├── FillInBlankExercise.jsx
@@ -47,37 +47,45 @@ src/
 │       │   ├── TrueFalseExercise.jsx
 │       │   └── index.js
 │       ├── TextToExerciseParser.jsx
-│       └── SettingsPanel.jsx
+│       ├── SettingsPanel.jsx
+│       ├── AIExerciseGenerator.jsx
+│       ├── ExerciseLibrary.jsx
+│       └── ProgressDashboard.jsx
 │
 ├── hooks/
-│   ├── useDesignLabConfig.js
+│   ├── useExerciseBuilderConfig.js         ← Hook de configuración
 │   └── useExerciseState.js
 │
 ├── firebase/
-│   └── designLabConfig.js
+│   └── exerciseBuilderConfig.js
 │
 └── pages/
-    └── DesignLabPage.jsx
+    └── ExerciseBuilder.jsx                 ← Página principal
 ```
 
 ---
 
 ## 🧩 Componentes Principales
 
-### 1. DesignLabPage
+### 1. ExerciseBuilder (Página Principal)
 
 Página principal con navegación:
 - **Home**: Bienvenida y accesos rápidos
 - **Parser**: Convertir texto a ejercicios
-- **Ejemplos**: Ejercicios prediseñados
-- **Estadísticas**: Progreso del usuario
+- **Library**: Biblioteca de ejercicios
+- **AI Generator**: Generación con IA
+- **Progress**: Progreso del usuario
 
 **Uso:**
 ```jsx
-import { DesignLabPage } from './pages/DesignLabPage';
+import { ExerciseBuilder } from './pages/ExerciseBuilder';
 
 function App() {
-  return <DesignLabPage />;
+  return (
+    <Router>
+      <Route path="/exercise-builder" element={<ExerciseBuilder />} />
+    </Router>
+  );
 }
 ```
 
@@ -87,10 +95,12 @@ function App() {
 
 Parser de texto plano a ejercicios React.
 
+**Ubicación:** `src/components/exercisebuilder/TextToExerciseParser.jsx`
+
 **Props:**
 ```jsx
 <TextToExerciseParser
-  onExerciseGenerated={(exercise) => console.log(exercise)}
+  onExerciseGenerated={(exercise) => logger.info('Generated:', exercise)}
 />
 ```
 
@@ -141,6 +151,8 @@ NIVEL: A2
 
 Panel de configuración visual.
 
+**Ubicación:** `src/components/exercisebuilder/SettingsPanel.jsx`
+
 **Configuraciones guardadas en Firestore:**
 ```javascript
 {
@@ -167,6 +179,8 @@ Panel de configuración visual.
 
 ### 1. MultipleChoiceExercise
 
+**Ubicación:** `src/components/exercisebuilder/exercises/MultipleChoiceExercise.jsx`
+
 **Props:**
 ```jsx
 <MultipleChoiceExercise
@@ -179,7 +193,7 @@ Panel de configuración visual.
   explanation="Hola es el saludo común."
   cefrLevel="A1"
   hints={['Es un saludo', 'Empieza con H']}
-  onComplete={(result) => console.log(result)}
+  onComplete={(result) => logger.info('Completed:', result)}
 />
 ```
 
@@ -197,7 +211,7 @@ Panel de configuración visual.
   cefrLevel="A1"
   hints={['Es reflexivo', 'Empieza con me']}
   audioUrl="/audio/example.mp3"
-  onComplete={(result) => console.log(result)}
+  onComplete={(result) => logger.info('Completed:', result)}
 />
 ```
 
@@ -215,7 +229,7 @@ Panel de configuración visual.
   ]}
   explanation="Usamos tener para sensaciones."
   cefrLevel="B1"
-  onComplete={(result) => console.log(result)}
+  onComplete={(result) => logger.info('Completed:', result)}
 />
 ```
 
@@ -230,7 +244,7 @@ Panel de configuración visual.
   correctAnswer={false}
   explanation="La mayoría van después."
   cefrLevel="A2"
-  onComplete={(result) => console.log(result)}
+  onComplete={(result) => logger.info('Completed:', result)}
 />
 ```
 
@@ -238,13 +252,15 @@ Panel de configuración visual.
 
 ## 🎣 Hooks Personalizados
 
-### useDesignLabConfig
+### useExerciseBuilderConfig
 
-Gestiona configuración del Design Lab con Firestore.
+**Ubicación:** `src/hooks/useExerciseBuilderConfig.js`
+
+Gestiona configuración del Exercise Builder con Firestore.
 
 **Uso:**
 ```jsx
-import { useDesignLabConfig } from '../hooks/useDesignLabConfig';
+import { useExerciseBuilderConfig } from '../hooks/useExerciseBuilderConfig';
 
 function MyComponent() {
   const {
@@ -256,13 +272,13 @@ function MyComponent() {
     updateField,      // Actualizar un campo
     resetConfig,      // Resetear a default
     reloadConfig      // Recargar desde Firestore
-  } = useDesignLabConfig();
+  } = useExerciseBuilderConfig();
 
   return (
     <div style={{ fontSize: `${config.fontSize}px` }}>
-      <button onClick={() => updateField('theme', 'dark')}>
+      <BaseButton onClick={() => updateField('theme', 'dark')}>
         Toggle Theme
-      </button>
+      </BaseButton>
     </div>
   );
 }
@@ -271,6 +287,8 @@ function MyComponent() {
 ---
 
 ### useExerciseState
+
+**Ubicación:** `src/hooks/useExerciseState.js`
 
 Gestiona estado de ejercicios individuales.
 
@@ -301,8 +319,8 @@ function MyExercise() {
 
   return (
     <div>
-      <button onClick={() => setUserAnswer('option1')}>Option 1</button>
-      <button onClick={checkAnswer}>Verificar</button>
+      <BaseButton onClick={() => setUserAnswer('option1')}>Option 1</BaseButton>
+      <BaseButton onClick={checkAnswer}>Verificar</BaseButton>
       {showFeedback && <p>{isCorrect ? 'Correcto' : 'Incorrecto'}</p>}
       <p>Puntos: {score} | Estrellas: {stars}</p>
     </div>
@@ -319,7 +337,7 @@ function MyExercise() {
 ```
 users/{userId}/
   configs/
-    designLab/
+    exerciseBuilder/                    ← Configuración del builder
       - theme: string
       - fontSize: number
       - feedbackColors: object
@@ -334,25 +352,27 @@ users/{userId}/
 
 ### Funciones de Firebase
 
+**Ubicación:** `src/firebase/exerciseBuilderConfig.js`
+
 ```javascript
 import {
-  getDesignLabConfig,
-  saveDesignLabConfig,
-  updateDesignLabConfigField,
-  resetDesignLabConfig
-} from '../firebase/designLabConfig';
+  getExerciseBuilderConfig,
+  saveExerciseBuilderConfig,
+  updateExerciseBuilderConfigField,
+  resetExerciseBuilderConfig
+} from '../firebase/exerciseBuilderConfig';
 
 // Obtener config
-const config = await getDesignLabConfig(userId);
+const config = await getExerciseBuilderConfig(userId);
 
 // Guardar config completa
-await saveDesignLabConfig(userId, { theme: 'dark', fontSize: 18 });
+await saveExerciseBuilderConfig(userId, { theme: 'dark', fontSize: 18 });
 
 // Actualizar un campo
-await updateDesignLabConfigField(userId, 'theme', 'dark');
+await updateExerciseBuilderConfigField(userId, 'theme', 'dark');
 
 // Resetear
-await resetDesignLabConfig(userId);
+await resetExerciseBuilderConfig(userId);
 ```
 
 ---
@@ -363,12 +383,12 @@ await resetDesignLabConfig(userId);
 
 ```jsx
 // En tu App.jsx o router
-import { DesignLabPage } from './pages/DesignLabPage';
+import { ExerciseBuilder } from './pages/ExerciseBuilder';
 
 function App() {
   return (
     <Router>
-      <Route path="/design-lab" element={<DesignLabPage />} />
+      <Route path="/exercise-builder" element={<ExerciseBuilder />} />
     </Router>
   );
 }
@@ -379,13 +399,13 @@ function App() {
 ### 2. Usar componentes individuales
 
 ```jsx
-import { MultipleChoiceExercise } from './components/designlab/exercises';
+import { MultipleChoiceExercise } from './components/exercisebuilder/exercises';
 
 function MyLesson() {
   const handleComplete = (result) => {
-    console.log('Score:', result.score);
-    console.log('Correct:', result.correct);
-    console.log('Attempts:', result.attempts);
+    logger.info('Score:', result.score);
+    logger.info('Correct:', result.correct);
+    logger.info('Attempts:', result.attempts);
   };
 
   return (
@@ -409,11 +429,11 @@ function MyLesson() {
 ### 3. Usar el Parser
 
 ```jsx
-import { TextToExerciseParser } from './components/designlab/TextToExerciseParser';
+import { TextToExerciseParser } from './components/exercisebuilder/TextToExerciseParser';
 
 function MyParserPage() {
   const handleExerciseGenerated = (exercise) => {
-    console.log('Exercise generated:', exercise);
+    logger.info('Exercise generated:', exercise);
     // exercise = { type: 'mcq', props: {...} }
   };
 
@@ -427,16 +447,16 @@ function MyParserPage() {
 
 ---
 
-## 🎯 Ejemplos Completos
-
-### Ejemplo 1: Lección con múltiples ejercicios
+## 🎯 Ejemplo Completo
 
 ```jsx
+import { useState } from 'react';
 import {
   MultipleChoiceExercise,
   FillInBlankExercise,
   TrueFalseExercise
-} from './components/designlab/exercises';
+} from './components/exercisebuilder/exercises';
+import logger from '../utils/logger';
 
 function SpanishLesson() {
   const [currentExercise, setCurrentExercise] = useState(0);
@@ -470,21 +490,72 @@ function SpanishLesson() {
   function handleComplete(result) {
     setResults([...results, result]);
     setCurrentExercise(currentExercise + 1);
+    logger.info('Exercise completed:', result);
   }
 
   const current = exercises[currentExercise];
   if (!current) {
-    return <div>¡Lección completada! Puntuación: {calculateTotal(results)}</div>;
+    return (
+      <div className="p-8 bg-white dark:bg-gray-900">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          ¡Lección completada!
+        </h2>
+        <p className="text-lg text-gray-600 dark:text-gray-300">
+          Puntuación: {calculateTotal(results)}
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div className="min-h-screen p-4 md:p-8 bg-gray-50 dark:bg-gray-900">
       {current.type === 'mcq' && <MultipleChoiceExercise {...current.props} />}
       {current.type === 'blank' && <FillInBlankExercise {...current.props} />}
     </div>
   );
 }
+
+export default SpanishLesson;
 ```
+
+---
+
+## ✅ Cumplimiento de Estándares
+
+El Exercise Builder cumple con **todos los estándares de código** de XIWENAPP:
+
+### ✅ REGLA #1: 100% Tailwind CSS
+- ❌ Sin archivos `.css` custom
+- ✅ Todas las clases son de Tailwind
+
+### ✅ REGLA #2: BaseModal
+- ✅ No usa modales custom
+
+### ✅ REGLA #3: Componentes Base
+- ✅ Usa `BaseButton`, `BaseCard`, `BaseBadge`, `BaseTextarea`, `BaseAlert`
+- ✅ No usa HTML nativo
+
+### ✅ REGLA #4: Custom Hooks
+- ✅ `useExerciseState.js`
+- ✅ `useExerciseBuilderConfig.js`
+
+### ✅ REGLA #5: DRY
+- ✅ Componentes extraídos y reutilizables
+
+### ✅ REGLA #6: Logger (NO console.*)
+- ✅ Usa `logger.info()`, `logger.error()`, `logger.debug()`
+- ❌ No usa `console.log()` o `console.error()`
+
+### ✅ REGLA #7: Async/Await con Try-Catch
+- ✅ Todas las operaciones async tienen manejo de errores
+
+### ✅ REGLA #8: Dark Mode
+- ✅ Todos los componentes soportan dark mode
+- ✅ Usa clases `dark:` en elementos
+
+### ✅ Mobile First
+- ✅ Diseño responsive con breakpoints correctos
+- ✅ Touch targets adecuados (44px+)
 
 ---
 
@@ -493,15 +564,24 @@ function SpanishLesson() {
 ### Exportar a JSON
 
 ```jsx
+import { BaseButton } from '../common';
+import { Download } from 'lucide-react';
+import logger from '../../utils/logger';
+
 function ExportButton({ exercises }) {
   const exportExercises = () => {
-    const dataStr = JSON.stringify(exercises, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `exercises-${Date.now()}.json`;
-    link.click();
+    try {
+      const dataStr = JSON.stringify(exercises, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `exercises-${Date.now()}.json`;
+      link.click();
+      logger.info('Exercises exported successfully');
+    } catch (err) {
+      logger.error('Error exporting exercises:', err);
+    }
   };
 
   return (
@@ -515,14 +595,23 @@ function ExportButton({ exercises }) {
 ### Importar desde JSON
 
 ```jsx
+import { BaseButton } from '../common';
+import { Upload } from 'lucide-react';
+import logger from '../../utils/logger';
+
 function ImportButton({ onImport }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const exercises = JSON.parse(event.target.result);
-        onImport(exercises);
+        try {
+          const exercises = JSON.parse(event.target.result);
+          onImport(exercises);
+          logger.info('Exercises imported successfully');
+        } catch (err) {
+          logger.error('Error importing exercises:', err);
+        }
       };
       reader.readAsText(file);
     }
@@ -546,7 +635,7 @@ function ImportButton({ onImport }) {
 
 ## ✅ Checklist de Integración
 
-Antes de usar el Design Lab:
+Antes de usar el Exercise Builder:
 
 - [ ] ✅ Firebase configurado con Firestore
 - [ ] ✅ AuthContext disponible (useAuth hook)
@@ -561,11 +650,13 @@ Antes de usar el Design Lab:
 
 ### Error: "useAuth must be used within an AuthProvider"
 
-**Solución:** Asegúrate de que el Design Lab esté dentro de un `<AuthProvider>`:
+**Solución:** Asegúrate de que el Exercise Builder esté dentro de un `<AuthProvider>`:
 
 ```jsx
+import { AuthProvider } from './contexts/AuthContext';
+
 <AuthProvider>
-  <DesignLabPage />
+  <ExerciseBuilder />
 </AuthProvider>
 ```
 
@@ -596,33 +687,34 @@ match /users/{userId}/configs/{configId} {
 
 ## 📚 Recursos Adicionales
 
-- **Coding Standards:** `.claude/CODING_STANDARDS_QUICK.md`
-- **Base Components:** `.claude/BASE_COMPONENTS.md`
-- **Design System:** `.claude/MASTER_STANDARDS.md`
+- **Guía del Proyecto:** `.claude/GUIDE.md`
+- **Estándares de Código:** `.claude/CODING_STANDARDS.md`
+- **Sistema de Diseño:** `.claude/DESIGN_SYSTEM.md`
 - **Tailwind CSS:** https://tailwindcss.com/docs
 - **Lucide Icons:** https://lucide.dev/icons
 
 ---
 
-## 📝 Notas de Implementación
+## 📝 Resumen de Tecnologías
 
-### Tecnologías usadas:
-- ✅ React (hooks funcionales)
-- ✅ Tailwind CSS (100%, sin CSS custom)
-- ✅ Firestore (persistencia)
-- ✅ Firebase Auth (autenticación)
-- ✅ lucide-react (iconografía)
-- ✅ Componentes base del proyecto
+### ✅ Usadas:
+- React (hooks funcionales)
+- Tailwind CSS (100%, sin CSS custom)
+- Firestore (persistencia)
+- Firebase Auth (autenticación)
+- lucide-react (iconografía)
+- Componentes base del proyecto
+- logger utility
 
-### No se usa:
-- ❌ CSS custom (.css files)
-- ❌ Inline styles
-- ❌ console.* (solo logger)
-- ❌ HTML nativo (solo componentes base)
-- ❌ localStorage (solo Firestore)
+### ❌ NO usadas:
+- CSS custom (.css files)
+- Inline styles
+- console.* (solo logger)
+- HTML nativo (solo componentes base)
+- localStorage (solo Firestore)
 
 ---
 
-**Última actualización:** 2025-11-08
-**Versión:** 1.0
-**Autor:** Claude Code (Anthropic)
+**Última actualización:** 2025-11-11
+**Versión:** 2.0 - Actualizada con nombres correctos
+**Mantenido por:** Claude Code

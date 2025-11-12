@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, PartyPopper, Smile, Zap, Check, X, RotateCcw } from 'lucide-react';
 import { getExerciseById } from '../../firebase/exercises';
 import MultipleChoiceExercise from './types/MultipleChoiceExercise';
+import BaseButton from '../common/BaseButton';
 import './ExercisePlayer.css';
 
 function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
@@ -88,9 +89,9 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
           </div>
           <h2 className="error-title">Error</h2>
           <p className="error-message">{error}</p>
-          <button className="btn btn-primary" onClick={handleExit}>
+          <BaseButton variant="primary" onClick={handleExit}>
             Volver
-          </button>
+          </BaseButton>
         </div>
       </div>
     );
@@ -174,12 +175,12 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
           </div>
 
           <div className="results-actions">
-            <button className="btn btn-outline" onClick={handleRetry}>
-              <RotateCcw size={18} strokeWidth={2} className="inline-icon" /> Intentar de Nuevo
-            </button>
-            <button className="btn btn-primary" onClick={handleExit}>
+            <BaseButton variant="outline" onClick={handleRetry} icon={RotateCcw}>
+              Intentar de Nuevo
+            </BaseButton>
+            <BaseButton variant="primary" onClick={handleExit}>
               ← Volver
-            </button>
+            </BaseButton>
           </div>
         </div>
       </div>
@@ -203,9 +204,9 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
           <div className="coming-soon">
             <h3>Verdadero/Falso</h3>
             <p>Este tipo de ejercicio estará disponible próximamente.</p>
-            <button className="btn btn-primary" onClick={handleExit}>
+            <BaseButton variant="primary" onClick={handleExit}>
               Volver
-            </button>
+            </BaseButton>
           </div>
         );
 
@@ -214,9 +215,9 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
           <div className="coming-soon">
             <h3>Completar Espacios</h3>
             <p>Este tipo de ejercicio estará disponible próximamente.</p>
-            <button className="btn btn-primary" onClick={handleExit}>
+            <BaseButton variant="primary" onClick={handleExit}>
               Volver
-            </button>
+            </BaseButton>
           </div>
         );
 
@@ -225,9 +226,9 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
           <div className="coming-soon">
             <h3>Tipo de ejercicio: {exercise.type}</h3>
             <p>Este tipo de ejercicio aún no está implementado.</p>
-            <button className="btn btn-primary" onClick={handleExit}>
+            <BaseButton variant="primary" onClick={handleExit}>
               Volver
-            </button>
+            </BaseButton>
           </div>
         );
     }

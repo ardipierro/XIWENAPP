@@ -1,6 +1,7 @@
 import logger from '../utils/logger';
 
 import { useState, useRef, useEffect } from 'react';
+import BaseButton from './common/BaseButton';
 import {
   Pencil,
   Square,
@@ -2358,12 +2359,12 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
               autoFocus
             />
             <div className="whiteboard-modal-actions">
-              <button onClick={() => setShowSaveModal(false)} className="whiteboard-modal-btn secondary">
+              <BaseButton onClick={() => setShowSaveModal(false)} variant="secondary">
                 Cancelar
-              </button>
-              <button onClick={handleSaveSession} className="whiteboard-modal-btn primary">
+              </BaseButton>
+              <BaseButton onClick={handleSaveSession} variant="primary">
                 {currentSessionId ? 'Actualizar' : 'Guardar'}
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -2387,20 +2388,20 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
                         {session.updatedAt ? new Date(session.updatedAt.seconds * 1000).toLocaleDateString() : 'Sin fecha'}
                       </p>
                     </div>
-                    <button
+                    <BaseButton
                       onClick={() => loadSession(session)}
-                      className="whiteboard-session-load-btn"
+                      variant="primary"
                     >
                       Cargar
-                    </button>
+                    </BaseButton>
                   </div>
                 ))}
               </div>
             )}
             <div className="whiteboard-modal-actions">
-              <button onClick={() => setShowLoadModal(false)} className="whiteboard-modal-btn secondary">
+              <BaseButton onClick={() => setShowLoadModal(false)} variant="secondary">
                 Cerrar
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -2413,27 +2414,27 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
             <h3 className="whiteboard-modal-title">Compartir Contenido</h3>
 
             <div className="share-content-type-selector">
-              <button
-                className={`share-type-btn ${shareContentType === 'video' ? 'active' : ''}`}
+              <BaseButton
+                variant={shareContentType === 'video' ? 'primary' : 'outline'}
                 onClick={() => setShareContentType('video')}
+                icon={Film}
               >
-                <Film size={18} />
-                <span>Video</span>
-              </button>
-              <button
-                className={`share-type-btn ${shareContentType === 'pdf' ? 'active' : ''}`}
+                Video
+              </BaseButton>
+              <BaseButton
+                variant={shareContentType === 'pdf' ? 'primary' : 'outline'}
                 onClick={() => setShareContentType('pdf')}
+                icon={FileText}
               >
-                <FileText size={18} />
-                <span>PDF</span>
-              </button>
-              <button
-                className={`share-type-btn ${shareContentType === 'image' ? 'active' : ''}`}
+                PDF
+              </BaseButton>
+              <BaseButton
+                variant={shareContentType === 'image' ? 'primary' : 'outline'}
                 onClick={() => setShareContentType('image')}
+                icon={FileImage}
               >
-                <FileImage size={18} />
-                <span>Imagen</span>
-              </button>
+                Imagen
+              </BaseButton>
             </div>
 
             <input
@@ -2456,12 +2457,12 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
             </div>
 
             <div className="whiteboard-modal-actions">
-              <button onClick={() => setShowShareModal(false)} className="whiteboard-modal-btn secondary">
+              <BaseButton onClick={() => setShowShareModal(false)} variant="secondary">
                 Cancelar
-              </button>
-              <button onClick={handleShareContent} className="whiteboard-modal-btn primary">
+              </BaseButton>
+              <BaseButton onClick={handleShareContent} variant="primary">
                 Compartir
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
