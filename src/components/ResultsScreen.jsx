@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Trophy, Medal, Clock, BarChart3 } from 'lucide-react'
+import logger from '../utils/logger'
+import { BaseButton } from './common'
 
 function ResultsScreen({
   students,
@@ -69,16 +71,16 @@ function ResultsScreen({
   }
 
   return (
-    <div className="min-h-screen bg-amber-50 p-8">
-      <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 relative">
+    <div className="h-screen bg-amber-50 dark:bg-gray-900 overflow-y-auto p-4 md:p-8">
+      <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-8 relative">
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-4">
             <svg className="w-28 h-28 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
             </svg>
           </div>
-          <h1 className="text-5xl font-bold text-gray-800 mb-2">¡Juego Terminado!</h1>
-          <p className="text-2xl text-gray-600">Resultados Finales</p>
+          <h1 className="text-5xl font-bold text-gray-800 dark:text-white mb-2">¡Juego Terminado!</h1>
+          <p className="text-2xl text-gray-600 dark:text-gray-300">Resultados Finales</p>
         </div>
 
         <div className="space-y-4 mb-8">
@@ -87,21 +89,21 @@ function ResultsScreen({
             const isSecond = index === 1
             const isThird = index === 2
             
-            let bgClass = 'bg-gray-100'
+            let bgClass = 'bg-gray-100 dark:bg-gray-700'
             let borderClass = ''
             let trophyIcon = null
 
             if (isFirst) {
-              bgClass = 'bg-amber-200'
-              borderClass = 'border-4 border-yellow-400'
-              trophyIcon = <Trophy size={64} strokeWidth={2} className="text-yellow-600" />
+              bgClass = 'bg-amber-200 dark:bg-amber-900/30'
+              borderClass = 'border-4 border-yellow-400 dark:border-yellow-600'
+              trophyIcon = <Trophy size={64} strokeWidth={2} className="text-yellow-600 dark:text-yellow-400" />
             } else if (isSecond) {
-              bgClass = 'bg-gray-200'
-              borderClass = 'border-4 border-gray-400'
-              trophyIcon = <Medal size={64} strokeWidth={2} className="text-gray-600" />
+              bgClass = 'bg-gray-200 dark:bg-gray-700'
+              borderClass = 'border-4 border-gray-400 dark:border-gray-500'
+              trophyIcon = <Medal size={64} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
             } else if (isThird) {
-              bgClass = 'bg-gray-100'
-              borderClass = 'border-4 border-gray-300'
+              bgClass = 'bg-gray-100 dark:bg-gray-700'
+              borderClass = 'border-4 border-gray-300 dark:border-gray-600'
               trophyIcon = <Medal size={64} strokeWidth={2} className="text-gray-500" />
             }
             
@@ -127,13 +129,13 @@ function ResultsScreen({
                               ? `${Math.round((scores[student] / questionsAnswered[student]) * 100)}% de aciertos`
                               : '0% de aciertos'}
                           </span>
-                          <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
                             ({scores[student]}/{questionsAnswered[student]} correctas)
                           </span>
                         </div>
                         <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3 overflow-hidden mb-2">
                           <div
-                            className="bg-gray-600 dark:bg-gray-50 dark:bg-gray-9000 h-3 rounded-full transition-all duration-500"
+                            className="bg-gray-600 dark:bg-gray-400 h-3 rounded-full transition-all duration-500"
                             style={{
                               width: questionsAnswered[student] > 0
                                 ? `${(scores[student] / questionsAnswered[student]) * 100}%`
@@ -150,33 +152,41 @@ function ResultsScreen({
                       </div>
                     </div>
                   </div>
-                  <div className="text-5xl font-bold text-gray-700 dark:text-gray-300 dark:text-gray-300">{scores[student]} puntos</div>
+                  <div className="text-5xl font-bold text-gray-700 dark:text-gray-300">{scores[student]} puntos</div>
                 </div>
               </div>
             )
           })}
         </div>
 
-        <button
+        <BaseButton
           onClick={resetGame}
-          className="w-full py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-50 dark:bg-gray-9000 font-semibold text-xl mb-3"
+          variant="primary"
+          size="xl"
+          fullWidth
+          className="mb-3"
         >
           Nuevo Juego
-        </button>
+        </BaseButton>
 
-        <button
+        <BaseButton
           onClick={() => setShowExerciseHistory(!showExerciseHistory)}
-          className="w-full py-3 bg-gray-50 dark:bg-gray-9000 text-white rounded-lg hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 font-semibold text-xl mb-3"
+          variant="secondary"
+          size="lg"
+          fullWidth
+          className="mb-3"
         >
           {showExerciseHistory ? 'Ocultar' : 'Ver'} Historial de este Ejercicio
-        </button>
+        </BaseButton>
 
-        <button
+        <BaseButton
           onClick={exportCurrentGameCSV}
-          className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-xl"
+          variant="success"
+          size="lg"
+          fullWidth
         >
           Exportar Resultados (CSV)
-        </button>
+        </BaseButton>
       </div>
 
       {showExerciseHistory && (

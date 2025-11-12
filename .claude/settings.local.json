@@ -137,6 +137,8 @@
       "Bash(npx eslint:*)",
       "Bash(ping:*)",
       "Bash(NUL)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run:*)",
       "Bash(git diff:*)"
     ],
     "deny": [],

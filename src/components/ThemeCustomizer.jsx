@@ -7,6 +7,7 @@ import logger from '../utils/logger';
 import { useState, useEffect } from 'react';
 import { Palette, RotateCcw, Download, Upload, Check } from 'lucide-react';
 import { THEMES, THEME_INFO } from '../contexts/ThemeContext';
+import BaseButton from './common/BaseButton';
 
 // Colores por defecto de cada tema (extraídos de globals.css)
 const DEFAULT_THEME_COLORS = {
@@ -308,13 +309,24 @@ function ThemeCustomizer() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-ghost btn-sm" onClick={exportConfig} title="Exportar configuración">
-            <Download size={16} />
+          <BaseButton
+            variant="ghost"
+            size="sm"
+            onClick={exportConfig}
+            title="Exportar configuración"
+            icon={Download}
+          >
             Exportar
-          </button>
-          <label className="btn btn-ghost btn-sm" title="Importar configuración">
-            <Upload size={16} />
-            Importar
+          </BaseButton>
+          <label title="Importar configuración" style={{ cursor: 'pointer' }}>
+            <BaseButton
+              variant="ghost"
+              size="sm"
+              icon={Upload}
+              as="span"
+            >
+              Importar
+            </BaseButton>
             <input
               type="file"
               accept=".json"
@@ -373,14 +385,15 @@ function ThemeCustomizer() {
           <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--color-text-primary)', margin: 0 }}>
             Colores del tema {THEME_INFO[selectedTheme].name}
           </h3>
-          <button
-            className="btn btn-ghost btn-sm"
+          <BaseButton
+            variant="ghost"
+            size="sm"
             onClick={resetTheme}
             title="Resetear a valores por defecto"
+            icon={RotateCcw}
           >
-            <RotateCcw size={16} />
             Resetear
-          </button>
+          </BaseButton>
         </div>
 
         {/* Categorías de colores */}
@@ -487,8 +500,8 @@ function ThemeCustomizer() {
             boxShadow: 'var(--shadow-lg)'
           }}
         >
-          <button
-            className="btn btn-ghost"
+          <BaseButton
+            variant="ghost"
             onClick={() => {
               if (confirm('¿Descartar cambios?')) {
                 setCustomColors(prev => {
@@ -501,14 +514,14 @@ function ThemeCustomizer() {
             }}
           >
             Descartar
-          </button>
-          <button
-            className="btn btn-primary"
+          </BaseButton>
+          <BaseButton
+            variant="primary"
             onClick={saveChanges}
+            icon={Check}
           >
-            <Check size={18} />
             Guardar cambios
-          </button>
+          </BaseButton>
         </div>
       )}
     </div>

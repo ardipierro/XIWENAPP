@@ -16,6 +16,7 @@ import {
   Link2,
   Save
 } from 'lucide-react';
+import BaseButton from './common/BaseButton';
 import {
   createLiveClass,
   getTeacherLiveClasses,
@@ -308,9 +309,9 @@ function LiveClassManager({ user, onStartClass, onBack }) {
     return (
       <div className="live-class-manager">
         {/* Botón Volver */}
-        <button onClick={onBack} className="btn btn-ghost mb-4">
+        <BaseButton onClick={onBack} variant="ghost" className="mb-4">
           ← Volver a Inicio
-        </button>
+        </BaseButton>
 
         <div className="loading-state">
           <div className="spinner"></div>
@@ -323,9 +324,9 @@ function LiveClassManager({ user, onStartClass, onBack }) {
   return (
     <div className="live-class-manager">
       {/* Botón Volver */}
-      <button onClick={onBack} className="btn btn-ghost mb-4">
+      <BaseButton onClick={onBack} variant="ghost" className="mb-4">
         ← Volver a Inicio
-      </button>
+      </BaseButton>
 
       {/* Header */}
       <div className="manager-header">
@@ -333,10 +334,9 @@ function LiveClassManager({ user, onStartClass, onBack }) {
           <Video size={32} strokeWidth={2} />
           <h1>Clases en Vivo</h1>
         </div>
-        <button onClick={() => setShowCreateModal(true)} className="btn btn-primary">
-          <Plus size={18} strokeWidth={2} />
+        <BaseButton onClick={() => setShowCreateModal(true)} variant="primary" icon={Plus}>
           Nueva Clase
-        </button>
+        </BaseButton>
       </div>
 
       {/* Filters */}
@@ -384,9 +384,9 @@ function LiveClassManager({ user, onStartClass, onBack }) {
           <Video size={64} strokeWidth={1.5} />
           <h3>No hay clases {filterStatus !== 'all' ? filterStatus === 'scheduled' ? 'programadas' : filterStatus === 'live' ? 'en vivo' : 'finalizadas' : ''}</h3>
           <p>Crea tu primera clase en vivo para comenzar</p>
-          <button onClick={() => setShowCreateModal(true)} className="btn btn-primary">
+          <BaseButton onClick={() => setShowCreateModal(true)} variant="primary">
             Crear primera clase
-          </button>
+          </BaseButton>
         </div>
       ) : (
         <div className={viewMode === 'grid' ? 'classes-grid' : 'classes-list'}>
@@ -624,13 +624,14 @@ function LiveClassManager({ user, onStartClass, onBack }) {
                                     <div className="font-medium text-gray-900 dark:text-gray-100">{content.title}</div>
                                     <div className="text-sm text-gray-600 dark:text-gray-400">{content.type}</div>
                                   </div>
-                                  <button
+                                  <BaseButton
                                     type="button"
-                                    className="btn btn-sm btn-danger"
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => handleUnassignContent(contentId)}
                                   >
                                     Eliminar
-                                  </button>
+                                  </BaseButton>
                                 </div>
                               );
                             })}
@@ -695,13 +696,14 @@ function LiveClassManager({ user, onStartClass, onBack }) {
                                       {group.studentCount || 0} estudiantes
                                     </div>
                                   </div>
-                                  <button
+                                  <BaseButton
                                     type="button"
-                                    className="btn btn-sm btn-danger"
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => handleUnassignGroup(groupId)}
                                   >
                                     Eliminar
-                                  </button>
+                                  </BaseButton>
                                 </div>
                               );
                             })}
@@ -759,13 +761,14 @@ function LiveClassManager({ user, onStartClass, onBack }) {
                                     <div className="font-medium text-gray-900 dark:text-gray-100">{student.name}</div>
                                     <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
                                   </div>
-                                  <button
+                                  <BaseButton
                                     type="button"
-                                    className="btn btn-sm btn-danger"
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => handleUnassignStudent(studentId)}
                                   >
                                     Eliminar
-                                  </button>
+                                  </BaseButton>
                                 </div>
                               );
                             })}
@@ -809,24 +812,21 @@ function LiveClassManager({ user, onStartClass, onBack }) {
 
               {/* Footer - Fixed */}
               <div className="modal-footer">
-                <button
+                <BaseButton
                   type="button"
                   onClick={() => { setShowCreateModal(false); setShowEditModal(false); }}
-                  className="btn btn-ghost"
+                  variant="ghost"
                 >
                   Cancelar
-                </button>
-                <button
+                </BaseButton>
+                <BaseButton
                   type="button"
                   onClick={showEditModal ? handleUpdateClass : (e) => { e.preventDefault(); handleCreateClass(e); }}
-                  className="btn btn-primary"
+                  variant="primary"
+                  icon={showEditModal ? Save : Plus}
                 >
-                  {showEditModal ? (
-                    <><Save size={18} /> Guardar Cambios</>
-                  ) : (
-                    <><Plus size={18} /> Crear Clase</>
-                  )}
-                </button>
+                  {showEditModal ? 'Guardar Cambios' : 'Crear Clase'}
+                </BaseButton>
               </div>
             </div>
           </div>
@@ -918,32 +918,28 @@ function LiveClassCard({ liveClass, onStart, onEdit, onCancel, onDelete }) {
 
       <div className="card-actions">
         {canStart && (
-          <button onClick={onStart} className="btn btn-primary">
-            <Play size={18} />
+          <BaseButton onClick={onStart} variant="primary" icon={Play}>
             Iniciar Clase
-          </button>
+          </BaseButton>
         )}
         {liveClass.status === 'live' && (
-          <button onClick={onStart} className="btn btn-primary">
-            <Play size={18} />
+          <BaseButton onClick={onStart} variant="primary" icon={Play}>
             Unirse
-          </button>
+          </BaseButton>
         )}
         {canEdit && onEdit && (
-          <button onClick={onEdit} className="btn btn-outline">
-            <FileText size={18} />
+          <BaseButton onClick={onEdit} variant="outline" icon={FileText}>
             Editar
-          </button>
+          </BaseButton>
         )}
         {canCancel && (
-          <button onClick={onCancel} className="btn btn-ghost">
+          <BaseButton onClick={onCancel} variant="ghost">
             Cancelar
-          </button>
+          </BaseButton>
         )}
         {canDelete && (
-          <button onClick={onDelete} className="btn btn-ghost">
-            <Trash2 size={18} />
-          </button>
+          <BaseButton onClick={onDelete} variant="ghost" icon={Trash2}>
+          </BaseButton>
         )}
       </div>
     </div>
