@@ -18,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { BaseLoading } from './common';
+import BaseButton from './common/BaseButton';
 import StudentFeedbackView from './StudentFeedbackView';
 
 export default function StudentAssignmentsView({ studentId }) {
@@ -393,30 +394,30 @@ function SubmissionModal({ assignment, studentId, onClose }) {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
+                <BaseButton
+                  variant="ghost"
                   onClick={onClose}
-                  className="btn btn-ghost flex-1"
+                  fullWidth
                 >
                   Cancelar
-                </button>
-                <button
-                  type="button"
+                </BaseButton>
+                <BaseButton
+                  variant="outline"
                   onClick={handleSaveDraft}
                   disabled={isSaving}
-                  className="btn btn-outline flex-1 disabled:opacity-50"
+                  fullWidth
                 >
                   {isSaving ? 'Guardando...' : 'Guardar borrador'}
-                </button>
-                <button
-                  type="button"
+                </BaseButton>
+                <BaseButton
+                  variant="primary"
                   onClick={handleSubmit}
                   disabled={isSaving}
-                  className="btn btn-primary flex-1 disabled:opacity-50"
+                  icon={Send}
+                  fullWidth
                 >
-                  <Send size={18} strokeWidth={2} />
                   {isSaving ? 'Entregando...' : 'Entregar tarea'}
-                </button>
+                </BaseButton>
               </div>
             </div>
           ) : (
@@ -438,12 +439,13 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                 </div>
               </div>
 
-              <button
+              <BaseButton
+                variant="ghost"
                 onClick={onClose}
-                className="btn btn-ghost w-full"
+                fullWidth
               >
                 Cerrar
-              </button>
+              </BaseButton>
             </div>
           )}
         </div>

@@ -13,6 +13,7 @@ import { db } from '../firebase/config';
 import { uploadImage, deleteImage } from '../firebase/storage';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
+import BaseButton from './common/BaseButton';
 import {
   getCourseContents,
   getCourseExercises,
@@ -396,9 +397,9 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
     <div className="courses-screen">
       {/* Back Button */}
       {onBack && (
-        <button onClick={onBack} className="btn btn-ghost mb-4">
+        <BaseButton onClick={onBack} variant="ghost" className="mb-4">
           ← Volver a Inicio
-        </button>
+        </BaseButton>
       )}
 
       {/* Header */}
@@ -432,9 +433,9 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
             {searchTerm ? 'Intenta con otro término de búsqueda' : 'Crea tu primer curso para comenzar'}
           </p>
           {!searchTerm && (
-            <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+            <BaseButton variant="primary" onClick={() => setShowCreateModal(true)}>
               + Crear Primer Curso
-            </button>
+            </BaseButton>
           )}
         </div>
       ) : viewMode === 'grid' ? (
@@ -634,14 +635,15 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                         alt="Vista previa de la imagen del curso"
                         className="w-full h-48 object-cover rounded-lg mb-2"
                       />
-                      <button
+                      <BaseButton
                         type="button"
                         onClick={handleRemoveImage}
                         disabled={uploadingImage}
-                        className="btn btn-danger btn-sm"
+                        variant="danger"
+                        size="sm"
                       >
                         {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                      </button>
+                      </BaseButton>
                     </div>
                   ) : (
                     <div>
@@ -674,21 +676,21 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
 
             {/* Footer con botones (sin zona de peligro en crear) */}
             <div className="modal-footer">
-              <button
+              <BaseButton
                 type="button"
-                className="btn btn-outline"
+                variant="outline"
                 onClick={() => setShowCreateModal(false)}
               >
                 Cancelar
-              </button>
-              <button
+              </BaseButton>
+              <BaseButton
                 type="submit"
-                className="btn btn-primary"
+                variant="primary"
                 onClick={handleCreate}
                 disabled={uploadingImage}
               >
                 {uploadingImage ? 'Subiendo...' : 'Crear Curso'}
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -804,14 +806,15 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                               alt="Vista previa de la imagen del curso"
                               className="w-full h-48 object-cover rounded-lg mb-2"
                             />
-                            <button
+                            <BaseButton
                               type="button"
                               onClick={handleRemoveImage}
                               disabled={uploadingImage}
-                              className="btn btn-danger btn-sm"
+                              variant="danger"
+                              size="sm"
                             >
                               {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                            </button>
+                            </BaseButton>
                           </div>
                         ) : (
                           <div>
@@ -859,12 +862,13 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                                   <span className="font-medium text-gray-900 dark:text-gray-100">{content.title}</span>
                                   <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({content.type})</span>
                                 </div>
-                                <button
-                                  className="btn btn-sm btn-danger"
+                                <BaseButton
+                                  variant="danger"
+                                  size="sm"
                                   onClick={() => handleRemoveContent(content.id)}
                                 >
                                   Eliminar
-                                </button>
+                                </BaseButton>
                               </div>
                             ))}
                           </div>
@@ -894,13 +898,14 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                                   </option>
                                 ))}
                             </select>
-                            <button
-                              className="btn btn-success"
+                            <BaseButton
+                              variant="success"
                               onClick={() => handleAddContent(selectedContentToAdd)}
                               disabled={!selectedContentToAdd}
+                              icon={Plus}
                             >
-                              <Plus size={16} strokeWidth={2} /> Agregar
-                            </button>
+                              Agregar
+                            </BaseButton>
                           </div>
                         )}
                       </div>
@@ -924,12 +929,13 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                                   <span className="font-medium text-gray-900 dark:text-gray-100">{student.displayName || student.email}</span>
                                   <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({student.email})</span>
                                 </div>
-                                <button
-                                  className="btn btn-sm btn-danger"
+                                <BaseButton
+                                  variant="danger"
+                                  size="sm"
                                   onClick={() => handleRemoveStudent(student.id)}
                                 >
                                   Eliminar
-                                </button>
+                                </BaseButton>
                               </div>
                             ))}
                           </div>
@@ -959,13 +965,14 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                                   </option>
                                 ))}
                             </select>
-                            <button
-                              className="btn btn-success"
+                            <BaseButton
+                              variant="success"
                               onClick={() => handleAddStudent(selectedStudentToAdd)}
                               disabled={!selectedStudentToAdd}
+                              icon={Plus}
                             >
-                              <Plus size={16} strokeWidth={2} /> Agregar
-                            </button>
+                              Agregar
+                            </BaseButton>
                           </div>
                         )}
                       </div>
@@ -977,23 +984,24 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
 
             {/* Footer con botones */}
             <div className="modal-footer">
-              <button
+              <BaseButton
                 type="button"
-                className="btn btn-danger"
+                variant="danger"
                 onClick={() => setShowConfirmDelete(true)}
+                icon={Trash2}
               >
-                <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
-              </button>
-              <button
+                Eliminar
+              </BaseButton>
+              <BaseButton
                 type="button"
-                className="btn btn-outline"
+                variant="outline"
                 onClick={handleCloseCourseModal}
               >
                 Cancelar
-              </button>
-              <button
+              </BaseButton>
+              <BaseButton
                 type="button"
-                className="btn btn-primary"
+                variant="primary"
                 onClick={(e) => {
                   e.preventDefault();
                   handleUpdate(e);
@@ -1001,7 +1009,7 @@ function CoursesScreen({ onBack, user, openCreateModal = false }) {
                 disabled={uploadingImage}
               >
                 {uploadingImage ? 'Subiendo...' : 'Guardar Cambios'}
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>

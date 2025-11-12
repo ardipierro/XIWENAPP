@@ -1,4 +1,5 @@
 import { Users, BookOpen, Edit, Trash2 } from 'lucide-react';
+import BaseButton from './common/BaseButton';
 
 function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
   return (
@@ -77,24 +78,27 @@ function CourseCard({ course, onViewLessons, onEdit, onDelete }) {
 
         {/* Acciones */}
         <div className="flex gap-2">
-          <button
+          <BaseButton
             onClick={() => onViewLessons?.(course)}
-            className="btn btn-sm btn-primary flex-1"
+            variant="primary"
+            size="sm"
+            icon={BookOpen}
+            fullWidth
           >
-            <BookOpen size={16} strokeWidth={2} className="inline-icon" /> Ver Lecciones
-          </button>
-          <button
+            Ver Lecciones
+          </BaseButton>
+          <BaseButton
             onClick={() => onEdit?.(course)}
-            className="btn btn-sm btn-outline"
-          >
-            <Edit size={16} strokeWidth={2} />
-          </button>
-          <button
+            variant="outline"
+            size="sm"
+            icon={Edit}
+          />
+          <BaseButton
             onClick={() => onDelete?.(course.id, course.name)}
-            className="btn btn-sm btn-danger"
-          >
-            <Trash2 size={16} strokeWidth={2} />
-          </button>
+            variant="danger"
+            size="sm"
+            icon={Trash2}
+          />
         </div>
       </div>
     </div>

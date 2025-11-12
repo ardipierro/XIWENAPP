@@ -1,3 +1,5 @@
+import BaseButton from './BaseButton';
+
 /**
  * PageHeader - Header de página con título, ícono y botón de acción
  * Responsive: se apila en móvil, horizontal en desktop
@@ -32,12 +34,13 @@ function PageHeader({
       </div>
 
       {actionLabel && onAction && (
-        <button
+        <BaseButton
           onClick={onAction}
-          className="btn btn-primary w-full sm:w-auto"
+          variant="primary"
+          className="w-full sm:w-auto"
         >
           {actionLabel}
-        </button>
+        </BaseButton>
       )}
     </div>
   );

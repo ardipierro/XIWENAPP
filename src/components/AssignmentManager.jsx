@@ -119,21 +119,21 @@ export default function AssignmentManager({ teacherId }) {
         <StatCard
           title="Total"
           value={assignments.length}
-          icon={<FileText size={40} strokeWidth={2} />}
+          icon={FileText}
           color="primary"
         />
 
         <StatCard
           title="Activas"
           value={assignments.filter(a => a.status === 'active').length}
-          icon={<CheckCircle size={40} strokeWidth={2} />}
+          icon={CheckCircle}
           color="secondary"
         />
 
         <StatCard
           title="Archivadas"
           value={assignments.filter(a => a.status === 'archived').length}
-          icon={<BarChart3 size={40} strokeWidth={2} />}
+          icon={BarChart3}
           color="primary"
         />
       </div>

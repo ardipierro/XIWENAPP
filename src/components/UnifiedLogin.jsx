@@ -10,6 +10,7 @@ import { auth } from '../firebase/config';
 import { createUserProfile, getUserRole } from '../firebase/firestore';
 import { isAdminEmail, getDefaultRole, ROLE_INFO } from '../firebase/roleConfig';
 import logger from '../utils/logger';
+import BaseButton from './common/BaseButton';
 import './UnifiedLogin.css';
 
 function UnifiedLogin() {
@@ -248,28 +249,16 @@ function UnifiedLogin() {
             </div>
           )}
 
-          <button
+          <BaseButton
             type="submit"
-            className="btn btn-primary"
+            variant="primary"
             disabled={loading}
+            loading={loading}
+            icon={loading ? undefined : (isRegistering ? UserPlus : LogIn)}
+            fullWidth
           >
-            {loading ? (
-              <>
-                <Loader size={16} className="spinner" />
-                <span>Cargando...</span>
-              </>
-            ) : isRegistering ? (
-              <>
-                <UserPlus size={16} />
-                <span>Crear cuenta</span>
-              </>
-            ) : (
-              <>
-                <LogIn size={16} />
-                <span>Ingresar</span>
-              </>
-            )}
-          </button>
+            {loading ? 'Cargando...' : (isRegistering ? 'Crear cuenta' : 'Ingresar')}
+          </BaseButton>
 
           {!isRegistering && (
             <button

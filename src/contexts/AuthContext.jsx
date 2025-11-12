@@ -4,7 +4,7 @@
  * @module contexts/AuthContext
  */
 
-import { createContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -367,4 +367,19 @@ export function AuthProvider({ children }) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+/**
+ * Custom hook para acceder al contexto de autenticación
+ * @returns {AuthContextValue}
+ * @throws {Error} Si se usa fuera del AuthProvider
+ */
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error('useAuth debe usarse dentro de un AuthProvider');
+  }
+
+  return context;
 }

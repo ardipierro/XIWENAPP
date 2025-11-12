@@ -25,10 +25,44 @@
 
 ---
 
-## [2025-11-11-a] - Reorganización completa de documentación
+## [2025-11-11-a] - AI Assistant System añadido
+
+### 🤖 AI Assistant System
+
+Nuevo sistema de asistente virtual con comandos de voz para administradores y profesores.
+
+#### Documentación
+- ✅ **AI_ASSISTANT.md** (NUEVO - 19KB)
+  - Documentación completa del sistema
+  - 5 servicios: Speech-to-Text, Query Analyzer, Student Analytics, Payment Analytics, AI Assistant
+  - Widget flotante con chat interactivo
+  - Comandos de voz en español (Web Speech API)
+  - Consultas sobre estudiantes, tareas, pagos y créditos
+  - API Reference completa
+  - Guías de uso y troubleshooting
+
+#### Componentes implementados
+- `src/services/SpeechToTextService.js` - Web Speech API wrapper
+- `src/services/QueryAnalyzerService.js` - NLP con IA multi-proveedor
+- `src/services/StudentAnalyticsService.js` - Consultas analíticas de estudiantes
+- `src/services/PaymentAnalyticsService.js` - Consultas analíticas de pagos
+- `src/services/AIAssistantService.js` - Orquestador principal
+- `src/components/AIAssistantWidget.jsx` - Widget flotante de chat
+- `docs/AI_ASSISTANT_GUIDE.md` - Guía de usuario
+
+#### Integración
+- Widget integrado en TeacherDashboard, AdminDashboard y StudentDashboard
+- Cumplimiento 100% con estándares del proyecto
+- Sin sombras (box-shadow: none)
+- Componentes base (BaseButton, BaseInput)
+- Dark mode completo
+
+---
+
+## [2025-11-11] - Reorganización completa de documentación
 
 ### 🎯 Resumen
-Consolidación de 10 archivos fragmentados en 6 archivos organizados y actualizados.
+Consolidación de 10 archivos fragmentados en 7 archivos organizados y actualizados.
 
 ### 📦 Estructura ANTES (10 archivos)
 ```
@@ -44,7 +78,7 @@ Consolidación de 10 archivos fragmentados en 6 archivos organizados y actualiza
 ✅ settings.local.json         (mantenido)
 ```
 
-### 📦 Estructura ACTUAL (6 archivos)
+### 📦 Estructura ACTUAL (7 archivos)
 
 ```
 .claude/
@@ -71,6 +105,13 @@ Consolidación de 10 archivos fragmentados en 6 archivos organizados y actualiza
 │   └─ Hooks renombrados: useDesignLabConfig → useExerciseBuilderConfig
 │   └─ Nueva sección: Cumplimiento de Estándares
 │   └─ Ejemplos con logger (no console.*)
+│
+├── 🤖 AI_ASSISTANT.md            (NUEVO - 19KB)
+│   └─ Sistema de asistente virtual con voz
+│   └─ Web Speech API para comandos de voz
+│   └─ 5 servicios: Speech, Query, StudentAnalytics, PaymentAnalytics, Orchestrator
+│   └─ Widget flotante integrado
+│   └─ API Reference completa
 │
 ├── 📊 CONTENT_SCHEMA.md          (RENOMBRADO - 7KB)
 │   └─ Era: UNIFIED_CONTENT_SCHEMA.md
@@ -201,6 +242,7 @@ Si necesitas información sobre:
 - **Reglas de código** → Lee `CODING_STANDARDS.md`
 - **Sistema de diseño** → Lee `DESIGN_SYSTEM.md`
 - **Ejercicios ELE** → Lee `EXERCISE_BUILDER.md`
+- **AI Assistant** → Lee `AI_ASSISTANT.md`
 - **Contenidos/Cursos** → Lee `CONTENT_SCHEMA.md`
 
 ---

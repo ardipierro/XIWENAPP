@@ -23,6 +23,7 @@
 | **CODING_STANDARDS.md** | Reglas de código, componentes base | Antes de escribir código |
 | **DESIGN_SYSTEM.md** | Sistema de diseño, colores, responsive | Antes de crear/modificar UI |
 | **EXERCISE_BUILDER.md** | Sistema de ejercicios ELE | Al trabajar con ejercicios |
+| **AI_ASSISTANT.md** | Sistema de asistente virtual con voz | Al trabajar con AI Assistant |
 | **CONTENT_SCHEMA.md** | Arquitectura de contenidos | Al trabajar con contenidos/cursos |
 
 > 📝 **Changelogs de Features:** Los changelogs específicos de features implementadas están en el directorio raíz (ej: `CHANGELOG_HOMEWORK_CORRECTION.md`, `CHANGELOG_NOCTURNO.md`).

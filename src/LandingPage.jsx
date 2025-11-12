@@ -3,6 +3,7 @@ import {
   GraduationCap, Gamepad2, Zap, BarChart3, Globe, Palette, Users,
   CheckCircle, Check, BookOpen, Target
 } from 'lucide-react';
+import BaseButton from './components/common/BaseButton';
 import './LandingPage.css';
 
 function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
@@ -27,12 +28,12 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
             <a href="#features">Características</a>
             <a href="#pricing">Precios</a>
             <a href="#faq">FAQ</a>
-            <button className="btn btn-outline" onClick={onNavigateToLogin}>
+            <BaseButton variant="outline" onClick={onNavigateToLogin}>
               Iniciar Sesión
-            </button>
-            <button className="btn btn-primary" onClick={onNavigateToRegister}>
+            </BaseButton>
+            <BaseButton variant="primary" onClick={onNavigateToRegister}>
               Registrarse
-            </button>
+            </BaseButton>
           </div>
         </div>
       </nav>
@@ -52,18 +53,20 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                 que quieren aprender jugando.
               </p>
               <div className="hero-buttons">
-                <button 
-                  className="btn btn-primary btn-large"
+                <BaseButton
+                  variant="primary"
+                  size="lg"
                   onClick={onNavigateToRegister}
                 >
                   Comenzar Gratis
-                </button>
-                <button 
-                  className="btn btn-outline btn-large"
+                </BaseButton>
+                <BaseButton
+                  variant="outline"
+                  size="lg"
                   onClick={onNavigateToLogin}
                 >
                   Ver Demo
-                </button>
+                </BaseButton>
               </div>
               <div className="hero-stats">
                 <div className="stat">
@@ -271,9 +274,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                 <li><Check size={16} strokeWidth={2} className="inline-icon" /> Reportes básicos</li>
                 <li><Check size={16} strokeWidth={2} className="inline-icon" /> Soporte por email</li>
               </ul>
-              <button className="btn btn-outline btn-block" onClick={onNavigateToRegister}>
+              <BaseButton variant="outline" fullWidth onClick={onNavigateToRegister}>
                 Comenzar Gratis
-              </button>
+              </BaseButton>
             </div>
 
             <div className="pricing-card featured">
@@ -293,9 +296,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                 <li><Check size={16} strokeWidth={2} className="inline-icon" /> Exportar a Excel/PDF</li>
                 <li><Check size={16} strokeWidth={2} className="inline-icon" /> Personalización completa</li>
               </ul>
-              <button className="btn btn-primary btn-block" onClick={onNavigateToRegister}>
+              <BaseButton variant="primary" fullWidth onClick={onNavigateToRegister}>
                 Probar 14 días gratis
-              </button>
+              </BaseButton>
             </div>
 
             <div className="pricing-card">
@@ -314,9 +317,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                 <li><Check size={16} strokeWidth={2} className="inline-icon" /> Capacitación incluida</li>
                 <li><Check size={16} strokeWidth={2} className="inline-icon" /> Account manager dedicado</li>
               </ul>
-              <button className="btn btn-outline btn-block" onClick={onNavigateToRegister}>
+              <BaseButton variant="outline" fullWidth onClick={onNavigateToRegister}>
                 Contactar Ventas
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -437,18 +440,20 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
               transformando la educación
             </p>
             <div className="cta-buttons">
-              <button 
-                className="btn btn-white btn-large"
+              <BaseButton
+                variant="white"
+                size="lg"
                 onClick={onNavigateToRegister}
               >
                 Crear Cuenta Gratis
-              </button>
-              <button 
-                className="btn btn-outline btn-large"
+              </BaseButton>
+              <BaseButton
+                variant="outline"
+                size="lg"
                 onClick={onNavigateToLogin}
               >
                 Ya Tengo Cuenta
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>

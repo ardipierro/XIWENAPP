@@ -43,6 +43,7 @@ import StudentClassView from './StudentClassView';
 import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { BaseAlert } from './common';
+import BaseButton from './common/BaseButton';
 import './UserProfile.css';
 
 // Icon mapping for role icons from roleConfig
@@ -632,12 +633,13 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                               (Asignado: {formatDate(enrollment.enrolledAt)})
                             </span>
                           </div>
-                          <button
-                            className="btn btn-sm btn-danger"
+                          <BaseButton
+                            variant="danger"
+                            size="sm"
                             onClick={() => handleUnenrollCourse(enrollment.courseId)}
                           >
                             Eliminar
-                          </button>
+                          </BaseButton>
                         </div>
                       ))}
                     </div>
@@ -668,8 +670,9 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                             </option>
                           ))}
                       </select>
-                      <button
-                        className="btn btn-success"
+                      <BaseButton
+                        variant="success"
+                        icon={Plus}
                         onClick={() => {
                           if (selectedCourseToAdd) {
                             handleEnrollCourse(selectedCourseToAdd);
@@ -678,8 +681,8 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                         }}
                         disabled={!selectedCourseToAdd}
                       >
-                        <Plus size={16} strokeWidth={2} /> Agregar
-                      </button>
+                        Agregar
+                      </BaseButton>
                     </div>
                   )}
                 </div>
@@ -769,25 +772,26 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         {!editing ? (
           <>
             {isAdmin && !isAdminEmail(selectedUser.email) && currentUser.uid !== selectedUser.id && (
-              <button
-                className="btn btn-danger"
+              <BaseButton
+                variant="danger"
+                icon={Trash2}
                 onClick={handleDeleteClick}
                 disabled={saving}
               >
-                <Trash2 size={18} strokeWidth={2} /> Eliminar
-              </button>
+                Eliminar
+              </BaseButton>
             )}
-            <button className="btn btn-outline" onClick={onBack}>
+            <BaseButton variant="outline" onClick={onBack}>
               Cancelar
-            </button>
-            <button className="btn btn-primary" onClick={() => setEditing(true)}>
-              <Edit size={18} strokeWidth={2} /> Editar
-            </button>
+            </BaseButton>
+            <BaseButton variant="primary" icon={Edit} onClick={() => setEditing(true)}>
+              Editar
+            </BaseButton>
           </>
         ) : (
           <>
-            <button
-              className="btn btn-outline"
+            <BaseButton
+              variant="outline"
               onClick={() => {
                 setEditing(false);
                 setFormData({
@@ -802,14 +806,15 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               disabled={saving}
             >
               Cancelar
-            </button>
-            <button
-              className="btn btn-primary"
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              icon={Save}
               onClick={handleSave}
               disabled={saving}
             >
-              <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar'}
-            </button>
+              {saving ? 'Guardando...' : 'Guardar'}
+            </BaseButton>
           </>
         )}
       </div>

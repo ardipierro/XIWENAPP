@@ -1,5 +1,6 @@
 import { User, Mail, BookOpen, Award, Eye, Trash2, DollarSign, Shield, Crown, UserCog, GraduationCap } from 'lucide-react';
 import { ROLE_INFO } from '../firebase/roleConfig';
+import BaseButton from './common/BaseButton';
 import './UserCard.css';
 
 /**
@@ -123,29 +124,29 @@ function UserCard({
 
         {/* Actions */}
         <div className="user-actions">
-          <button
+          <BaseButton
             onClick={(e) => {
               e.stopPropagation();
               onView && onView(user);
             }}
-            className="user-action-btn btn-view"
-            title="Ver detalles"
+            variant="primary"
+            size="sm"
+            icon={Eye}
+            fullWidth
           >
-            <Eye size={18} />
-            <span>Ver</span>
-          </button>
+            Ver
+          </BaseButton>
 
           {isAdmin && (
-            <button
+            <BaseButton
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete && onDelete(user);
               }}
-              className="user-action-btn btn-delete"
-              title="Eliminar"
-            >
-              <Trash2 size={18} />
-            </button>
+              variant="danger"
+              size="sm"
+              icon={Trash2}
+            />
           )}
         </div>
       </div>

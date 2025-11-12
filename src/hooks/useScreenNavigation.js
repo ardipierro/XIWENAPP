@@ -73,6 +73,7 @@ export function useScreenNavigation() {
     'messages': 'messages', // Messages Panel (Teacher/Student)
     'payments': 'payments', // Payments Panel (Admin)
     'aiConfig': 'aiConfig', // AI Configuration (Admin)
+    'imageProviders': 'imageProviders', // Image Providers Configuration (Admin)
     'settings': 'settings', // Settings (Admin)
     'themeBuilder': 'themeBuilder', // Theme Builder (Admin/Teacher)
     'exerciseBuilder': 'exerciseBuilder', // Exercise Builder (Admin/Teacher)

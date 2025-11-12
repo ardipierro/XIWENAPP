@@ -314,23 +314,19 @@ function QuestionScreen({
               </button>
             </div>
           </div>
-          <div className="overflow-x-auto pb-2">
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${validStudents.length}, minmax(200px, 1fr))`,
-              gap: '12px'
-            }}>
+          <div className="overflow-x-auto pb-2 pt-3 px-1">
+            <div className="flex gap-3">
             {validStudents.map(student => (
               <div
                 key={student}
-                className={`p-3 rounded-lg relative ${
+                className={`p-3 rounded-lg relative min-w-[200px] w-[200px] flex-shrink-0 ${
                   student === currentStudent
-                    ? 'bg-gray-200 dark:bg-gray-700 border-4 border-gray-500 dark:border-gray-400 transform scale-105'
+                    ? 'bg-gray-200 dark:bg-gray-700 border-4 border-gray-500 dark:border-gray-400'
                     : 'bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600'
                 }`}
               >
                 {student === currentStudent && (
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-gray-600 dark:bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gray-600 dark:bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap z-10">
                     TU TURNO
                   </div>
                 )}

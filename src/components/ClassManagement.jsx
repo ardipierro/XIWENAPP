@@ -14,6 +14,7 @@ import {
   updateSessionStatus
 } from '../firebase/classSessions';
 import { getGroupsByTeacher } from '../firebase/groups';
+import BaseButton from './common/BaseButton';
 import './ClassManagement.css';
 
 /**

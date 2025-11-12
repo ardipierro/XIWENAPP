@@ -32,7 +32,8 @@ import {
   UsersRound,
   Layers,
   Sparkles,
-  BookMarked
+  BookMarked,
+  Image
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -82,6 +83,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
               { icon: ClipboardList, label: 'Asistencias', path: '/admin', action: 'attendance' },
               { icon: Lightbulb, label: 'Tareas IA', path: '/admin', action: 'aiConfig' },
+              { icon: Image, label: 'Imágenes IA', path: '/admin', action: 'imageProviders' },
               { icon: Settings, label: 'Configuración', path: '/admin', action: 'settings' },
             ]
           },
