@@ -14,7 +14,7 @@
 
 ---
 
-## 🎯 Las 8 Reglas Core
+## 🎯 Las 9 Reglas Core
 
 ### REGLA #1: 100% Tailwind CSS - CERO CSS Custom
 
@@ -273,6 +273,73 @@ saveData(formData)
 ```
 
 **Razón:** Accesibilidad, preferencias del usuario, UX moderna.
+
+---
+
+### REGLA #9: UniversalCard para TODAS las tarjetas
+
+**✅ SIEMPRE usar UniversalCard para mostrar items:**
+```javascript
+import { UniversalCard } from './common';
+
+// Mostrar curso
+<UniversalCard
+  viewMode={viewMode}
+  type="course"
+  data={course}
+  onView={handleView}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
+
+// Mostrar estudiante
+<UniversalCard
+  viewMode={viewMode}
+  type="student"
+  data={student}
+  enrollmentCount={10}
+  onView={handleView}
+  isAdmin={true}
+/>
+
+// Mostrar usuario (cualquier rol)
+<UniversalCard
+  viewMode={viewMode}
+  type="user"
+  data={user}
+  onView={handleView}
+/>
+```
+
+**❌ NO HACER:**
+```javascript
+// ❌ NO crear cards custom con divs y CSS
+<div className="custom-card">
+  <img src={course.imageUrl} />
+  <h3>{course.name}</h3>
+  <button onClick={handleView}>Ver</button>
+</div>
+
+// ❌ NO crear nuevos componentes Card
+function MyCourseCard({ course }) {
+  return <div>...</div>;
+}
+```
+
+**Tipos soportados:**
+- `course` - Cursos
+- `student` - Estudiantes
+- `user` - Usuarios (todos los roles)
+- `content` - Contenido educativo
+- `class` - Clases/sesiones
+
+**ViewMode:**
+- `grid` - Vista de cuadrícula (vertical, para galleries)
+- `list` - Vista de lista (horizontal, para listados detallados)
+
+**Razón:** Consistencia visual, comportamiento estandarizado, menos código duplicado, soporte automático Grid/List.
+
+**Excepciones:** Solo usar BaseCard directamente si necesitas un layout muy específico que UniversalCard no soporta.
 
 ---
 

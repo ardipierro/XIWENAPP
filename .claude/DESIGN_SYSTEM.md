@@ -193,40 +193,109 @@ const sizes = {
 
 ---
 
-### 2. CARDS - Estándar Unificado
+### 2. CARDS - Sistema Unificado (UniversalCard)
 
-**Estructura Base:**
+**🎯 REGLA CRÍTICA:** Todas las cards de la aplicación DEBEN usar `UniversalCard` o `BaseCard`.
+
+#### **UniversalCard - Componente Principal**
+
+Wrapper inteligente sobre BaseCard que adapta automáticamente el contenido según el tipo:
+
 ```jsx
-<div
-  className="flex flex-col rounded-xl overflow-hidden
-             transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
-             hover:-translate-y-1"
-  style={{
-    background: 'var(--color-bg-secondary)',
-    border: '1px solid var(--color-border)',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
-    e.currentTarget.style.borderColor = 'var(--color-border-focus)';
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)';
-    e.currentTarget.style.borderColor = 'var(--color-border)';
-  }}
->
-  {/* Card Content */}
-</div>
+import { UniversalCard } from './components/common';
+
+<UniversalCard
+  viewMode="grid"  // 'grid' o 'list'
+  type="course"    // 'course', 'student', 'user', 'content', 'class'
+  data={item}      // Datos del item
+  onView={handleView}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+  showActions={true}
+  showStats={true}
+  isAdmin={false}
+  enrollmentCount={0}  // Solo para students/users
+/>
 ```
 
-**Valores Estandarizados:**
+**Tipos soportados:**
+- `course`: Tarjetas de cursos con imagen, stats de alumnos y lecciones
+- `student`: Tarjetas de estudiantes con avatar, email, stats de cursos y créditos
+- `user`: Tarjetas de usuarios (cualquier rol: admin, teacher, student, etc.)
+- `content`: Tarjetas de contenido educativo (lesson, reading, video, link)
+- `class`: Tarjetas de clases (con opción de mostrar "EN VIVO")
+
+#### **BaseCard - Componente Base**
+
+Para casos personalizados que necesitan más control:
+
+```jsx
+import { BaseCard } from './components/common';
+
+<BaseCard
+  viewMode="grid"           // 'grid' o 'list'
+  image={imageUrl}          // Imagen superior
+  icon={IconComponent}      // Lucide icon
+  avatar="A"                // Inicial para avatar
+  avatarColor="#6366f1"     // Color del avatar
+  title="Título"
+  subtitle="Subtítulo"
+  badges={[<BaseBadge />]}
+  stats={<StatsComponent />}
+  actions={<ActionsComponent />}
+  onClick={handleClick}
+  hover={true}
+  borderColor="var(--color-accent)"
+>
+  {/* Contenido personalizado */}
+</BaseCard>
+```
+
+#### **Valores Estandarizados:**
+
+**Grid View (vista vertical):**
 - **Border radius:** `rounded-xl` (16px)
 - **Padding:** `p-5` (20px) para content
 - **Gap:** `gap-4` (16px) entre elementos
+- **Image height:** `h-48` (192px)
+- **Avatar size:** `w-20 h-20` (80px)
+- **Layout:** `flex flex-col`
 - **Shadow normal:** `0 1px 3px rgba(0, 0, 0, 0.06)`
 - **Shadow hover:** `0 12px 24px rgba(0, 0, 0, 0.15)`
 - **Hover translate:** `-translate-y-1` (4px hacia arriba)
 - **Transition:** `transition-all duration-300`
+
+**List View (vista horizontal):**
+- **Border radius:** `rounded-xl` (16px)
+- **Padding:** `p-4` (16px) para content
+- **Gap:** `gap-3 md:gap-6` entre elementos
+- **Image width:** `md:w-[120px]` (120px en desktop)
+- **Avatar size:** `w-14 h-14` (56px)
+- **Min height:** `min-h-[100px]`
+- **Layout:** `flex flex-col md:flex-row`
+- **Shadow/Transition:** igual que Grid
+
+#### **Migración de Cards Legacy**
+
+Si tienes un componente card antiguo, reemplázalo así:
+
+```jsx
+// ❌ ANTES (custom card con CSS)
+<div className="course-card">
+  <img src={course.imageUrl} />
+  <h3>{course.name}</h3>
+  <p>{course.description}</p>
+  <button onClick={handleView}>Ver</button>
+</div>
+
+// ✅ DESPUÉS (UniversalCard)
+<UniversalCard
+  viewMode={viewMode}
+  type="course"
+  data={course}
+  onView={handleView}
+/>
+```
 
 ---
 

@@ -17,6 +17,7 @@ export { default as BaseTextarea } from './BaseTextarea';
 
 // Layout & Display
 export { default as BaseCard } from './BaseCard';
+export { default as UniversalCard } from './UniversalCard';
 export { default as BaseModal, useModal } from './BaseModal';
 
 // Feedback & Status

@@ -1,29 +1,29 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/LiveClassCard.css';
+import { UniversalCard } from './common';
+import BaseBadge from './common/BaseBadge';
 
 /**
- * Card destacada para clases en vivo
- * Muestra información de la clase con diseño llamativo y botón de unirse
+ * LiveClassCard - Wrapper sobre UniversalCard para clases en vivo
+ *
+ * Componente refactorizado a 100% Tailwind CSS usando el sistema unificado.
+ * Muestra clases activas con badge "EN VIVO" animado.
+ *
+ * @param {object} session - Datos de la sesión de clase
+ * @param {function} onJoin - Callback para unirse a la clase
+ * @param {string} viewMode - 'grid' o 'list' (default: 'grid')
  */
-function LiveClassCard({ session, onJoin }) {
+function LiveClassCard({ session, onJoin, viewMode = 'grid' }) {
   const navigate = useNavigate();
 
   const handleJoinClick = () => {
     if (onJoin) {
       onJoin(session);
     } else {
-      // Por defecto, navegar a la sesión
       navigate(`/class-session/${session.id}`);
     }
   };
 
-  // Calcular cuántos participantes hay
-  const participantCount = session.participants?.length || 0;
-  const maxParticipants = session.maxParticipants || 30;
-  const participantsText = `${participantCount}/${maxParticipants}`;
-
-  // Calcular cuánto tiempo lleva en vivo
+  // Calcular tiempo en vivo
   const getTimeInLive = () => {
     if (!session.startedAt) return '';
 
@@ -39,76 +39,69 @@ function LiveClassCard({ session, onJoin }) {
     return `Hace ${diffHours}h ${remainingMinutes}m`;
   };
 
-  return (
-    <div className="live-class-card">
-      {/* Indicador de Live pulsante */}
-      <div className="live-indicator">
-        <span className="live-dot"></span>
-        <span className="live-text">EN VIVO</span>
-      </div>
+  // Preparar datos para UniversalCard
+  const classData = {
+    ...session,
+    status: 'live',
+    startTime: getTimeInLive()
+  };
 
-      {/* Contenido principal */}
-      <div className="live-class-content">
-        {/* Info de la clase */}
-        <div className="live-class-info">
-          <h3 className="live-class-name">{session.name}</h3>
-
-          <div className="live-class-meta">
-            <div className="meta-item">
-              <span className="meta-icon">👨‍🏫</span>
-              <span className="meta-text">{session.teacherName}</span>
-            </div>
-
-            {session.courseName && (
-              <div className="meta-item">
-                <span className="meta-icon">📚</span>
-                <span className="meta-text">{session.courseName}</span>
-              </div>
-            )}
-
-            <div className="meta-item">
-              <span className="meta-icon">👥</span>
-              <span className="meta-text">{participantsText} participantes</span>
-            </div>
-
-            <div className="meta-item">
-              <span className="meta-icon">⏱️</span>
-              <span className="meta-text">{getTimeInLive()}</span>
-            </div>
-
-            {session.whiteboardType && session.whiteboardType !== 'none' && (
-              <div className="meta-item">
-                <span className="meta-icon">🎨</span>
-                <span className="meta-text">
-                  {session.whiteboardType === 'canvas' ? 'Pizarra Canvas' : 'Pizarra Excalidraw'}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {session.description && (
-            <p className="live-class-description">{session.description}</p>
-          )}
-        </div>
-
-        {/* Botón de unirse */}
-        <div className="live-class-actions">
-          <button
-            className="join-live-btn"
-            onClick={handleJoinClick}
-            title="Unirse a la clase en vivo"
-          >
-            <span className="join-icon">🎥</span>
-            <span className="join-text">Unirse Ahora</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Barra de progreso animada */}
-      <div className="live-progress-bar">
-        <div className="live-progress-fill"></div>
-      </div>
+  // Crear badge personalizado para "EN VIVO"
+  const liveBadge = (
+    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500 dark:bg-red-600 text-white font-bold text-xs animate-pulse">
+      <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+      EN VIVO
     </div>
+  );
+
+  // Información adicional de la clase
+  const classInfo = (
+    <div className="flex flex-col gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+      {session.teacherName && (
+        <div className="flex items-center gap-2">
+          <span>👨‍🏫</span>
+          <span>{session.teacherName}</span>
+        </div>
+      )}
+      {session.courseName && (
+        <div className="flex items-center gap-2">
+          <span>📚</span>
+          <span>{session.courseName}</span>
+        </div>
+      )}
+      {session.participants && (
+        <div className="flex items-center gap-2">
+          <span>👥</span>
+          <span>{session.participants.length}/{session.maxParticipants || 30} participantes</span>
+        </div>
+      )}
+      {session.whiteboardType && session.whiteboardType !== 'none' && (
+        <div className="flex items-center gap-2">
+          <span>🎨</span>
+          <span>{session.whiteboardType === 'canvas' ? 'Pizarra Canvas' : 'Pizarra Excalidraw'}</span>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <UniversalCard
+      viewMode={viewMode}
+      type="class"
+      data={classData}
+      onView={handleJoinClick}
+      showActions={true}
+      showStats={true}
+      className="border-2 border-red-500 dark:border-red-600"
+    >
+      {/* Badge EN VIVO encima del contenido */}
+      <div className="mb-3">
+        {liveBadge}
+      </div>
+
+      {/* Información adicional de la clase */}
+      {classInfo}
+    </UniversalCard>
   );
 }
 
