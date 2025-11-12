@@ -765,11 +765,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
               <Upload className="text-primary-600 dark:text-primary-400" size={32} strokeWidth={2} />
             </div>
             <div className="flex-1">
-              <h3 className="text-xl md:text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-                Corrección de Tareas
+              <h3 className="text-xl md:text-2xl font-bold mb-3 text-gray-900 dark:text-white">
+                Enviar Tareas
               </h3>
-              <p className="text-gray-700 dark:text-gray-300 mb-4">
-                Sube fotos de tus tareas y recibe corrección de ortografía, gramática y vocabulario en segundos
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                Subí fotos de tus tareas. <strong>Asegurate de sacar fotos bien iluminadas, sin sombras y no inclinadas</strong> para que se puedan leer más fácilmente. Tu profesora revisará cada tarea y te dará feedback personalizado.
               </p>
               <BaseButton
                 variant="primary"
@@ -778,7 +778,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 onClick={() => handleMenuAction('quickCorrection')}
                 className="shadow-lg"
               >
-                Subir Tarea para Corregir
+                Enviar Tareas
               </BaseButton>
             </div>
           </div>

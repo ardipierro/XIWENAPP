@@ -159,14 +159,14 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
       <div className="card">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-primary-100 dark:bg-primary-900 rounded-lg">
-            <Sparkles className="text-primary-600 dark:text-primary-400" size={24} />
+            <Upload className="text-primary-600 dark:text-primary-400" size={24} />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Corrección Instantánea
+              Enviar Tareas
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Sube fotos de tus tareas y recibe corrección automática
+              Subí fotos de tus tareas. Tu profesora las revisará y te dará feedback.
             </p>
           </div>
         </div>
@@ -229,12 +229,15 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
         {/* Upload Area */}
         <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary-500 dark:hover:border-primary-400 transition-colors">
           <Upload className="mx-auto text-gray-400 mb-3" size={48} />
-          <p className="text-gray-700 dark:text-gray-300 font-medium mb-2">
-            Sube fotos de tu tarea escrita
+          <p className="text-gray-700 dark:text-gray-300 font-medium mb-3">
+            Consejos para sacar buenas fotos:
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            JPG, PNG - Análisis automático de ortografía, gramática y vocabulario
-          </p>
+          <ul className="text-sm text-gray-600 dark:text-gray-400 mb-4 space-y-1 text-left max-w-md mx-auto">
+            <li>✓ Buena iluminación (luz natural es mejor)</li>
+            <li>✓ Sin sombras sobre el texto</li>
+            <li>✓ Foto derecha, no inclinada</li>
+            <li>✓ Texto legible y enfocado</li>
+          </ul>
           <input
             type="file"
             multiple
