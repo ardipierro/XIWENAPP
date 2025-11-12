@@ -292,15 +292,15 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   }
 
   return (
-    <div className="p-6 min-h-screen" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+    <div className="p-6 min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
               📚 Gestión de Contenidos
             </h1>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Sistema unificado para todos tus recursos educativos
             </p>
           </div>
@@ -315,25 +315,25 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Total</p>
-            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.total}</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Total</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
           </div>
-          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Cursos</p>
-            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.courses}</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Cursos</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.courses}</p>
           </div>
-          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Lecciones</p>
-            <p className="text-2xl font-bold" style={{ color: 'var(--color-success)' }}>{stats.lessons}</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Lecciones</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.lessons}</p>
           </div>
-          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Ejercicios</p>
-            <p className="text-2xl font-bold" style={{ color: 'var(--color-warning)' }}>{stats.exercises}</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Ejercicios</p>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.exercises}</p>
           </div>
-          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Juegos</p>
-            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{stats.games}</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Juegos</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.games}</p>
           </div>
         </div>
 
@@ -468,17 +468,17 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         {viewingContent && (
           <div className="space-y-4">
             {/* Metadata */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
               <div>
-                <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Tipo</p>
-                <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tipo</p>
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
                   {CONTENT_TYPE_CONFIG[viewingContent.type]?.label || viewingContent.type}
                 </p>
               </div>
               {viewingContent.metadata?.difficulty && (
                 <div>
-                  <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>Dificultad</p>
-                  <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Dificultad</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">
                     {viewingContent.metadata.difficulty}
                   </p>
                 </div>
@@ -488,8 +488,8 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
             {/* Description */}
             {viewingContent.description && (
               <div>
-                <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Descripción</h4>
-                <p style={{ color: 'var(--color-text-secondary)' }}>{viewingContent.description}</p>
+                <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Descripción</h4>
+                <p className="text-gray-600 dark:text-gray-400">{viewingContent.description}</p>
               </div>
             )}
 
@@ -498,7 +498,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               {/* Video Player */}
               {viewingContent.type === CONTENT_TYPES.VIDEO && viewingContent.url && (
                 <div className="mb-4 space-y-4">
-                  <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Video</h4>
+                  <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Video</h4>
 
                   {/* Video iframe player con thumbnail */}
                   <div className="relative w-full bg-black rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
@@ -519,7 +519,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                             className="group w-20 h-20 rounded-full bg-white/90 hover:bg-white hover:scale-110 transition-all flex items-center justify-center shadow-xl"
                             aria-label="Reproducir video"
                           >
-                            <Play className="w-10 h-10 ml-1 transition-colors" style={{ color: 'var(--color-text-primary)' }} strokeWidth={2} fill="currentColor" />
+                            <Play className="w-10 h-10 ml-1 transition-colors text-gray-900 dark:text-gray-900" strokeWidth={2} fill="currentColor" />
                           </button>
                         </div>
                       </>
@@ -546,16 +546,16 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                      URL: <a href={viewingContent.url} target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: 'var(--color-primary)' }}>{viewingContent.url}</a>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      URL: <a href={viewingContent.url} target="_blank" rel="noopener noreferrer" className="hover:underline text-primary-600 dark:text-primary-400">{viewingContent.url}</a>
                     </p>
 
                     {viewingContent.body && (
                       <details className="text-xs">
-                        <summary className="cursor-pointer" style={{ color: 'var(--color-text-secondary)' }}>
+                        <summary className="cursor-pointer text-gray-600 dark:text-gray-400">
                           Ver código embed
                         </summary>
-                        <pre className="mt-2 p-2 rounded text-[10px] overflow-x-auto" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                        <pre className="mt-2 p-2 rounded text-[10px] overflow-x-auto bg-gray-100 dark:bg-gray-800">
                           <code>{viewingContent.body}</code>
                         </pre>
                       </details>
@@ -564,8 +564,8 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
                   {/* Bunny.net Metadata */}
                   {viewingContent.videoData && (
-                    <div className="pt-4 space-y-3" style={{ borderTop: '1px solid var(--color-border)' }}>
-                      <h5 className="text-xs font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
+                    <div className="pt-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
+                      <h5 className="text-xs font-semibold flex items-center gap-2 text-gray-600 dark:text-gray-400">
                         <span className="text-orange-500">🐰</span>
                         Datos de Bunny.net
                       </h5>
@@ -573,12 +573,11 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                       {/* Thumbnail */}
                       {viewingContent.videoData.thumbnailUrl && (
                         <div>
-                          <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Thumbnail:</p>
+                          <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Thumbnail:</p>
                           <img
                             src={viewingContent.videoData.thumbnailUrl}
                             alt="Video thumbnail"
-                            className="w-full max-w-sm rounded-lg"
-                            style={{ border: '1px solid var(--color-border)' }}
+                            className="w-full max-w-sm rounded-lg border border-gray-200 dark:border-gray-700"
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
                         </div>
@@ -587,12 +586,11 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                       {/* Preview Animation */}
                       {viewingContent.videoData.previewUrl && (
                         <div>
-                          <p className="text-xs mb-1" style={{ color: 'var(--color-text-secondary)' }}>Vista Previa Animada:</p>
+                          <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Vista Previa Animada:</p>
                           <img
                             src={viewingContent.videoData.previewUrl}
                             alt="Video preview animation"
-                            className="w-full max-w-sm rounded-lg"
-                            style={{ border: '1px solid var(--color-border)' }}
+                            className="w-full max-w-sm rounded-lg border border-gray-200 dark:border-gray-700"
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
                         </div>
@@ -602,14 +600,14 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         {viewingContent.videoData.videoGuid && (
                           <div>
-                            <span className="font-medium" style={{ color: 'var(--color-text-secondary)' }}>Video GUID:</span>
-                            <p className="font-mono text-[10px] break-all" style={{ color: 'var(--color-text-primary)' }}>{viewingContent.videoData.videoGuid}</p>
+                            <span className="font-medium text-gray-600 dark:text-gray-400">Video GUID:</span>
+                            <p className="font-mono text-[10px] break-all text-gray-900 dark:text-white">{viewingContent.videoData.videoGuid}</p>
                           </div>
                         )}
                         {viewingContent.videoData.collectionId && (
                           <div>
-                            <span className="font-medium" style={{ color: 'var(--color-text-secondary)' }}>Collection ID:</span>
-                            <p className="font-mono" style={{ color: 'var(--color-text-primary)' }}>{viewingContent.videoData.collectionId}</p>
+                            <span className="font-medium text-gray-600 dark:text-gray-400">Collection ID:</span>
+                            <p className="font-mono text-gray-900 dark:text-white">{viewingContent.videoData.collectionId}</p>
                           </div>
                         )}
                       </div>
@@ -621,13 +619,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               {/* Link */}
               {viewingContent.type === CONTENT_TYPES.LINK && viewingContent.url && (
                 <div className="mb-4">
-                  <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Enlace</h4>
+                  <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Enlace</h4>
                   <a
                     href={viewingContent.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
                   >
                     Abrir enlace
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -638,7 +635,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               )}
 
               {/* Exercises */}
-              <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">
                 {viewingContent.type === CONTENT_TYPES.EXERCISE ? 'Ejercicios' : 'Contenido'}
               </h4>
               {viewingContent.type === CONTENT_TYPES.EXERCISE ? (
@@ -647,12 +644,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                     try {
                       const exercises = JSON.parse(viewingContent.body);
                       return exercises.map((ex, idx) => (
-                        <div key={idx} className="p-6 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+                        <div key={idx} className="p-6 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                           <div className="flex items-center gap-2 mb-4">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold" style={{ backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}>
+                            <span className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
                               {idx + 1}
                             </span>
-                            <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
+                            <span className="text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
                               {ex.type}
                             </span>
                           </div>
@@ -675,20 +672,20 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
                           {/* For other types, show JSON for now */}
                           {!['gap-fill', 'multiple-choice'].includes(ex.type) && (
-                            <pre className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-text-secondary)' }}>
+                            <pre className="text-sm whitespace-pre-wrap text-gray-600 dark:text-gray-400">
                               {JSON.stringify(ex, null, 2)}
                             </pre>
                           )}
                         </div>
                       ));
                     } catch (e) {
-                      return <p style={{ color: 'var(--color-danger)' }}>Error al parsear ejercicios: {e.message}</p>;
+                      return <p className="text-red-600 dark:text-red-400">Error al parsear ejercicios: {e.message}</p>;
                     }
                   })()}
                 </div>
               ) : (
-                <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-                  <pre className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-text-secondary)' }}>
+                <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <pre className="text-sm whitespace-pre-wrap text-gray-600 dark:text-gray-400">
                     {viewingContent.body || 'Sin contenido'}
                   </pre>
                 </div>
@@ -719,26 +716,26 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return variants[type] || 'default';
   };
 
-  const getDifficultyStyle = (difficulty) => {
-    const styles = {
-      [DIFFICULTY_LEVELS.BEGINNER]: { color: 'var(--color-success)', backgroundColor: 'color-mix(in srgb, var(--color-success) 10%, transparent)' },
-      [DIFFICULTY_LEVELS.INTERMEDIATE]: { color: 'var(--color-warning)', backgroundColor: 'color-mix(in srgb, var(--color-warning) 10%, transparent)' },
-      [DIFFICULTY_LEVELS.ADVANCED]: { color: 'var(--color-danger)', backgroundColor: 'color-mix(in srgb, var(--color-danger) 10%, transparent)' }
+  const getDifficultyClasses = (difficulty) => {
+    const classes = {
+      [DIFFICULTY_LEVELS.BEGINNER]: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
+      [DIFFICULTY_LEVELS.INTERMEDIATE]: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/20',
+      [DIFFICULTY_LEVELS.ADVANCED]: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
     };
-    return styles[difficulty] || { color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-bg-tertiary)' };
+    return classes[difficulty] || 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800';
   };
 
-  const getIconColorStyle = (type) => {
+  const getIconColorClasses = (type) => {
     const colorMap = {
-      [CONTENT_TYPES.LESSON]: { bg: 'color-mix(in srgb, var(--color-success) 10%, transparent)', icon: 'var(--color-success)' },
-      [CONTENT_TYPES.VIDEO]: { bg: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', icon: 'var(--color-danger)' },
-      [CONTENT_TYPES.EXERCISE]: { bg: 'color-mix(in srgb, var(--color-warning) 10%, transparent)', icon: 'var(--color-warning)' },
-      [CONTENT_TYPES.COURSE]: { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' },
-      [CONTENT_TYPES.READING]: { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' },
-      [CONTENT_TYPES.LINK]: { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' },
-      [CONTENT_TYPES.LIVE_GAME]: { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' }
+      [CONTENT_TYPES.LESSON]: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
+      [CONTENT_TYPES.VIDEO]: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
+      [CONTENT_TYPES.EXERCISE]: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+      [CONTENT_TYPES.COURSE]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+      [CONTENT_TYPES.READING]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+      [CONTENT_TYPES.LINK]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+      [CONTENT_TYPES.LIVE_GAME]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white'
     };
-    return colorMap[type] || { bg: 'var(--color-bg-tertiary)', icon: 'var(--color-text-primary)' };
+    return colorMap[type] || 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white';
   };
 
   // Determinar si tiene imagen (thumbnail de video u otra imagen)
@@ -760,7 +757,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           {/* Overlay con icono de play - solo visible en hover */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-all duration-300">
             <div className="w-16 h-16 rounded-full bg-white/0 group-hover:bg-white/90 flex items-center justify-center transition-all duration-300 scale-0 group-hover:scale-100">
-              <Play className="w-8 h-8 ml-1" style={{ color: 'var(--color-text-primary)' }} strokeWidth={2} fill="currentColor" />
+              <Play className="w-8 h-8 ml-1 text-gray-900" strokeWidth={2} fill="currentColor" />
             </div>
           </div>
         </div>
@@ -768,10 +765,10 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     }
 
     // Fallback: Icono del tipo de contenido
-    const iconColors = getIconColorStyle(content.type);
+    const iconClasses = getIconColorClasses(content.type);
     return (
-      <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: iconColors.bg }}>
-        <IconComponent className="w-12 h-12" style={{ color: iconColors.icon }} strokeWidth={1.5} />
+      <div className={`w-full h-full flex items-center justify-center ${iconClasses}`}>
+        <IconComponent className="w-12 h-12" strokeWidth={1.5} />
       </div>
     );
   };
@@ -780,12 +777,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return (
       <div
         id={`content-${content.id}`}
-        className="group rounded-lg transition-all overflow-hidden"
-        style={{
-          backgroundColor: 'var(--color-bg-secondary)',
-          border: isNew ? '1px solid var(--color-success)' : '1px solid var(--color-border)',
-          boxShadow: isNew ? '0 10px 15px -3px color-mix(in srgb, var(--color-success) 20%, transparent)' : 'none'
-        }}
+        className={`group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
       >
         <div className="flex items-stretch min-h-[140px]">
           {/* Imagen o Icono - Cuadrado que ocupa toda la altura */}
@@ -798,19 +790,18 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
                 onError={(e) => {
                   e.target.style.display = 'none';
                   // Mostrar ícono de fallback
-                  const iconColors = getIconColorStyle(content.type);
+                  const iconClasses = getIconColorClasses(content.type);
                   const fallback = document.createElement('div');
-                  fallback.className = 'w-full h-full flex items-center justify-center';
-                  fallback.style.backgroundColor = iconColors.bg;
+                  fallback.className = `w-full h-full flex items-center justify-center ${iconClasses}`;
                   e.target.parentElement.appendChild(fallback);
                 }}
               />
             ) : (
               (() => {
-                const iconColors = getIconColorStyle(content.type);
+                const iconClasses = getIconColorClasses(content.type);
                 return (
-                  <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: iconColors.bg }}>
-                    <IconComponent className="w-10 h-10" style={{ color: iconColors.icon }} strokeWidth={2} />
+                  <div className={`w-full h-full flex items-center justify-center ${iconClasses}`}>
+                    <IconComponent className="w-10 h-10" strokeWidth={2} />
                   </div>
                 );
               })()
@@ -825,29 +816,29 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
                 {config.label}
               </BaseBadge>
               {content.metadata?.difficulty && (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={getDifficultyStyle(content.metadata.difficulty)}>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
                   {content.metadata.difficulty}
                 </span>
               )}
               {content.metadata?.tags?.slice(0, 2).map((tag, idx) => (
-                <span key={idx} className="text-xs px-2 py-0.5 rounded-full" style={{ color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-bg-tertiary)' }}>
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
                   {tag}
                 </span>
               ))}
             </div>
 
             {/* Título */}
-            <h3 className="text-base font-semibold truncate mb-1" style={{ color: 'var(--color-text-primary)' }}>
+            <h3 className="text-base font-semibold truncate mb-1 text-gray-900 dark:text-white">
               {content.title}
             </h3>
 
             {/* Descripción */}
-            <p className="text-sm line-clamp-1 mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-sm line-clamp-1 mb-2 text-gray-600 dark:text-gray-400">
               {content.description || config.description}
             </p>
 
             {/* Metadata (fecha, duración, puntos) */}
-            <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+            <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
               {content.createdAt && (
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
@@ -884,11 +875,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   return (
     <BaseCard
       id={`content-${content.id}`}
-      className="group transition-all"
-      style={{
-        border: isNew ? '1px solid var(--color-success)' : '1px solid var(--color-border)',
-        boxShadow: isNew ? '0 10px 15px -3px color-mix(in srgb, var(--color-success) 20%, transparent)' : 'none'
-      }}
+      className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
       image={renderImageOrIcon()}
     >
       <div className="flex flex-col h-full">
@@ -898,25 +885,25 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
             {config.label}
           </BaseBadge>
           {content.metadata?.difficulty && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={getDifficultyStyle(content.metadata.difficulty)}>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
               {content.metadata.difficulty}
             </span>
           )}
         </div>
 
         {/* Título */}
-        <h3 className="text-lg font-semibold mb-2 line-clamp-2" style={{ color: 'var(--color-text-primary)' }}>
+        <h3 className="text-lg font-semibold mb-2 line-clamp-2 text-gray-900 dark:text-white">
           {content.title}
         </h3>
 
         {/* Descripción */}
-        <p className="text-sm mb-4 line-clamp-3 flex-grow" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-sm mb-4 line-clamp-3 flex-grow text-gray-600 dark:text-gray-400">
           {content.description || config.description}
         </p>
 
         {/* Metadata (fecha, duración, puntos, tags) */}
         <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-3 text-xs flex-wrap" style={{ color: 'var(--color-text-secondary)' }}>
+          <div className="flex items-center gap-3 text-xs flex-wrap text-gray-600 dark:text-gray-400">
             {content.createdAt && (
               <div className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
@@ -940,9 +927,9 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           {/* Tags */}
           {content.metadata?.tags?.length > 0 && (
             <div className="flex items-center gap-1 flex-wrap">
-              <Tag className="w-3.5 h-3.5" style={{ color: 'var(--color-text-secondary)' }} strokeWidth={2} />
+              <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
               {content.metadata.tags.slice(0, 3).map((tag, idx) => (
-                <span key={idx} className="text-xs px-2 py-0.5 rounded-full" style={{ color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-bg-tertiary)' }}>
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
                   {tag}
                 </span>
               ))}
@@ -951,7 +938,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
         </div>
 
         {/* Footer - Action Buttons */}
-        <div className="flex gap-2 mt-auto pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+        <div className="flex gap-2 mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
           <BaseButton variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
             Ver
           </BaseButton>
