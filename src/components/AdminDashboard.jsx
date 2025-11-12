@@ -100,6 +100,7 @@ import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import ThemeCustomizer from './ThemeCustomizer';
 import aiService from '../services/aiService';
+import AIAssistantWidget from './AIAssistantWidget';
 import './AdminDashboard.css';
 
 // Custom hooks
@@ -1759,6 +1760,9 @@ function AdminDashboard({ user, userRole, onLogout }) {
           </div>
         </div>
       )}
+
+      {/* AI Assistant Widget */}
+      <AIAssistantWidget />
     </>
   );
 }

@@ -32,6 +32,7 @@ import StudentFeesPanel from './StudentFeesPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import { useStudentDashboard } from '../hooks/useStudentDashboard';
+import AIAssistantWidget from './AIAssistantWidget';
 
 // Base Components
 import {
@@ -809,7 +810,10 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         )}
       </div>
     </DashboardLayout>
-  );
+
+    {/* AI Assistant Widget */}
+    <AIAssistantWidget />
+  </>;
 }
 
 export default StudentDashboard;
