@@ -24,6 +24,7 @@ import {
   CalendarDays,
   CheckSquare,
   FileCheck,
+  CheckCircle,
   MessageCircle,
   DollarSign,
   Shield,
@@ -81,6 +82,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
               { icon: ClipboardList, label: 'Asistencias', path: '/admin', action: 'attendance' },
+              { icon: CheckCircle, label: 'Revisar Tareas', path: '/admin', action: 'homeworkReview' },
               { icon: Lightbulb, label: 'Tareas IA', path: '/admin', action: 'aiConfig' },
               { icon: Settings, label: 'Configuración', path: '/admin', action: 'settings' },
             ]
@@ -108,6 +110,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classSessions' },
           { icon: CheckSquare, label: 'Tareas', path: '/teacher', action: 'assignments' },
           { icon: FileCheck, label: 'Calificar', path: '/teacher', action: 'grading' },
+          { icon: CheckCircle, label: 'Revisar Tareas', path: '/teacher', action: 'homeworkReview' },
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },

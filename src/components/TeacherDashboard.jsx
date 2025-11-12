@@ -77,6 +77,7 @@ import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 import AssignmentManager from './AssignmentManager';
 import GradingInterface from './GradingInterface';
+import HomeworkReviewPanel from './HomeworkReviewPanel';
 import UnifiedCalendar from './UnifiedCalendar';
 import MessagesPanel from './MessagesPanel';
 import ClassCountdownBanner from './ClassCountdownBanner';
@@ -1515,6 +1516,15 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <AssignmentManager teacherId={user?.id} />
+      </DashboardLayout>
+    );
+  }
+
+  // Homework Review Screen - Review AI-corrected homework
+  if (navigation.currentScreen === 'homeworkReview') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <HomeworkReviewPanel teacherId={user?.id} />
       </DashboardLayout>
     );
   }

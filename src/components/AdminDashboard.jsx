@@ -97,6 +97,7 @@ import AdminPaymentsPanel from './AdminPaymentsPanel';
 import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
 import SettingsPanel from './SettingsPanel';
+import HomeworkReviewPanel from './HomeworkReviewPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ClassSessionModal from './ClassSessionModal';
@@ -597,6 +598,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
           </BaseButton>
           <AIConfigPanel />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Homework Review Panel - WITH Layout
+  if (navigation.currentScreen === 'homeworkReview') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <HomeworkReviewPanel />
       </DashboardLayout>
     );
   }
