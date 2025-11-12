@@ -163,92 +163,105 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}>🔄</div>
-        <p style={styles.loadingText}>Cargando lecciones...</p>
+      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-600 dark:bg-gray-800">
+        <div className="text-5xl animate-spin">🔄</div>
+        <p className="text-white text-lg mt-5">Cargando lecciones...</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <div className="min-h-screen bg-gray-600 dark:bg-gray-800 py-10 px-5">
       {/* Header */}
-      <div style={styles.header}>
-        <button onClick={onBack} style={styles.backButton}>
+      <div className="max-w-6xl mx-auto mb-10 flex justify-between items-center gap-5 flex-wrap">
+        <button
+          onClick={onBack}
+          className="py-3 px-6 bg-white/20 border-2 border-white rounded-lg cursor-pointer text-base font-semibold text-white transition-all hover:bg-white/30"
+        >
           ← Volver a Cursos
         </button>
         <div>
-          <h1 style={styles.title}>📖 Lecciones de {course.name}</h1>
+          <h1 className="text-3xl font-bold text-white m-0">📖 Lecciones de {course.name}</h1>
           {course.description && (
-            <p style={styles.subtitle}>{course.description}</p>
+            <p className="text-base text-white/90 mt-2 mb-0">{course.description}</p>
           )}
         </div>
-        <button onClick={openCreateModal} style={styles.createButton}>
+        <button
+          onClick={openCreateModal}
+          className="py-3 px-6 bg-green-600 border-none rounded-lg cursor-pointer text-base font-semibold text-white transition-all hover:bg-green-700"
+        >
           ➕ Nueva Lección
         </button>
       </div>
 
       {/* Lista de Lecciones */}
-      <div style={styles.lessonsContainer}>
+      <div className="max-w-6xl mx-auto">
         {lessons.length === 0 ? (
-          <div style={styles.emptyState}>
-            <p style={styles.emptyIcon}>📚</p>
-            <h3 style={styles.emptyTitle}>No hay lecciones creadas</h3>
-            <p style={styles.emptyText}>Crea la primera lección para este curso</p>
-            <button onClick={openCreateModal} style={styles.createButtonLarge}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl py-15 px-10 text-center shadow-2xl">
+            <p className="text-8xl m-0 mb-5">📚</p>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white m-0 mb-2">No hay lecciones creadas</h3>
+            <p className="text-base text-gray-600 dark:text-gray-400 m-0 mb-7">Crea la primera lección para este curso</p>
+            <button
+              onClick={openCreateModal}
+              className="py-3.5 px-8 bg-green-600 border-none rounded-lg cursor-pointer text-lg font-semibold text-white transition-all hover:bg-green-700"
+            >
               ➕ Crear Primera Lección
             </button>
           </div>
         ) : (
           lessons.map((lesson, index) => (
-            <div key={lesson.id} style={styles.lessonCard}>
-              <div style={styles.lessonHeader}>
-                <div style={styles.lessonNumber}>{index + 1}</div>
-                <div style={styles.lessonIcon}>{getLessonIcon(lesson.type)}</div>
-                <div style={styles.lessonInfo}>
-                  <h3 style={styles.lessonTitle}>{lesson.title}</h3>
-                  <span style={styles.typeBadge}>
+            <div key={lesson.id} className="bg-white dark:bg-gray-900 rounded-2xl p-6 mb-5 shadow-lg transition-transform hover:translate-y-[-4px]">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-10 h-10 rounded-full bg-gray-600 dark:bg-gray-700 text-white flex items-center justify-center font-bold text-lg">
+                  {index + 1}
+                </div>
+                <div className="text-3xl">{getLessonIcon(lesson.type)}</div>
+                <div className="flex-1 flex items-center gap-3 flex-wrap">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white m-0 flex-1">
+                    {lesson.title}
+                  </h3>
+                  <span className="py-1 px-3 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-xs font-semibold">
                     {getLessonTypeBadge(lesson.type)}
                   </span>
                 </div>
               </div>
 
               {lesson.content && (
-                <div style={styles.lessonPreview}>
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-4">
                   {lesson.type === 'text' && (
-                    <p style={styles.textPreview}>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed m-0">
                       {lesson.content.substring(0, 150)}
                       {lesson.content.length > 150 && '...'}
                     </p>
                   )}
                   {lesson.type === 'video' && (
-                    <p style={styles.textPreview}>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed m-0">
                       🎥 URL: {lesson.content}
                     </p>
                   )}
                   {lesson.type === 'audio' && (
-                    <p style={styles.textPreview}>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed m-0">
                       🎧 URL: {lesson.content}
                     </p>
                   )}
                   {lesson.type === 'interactive' && (
-                    <p style={styles.textPreview}>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed m-0">
                       ✨ Contenido interactivo configurado
                     </p>
                   )}
                 </div>
               )}
 
-              <div style={styles.lessonActions}>
+              <div className="flex gap-2">
                 <button
                   onClick={() => openEditModal(lesson)}
-                  style={styles.editButton}
+                  className="flex-1 py-2.5 px-4 bg-gray-600 dark:bg-gray-700 border-none rounded-lg cursor-pointer text-sm font-semibold text-white transition-all hover:bg-gray-700 dark:hover:bg-gray-600"
                 >
                   ✏️ Editar
                 </button>
                 <button
                   onClick={() => handleDeleteLesson(lesson.id, lesson.title)}
-                  style={styles.deleteButton}
+                  className="flex-1 py-2.5 px-4 bg-red-500 dark:bg-red-600 border-none rounded-lg cursor-pointer text-sm font-semibold text-white transition-all hover:bg-red-600 dark:hover:bg-red-500"
                 >
                   🗑️ Eliminar
                 </button>
@@ -260,33 +273,48 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
 
       {/* Modal para Crear/Editar */}
       {showModal && (
-        <div style={styles.modalOverlay} onClick={closeModal}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>
+        <div
+          className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 dark:bg-black/70 flex justify-center items-center z-[1000]"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 rounded-2xl w-[90%] max-w-2xl max-h-[90vh] overflow-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white m-0">
                 {editingLesson ? '✏️ Editar Lección' : '➕ Nueva Lección'}
               </h2>
-              <button onClick={closeModal} style={styles.closeButton}>✕</button>
+              <button
+                onClick={closeModal}
+                className="bg-transparent border-none text-2xl cursor-pointer text-gray-600 dark:text-gray-400 py-1 px-2 leading-none hover:text-gray-900 dark:hover:text-white"
+              >
+                ✕
+              </button>
             </div>
 
-            <div style={styles.modalBody}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Título de la Lección *</label>
+            <div className="p-6">
+              <div className="mb-5">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Título de la Lección *
+                </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Ej: Introducción a las fracciones"
-                  style={styles.input}
+                  className="w-full py-3 px-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-400 outline-none"
                 />
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Tipo de Lección *</label>
+              <div className="mb-5">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Tipo de Lección *
+                </label>
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  style={styles.select}
+                  className="w-full py-3 px-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-400 outline-none"
                 >
                   <option value="text">📄 Texto</option>
                   <option value="video">🎥 Video</option>
@@ -295,8 +323,8 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
                 </select>
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
+              <div className="mb-5">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   {formData.type === 'text' && 'Contenido de Texto'}
                   {formData.type === 'video' && 'URL del Video (YouTube, Vimeo, etc.)'}
                   {formData.type === 'audio' && 'URL del Audio'}
@@ -314,29 +342,32 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
                       ? 'https://...'
                       : 'Contenido interactivo (se cargará desde archivo)'
                   }
-                  style={styles.textarea}
+                  className="w-full py-3 px-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-base resize-y font-[inherit] bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-400 outline-none"
                   rows={8}
                 />
                 {(formData.type === 'video' || formData.type === 'audio') && (
-                  <p style={styles.helpText}>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 mb-0">
                     💡 Por ahora ingresa la URL. En futuras versiones podrás cargar archivos.
                   </p>
                 )}
                 {formData.type === 'interactive' && (
-                  <p style={styles.helpText}>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 mb-0">
                     💡 El contenido interactivo se cargará desde archivos .txt en futuras versiones.
                   </p>
                 )}
               </div>
             </div>
 
-            <div style={styles.modalFooter}>
-              <button onClick={closeModal} style={styles.cancelButton}>
+            <div className="flex gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={closeModal}
+                className="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 border-none rounded-lg cursor-pointer text-base font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
                 Cancelar
               </button>
               <button
                 onClick={editingLesson ? handleUpdateLesson : handleCreateLesson}
-                style={styles.saveButton}
+                className="flex-1 py-3 px-4 bg-green-600 dark:bg-green-700 border-none rounded-lg cursor-pointer text-base font-semibold text-white hover:bg-green-700 dark:hover:bg-green-600"
               >
                 {editingLesson ? '💾 Guardar Cambios' : '➕ Crear Lección'}
               </button>
@@ -347,316 +378,5 @@ function LessonScreen({ course, lessons: initialLessons, onBack }) {
     </div>
   );
 }
-
-// Estilos
-const styles = {
-  container: {
-    minHeight: '100vh',
-    background: '#71717a',
-    padding: '40px 20px',
-  },
-  loadingContainer: {
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    background: '#71717a',
-  },
-  spinner: {
-    fontSize: '48px',
-    animation: 'spin 1s linear infinite',
-  },
-  loadingText: {
-    color: 'white',
-    fontSize: '18px',
-    marginTop: '20px',
-  },
-  header: {
-    maxWidth: '1200px',
-    margin: '0 auto 40px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '20px',
-    flexWrap: 'wrap',
-  },
-  backButton: {
-    padding: '12px 24px',
-    background: 'rgba(255,255,255,0.2)',
-    border: '2px solid white',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  title: {
-    fontSize: '32px',
-    fontWeight: '700',
-    color: 'white',
-    margin: '0',
-  },
-  subtitle: {
-    fontSize: '16px',
-    color: 'rgba(255,255,255,0.9)',
-    margin: '8px 0 0 0',
-  },
-  createButton: {
-    padding: '12px 24px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  lessonsContainer: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  emptyState: {
-    background: 'white',
-    borderRadius: '20px',
-    padding: '60px 40px',
-    textAlign: 'center',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-  },
-  emptyIcon: {
-    fontSize: '80px',
-    margin: '0 0 20px 0',
-  },
-  emptyTitle: {
-    fontSize: '24px',
-    fontWeight: '700',
-    color: '#1f2937',
-    margin: '0 0 10px 0',
-  },
-  emptyText: {
-    fontSize: '16px',
-    color: '#6b7280',
-    margin: '0 0 30px 0',
-  },
-  createButtonLarge: {
-    padding: '14px 32px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontSize: '18px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  lessonCard: {
-    background: 'white',
-    borderRadius: '16px',
-    padding: '24px',
-    marginBottom: '20px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-    transition: 'transform 0.3s',
-  },
-  lessonHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    marginBottom: '16px',
-  },
-  lessonNumber: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    background: '#71717a',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: '700',
-    fontSize: '18px',
-  },
-  lessonIcon: {
-    fontSize: '32px',
-  },
-  lessonInfo: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    flexWrap: 'wrap',
-  },
-  lessonTitle: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: '#1f2937',
-    margin: 0,
-    flex: 1,
-  },
-  typeBadge: {
-    padding: '4px 12px',
-    background: '#e4e4e7',
-    color: '#71717a',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
-  },
-  lessonPreview: {
-    background: '#f9fafb',
-    padding: '16px',
-    borderRadius: '8px',
-    marginBottom: '16px',
-  },
-  textPreview: {
-    color: '#6b7280',
-    fontSize: '14px',
-    lineHeight: '1.6',
-    margin: 0,
-  },
-  lessonActions: {
-    display: 'flex',
-    gap: '8px',
-  },
-  editButton: {
-    flex: 1,
-    padding: '10px',
-    background: '#71717a',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  deleteButton: {
-    flex: 1,
-    padding: '10px',
-    background: '#ef4444',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: 'white',
-    transition: 'all 0.3s',
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modal: {
-    background: 'white',
-    borderRadius: '20px',
-    width: '90%',
-    maxWidth: '600px',
-    maxHeight: '90vh',
-    overflow: 'auto',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-  },
-  modalHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '24px',
-    borderBottom: '1px solid #e5e7eb',
-  },
-  modalTitle: {
-    fontSize: '24px',
-    fontWeight: '700',
-    color: '#1f2937',
-    margin: 0,
-  },
-  closeButton: {
-    background: 'none',
-    border: 'none',
-    fontSize: '24px',
-    cursor: 'pointer',
-    color: '#6b7280',
-    padding: '4px 8px',
-    lineHeight: 1,
-  },
-  modalBody: {
-    padding: '24px',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: '8px',
-  },
-  input: {
-    width: '100%',
-    padding: '12px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '16px',
-    boxSizing: 'border-box',
-  },
-  select: {
-    width: '100%',
-    padding: '12px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '16px',
-    boxSizing: 'border-box',
-  },
-  textarea: {
-    width: '100%',
-    padding: '12px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '16px',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box',
-  },
-  helpText: {
-    fontSize: '12px',
-    color: '#6b7280',
-    marginTop: '8px',
-  },
-  modalFooter: {
-    display: 'flex',
-    gap: '12px',
-    padding: '24px',
-    borderTop: '1px solid #e5e7eb',
-  },
-  cancelButton: {
-    flex: 1,
-    padding: '12px',
-    background: '#e5e7eb',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#374151',
-  },
-  saveButton: {
-    flex: 1,
-    padding: '12px',
-    background: '#10b981',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'white',
-  },
-};
 
 export default LessonScreen;
