@@ -148,3 +148,11 @@ exports.checkAICredentials = checkAICredentials;
 // Export homework analyzer function
 const { analyzeHomeworkImage } = require('./homeworkAnalyzer');
 exports.analyzeHomeworkImage = analyzeHomeworkImage;
+
+// ============================================================================
+// DASHBOARD ASSISTANT
+// ============================================================================
+
+// Export dashboard assistant with rich context
+const { dashboardAssistant } = require('./dashboardAssistant');
+exports.dashboardAssistant = dashboardAssistant;

@@ -107,7 +107,7 @@ import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import ThemeCustomizer from './ThemeCustomizer';
 import aiService from '../services/aiService';
-import AIAssistantWidget from './AIAssistantWidget';
+import DashboardAssistant from './DashboardAssistant';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -605,12 +605,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'settings') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-4 md:p-6 lg:p-8">
-          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
-            ← Back to Home
-          </BaseButton>
-          <SettingsPanel />
-        </div>
+        <SettingsPanel />
       </DashboardLayout>
     );
   }
@@ -1461,7 +1456,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       )}
 
       {/* AI Assistant Widget */}
-      <AIAssistantWidget />
+      <DashboardAssistant />
     </>
   );
 }

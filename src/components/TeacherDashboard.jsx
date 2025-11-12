@@ -85,7 +85,7 @@ import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
 import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
-import AIAssistantWidget from './AIAssistantWidget';
+import DashboardAssistant from './DashboardAssistant';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -1699,7 +1699,7 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       />
 
       {/* AI Assistant Widget */}
-      <AIAssistantWidget />
+      <DashboardAssistant />
     </>
   );
 }
