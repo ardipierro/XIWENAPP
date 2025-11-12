@@ -750,7 +750,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
               <BaseButton
                 onClick={onBack}
                 variant="outline"
-                icon={<Home />}
+                icon={Home}
                 title="Volver al dashboard"
               >
                 <span className="hidden sm:inline text-sm font-medium">Volver</span>
@@ -769,35 +769,35 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
               onClick={() => setSelectedTool('select')}
             />
             <ToolButton
-              icon={<Highlighter className="w-5 h-5" />}
+              icon={Highlighter}
               label="Subrayar"
               active={selectedTool === 'highlight'}
               onClick={() => setSelectedTool('highlight')}
               disabled={readOnly}
             />
             <ToolButton
-              icon={<StickyNote className="w-5 h-5" />}
+              icon={StickyNote}
               label="Nota"
               active={selectedTool === 'note'}
               onClick={() => setSelectedTool('note')}
               disabled={readOnly}
             />
             <ToolButton
-              icon={<Pen className="w-5 h-5" />}
+              icon={Pen}
               label="Dibujar"
               active={selectedTool === 'draw'}
               onClick={() => setSelectedTool('draw')}
               disabled={readOnly}
             />
             <ToolButton
-              icon={<Type className="w-5 h-5" />}
+              icon={Type}
               label="Texto"
               active={selectedTool === 'text'}
               onClick={() => setSelectedTool('text')}
               disabled={readOnly}
             />
             <ToolButton
-              icon={<Edit3 className="w-5 h-5" />}
+              icon={Edit3}
               label="Editar"
               active={isEditMode}
               onClick={isEditMode ? handleExitEditMode : handleEnterEditMode}
@@ -811,13 +811,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
             <BaseButton
               onClick={() => setShowInstructionsModal(true)}
               variant="ghost"
-              icon={<HelpCircle />}
+              icon={HelpCircle}
               title="Ayuda"
             />
             <BaseButton
               onClick={handleExportAnnotations}
               variant="ghost"
-              icon={<Download />}
+              icon={Download}
               title="Exportar"
             />
             <label className="icon-btn cursor-pointer" title="Importar">
@@ -828,7 +828,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
               <BaseButton
                 onClick={handleSaveAnnotations}
                 variant="primary"
-                icon={<Save />}
+                icon={Save}
               >
                 <span className="hidden sm:inline">Guardar</span>
               </BaseButton>
@@ -846,7 +846,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
                   variant="ghost"
                   size="sm"
-                  icon={<ZoomOut className="w-4 h-4" />}
+                  icon={ZoomOut}
                 />
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
                   {fontSize}px
@@ -855,7 +855,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   onClick={() => setFontSize(Math.min(32, fontSize + 2))}
                   variant="ghost"
                   size="sm"
-                  icon={<ZoomIn className="w-4 h-4" />}
+                  icon={ZoomIn}
                 />
               </div>
               <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
@@ -959,7 +959,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   disabled={historyIndex <= 0}
                   variant="ghost"
                   size="sm"
-                  icon={<Undo className="w-4 h-4" />}
+                  icon={Undo}
                   title="Deshacer"
                 />
                 <BaseButton
@@ -967,14 +967,14 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   disabled={historyIndex >= canvasHistory.length - 1}
                   variant="ghost"
                   size="sm"
-                  icon={<Redo className="w-4 h-4" />}
+                  icon={Redo}
                   title="Rehacer"
                 />
                 <BaseButton
                   onClick={handleClearCanvas}
                   variant="danger"
                   size="sm"
-                  icon={<Trash2 className="w-4 h-4" />}
+                  icon={Trash2}
                   title="Limpiar"
                 />
               </div>
@@ -1020,7 +1020,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
                   variant="ghost"
                   size="sm"
-                  icon={<ZoomOut className="w-4 h-4" />}
+                  icon={ZoomOut}
                 />
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
                   {fontSize}px
@@ -1029,7 +1029,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   onClick={() => setFontSize(Math.min(32, fontSize + 2))}
                   variant="ghost"
                   size="sm"
-                  icon={<ZoomIn className="w-4 h-4" />}
+                  icon={ZoomIn}
                 />
               </div>
             </div>
@@ -1047,21 +1047,21 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                         onClick={handleBold}
                         variant="ghost"
                         size="sm"
-                        icon={<Bold className="w-4 h-4" />}
+                        icon={Bold}
                         title="Negrita"
                       />
                       <BaseButton
                         onClick={handleItalic}
                         variant="ghost"
                         size="sm"
-                        icon={<Italic className="w-4 h-4" />}
+                        icon={Italic}
                         title="Cursiva"
                       />
                       <BaseButton
                         onClick={handleUnderline}
                         variant="ghost"
                         size="sm"
-                        icon={<UnderlineIcon className="w-4 h-4" />}
+                        icon={UnderlineIcon}
                         title="Subrayado"
                       />
                       <div className="relative">
@@ -1094,7 +1094,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                     disabled={!hasUnsavedEdits}
                     variant="success"
                     size="sm"
-                    icon={<Save className="w-3 h-3" />}
+                    icon={Save}
                     title="Guardar ediciones"
                   >
                     <span>Guardar</span>
@@ -1104,21 +1104,21 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                     disabled={!hasUnsavedEdits}
                     variant="ghost"
                     size="sm"
-                    icon={<X className="w-4 h-4" />}
+                    icon={X}
                     title="Descartar cambios"
                   />
                   <BaseButton
                     onClick={() => setShowOriginal(!showOriginal)}
                     variant={showOriginal ? 'primary' : 'ghost'}
                     size="sm"
-                    icon={<Eye className="w-4 h-4" />}
+                    icon={Eye}
                     title={showOriginal ? 'Mostrar versión editada' : 'Mostrar versión original'}
                   />
                   <BaseButton
                     onClick={handleResetToOriginal}
                     variant="danger"
                     size="sm"
-                    icon={<RotateCcw className="w-4 h-4" />}
+                    icon={RotateCcw}
                     title="Restaurar al original"
                   />
                 </div>
@@ -1262,7 +1262,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                     onClick={() => handleDeleteFloatingText(floatingText.id)}
                     variant="danger"
                     size="sm"
-                    icon={<X className="w-3 h-3" />}
+                    icon={X}
                   />
                 )}
               </div>
@@ -1304,7 +1304,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                     onClick={() => handleDeleteNote(note.id)}
                     variant="ghost"
                     size="sm"
-                    icon={<X className="w-4 h-4" />}
+                    icon={X}
                   />
                 )}
               </div>
@@ -1378,7 +1378,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
               <BaseButton
                 onClick={() => setShowInstructionsModal(false)}
                 variant="ghost"
-                icon={<X className="w-6 h-6" />}
+                icon={X}
               />
             </div>
 
@@ -1541,6 +1541,8 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
  * Tool Button Component
  */
 function ToolButton({ icon, label, active, onClick, disabled }) {
+  const IconComponent = icon;
+
   return (
     <button
       onClick={onClick}
@@ -1552,7 +1554,11 @@ function ToolButton({ icon, label, active, onClick, disabled }) {
       } disabled:opacity-50 disabled:cursor-not-allowed`}
       title={label}
     >
-      {typeof icon === 'string' ? <span className="text-lg">{icon}</span> : icon}
+      {typeof icon === 'string' ? (
+        <span className="text-lg">{icon}</span>
+      ) : (
+        <IconComponent className="w-5 h-5" />
+      )}
       <span className="hidden sm:inline text-sm">{label}</span>
     </button>
   );
@@ -1578,7 +1584,7 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }
           onClick={onCancel}
           variant="ghost"
           size="sm"
-          icon={<X className="w-4 h-4" />}
+          icon={X}
         />
       </div>
 
@@ -1628,7 +1634,7 @@ function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
           onClick={onCancel}
           variant="ghost"
           size="sm"
-          icon={<X className="w-4 h-4" />}
+          icon={X}
         />
       </div>
 
@@ -1670,7 +1676,7 @@ ContentReader.propTypes = {
 };
 
 ToolButton.propTypes = {
-  icon: PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
+  icon: PropTypes.oneOfType([PropTypes.string, PropTypes.element, PropTypes.elementType]).isRequired,
   label: PropTypes.string.isRequired,
   active: PropTypes.bool,
   onClick: PropTypes.func.isRequired,

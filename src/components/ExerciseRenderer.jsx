@@ -131,7 +131,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
               ${showCorrectAnswer && exercise.correct === true ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : ''}
             `}
             disabled={showCorrectAnswer}
-            icon={<Check size={20} strokeWidth={2} />}
+            icon={Check}
           >
             Verdadero
           </BaseButton>
@@ -146,7 +146,7 @@ function ExerciseRenderer({ exercise, onAnswer, showCorrectAnswer = false }) {
               ${showCorrectAnswer && exercise.correct === false ? 'border-green-500 bg-green-50 dark:bg-green-900/30' : ''}
             `}
             disabled={showCorrectAnswer}
-            icon={<X size={20} strokeWidth={2} />}
+            icon={X}
           >
             Falso
           </BaseButton>
