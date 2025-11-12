@@ -1,6 +1,6 @@
 import logger from '../utils/logger';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -31,8 +31,14 @@ import MessagesPanel from './MessagesPanel';
 import StudentFeesPanel from './StudentFeesPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
+import LiveClassCard from './LiveClassCard';
+import NotificationCenter from './NotificationCenter';
+import ClassCountdownBanner from './ClassCountdownBanner';
 import { useStudentDashboard } from '../hooks/useStudentDashboard';
 import AIAssistantWidget from './AIAssistantWidget';
+import useRealtimeClassStatus from '../hooks/useRealtimeClassStatus';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 // Base Components
 import {
@@ -69,6 +75,40 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   const [selectedExerciseId, setSelectedExerciseId] = useState(null);
   const [selectedWhiteboardSession, setSelectedWhiteboardSession] = useState(null);
   const [selectedLiveClass, setSelectedLiveClass] = useState(null);
+
+  // Live classes state
+  const [liveClassSessions, setLiveClassSessions] = useState([]);
+
+  // Upcoming classes hook (countdown banner)
+  const { upcomingSessions, shouldShowCountdown } = useRealtimeClassStatus(
+    user?.uid,
+    'student',
+    { minutesAhead: 10, includeScheduled: true }
+  );
+
+  // Listener para clases en vivo asignadas al estudiante
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const q = query(
+      collection(db, 'class_sessions'),
+      where('status', '==', 'live'),
+      where('assignedStudents', 'array-contains', user.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const sessions = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setLiveClassSessions(sessions);
+      logger.debug('🔴 Clases en vivo actualizadas:', sessions.length);
+    }, (error) => {
+      logger.error('❌ Error listening to live class sessions:', error);
+    });
+
+    return () => unsubscribe();
+  }, [user?.uid]);
 
   // Helper to format relative time
   const formatRelativeTime = (timestamp) => {
@@ -211,6 +251,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       collaborativeSessionId: whiteboard.liveSessionId
     });
     setCurrentView('whiteboard');
+  };
+
+  const handleJoinLiveClass = (session) => {
+    logger.debug('🔴 [StudentDashboard] Joining live class:', session);
+    navigate(`/class-session/${session.id}`);
   };
 
   // Loading state
@@ -479,8 +524,31 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
   // Main Dashboard view
   return (
-    <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+    <>
+      <DashboardLayout
+        user={user}
+        userRole={userRole}
+        onLogout={onLogout}
+        onMenuAction={handleMenuAction}
+        headerContent={<NotificationCenter userId={user?.uid} showToasts={true} />}
+      >
       <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        {/* Live Classes - TOP PRIORITY */}
+        {liveClassSessions.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              🔴 Clases en Vivo Ahora
+            </h2>
+            {liveClassSessions.map((session) => (
+              <LiveClassCard
+                key={session.id}
+                session={session}
+                onJoin={handleJoinLiveClass}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Live Whiteboards - Priority Section */}
         {liveWhiteboards.length > 0 && (
           <div className="text-white rounded-xl p-4 md:p-6 shadow-lg" style={{ backgroundColor: 'var(--color-success)' }}>
@@ -813,6 +881,15 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       {/* AI Assistant Widget */}
       <AIAssistantWidget />
     </DashboardLayout>
+
+      {/* Countdown Banner para clase próxima */}
+      {upcomingSessions.length > 0 && shouldShowCountdown(upcomingSessions[0], 10) && (
+        <ClassCountdownBanner
+          session={upcomingSessions[0]}
+          onJoin={handleJoinLiveClass}
+        />
+      )}
+    </>
   );
 }
 

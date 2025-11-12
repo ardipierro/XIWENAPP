@@ -15,6 +15,8 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from './config';
+import { createMeetSession, endMeetSessionByClassId } from './meetSessions';
+import { notifyClassStarted, notifyClassEnded } from './notifications';
 
 /**
  * Sistema Unificado de Sesiones de Clase
@@ -296,11 +298,22 @@ export async function getLiveSessions(teacherId = null) {
 
 /**
  * Iniciar una sesión (cambiar status a 'live')
+ * Crea automáticamente una meet session y notifica a los estudiantes asignados
  * @param {string} sessionId - ID de la sesión
- * @returns {Promise<Object>} - {success: boolean, error?: string}
+ * @returns {Promise<Object>} - {success: boolean, meetSessionId?: string, error?: string}
  */
 export async function startClassSession(sessionId) {
   try {
+    // 1. Obtener datos de la sesión
+    const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
+
+    if (!sessionDoc.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const sessionData = sessionDoc.data();
+
+    // 2. Actualizar status a 'live'
     const docRef = doc(db, 'class_sessions', sessionId);
     await updateDoc(docRef, {
       status: 'live',
@@ -308,8 +321,58 @@ export async function startClassSession(sessionId) {
       updatedAt: serverTimestamp()
     });
 
+    let meetSessionId = null;
+
+    // 3. Crear meet_session automáticamente si es modo 'live'
+    if (sessionData.mode === 'live') {
+      try {
+        meetSessionId = await createMeetSession({
+          classSessionId: sessionId,
+          ownerId: sessionData.teacherId,
+          ownerName: sessionData.teacherName,
+          roomName: sessionData.roomName,
+          sessionName: sessionData.name,
+          courseId: sessionData.courseId,
+          courseName: sessionData.courseName
+        });
+
+        // Guardar referencia al meet_session en class_session
+        await updateDoc(docRef, {
+          meetSessionId: meetSessionId
+        });
+
+        logger.info('✅ Meet session creada automáticamente:', meetSessionId);
+      } catch (meetError) {
+        logger.error('⚠️ Error creando meet session (no crítico):', meetError);
+        // No detenemos el flujo si falla la creación de meet_session
+      }
+    }
+
+    // 4. Notificar a estudiantes asignados
+    const assignedStudents = sessionData.assignedStudents || [];
+
+    if (assignedStudents.length > 0) {
+      try {
+        await notifyClassStarted(assignedStudents, {
+          sessionId: sessionId,
+          name: sessionData.name,
+          teacherId: sessionData.teacherId,
+          teacherName: sessionData.teacherName,
+          courseId: sessionData.courseId,
+          courseName: sessionData.courseName,
+          joinUrl: `${window.location.origin}/class-session/${sessionId}`,
+          roomName: sessionData.roomName
+        });
+
+        logger.info(`✅ ${assignedStudents.length} estudiantes notificados`);
+      } catch (notifyError) {
+        logger.error('⚠️ Error enviando notificaciones (no crítico):', notifyError);
+        // No detenemos el flujo si fallan las notificaciones
+      }
+    }
+
     logger.info('✅ Sesión iniciada:', sessionId);
-    return { success: true };
+    return { success: true, meetSessionId };
   } catch (error) {
     logger.error('❌ Error iniciando sesión:', error);
     return { success: false, error: error.message };
@@ -318,17 +381,59 @@ export async function startClassSession(sessionId) {
 
 /**
  * Finalizar una sesión (cambiar status a 'ended')
+ * Finaliza automáticamente la meet session y notifica a los estudiantes
  * @param {string} sessionId - ID de la sesión
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function endClassSession(sessionId) {
   try {
+    // 1. Obtener datos de la sesión
+    const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
+
+    if (!sessionDoc.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const sessionData = sessionDoc.data();
+
+    // 2. Actualizar status a 'ended'
     const docRef = doc(db, 'class_sessions', sessionId);
     await updateDoc(docRef, {
       status: 'ended',
       endedAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
+
+    // 3. Finalizar meet_session si existe
+    if (sessionData.mode === 'live') {
+      try {
+        await endMeetSessionByClassId(sessionId);
+        logger.info('✅ Meet session finalizada automáticamente');
+      } catch (meetError) {
+        logger.error('⚠️ Error finalizando meet session (no crítico):', meetError);
+        // No detenemos el flujo si falla la finalización de meet_session
+      }
+    }
+
+    // 4. Notificar a estudiantes que participaron
+    const assignedStudents = sessionData.assignedStudents || [];
+
+    if (assignedStudents.length > 0) {
+      try {
+        await notifyClassEnded(assignedStudents, {
+          sessionId: sessionId,
+          name: sessionData.name,
+          teacherId: sessionData.teacherId,
+          teacherName: sessionData.teacherName,
+          recordingUrl: sessionData.recordingUrl || null
+        });
+
+        logger.info(`✅ ${assignedStudents.length} estudiantes notificados del fin de clase`);
+      } catch (notifyError) {
+        logger.error('⚠️ Error enviando notificaciones (no crítico):', notifyError);
+        // No detenemos el flujo si fallan las notificaciones
+      }
+    }
 
     logger.info('✅ Sesión finalizada:', sessionId);
     return { success: true };

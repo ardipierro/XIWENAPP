@@ -181,14 +181,34 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
       const result = await startClassSession(sessionId);
 
       if (result.success) {
-        setMessage({ type: 'success', text: 'Sesión iniciada' });
+        // Mensaje de éxito mejorado
+        const successMessages = [
+          '✅ Sesión iniciada correctamente'
+        ];
+
+        if (result.meetSessionId) {
+          successMessages.push('🎥 Sala MEET creada automáticamente');
+        }
+
+        const session = sessions.find(s => s.id === sessionId);
+        const studentCount = session?.assignedStudents?.length || 0;
+
+        if (studentCount > 0) {
+          successMessages.push(`📢 ${studentCount} estudiante${studentCount > 1 ? 's' : ''} notificado${studentCount > 1 ? 's' : ''}`);
+        }
+
+        setMessage({
+          type: 'success',
+          text: successMessages.join(' • ')
+        });
+
         await loadData();
         logger.info('Sesión iniciada:', sessionId);
 
-        // Abrir la sala
+        // Abrir la sala automáticamente
         if (onJoinSession) {
-          const session = sessions.find(s => s.id === sessionId);
-          onJoinSession(session);
+          const updatedSession = sessions.find(s => s.id === sessionId);
+          onJoinSession(updatedSession || session);
         }
       } else {
         setMessage({ type: 'error', text: result.error || 'Error al iniciar sesión' });
