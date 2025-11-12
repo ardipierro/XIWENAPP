@@ -139,7 +139,13 @@
       "Bash(NUL)",
       "Bash(npm run lint:*)",
       "Bash(npm run:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(del \"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\settings\\CredentialSection.jsx\")",
+      "Bash(start \"https://console.firebase.google.com/v1/r/project/xiwen-app-2026/firestore/indexes?create_composite=ClJwcm9qZWN0cy94aXdlbi1hcHAtMjAyNi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvYXNzaWdubWVudHMvaW5kZXhlcy9fEAEaDQoJdGVhY2hlcklkEAEaDQoJY3JlYXRlZEF0EAIaDAoIX19uYW1lX18QAg\")",
+      "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/indexes\")",
+      "Bash(powershell -Command \"(Get-Content ''src/constants/aiFunctions.js'') | Where-Object { $_-notmatch ''apiKey: '''''''','' } | Set-Content ''src/constants/aiFunctions.js.tmp'' && Move-Item -Force ''src/constants/aiFunctions.js.tmp'' ''src/constants/aiFunctions.js''\")",
+      "Bash(powershell -Command \"(Get-Content ''src/constants/aiFunctions.js'') | Where-Object { $_-notmatch ''      apiKey:'' } | Set-Content ''src/constants/aiFunctions.js.tmp''; Move-Item -Force ''src/constants/aiFunctions.js.tmp'' ''src/constants/aiFunctions.js''\")",
+      "WebFetch(domain:platform.openai.com)"
     ],
     "deny": [],
     "ask": []
