@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Video, Calendar, PenTool, Presentation, Clock, Users, FileText } from 'lucide-react';
+import { Video, Calendar, PenTool, Presentation, Clock, Users, FileText, Plus, Trash2 } from 'lucide-react';
 import logger from '../utils/logger';
 import { BaseModal, BaseButton, BaseInput, BaseSelect, BaseTextarea } from './common';
 import { Timestamp } from 'firebase/firestore';
+import {
+  assignGroupToSession,
+  unassignGroupFromSession,
+  assignStudentToSession,
+  unassignStudentFromSession,
+  assignContentToSession,
+  unassignContentFromSession
+} from '../firebase/classSessions';
 
 /**
  * Modal para crear/editar sesiones de clase unificadas
@@ -14,6 +22,9 @@ function ClassSessionModal({
   onSubmit,
   session = null,
   courses = [],
+  students = [],
+  groups = [],
+  contents = [],
   loading = false
 }) {
   const isEditing = !!session;
@@ -44,6 +55,13 @@ function ClassSessionModal({
   });
 
   const [errors, setErrors] = useState({});
+  const [assignmentMessage, setAssignmentMessage] = useState({ type: '', text: '' });
+  const [assignmentLoading, setAssignmentLoading] = useState(false);
+
+  const showAssignmentMessage = (type, text) => {
+    setAssignmentMessage({ type, text });
+    setTimeout(() => setAssignmentMessage({ type: '', text: '' }), 3000);
+  };
 
   // Cargar datos si es edición
   useEffect(() => {
@@ -215,6 +233,86 @@ function ClassSessionModal({
     }
   };
 
+  // Handlers para asignar/desasignar
+  const handleAssignStudent = async (studentId) => {
+    if (!session?.id) return;
+    setAssignmentLoading(true);
+    const result = await assignStudentToSession(session.id, studentId);
+    if (result.success) {
+      showAssignmentMessage('success', '✅ Estudiante asignado');
+      // Refrescar la sesión para actualizar la UI
+      session.assignedStudents = [...(session.assignedStudents || []), studentId];
+    } else {
+      showAssignmentMessage('error', result.error || 'Error al asignar estudiante');
+    }
+    setAssignmentLoading(false);
+  };
+
+  const handleUnassignStudent = async (studentId) => {
+    if (!session?.id) return;
+    setAssignmentLoading(true);
+    const result = await unassignStudentFromSession(session.id, studentId);
+    if (result.success) {
+      showAssignmentMessage('success', '✅ Estudiante removido');
+      session.assignedStudents = (session.assignedStudents || []).filter(id => id !== studentId);
+    } else {
+      showAssignmentMessage('error', result.error || 'Error al remover estudiante');
+    }
+    setAssignmentLoading(false);
+  };
+
+  const handleAssignGroup = async (groupId) => {
+    if (!session?.id) return;
+    setAssignmentLoading(true);
+    const result = await assignGroupToSession(session.id, groupId);
+    if (result.success) {
+      showAssignmentMessage('success', '✅ Grupo asignado');
+      session.assignedGroups = [...(session.assignedGroups || []), groupId];
+    } else {
+      showAssignmentMessage('error', result.error || 'Error al asignar grupo');
+    }
+    setAssignmentLoading(false);
+  };
+
+  const handleUnassignGroup = async (groupId) => {
+    if (!session?.id) return;
+    setAssignmentLoading(true);
+    const result = await unassignGroupFromSession(session.id, groupId);
+    if (result.success) {
+      showAssignmentMessage('success', '✅ Grupo removido');
+      session.assignedGroups = (session.assignedGroups || []).filter(id => id !== groupId);
+    } else {
+      showAssignmentMessage('error', result.error || 'Error al remover grupo');
+    }
+    setAssignmentLoading(false);
+  };
+
+  const handleAssignContent = async (contentId) => {
+    if (!session?.id) return;
+    setAssignmentLoading(true);
+    const result = await assignContentToSession(session.id, contentId);
+    if (result.success) {
+      showAssignmentMessage('success', '✅ Contenido asignado');
+      session.contentIds = [...(session.contentIds || []), contentId];
+    } else {
+      showAssignmentMessage('error', result.error || 'Error al asignar contenido');
+    }
+    setAssignmentLoading(false);
+  };
+
+  const handleUnassignContent = async (contentId) => {
+    if (!session?.id) return;
+    setAssignmentLoading(true);
+    const result = await unassignContentFromSession(session.id, contentId);
+    if (result.success) {
+      showAssignmentMessage('success', '✅ Contenido removido');
+      session.contentIds = (session.contentIds || []).filter(id => id !== contentId);
+    } else {
+      showAssignmentMessage('error', result.error || 'Error al remover contenido');
+    }
+    setAssignmentLoading(false);
+  };
+
   const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
   // Debug: Log del estado actual
@@ -294,6 +392,17 @@ function ClassSessionModal({
 
         {/* Tab Content */}
         <div className="min-h-[400px]">
+          {/* Mensaje de asignación */}
+          {assignmentMessage.text && (
+            <div className={`mb-4 p-3 rounded-lg ${
+              assignmentMessage.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+                : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+            }`}>
+              {assignmentMessage.text}
+            </div>
+          )}
+
           {/* General Tab */}
           {activeTab === 'general' && (
             <div className="space-y-6">
@@ -628,25 +737,201 @@ function ClassSessionModal({
 
           {/* Estudiantes Tab */}
           {activeTab === 'estudiantes' && (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <Users className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-                <p className="text-gray-600 dark:text-gray-400">
-                  La asignación de estudiantes y grupos estará disponible próximamente
-                </p>
-              </div>
+            <div className="space-y-6">
+              {!isEditing ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <Users className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Primero crea la sesión para poder asignar estudiantes y grupos
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Grupos Asignados */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Users size={20} strokeWidth={2} />
+                      Grupos Asignados
+                    </h3>
+                    {(session.assignedGroups || []).length === 0 ? (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">No hay grupos asignados</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {groups.filter(g => (session.assignedGroups || []).includes(g.id)).map(group => (
+                          <div key={group.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">{group.name}</div>
+                              {group.description && (
+                                <div className="text-sm text-gray-600 dark:text-gray-400">{group.description}</div>
+                              )}
+                            </div>
+                            <BaseButton
+                              variant="danger"
+                              size="sm"
+                              icon={Trash2}
+                              onClick={() => handleUnassignGroup(group.id)}
+                              disabled={assignmentLoading}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Asignar Nuevo Grupo */}
+                  {groups.filter(g => !(session.assignedGroups || []).includes(g.id)).length > 0 && (
+                    <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Plus size={18} strokeWidth={2} />
+                        Asignar Grupo
+                      </h4>
+                      <BaseSelect
+                        value=""
+                        onChange={(e) => e.target.value && handleAssignGroup(e.target.value)}
+                        options={[
+                          { value: '', label: 'Selecciona un grupo...' },
+                          ...groups
+                            .filter(g => !(session.assignedGroups || []).includes(g.id))
+                            .map(g => ({ value: g.id, label: g.name }))
+                        ]}
+                        disabled={assignmentLoading}
+                      />
+                    </div>
+                  )}
+
+                  {/* Estudiantes Asignados */}
+                  <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Users size={20} strokeWidth={2} />
+                      Estudiantes Asignados Individualmente
+                    </h3>
+                    {(session.assignedStudents || []).length === 0 ? (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">No hay estudiantes asignados individualmente</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {students.filter(s => (session.assignedStudents || []).includes(s.id)).map(student => (
+                          <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">{student.name}</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
+                            </div>
+                            <BaseButton
+                              variant="danger"
+                              size="sm"
+                              icon={Trash2}
+                              onClick={() => handleUnassignStudent(student.id)}
+                              disabled={assignmentLoading}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Asignar Nuevo Estudiante */}
+                  {students.filter(s => !(session.assignedStudents || []).includes(s.id)).length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Plus size={18} strokeWidth={2} />
+                        Asignar Estudiante
+                      </h4>
+                      <BaseSelect
+                        value=""
+                        onChange={(e) => e.target.value && handleAssignStudent(e.target.value)}
+                        options={[
+                          { value: '', label: 'Selecciona un estudiante...' },
+                          ...students
+                            .filter(s => !(session.assignedStudents || []).includes(s.id))
+                            .map(s => ({ value: s.id, label: `${s.name} (${s.email})` }))
+                        ]}
+                        disabled={assignmentLoading}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
           {/* Contenidos Tab */}
           {activeTab === 'contenidos' && (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-                <p className="text-gray-600 dark:text-gray-400">
-                  La asignación de contenido a esta sesión estará disponible próximamente
-                </p>
-              </div>
+            <div className="space-y-6">
+              {!isEditing ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Primero crea la sesión para poder asignar contenidos
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Contenidos Asignados */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <FileText size={20} strokeWidth={2} />
+                      Contenidos Asignados
+                    </h3>
+                    {(session.contentIds || []).length === 0 ? (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">No hay contenidos asignados a esta sesión</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {contents.filter(c => (session.contentIds || []).includes(c.id)).map(content => (
+                          <div key={content.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium text-gray-900 dark:text-white">{content.title}</div>
+                                {content.type && (
+                                  <span className="px-2 py-1 text-xs rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                    {content.type}
+                                  </span>
+                                )}
+                              </div>
+                              {content.description && (
+                                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{content.description}</div>
+                              )}
+                            </div>
+                            <BaseButton
+                              variant="danger"
+                              size="sm"
+                              icon={Trash2}
+                              onClick={() => handleUnassignContent(content.id)}
+                              disabled={assignmentLoading}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Asignar Nuevo Contenido */}
+                  {contents.filter(c => !(session.contentIds || []).includes(c.id)).length > 0 && (
+                    <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Plus size={18} strokeWidth={2} />
+                        Asignar Contenido
+                      </h4>
+                      <BaseSelect
+                        value=""
+                        onChange={(e) => e.target.value && handleAssignContent(e.target.value)}
+                        options={[
+                          { value: '', label: 'Selecciona un contenido...' },
+                          ...contents
+                            .filter(c => !(session.contentIds || []).includes(c.id))
+                            .map(c => ({ value: c.id, label: `${c.title} ${c.type ? `(${c.type})` : ''}` }))
+                        ]}
+                        disabled={assignmentLoading}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Puedes asignar lecciones, ejercicios, videos y otros contenidos a esta sesión
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
