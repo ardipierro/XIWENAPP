@@ -364,10 +364,10 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
                 variant={isListening ? 'danger' : 'secondary'}
                 size="sm"
                 disabled={isLoading}
-                title={isListening ? 'Detener grabación' : 'Usar micrófono'}
+                title={isListening ? 'Click para detener' : 'Usar micrófono'}
                 className={`!p-2 ${isListening ? 'animate-pulse' : ''}`}
               >
-                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                <Mic size={20} className={isListening ? 'text-white' : ''} />
               </BaseButton>
               <BaseButton
                 onClick={handleSendMessage}
