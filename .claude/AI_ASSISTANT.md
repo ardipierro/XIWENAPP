@@ -2,8 +2,8 @@
 
 **✅ Claude Code**: Documentación completa del AI Assistant System para XIWENAPP
 
-**Última actualización:** 2025-11-11
-**Versión:** 2.0 - Actualizada
+**Última actualización:** 2025-11-12
+**Versión:** 2.1 - Fase 2 Completa
 
 ---
 
@@ -40,10 +40,12 @@ El **AI Assistant System** es un asistente virtual inteligente que permite a adm
 ```
 src/
 ├── services/
-│   ├── SpeechToTextService.js         # Web Speech API wrapper
-│   ├── QueryAnalyzerService.js        # NLP con IA multi-proveedor
-│   ├── StudentAnalyticsService.js     # Consultas de estudiantes
-│   ├── PaymentAnalyticsService.js     # Consultas de pagos
+│   ├── SpeechToTextService.js         # Web Speech API wrapper (Fase 1)
+│   ├── QueryAnalyzerService.js        # NLP con IA multi-proveedor (Fase 1)
+│   ├── StudentAnalyticsService.js     # Consultas de estudiantes (Fase 1)
+│   ├── PaymentAnalyticsService.js     # Consultas de pagos (Fase 1)
+│   ├── TaskCreationService.js         # Creación de tareas (Fase 2) ✨ NUEVO
+│   ├── ContentGenerationService.js    # Generación de contenido (Fase 2) ✨ NUEVO
 │   └── AIAssistantService.js          # Orquestador principal
 │
 ├── components/
@@ -235,7 +237,260 @@ const students = await PaymentAnalyticsService.getStudentsWithLowCredits({
 
 ---
 
-### 5. AIAssistantService
+### 5. TaskCreationService ✨ NUEVO (Fase 2)
+
+Crea y asigna tareas/assignments usando IA para generar contenido.
+
+**Características:**
+- Generación de títulos y descripciones con IA
+- Parsing de fechas en lenguaje natural (español)
+- Asignación automática a grupos, cursos o todos los estudiantes
+- Resolución de "grupo A", "todos", "curso HSK 3"
+- Integración con Firestore (assignments, groups, courses)
+
+**API:**
+
+#### createAssignment(params, teacherId)
+Crea una nueva tarea con contenido generado por IA.
+
+```javascript
+import TaskCreationService from '../services/TaskCreationService';
+
+const result = await TaskCreationService.createAssignment({
+  topic: 'gramática HSK 3',
+  difficulty: 'intermediate',
+  due_date: 'viernes'  // lenguaje natural
+}, 'teacher123');
+
+console.log(result);
+// {
+//   success: true,
+//   assignmentId: 'abc123',
+//   assignment: {
+//     id: 'abc123',
+//     title: 'Tarea: Gramática HSK 3 - Partículas 了 y 过',
+//     description: 'Completa los ejercicios sobre el uso de partículas temporales...',
+//     topic: 'gramática HSK 3',
+//     difficulty: 'intermediate',
+//     dueDate: Timestamp (próximo viernes),
+//     status: 'draft',
+//     teacherId: 'teacher123',
+//     maxPoints: 100
+//   }
+// }
+```
+
+#### assignTask(assignmentId, params)
+Asigna una tarea a estudiantes, grupos o cursos.
+
+```javascript
+const result = await TaskCreationService.assignTask('abc123', {
+  target: 'grupo A'  // También: 'todos', 'curso HSK 3'
+});
+
+console.log(result);
+// {
+//   success: true,
+//   studentCount: 8,
+//   studentIds: ['student1', 'student2', ...]
+// }
+```
+
+#### createAndAssignTask(params, teacherId)
+Crea y asigna en una sola operación.
+
+```javascript
+const result = await TaskCreationService.createAndAssignTask({
+  topic: 'vocabulario sobre comida',
+  difficulty: 'beginner',
+  due_date: 'próxima semana',
+  target: 'grupo B'
+}, 'teacher123');
+
+console.log(result);
+// {
+//   success: true,
+//   assignment: { ... },
+//   assignedTo: 12,
+//   message: 'Tarea "Vocabulario: Comida y Bebidas" creada y asignada a 12 estudiante(s)'
+// }
+```
+
+**Parsing de fechas soportado:**
+- Días de semana: "lunes", "martes", "viernes", etc.
+- Relativos: "mañana", "pasado mañana"
+- Numéricos: "en 3 días", "en 5 días"
+- Períodos: "una semana", "próxima semana"
+- Default: 7 días si no se especifica
+
+**Resolución de targets:**
+- "grupo A", "grupo B" → busca en collection `groups/` y `group_members/`
+- "todos" / "todos los estudiantes" → query `users/` con `role == 'student'`
+- "curso HSK 3" → busca en collection `courses/` por nombre
+
+---
+
+### 6. ContentGenerationService ✨ NUEVO (Fase 2)
+
+Genera contenido educativo con IA (ejercicios, lecciones, vocabulario).
+
+**Características:**
+- Soporte multi-provider (OpenAI, Claude, Gemini, Grok)
+- 4 tipos de ejercicios (MCQ, fill-in-blank, matching, true/false)
+- Lecciones completas con vocabulario + gramática + cultura
+- Vocabulario con pinyin, traducción y ejemplos
+- Adaptación automática de dificultad (HSK 1-6)
+
+**API:**
+
+#### generateExercises(params)
+Genera ejercicios de diferentes tipos.
+
+```javascript
+import ContentGenerationService from '../services/ContentGenerationService';
+
+// Ejercicios de opción múltiple
+const result = await ContentGenerationService.generateExercises({
+  topic: 'tonos del chino',
+  difficulty: 'beginner',  // 'beginner', 'intermediate', 'advanced'
+  quantity: 5,
+  type: 'multiple-choice'  // 'mcq', 'fill-in-blank', 'matching', 'true-false'
+});
+
+console.log(result);
+// {
+//   success: true,
+//   exercises: [
+//     {
+//       question: '¿Cuál es el primer tono en chino?',
+//       options: ['平 (plano)', '升 (ascendente)', '曲 (descendente-ascendente)', '降 (descendente)'],
+//       correctAnswer: 0,
+//       explanation: 'El primer tono es plano y constante (平 píng)'
+//     },
+//     // ... 4 ejercicios más
+//   ],
+//   metadata: {
+//     topic: 'tonos del chino',
+//     difficulty: 'beginner',
+//     type: 'multiple-choice',
+//     generatedAt: '2025-11-12T10:30:00Z',
+//     provider: 'claude'
+//   }
+// }
+
+// Ejercicios de completar espacios
+const fillInBlank = await ContentGenerationService.generateExercises({
+  topic: 'verbos de acción',
+  difficulty: 'intermediate',
+  quantity: 8,
+  type: 'fill-in-blank'
+});
+
+console.log(fillInBlank.exercises[0]);
+// {
+//   sentence: '我 _____ 学生。',
+//   answer: '是',
+//   hint: 'Verbo ser/estar en chino',
+//   explanation: '是 (shì) significa "ser/estar"'
+// }
+```
+
+#### generateLesson(params)
+Genera lección completa con estructura pedagógica.
+
+```javascript
+const result = await ContentGenerationService.generateLesson({
+  topic: 'saludos y presentaciones',
+  difficulty: 'beginner',
+  focus: 'vocabulario y gramática'  // área de enfoque
+});
+
+console.log(result);
+// {
+//   success: true,
+//   lesson: {
+//     title: 'Lección 1: Saludos y Presentaciones en Chino',
+//     introduction: 'En esta lección aprenderás los saludos más comunes...',
+//     vocabulary: [
+//       {
+//         chinese: '你好',
+//         pinyin: 'nǐ hǎo',
+//         spanish: 'hola',
+//         example: '你好，我是王老师。(Hola, soy el profesor Wang)'
+//       },
+//       {
+//         chinese: '再见',
+//         pinyin: 'zàijiàn',
+//         spanish: 'adiós',
+//         example: '明天见！再见！(¡Hasta mañana! ¡Adiós!)'
+//       }
+//       // ... 5-7 palabras totales
+//     ],
+//     grammar: [
+//       {
+//         point: 'Estructura básica: 我是 + nombre',
+//         explanation: 'Para presentarte, usa 我 (wǒ, yo) + 是 (shì, ser) + tu nombre',
+//         examples: ['我是学生 (Wǒ shì xuésheng - Soy estudiante)', '我是老师 (Wǒ shì lǎoshī - Soy profesor)']
+//       }
+//       // ... 2-3 puntos gramaticales
+//     ],
+//     culturalNotes: [
+//       'En China, es común usar títulos profesionales al saludar (王老师, 李医生)',
+//       'El saludo 你好 es formal; entre amigos jóvenes se usa más 嗨 (hāi)'
+//     ]
+//   },
+//   metadata: { ... }
+// }
+```
+
+#### generateVocabulary(params)
+Genera listas de vocabulario con pinyin y ejemplos.
+
+```javascript
+const result = await ContentGenerationService.generateVocabulary({
+  topic: 'familia',
+  difficulty: 'beginner',
+  quantity: 10
+});
+
+console.log(result);
+// {
+//   success: true,
+//   vocabulary: [
+//     {
+//       chinese: '爸爸',
+//       pinyin: 'bàba',
+//       spanish: 'papá',
+//       example: '我爸爸是医生。(Mi papá es médico)',
+//       hskLevel: 'HSK1'
+//     },
+//     {
+//       chinese: '妈妈',
+//       pinyin: 'māma',
+//       spanish: 'mamá',
+//       example: '妈妈做饭很好吃。(La comida que cocina mamá es muy rica)',
+//       hskLevel: 'HSK1'
+//     }
+//     // ... 8 palabras más
+//   ],
+//   metadata: { ... }
+// }
+```
+
+**Tipos de ejercicios soportados:**
+- `multiple-choice` / `mcq`: Opción múltiple (4 opciones)
+- `fill-in-blank` / `blank`: Completar espacios (con hint opcional)
+- `matching` / `match`: Emparejar pares (chino ↔ español)
+- `true-false`: Verdadero/Falso con explicación
+
+**Niveles de dificultad:**
+- `beginner`: HSK 1-2 (principiante)
+- `intermediate`: HSK 3-4 (intermedio)
+- `advanced`: HSK 5-6 (avanzado)
+
+---
+
+### 7. AIAssistantService
 
 Orquestador principal que coordina todos los servicios.
 
@@ -352,7 +607,7 @@ function TeacherDashboard() {
 
 ### Ejemplos de consultas soportadas
 
-#### Estudiantes
+#### Estudiantes (Fase 1)
 ```
 ✅ "Muéstrame los estudiantes que no entregaron"
 ✅ "¿Quiénes tienen bajo rendimiento?"
@@ -361,7 +616,7 @@ function TeacherDashboard() {
 ✅ "¿Quién no entregó la tarea de hoy?"
 ```
 
-#### Pagos
+#### Pagos (Fase 1)
 ```
 ✅ "Muéstrame los pagos vencidos"
 ✅ "Pagos próximos a vencer"
@@ -370,11 +625,24 @@ function TeacherDashboard() {
 ✅ "Estado general de pagos"
 ```
 
-#### Fase 2 (futuro)
+#### Creación de Tareas (Fase 2) ✨ NUEVO
 ```
-🔜 "Crea una tarea de gramática nivel A2"
-🔜 "Asigna la tarea a todos los estudiantes de curso 1"
-🔜 "Genera un ejercicio de vocabulario sobre comida"
+✅ "Crea una tarea de gramática HSK 3 para el grupo A, entrega el viernes"
+✅ "Crea una tarea de vocabulario para todos los estudiantes"
+✅ "Crea una tarea de HSK 4 para el curso de chino intermedio"
+✅ "Genera una tarea nivel principiante sobre saludos, entrega mañana"
+✅ "Crea una tarea de pronombres para el grupo B, entrega en 3 días"
+```
+
+#### Generación de Contenido (Fase 2) ✨ NUEVO
+```
+✅ "Genera 5 ejercicios de vocabulario nivel básico sobre familia"
+✅ "Genera 10 palabras de vocabulario sobre comida"
+✅ "Genera una lección sobre tonos en chino mandarín"
+✅ "Crea 8 ejercicios de completar espacios nivel intermedio"
+✅ "Genera ejercicios de opción múltiple sobre HSK 2"
+✅ "Genera vocabulario avanzado sobre negocios"
+✅ "Crea una lección sobre caracteres chinos nivel principiante"
 ```
 
 ---
@@ -387,8 +655,10 @@ function TeacherDashboard() {
 users/
   - name, email, role, credits, lastActivity
 
-assignments/
+assignments/ ✨ (Fase 1 + Fase 2)
   - title, description, courseId, teacherId, dueDate, status
+  - topic, difficulty, instructions, maxPoints
+  - assignedTo (array de studentIds), createdBy
 
 submissions/
   - assignmentId, studentId, status, grade, submittedAt
@@ -398,6 +668,14 @@ payments/
 
 courses/
   - title, teacherId, studentIds
+
+groups/ ✨ NUEVO (Fase 2)
+  - name, description, teacherId, studentCount
+  - color, createdAt
+
+group_members/ ✨ NUEVO (Fase 2)
+  - groupId, studentId, studentName
+  - joinedAt
 ```
 
 ### Firestore Queries
@@ -426,6 +704,23 @@ const q = query(
   collection(db, 'users'),
   where('role', '==', 'student'),
   where('credits', '<', 2)
+);
+```
+
+**Miembros de un grupo (Fase 2):**
+```javascript
+const q = query(
+  collection(db, 'group_members'),
+  where('groupId', '==', groupId)
+);
+```
+
+**Tareas creadas por IA (Fase 2):**
+```javascript
+const q = query(
+  collection(db, 'assignments'),
+  where('createdBy', '==', 'ai_assistant'),
+  where('teacherId', '==', teacherId)
 );
 ```
 
@@ -473,7 +768,66 @@ const q = query(
 
 ---
 
-### 3. Usar en código custom
+### 3. Para Profesores - Fase 2 (Crear Tareas con IA) ✨ NUEVO
+
+**Escenario:** Crear una tarea y asignarla a un grupo
+
+1. Abrir dashboard de profesor
+2. Click en botón flotante del asistente
+3. Decir o escribir: **"Crea una tarea de gramática HSK 3 para el grupo A, entrega el viernes"**
+4. El asistente:
+   - Genera título y descripción con IA
+   - Busca estudiantes del "grupo A"
+   - Crea la tarea en Firestore
+   - Asigna a todos los estudiantes del grupo
+5. Respuesta: "✅ **Tarea creada:** Gramática HSK 3 - Partículas 了 y 过. Asignada a 8 estudiante(s)"
+
+**Otros ejemplos:**
+- "Crea una tarea de vocabulario para todos los estudiantes, entrega mañana"
+- "Genera una tarea nivel básico sobre números, entrega en 3 días"
+- "Crea tarea HSK 4 para curso de chino intermedio"
+
+---
+
+### 4. Para Profesores - Fase 2 (Generar Contenido) ✨ NUEVO
+
+**Escenario A:** Generar ejercicios de vocabulario
+
+1. Click en asistente
+2. Decir: **"Genera 5 ejercicios de vocabulario nivel básico sobre familia"**
+3. El asistente genera con IA:
+   - 5 ejercicios de opción múltiple
+   - Opciones en chino con pinyin
+   - Respuestas correctas
+   - Explicaciones
+4. Los ejercicios quedan listos para revisar y usar
+
+**Escenario B:** Generar una lección completa
+
+1. Click en asistente
+2. Decir: **"Genera una lección sobre tonos en chino mandarín"**
+3. El asistente genera:
+   - Introducción al tema
+   - 5-7 palabras clave con pinyin
+   - Puntos gramaticales importantes
+   - Ejemplos de uso
+   - Notas culturales
+4. La lección está lista para compartir con estudiantes
+
+**Escenario C:** Generar lista de vocabulario
+
+1. Click en asistente
+2. Decir: **"Genera 10 palabras de vocabulario sobre comida"**
+3. El asistente genera:
+   - Caracteres chinos
+   - Pinyin
+   - Traducción al español
+   - Ejemplos de uso en oraciones
+   - Nivel HSK de cada palabra
+
+---
+
+### 5. Usar en código custom
 
 ```jsx
 import AIAssistantService from '../services/AIAssistantService';
@@ -546,6 +900,26 @@ async function handleCustomQuery() {
 | `getOverduePayments(filters)` | `{ studentId? }` | `Promise<Payment[]>` |
 | `getUpcomingPayments(filters)` | `{ daysAhead? }` | `Promise<Payment[]>` |
 | `getStudentsWithLowCredits(filters)` | `{ threshold? }` | `Promise<Student[]>` |
+
+---
+
+### TaskCreationService ✨ NUEVO (Fase 2)
+
+| Método | Params | Retorno |
+|--------|--------|---------|
+| `createAssignment(params, teacherId)` | `{ topic, difficulty, due_date, description }`, teacherId: string | `Promise<{ success, assignmentId, assignment }>` |
+| `assignTask(assignmentId, params)` | assignmentId: string, `{ target }` | `Promise<{ success, studentCount, studentIds }>` |
+| `createAndAssignTask(params, teacherId)` | `{ topic, difficulty, due_date, target }`, teacherId: string | `Promise<{ success, assignment, assignedTo, message }>` |
+
+---
+
+### ContentGenerationService ✨ NUEVO (Fase 2)
+
+| Método | Params | Retorno |
+|--------|--------|---------|
+| `generateExercises(params)` | `{ topic, difficulty, quantity, type }` | `Promise<{ success, exercises, metadata }>` |
+| `generateLesson(params)` | `{ topic, difficulty, focus }` | `Promise<{ success, lesson, metadata }>` |
+| `generateVocabulary(params)` | `{ topic, difficulty, quantity }` | `Promise<{ success, vocabulary, metadata }>` |
 
 ---
 
@@ -660,12 +1034,15 @@ Antes de usar el AI Assistant:
 - [ ] ✅ logger.js en utils/
 - [ ] ✅ Tailwind CSS con dark mode
 - [ ] ✅ lucide-react instalado
-- [ ] ✅ Collections de Firebase pobladas:
+- [ ] ✅ Collections de Firebase pobladas (Fase 1):
   - [ ] users/
   - [ ] assignments/
   - [ ] submissions/
   - [ ] payments/
   - [ ] courses/
+- [ ] ✨ Collections adicionales para Fase 2:
+  - [ ] groups/ (opcional, para asignación por grupos)
+  - [ ] group_members/ (opcional, para asignación por grupos)
 
 ---
 
@@ -701,15 +1078,19 @@ Antes de usar el AI Assistant:
 
 ### Fases de desarrollo:
 
-**Fase 1 - Completada ✅**
+**Fase 1 - Completada ✅** (Nov 11, 2025)
 - Prototipo rápido con Web Speech API
 - Consultas sobre estudiantes y pagos
 - Widget flotante con chat interactivo
+- 5 servicios base implementados
 
-**Fase 2 - Pendiente 🔜**
-- Creación de tareas por voz
-- Asignación de tareas a grupos
-- Generación de contenido educativo
+**Fase 2 - Completada ✅** (Nov 12, 2025)
+- Creación de tareas por voz con AI
+- Asignación automática a grupos/cursos
+- Generación de contenido educativo (ejercicios, lecciones, vocabulario)
+- 2 servicios nuevos: TaskCreationService, ContentGenerationService
+- Parsing de fechas en lenguaje natural (español)
+- Resolución automática de grupos y estudiantes
 
 **Fase 3 - Futuro 💡**
 - Dashboard de analytics avanzado
