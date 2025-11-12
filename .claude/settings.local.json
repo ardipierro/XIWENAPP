@@ -136,7 +136,8 @@
       "Bash(timeout /t 5 /nobreak)",
       "Bash(npx eslint:*)",
       "Bash(ping:*)",
-      "Bash(NUL)"
+      "Bash(NUL)",
+      "Bash(git diff:*)"
     ],
     "deny": [],
     "ask": []
