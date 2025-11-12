@@ -15,11 +15,15 @@ import {
   Upload,
   Send,
   X,
-  Sparkles
+  Sparkles,
+  Image as ImageIcon,
+  Trash2
 } from 'lucide-react';
 import { BaseLoading } from './common';
 import BaseButton from './common/BaseButton';
 import StudentFeedbackView from './StudentFeedbackView';
+import { uploadMessageAttachment } from '../firebase/storage';
+import { triggerHomeworkAnalysis } from '../firebase/submissions';
 
 export default function StudentAssignmentsView({ studentId }) {
   const { assignments, loading } = useAssignments(studentId, 'student');
@@ -209,10 +213,52 @@ function SubmissionModal({ assignment, studentId, onClose }) {
 
   const [text, setText] = useState(submission?.text || '');
   const [files, setFiles] = useState(submission?.files || []);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const isSubmitted = submission?.status === 'submitted' || submission?.status === 'graded';
   const isGraded = submission?.status === 'graded';
+
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+
+    // Filter only images
+    const images = selectedFiles.filter(file => file.type.startsWith('image/'));
+
+    if (images.length !== selectedFiles.length) {
+      alert('Solo se permiten archivos de imagen (JPG, PNG, etc.)');
+    }
+
+    if (images.length > 0) {
+      setImageFiles(prevFiles => [...prevFiles, ...images]);
+
+      // Generate previews
+      images.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setImagePreviews(prev => [...prev, {
+            file,
+            url: event.target.result,
+            name: file.name
+          }]);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      logger.info(`Selected ${images.length} image(s)`, 'StudentAssignmentsView');
+    }
+
+    // Reset input
+    e.target.value = '';
+  };
+
+  const handleRemoveImage = (index) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    logger.info(`Removed image at index ${index}`, 'StudentAssignmentsView');
+  };
 
   const handleSaveDraft = async () => {
     try {
@@ -237,8 +283,8 @@ function SubmissionModal({ assignment, studentId, onClose }) {
   };
 
   const handleSubmit = async () => {
-    if (!text.trim() && files.length === 0) {
-      alert('Debes agregar contenido o archivos antes de entregar');
+    if (!text.trim() && imageFiles.length === 0) {
+      alert('Debes agregar contenido o imágenes antes de entregar');
       logger.warn('Attempted to submit empty assignment', { assignmentId: assignment.id });
       return;
     }
@@ -249,24 +295,83 @@ function SubmissionModal({ assignment, studentId, onClose }) {
 
     try {
       setIsSaving(true);
-      logger.info('Submitting assignment', { assignmentId: assignment.id, studentId });
+      setUploadProgress(0);
+      logger.info('Submitting assignment', {
+        assignmentId: assignment.id,
+        studentId,
+        imageCount: imageFiles.length
+      });
 
-      // Save first
+      // Upload images to Firebase Storage
+      const uploadedAttachments = [];
+
+      if (imageFiles.length > 0) {
+        logger.info(`Uploading ${imageFiles.length} image(s)...`, 'StudentAssignmentsView');
+
+        for (let i = 0; i < imageFiles.length; i++) {
+          const file = imageFiles[i];
+          setUploadProgress(Math.round(((i + 1) / imageFiles.length) * 100));
+
+          try {
+            const url = await uploadMessageAttachment(
+              file,
+              `submissions/${assignment.id}`,
+              studentId
+            );
+
+            uploadedAttachments.push({
+              url,
+              filename: file.name,
+              type: file.type,
+              size: file.size
+            });
+
+            logger.info(`Uploaded image ${i + 1}/${imageFiles.length}`, 'StudentAssignmentsView');
+          } catch (uploadError) {
+            logger.error(`Error uploading image ${file.name}`, uploadError);
+            alert(`Error al subir la imagen ${file.name}. Intenta de nuevo.`);
+            setIsSaving(false);
+            return;
+          }
+        }
+      }
+
+      // Save submission with attachments
       const result = await save({
         assignmentId: assignment.id,
         studentId,
         text,
-        files,
+        files: uploadedAttachments,
         status: 'draft'
       });
 
       if (result.success) {
-        // Then submit
-        await submitForGrading(result.id || submission.id, assignment);
+        const submissionId = result.id || submission?.id;
+
+        // Submit for grading
+        await submitForGrading(submissionId, assignment);
+
+        // Trigger AI homework analysis for images
+        if (uploadedAttachments.length > 0) {
+          logger.info(`Triggering AI analysis for ${uploadedAttachments.length} image(s)`, 'StudentAssignmentsView');
+
+          await triggerHomeworkAnalysis(
+            submissionId,
+            assignment.id,
+            studentId,
+            uploadedAttachments
+          );
+
+          logger.info('AI analysis triggered successfully', 'StudentAssignmentsView');
+        }
+
         logger.info('Assignment submitted successfully', {
           assignmentId: assignment.id,
-          submissionId: result.id || submission.id
+          submissionId,
+          attachmentCount: uploadedAttachments.length
         });
+
+        alert('¡Tarea entregada exitosamente! La corrección automática comenzará en breve.');
       }
 
       onClose();
@@ -275,6 +380,7 @@ function SubmissionModal({ assignment, studentId, onClose }) {
       alert('Error al entregar la tarea. Intenta de nuevo.');
     } finally {
       setIsSaving(false);
+      setUploadProgress(0);
     }
   };
 
@@ -371,24 +477,88 @@ function SubmissionModal({ assignment, studentId, onClose }) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Archivos adjuntos (opcional)
+                  <div className="flex items-center gap-2">
+                    <ImageIcon size={16} />
+                    Imágenes de la tarea
+                    {imagePreviews.length > 0 && (
+                      <span className="text-xs text-primary-600 dark:text-primary-400">
+                        ({imagePreviews.length} imagen{imagePreviews.length !== 1 ? 'es' : ''})
+                      </span>
+                    )}
+                  </div>
                 </label>
-                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+
+                {/* Image Previews */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                    {imagePreviews.map((preview, index) => (
+                      <div
+                        key={index}
+                        className="relative group rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-600 hover:border-primary-500 transition-colors"
+                      >
+                        <img
+                          src={preview.url}
+                          alt={preview.name}
+                          className="w-full h-32 object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 truncate">
+                          {preview.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload Progress */}
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      <span>Subiendo imágenes...</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div
+                        className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* File Upload Area */}
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary-500 dark:hover:border-primary-400 transition-colors">
                   <Upload className="mx-auto text-gray-400 mb-2" size={32} />
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    Arrastra archivos o haz click para seleccionar
+                    Solo imágenes (JPG, PNG, etc.)
                   </p>
                   <input
                     type="file"
                     multiple
+                    accept="image/*"
+                    onChange={handleFileChange}
                     className="hidden"
                     id="file-upload"
+                    disabled={isSaving}
                   />
                   <label
                     htmlFor="file-upload"
-                    className="inline-block px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className={`inline-block px-4 py-2 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-lg cursor-pointer hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors ${
+                      isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
-                    Seleccionar archivos
+                    <div className="flex items-center gap-2">
+                      <ImageIcon size={16} />
+                      Seleccionar imágenes
+                    </div>
                   </label>
                 </div>
               </div>
