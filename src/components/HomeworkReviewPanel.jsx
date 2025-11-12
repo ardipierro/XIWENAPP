@@ -32,6 +32,7 @@ import {
   BaseBadge,
   BaseEmptyState
 } from './common';
+import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import {
   getPendingReviews,
   approveReview,
@@ -216,6 +217,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState(review.overallFeedback || '');
   const [editedGrade, setEditedGrade] = useState(review.suggestedGrade || 0);
+  const [updatedCorrections, setUpdatedCorrections] = useState(review.detailedCorrections || []);
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({
     errors: true,
@@ -227,12 +229,29 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
       setIsApproving(true);
       setError(null);
 
-      const teacherEdits = isEditing
-        ? {
-            overallFeedback: editedFeedback,
-            suggestedGrade: parseFloat(editedGrade)
-          }
-        : {};
+      // Add IDs to corrections if they don't have them
+      const correctionsWithIds = updatedCorrections.map((corr, idx) => ({
+        ...corr,
+        id: corr.id || `corr_${idx}`,
+        teacherStatus: corr.teacherStatus || 'pending'
+      }));
+
+      // Calculate approved corrections summary
+      const approvedCorrections = correctionsWithIds.filter(c => c.teacherStatus === 'approved');
+      const approvedSummary = approvedCorrections.reduce((acc, corr) => {
+        acc[corr.type] = (acc[corr.type] || 0) + 1;
+        return acc;
+      }, {});
+
+      const teacherEdits = {
+        overallFeedback: editedFeedback,
+        suggestedGrade: parseFloat(editedGrade),
+        aiSuggestions: correctionsWithIds,
+        approvedErrorSummary: {
+          ...approvedSummary,
+          total: approvedCorrections.length
+        }
+      };
 
       const result = await approveReview(review.id, teacherEdits);
 
@@ -388,66 +407,12 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
           )}
         </div>
 
-        {/* Detailed Corrections */}
-        {review.detailedCorrections && review.detailedCorrections.length > 0 && (
-          <div>
-            <button
-              onClick={() => toggleSection('corrections')}
-              className="w-full flex items-center justify-between text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3"
-            >
-              <span className="flex items-center gap-2">
-                <Edit3 size={18} strokeWidth={2} />
-                Correcciones Detalladas ({review.detailedCorrections.length})
-              </span>
-              {expandedSections.corrections ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-            </button>
-            {expandedSections.corrections && (
-              <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
-                {review.detailedCorrections.map((correction, index) => (
-                  <BaseCard key={index}>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <BaseBadge color={errorTypeColors[correction.type]}>
-                          {errorTypeIcons[correction.type]} {errorTypeLabels[correction.type]}
-                        </BaseBadge>
-                        <BaseBadge variant="outline" size="sm">
-                          Línea {correction.line}
-                        </BaseBadge>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">
-                            Error:
-                          </span>
-                          <span className="text-sm text-red-600 dark:text-red-400 line-through flex-1">
-                            {correction.original}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">
-                            Correcto:
-                          </span>
-                          <span className="text-sm text-green-600 dark:text-green-400 font-medium flex-1">
-                            {correction.correction}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/10 rounded border border-blue-200 dark:border-blue-800">
-                        <div className="flex items-start gap-2">
-                          <Lightbulb size={14} strokeWidth={2} className="text-blue-600 dark:text-blue-400 mt-0.5" />
-                          <p className="text-xs text-blue-800 dark:text-blue-200">
-                            {correction.explanation}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </BaseCard>
-                ))}
-              </div>
-            )}
-          </div>
+        {/* ✨ NEW: Correction Review Panel - Individual approval/rejection */}
+        {updatedCorrections && updatedCorrections.length > 0 && (
+          <CorrectionReviewPanel
+            review={{ ...review, aiSuggestions: updatedCorrections }}
+            onCorrectionsUpdate={(corrections) => setUpdatedCorrections(corrections)}
+          />
         )}
 
         {/* Overall Feedback - Editable */}
