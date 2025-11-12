@@ -1,5 +1,5 @@
 /**
- * @fileoverview Quick homework correction - Upload images for instant AI feedback
+ * @fileoverview Quick homework correction - Upload images for instant feedback
  * @module components/QuickHomeworkCorrection
  */
 
@@ -166,7 +166,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
               Corrección Instantánea
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Sube fotos de tus tareas y recibe corrección automática por IA
+              Sube fotos de tus tareas y recibe corrección automática
             </p>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
             Sube fotos de tu tarea escrita
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            JPG, PNG - La IA analizará ortografía, gramática y vocabulario
+            JPG, PNG - Análisis automático de ortografía, gramática y vocabulario
           </p>
           <input
             type="file"
@@ -447,7 +447,7 @@ function ReviewDetailModal({ review, onClose }) {
                     Analizando tu tarea...
                   </p>
                   <p className="text-xs text-blue-700 dark:text-blue-300">
-                    La IA está revisando ortografía, gramática y vocabulario
+                    Revisando ortografía, gramática y vocabulario
                   </p>
                 </div>
               </div>
@@ -471,7 +471,7 @@ function ReviewDetailModal({ review, onClose }) {
             />
           </div>
 
-          {/* AI Analysis */}
+          {/* Analysis Results */}
           {liveReview.status === 'completed' && analysis && (
             <div className="space-y-4">
               {/* Extracted Text */}
@@ -533,7 +533,7 @@ function ReviewDetailModal({ review, onClose }) {
                 <div className="p-4 bg-primary-50 dark:bg-primary-900 border border-primary-200 dark:border-primary-700 rounded-lg">
                   <h3 className="text-sm font-medium text-primary-900 dark:text-primary-100 mb-2 flex items-center gap-2">
                     <Sparkles size={16} />
-                    Comentario General de la IA
+                    Comentario General
                   </h3>
                   <p className="text-sm text-primary-800 dark:text-primary-200">
                     {analysis.overallFeedback}

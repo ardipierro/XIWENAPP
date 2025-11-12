@@ -126,7 +126,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
           { icon: ClipboardList, label: 'Asignado a Mí', path: '/student', action: 'assignments' },
           { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'assignmentsView' },
-          { icon: Sparkles, label: 'Corrección IA', path: '/student', action: 'quickCorrection' },
+          { icon: FileCheck, label: 'Corrección', path: '/student', action: 'quickCorrection' },
           { icon: Trophy, label: 'Gamificación', path: '/student', action: 'gamification' },
           { icon: CalendarDays, label: 'Calendario', path: '/student', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/student', action: 'messages' },

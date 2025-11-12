@@ -762,14 +762,14 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         <div className="rounded-xl p-6 md:p-8 bg-gradient-to-br from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20" style={{ borderWidth: '2px', borderStyle: 'solid', borderColor: 'var(--color-primary)' }}>
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
-              <Sparkles className="text-primary-600 dark:text-primary-400" size={32} strokeWidth={2} />
+              <Upload className="text-primary-600 dark:text-primary-400" size={32} strokeWidth={2} />
             </div>
             <div className="flex-1">
               <h3 className="text-xl md:text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-                Corrección Instantánea con IA
+                Corrección de Tareas
               </h3>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                Sube fotos de tus tareas y recibe corrección automática de ortografía, gramática y vocabulario en segundos
+                Sube fotos de tus tareas y recibe corrección de ortografía, gramática y vocabulario en segundos
               </p>
               <BaseButton
                 variant="primary"
