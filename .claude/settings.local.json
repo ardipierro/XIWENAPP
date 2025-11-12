@@ -136,7 +136,9 @@
       "Bash(timeout /t 5 /nobreak)",
       "Bash(npx eslint:*)",
       "Bash(ping:*)",
-      "Bash(NUL)"
+      "Bash(NUL)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTeacherScheduledClasses } from '../firebase/scheduledClasses';
 import { getUpcomingSessions } from '../firebase/classSessions';
+import BaseButton from './common/BaseButton';
 import './CalendarView.css';
 
 function CalendarView({ user }) {
@@ -87,12 +88,13 @@ function CalendarView({ user }) {
       {/* Week Navigation */}
       <div className="card mb-6">
         <div className="flex justify-between items-center">
-          <button
-            className="btn btn-outline"
+          <BaseButton
+            variant="outline"
             onClick={() => setWeekOffset(weekOffset - 1)}
+            icon={ChevronLeft}
           >
-            <ChevronLeft size={16} strokeWidth={2} /> Semana Anterior
-          </button>
+            Semana Anterior
+          </BaseButton>
           <div className="text-center">
             <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {weekOffset === 0 ? 'Esta Semana' : `Semana ${weekOffset > 0 ? '+' : ''}${weekOffset}`}
@@ -101,12 +103,13 @@ function CalendarView({ user }) {
               {formatDate(weekDays[0])} - {formatDate(weekDays[6])}
             </p>
           </div>
-          <button
-            className="btn btn-outline"
+          <BaseButton
+            variant="outline"
             onClick={() => setWeekOffset(weekOffset + 1)}
+            iconRight={ChevronRight}
           >
-            Semana Siguiente <ChevronRight size={16} strokeWidth={2} />
-          </button>
+            Semana Siguiente
+          </BaseButton>
         </div>
       </div>
 

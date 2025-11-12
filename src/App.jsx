@@ -31,6 +31,7 @@ const DesignLab = lazy(() => import('./components/DesignLab'));
 const ContentReaderPage = lazy(() => import('./pages/ContentReaderPage'));
 const ContentReaderDemo = lazy(() => import('./pages/ContentReaderDemo'));
 
+import BaseButton from './components/common/BaseButton';
 import './App.css';
 
 /**
@@ -247,12 +248,12 @@ function Register() {
         <h2>Crear Cuenta</h2>
         <p>El registro completo estará disponible próximamente.</p>
         <p>Por ahora, contacta al administrador para crear una cuenta.</p>
-        <button className="btn btn-primary" onClick={() => navigate('/login')}>
+        <BaseButton variant="primary" onClick={() => navigate('/login')}>
           Ir al Login
-        </button>
-        <button className="btn btn-outline" onClick={() => navigate('/')} style={{ marginTop: '12px' }}>
+        </BaseButton>
+        <BaseButton variant="outline" onClick={() => navigate('/')} style={{ marginTop: '12px' }}>
           Volver al Inicio
-        </button>
+        </BaseButton>
       </div>
     </div>
   );
@@ -367,9 +368,9 @@ function NotFound() {
         <h1>404</h1>
         <h2>Página No Encontrada</h2>
         <p>Lo sentimos, la página que buscas no existe.</p>
-        <button className="btn btn-primary" onClick={() => navigate('/')}>
+        <BaseButton variant="primary" onClick={() => navigate('/')}>
           Volver al Inicio
-        </button>
+        </BaseButton>
       </div>
     </div>
   );

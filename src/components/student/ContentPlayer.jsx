@@ -8,6 +8,7 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 import { db } from '../../firebase/config';
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { markContentCompleted, getCourseProgress } from '../../firebase/studentProgress';
+import BaseButton from '../common/BaseButton';
 import './ContentPlayer.css';
 
 function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
@@ -250,9 +251,9 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
           </div>
           <h2>Error</h2>
           <p>{error}</p>
-          <button className="btn btn-primary" onClick={onBack}>
+          <BaseButton variant="primary" onClick={onBack}>
             Volver
-          </button>
+          </BaseButton>
         </div>
       </div>
     );
@@ -263,9 +264,9 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
       <div className="content-player">
         <div className="error-container">
           <p>No se pudo cargar el contenido</p>
-          <button className="btn btn-primary" onClick={onBack}>
+          <BaseButton variant="primary" onClick={onBack}>
             Volver
-          </button>
+          </BaseButton>
         </div>
       </div>
     );
