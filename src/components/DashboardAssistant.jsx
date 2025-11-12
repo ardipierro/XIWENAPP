@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Loader, Sparkles, ChevronDown, TrendingUp, Users, BookOpen, DollarSign } from 'lucide-react';
+import { MessageCircle, Send, X, Loader, Sparkles, ChevronDown, Mic, MicOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import DashboardAssistantService from '../services/DashboardAssistantService';
 import { BaseButton, BaseInput } from './common';
@@ -17,9 +17,11 @@ function DashboardAssistant() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [isListening, setIsListening] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -101,6 +103,71 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * Initialize speech recognition
+   */
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = 'es-ES';
+
+        recognitionRef.current.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          setInputText(transcript);
+          setIsListening(false);
+        };
+
+        recognitionRef.current.onerror = (event) => {
+          logger.error('Speech recognition error', 'DashboardAssistant', event.error);
+          setIsListening(false);
+        };
+
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  /**
+   * Handle voice input
+   */
+  const handleVoiceClick = () => {
+    if (!recognitionRef.current) {
+      const errorMessage = {
+        role: 'assistant',
+        content: 'Tu navegador no soporta reconocimiento de voz. Por favor, usa Chrome, Edge o Safari.',
+        timestamp: new Date(),
+        isError: true
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (error) {
+        logger.error('Error starting recognition', 'DashboardAssistant', error);
+        setIsListening(false);
+      }
     }
   };
 
@@ -288,15 +355,25 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                placeholder="Pregunta algo sobre tus datos..."
-                disabled={isLoading}
+                placeholder={isListening ? "Escuchando..." : "Pregunta algo sobre tus datos..."}
+                disabled={isLoading || isListening}
                 className="!text-sm flex-1"
               />
+              <BaseButton
+                onClick={handleVoiceClick}
+                variant={isListening ? 'danger' : 'secondary'}
+                size="sm"
+                disabled={isLoading}
+                title={isListening ? 'Detener grabación' : 'Usar micrófono'}
+                className={`!p-2 ${isListening ? 'animate-pulse' : ''}`}
+              >
+                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+              </BaseButton>
               <BaseButton
                 onClick={handleSendMessage}
                 variant="primary"
                 size="sm"
-                disabled={isLoading || !inputText.trim()}
+                disabled={isLoading || !inputText.trim() || isListening}
                 title="Enviar mensaje"
                 className="!p-2 !px-4"
               >
@@ -304,7 +381,7 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
               </BaseButton>
             </div>
             <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-2 text-center">
-              Respuestas basadas en tus datos reales • Powered by AI
+              🎤 Click en el micrófono para hablar • Respuestas con tus datos reales
             </p>
           </div>
         </div>
