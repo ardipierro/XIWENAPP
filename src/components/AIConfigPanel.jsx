@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings } from 'lucide-react';
+import { Lightbulb, Filter, Settings, Play } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 import {
@@ -18,6 +18,7 @@ import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
+import ImageGenerationDemo from './ImageGenerationDemo';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
 
 function AIConfigPanel() {
@@ -33,6 +34,7 @@ function AIConfigPanel() {
   const [viewMode, setViewMode] = useState('grid');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showImageDemo, setShowImageDemo] = useState(false);
 
   // ============================================================================
   // EFECTOS - Cargar config al montar
@@ -222,40 +224,68 @@ function AIConfigPanel() {
     );
   }
 
+  // Si está mostrando el demo de imágenes, renderizar solo ese componente
+  if (showImageDemo) {
+    return (
+      <div className="ai-config-panel">
+        <BaseButton
+          variant="outline"
+          onClick={() => setShowImageDemo(false)}
+          className="mb-6"
+        >
+          ← Volver a Tareas IA
+        </BaseButton>
+        <ImageGenerationDemo />
+      </div>
+    );
+  }
+
   // ============================================================================
   // RENDER PRINCIPAL
   // ============================================================================
   return (
     <div className="ai-config-panel">
       {/* Header */}
-      <PageHeader
-        icon={Lightbulb}
-        title="Tareas IA"
-        actionLabel="+ Crear Nueva Configuración"
-        onAction={() => {
-          const newFunction = {
-            id: `custom_${Date.now()}`,
-            name: 'Nueva Función de IA',
-            description: 'Configura esta función personalizada',
-            icon: Settings,
-            category: 'content',
-            defaultConfig: {
-              enabled: false,
-              provider: '',
-              model: '',
-              apiKey: '',
-              systemPrompt: '',
-              parameters: {
-                temperature: 0.7,
-                maxTokens: 2000,
-                topP: 1
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+        <PageHeader
+          icon={Lightbulb}
+          title="Tareas IA"
+          actionLabel="+ Crear Nueva Configuración"
+          onAction={() => {
+            const newFunction = {
+              id: `custom_${Date.now()}`,
+              name: 'Nueva Función de IA',
+              description: 'Configura esta función personalizada',
+              icon: Settings,
+              category: 'content',
+              defaultConfig: {
+                enabled: false,
+                provider: '',
+                model: '',
+                apiKey: '',
+                systemPrompt: '',
+                parameters: {
+                  temperature: 0.7,
+                  maxTokens: 2000,
+                  topP: 1
+                }
               }
-            }
-          };
-          setSelectedFunction(newFunction);
-          setModalOpen(true);
-        }}
-      />
+            };
+            setSelectedFunction(newFunction);
+            setModalOpen(true);
+          }}
+        />
+
+        {/* Botón de Tareas de Demostración */}
+        <BaseButton
+          variant="primary"
+          icon={Play}
+          onClick={() => setShowImageDemo(true)}
+          className="whitespace-nowrap"
+        >
+          Tareas de Demostración
+        </BaseButton>
+      </div>
 
       {/* Description and Stats */}
       <div className="mb-6">

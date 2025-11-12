@@ -89,7 +89,7 @@ import MessagesPanel from './MessagesPanel';
 import AdminPaymentsPanel from './AdminPaymentsPanel';
 import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
-import ImageProvidersConfig from './ImageProvidersConfig';
+import SettingsPanel from './SettingsPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ClassSessionModal from './ClassSessionModal';
@@ -613,15 +613,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Image Providers Configuration - WITH Layout
-  if (navigation.currentScreen === 'imageProviders') {
+  // Settings Panel - WITH Layout
+  if (navigation.currentScreen === 'settings') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
-          <ImageProvidersConfig />
+          </BaseButton>
+          <SettingsPanel />
         </div>
       </DashboardLayout>
     );
@@ -780,218 +780,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Settings Panel - WITH Layout
-  if (navigation.currentScreen === 'settings') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-6">
-            ← Back to Home
-          </BaseButton>
-
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Settings</h1>
-              <p style={{ color: 'var(--color-text-secondary)' }}>
-                Manage system settings and preferences
-              </p>
-            </div>
-
-            {/* Tabs */}
-            <div style={{ borderBottom: '1px solid var(--color-border)' }}>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setSettingsTab('general')}
-                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
-                  style={{
-                    borderColor: settingsTab === 'general' ? 'var(--color-primary)' : 'transparent',
-                    color: settingsTab === 'general' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                  }}
-                >
-                  <Info className="w-5 h-5" />
-                  General
-                </button>
-                <button
-                  onClick={() => setSettingsTab('credentials')}
-                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
-                  style={{
-                    borderColor: settingsTab === 'credentials' ? 'var(--color-primary)' : 'transparent',
-                    color: settingsTab === 'credentials' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                  }}
-                >
-                  <Key className="w-5 h-5" />
-                  Credenciales IA
-                </button>
-                <button
-                  onClick={() => setSettingsTab('theme')}
-                  className="flex items-center gap-2 px-4 py-3 font-medium border-b-2 transition-colors"
-                  style={{
-                    borderColor: settingsTab === 'theme' ? 'var(--color-primary)' : 'transparent',
-                    color: settingsTab === 'theme' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-                  }}
-                >
-                  <Palette className="w-5 h-5" />
-                  Editor de Temas
-                </button>
-              </div>
-            </div>
-
-            {/* Tab Content: General */}
-            {settingsTab === 'general' && (
-              <div className="space-y-6">
-                <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-                  <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>System Information</h2>
-                  <div className="space-y-3" style={{ color: 'var(--color-text-secondary)' }}>
-                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <span className="font-medium">Application Version</span>
-                      <span>v1.0.0</span>
-                    </div>
-                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <span className="font-medium">Environment</span>
-                      <span>{import.meta.env.MODE}</span>
-                    </div>
-                    <div className="flex justify-between py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <span className="font-medium">Admin Email</span>
-                      <span>{user.email}</span>
-                    </div>
-                    <div className="flex justify-between py-2">
-                      <span className="font-medium">Firebase Project</span>
-                      <span>xiwen-app-2026</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Tab Content: Credentials */}
-            {settingsTab === 'credentials' && (
-              <div className="space-y-6">
-                {/* AI Credentials Section */}
-            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-primary)', border: '1px solid var(--color-border)' }}>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-                <Settings className="w-5 h-5" />
-                Credenciales de IA
-              </h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-                Configura las API keys de los proveedores de IA para usar funciones inteligentes en la plataforma
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" key={credentialsRefresh}>
-                {aiService.getAvailableProviders().map((provider) => {
-                  // Check credentials from Firebase Secret Manager OR localStorage
-                  const hasFirebaseCredential = aiCredentials[provider.name] || false;
-                  const hasLocalStorageCredential = provider.name === 'elevenlabs'
-                    ? !!localStorage.getItem('ai_credentials_elevenlabs')
-                    : false;
-                  const isConfigured = hasFirebaseCredential || hasLocalStorageCredential;
-
-                  return (
-                    <button
-                      key={provider.name}
-                      onClick={() => {
-                        setSelectedProvider({
-                          ...provider,
-                          docsUrl: provider.name === 'openai' ? 'https://platform.openai.com/api-keys' :
-                                   provider.name === 'gemini' ? 'https://aistudio.google.com/app/apikey' :
-                                   provider.name === 'grok' ? 'https://console.x.ai/' :
-                                   provider.name === 'elevenlabs' ? 'https://elevenlabs.io/app/settings/api-keys' :
-                                   'https://console.anthropic.com/settings/keys'
-                        });
-                        setShowAICredentialsModal(true);
-                      }}
-                      className="relative flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200 active:scale-[0.98]"
-                      style={{
-                        borderColor: isConfigured ? 'var(--color-success)' : 'var(--color-border)',
-                        backgroundColor: isConfigured ? 'rgba(34, 197, 94, 0.1)' : 'var(--color-bg-primary)'
-                      }}
-                    >
-                      <div className="text-3xl">{provider.icon}</div>
-                      <div className="flex-1 text-left">
-                        <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                          {provider.label}
-                        </h3>
-                        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                          {provider.model}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0">
-                        {isConfigured ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: 'var(--color-success)', color: 'white' }}>
-                            <CheckCircle className="w-3 h-3" />
-                            Configurado
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                            <Settings className="w-3 h-3" />
-                            Configurar
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-                <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                  <strong>Nota:</strong> Las credenciales se guardan de forma segura en el navegador local. No se comparten con otros usuarios.
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="flex items-start gap-3">
-                <Settings className="flex-shrink-0 mt-1" size={20} style={{ color: 'var(--color-text-secondary)' }} />
-                <div>
-                  <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
-                    Additional Settings Coming Soon
-                  </h3>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    More configuration options will be available in future updates, including:
-                  </p>
-                  <ul className="mt-2 space-y-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    <li>• Email notifications preferences</li>
-                    <li>• System-wide defaults</li>
-                    <li>• Backup and restore options</li>
-                    <li>• Integration settings</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-              </div>
-            )}
-
-            {/* Tab Content: Theme */}
-            {settingsTab === 'theme' && (
-              <div className="space-y-6">
-                <ThemeCustomizer />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* AI Credentials Modal */}
-        <AICredentialsModal
-          isOpen={showAICredentialsModal}
-          onClose={() => {
-            setShowAICredentialsModal(false);
-            setSelectedProvider(null);
-          }}
-          provider={selectedProvider}
-          isConfigured={selectedProvider ? aiCredentials[selectedProvider.name] : false}
-          onSave={async (providerName, apiKey) => {
-            logger.info('API Key saved for provider:', providerName);
-            // Forzar re-render para actualizar el estado visual
-            setCredentialsRefresh(prev => prev + 1);
-            // Reload providers to update configured status
-            setTimeout(() => {
-              window.location.reload();
-            }, 1500);
-          }}
-        />
-      </DashboardLayout>
-    );
-  }
 
   // Whiteboard Manager - WITH Layout
   if (navigation.currentScreen === 'whiteboardSessions') {

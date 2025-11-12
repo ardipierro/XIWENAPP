@@ -3,15 +3,22 @@
  * @module components/AIFunctionCard
  */
 
-import { Settings, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Settings, CheckCircle, AlertCircle, XCircle, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { BaseButton, BaseBadge } from './common';
 import { getProviderById } from '../constants/aiFunctions';
 import logger from '../utils/logger';
+import imageService from '../services/imageService';
 
 /**
  * Card de función de IA - soporta vista grid y list
  */
 function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) {
+  // Estado local para preview de imágenes
+  const [testingImage, setTestingImage] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
+  const [imageError, setImageError] = useState(null);
+
   // Usar defaultConfig si no hay config guardada
   const activeConfig = config || aiFunction.defaultConfig;
 
@@ -19,14 +26,49 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
   const isEnabled = activeConfig?.enabled || false;
   const provider = activeConfig?.provider ? getProviderById(activeConfig.provider) : null;
 
+  // Detectar si es una función de imagen
+  const isImageFunction = ['dalle', 'stability'].includes(activeConfig?.provider);
+
   logger.debug(`[AIFunctionCard] ${aiFunction.name}:`, {
     isConfigured,
     isEnabled,
-    provider: activeConfig?.provider
+    provider: activeConfig?.provider,
+    isImageFunction
   });
 
   const FunctionIcon = aiFunction.icon;
   const ProviderIcon = provider?.icon;
+
+  /**
+   * Test rápido de generación de imagen
+   */
+  const handleQuickImageTest = async (e) => {
+    e.stopPropagation();
+
+    if (!isConfigured) {
+      setImageError('Configura la función primero');
+      return;
+    }
+
+    setTestingImage(true);
+    setImageError(null);
+    setGeneratedImageUrl(null);
+
+    try {
+      const result = await imageService.testGeneration(activeConfig.provider);
+
+      if (result.success && result.images && result.images[0]) {
+        setGeneratedImageUrl(result.images[0].url || result.images[0].b64_json);
+      } else {
+        setImageError(result.error || 'Error generando imagen');
+      }
+    } catch (error) {
+      logger.error('Quick image test failed:', error);
+      setImageError(error.message || 'Error al generar imagen');
+    } finally {
+      setTestingImage(false);
+    }
+  };
 
   // Determinar badge de estado (simplificado)
   const getStatusBadge = () => {
@@ -106,8 +148,44 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
             </div>
           )}
 
+          {/* Preview de imagen generada (solo para funciones de imagen) */}
+          {isImageFunction && generatedImageUrl && (
+            <div className="mb-3 rounded-lg overflow-hidden border-2 border-purple-300 dark:border-purple-700">
+              <img
+                src={generatedImageUrl}
+                alt="Generated preview"
+                className="w-full h-auto"
+              />
+            </div>
+          )}
+
+          {/* Error de imagen */}
+          {isImageFunction && imageError && (
+            <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-xs text-red-600 dark:text-red-400 m-0">
+                {imageError}
+              </p>
+            </div>
+          )}
+
           {/* Spacer para empujar el botón abajo */}
           <div className="flex-1"></div>
+
+          {/* Botones - Quick test para imágenes */}
+          {isImageFunction && isConfigured && (
+            <BaseButton
+              variant="outline"
+              icon={Sparkles}
+              onClick={handleQuickImageTest}
+              disabled={testingImage}
+              loading={testingImage}
+              fullWidth
+              size="sm"
+              className="mb-2"
+            >
+              {testingImage ? 'Generando...' : 'Prueba Rápida'}
+            </BaseButton>
+          )}
 
           {/* Botón configurar */}
           <BaseButton
