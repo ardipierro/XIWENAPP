@@ -12,7 +12,8 @@ import {
   StopCircle,
   Users,
   Clock,
-  X
+  X,
+  Zap
 } from 'lucide-react';
 import logger from '../utils/logger';
 import {
@@ -22,12 +23,14 @@ import {
   deleteClassSession,
   startClassSession,
   endClassSession,
-  getDayName
+  getDayName,
+  createInstantMeetSession
 } from '../firebase/classSessions';
 import { loadCourses, getAllUsers } from '../firebase/firestore';
 import { getAllGroups } from '../firebase/groups';
 import { getAllContent } from '../firebase/content';
 import ClassSessionModal from './ClassSessionModal';
+import InstantMeetModal from './InstantMeetModal';
 import {
   BaseButton,
   BaseCard,
@@ -49,6 +52,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showInstantMeetModal, setShowInstantMeetModal] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, scheduled, live, ended
@@ -140,6 +144,43 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
     } catch (error) {
       logger.error('Error en handleCreate:', error);
       setMessage({ type: 'error', text: 'Error al crear sesión' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCreateInstantMeet = async (config) => {
+    try {
+      setActionLoading('instant');
+
+      const result = await createInstantMeetSession({
+        teacherId: user.uid,
+        teacherName: user.displayName || user.email,
+        meetLink: config.meetLink || '',
+        assignedGroups: config.assignedGroups || [],
+        assignedStudents: config.assignedStudents || []
+      });
+
+      if (result.success) {
+        setMessage({ type: 'success', text: '¡Clase instantánea creada e iniciada!' });
+        setShowInstantMeetModal(false);
+        await loadData();
+
+        // Navegar a la sala de clase
+        if (onJoinSession) {
+          onJoinSession({
+            id: result.sessionId,
+            roomName: result.roomName
+          });
+        }
+
+        logger.info('✅ Clase instantánea creada:', result.sessionId);
+      } else {
+        setMessage({ type: 'error', text: result.error || 'Error al crear clase instantánea' });
+      }
+    } catch (error) {
+      logger.error('Error en handleCreateInstantMeet:', error);
+      setMessage({ type: 'error', text: 'Error al crear la clase instantánea' });
     } finally {
       setActionLoading(null);
     }
@@ -444,13 +485,22 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
             {sessions.length} sesiones totales
           </p>
         </div>
-        <BaseButton
-          variant="primary"
-          icon={Plus}
-          onClick={() => setShowModal(true)}
-        >
-          Nueva Sesión
-        </BaseButton>
+        <div className="flex items-center gap-3">
+          <BaseButton
+            variant="success"
+            icon={Zap}
+            onClick={() => setShowInstantMeetModal(true)}
+          >
+            Clase Instantánea
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            icon={Plus}
+            onClick={() => setShowModal(true)}
+          >
+            Nueva Sesión
+          </BaseButton>
+        </div>
       </div>
 
       {/* Mensaje */}
@@ -724,6 +774,17 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
         groups={groups}
         contents={contents}
         loading={actionLoading === 'create' || actionLoading === 'edit'}
+      />
+
+      {/* Instant Meet Modal */}
+      <InstantMeetModal
+        isOpen={showInstantMeetModal}
+        onClose={() => setShowInstantMeetModal(false)}
+        onCreateSession={handleCreateInstantMeet}
+        teacherId={user?.uid}
+        teacherName={user?.displayName || user?.email}
+        students={students}
+        groups={groups}
       />
     </div>
   );
