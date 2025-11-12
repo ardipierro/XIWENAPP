@@ -22,16 +22,26 @@ import {
   FlaskConical,
   Plus,
   Trash2,
-  UsersRound
+  UsersRound,
+  FileText,
+  X
 } from 'lucide-react';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { updateUser, deleteUser } from '../firebase/users';
 import {
   getStudentEnrollments,
   enrollStudentInCourse,
-  unenrollStudentFromCourse
+  unenrollStudentFromCourse,
+  getStudentContentAssignments,
+  assignContentToStudent,
+  unassignContentFromStudent,
+  getTeacherStudents,
+  assignStudentToTeacher,
+  unassignStudentFromTeacher,
+  getAvailableStudents
 } from '../firebase/firestore';
 import { loadCourses } from '../firebase/firestore';
+import { getAllContent } from '../firebase/content';
 import { getUserCredits } from '../firebase/credits';
 import {
   getStudentGuardians,
@@ -80,6 +90,18 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [selectedCourseToAdd, setSelectedCourseToAdd] = useState('');
 
+  // Estados para contenidos
+  const [assignedContents, setAssignedContents] = useState([]);
+  const [availableContents, setAvailableContents] = useState([]);
+  const [loadingContents, setLoadingContents] = useState(false);
+  const [selectedContentToAdd, setSelectedContentToAdd] = useState('');
+
+  // Estados para alumnos (solo para profesores)
+  const [teacherStudents, setTeacherStudents] = useState([]);
+  const [availableStudentsToAssign, setAvailableStudentsToAssign] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [selectedStudentToAdd, setSelectedStudentToAdd] = useState('');
+
   // Estado para créditos
   const [userCredits, setUserCredits] = useState(selectedUser?.credits || 0);
 
@@ -105,6 +127,10 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   useEffect(() => {
     if (activeTab === 'courses') {
       loadCoursesData();
+    } else if (activeTab === 'contents') {
+      loadContentsData();
+    } else if (activeTab === 'students') {
+      loadStudentsData();
     } else if (activeTab === 'guardians') {
       loadGuardiansData();
     }
@@ -143,6 +169,42 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       showMessage('error', 'Error al cargar cursos');
     } finally {
       setLoadingCourses(false);
+    }
+  };
+
+  const loadContentsData = async () => {
+    setLoadingContents(true);
+    try {
+      // Cargar contenidos asignados
+      const assignments = await getStudentContentAssignments(selectedUser.id);
+      setAssignedContents(assignments);
+
+      // Cargar todos los contenidos disponibles
+      const allContents = await getAllContent();
+      setAvailableContents(allContents);
+    } catch (error) {
+      logger.error('Error al cargar contenidos:', error);
+      showMessage('error', 'Error al cargar contenidos');
+    } finally {
+      setLoadingContents(false);
+    }
+  };
+
+  const loadStudentsData = async () => {
+    setLoadingStudents(true);
+    try {
+      // Cargar alumnos asignados al profesor
+      const students = await getTeacherStudents(selectedUser.id);
+      setTeacherStudents(students);
+
+      // Cargar todos los estudiantes disponibles
+      const allStudents = await getAvailableStudents();
+      setAvailableStudentsToAssign(allStudents);
+    } catch (error) {
+      logger.error('Error al cargar alumnos:', error);
+      showMessage('error', 'Error al cargar alumnos');
+    } finally {
+      setLoadingStudents(false);
     }
   };
 
@@ -279,6 +341,58 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
     }
   };
 
+  const handleAssignContent = async (contentId) => {
+    try {
+      const assignmentId = await assignContentToStudent(selectedUser.id, contentId);
+      if (assignmentId) {
+        showMessage('success', 'Contenido asignado exitosamente');
+        await loadContentsData();
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      showMessage('error', 'Error al asignar contenido');
+    }
+  };
+
+  const handleUnassignContent = async (contentId) => {
+    try {
+      const success = await unassignContentFromStudent(selectedUser.id, contentId);
+      if (success) {
+        showMessage('success', 'Contenido desasignado exitosamente');
+        await loadContentsData();
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      showMessage('error', 'Error al desasignar contenido');
+    }
+  };
+
+  const handleAssignStudent = async (studentId) => {
+    try {
+      const assignmentId = await assignStudentToTeacher(selectedUser.id, studentId);
+      if (assignmentId) {
+        showMessage('success', 'Alumno asignado exitosamente');
+        await loadStudentsData();
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      showMessage('error', 'Error al asignar alumno');
+    }
+  };
+
+  const handleUnassignStudent = async (studentId) => {
+    try {
+      const success = await unassignStudentFromTeacher(selectedUser.id, studentId);
+      if (success) {
+        showMessage('success', 'Alumno desasignado exitosamente');
+        await loadStudentsData();
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      showMessage('error', 'Error al desasignar alumno');
+    }
+  };
+
   const handleViewAs = () => {
     // Guardar userId para reabrir el perfil al volver
     sessionStorage.setItem('viewAsReturnUserId', selectedUser.id);
@@ -292,6 +406,14 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
   const isCourseEnrolled = (courseId) => {
     return enrolledCourses.some(e => e.courseId === courseId);
+  };
+
+  const isContentAssigned = (contentId) => {
+    return assignedContents.some(a => a.contentId === contentId);
+  };
+
+  const isStudentAssigned = (studentId) => {
+    return teacherStudents.some(s => s.studentId === studentId);
   };
 
   const formatDate = (timestamp) => {
@@ -434,6 +556,36 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
             <CreditCard size={18} strokeWidth={2} />
             <span>Créditos</span>
           </button>
+          <button
+            onClick={() => setActiveTab('contents')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'contents'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
+          >
+            <FileText size={18} strokeWidth={2} />
+            <span>Contenidos</span>
+          </button>
+          {(['teacher', 'trial_teacher', 'admin'].includes(selectedUser?.role)) && (
+            <button
+              onClick={() => setActiveTab('students')}
+              className={`
+                flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+                border-b-2 font-medium text-sm transition-colors
+                ${activeTab === 'students'
+                  ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                  : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+                }
+              `}
+            >
+              <GraduationCap size={18} strokeWidth={2} />
+              <span>Alumnos</span>
+            </button>
+          )}
           <button
             onClick={() => setActiveTab('classes')}
             className={`
@@ -683,6 +835,189 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                       >
                         Agregar
                       </BaseButton>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Contenidos */}
+        {activeTab === 'contents' && (
+          <div>
+            {loadingContents ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-12 h-12 border-4 border-zinc-200 dark:border-zinc-800 border-t-zinc-900 dark:border-t-white rounded-full animate-spin mb-4"></div>
+                <p className="text-zinc-600 dark:text-zinc-400">Cargando contenidos...</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Contenidos asignados */}
+                <div>
+                  <h4 className="text-lg font-semibold text-zinc-900 dark:text-white mb-3">
+                    Contenidos Asignados
+                  </h4>
+                  {assignedContents.length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">No hay contenidos asignados</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {assignedContents.map(assignment => (
+                        <div key={assignment.id} className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-zinc-900 dark:text-white">{assignment.contentName}</span>
+                              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+                                {assignment.contentType}
+                              </span>
+                            </div>
+                            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                              Asignado: {formatDate(assignment.assignedAt)}
+                            </span>
+                          </div>
+                          <button
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                            onClick={() => handleUnassignContent(assignment.contentId)}
+                          >
+                            <X size={16} strokeWidth={2} />
+                            Eliminar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Agregar contenido */}
+                <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Plus size={18} strokeWidth={2} className="text-zinc-700 dark:text-zinc-300" />
+                    <h4 className="text-lg font-semibold text-zinc-900 dark:text-white">Asignar Contenido</h4>
+                  </div>
+                  {availableContents.filter(c => !isContentAssigned(c.id)).length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">Todos los contenidos ya están asignados</p>
+                  ) : (
+                    <div className="flex gap-3">
+                      <select
+                        className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                        value={selectedContentToAdd}
+                        onChange={(e) => setSelectedContentToAdd(e.target.value)}
+                      >
+                        <option value="">Selecciona un contenido...</option>
+                        {availableContents
+                          .filter(c => !isContentAssigned(c.id))
+                          .map(content => (
+                            <option key={content.id} value={content.id}>
+                              [{content.type}] {content.title || content.name}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        className="flex items-center gap-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          if (selectedContentToAdd) {
+                            handleAssignContent(selectedContentToAdd);
+                            setSelectedContentToAdd('');
+                          }
+                        }}
+                        disabled={!selectedContentToAdd}
+                      >
+                        <Plus size={16} strokeWidth={2} /> Agregar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Alumnos (solo profesores) */}
+        {activeTab === 'students' && (
+          <div>
+            {loadingStudents ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-12 h-12 border-4 border-zinc-200 dark:border-zinc-800 border-t-zinc-900 dark:border-t-white rounded-full animate-spin mb-4"></div>
+                <p className="text-zinc-600 dark:text-zinc-400">Cargando alumnos...</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Alumnos asignados */}
+                <div>
+                  <h4 className="text-lg font-semibold text-zinc-900 dark:text-white mb-3">
+                    Alumnos Asignados
+                  </h4>
+                  {teacherStudents.length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">No hay alumnos asignados a este profesor</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {teacherStudents.map(student => (
+                        <div key={student.assignmentId} className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-zinc-900 dark:text-white">{student.studentName}</span>
+                              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+                                {student.studentRole}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                                {student.studentEmail}
+                              </span>
+                              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                                • Asignado: {formatDate(student.assignedAt)}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                            onClick={() => handleUnassignStudent(student.studentId)}
+                          >
+                            <X size={16} strokeWidth={2} />
+                            Eliminar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Agregar alumno */}
+                <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Plus size={18} strokeWidth={2} className="text-zinc-700 dark:text-zinc-300" />
+                    <h4 className="text-lg font-semibold text-zinc-900 dark:text-white">Asignar Alumno</h4>
+                  </div>
+                  {availableStudentsToAssign.filter(s => !isStudentAssigned(s.id)).length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">Todos los alumnos ya están asignados</p>
+                  ) : (
+                    <div className="flex gap-3">
+                      <select
+                        className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                        value={selectedStudentToAdd}
+                        onChange={(e) => setSelectedStudentToAdd(e.target.value)}
+                      >
+                        <option value="">Selecciona un alumno...</option>
+                        {availableStudentsToAssign
+                          .filter(s => !isStudentAssigned(s.id))
+                          .map(student => (
+                            <option key={student.id} value={student.id}>
+                              {student.name || student.email} ({student.role})
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        className="flex items-center gap-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          if (selectedStudentToAdd) {
+                            handleAssignStudent(selectedStudentToAdd);
+                            setSelectedStudentToAdd('');
+                          }
+                        }}
+                        disabled={!selectedStudentToAdd}
+                      >
+                        <Plus size={16} strokeWidth={2} /> Agregar
+                      </button>
                     </div>
                   )}
                 </div>

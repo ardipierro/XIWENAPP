@@ -1272,6 +1272,267 @@ export const getBatchEnrollmentCounts = async (studentIds = []) => {
 };
 
 // ============================================
+// ASIGNACIÓN DE CONTENIDOS INDIVIDUALES
+// ============================================
+
+/**
+ * Asignar contenido individual a un estudiante
+ */
+export const assignContentToStudent = async (studentId, contentId) => {
+  try {
+    // Verificar si ya está asignado
+    const contentAssignmentsRef = collection(db, 'content_assignments');
+    const q = query(
+      contentAssignmentsRef,
+      where('studentId', '==', studentId),
+      where('contentId', '==', contentId)
+    );
+    const existingAssignment = await getDocs(q);
+
+    if (!existingAssignment.empty) {
+      logger.debug('ℹ️ El contenido ya está asignado a este estudiante');
+      return existingAssignment.docs[0].id;
+    }
+
+    // Crear nueva asignación
+    const assignmentRef = await addDoc(contentAssignmentsRef, {
+      studentId,
+      contentId,
+      assignedAt: serverTimestamp(),
+      status: 'assigned', // assigned, in_progress, completed
+      progress: {
+        completed: false,
+        startedAt: null,
+        completedAt: null,
+        percentComplete: 0
+      },
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    logger.debug('✅ Contenido asignado al estudiante:', assignmentRef.id);
+    return assignmentRef.id;
+  } catch (error) {
+    logger.error('❌ Error asignando contenido:', error);
+    return null;
+  }
+};
+
+/**
+ * Desasignar contenido de un estudiante
+ */
+export const unassignContentFromStudent = async (studentId, contentId) => {
+  try {
+    const contentAssignmentsRef = collection(db, 'content_assignments');
+    const q = query(
+      contentAssignmentsRef,
+      where('studentId', '==', studentId),
+      where('contentId', '==', contentId)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      logger.debug('ℹ️ No se encontró asignación de contenido para desasignar');
+      return false;
+    }
+
+    // Eliminar registro de asignación
+    const assignmentId = querySnapshot.docs[0].id;
+    await deleteDoc(doc(db, 'content_assignments', assignmentId));
+
+    logger.debug('✅ Contenido desasignado del estudiante');
+    return true;
+  } catch (error) {
+    logger.error('❌ Error desasignando contenido:', error);
+    return false;
+  }
+};
+
+/**
+ * Obtener todos los contenidos asignados a un estudiante
+ */
+export const getStudentContentAssignments = async (studentId) => {
+  try {
+    const contentAssignmentsRef = collection(db, 'content_assignments');
+    const q = query(contentAssignmentsRef, where('studentId', '==', studentId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    // Obtener datos completos de cada contenido
+    const assignments = [];
+    for (const assignDoc of querySnapshot.docs) {
+      const assignmentData = assignDoc.data();
+      const contentRef = doc(db, 'contents', assignmentData.contentId);
+      const contentSnap = await getDoc(contentRef);
+
+      if (contentSnap.exists()) {
+        assignments.push({
+          id: assignDoc.id,
+          contentId: contentSnap.id,
+          contentName: contentSnap.data().title || contentSnap.data().name,
+          contentType: contentSnap.data().type,
+          progress: assignmentData.progress,
+          status: assignmentData.status,
+          assignedAt: assignmentData.assignedAt
+        });
+      }
+    }
+
+    logger.debug(`✅ ${assignments.length} contenidos asignados cargados para el estudiante`);
+    return assignments;
+  } catch (error) {
+    logger.error('❌ Error cargando contenidos asignados del estudiante:', error);
+    return [];
+  }
+};
+
+// ============================================
+// RELACIÓN PROFESOR-ALUMNO
+// ============================================
+
+/**
+ * Asignar un alumno a un profesor
+ */
+export const assignStudentToTeacher = async (teacherId, studentId) => {
+  try {
+    // Verificar si ya está asignado
+    const teacherStudentsRef = collection(db, 'teacher_students');
+    const q = query(
+      teacherStudentsRef,
+      where('teacherId', '==', teacherId),
+      where('studentId', '==', studentId)
+    );
+    const existingAssignment = await getDocs(q);
+
+    if (!existingAssignment.empty) {
+      logger.debug('ℹ️ El alumno ya está asignado a este profesor');
+      return existingAssignment.docs[0].id;
+    }
+
+    // Obtener datos del estudiante para guardar su nombre
+    const studentRef = doc(db, 'users', studentId);
+    const studentSnap = await getDoc(studentRef);
+    const studentName = studentSnap.exists() ? (studentSnap.data().name || studentSnap.data().email) : 'Unknown';
+
+    // Crear nueva asignación
+    const assignmentRef = await addDoc(teacherStudentsRef, {
+      teacherId,
+      studentId,
+      studentName,
+      assignedAt: serverTimestamp(),
+      status: 'active', // active, inactive
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    logger.debug('✅ Alumno asignado al profesor:', assignmentRef.id);
+    return assignmentRef.id;
+  } catch (error) {
+    logger.error('❌ Error asignando alumno al profesor:', error);
+    return null;
+  }
+};
+
+/**
+ * Desasignar un alumno de un profesor
+ */
+export const unassignStudentFromTeacher = async (teacherId, studentId) => {
+  try {
+    const teacherStudentsRef = collection(db, 'teacher_students');
+    const q = query(
+      teacherStudentsRef,
+      where('teacherId', '==', teacherId),
+      where('studentId', '==', studentId)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      logger.debug('ℹ️ No se encontró asignación de alumno para desasignar');
+      return false;
+    }
+
+    // Eliminar registro de asignación
+    const assignmentId = querySnapshot.docs[0].id;
+    await deleteDoc(doc(db, 'teacher_students', assignmentId));
+
+    logger.debug('✅ Alumno desasignado del profesor');
+    return true;
+  } catch (error) {
+    logger.error('❌ Error desasignando alumno del profesor:', error);
+    return false;
+  }
+};
+
+/**
+ * Obtener todos los alumnos asignados a un profesor
+ */
+export const getTeacherStudents = async (teacherId) => {
+  try {
+    const teacherStudentsRef = collection(db, 'teacher_students');
+    const q = query(teacherStudentsRef, where('teacherId', '==', teacherId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    // Obtener datos completos de cada alumno
+    const students = [];
+    for (const assignDoc of querySnapshot.docs) {
+      const assignmentData = assignDoc.data();
+      const studentRef = doc(db, 'users', assignmentData.studentId);
+      const studentSnap = await getDoc(studentRef);
+
+      if (studentSnap.exists()) {
+        students.push({
+          assignmentId: assignDoc.id,
+          studentId: studentSnap.id,
+          studentName: studentSnap.data().name || studentSnap.data().email,
+          studentEmail: studentSnap.data().email,
+          studentRole: studentSnap.data().role,
+          assignedAt: assignmentData.assignedAt,
+          status: assignmentData.status
+        });
+      }
+    }
+
+    logger.debug(`✅ ${students.length} alumnos asignados cargados para el profesor`);
+    return students;
+  } catch (error) {
+    logger.error('❌ Error cargando alumnos del profesor:', error);
+    return [];
+  }
+};
+
+/**
+ * Obtener todos los estudiantes disponibles para asignar (filtrados por rol)
+ */
+export const getAvailableStudents = async () => {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('role', 'in', ['student', 'listener', 'trial']));
+    const querySnapshot = await getDocs(q);
+
+    const students = [];
+    querySnapshot.forEach((doc) => {
+      students.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+
+    logger.debug(`✅ ${students.length} estudiantes disponibles cargados`);
+    return students;
+  } catch (error) {
+    logger.error('❌ Error cargando estudiantes disponibles:', error);
+    return [];
+  }
+};
+
+// ============================================
 // MIGRACIÓN DESDE LOCALSTORAGE
 // ============================================
 
