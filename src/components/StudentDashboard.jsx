@@ -25,6 +25,7 @@ import StudentClassView from './StudentClassView';
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
 import StudentAssignmentsView from './StudentAssignmentsView';
+import QuickHomeworkCorrection from './QuickHomeworkCorrection';
 import GamificationPanel from './GamificationPanel';
 import UnifiedCalendar from './UnifiedCalendar';
 import MessagesPanel from './MessagesPanel';
@@ -207,6 +208,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
       'courses': 'courses',
       'assignments': 'assignments',
       'assignmentsView': 'assignmentsView',
+      'quickCorrection': 'quickCorrection',
       'gamification': 'gamification',
       'calendar': 'calendar',
       'messages': 'messages',
@@ -374,6 +376,23 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             ← Volver a Inicio
           </BaseButton>
           <StudentAssignmentsView studentId={student?.id} />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Render Quick Homework Correction
+  if (currentView === 'quickCorrection') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <QuickHomeworkCorrection
+            studentId={student?.id}
+            studentName={student?.name || user?.displayName}
+          />
         </div>
       </DashboardLayout>
     );

@@ -164,17 +164,31 @@ export async function getReviewsByAssignment(assignmentId) {
 /**
  * Get all reviews by a student
  * @param {string} studentId - Student ID
+ * @param {boolean} includeUnreviewed - Include unreviewed corrections (for free corrections)
  * @returns {Promise<Array>} Array of reviews
  */
-export async function getReviewsByStudent(studentId) {
+export async function getReviewsByStudent(studentId, includeUnreviewed = false) {
   try {
     const reviewsRef = collection(db, 'homework_reviews');
-    const q = query(
-      reviewsRef,
-      where('studentId', '==', studentId),
-      where('teacherReviewed', '==', true), // Only show reviews approved by teacher
-      orderBy('createdAt', 'desc')
-    );
+    let q;
+
+    if (includeUnreviewed) {
+      // For free corrections, show all statuses (including processing, completed, etc.)
+      q = query(
+        reviewsRef,
+        where('studentId', '==', studentId),
+        orderBy('createdAt', 'desc')
+      );
+    } else {
+      // For assignment-based corrections, only show teacher-reviewed ones
+      q = query(
+        reviewsRef,
+        where('studentId', '==', studentId),
+        where('teacherReviewed', '==', true),
+        orderBy('createdAt', 'desc')
+      );
+    }
+
     const snapshot = await getDocs(q);
 
     const reviews = snapshot.docs.map(doc => ({
