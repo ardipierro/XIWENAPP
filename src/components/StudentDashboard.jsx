@@ -769,7 +769,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
                 Enviar Tareas
               </h3>
               <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-                Subí fotos de tus tareas. <strong>Asegurate de sacar fotos bien iluminadas, sin sombras y no inclinadas</strong> para que se puedan leer más fácilmente. Tu profesora revisará cada tarea y te dará feedback personalizado.
+                Subí fotos de tus tareas. <strong>Asegurate de sacar la foto desde arriba (perpendicular a la hoja)</strong> para que no se vea deformada o distorsionada. Usá <strong>buena iluminación y sin sombras</strong> para que el texto se lea claramente.
               </p>
               <BaseButton
                 variant="primary"

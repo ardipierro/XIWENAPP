@@ -166,7 +166,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
               Enviar Tareas
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Subí fotos de tus tareas. Tu profesora las revisará y te dará feedback.
+              Subí fotos de tus tareas completadas para su revisión.
             </p>
           </div>
         </div>
@@ -232,11 +232,11 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
           <p className="text-gray-700 dark:text-gray-300 font-medium mb-3">
             Consejos para sacar buenas fotos:
           </p>
-          <ul className="text-sm text-gray-600 dark:text-gray-400 mb-4 space-y-1 text-left max-w-md mx-auto">
-            <li>✓ Buena iluminación (luz natural es mejor)</li>
-            <li>✓ Sin sombras sobre el texto</li>
-            <li>✓ Foto derecha, no inclinada</li>
-            <li>✓ Texto legible y enfocado</li>
+          <ul className="text-sm text-gray-600 dark:text-gray-400 mb-4 space-y-2 text-left max-w-md mx-auto">
+            <li>📐 <strong>Foto desde arriba:</strong> Poné la cámara perpendicular a la hoja (directamente encima) para evitar que se vea deformada o distorsionada</li>
+            <li>💡 <strong>Buena iluminación:</strong> Usá luz natural o una lámpara potente</li>
+            <li>☀️ <strong>Sin sombras:</strong> Evitá que tu mano o cuerpo hagan sombra sobre el texto</li>
+            <li>🎯 <strong>Enfoque claro:</strong> Asegurate de que el texto se vea nítido y legible</li>
           </ul>
           <input
             type="file"
