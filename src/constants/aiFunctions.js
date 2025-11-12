@@ -29,17 +29,24 @@ import {
 
 /**
  * Available AI providers
+ * ⚠️ IMPORTANTE: Los IDs deben coincidir con PROVIDER_MAPPINGS en CredentialsTab.jsx
+ * - claude (no anthropic) para consistencia con backend
+ * - grok (no xai) para consistencia con backend
  */
 export const AI_PROVIDERS = [
   {
     id: 'openai',
     name: 'OpenAI',
     icon: Bot,
-    description: 'Modelos GPT de OpenAI. Soporta temperature y top_p.',
+    description: 'Modelos GPT de OpenAI. Soporta temperature, top_p y max_tokens.',
     models: [
-      { value: 'gpt-4', label: 'GPT-4' },
-      { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-      { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
+      { value: 'gpt-4.1', label: 'GPT-4.1 (Latest 2025 - 1M tokens context)' },
+      { value: 'gpt-4.1-mini', label: 'GPT-4.1 Mini (Latest 2025 - Balanceado)' },
+      { value: 'gpt-4.1-nano', label: 'GPT-4.1 Nano (Latest 2025 - Más rápido)' },
+      { value: 'gpt-4o', label: 'GPT-4o (Multimodal)' },
+      { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+      { value: 'gpt-4-turbo', label: 'GPT-4 Turbo (Legacy)' },
+      { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (Deprecated)' }
     ],
     supportsTemperature: true,
     supportsTopP: true,
@@ -47,44 +54,52 @@ export const AI_PROVIDERS = [
   },
   {
     id: 'claude',
-    name: 'Claude',
+    name: 'Claude (Anthropic)',
     icon: Brain,
-    description: 'Modelos Claude de Anthropic. Solo soporta temperature (no top_p).',
+    description: 'Modelos Claude de Anthropic. Soporta temperature y max_tokens (no top_p). Claude 4.5 con 1M tokens.',
     models: [
-      { value: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5 (Latest)' },
-      { value: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5 (Sep 2024)' },
-      { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 (Latest)' },
-      { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (Oct 2024)' },
-      { value: 'claude-opus-4-1', label: 'Claude Opus 4.1 (Latest)' },
-      { value: 'claude-opus-4-1-20250805', label: 'Claude Opus 4.1 (Aug 2024)' }
+      { value: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5 (Latest - Mejor coding, reasoning y agentes)' },
+      { value: 'claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5 (Sep 2025)' },
+      { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 (Más rápido, near-frontier performance)' },
+      { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (Oct 2025)' },
+      { value: 'claude-opus-4-1', label: 'Claude Opus 4.1 (Más potente)' },
+      { value: 'claude-opus-4-1-20250805', label: 'Claude Opus 4.1 (Ago 2025)' },
+      { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet (Legacy - Oct 2024)' },
+      { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus (Legacy)' }
     ],
     supportsTemperature: true,
     supportsTopP: false,
-    supportsMaxTokens: true
+    supportsMaxTokens: true,
+    supportsExtendedThinking: true
   },
   {
     id: 'grok',
-    name: 'Grok',
+    name: 'Grok (xAI)',
     icon: Rocket,
-    description: 'Modelos Grok de xAI. Soporta temperature y top_p.',
+    description: 'Modelos Grok de xAI. Soporta temperature, top_p y max_tokens. Grok 4 con 256K tokens de contexto.',
     models: [
-      { value: 'grok-beta', label: 'Grok Beta' },
-      { value: 'grok-2', label: 'Grok 2' }
+      { value: 'grok-4', label: 'Grok 4 (Latest - Julio 2025, 256K context, más inteligente)' },
+      { value: 'grok-3', label: 'Grok 3 (Feb 2025 - GA disponible)' },
+      { value: 'grok-3-mini', label: 'Grok 3 Mini (Feb 2025 - Eficiente)' },
+      { value: 'grok-2-1212', label: 'Grok 2 (Legacy - Dec 2024)' },
+      { value: 'grok-2-vision-1212', label: 'Grok 2 Vision (Legacy - Dec 2024)' }
     ],
     supportsTemperature: true,
     supportsTopP: true,
-    supportsMaxTokens: true
+    supportsMaxTokens: true,
+    supportsLiveSearch: true
   },
   {
     id: 'google',
-    name: 'Google',
+    name: 'Google Gemini',
     icon: Search,
-    description: 'Modelos Gemini de Google. Soporta temperature y top_p.',
+    description: 'Modelos Gemini de Google. Soporta temperature, top_p y max_tokens.',
     models: [
-      { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (Latest)' },
-      { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (Best Price-Performance)' },
-      { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite (Fastest)' },
-      { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' }
+      { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (Más avanzado - Tareas complejas)' },
+      { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (Velocidad y eficiencia)' },
+      { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite (Más económico - Alto volumen)' },
+      { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro (Legacy)' },
+      { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash (Legacy)' }
     ],
     supportsTemperature: true,
     supportsTopP: true,
@@ -92,7 +107,7 @@ export const AI_PROVIDERS = [
   },
   {
     id: 'dalle',
-    name: 'DALL-E',
+    name: 'DALL-E (OpenAI)',
     icon: Image,
     description: 'Generación de imágenes con DALL-E de OpenAI. Ideal para ilustraciones educativas.',
     models: [
@@ -118,11 +133,16 @@ export const AI_PROVIDERS = [
     id: 'stability',
     name: 'Stability AI',
     icon: Palette,
-    description: 'Stable Diffusion para imágenes artísticas y realistas. Gran control creativo.',
+    description: 'Stable Diffusion 3.5 (Latest - 8.1B parámetros). Ideal para imágenes artísticas y realistas con gran control creativo.',
     models: [
-      { value: 'stable-diffusion-xl-1024-v1-0', label: 'SDXL 1.0 (Mejor calidad)' },
-      { value: 'stable-diffusion-v1-6', label: 'SD 1.6 (Equilibrado)' },
-      { value: 'stable-diffusion-512-v2-1', label: 'SD 2.1 (Rápido)' }
+      { value: 'stable-diffusion-3.5-large', label: 'SD 3.5 Large (Latest - 8.1B params, mejor calidad)' },
+      { value: 'stable-diffusion-3.5-large-turbo', label: 'SD 3.5 Large Turbo (Latest - Más rápido)' },
+      { value: 'stable-diffusion-3.5-medium', label: 'SD 3.5 Medium (Latest - Balanceado)' },
+      { value: 'stable-diffusion-3.5-flash', label: 'SD 3.5 Flash (Latest - Velocidad)' },
+      { value: 'stable-image-ultra', label: 'Stable Image Ultra (Máxima calidad)' },
+      { value: 'stable-image-core', label: 'Stable Image Core (Balanceado)' },
+      { value: 'stable-diffusion-3-large', label: 'SD 3 Large (Legacy)' },
+      { value: 'stable-diffusion-xl-1024-v1-0', label: 'SDXL 1.0 (Legacy)' }
     ],
     supportsTemperature: false,
     supportsTopP: false,
@@ -141,6 +161,7 @@ export const AI_PROVIDERS = [
 
 /**
  * Available AI functions/use cases
+ * ⚠️ IMPORTANTE: Las API keys NO se guardan aquí, vienen del panel de Credenciales
  */
 export const AI_FUNCTIONS = [
   {
@@ -152,8 +173,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'openai',
-      model: 'gpt-4',
-      apiKey: '',
+      model: 'gpt-4.1',
       systemPrompt: 'Eres un experto profesor de español como lengua extranjera (ESL/ELE). Generas ejercicios educativos de alta calidad siguiendo formatos específicos. Tus ejercicios son apropiados para el nivel CEFR solicitado y siguen las mejores prácticas pedagógicas.',
       parameters: {
         temperature: 0.7,
@@ -172,7 +192,6 @@ export const AI_FUNCTIONS = [
       enabled: false,
       provider: 'claude',
       model: 'claude-sonnet-4-5',
-      apiKey: '',
       systemPrompt: 'Eres un tutor paciente y amigable. Respondes preguntas de estudiantes de español de manera clara, usando ejemplos y siendo alentador. Adaptas tu nivel de explicación al nivel del estudiante.',
       parameters: {
         temperature: 0.8,
@@ -190,8 +209,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'grok',
-      model: 'grok-2',
-      apiKey: '',
+      model: 'grok-4',
       systemPrompt: 'Eres un evaluador objetivo y constructivo. Analizas respuestas de estudiantes de español, identificas errores gramaticales, ortográficos y de contenido. Proporcionas feedback específico y sugerencias de mejora.',
       parameters: {
         temperature: 0.3,
@@ -210,7 +228,6 @@ export const AI_FUNCTIONS = [
       enabled: false,
       provider: 'google',
       model: 'gemini-2.5-flash',
-      apiKey: '',
       systemPrompt: 'Eres un creador de contenido educativo especializado en enseñanza de español. Generas lecciones bien estructuradas, lecturas apropiadas por nivel, y material didáctico efectivo.',
       parameters: {
         temperature: 0.75,
@@ -228,8 +245,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'openai',
-      model: 'gpt-4',
-      apiKey: '',
+      model: 'gpt-4.1',
       systemPrompt: 'Eres un traductor educativo. Traduces textos y además proporcionas contexto cultural, explicaciones de modismos, y notas pedagógicas útiles para estudiantes de español.',
       parameters: {
         temperature: 0.5,
@@ -247,8 +263,7 @@ export const AI_FUNCTIONS = [
     defaultConfig: {
       enabled: false,
       provider: 'claude',
-      model: 'claude-haiku-4-5',
-      apiKey: '',
+      model: 'claude-3-5-haiku-20241022',
       systemPrompt: 'Eres un asistente que genera feedback personalizado y constructivo para estudiantes. Tus comentarios son específicos, alentadores y proporcionan pasos claros para mejorar.',
       parameters: {
         temperature: 0.7,
@@ -267,7 +282,6 @@ export const AI_FUNCTIONS = [
       enabled: false,
       provider: 'openai',
       model: 'gpt-4-turbo',
-      apiKey: '',
       systemPrompt: 'Eres un planificador de clases experto en ELE. Creas planes de lección detallados, con objetivos claros, actividades variadas, y evaluaciones apropiadas para cada nivel.',
       parameters: {
         temperature: 0.8,
@@ -286,7 +300,6 @@ export const AI_FUNCTIONS = [
       enabled: false,
       provider: 'google',
       model: 'gemini-2.5-flash',
-      apiKey: '',
       systemPrompt: 'Eres un especialista en fonética española. Analizas transcripciones de audio y proporcionas feedback específico sobre pronunciación, entonación y ritmo.',
       parameters: {
         temperature: 0.6,
@@ -305,7 +318,6 @@ export const AI_FUNCTIONS = [
       enabled: false,
       provider: 'claude',
       model: 'claude-sonnet-4-5',
-      apiKey: '',
       systemPrompt: `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
 
 INSTRUCCIONES:
@@ -365,7 +377,6 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       enabled: true,
       provider: 'claude',
       model: 'claude-sonnet-4-5',
-      apiKey: '',
       systemPrompt: 'Eres un asistente inteligente para el dashboard de XIWENAPP, una plataforma educativa de enseñanza de chino mandarín. Ayudas a profesores y administradores a obtener información sobre estudiantes, tareas, pagos y métricas del sistema. Respondes de forma clara, concisa y profesional en español.',
       parameters: {
         temperature: 0.7,
@@ -384,7 +395,6 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       enabled: false,
       provider: 'dalle',
       model: 'dall-e-3',
-      apiKey: '',
       systemPrompt: 'Genera imágenes educativas claras y apropiadas para estudiantes de español. Las imágenes deben ser simples, coloridas y fáciles de entender.',
       parameters: {
         size: '1024x1024',
@@ -402,8 +412,7 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
     defaultConfig: {
       enabled: false,
       provider: 'stability',
-      model: 'stable-diffusion-xl-1024-v1-0',
-      apiKey: '',
+      model: 'stable-diffusion-3.5-large',
       systemPrompt: 'Crea ilustraciones artísticas y atractivas para material educativo. Estilo amigable, colorido y apropiado para todas las edades.',
       parameters: {
         size: '1024x1024',
@@ -422,7 +431,6 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       enabled: false,
       provider: 'dalle',
       model: 'dall-e-3',
-      apiKey: '',
       systemPrompt: 'Crea imágenes claras y didácticas para enseñar vocabulario en español. Cada imagen debe mostrar claramente el objeto, acción o concepto de forma inequívoca.',
       parameters: {
         size: '1024x1024',

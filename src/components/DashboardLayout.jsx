@@ -26,8 +26,9 @@ import { isAdminEmail } from '../firebase/roleConfig.js';
  * @param {React.ReactNode} props.children - Contenido a renderizar
  * @param {Function} props.onMenuAction - Callback para acciones del menú
  * @param {string} props.currentScreen - Pantalla actual activa
+ * @param {boolean} props.fullWidth - Si true, remueve el max-width del contenedor
  */
-function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen }) {
+function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen, fullWidth = false }) {
   // Menú visible solo en desktop (>= 1025px)
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1025);
 
@@ -89,7 +90,7 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
           scrollbar-track-transparent
         `}
       >
-        <div className="px-4 py-3 md:px-6 md:py-3 max-w-[1400px] mx-auto">
+        <div className={`px-4 py-3 md:px-6 md:py-3 ${fullWidth ? '' : 'max-w-[1400px] mx-auto'}`}>
           {children}
         </div>
       </main>
