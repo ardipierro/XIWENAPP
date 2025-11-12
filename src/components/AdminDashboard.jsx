@@ -101,7 +101,6 @@ import InteractiveBookViewer from './InteractiveBookViewer';
 import ThemeCustomizer from './ThemeCustomizer';
 import aiService from '../services/aiService';
 import AIAssistantWidget from './AIAssistantWidget';
-import './AdminDashboard.css';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
