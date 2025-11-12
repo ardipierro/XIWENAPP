@@ -137,6 +137,7 @@ function AIAssistantWidget() {
 
       setMessages(prev => [...prev, errorMessage]);
     } finally {
+      // Always reset listening state
       setIsListening(false);
     }
   };

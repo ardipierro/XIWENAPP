@@ -295,6 +295,25 @@ export const AI_FUNCTIONS = [
     }
   },
   {
+    id: 'dashboard_assistant',
+    name: 'Asistente del Dashboard',
+    description: 'Asistente inteligente para consultas sobre estudiantes, tareas, pagos y métricas del dashboard',
+    icon: BarChart3,
+    category: 'tools',
+    defaultConfig: {
+      enabled: true,
+      provider: 'claude',
+      model: 'claude-sonnet-4-5',
+      apiKey: '',
+      systemPrompt: 'Eres un asistente inteligente para el dashboard de XIWENAPP, una plataforma educativa de enseñanza de chino mandarín. Ayudas a profesores y administradores a obtener información sobre estudiantes, tareas, pagos y métricas del sistema. Respondes de forma clara, concisa y profesional en español.',
+      parameters: {
+        temperature: 0.7,
+        maxTokens: 2000,
+        topP: 1
+      }
+    }
+  },
+  {
     id: 'image_generator',
     name: 'Generador de Imágenes',
     description: 'Crea imágenes educativas para lecciones y ejercicios',
