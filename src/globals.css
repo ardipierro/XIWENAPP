@@ -1557,5 +1557,23 @@ input:-webkit-autofill:active {
 }
 
 /* ============================================
+   ANIMACIONES PERSONALIZADAS
+   ============================================ */
+
+/* Shimmer effect para audio player */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+/* ============================================
    FIN DEL ARCHIVO - TODO CENTRALIZADO EN TAILWIND
    ============================================ */

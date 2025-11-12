@@ -123,85 +123,92 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
           </button>
         )}
 
-        {/* Panel expandible con extras */}
+        {/* Panel expandible con extras - Grid Layout Organizado */}
         {showExtras && (
-          <div className="mt-3 w-full space-y-3 animate-in slide-in-from-top-2 duration-200">
-            {/* Audio Player */}
-            {line.audioUrl && (
-              <AudioPlayer
-                audioUrl={line.audioUrl}
-                text={line.text}
-                voice={characterVoice}
-                showText={false}
-                className="text-xs"
-              />
-            )}
-
-            {/* Traducción */}
-            {line.translation && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <button
-                  onClick={() => setShowTranslation(!showTranslation)}
-                  className="w-full flex items-center justify-between text-sm font-medium text-amber-900 dark:text-amber-100"
-                >
-                  <span className="flex items-center gap-2">
-                    <Languages size={14} />
-                    Traducción al chino
-                  </span>
-                  {showTranslation ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-                {showTranslation && (
-                  <p className="mt-2 text-sm text-amber-800 dark:text-amber-200">
-                    {line.translation}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Notas */}
-            {line.notes && line.notes.length > 0 && (
-              <div className="space-y-2">
-                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  📝 Notas y vocabulario
+          <div className="mt-3 w-full animate-in slide-in-from-top-2 duration-200">
+            {/* Grid layout para organizar contenido */}
+            <div className="grid grid-cols-1 gap-3">
+              {/* Audio Player - Siempre primero */}
+              {line.audioUrl && (
+                <div className="col-span-1">
+                  <AudioPlayer
+                    audioUrl={line.audioUrl}
+                    text={line.text}
+                    voice={characterVoice}
+                    showText={false}
+                    className="text-xs"
+                  />
                 </div>
-                {line.notes.map((note, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded text-xs"
-                  >
-                    <span className="font-semibold text-purple-900 dark:text-purple-200">
-                      {note.word}:
-                    </span>{' '}
-                    <span className="text-purple-800 dark:text-purple-300">
-                      {note.definition}
-                    </span>
-                    {note.rioplatenseNote && (
-                      <div className="mt-1 text-purple-700 dark:text-purple-400">
-                        🇦🇷 {note.rioplatenseNote}
-                      </div>
+              )}
+
+              {/* Grid de 2 columnas para traducción y notas en desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Traducción */}
+                {line.translation && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <button
+                      onClick={() => setShowTranslation(!showTranslation)}
+                      className="w-full flex items-center justify-between text-sm font-medium text-amber-900 dark:text-amber-100 mb-2"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Languages size={14} />
+                        Traducción
+                      </span>
+                      {showTranslation ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+                    {showTranslation && (
+                      <p className="text-sm text-amber-800 dark:text-amber-200">
+                        {line.translation}
+                      </p>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                )}
 
-            {/* Ejercicio interactivo */}
-            {hasExercise && (
-              <div className="border-t-2 border-dashed border-gray-300 dark:border-gray-700 pt-3">
-                {line.exercise.type === 'fill_in_blank' && (
-                  <FillInBlankExercise
-                    exercise={line.exercise}
-                    onComplete={(result) => onExerciseComplete(line.exercise.exerciseId, result)}
-                  />
-                )}
-                {line.exercise.type === 'multiple_choice' && (
-                  <MultipleChoiceExercise
-                    exercise={line.exercise}
-                    onComplete={(result) => onExerciseComplete(line.exercise.exerciseId, result)}
-                  />
+                {/* Notas - Card compacto */}
+                {line.notes && line.notes.length > 0 && (
+                  <div className="p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                    <div className="text-xs font-semibold text-purple-900 dark:text-purple-200 mb-2 flex items-center gap-1">
+                      📝 Vocabulario ({line.notes.length})
+                    </div>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {line.notes.map((note, idx) => (
+                        <div key={idx} className="text-xs">
+                          <span className="font-semibold text-purple-900 dark:text-purple-200">
+                            {note.word}:
+                          </span>{' '}
+                          <span className="text-purple-800 dark:text-purple-300">
+                            {note.definition}
+                          </span>
+                          {note.rioplatenseNote && (
+                            <div className="mt-1 text-purple-700 dark:text-purple-400">
+                              🇦🇷 {note.rioplatenseNote}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
-            )}
+
+              {/* Ejercicio interactivo - Ancho completo */}
+              {hasExercise && (
+                <div className="col-span-1 border-t-2 border-dashed border-gray-300 dark:border-gray-700 pt-3">
+                  {line.exercise.type === 'fill_in_blank' && (
+                    <FillInBlankExercise
+                      exercise={line.exercise}
+                      onComplete={(result) => onExerciseComplete(line.exercise.exerciseId, result)}
+                    />
+                  )}
+                  {line.exercise.type === 'multiple_choice' && (
+                    <MultipleChoiceExercise
+                      exercise={line.exercise}
+                      onComplete={(result) => onExerciseComplete(line.exercise.exerciseId, result)}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

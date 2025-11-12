@@ -261,7 +261,7 @@ function AudioPlayer({
       }, 100);
 
       await ttsService.speak(text, {
-        rate: playbackSpeed * 0.9, // Ajustar rate según velocidad seleccionada
+        rate: playbackSpeed, // Aplicar velocidad seleccionada directamente
         volume: isMuted ? 0 : 1.0
       });
     } catch (err) {
@@ -289,41 +289,70 @@ function AudioPlayer({
 
   return (
     <div className={`audio-player ${className}`}>
-      <div className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-        {/* Play/Pause Button */}
+      <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        {/* Play/Pause Button - Hero style */}
         <button
           onClick={isPlaying ? pauseAudio : playAudio}
-          className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors"
+          className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 hover:from-zinc-600 hover:to-zinc-800 dark:hover:from-zinc-500 dark:hover:to-zinc-700 text-white rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
           title={isPlaying ? 'Pausar' : 'Reproducir'}
         >
-          {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
+          {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
         </button>
 
-        {/* Progress Bar */}
-        <div className="flex-1">
-          <div className="h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
+        {/* Progress Bar - Modernizada */}
+        <div className="flex-1 space-y-2">
+          {/* Barra de progreso con animación */}
+          <div className="relative h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden group">
+            {/* Background glow effect */}
             <div
-              className="h-full bg-blue-600 transition-all duration-200"
+              className="absolute inset-0 bg-gradient-to-r from-zinc-400 via-zinc-500 to-zinc-600 dark:from-zinc-500 dark:via-zinc-600 dark:to-zinc-700 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
               style={{ width: `${progress}%` }}
             />
+
+            {/* Progress fill con gradiente */}
+            <div
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-zinc-600 via-zinc-700 to-zinc-800 dark:from-zinc-500 dark:via-zinc-600 dark:to-zinc-700 transition-all duration-300 ease-out rounded-full"
+              style={{ width: `${progress}%` }}
+            >
+              {/* Animated shine effect */}
+              {isPlaying && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"
+                     style={{
+                       backgroundSize: '200% 100%',
+                       animation: 'shimmer 2s linear infinite'
+                     }}
+                />
+              )}
+            </div>
+
+            {/* Progress indicator dot */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white dark:bg-gray-100 rounded-full shadow-md border-2 border-zinc-700 dark:border-zinc-600 transition-all duration-300 opacity-0 group-hover:opacity-100"
+              style={{ left: `calc(${progress}% - 8px)` }}
+            />
           </div>
-          <div className="flex justify-between mt-1 text-xs text-gray-600 dark:text-gray-400">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
+
+          {/* Time indicators */}
+          <div className="flex justify-between items-center text-xs font-medium text-gray-600 dark:text-gray-400">
+            <span className="tabular-nums">{formatTime(currentTime)}</span>
+            <span className="tabular-nums">{formatTime(duration)}</span>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {useTTS && (
-            <div className="text-blue-600 dark:text-blue-400" title="Usando Text-to-Speech">
-              <Mic size={18} />
+            <div
+              className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg"
+              title="Usando Text-to-Speech con IA"
+            >
+              <Mic size={18} className="text-amber-600 dark:text-amber-400" />
             </div>
           )}
 
           <button
             onClick={resetAudio}
-            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             title="Reiniciar"
           >
             <RotateCcw size={18} className="text-gray-600 dark:text-gray-400" />
@@ -331,7 +360,7 @@ function AudioPlayer({
 
           <button
             onClick={toggleMute}
-            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             title={isMuted ? 'Activar sonido' : 'Silenciar'}
           >
             {isMuted ? (
@@ -341,11 +370,11 @@ function AudioPlayer({
             )}
           </button>
 
-          {/* Control de velocidad */}
+          {/* Control de velocidad - Mejorado */}
           <select
             value={playbackSpeed}
             onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-            className="px-2 py-1 text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100"
+            className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
             title="Velocidad de reproducción"
           >
             <option value="0.5">0.5x</option>
