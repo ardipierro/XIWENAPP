@@ -354,20 +354,39 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
 
     // Update review document with results
     console.log('[analyzeHomeworkImage] Updating review document...');
+
+    // Add IDs and teacherStatus to each correction
+    const correctionsWithIds = (analysisResult.detailedCorrections || []).map((corr, idx) => ({
+      ...corr,
+      id: `corr_${idx}`,
+      teacherStatus: 'pending'
+    }));
+
     await reviewRef.update({
-      status: 'completed',
+      status: 'pending_review',  // ✨ Changed from 'completed' - now waits for teacher approval
       aiProvider: functionConfig.provider,
       aiModel: functionConfig.model,
       transcription: analysisResult.transcription,
-      errorSummary: analysisResult.errorSummary,
+
+      // ✨ New structure: aiSuggestions with IDs and teacher status
+      aiSuggestions: correctionsWithIds,
+
+      // ✨ Keep original AI summary separate
+      aiErrorSummary: analysisResult.errorSummary,
+
+      // Keep legacy field for backward compatibility
       detailedCorrections: analysisResult.detailedCorrections || [],
+      errorSummary: analysisResult.errorSummary,
+
       overallFeedback: analysisResult.overallFeedback || '',
       suggestedGrade: analysisResult.suggestedGrade || 0,
       analyzedAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
     console.log(`[analyzeHomeworkImage] ✅ Analysis completed for review: ${reviewId}`);
+    console.log(`[analyzeHomeworkImage] Status set to: pending_review (awaiting teacher approval)`);
     console.log(`[analyzeHomeworkImage] Found ${analysisResult.errorSummary.total} errors`);
+    console.log(`[analyzeHomeworkImage] Created ${correctionsWithIds.length} correction suggestions`);
     console.log(`[analyzeHomeworkImage] Suggested grade: ${analysisResult.suggestedGrade}`);
 
     return null;
