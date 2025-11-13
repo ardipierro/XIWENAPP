@@ -410,7 +410,7 @@ function SubmissionModal({ assignment, studentId, onClose }) {
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="p-2 text-gray-600 bg-gray-100 hover:text-gray-700 hover:bg-gray-200 dark:text-gray-400 dark:bg-gray-800 dark:hover:text-gray-300 dark:hover:bg-gray-700 rounded-lg"
             >
               <X size={24} />
             </button>

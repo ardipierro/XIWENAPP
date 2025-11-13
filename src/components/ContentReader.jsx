@@ -3404,7 +3404,7 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel, 
         <h4 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
           {isEditing ? 'Editar Nota' : 'Agregar Nota'}
         </h4>
-        <button onClick={onCancel} className="p-1 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-700 rounded">
+        <button onClick={onCancel} className="p-1 text-primary-600 bg-primary-50 hover:bg-primary-100 dark:text-primary-400 dark:bg-primary-900/20 dark:hover:bg-primary-700 rounded">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -3469,7 +3469,7 @@ function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel, isEdit
         <h4 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
           {isEditing ? 'Editar Texto' : 'Agregar Texto'}
         </h4>
-        <button onClick={onCancel} className="p-1 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-700 rounded">
+        <button onClick={onCancel} className="p-1 text-primary-600 bg-primary-50 hover:bg-primary-100 dark:text-primary-400 dark:bg-primary-900/20 dark:hover:bg-primary-700 rounded">
           <X className="w-4 h-4" />
         </button>
       </div>

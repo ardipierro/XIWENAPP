@@ -72,7 +72,7 @@ function BaseButton({
         hover: { backgroundColor: 'var(--color-warning-dark)' }
       },
       ghost: {
-        backgroundColor: 'transparent',
+        backgroundColor: 'var(--color-bg-secondary)', // Fondo sutil visible
         color: 'var(--color-text-primary)',
         border: '1px solid transparent',
         hover: {
