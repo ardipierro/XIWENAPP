@@ -61,6 +61,7 @@ function InteractiveBookViewer() {
   const [exerciseResults, setExerciseResults] = useState({});
   const [viewSettings, setViewSettings] = useState({ spacing: 'normal' }); // View settings for layout
   const [showMetadataBadges, setShowMetadataBadges] = useState(true); // Mostrar/ocultar badges
+  const [characters, setCharacters] = useState([]); // Personajes del libro
   const settingsModal = useModal();
 
   // Cargar configuración de badges desde localStorage
@@ -120,6 +121,18 @@ function InteractiveBookViewer() {
       const data = await response.json();
       setBookData(data);
       logger.info('📚 Libro interactivo cargado:', data.metadata);
+
+      // Extraer personajes únicos del diálogo
+      const allCharacters = new Set();
+      data.units?.forEach(unit => {
+        unit.content?.dialogue?.characters?.forEach(char => {
+          allCharacters.add(JSON.stringify({ id: char.id, name: char.name }));
+        });
+      });
+
+      const charactersList = Array.from(allCharacters).map(char => JSON.parse(char));
+      setCharacters(charactersList);
+      logger.info('👥 Personajes encontrados:', charactersList);
     } catch (err) {
       logger.error('Error cargando libro:', err);
       setError('No se pudo cargar el libro interactivo. Asegurate de que el archivo ADE1_enriched_SAMPLE.json esté en la carpeta public/');
@@ -654,6 +667,7 @@ function InteractiveBookViewer() {
             <SettingsModal
               isOpen={settingsModal.isOpen}
               onClose={settingsModal.close}
+              characters={characters}
             />
 
             {/* Unidades */}
