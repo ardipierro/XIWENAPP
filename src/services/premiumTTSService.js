@@ -129,14 +129,8 @@ class PremiumTTSService {
    */
   async generateWithFreeAPI(text, voice = 'es-AR') {
     try {
-      // Buscar API key de VoiceRSS en localStorage
-      const apiKey = localStorage.getItem('ai_credentials_voicerss') || 'demo';
-
-      // Si solo tenemos 'demo', mejor saltar VoiceRSS (límites muy restrictivos)
-      if (apiKey === 'demo') {
-        throw new Error('VoiceRSS demo key has limits, skipping to Web Speech');
-      }
-
+      // Usar VoiceRSS API (gratuita, buena calidad)
+      const apiKey = 'demo'; // Usar 'demo' o solicitar key gratuita en voicerss.org
       const params = new URLSearchParams({
         key: apiKey,
         src: text,
