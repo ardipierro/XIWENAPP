@@ -5,8 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { BarChart3, User, Settings, LogOut } from 'lucide-react';
-import './UserMenu.css';
 
+/**
+ * UserMenu - Dropdown menu del usuario
+ * Refactorizado para usar Design System 3.0 (100% Tailwind, 0 CSS custom)
+ */
 function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
   const navigate = useNavigate();
   const menuRef = useRef(null);
@@ -57,51 +60,92 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
   const isStudent = ['student', 'listener', 'trial'].includes(userRole);
 
   return (
-    <div className="dropdown user-menu" ref={menuRef}>
-      <div className="dropdown-options">
+    <div
+      className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg overflow-hidden z-50"
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        border: '1px solid var(--color-border)'
+      }}
+      ref={menuRef}
+    >
+      <div className="py-1">
         {/* Opciones de navegación */}
         {isStudent && (
           <button
-            className="dropdown-option menu-item"
+            className="
+              w-full px-4 py-2.5 flex items-center gap-3 text-left
+              hover:bg-opacity-80 transition-colors duration-150
+            "
+            style={{
+              backgroundColor: 'transparent',
+              color: 'var(--color-text-primary)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             onClick={() => alert('Funcionalidad en desarrollo')}
           >
-            <BarChart3 size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
-            <div className="dropdown-option-content">
-              <div className="dropdown-option-title menu-item-text">Mi Progreso</div>
-            </div>
+            <BarChart3 size={18} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
+            <span className="font-medium">Mi Progreso</span>
           </button>
         )}
 
-        {/* Configuración */}
+        {/* Ver Perfil */}
         <button
-          className="dropdown-option menu-item"
+          className="
+            w-full px-4 py-2.5 flex items-center gap-3 text-left
+            hover:bg-opacity-80 transition-colors duration-150
+          "
+          style={{
+            backgroundColor: 'transparent',
+            color: 'var(--color-text-primary)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           onClick={onViewProfile}
         >
-          <User size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
-          <div className="dropdown-option-content">
-            <div className="dropdown-option-title menu-item-text">Ver Perfil</div>
-          </div>
+          <User size={18} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
+          <span className="font-medium">Ver Perfil</span>
         </button>
 
+        {/* Configuración */}
         <button
-          className="dropdown-option menu-item"
+          className="
+            w-full px-4 py-2.5 flex items-center gap-3 text-left
+            hover:bg-opacity-80 transition-colors duration-150
+          "
+          style={{
+            backgroundColor: 'transparent',
+            color: 'var(--color-text-primary)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           onClick={() => alert('Funcionalidad de configuración en desarrollo')}
         >
-          <Settings size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
-          <div className="dropdown-option-content">
-            <div className="dropdown-option-title menu-item-text">Configuración</div>
-          </div>
+          <Settings size={18} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
+          <span className="font-medium">Configuración</span>
         </button>
+
+        {/* Separador */}
+        <div className="my-1" style={{ borderTop: '1px solid var(--color-border)' }}></div>
 
         {/* Cerrar sesión */}
         <button
-          className="dropdown-option menu-item logout-item"
+          className="
+            w-full px-4 py-2.5 flex items-center gap-3 text-left
+            hover:bg-opacity-80 transition-colors duration-150
+          "
+          style={{
+            backgroundColor: 'transparent',
+            color: 'var(--color-error)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--color-error-bg)';
+          }}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           onClick={handleLogout}
         >
-          <LogOut size={18} strokeWidth={2} className="dropdown-icon menu-item-icon" />
-          <div className="dropdown-option-content">
-            <div className="dropdown-option-title menu-item-text">Cerrar Sesión</div>
-          </div>
+          <LogOut size={18} strokeWidth={2} />
+          <span className="font-medium">Cerrar Sesión</span>
         </button>
       </div>
     </div>

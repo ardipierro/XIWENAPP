@@ -1,9 +1,9 @@
 /**
  * @fileoverview Reaction Picker Component - Quick emoji reactions
  * @module components/ReactionPicker
+ *
+ * Refactorizado para usar Design System 3.0 (100% Tailwind, 0 CSS custom)
  */
-
-import './ReactionPicker.css';
 
 const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🎉', '🔥', '👏'];
 
@@ -14,11 +14,18 @@ const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🎉', '🔥
  */
 function ReactionPicker({ onSelect }) {
   return (
-    <div className="reaction-picker">
+    <div className="flex flex-wrap gap-2 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
       {QUICK_REACTIONS.map((emoji) => (
         <button
           key={emoji}
-          className="reaction-btn-quick"
+          className="
+            w-10 h-10 flex items-center justify-center rounded-lg text-2xl
+            hover:scale-110 active:scale-95 transition-all duration-150
+          "
+          style={{
+            backgroundColor: 'var(--color-bg-primary)',
+            border: '1px solid var(--color-border)'
+          }}
           onClick={() => onSelect(emoji)}
           title={`Reaccionar con ${emoji}`}
         >
