@@ -88,7 +88,7 @@ function DialogueExtras({
       {/* Contenido - TODOS con mismo wrapper p-6 */}
       <div className="animate-in fade-in duration-200">
         {activeTab === 'audio' && (
-          <div className="mb-16">
+          <div className="mb-32">
             <AudioPlayer
               audioUrl={audioUrl}
               text={text}
