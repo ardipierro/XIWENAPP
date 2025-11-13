@@ -98,7 +98,6 @@ import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
 import SettingsPanel from './SettingsPanel';
 import HomeworkReviewPanel from './HomeworkReviewPanel';
-import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ClassSessionModal from './ClassSessionModal';
 import UnifiedCalendar from './UnifiedCalendar';
