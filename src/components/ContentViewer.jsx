@@ -41,9 +41,14 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
 
   /**
    * Detecta el tipo real del contenido
-   * @returns {string} Tipo detectado: 'exercise', 'unit', 'video', 'link', 'text'
+   * @returns {string} Tipo detectado: 'course', 'container', 'exercise', 'unit', 'video', 'link', 'text'
    */
   const detectContentType = () => {
+    // Si es curso o contenedor con childContentIds
+    if (content.type === 'course' || content.type === 'container') {
+      return content.type;
+    }
+
     // Si es video de YouTube
     if (content.type === 'video' && content.body?.includes('youtube.com')) {
       return 'video';
@@ -367,6 +372,101 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
   };
 
   /**
+   * Renderiza un curso o contenedor con lista de contenidos
+   */
+  const renderCourse = () => {
+    const childContentIds = content.metadata?.childContentIds || [];
+    const isCourse = content.type === 'course';
+
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <BookOpen size={24} strokeWidth={2} />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-100 mb-2">
+                {isCourse ? '🎓 Curso' : '📦 Contenedor'}
+              </h3>
+              {content.body && (
+                <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                  {content.body}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Contenidos incluidos */}
+        <div>
+          <h4 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+            <BookMarked size={20} strokeWidth={2} />
+            Contenidos Incluidos ({childContentIds.length})
+          </h4>
+
+          {childContentIds.length > 0 ? (
+            <div className="space-y-3">
+              {childContentIds.map((childId, index) => (
+                <div
+                  key={childId}
+                  className="flex items-center gap-3 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+                >
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 flex items-center justify-center font-semibold text-sm">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-white truncate">
+                      ID: {childId}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      Contenido asignado
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <CheckCircle size={18} className="text-green-500" strokeWidth={2} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-700">
+              <AlertCircle size={32} className="mx-auto mb-3 text-zinc-400" strokeWidth={1.5} />
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                No hay contenidos asignados a este {isCourse ? 'curso' : 'contenedor'}
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                Edita este contenido y ve al tab "Asignar Contenidos" para agregar items
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Metadatos adicionales */}
+        {content.metadata && Object.keys(content.metadata).length > 1 && (
+          <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+            <h5 className="text-sm font-semibold text-zinc-900 dark:text-white mb-2">
+              Información Adicional
+            </h5>
+            <dl className="grid grid-cols-2 gap-2 text-xs">
+              {Object.entries(content.metadata).map(([key, value]) => {
+                if (key === 'childContentIds') return null;
+                return (
+                  <div key={key}>
+                    <dt className="text-zinc-500 dark:text-zinc-400 font-medium">{key}:</dt>
+                    <dd className="text-zinc-700 dark:text-zinc-300">{String(value)}</dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  /**
    * Renderiza texto plano
    */
   const renderText = () => {
@@ -386,6 +486,10 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
   let renderedContent;
   try {
     switch (contentType) {
+      case 'course':
+      case 'container':
+        renderedContent = renderCourse();
+        break;
       case 'exercise':
         renderedContent = renderExercise();
         break;
