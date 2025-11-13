@@ -40,16 +40,29 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
   const hasExtras = line.notes?.length > 0 || line.translation || line.audioUrl;
   const hasExercise = line.interactiveType && line.exercise;
 
+  // ✅ Avatares SIEMPRE visibles (sin configuración)
+  // Colores según personaje (hash simple del nombre)
+  const getAvatarColor = (name) => {
+    const colors = [
+      'from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700',
+      'from-purple-400 to-purple-600 dark:from-purple-500 dark:to-purple-700',
+      'from-pink-400 to-pink-600 dark:from-pink-500 dark:to-pink-700',
+      'from-green-400 to-green-600 dark:from-green-500 dark:to-green-700',
+      'from-orange-400 to-orange-600 dark:from-orange-500 dark:to-orange-700',
+      'from-teal-400 to-teal-600 dark:from-teal-500 dark:to-teal-700'
+    ];
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  };
+
   return (
-    <div className={`flex gap-3 mb-4 ${isRight ? 'flex-row-reverse' : 'flex-row'}`}>
-      {/* Avatar - AUMENTADO 33% */}
-      {settings.showAvatars && (
-        <div className="flex-shrink-0">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-600 dark:to-blue-800 flex items-center justify-center border-3 border-white dark:border-gray-800 shadow-lg">
-            <User size={32} className="text-white" />
-          </div>
+    <div className={`flex gap-4 mb-6 ${isRight ? 'flex-row-reverse' : 'flex-row'}`}>
+      {/* Avatar - SIEMPRE VISIBLE, colores por personaje */}
+      <div className="flex-shrink-0">
+        <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${getAvatarColor(line.character)} flex items-center justify-center border-3 border-white dark:border-gray-800 shadow-lg`}>
+          <User size={32} className="text-white" />
         </div>
-      )}
+      </div>
 
       {/* Burbuja de diálogo */}
       <div className={`flex-1 max-w-[75%] ${isRight ? 'items-end' : 'items-start'} flex flex-col`}>
@@ -131,17 +144,18 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
           </button>
         )}
 
-        {/* Panel expandible con extras - Accordion Organizado */}
+        {/* Panel expandible con extras - Accordion con ESPACIO REAL */}
         {showExtras && (
-          <div className="mt-3 w-full space-y-3 animate-in slide-in-from-top-2 duration-200">
+          <div className="mt-4 w-full space-y-6 animate-in slide-in-from-top-2 duration-200">
             {/* Audio Player - SIEMPRE VISIBLE sin accordion */}
             {line.audioUrl && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-blue-200 dark:border-blue-800 p-3">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-blue-200 dark:border-blue-800 p-4 shadow-sm">
                 <AudioPlayer
                   audioUrl={line.audioUrl}
                   text={line.text}
                   voiceConfig={voiceConfig}
                   characterName={line.character}
+                  characters={characters}
                   showText={false}
                   className="text-xs"
                 />
