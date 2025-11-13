@@ -55,7 +55,7 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-none ${isViewingAs ? 'has-banner' : ''}`}>
+    <div className={`dashboard-layout min-h-screen bg-gray-50 dark:bg-gray-900 transition-none ${isViewingAs ? 'has-banner' : ''}`}>
       {/* Banner "Ver como" (solo visible cuando está activo) */}
       <ViewAsBanner />
 
@@ -67,6 +67,7 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
         sidebarOpen={sidebarOpen}
         isAdmin={isAdmin}
         onMenuAction={onMenuAction}
+        hasBanner={isViewingAs}
       />
 
       {/* Menú Lateral */}
@@ -77,12 +78,15 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
         onMenuAction={onMenuAction}
         currentScreen={currentScreen}
         isAdmin={isAdmin}
+        hasBanner={isViewingAs}
       />
 
       {/* Contenido Principal */}
       <main
         className={`
-          ${isViewingAs ? 'mt-[108px] h-[calc(100vh-108px)] md:mt-[102px] md:h-[calc(100vh-102px)]' : 'mt-16 h-[calc(100vh-64px)]'}
+          ${isViewingAs
+            ? 'mt-[86px] md:mt-[100px] lg:mt-[108px] h-[calc(100vh-86px)] md:h-[calc(100vh-100px)] lg:h-[calc(100vh-108px)]'
+            : 'mt-12 md:mt-14 lg:mt-16 h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] lg:h-[calc(100vh-64px)]'}
           ${sidebarOpen ? 'ml-0 lg:ml-[200px]' : 'ml-0'}
           overflow-y-auto overflow-x-hidden
           transition-[margin-left] duration-200 ease-in-out
