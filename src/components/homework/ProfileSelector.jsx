@@ -169,23 +169,27 @@ export default function ProfileSelector({
               const selected = profiles.find(p => p.id === selectedProfileId);
               if (!selected) return null;
 
+              const settings = selected.settings || {};
+              const strictness = settings.strictness || 'moderate';
+              const checks = settings.checks || [];
+
               return (
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <strong>Severidad:</strong>
                     <BaseBadge
                       variant={
-                        selected.strictness === 'lenient' ? 'success' :
-                        selected.strictness === 'strict' ? 'danger' : 'warning'
+                        strictness === 'lenient' ? 'success' :
+                        strictness === 'strict' ? 'danger' : 'warning'
                       }
                       size="sm"
                     >
-                      {selected.strictness === 'lenient' ? '🟢 Leniente' :
-                       selected.strictness === 'strict' ? '🔴 Estricto' : '🟡 Moderado'}
+                      {strictness === 'lenient' ? '🟢 Leniente' :
+                       strictness === 'strict' ? '🔴 Estricto' : '🟡 Moderado'}
                     </BaseBadge>
                   </div>
                   <div>
-                    <strong>Revisa:</strong> {selected.checkTypes.join(', ')}
+                    <strong>Revisa:</strong> {checks.join(', ')}
                   </div>
                   {selected.description && (
                     <div>
