@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock, Layers } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock, Layers, ArrowUpDown } from 'lucide-react';
 import { useContent } from '../hooks/useContent.js';
 import ContentRepository from '../services/ContentRepository.js';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse.js';
@@ -20,6 +20,7 @@ import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import BaseButton from './common/BaseButton';
 import ContentViewer from './ContentViewer';
+import ContentOrderEditor from './ContentOrderEditor';
 
 /**
  * Componente para gestión de contenido educativo
@@ -54,6 +55,9 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
   const [uploadingImage, setUploadingImage] = useState(false);
   const [activeTab, setActiveTab] = useState('general'); // 'general' or 'config'
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showOrderEditor, setShowOrderEditor] = useState(false);
+  const [childContents, setChildContents] = useState([]);
+  const [loadingChildren, setLoadingChildren] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     type: 'lesson',
@@ -266,6 +270,65 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       // Incluso si falla, limpiar la URL del formulario
       setFormData({ ...formData, imageUrl: '' });
       alert('Imagen removida del formulario');
+    }
+  };
+
+  /**
+   * Carga los contenidos hijos para poder reordenarlos
+   */
+  const loadChildContents = async () => {
+    if (!formData.childContentIds || formData.childContentIds.length === 0) {
+      setChildContents([]);
+      return;
+    }
+
+    try {
+      setLoadingChildren(true);
+      const loadedContents = [];
+
+      for (const childId of formData.childContentIds) {
+        const result = await ContentRepository.getById(childId);
+        if (result.success && result.data) {
+          loadedContents.push(result.data);
+        }
+      }
+
+      setChildContents(loadedContents);
+      logger.debug(`Cargados ${loadedContents.length} contenidos hijos`, 'ContentManager');
+    } catch (error) {
+      logger.error('Error cargando contenidos hijos', error, 'ContentManager');
+      alert('Error al cargar contenidos: ' + error.message);
+    } finally {
+      setLoadingChildren(false);
+    }
+  };
+
+  /**
+   * Abre el modal de reordenamiento
+   */
+  const handleOpenOrderEditor = async () => {
+    await loadChildContents();
+    setShowOrderEditor(true);
+  };
+
+  /**
+   * Callback después de guardar el orden
+   */
+  const handleOrderSaved = async () => {
+    // Recargar el contenido para obtener el nuevo orden
+    await refetch();
+
+    // Recargar el selectedContent si existe
+    if (selectedContent) {
+      const result = await ContentRepository.getById(selectedContent.id);
+      if (result.success) {
+        setSelectedContent(result.data);
+        // Actualizar formData con el nuevo metadata
+        setFormData({
+          ...formData,
+          childContentIds: result.data.metadata?.childContentIds || []
+        });
+      }
     }
   };
 
@@ -1106,10 +1169,25 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                     </div>
 
                     {formData.childContentIds.length > 0 && (
-                      <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                        <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                          {formData.childContentIds.length} contenido(s) seleccionado(s)
-                        </p>
+                      <div className="mt-4 space-y-3">
+                        <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                          <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                            {formData.childContentIds.length} contenido(s) seleccionado(s)
+                          </p>
+                        </div>
+
+                        {/* Botón Reordenar Contenidos */}
+                        {formData.childContentIds.length >= 2 && (
+                          <BaseButton
+                            variant="outline"
+                            icon={ArrowUpDown}
+                            onClick={handleOpenOrderEditor}
+                            disabled={loadingChildren}
+                            className="w-full"
+                          >
+                            {loadingChildren ? 'Cargando...' : 'Reordenar Contenidos'}
+                          </BaseButton>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1181,6 +1259,17 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
         }}
         onCancel={() => setShowConfirmDelete(false)}
       />
+
+      {/* Modal de reordenamiento de contenidos */}
+      {selectedContent && (
+        <ContentOrderEditor
+          course={selectedContent}
+          contents={childContents}
+          isOpen={showOrderEditor}
+          onClose={() => setShowOrderEditor(false)}
+          onSave={handleOrderSaved}
+        />
+      )}
     </div>
   );
 }

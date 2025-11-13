@@ -90,6 +90,26 @@ function CoursePlayer({ courseId, userId, onBack }) {
         }
       }
 
+      // Aplicar orden guardado en metadata.contentOrder si existe
+      const contentOrder = courseData.metadata?.contentOrder;
+      if (contentOrder && Array.isArray(contentOrder) && contentOrder.length > 0) {
+        loadedContents.sort((a, b) => {
+          const indexA = contentOrder.indexOf(a.id);
+          const indexB = contentOrder.indexOf(b.id);
+
+          // Si ambos están en el orden, usar ese orden
+          if (indexA !== -1 && indexB !== -1) {
+            return indexA - indexB;
+          }
+          // Si solo uno está, poner el que está primero
+          if (indexA !== -1) return -1;
+          if (indexB !== -1) return 1;
+          // Si ninguno está, mantener orden actual
+          return 0;
+        });
+        logger.debug(`Contenidos ordenados según metadata.contentOrder`, 'CoursePlayer');
+      }
+
       setContents(loadedContents);
       logger.info(`Curso cargado: ${courseData.title} con ${loadedContents.length} contenidos`, 'CoursePlayer');
 
