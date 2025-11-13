@@ -30,7 +30,8 @@ import {
   BaseLoading,
   BaseAlert,
   BaseBadge,
-  BaseEmptyState
+  BaseEmptyState,
+  ImageLightbox
 } from './common';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
@@ -230,6 +231,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
     errors: true,
     corrections: true
   });
+  const [showImageLightbox, setShowImageLightbox] = useState(false);
 
   const handleApprove = async () => {
     try {
@@ -312,7 +314,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
       isOpen={true}
       onClose={onClose}
       title="Revisar Corrección de IA"
-      size="full"
+      size="xl"
     >
       <div className="space-y-6">
         {error && (
@@ -349,11 +351,19 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
 
         {/* Image */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <ImageIcon size={18} strokeWidth={2} />
-            Imagen de la Tarea
-          </h3>
-          <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <ImageIcon size={18} strokeWidth={2} />
+              Imagen de la Tarea
+            </h3>
+            <BaseBadge variant="info" size="sm">
+              Click para ampliar
+            </BaseBadge>
+          </div>
+          <div
+            className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+            onClick={() => setShowImageLightbox(true)}
+          >
             <img
               src={review.imageUrl}
               alt="Tarea del estudiante"
@@ -532,6 +542,14 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
           </BaseButton>
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        isOpen={showImageLightbox}
+        onClose={() => setShowImageLightbox(false)}
+        imageUrl={review.imageUrl}
+        alt="Tarea del estudiante"
+      />
     </BaseModal>
   );
 }
