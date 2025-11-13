@@ -22,18 +22,20 @@ import {
   ZoomOut,
   Eye,
   EyeOff,
-  Image
+  Image,
+  User
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge } from './common';
 import ViewCustomizer from './interactive-book/ViewCustomizer';
 import TTSSettings from './interactive-book/TTSSettings';
 import AIImageGenerator from './interactive-book/AIImageGenerator';
+import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
 
 /**
  * Modal de configuración completo con tabs
  */
-function SettingsModal({ isOpen, onClose }) {
+function SettingsModal({ isOpen, onClose, characters = [] }) {
   const [activeTab, setActiveTab] = useState('visual');
   const [displaySettings, setDisplaySettings] = useState({
     zoom: 100, // 50-200%
@@ -93,6 +95,42 @@ function SettingsModal({ isOpen, onClose }) {
     }
   };
 
+  // Aplicar preset de velocidad con validación
+  const applyPresetRate = (rate, presetName) => {
+    const saved = localStorage.getItem('xiwen_character_voices');
+
+    if (!saved) {
+      alert('⚠️ Aún no hay personajes configurados.\n\nPrimero carga un libro interactivo para que se detecten los personajes automáticamente.');
+      return;
+    }
+
+    try {
+      const configs = JSON.parse(saved);
+      const characterIds = Object.keys(configs);
+
+      if (characterIds.length === 0) {
+        alert('⚠️ No hay personajes configurados aún.\n\nAbre un libro interactivo primero para que se carguen los personajes.');
+        return;
+      }
+
+      // Aplicar velocidad a todos los personajes
+      characterIds.forEach(charId => {
+        if (configs[charId]?.voiceConfig) {
+          configs[charId].voiceConfig.rate = rate;
+        }
+      });
+
+      localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+      window.dispatchEvent(new Event('xiwen_settings_changed'));
+
+      // Feedback de éxito
+      console.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
+    } catch (err) {
+      console.error('Error aplicando preset:', err);
+      alert('❌ Error al aplicar el preset. Por favor intenta nuevamente.');
+    }
+  };
+
   const tabs = [
     {
       id: 'visual',
@@ -111,6 +149,12 @@ function SettingsModal({ isOpen, onClose }) {
       label: 'Voz IA',
       icon: Volume2,
       description: 'Text-to-Speech'
+    },
+    {
+      id: 'characters',
+      label: 'Personajes',
+      icon: User,
+      description: 'Voces por personaje'
     },
     {
       id: 'images',
@@ -268,6 +312,11 @@ function SettingsModal({ isOpen, onClose }) {
           {/* TAB: TTS (directo, sin botón) */}
           {activeTab === 'tts' && (
             <TTSSettings alwaysOpen={true} />
+          )}
+
+          {/* TAB: CHARACTERS - Voces por personaje */}
+          {activeTab === 'characters' && (
+            <CharacterVoiceManager characters={characters} alwaysOpen={true} />
           )}
 
           {/* TAB: IMAGES IA */}
@@ -461,51 +510,117 @@ function SettingsModal({ isOpen, onClose }) {
           {activeTab === 'practice' && (
             <div className="space-y-6">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Configuración de Práctica
+                Presets de Escucha
               </h3>
 
-              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Mic size={20} className="text-amber-600 dark:text-amber-400" />
-                  <span className="font-semibold text-amber-900 dark:text-amber-100">
-                    Próximamente: Práctica de Pronunciación
-                  </span>
-                </div>
-                <p className="text-sm text-amber-800 dark:text-amber-200">
-                  • Reconocimiento de voz con Speech Recognition API<br />
-                  • Evaluación de pronunciación<br />
-                  • Comparación con audio nativo<br />
-                  • Feedback en tiempo real
-                </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Aplica configuraciones de velocidad predefinidas para diferentes estilos de aprendizaje.
+                Estos presets se aplican globalmente a todos los personajes.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Preset: Estándar */}
+                <button
+                  onClick={() => applyPresetRate(1.0, 'Estándar')}
+                  className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                      <Gauge size={24} className="text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white">Estándar</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">1.0x normal</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Velocidad normal, ideal para la mayoría de los usuarios.
+                  </p>
+                </button>
+
+                {/* Preset: Principiante */}
+                <button
+                  onClick={() => applyPresetRate(0.75, 'Principiante')}
+                  className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
+                      <span className="text-2xl">🐌</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white">Principiante</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">0.75x lento</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Más lento para entender mejor. Perfecto para comenzar.
+                  </p>
+                </button>
+
+                {/* Preset: Rápido */}
+                <button
+                  onClick={() => applyPresetRate(1.25, 'Rápido')}
+                  className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center group-hover:bg-orange-200 dark:group-hover:bg-orange-800/50 transition-colors">
+                      <span className="text-2xl">⚡</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white">Rápido</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">1.25x rápido</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Para usuarios avanzados que quieren practicar a mayor velocidad.
+                  </p>
+                </button>
+
+                {/* Preset: Narración */}
+                <button
+                  onClick={() => applyPresetRate(0.9, 'Narración')}
+                  className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                      <span className="text-2xl">📖</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white">Narración</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">0.9x suave</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Estilo audiolibro, relajado y fácil de seguir.
+                  </p>
+                </button>
               </div>
 
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Gauge size={20} className="text-blue-600 dark:text-blue-400" />
-                  <span className="font-semibold text-blue-900 dark:text-blue-100">
-                    Próximamente: Control de Velocidad de Audio
-                  </span>
-                </div>
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  • Velocidades: 0.5x, 0.75x, 1x, 1.25x, 1.5x, 2x<br />
-                  • Sin cambio de pitch<br />
-                  • Ideal para principiantes
+                <p className="text-sm text-blue-900 dark:text-blue-100">
+                  💡 <strong>Tip:</strong> Los presets aplican la velocidad globalmente. Para configurar cada personaje individualmente, usa la pestaña "Personajes".
                 </p>
               </div>
 
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Bookmark size={20} className="text-green-600 dark:text-green-400" />
-                  <span className="font-semibold text-green-900 dark:text-green-100">
-                    Próximamente: Notas y Marcadores
-                  </span>
+              {/* Próximas funcionalidades */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h4 className="text-md font-bold text-gray-900 dark:text-white mb-3">
+                  Próximamente
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
+                    <Mic size={18} className="flex-shrink-0 mt-0.5" />
+                    <div>
+                      <strong>Práctica de Pronunciación:</strong> Reconocimiento de voz y feedback en tiempo real
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
+                    <Bookmark size={18} className="flex-shrink-0 mt-0.5" />
+                    <div>
+                      <strong>Notas y Marcadores:</strong> Guarda tus frases favoritas y crea vocabulario personalizado
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-green-800 dark:text-green-200">
-                  • Marcar frases favoritas<br />
-                  • Agregar notas personales<br />
-                  • Crear vocabulario personalizado<br />
-                  • Exportar a PDF/TXT
-                </p>
               </div>
             </div>
           )}
@@ -561,7 +676,13 @@ function SettingsModal({ isOpen, onClose }) {
 
 SettingsModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  characters: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired
+    })
+  )
 };
 
 export default SettingsModal;
