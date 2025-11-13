@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock, Layers, ArrowUpDown } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock, Layers, ArrowUpDown, Palette } from 'lucide-react';
 import { useContent } from '../hooks/useContent.js';
 import ContentRepository from '../services/ContentRepository.js';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse.js';
@@ -21,6 +21,7 @@ import SearchBar from './common/SearchBar';
 import BaseButton from './common/BaseButton';
 import ContentViewer from './ContentViewer';
 import ContentOrderEditor from './ContentOrderEditor';
+import ContentStyleEditor from './ContentStyleEditor';
 
 /**
  * Componente para gestión de contenido educativo
@@ -64,7 +65,8 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
     body: '',
     courseIds: [], // Changed from courseId to courseIds array
     imageUrl: '',
-    childContentIds: [] // Para cursos/containers: IDs de contenidos incluidos
+    childContentIds: [], // Para cursos/containers: IDs de contenidos incluidos
+    styles: null // Estilos visuales personalizados
   });
 
   // Cargar relaciones de cursos cuando cambia el contenido
@@ -114,7 +116,8 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       body: formData.body,
       createdBy: user.uid,
       metadata: {
-        ...(formData.childContentIds.length > 0 && { childContentIds: formData.childContentIds })
+        ...(formData.childContentIds.length > 0 && { childContentIds: formData.childContentIds }),
+        ...(formData.styles && { styles: formData.styles })
       }
     });
 
@@ -128,7 +131,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       await refetch();
 
       setShowCreateModal(false);
-      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '', childContentIds: [] });
+      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '', childContentIds: [], styles: null });
 
       logger.info('Contenido creado exitosamente', 'ContentManager');
     } else {
@@ -159,7 +162,8 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
           body: contentItem.body || '',
           courseIds: courseIds,
           imageUrl: contentItem.imageUrl || '',
-          childContentIds: contentItem.metadata?.childContentIds || []
+          childContentIds: contentItem.metadata?.childContentIds || [],
+          styles: contentItem.metadata?.styles || null
         });
         setShowEditModal(true);
       } else {
@@ -185,7 +189,8 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       body: formData.body,
       metadata: {
         ...selectedContent.metadata,
-        ...(formData.childContentIds.length > 0 && { childContentIds: formData.childContentIds })
+        ...(formData.childContentIds.length > 0 && { childContentIds: formData.childContentIds }),
+        ...(formData.styles && { styles: formData.styles })
       }
     });
 
@@ -198,7 +203,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
 
       setShowEditModal(false);
       setSelectedContent(null);
-      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '', childContentIds: [] });
+      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '', childContentIds: [], styles: null });
 
       logger.info('Contenido actualizado exitosamente', 'ContentManager');
     } else {
@@ -971,6 +976,22 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                   </button>
                 )}
                 <button
+                  onClick={() => setActiveTab('styles')}
+                  className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                  style={{
+                    borderColor: activeTab === 'styles' ? 'var(--color-border)' : 'transparent',
+                    color: activeTab === 'styles' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== 'styles') e.currentTarget.style.color = 'var(--color-text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== 'styles') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                  }}
+                >
+                  <Palette size={18} strokeWidth={2} className="inline-icon" /> Estilos
+                </button>
+                <button
                   onClick={() => setActiveTab('config')}
                   className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
                   style={{
@@ -1190,6 +1211,19 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                         )}
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* TAB: ESTILOS */}
+                {activeTab === 'styles' && (
+                  <div className="pt-6">
+                    <ContentStyleEditor
+                      initialStyles={formData.styles}
+                      onSave={(styles) => {
+                        setFormData({ ...formData, styles });
+                        logger.info('Estilos actualizados en formData', 'ContentManager');
+                      }}
+                    />
                   </div>
                 )}
 
