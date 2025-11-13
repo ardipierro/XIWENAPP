@@ -62,7 +62,7 @@ import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
 import ContentManager from './ContentManager';
-import ClassManager from './ClassManager';
+import ClassSessionManager from './ClassSessionManager';
 import ExerciseManager from './ExerciseManager';
 import UnifiedContentManager from './UnifiedContentManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
