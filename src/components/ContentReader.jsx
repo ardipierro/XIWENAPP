@@ -31,7 +31,8 @@ import {
   Italic,
   Underline as UnderlineIcon,
   Plus,
-  Pipette
+  Pipette,
+  Eraser
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import {
@@ -97,6 +98,20 @@ const FONTS = {
   georgia: { name: 'Georgia', style: 'Georgia, serif' },
   courier: { name: 'Courier', style: 'Courier New, monospace' },
   verdana: { name: 'Verdana', style: 'Verdana, sans-serif' },
+};
+
+/**
+ * Templates de notas predefinidos
+ */
+const NOTE_TEMPLATES = {
+  blank: { name: 'En blanco', icon: '📝', text: '' },
+  important: { name: 'Importante', icon: '⭐', text: '⭐ IMPORTANTE: ' },
+  question: { name: 'Pregunta', icon: '❓', text: '❓ Pregunta: ' },
+  idea: { name: 'Idea', icon: '💡', text: '💡 Idea: ' },
+  todo: { name: 'Tarea', icon: '✅', text: '✅ TODO: ' },
+  warning: { name: 'Advertencia', icon: '⚠️', text: '⚠️ Advertencia: ' },
+  remember: { name: 'Recordar', icon: '🔔', text: '🔔 Recordar: ' },
+  summary: { name: 'Resumen', icon: '📋', text: '📋 Resumen: ' },
 };
 
 /**
@@ -200,6 +215,8 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const [drawingPoints, setDrawingPoints] = useState([]);
   const [canvasHistory, setCanvasHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isErasing, setIsErasing] = useState(false);
+  const [eraserSize, setEraserSize] = useState(20);
 
   // Estados de drag & resize
   const [draggingNote, setDraggingNote] = useState(null);
@@ -212,6 +229,118 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const contentRef = useRef(null);
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
+
+  /**
+   * Cargar colores personalizados desde localStorage
+   */
+  useEffect(() => {
+    try {
+      const savedColors = localStorage.getItem('contentReader_customColors');
+      if (savedColors) {
+        setCustomColors(JSON.parse(savedColors));
+      }
+    } catch (error) {
+      logger.error('Error loading custom colors:', error, 'ContentReader');
+    }
+  }, []);
+
+  /**
+   * Guardar colores personalizados en localStorage
+   */
+  useEffect(() => {
+    try {
+      localStorage.setItem('contentReader_customColors', JSON.stringify(customColors));
+    } catch (error) {
+      logger.error('Error saving custom colors:', error, 'ContentReader');
+    }
+  }, [customColors]);
+
+  /**
+   * Keyboard Shortcuts
+   */
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Prevenir shortcuts en inputs/textareas (excepto contentEditable)
+      if ((e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') && !e.target.isContentEditable) {
+        return;
+      }
+
+      const isCtrl = e.ctrlKey || e.metaKey;
+
+      // CTRL+S - Guardar anotaciones
+      if (isCtrl && e.key === 's') {
+        e.preventDefault();
+        if (!readOnly) handleSaveAnnotations();
+        return;
+      }
+
+      // CTRL+Z - Undo (canvas)
+      if (isCtrl && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (selectedTool === 'draw') handleUndo();
+        return;
+      }
+
+      // CTRL+SHIFT+Z o CTRL+Y - Redo (canvas)
+      if (isCtrl && ((e.key === 'z' && e.shiftKey) || e.key === 'y')) {
+        e.preventDefault();
+        if (selectedTool === 'draw') handleRedo();
+        return;
+      }
+
+      // CTRL+B - Bold (en edit mode)
+      if (isCtrl && e.key === 'b') {
+        e.preventDefault();
+        if (isEditMode && !showOriginal) handleBold();
+        return;
+      }
+
+      // CTRL+I - Italic (en edit mode)
+      if (isCtrl && e.key === 'i') {
+        e.preventDefault();
+        if (isEditMode && !showOriginal) handleItalic();
+        return;
+      }
+
+      // CTRL+U - Underline (en edit mode)
+      if (isCtrl && e.key === 'u') {
+        e.preventDefault();
+        if (isEditMode && !showOriginal) handleUnderline();
+        return;
+      }
+
+      // ESC - Cerrar modales/forms
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (showInstructionsModal) setShowInstructionsModal(false);
+        if (showNoteForm) {
+          setShowNoteForm(false);
+          setCurrentNote({ text: '', position: null });
+          setEditingNote(null);
+        }
+        if (showTextForm) {
+          setShowTextForm(false);
+          setCurrentText({ text: '', position: null });
+          setEditingText(null);
+        }
+        if (showAdvancedColorPicker) setShowAdvancedColorPicker(false);
+        return;
+      }
+
+      // 1-6 - Seleccionar herramientas (solo si no está en input)
+      if (!isEditMode && e.target === document.body) {
+        if (e.key === '1') setSelectedTool('select');
+        if (e.key === '2') setSelectedTool('highlight');
+        if (e.key === '3') setSelectedTool('note');
+        if (e.key === '4') setSelectedTool('draw');
+        if (e.key === '5') setSelectedTool('text');
+        if (e.key === 'e') toggleEraser();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isEditMode, showOriginal, selectedTool, showInstructionsModal, showNoteForm, showTextForm, showAdvancedColorPicker, readOnly, isErasing]);
 
   /**
    * Cargar anotaciones desde Firebase
@@ -685,7 +814,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   }, []);
 
   /**
-   * Canvas - Dibujo con soporte Apple Pencil
+   * Canvas - Dibujo con soporte Apple Pencil y Borrador
    */
   const handleCanvasPointerDown = (e) => {
     if (selectedTool !== 'draw') return;
@@ -701,15 +830,19 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     // Capturar el puntero para seguir recibiendo eventos
     canvas.setPointerCapture(e.pointerId);
 
-    // Obtener presión (0.0 - 1.0) - Apple Pencil la soporta
-    const pressure = e.pressure || 0.5; // Default 0.5 si no hay presión
-
-    setIsDrawing(true);
-    setDrawingPoints([[x, y, pressure]]);
+    if (isErasing) {
+      // Modo borrador
+      handleEraseDrawing(x, y);
+    } else {
+      // Modo dibujo normal
+      const pressure = e.pressure || 0.5; // Default 0.5 si no hay presión
+      setIsDrawing(true);
+      setDrawingPoints([[x, y, pressure]]);
+    }
   };
 
   const handleCanvasPointerMove = (e) => {
-    if (!isDrawing || selectedTool !== 'draw') return;
+    if (selectedTool !== 'draw') return;
 
     e.preventDefault();
 
@@ -717,10 +850,16 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const pressure = e.pressure || 0.5;
 
-    setDrawingPoints(prev => [...prev, [x, y, pressure]]);
-    drawLine(x, y, pressure);
+    if (isErasing) {
+      // Borrar mientras se mueve
+      handleEraseDrawing(x, y);
+    } else if (isDrawing) {
+      // Dibujar mientras se mueve
+      const pressure = e.pressure || 0.5;
+      setDrawingPoints(prev => [...prev, [x, y, pressure]]);
+      drawLine(x, y, pressure);
+    }
   };
 
   const handleCanvasPointerUp = (e) => {
@@ -862,6 +1001,49 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
         drawings: nextDrawings
       }));
       redrawCanvas(nextDrawings);
+    }
+  };
+
+  /**
+   * Borrador (Eraser)
+   */
+  const toggleEraser = () => {
+    setIsErasing(!isErasing);
+    if (!isErasing) {
+      // Al activar el borrador, cambiar a herramienta dibujo
+      setSelectedTool('draw');
+    }
+  };
+
+  const handleEraseDrawing = (x, y) => {
+    // Detectar qué dibujos están bajo el cursor
+    const drawingsToKeep = annotations.drawings.filter(drawing => {
+      if (!drawing.points || drawing.points.length === 0) return true;
+
+      // Verificar si algún punto del dibujo está dentro del área del borrador
+      const isNearEraser = drawing.points.some(point => {
+        const [px, py] = point;
+        const distance = Math.sqrt(Math.pow(px - x, 2) + Math.pow(py - y, 2));
+        return distance < eraserSize;
+      });
+
+      return !isNearEraser; // Mantener solo los que NO están cerca del borrador
+    });
+
+    // Si se eliminó algún dibujo
+    if (drawingsToKeep.length < annotations.drawings.length) {
+      setAnnotations(prev => ({
+        ...prev,
+        drawings: drawingsToKeep
+      }));
+
+      // Actualizar historial
+      const newHistory = canvasHistory.slice(0, historyIndex + 1);
+      newHistory.push(drawingsToKeep);
+      setCanvasHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+
+      redrawCanvas(drawingsToKeep);
     }
   };
 
@@ -1107,16 +1289,44 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
               </div>
               <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
               <div className="flex items-center gap-1">
-                <button onClick={handleUndo} disabled={historyIndex <= 0} className="icon-btn text-xs p-1" title="Deshacer">
+                <button
+                  onClick={toggleEraser}
+                  className={`icon-btn text-xs p-1 ${isErasing ? 'bg-accent-500 text-white' : ''}`}
+                  title={isErasing ? 'Modo dibujo (E)' : 'Borrador (E)'}
+                >
+                  <Eraser className="w-4 h-4" />
+                </button>
+                <button onClick={handleUndo} disabled={historyIndex <= 0} className="icon-btn text-xs p-1" title="Deshacer (CTRL+Z)">
                   <Undo className="w-4 h-4" />
                 </button>
-                <button onClick={handleRedo} disabled={historyIndex >= canvasHistory.length - 1} className="icon-btn text-xs p-1" title="Rehacer">
+                <button onClick={handleRedo} disabled={historyIndex >= canvasHistory.length - 1} className="icon-btn text-xs p-1" title="Rehacer (CTRL+Y)">
                   <Redo className="w-4 h-4" />
                 </button>
-                <button onClick={handleClearCanvas} className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs p-1" title="Limpiar">
+                <button onClick={handleClearCanvas} className="icon-btn bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs p-1" title="Limpiar todo">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+
+            {/* Eraser Size Control */}
+            {isErasing && (
+              <div className="mt-2 px-2 py-1 bg-white dark:bg-primary-900 rounded border border-primary-200 dark:border-primary-700">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Tamaño del borrador:</span>
+                  <input
+                    type="range"
+                    min="10"
+                    max="50"
+                    value={eraserSize}
+                    onChange={(e) => setEraserSize(parseInt(e.target.value))}
+                    className="flex-1"
+                  />
+                  <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[35px]">
+                    {eraserSize}px
+                  </span>
+                </div>
+              </div>
+            )}
             </div>
 
             {/* Advanced Color Picker Panel */}
@@ -1664,7 +1874,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">📝</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Notas:</strong>
-                      <p className="text-xs mt-1">Click para crear notas. Arrastra desde el ícono de mover. Redimensiona desde la esquina. <strong>Doble click para editar</strong> el contenido.</p>
+                      <p className="text-xs mt-1">Click para crear notas. <strong>8 templates</strong> con iconos (importante, pregunta, idea, tarea, etc.). Arrastra desde el ícono de mover. Redimensiona desde la esquina. <strong>Doble click para editar</strong>.</p>
                     </div>
                   </div>
 
@@ -1672,7 +1882,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">🎨</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Dibujar:</strong>
-                      <p className="text-xs mt-1">5 grosores: fino, medio, grueso, marcador y <strong>resaltador</strong> (ancho, semitransparente). Soporta Apple Pencil con sensibilidad a presión. Selector avanzado con colores personalizados y opacidad.</p>
+                      <p className="text-xs mt-1">5 grosores: fino, medio, grueso, marcador y <strong>resaltador</strong> (ancho, semitransparente). Soporta Apple Pencil con sensibilidad a presión. <strong>Borrador selectivo</strong> con tamaño ajustable (presiona E o click en el ícono). Selector avanzado con colores personalizados y opacidad.</p>
                     </div>
                   </div>
 
@@ -1703,7 +1913,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">🎨</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Colores:</strong>
-                      <p className="text-xs mt-1">8 colores predefinidos + <strong>selector avanzado</strong> con colores personalizados, control de opacidad y colores recientes</p>
+                      <p className="text-xs mt-1">8 colores predefinidos + <strong>selector avanzado</strong> con colores personalizados, control de opacidad y colores recientes. <strong>Los colores personalizados se guardan automáticamente</strong> en el navegador.</p>
                     </div>
                   </div>
 
@@ -1763,16 +1973,29 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                   <span className="text-xl">💡</span>
                   Tips Importantes
                 </h3>
-                <div className="grid md:grid-cols-3 gap-3 text-xs text-primary-600 dark:text-primary-400">
-                  <p>
-                    <strong>Doble Click:</strong> Haz doble click en notas o textos flotantes para editarlos nuevamente (texto, fuente, tamaño, color).
-                  </p>
-                  <p>
-                    <strong>Apple Pencil:</strong> El dibujo detecta presión del stylus para líneas dinámicas. Usa el resaltador para marcas semitransparentes.
-                  </p>
-                  <p>
-                    <strong>Selector Avanzado:</strong> Click en el ícono pipeta para crear colores personalizados con opacidad ajustable.
-                  </p>
+                <div className="grid md:grid-cols-2 gap-3 text-xs text-primary-600 dark:text-primary-400">
+                  <div>
+                    <p className="mb-2">
+                      <strong>Doble Click:</strong> Haz doble click en notas o textos flotantes para editarlos nuevamente (texto, fuente, tamaño, color).
+                    </p>
+                    <p className="mb-2">
+                      <strong>Apple Pencil:</strong> El dibujo detecta presión del stylus para líneas dinámicas. Usa el resaltador para marcas semitransparentes.
+                    </p>
+                    <p>
+                      <strong>Borrador:</strong> Presiona E o click en el ícono para activar/desactivar el borrador. Ajusta el tamaño para borrar más o menos área.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="mb-2">
+                      <strong>Atajos de Teclado:</strong> CTRL+S (guardar), CTRL+Z/Y (undo/redo), CTRL+B/I/U (formato), ESC (cerrar modales), 1-5 (herramientas).
+                    </p>
+                    <p className="mb-2">
+                      <strong>Templates de Notas:</strong> 8 templates con iconos para diferentes tipos de notas (importante, pregunta, idea, tarea, etc.).
+                    </p>
+                    <p>
+                      <strong>Persistencia:</strong> Los colores personalizados se guardan automáticamente y estarán disponibles en futuras sesiones.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -1817,7 +2040,7 @@ function ToolButton({ icon, label, active, onClick, disabled }) {
 function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel, isEditing }) {
   return (
     <div
-      className="absolute bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-700 p-4 rounded-lg shadow-xl max-w-sm z-30"
+      className="absolute bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-700 p-4 rounded-lg shadow-xl max-w-md z-30"
       style={{
         left: currentNote.position?.x || 0,
         top: currentNote.position?.y || 0
@@ -1832,6 +2055,26 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel, 
         </button>
       </div>
 
+      {/* Note Templates - Solo mostrar al crear nueva nota */}
+      {!isEditing && (
+        <div className="mb-3">
+          <p className="text-xs font-medium text-primary-700 dark:text-primary-300 mb-2">Templates:</p>
+          <div className="grid grid-cols-4 gap-1">
+            {Object.entries(NOTE_TEMPLATES).map(([key, template]) => (
+              <button
+                key={key}
+                onClick={() => setCurrentNote({ ...currentNote, text: template.text })}
+                className="p-2 text-center hover:bg-primary-100 dark:hover:bg-primary-700 rounded transition-colors border border-primary-200 dark:border-primary-600"
+                title={template.name}
+              >
+                <span className="text-lg">{template.icon}</span>
+                <p className="text-[10px] text-primary-600 dark:text-primary-400 mt-0.5">{template.name}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {selectedText && (
         <p className="text-xs text-primary-600 dark:text-primary-400 italic mb-2 border-l-2 border-accent-500 pl-2">
           "{selectedText}"
@@ -1844,7 +2087,6 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel, 
         placeholder="Escribe tu nota aquí..."
         className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-primary-50 dark:bg-primary-900 text-primary-900 dark:text-primary-100 focus:ring-2 focus:ring-accent-500 focus:border-transparent resize-none"
         rows={4}
-        autoFocus
       />
 
       <button
