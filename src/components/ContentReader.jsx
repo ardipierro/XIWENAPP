@@ -1874,147 +1874,242 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
         <div className="toolbar-separator"></div>
 
         <div className="toolbar-content-wrapper">
-        <div className="flex items-center justify-between gap-2">
-          {/* Herramientas principales */}
-          <div className="flex items-center gap-2">
-            <ToolButton
-              icon="👆"
-              label="Seleccionar"
-              active={selectedTool === 'select'}
-              onClick={() => setSelectedTool('select')}
-            />
-            <ToolButton
-              icon={<Highlighter className="w-5 h-5" />}
-              label="Subrayar"
-              active={selectedTool === 'highlight'}
-              onClick={() => setSelectedTool('highlight')}
+        <div className="flex items-center gap-2">
+          {/* Grupo 1: Selección (siempre visible) */}
+          <button
+            onClick={() => setSelectedTool('select')}
+            className={`tool-btn-compact ${selectedTool === 'select' ? 'active' : ''}`}
+            title="Seleccionar"
+          >
+            👆
+          </button>
+
+          <div className="toolbar-separator"></div>
+
+          {/* Grupo 2: Anotaciones (Dropdown) */}
+          <div className="toolbar-group-collapsible">
+            <button
+              onClick={() => setExpandedGroup(expandedGroup === 'annotations' ? null : 'annotations')}
+              className={`tool-btn-compact ${['highlight', 'note', 'draw', 'text'].includes(selectedTool) || isEditMode ? 'active' : ''}`}
+              title="Anotaciones"
               disabled={readOnly}
-            />
-            <ToolButton
-              icon={<StickyNote className="w-5 h-5" />}
-              label="Nota"
-              active={selectedTool === 'note'}
-              onClick={() => setSelectedTool('note')}
-              disabled={readOnly}
-            />
-            <ToolButton
-              icon={<Pen className="w-5 h-5" />}
-              label="Dibujar"
-              active={selectedTool === 'draw'}
-              onClick={() => setSelectedTool('draw')}
-              disabled={readOnly}
-            />
-            <ToolButton
-              icon={<Type className="w-5 h-5" />}
-              label="Texto"
-              active={selectedTool === 'text'}
-              onClick={() => setSelectedTool('text')}
-              disabled={readOnly}
-            />
-            <ToolButton
-              icon={<Edit3 className="w-5 h-5" />}
-              label="Editar"
-              active={isEditMode}
-              onClick={isEditMode ? handleExitEditMode : handleEnterEditMode}
-              disabled={readOnly}
-            />
+            >
+              <Highlighter className="w-5 h-5" />
+              <ChevronDown className="w-3 h-3" />
+            </button>
+            {expandedGroup === 'annotations' && (
+              <div className="tool-submenu-reader">
+                <button
+                  onClick={() => { setSelectedTool('highlight'); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${selectedTool === 'highlight' ? 'active' : ''}`}
+                  title="Subrayar"
+                >
+                  <Highlighter className="w-4 h-4" />
+                  <span>Subrayar</span>
+                </button>
+                <button
+                  onClick={() => { setSelectedTool('note'); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${selectedTool === 'note' ? 'active' : ''}`}
+                  title="Nota"
+                >
+                  <StickyNote className="w-4 h-4" />
+                  <span>Nota</span>
+                </button>
+                <button
+                  onClick={() => { setSelectedTool('draw'); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${selectedTool === 'draw' ? 'active' : ''}`}
+                  title="Dibujar"
+                >
+                  <Pen className="w-4 h-4" />
+                  <span>Dibujar</span>
+                </button>
+                <button
+                  onClick={() => { setSelectedTool('text'); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${selectedTool === 'text' ? 'active' : ''}`}
+                  title="Texto flotante"
+                >
+                  <Type className="w-4 h-4" />
+                  <span>Texto</span>
+                </button>
+                <button
+                  onClick={() => { isEditMode ? handleExitEditMode() : handleEnterEditMode(); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${isEditMode ? 'active' : ''}`}
+                  title="Editar contenido"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  <span>Editar</span>
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            {/* FASE 3 - Búsqueda */}
+          <div className="toolbar-separator"></div>
+
+          {/* Grupo 3: Búsqueda/Capas (Dropdown) */}
+          <div className="toolbar-group-collapsible">
             <button
-              onClick={() => setShowSearchPanel(!showSearchPanel)}
-              className={`icon-btn ${showSearchPanel ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
-              title="Buscar (CTRL+F)"
+              onClick={() => setExpandedGroup(expandedGroup === 'search' ? null : 'search')}
+              className={`tool-btn-compact ${showSearchPanel || showLayersPanel || showFiltersPanel ? 'active' : ''}`}
+              title="Búsqueda y Capas"
             >
               <Search className="w-5 h-5" />
+              <ChevronDown className="w-3 h-3" />
             </button>
+            {expandedGroup === 'search' && (
+              <div className="tool-submenu-reader">
+                <button
+                  onClick={() => { setShowSearchPanel(!showSearchPanel); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${showSearchPanel ? 'active' : ''}`}
+                  title="Buscar (CTRL+F)"
+                >
+                  <Search className="w-4 h-4" />
+                  <span>Buscar</span>
+                </button>
+                <button
+                  onClick={() => { setShowLayersPanel(!showLayersPanel); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${showLayersPanel ? 'active' : ''}`}
+                  title="Capas (CTRL+L)"
+                >
+                  <Layers className="w-4 h-4" />
+                  <span>Capas</span>
+                </button>
+                <button
+                  onClick={() => { setShowFiltersPanel(!showFiltersPanel); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${showFiltersPanel ? 'active' : ''}`}
+                  title="Filtros avanzados"
+                >
+                  <Filter className="w-4 h-4" />
+                  <span>Filtros</span>
+                </button>
+              </div>
+            )}
+          </div>
 
-            {/* FASE 3 - Capas */}
+          <div className="toolbar-separator"></div>
+
+          {/* Grupo 4: Herramientas Avanzadas (Dropdown) */}
+          <div className="toolbar-group-collapsible">
             <button
-              onClick={() => setShowLayersPanel(!showLayersPanel)}
-              className={`icon-btn ${showLayersPanel ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
-              title="Capas (CTRL+L)"
-            >
-              <Layers className="w-5 h-5" />
-            </button>
-
-            {/* FASE 3 - Exportar imagen */}
-            <button onClick={handleExportImage} className="icon-btn" title="Exportar como imagen">
-              <FileImage className="w-5 h-5" />
-            </button>
-
-            {/* FASE 3 - Modo presentación */}
-            <button
-              onClick={togglePresentationMode}
-              className={`icon-btn ${isPresentationMode ? 'bg-accent-500 text-white' : ''}`}
-              title="Modo presentación (P / F11)"
-            >
-              <Presentation className="w-5 h-5" />
-            </button>
-
-            <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
-
-            {/* FASE 4 - Format Painter */}
-            <button
-              onClick={toggleFormatPainter}
-              className={`icon-btn ${isFormatPainterActive ? 'bg-blue-500 text-white' : ''}`}
-              title="Copiar formato (Format Painter)"
+              onClick={() => setExpandedGroup(expandedGroup === 'tools' ? null : 'tools')}
+              className={`tool-btn-compact ${isFormatPainterActive || showMiniMap || showMagnifier ? 'active' : ''}`}
+              title="Herramientas Avanzadas"
               disabled={readOnly}
             >
               <Paintbrush className="w-5 h-5" />
+              <ChevronDown className="w-3 h-3" />
             </button>
-
-            {/* FASE 4 - Filtros */}
-            <button
-              onClick={() => setShowFiltersPanel(!showFiltersPanel)}
-              className={`icon-btn ${showFiltersPanel ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
-              title="Filtros avanzados"
-            >
-              <Filter className="w-5 h-5" />
-            </button>
-
-            {/* FASE 4 - Mini Mapa */}
-            <button
-              onClick={toggleMiniMap}
-              className={`icon-btn ${showMiniMap ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
-              title="Mini mapa de navegación"
-            >
-              <Map className="w-5 h-5" />
-            </button>
-
-            {/* FASE 4 - Magnifier */}
-            <button
-              onClick={toggleMagnifier}
-              className={`icon-btn ${showMagnifier ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
-              title="Lupa / Zoom local"
-            >
-              <Maximize2 className="w-5 h-5" />
-            </button>
-
-            <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
-
-            <button onClick={() => setShowInstructionsModal(true)} className="icon-btn" title="Ayuda">
-              <HelpCircle className="w-5 h-5" />
-            </button>
-            <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar JSON">
-              <Download className="w-5 h-5" />
-            </button>
-            <button onClick={handleExportPDF} className="icon-btn" title="Exportar PDF">
-              <FileDown className="w-5 h-5" />
-            </button>
-            <label className="icon-btn cursor-pointer" title="Importar JSON">
-              <Upload className="w-5 h-5" />
-              <input type="file" accept=".json" onChange={handleImportAnnotations} className="hidden" />
-            </label>
-            {!readOnly && (
-              <button onClick={handleSaveAnnotations} className="flex items-center gap-2 px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all shadow-md">
-                <Save className="w-5 h-5" />
-                <span className="hidden sm:inline">Guardar</span>
-              </button>
+            {expandedGroup === 'tools' && (
+              <div className="tool-submenu-reader">
+                <button
+                  onClick={() => { toggleFormatPainter(); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${isFormatPainterActive ? 'active' : ''}`}
+                  title="Copiar formato"
+                >
+                  <Paintbrush className="w-4 h-4" />
+                  <span>Format Painter</span>
+                </button>
+                <button
+                  onClick={() => { toggleMiniMap(); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${showMiniMap ? 'active' : ''}`}
+                  title="Mini mapa"
+                >
+                  <Map className="w-4 h-4" />
+                  <span>Mini Mapa</span>
+                </button>
+                <button
+                  onClick={() => { toggleMagnifier(); setExpandedGroup(null); }}
+                  className={`tool-btn-submenu ${showMagnifier ? 'active' : ''}`}
+                  title="Lupa / Zoom"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                  <span>Lupa</span>
+                </button>
+              </div>
             )}
           </div>
+
+          <div className="toolbar-separator"></div>
+
+          {/* Grupo 5: Exportar (Dropdown) */}
+          <div className="toolbar-group-collapsible">
+            <button
+              onClick={() => setExpandedGroup(expandedGroup === 'export' ? null : 'export')}
+              className="tool-btn-compact"
+              title="Exportar e Importar"
+            >
+              <Download className="w-5 h-5" />
+              <ChevronDown className="w-3 h-3" />
+            </button>
+            {expandedGroup === 'export' && (
+              <div className="tool-submenu-reader">
+                <button
+                  onClick={() => { handleExportImage(); setExpandedGroup(null); }}
+                  className="tool-btn-submenu"
+                  title="Exportar como imagen"
+                >
+                  <FileImage className="w-4 h-4" />
+                  <span>Imagen</span>
+                </button>
+                <button
+                  onClick={() => { handleExportAnnotations(); setExpandedGroup(null); }}
+                  className="tool-btn-submenu"
+                  title="Exportar JSON"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>JSON</span>
+                </button>
+                <button
+                  onClick={() => { handleExportPDF(); setExpandedGroup(null); }}
+                  className="tool-btn-submenu"
+                  title="Exportar PDF"
+                >
+                  <FileDown className="w-4 h-4" />
+                  <span>PDF</span>
+                </button>
+                <label className="tool-btn-submenu cursor-pointer" title="Importar JSON">
+                  <Upload className="w-4 h-4" />
+                  <span>Importar</span>
+                  <input type="file" accept=".json" onChange={(e) => { handleImportAnnotations(e); setExpandedGroup(null); }} className="hidden" />
+                </label>
+              </div>
+            )}
+          </div>
+
+          <div className="toolbar-separator"></div>
+
+          {/* Grupo 6: Presentación (siempre visible) */}
+          <button
+            onClick={togglePresentationMode}
+            className={`tool-btn-compact ${isPresentationMode ? 'active' : ''}`}
+            title="Modo presentación (P / F11)"
+          >
+            <Presentation className="w-5 h-5" />
+          </button>
+
+          <div className="toolbar-separator"></div>
+
+          {/* Grupo 7: Ayuda (siempre visible) */}
+          <button
+            onClick={() => setShowInstructionsModal(true)}
+            className="tool-btn-compact"
+            title="Ayuda"
+          >
+            <HelpCircle className="w-5 h-5" />
+          </button>
+
+          <div className="toolbar-separator"></div>
+
+          {/* Grupo 8: Guardar (siempre visible si no readOnly) */}
+          {!readOnly && (
+            <button
+              onClick={handleSaveAnnotations}
+              className="tool-btn-save"
+              title="Guardar anotaciones"
+            >
+              <Save className="w-5 h-5" />
+              <span className="hidden sm:inline">Guardar</span>
+            </button>
+          )}
         </div>
 
         {/* FASE 3 - Panel de búsqueda */}

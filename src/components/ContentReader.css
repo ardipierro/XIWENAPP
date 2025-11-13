@@ -167,6 +167,196 @@
   transform: rotate(90deg);
 }
 
+/* ============================================
+   GRUPOS DROPDOWN COLAPSABLES
+   ============================================ */
+
+/* Botón Compacto */
+.tool-btn-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--color-text-primary, #111827);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.tool-btn-compact:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dark .tool-btn-compact:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tool-btn-compact.active {
+  background: var(--color-accent, #2563eb);
+  color: white;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.tool-btn-compact:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Botón Guardar Especial */
+.tool-btn-save {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--color-accent, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  flex-shrink: 0;
+}
+
+.tool-btn-save:hover {
+  background: var(--color-accent-dark, #1d4ed8);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Grupo Colapsable */
+.toolbar-group-collapsible {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Submenú Dropdown */
+.tool-submenu-reader {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 180px;
+  animation: slideUpFade 0.2s ease-out;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.dark .tool-submenu-reader {
+  background: rgba(30, 30, 30, 0.98);
+  border-color: #3f3f46;
+}
+
+/* Botones dentro del Submenú */
+.tool-btn-submenu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--color-text-primary, #111827);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tool-btn-submenu:hover {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--color-accent, #2563eb);
+}
+
+.dark .tool-btn-submenu:hover {
+  background: rgba(37, 99, 235, 0.2);
+}
+
+.tool-btn-submenu.active {
+  background: rgba(37, 99, 235, 0.15);
+  color: var(--color-accent, #2563eb);
+  font-weight: 600;
+}
+
+.tool-btn-submenu svg {
+  flex-shrink: 0;
+}
+
+/* Ajustes para modo vertical */
+.floating-toolbar-reader.vertical .toolbar-group-collapsible {
+  width: 100%;
+}
+
+.floating-toolbar-reader.vertical .tool-submenu-reader {
+  left: 100%;
+  bottom: auto;
+  top: 0;
+  transform: translateX(0);
+  margin-left: 12px;
+}
+
+.floating-toolbar-reader.vertical .tool-submenu-reader {
+  animation: slideRightFade 0.2s ease-out;
+}
+
+@keyframes slideRightFade {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Cuando está a la izquierda, el submenú sale a la derecha */
+.floating-toolbar-reader.vertical.left .tool-submenu-reader {
+  left: 100%;
+  right: auto;
+  margin-left: 12px;
+  margin-right: 0;
+}
+
+/* Cuando está a la derecha, el submenú sale a la izquierda */
+.floating-toolbar-reader.vertical:not(.left) .tool-submenu-reader {
+  left: auto;
+  right: 100%;
+  margin-left: 0;
+  margin-right: 12px;
+}
+
 /* Toolbar Separator */
 .toolbar-separator {
   width: 1px;
@@ -236,6 +426,38 @@
   }
 }
 
+/* Responsive para Grupos Dropdown - Mobile */
+@media (max-width: 768px) {
+  .tool-btn-compact {
+    min-width: 36px;
+    height: 36px;
+    padding: 6px;
+    font-size: 18px;
+  }
+
+  .tool-btn-save {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .tool-submenu-reader {
+    min-width: 160px;
+    padding: 6px;
+    gap: 2px;
+  }
+
+  .tool-btn-submenu {
+    padding: 8px 10px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  /* En móvil, los submenús salen hacia arriba siempre */
+  .floating-toolbar-reader .tool-submenu-reader {
+    bottom: calc(100% + 8px);
+  }
+}
+
 /* Landscape mode en móvil */
 @media (max-width: 1024px) and (orientation: landscape) {
   .floating-toolbar-reader {
@@ -252,5 +474,10 @@
     top: 10px;
     left: 10px;
     padding: 8px 12px;
+  }
+
+  /* Ajustar submenús en landscape */
+  .tool-submenu-reader {
+    min-width: 140px;
   }
 }
