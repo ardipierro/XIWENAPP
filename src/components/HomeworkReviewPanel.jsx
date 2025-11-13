@@ -144,6 +144,8 @@ export default function HomeworkReviewPanel({ teacherId }) {
             setSelectedReview(null);
           }}
           onApproveSuccess={handleApproveSuccess}
+          teacherId={teacherId}
+          currentUser={user}
         />
       )}
     </div>
@@ -217,7 +219,7 @@ function ReviewCard({ review, onSelect }) {
 /**
  * Review Detail Modal Component
  */
-function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
+function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: parentTeacherId, currentUser }) {
   const [isApproving, setIsApproving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState(review.overallFeedback || '');
@@ -363,7 +365,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
         {/* Profile Selector */}
         <ProfileSelector
           studentId={review.studentId}
-          teacherId={review.teacherId || teacherId || user?.uid}
+          teacherId={review.teacherId || parentTeacherId || currentUser?.uid}
           currentReviewId={review.id}
           onReanalyze={async (profileId) => {
             const result = await requestReanalysis(review.id, profileId);
