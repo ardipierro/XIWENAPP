@@ -394,8 +394,8 @@ service cloud.firestore {
         (isAdmin() ||
          (isTeacher() && request.resource.data.teacherId == request.auth.uid));
 
-      // Teachers can read their own profiles, admins can read all
-      allow read: if isAuthenticated() &&
+      // Admins can list/read all profiles, teachers can read their own
+      allow list, get: if isAuthenticated() &&
         (isAdmin() ||
          resource.data.teacherId == request.auth.uid);
 

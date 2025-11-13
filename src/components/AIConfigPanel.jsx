@@ -39,8 +39,8 @@ function AIConfigPanel() {
   const [showImageDemo, setShowImageDemo] = useState(false);
   const [showCorrectionProfiles, setShowCorrectionProfiles] = useState(false);
 
-  // Get current user
-  const { user } = useAuth();
+  // Get current user and role
+  const { user, userRole } = useAuth();
 
   // ============================================================================
   // EFECTOS - Cargar config al montar
@@ -450,6 +450,7 @@ function AIConfigPanel() {
         <HomeworkCorrectionProfilesModal
           onClose={() => setShowCorrectionProfiles(false)}
           teacherId={user.uid}
+          userRole={userRole}
         />
       )}
     </div>

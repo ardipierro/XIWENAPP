@@ -180,18 +180,24 @@ export async function getCorrectionProfile(profileId) {
 }
 
 /**
- * Get all correction profiles for a teacher
+ * Get all correction profiles for a teacher (or all if admin)
  * @param {string} teacherId - Teacher ID
+ * @param {boolean} isAdmin - Whether the user is an admin
  * @returns {Promise<Array>} Array of profiles
  */
-export async function getCorrectionProfilesByTeacher(teacherId) {
+export async function getCorrectionProfilesByTeacher(teacherId, isAdmin = false) {
   try {
     const profilesRef = collection(db, 'correction_profiles');
-    const q = query(
-      profilesRef,
-      where('teacherId', '==', teacherId),
-      orderBy('createdAt', 'desc')
-    );
+
+    // Admins can see all profiles, teachers only their own
+    const q = isAdmin
+      ? query(profilesRef, orderBy('createdAt', 'desc'))
+      : query(
+          profilesRef,
+          where('teacherId', '==', teacherId),
+          orderBy('createdAt', 'desc')
+        );
+
     const snapshot = await getDocs(q);
 
     const profiles = snapshot.docs.map(doc => ({

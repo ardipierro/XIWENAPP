@@ -32,13 +32,15 @@ import {
 import ProfileEditor from './ProfileEditor';
 import logger from '../../utils/logger';
 
-export default function HomeworkCorrectionProfilesModal({ onClose, teacherId }) {
+export default function HomeworkCorrectionProfilesModal({ onClose, teacherId, userRole }) {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
+  const isAdmin = userRole === 'admin';
 
   useEffect(() => {
     loadProfiles();
@@ -48,14 +50,14 @@ export default function HomeworkCorrectionProfilesModal({ onClose, teacherId }) 
     try {
       setLoading(true);
       setError(null);
-      const result = await getCorrectionProfilesByTeacher(teacherId);
+      const result = await getCorrectionProfilesByTeacher(teacherId, isAdmin);
 
       // If no profiles exist, initialize defaults
       if (result.length === 0) {
         logger.info('No profiles found, initializing defaults', 'ProfilesModal');
         const initResult = await initializeDefaultProfiles(teacherId);
         if (initResult.success) {
-          const newProfiles = await getCorrectionProfilesByTeacher(teacherId);
+          const newProfiles = await getCorrectionProfilesByTeacher(teacherId, isAdmin);
           setProfiles(newProfiles);
         }
       } else {
