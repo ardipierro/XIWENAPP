@@ -773,3 +773,72 @@ export function getDayName(day) {
   const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   return days[day] || '';
 }
+
+/**
+ * Crear clase instantánea con Google Meet
+ * Crea y inicia automáticamente una clase en vivo
+ *
+ * @param {Object} config - Configuración de la clase instantánea
+ * @param {string} config.teacherId - ID del profesor
+ * @param {string} config.teacherName - Nombre del profesor
+ * @param {string} config.meetLink - Link de Google Meet (opcional)
+ * @param {Array<string>} config.assignedGroups - IDs de grupos asignados
+ * @param {Array<string>} config.assignedStudents - IDs de estudiantes asignados
+ * @param {string} config.name - Nombre personalizado (opcional)
+ * @returns {Promise<Object>} - Resultado con sessionId, roomName, meetSessionId
+ */
+export async function createInstantMeetSession(config) {
+  try {
+    const {
+      teacherId,
+      teacherName,
+      meetLink = '',
+      assignedGroups = [],
+      assignedStudents = [],
+      name = null
+    } = config;
+
+    const now = new Date();
+    const defaultName = `Clase Instantánea - ${now.toLocaleDateString('es-ES')} ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+
+    const sessionData = {
+      name: name || defaultName,
+      description: 'Clase en vivo creada instantáneamente',
+      teacherId,
+      teacherName,
+      mode: 'live',
+      type: 'single',
+      scheduledStart: Timestamp.fromDate(now),
+      duration: 60,
+      maxParticipants: 30,
+      recordingEnabled: false,
+      whiteboardType: 'none',
+      meetLink: meetLink || '',
+      zoomLink: '',
+      assignedGroups,
+      assignedStudents
+    };
+
+    // Crear sesión
+    const result = await createClassSession(sessionData);
+
+    if (result.success) {
+      // Auto-iniciar la sesión
+      const startResult = await startClassSession(result.sessionId);
+
+      logger.info('✅ Clase instantánea creada e iniciada:', result.sessionId);
+
+      return {
+        success: true,
+        sessionId: result.sessionId,
+        roomName: result.roomName,
+        meetSessionId: startResult.meetSessionId
+      };
+    }
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Error creando clase instantánea:', error);
+    return { success: false, error: error.message };
+  }
+}
