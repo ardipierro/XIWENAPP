@@ -456,23 +456,23 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
 
             {/* Grid de voces */}
             {!loadingVoices && !voicesError && filteredVoices.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[400px] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto">
                 {filteredVoices.map((voice) => (
                   <div
                     key={voice.voice_id}
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
                       selectedVoice?.voice_id === voice.voice_id
                         ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                     }`}
                     onClick={() => handleSelectVoice(voice)}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
                           {voice.name}
                         </h4>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex flex-wrap gap-1 mt-1">
                           {voice.labels?.accent && (
                             <BaseBadge variant="info" size="sm">
                               {voice.labels.accent}
@@ -491,7 +491,7 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
                         </div>
                       </div>
                       {selectedVoice?.voice_id === voice.voice_id && (
-                        <CheckCircle className="text-purple-500" size={20} />
+                        <CheckCircle className="text-purple-500 flex-shrink-0" size={18} />
                       )}
                     </div>
 
