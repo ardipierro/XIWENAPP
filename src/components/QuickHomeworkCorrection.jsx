@@ -16,12 +16,14 @@ import {
   X
 } from 'lucide-react';
 import { uploadMessageAttachment } from '../firebase/storage';
-import { createHomeworkReview, getReviewsByStudent, subscribeToReview } from '../firebase/homework_reviews';
+import { createHomeworkReview, getReviewsByStudent, subscribeToReview, REVIEW_STATUS } from '../firebase/homework_reviews';
+import { getUserById } from '../firebase/users';
 import BaseButton from './common/BaseButton';
 import { BaseLoading } from './common';
 import logger from '../utils/logger';
 
 export default function QuickHomeworkCorrection({ studentId, studentName }) {
+  const [teacherId, setTeacherId] = useState(null);
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -29,6 +31,21 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
   const [recentReviews, setRecentReviews] = useState([]);
   const [selectedReview, setSelectedReview] = useState(null);
   const [loadingReviews, setLoadingReviews] = useState(true);
+
+  // Load teacher ID from student data
+  useEffect(() => {
+    const loadTeacherId = async () => {
+      try {
+        const studentData = await getUserById(studentId);
+        if (studentData && studentData.teacherId) {
+          setTeacherId(studentData.teacherId);
+        }
+      } catch (error) {
+        logger.error('Error loading teacher ID', 'QuickHomeworkCorrection', error);
+      }
+    };
+    loadTeacherId();
+  }, [studentId]);
 
   // Load recent reviews
   useEffect(() => {
@@ -121,6 +138,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
         const reviewData = {
           studentId,
           studentName: studentName || 'Estudiante',
+          teacherId: teacherId || null, // Include teacherId if available
           imageUrl: uploadResult.url, // Extract URL from upload result
           filename: file.name,
           imageSize: file.size,
@@ -138,8 +156,8 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
         setUploadProgress(Math.round(((i + 1) / imageFiles.length) * 100));
       }
 
-      // Success
-      alert(`¡${imageFiles.length} imagen${imageFiles.length > 1 ? 'es' : ''} subida${imageFiles.length > 1 ? 's' : ''}! La corrección automática comenzará en breve.`);
+      // Success - Simple message
+      alert('Enviado');
 
       // Clear form
       setImageFiles([]);
@@ -218,7 +236,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
         {uploadProgress > 0 && uploadProgress < 100 && (
           <div className="mb-4">
             <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-              <span>Subiendo y analizando...</span>
+              <span>Enviando</span>
               <span>{uploadProgress}%</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -289,7 +307,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
           <div className="text-center py-8">
             <Sparkles className="mx-auto text-gray-400 mb-3" size={48} />
             <p className="text-gray-600 dark:text-gray-400">
-              Aún no tienes correcciones. ¡Sube tu primera tarea!
+              Sin correcciones
             </p>
           </div>
         ) : (
@@ -319,21 +337,28 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
 function ReviewCard({ review, onClick }) {
   const getStatusConfig = () => {
     switch (review.status) {
-      case 'processing':
+      case REVIEW_STATUS.PROCESSING:
         return {
           icon: Clock,
-          text: 'Analizando...',
+          text: 'Procesando',
           color: 'text-blue-600 dark:text-blue-400',
           bg: 'bg-blue-100 dark:bg-blue-900'
         };
-      case 'completed':
+      case REVIEW_STATUS.PENDING_REVIEW:
+        return {
+          icon: Clock,
+          text: 'Listo',
+          color: 'text-yellow-600 dark:text-yellow-400',
+          bg: 'bg-yellow-100 dark:bg-yellow-900'
+        };
+      case REVIEW_STATUS.APPROVED:
         return {
           icon: CheckCircle,
-          text: review.teacherReviewed ? 'Revisado' : 'Completado',
+          text: 'Corregido',
           color: 'text-green-600 dark:text-green-400',
           bg: 'bg-green-100 dark:bg-green-900'
         };
-      case 'failed':
+      case REVIEW_STATUS.FAILED:
         return {
           icon: AlertCircle,
           text: 'Error',
@@ -343,7 +368,7 @@ function ReviewCard({ review, onClick }) {
       default:
         return {
           icon: Clock,
-          text: 'Pendiente',
+          text: 'Listo',
           color: 'text-gray-600 dark:text-gray-400',
           bg: 'bg-gray-100 dark:bg-gray-800'
         };
@@ -421,8 +446,11 @@ function ReviewDetailModal({ review, onClose }) {
 
   // Extract analysis data from the review document
   // Cloud Function saves fields directly: transcription, errorSummary, detailedCorrections, etc.
-  const hasAnalysis = liveReview.status === 'completed' && liveReview.transcription;
+  const hasAnalysis = liveReview.status === REVIEW_STATUS.APPROVED && liveReview.transcription;
   const createdDate = liveReview.createdAt?.toDate?.();
+
+  // If not approved yet, show simple pending state
+  const isWaitingForTeacher = liveReview.status === REVIEW_STATUS.PENDING_REVIEW;
 
   // Group detailed corrections by type
   const getErrorsByType = (type) => {
@@ -490,23 +518,34 @@ function ReviewDetailModal({ review, onClose }) {
           </div>
 
           {/* Status */}
-          {liveReview.status === 'processing' && (
+          {liveReview.status === REVIEW_STATUS.PROCESSING && (
             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
               <div className="flex items-center gap-3">
                 <BaseLoading variant="spinner" size="sm" />
                 <div>
                   <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                    Analizando tu tarea...
-                  </p>
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
-                    Revisando ortografía, gramática y vocabulario
+                    Procesando
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {liveReview.status === 'failed' && (
+          {/* Waiting for teacher review */}
+          {isWaitingForTeacher && (
+            <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Clock className="text-yellow-600 dark:text-yellow-400" size={24} />
+                <div>
+                  <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+                    En revisión
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {liveReview.status === REVIEW_STATUS.FAILED && (
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg">
               <p className="text-sm text-red-800 dark:text-red-200">
                 <strong>Error:</strong> {liveReview.errorMessage || 'No se pudo analizar la imagen'}
@@ -515,16 +554,18 @@ function ReviewDetailModal({ review, onClose }) {
           )}
 
           {/* Image */}
-          <div className="mb-6">
-            <img
-              src={liveReview.imageUrl}
-              alt="Tarea"
-              className="w-full rounded-lg border border-gray-200 dark:border-gray-700"
-            />
-          </div>
+          {!isWaitingForTeacher && (
+            <div className="mb-6">
+              <img
+                src={liveReview.imageUrl}
+                alt="Tarea"
+                className="w-full rounded-lg border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+          )}
 
-          {/* Analysis Results */}
-          {hasAnalysis && (
+          {/* Analysis Results - Only show if approved */}
+          {hasAnalysis && !isWaitingForTeacher && (
             <div className="space-y-4">
               {/* Extracted Text with Highlighting */}
               {liveReview.transcription && (

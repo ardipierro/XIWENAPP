@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings, Play } from 'lucide-react';
+import { Lightbulb, Filter, Settings, Play, CheckCircle } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 import {
@@ -19,7 +19,9 @@ import SearchBar from './common/SearchBar';
 import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
 import ImageGenerationDemo from './ImageGenerationDemo';
+import HomeworkCorrectionProfilesModal from './homework/HomeworkCorrectionProfilesModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
+import { useAuth } from '../contexts/AuthContext';
 
 function AIConfigPanel() {
   // ============================================================================
@@ -35,6 +37,10 @@ function AIConfigPanel() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showImageDemo, setShowImageDemo] = useState(false);
+  const [showCorrectionProfiles, setShowCorrectionProfiles] = useState(false);
+
+  // Get current user and role
+  const { user, userRole } = useAuth();
 
   // ============================================================================
   // EFECTOS - Cargar config al montar
@@ -287,6 +293,29 @@ function AIConfigPanel() {
         </BaseButton>
       </div>
 
+      {/* ✨ NEW: Homework Correction Profiles Section */}
+      <div className="mb-8 p-6 bg-zinc-50 dark:bg-zinc-900 rounded-lg border-2 border-primary-200 dark:border-primary-800">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="text-primary-600 dark:text-primary-400" size={24} strokeWidth={2} />
+            <div>
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                Perfiles de Corrección de Tareas
+              </h3>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Configura cómo se corrigen las tareas según el nivel de cada alumno
+              </p>
+            </div>
+          </div>
+          <BaseButton
+            variant="primary"
+            onClick={() => setShowCorrectionProfiles(true)}
+          >
+            Gestionar Perfiles
+          </BaseButton>
+        </div>
+      </div>
+
       {/* Description and Stats */}
       <div className="mb-6">
         <p className="text-zinc-600 dark:text-zinc-400 mb-4">
@@ -414,6 +443,15 @@ function AIConfigPanel() {
           onSave={handleSaveFunction}
         />,
         document.body
+      )}
+
+      {/* ✨ NEW: Correction Profiles Modal */}
+      {showCorrectionProfiles && user && (
+        <HomeworkCorrectionProfilesModal
+          onClose={() => setShowCorrectionProfiles(false)}
+          teacherId={user.uid}
+          userRole={userRole}
+        />
       )}
     </div>
   );

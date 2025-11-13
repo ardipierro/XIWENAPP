@@ -21,6 +21,18 @@ import { db } from './config';
 import logger from '../utils/logger';
 
 /**
+ * Homework review status constants
+ */
+export const REVIEW_STATUS = {
+  UPLOADING: 'uploading',           // Image is being uploaded
+  PROCESSING: 'processing',          // AI is analyzing
+  PENDING_REVIEW: 'pending_review',  // Waiting for teacher review
+  APPROVED: 'approved',              // Teacher approved - student can view
+  REJECTED: 'rejected',              // Teacher rejected
+  FAILED: 'failed'                   // Processing failed
+};
+
+/**
  * Create a homework review record
  * @param {Object} reviewData - Review data
  * @returns {Promise<Object>} Result with id
@@ -30,7 +42,7 @@ export async function createHomeworkReview(reviewData) {
     const reviewsRef = collection(db, 'homework_reviews');
     const docRef = await addDoc(reviewsRef, {
       ...reviewData,
-      status: 'processing',
+      status: REVIEW_STATUS.PROCESSING,
       teacherReviewed: false,
       createdAt: serverTimestamp()
     });
@@ -219,7 +231,7 @@ export async function getPendingReviews(teacherId = null) {
     q = query(
       reviewsRef,
       where('teacherReviewed', '==', false),
-      where('status', '==', 'completed'),
+      where('status', '==', REVIEW_STATUS.PENDING_REVIEW),
       orderBy('createdAt', 'desc')
     );
 
@@ -260,6 +272,7 @@ export async function approveReview(reviewId, teacherEdits = {}) {
   try {
     const docRef = doc(db, 'homework_reviews', reviewId);
     await updateDoc(docRef, {
+      status: REVIEW_STATUS.APPROVED,
       teacherReviewed: true,
       teacherReviewedAt: serverTimestamp(),
       ...teacherEdits
@@ -269,6 +282,38 @@ export async function approveReview(reviewId, teacherEdits = {}) {
     return { success: true };
   } catch (error) {
     logger.error(`Error approving review ${reviewId}`, 'HomeworkReviews', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Request reanalysis of a homework with a different profile
+ * @param {string} reviewId - Review ID
+ * @param {string} profileId - Correction profile ID to use
+ * @returns {Promise<Object>} Result
+ */
+export async function requestReanalysis(reviewId, profileId) {
+  try {
+    const docRef = doc(db, 'homework_reviews', reviewId);
+    await updateDoc(docRef, {
+      status: REVIEW_STATUS.PROCESSING,
+      correctionProfileId: profileId,
+      requestReanalysis: true,
+      reanalysisRequestedAt: serverTimestamp(),
+      // Clear previous corrections
+      aiSuggestions: [],
+      aiErrorSummary: {},
+      detailedCorrections: [],
+      errorSummary: {},
+      overallFeedback: '',
+      suggestedGrade: 0,
+      teacherReviewed: false
+    });
+
+    logger.info(`Requested reanalysis for review ${reviewId} with profile ${profileId}`, 'HomeworkReviews');
+    return { success: true };
+  } catch (error) {
+    logger.error(`Error requesting reanalysis for review ${reviewId}`, 'HomeworkReviews', error);
     return { success: false, error: error.message };
   }
 }
@@ -306,7 +351,7 @@ export function subscribeToPendingReviews(callback) {
     const q = query(
       reviewsRef,
       where('teacherReviewed', '==', false),
-      where('status', '==', 'completed'),
+      where('status', '==', REVIEW_STATUS.PENDING_REVIEW),
       orderBy('createdAt', 'desc')
     );
 

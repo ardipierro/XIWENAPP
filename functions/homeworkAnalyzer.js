@@ -5,9 +5,112 @@
  * Analiza imágenes de tareas usando AI Vision (Claude o GPT-4)
  */
 
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
+
+// ============================================================================
+// CORRECTION PROFILE HELPERS
+// ============================================================================
+
+/**
+ * Get correction profile for a student
+ * Returns individual assignment or teacher's default profile
+ */
+async function getStudentCorrectionProfile(studentId, teacherId, db) {
+  try {
+    // Check for individual profile assignment
+    const assignmentsRef = db.collection('profile_students');
+    const assignmentQuery = assignmentsRef
+      .where('studentId', '==', studentId)
+      .where('teacherId', '==', teacherId)
+      .limit(1);
+
+    const assignmentSnapshot = await assignmentQuery.get();
+
+    if (!assignmentSnapshot.empty) {
+      const assignment = assignmentSnapshot.docs[0].data();
+      const profileDoc = await db.collection('correction_profiles').doc(assignment.profileId).get();
+      if (profileDoc.exists) {
+        console.log(`[getStudentCorrectionProfile] Found individual profile for student ${studentId}`);
+        return { id: profileDoc.id, ...profileDoc.data() };
+      }
+    }
+
+    // Fallback to teacher's default profile
+    const profilesRef = db.collection('correction_profiles');
+    const defaultQuery = profilesRef
+      .where('teacherId', '==', teacherId)
+      .where('isDefault', '==', true)
+      .limit(1);
+
+    const defaultSnapshot = await defaultQuery.get();
+
+    if (!defaultSnapshot.empty) {
+      const profileDoc = defaultSnapshot.docs[0];
+      console.log(`[getStudentCorrectionProfile] Using default profile for student ${studentId}`);
+      return { id: profileDoc.id, ...profileDoc.data() };
+    }
+
+    console.log(`[getStudentCorrectionProfile] No profile found for student ${studentId}`);
+    return null;
+  } catch (error) {
+    console.error(`[getStudentCorrectionProfile] Error:`, error);
+    return null;
+  }
+}
+
+/**
+ * Map correction profile to analysis parameters
+ */
+function mapProfileToParams(profile) {
+  if (!profile) {
+    return {
+      strictnessLevel: 'intermediate',
+      correctionTypes: {
+        spelling: true,
+        grammar: true,
+        punctuation: true,
+        vocabulary: true
+      },
+      feedbackStyle: 'encouraging',
+      detailedExplanations: true,
+      includeSynonyms: false,
+      includeExamples: true
+    };
+  }
+
+  // Get settings object (profiles store data in settings)
+  const settings = profile.settings || {};
+
+  // Map profile strictness to function parameters
+  const strictnessMap = {
+    lenient: 'beginner',
+    moderate: 'intermediate',
+    strict: 'advanced'
+  };
+
+  // Map check types array to correctionTypes object
+  const checks = settings.checks || [];
+  const correctionTypes = {
+    spelling: checks.includes('spelling'),
+    grammar: checks.includes('grammar'),
+    punctuation: checks.includes('punctuation'),
+    vocabulary: checks.includes('vocabulary')
+  };
+
+  // Get display settings
+  const display = settings.display || {};
+
+  return {
+    strictnessLevel: strictnessMap[settings.strictness] || 'intermediate',
+    correctionTypes,
+    feedbackStyle: 'encouraging',
+    detailedExplanations: display.showDetailedErrors !== false,
+    includeSynonyms: false,
+    includeExamples: true
+  };
+}
 
 // ============================================================================
 // AI VISION HELPERS
@@ -235,23 +338,34 @@ exports.analyzeHomeworkImage = onDocumentCreated({
 
     console.log(`[analyzeHomeworkImage] Using provider: ${functionConfig.provider}`);
 
+    // ✨ Get student's correction profile
+    const correctionProfile = await getStudentCorrectionProfile(
+      reviewData.studentId,
+      reviewData.teacherId,
+      db
+    );
+
+    if (correctionProfile) {
+      console.log(`[analyzeHomeworkImage] Using correction profile: ${correctionProfile.name} (${correctionProfile.id})`);
+    } else {
+      console.log(`[analyzeHomeworkImage] No profile found, using default settings`);
+    }
+
     // Download image as base64
     console.log('[analyzeHomeworkImage] Downloading image...');
     const imageBase64 = await downloadImageAsBase64(reviewData.imageUrl);
     console.log('[analyzeHomeworkImage] Image downloaded successfully');
 
-    // Build dynamic system prompt based on configuration
-    const strictnessLevel = functionConfig.strictnessLevel || 'intermediate';
-    const correctionTypes = functionConfig.correctionTypes || {
-      spelling: true,
-      grammar: true,
-      punctuation: true,
-      vocabulary: true
-    };
-    const feedbackStyle = functionConfig.feedbackStyle || 'encouraging';
-    const detailedExplanations = functionConfig.detailedExplanations !== false;
-    const includeSynonyms = functionConfig.includeSynonyms === true;
-    const includeExamples = functionConfig.includeExamples !== false;
+    // ✨ Map profile to analysis parameters (or use defaults)
+    const profileParams = mapProfileToParams(correctionProfile);
+
+    // Build dynamic system prompt based on profile configuration
+    const strictnessLevel = profileParams.strictnessLevel;
+    const correctionTypes = profileParams.correctionTypes;
+    const feedbackStyle = profileParams.feedbackStyle;
+    const detailedExplanations = profileParams.detailedExplanations;
+    const includeSynonyms = profileParams.includeSynonyms;
+    const includeExamples = profileParams.includeExamples;
 
     // Strictness instructions
     const strictnessInstructions = {
@@ -354,20 +468,40 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
 
     // Update review document with results
     console.log('[analyzeHomeworkImage] Updating review document...');
+
+    // Add IDs and teacherStatus to each correction
+    const correctionsWithIds = (analysisResult.detailedCorrections || []).map((corr, idx) => ({
+      ...corr,
+      id: `corr_${idx}`,
+      teacherStatus: 'pending'
+    }));
+
     await reviewRef.update({
-      status: 'completed',
+      status: 'pending_review',  // ✨ Changed from 'completed' - now waits for teacher approval
       aiProvider: functionConfig.provider,
       aiModel: functionConfig.model,
+      correctionProfileId: correctionProfile?.id || null,  // ✨ Store which profile was used
       transcription: analysisResult.transcription,
-      errorSummary: analysisResult.errorSummary,
+
+      // ✨ New structure: aiSuggestions with IDs and teacher status
+      aiSuggestions: correctionsWithIds,
+
+      // ✨ Keep original AI summary separate
+      aiErrorSummary: analysisResult.errorSummary,
+
+      // Keep legacy field for backward compatibility
       detailedCorrections: analysisResult.detailedCorrections || [],
+      errorSummary: analysisResult.errorSummary,
+
       overallFeedback: analysisResult.overallFeedback || '',
       suggestedGrade: analysisResult.suggestedGrade || 0,
       analyzedAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
     console.log(`[analyzeHomeworkImage] ✅ Analysis completed for review: ${reviewId}`);
+    console.log(`[analyzeHomeworkImage] Status set to: pending_review (awaiting teacher approval)`);
     console.log(`[analyzeHomeworkImage] Found ${analysisResult.errorSummary.total} errors`);
+    console.log(`[analyzeHomeworkImage] Created ${correctionsWithIds.length} correction suggestions`);
     console.log(`[analyzeHomeworkImage] Suggested grade: ${analysisResult.suggestedGrade}`);
 
     return null;
@@ -384,6 +518,258 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       });
     } catch (updateError) {
       console.error(`[analyzeHomeworkImage] Error updating review with error status:`, updateError);
+    }
+
+    // Don't throw - we handled the error by updating the document
+    return null;
+  }
+});
+
+/**
+ * Firestore Trigger: Handle reanalysis requests
+ *
+ * Triggers when requestReanalysis flag is set to true
+ * Re-analyzes the homework with the new correction profile
+ */
+exports.reanalyzeHomework = onDocumentUpdated({
+  document: 'homework_reviews/{reviewId}',
+  region: 'us-central1',
+  secrets: ['CLAUDE_API_KEY', 'OPENAI_API_KEY']
+}, async (event) => {
+  const reviewId = event.params.reviewId;
+  const beforeData = event.data.before.data();
+  const afterData = event.data.after.data();
+
+  console.log(`[reanalyzeHomework] Triggered for review: ${reviewId}`);
+
+  // Only process if requestReanalysis is newly set to true and status is processing
+  if (!afterData.requestReanalysis || afterData.status !== 'processing') {
+    console.log(`[reanalyzeHomework] Skipping - requestReanalysis: ${afterData.requestReanalysis}, status: ${afterData.status}`);
+    return null;
+  }
+
+  // Skip if already processing a reanalysis
+  if (beforeData.requestReanalysis === true && beforeData.status === 'processing') {
+    console.log(`[reanalyzeHomework] Skipping - already processing reanalysis`);
+    return null;
+  }
+
+  const db = admin.firestore();
+  const reviewRef = db.collection('homework_reviews').doc(reviewId);
+
+  try {
+    console.log(`[reanalyzeHomework] Starting reanalysis with profile: ${afterData.correctionProfileId}`);
+
+    // Get AI configuration from Firestore
+    const configDoc = await db.collection('ai_config').doc('global').get();
+    const aiConfig = configDoc.exists ? configDoc.data() : {};
+
+    // Get homework_analyzer function config
+    const functionConfig = aiConfig.homework_analyzer || {
+      enabled: true,
+      provider: 'claude',
+      model: 'claude-sonnet-4-5'
+    };
+
+    if (!functionConfig.enabled) {
+      throw new Error('Homework analyzer function is not enabled');
+    }
+
+    console.log(`[reanalyzeHomework] Using provider: ${functionConfig.provider}`);
+
+    // ✨ Get the specific correction profile (from correctionProfileId field)
+    let correctionProfile = null;
+    if (afterData.correctionProfileId) {
+      const profileDoc = await db.collection('correction_profiles').doc(afterData.correctionProfileId).get();
+      if (profileDoc.exists) {
+        correctionProfile = { id: profileDoc.id, ...profileDoc.data() };
+        console.log(`[reanalyzeHomework] Using correction profile: ${correctionProfile.name} (${correctionProfile.id})`);
+      } else {
+        console.warn(`[reanalyzeHomework] Profile ${afterData.correctionProfileId} not found, using default`);
+      }
+    }
+
+    // Fallback to student's profile if not specified
+    if (!correctionProfile) {
+      correctionProfile = await getStudentCorrectionProfile(
+        afterData.studentId,
+        afterData.teacherId,
+        db
+      );
+    }
+
+    // Download image as base64
+    console.log('[reanalyzeHomework] Downloading image...');
+    const imageBase64 = await downloadImageAsBase64(afterData.imageUrl);
+    console.log('[reanalyzeHomework] Image downloaded successfully');
+
+    // ✨ Map profile to analysis parameters
+    const profileParams = mapProfileToParams(correctionProfile);
+
+    // Build dynamic system prompt based on profile configuration
+    const strictnessLevel = profileParams.strictnessLevel;
+    const correctionTypes = profileParams.correctionTypes;
+    const feedbackStyle = profileParams.feedbackStyle;
+    const detailedExplanations = profileParams.detailedExplanations;
+    const includeSynonyms = profileParams.includeSynonyms;
+    const includeExamples = profileParams.includeExamples;
+
+    // Strictness instructions
+    const strictnessInstructions = {
+      beginner: 'Sé MUY tolerante. Solo detecta errores básicos y evidentes. Ignora errores menores de vocabulario o estilo. El objetivo es no desmotivar al estudiante principiante.',
+      intermediate: 'Sé equilibrado. Detecta errores comunes de ortografía, gramática, puntuación y vocabulario, pero no seas excesivamente crítico con matices sutiles.',
+      advanced: 'Sé estricto y minucioso. Detecta todos los errores, incluidos matices de vocabulario, estilo, registro formal/informal, y sutilezas gramaticales.'
+    };
+
+    // Feedback style instructions
+    const feedbackInstructions = {
+      encouraging: 'Usa un tono positivo, alentador y motivador. Destaca los aciertos antes de mencionar errores. Usa frases como "¡Muy bien!", "Excelente intento", "Vas por buen camino". Sé comprensivo y pedagógico.',
+      neutral: 'Usa un tono directo, objetivo y profesional. Sé claro y conciso en tus observaciones sin ser ni demasiado positivo ni negativo. Enfócate en los hechos.',
+      academic: 'Usa un tono formal y académico. Proporciona feedback detallado con terminología técnica apropiada. Sé preciso y exhaustivo en tus explicaciones.'
+    };
+
+    // Build error types to detect
+    const activeTypes = Object.keys(correctionTypes).filter(type => correctionTypes[type]);
+    const typesInstructions = activeTypes.length > 0
+      ? `Identifica SOLO estos tipos de errores: ${activeTypes.join(', ')}.`
+      : 'Identifica errores de ortografía, gramática, puntuación y vocabulario.';
+
+    // Optional features
+    const optionalFeatures = [];
+    if (includeSynonyms) {
+      optionalFeatures.push('- Para errores de vocabulario, sugiere sinónimos y alternativas más apropiadas.');
+    }
+    if (includeExamples) {
+      optionalFeatures.push('- Incluye ejemplos de uso correcto para cada corrección cuando sea útil.');
+    }
+
+    // Build final system prompt
+    const systemPrompt = `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
+
+NIVEL DE EXIGENCIA: ${strictnessLevel.toUpperCase()}
+${strictnessInstructions[strictnessLevel]}
+
+ESTILO DE FEEDBACK: ${feedbackStyle.toUpperCase()}
+${feedbackInstructions[feedbackStyle]}
+
+INSTRUCCIONES:
+1. Lee cuidadosamente el texto en la imagen (puede ser manuscrito o impreso)
+2. ${typesInstructions}
+3. Clasifica cada error por tipo
+4. Para cada error, proporciona:
+   - El texto original (con el error)
+   - La corrección apropiada
+   - ${detailedExplanations ? 'Una explicación clara, detallada y pedagógica del error' : 'Una explicación breve del error'}
+   - El número de línea aproximado donde aparece
+${optionalFeatures.length > 0 ? optionalFeatures.join('\n') : ''}
+5. Genera un resumen ejecutivo con conteo de errores por categoría
+6. Proporciona feedback general constructivo
+7. Sugiere una calificación (0-100) basada en:
+   - Exactitud gramatical (40%)
+   - Ortografía (20%)
+   - Vocabulario y uso apropiado (20%)
+   - Estructura y coherencia (20%)
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "transcription": "Texto completo extraído de la imagen",
+  "errorSummary": {
+    "spelling": número,
+    "grammar": número,
+    "punctuation": número,
+    "vocabulary": número,
+    "total": número
+  },
+  "detailedCorrections": [
+    {
+      "type": "spelling|grammar|punctuation|vocabulary",
+      "original": "texto con error",
+      "correction": "texto corregido",
+      "explanation": "explicación pedagógica",
+      "line": número
+    }
+  ],
+  "overallFeedback": "Comentario general constructivo",
+  "suggestedGrade": número (0-100)
+}
+
+Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
+
+    // Analyze with selected provider
+    let aiResponse;
+    if (functionConfig.provider === 'openai') {
+      aiResponse = await analyzeWithOpenAI(afterData.imageUrl, imageBase64, systemPrompt);
+    } else {
+      // Default to Claude
+      aiResponse = await analyzeWithClaude(afterData.imageUrl, imageBase64, systemPrompt);
+    }
+
+    // Parse JSON response
+    console.log('[reanalyzeHomework] Parsing AI response...');
+    const analysisResult = parseAIResponse(aiResponse);
+
+    // Validate required fields
+    if (!analysisResult.transcription || !analysisResult.errorSummary) {
+      throw new Error('AI response missing required fields');
+    }
+
+    // Update review document with new results
+    console.log('[reanalyzeHomework] Updating review document...');
+
+    // Add IDs and teacherStatus to each correction
+    const correctionsWithIds = (analysisResult.detailedCorrections || []).map((corr, idx) => ({
+      ...corr,
+      id: `corr_${idx}`,
+      teacherStatus: 'pending'
+    }));
+
+    await reviewRef.update({
+      status: 'pending_review',
+      aiProvider: functionConfig.provider,
+      aiModel: functionConfig.model,
+      correctionProfileId: correctionProfile?.id || null,
+      transcription: analysisResult.transcription,
+
+      // New structure: aiSuggestions with IDs and teacher status
+      aiSuggestions: correctionsWithIds,
+
+      // Keep original AI summary separate
+      aiErrorSummary: analysisResult.errorSummary,
+
+      // Keep legacy field for backward compatibility
+      detailedCorrections: analysisResult.detailedCorrections || [],
+      errorSummary: analysisResult.errorSummary,
+
+      overallFeedback: analysisResult.overallFeedback || '',
+      suggestedGrade: analysisResult.suggestedGrade || 0,
+      analyzedAt: admin.firestore.FieldValue.serverTimestamp(),
+
+      // ✨ Clear reanalysis flag
+      requestReanalysis: false,
+      reanalyzedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log(`[reanalyzeHomework] ✅ Reanalysis completed for review: ${reviewId}`);
+    console.log(`[reanalyzeHomework] Status set to: pending_review`);
+    console.log(`[reanalyzeHomework] Found ${analysisResult.errorSummary.total} errors`);
+    console.log(`[reanalyzeHomework] Created ${correctionsWithIds.length} correction suggestions`);
+    console.log(`[reanalyzeHomework] Suggested grade: ${analysisResult.suggestedGrade}`);
+
+    return null;
+
+  } catch (error) {
+    console.error(`[reanalyzeHomework] ❌ Error reanalyzing review ${reviewId}:`, error);
+
+    // Update review document with error
+    try {
+      await reviewRef.update({
+        status: 'failed',
+        errorMessage: error.message || 'Unknown error during reanalysis',
+        requestReanalysis: false,
+        analyzedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (updateError) {
+      console.error(`[reanalyzeHomework] Error updating review with error status:`, updateError);
     }
 
     // Don't throw - we handled the error by updating the document
