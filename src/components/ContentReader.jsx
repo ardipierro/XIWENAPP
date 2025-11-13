@@ -32,7 +32,13 @@ import {
   Underline as UnderlineIcon,
   Plus,
   Pipette,
-  Eraser
+  Eraser,
+  Layers,
+  Search,
+  FileImage,
+  Presentation,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import {
@@ -225,6 +231,24 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const [resizeDirection, setResizeDirection] = useState(null); // 'horizontal', 'vertical', 'diagonal'
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
+  // Estados FASE 3 - Sistema de capas
+  const [layersVisible, setLayersVisible] = useState({
+    highlights: true,
+    notes: true,
+    drawings: true,
+    floatingTexts: true
+  });
+  const [showLayersPanel, setShowLayersPanel] = useState(false);
+
+  // Estados FASE 3 - Búsqueda
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
+
+  // Estados FASE 3 - Modo presentación
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
+
   // Referencias
   const contentRef = useRef(null);
   const canvasRef = useRef(null);
@@ -254,6 +278,152 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       logger.error('Error saving custom colors:', error, 'ContentReader');
     }
   }, [customColors]);
+
+  /**
+   * Cargar estado de capas desde localStorage
+   */
+  useEffect(() => {
+    try {
+      const savedLayers = localStorage.getItem('contentReader_layersVisible');
+      if (savedLayers) {
+        setLayersVisible(JSON.parse(savedLayers));
+      }
+    } catch (error) {
+      logger.error('Error loading layers state:', error, 'ContentReader');
+    }
+  }, []);
+
+  /**
+   * Guardar estado de capas en localStorage
+   */
+  useEffect(() => {
+    try {
+      localStorage.setItem('contentReader_layersVisible', JSON.stringify(layersVisible));
+    } catch (error) {
+      logger.error('Error saving layers state:', error, 'ContentReader');
+    }
+  }, [layersVisible]);
+
+  /**
+   * Toggle visibilidad de capa
+   */
+  const toggleLayer = (layer) => {
+    setLayersVisible(prev => ({
+      ...prev,
+      [layer]: !prev[layer]
+    }));
+  };
+
+  /**
+   * Búsqueda en contenido y anotaciones
+   */
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+
+    if (!query.trim()) {
+      setSearchResults([]);
+      setCurrentSearchIndex(0);
+      return;
+    }
+
+    const results = [];
+    const lowerQuery = query.toLowerCase();
+
+    // Buscar en highlights
+    annotations.highlights.forEach(highlight => {
+      if (highlight.text && highlight.text.toLowerCase().includes(lowerQuery)) {
+        results.push({
+          type: 'highlight',
+          id: highlight.id,
+          text: highlight.text,
+          preview: highlight.text.substring(0, 100)
+        });
+      }
+    });
+
+    // Buscar en notas
+    annotations.notes.forEach(note => {
+      if (note.text && note.text.toLowerCase().includes(lowerQuery)) {
+        results.push({
+          type: 'note',
+          id: note.id,
+          text: note.text,
+          preview: note.text.substring(0, 100)
+        });
+      }
+    });
+
+    // Buscar en textos flotantes
+    annotations.floatingTexts.forEach(text => {
+      if (text.text && text.text.toLowerCase().includes(lowerQuery)) {
+        results.push({
+          type: 'floatingText',
+          id: text.id,
+          text: text.text,
+          preview: text.text
+        });
+      }
+    });
+
+    setSearchResults(results);
+    setCurrentSearchIndex(0);
+  };
+
+  /**
+   * Navegar entre resultados de búsqueda
+   */
+  const navigateSearch = (direction) => {
+    if (searchResults.length === 0) return;
+
+    let newIndex = currentSearchIndex;
+    if (direction === 'next') {
+      newIndex = (currentSearchIndex + 1) % searchResults.length;
+    } else {
+      newIndex = currentSearchIndex === 0 ? searchResults.length - 1 : currentSearchIndex - 1;
+    }
+    setCurrentSearchIndex(newIndex);
+
+    // Scroll to result (simplificado - podríamos mejorar esto)
+    logger.info(`Navegando a resultado ${newIndex + 1} de ${searchResults.length}`, 'ContentReader');
+  };
+
+  /**
+   * Exportar a imagen
+   */
+  const handleExportImage = async () => {
+    try {
+      const container = containerRef.current;
+      if (!container) return;
+
+      // Usar html2canvas si está disponible
+      if (typeof window.html2canvas === 'function') {
+        const canvas = await window.html2canvas(container);
+        const link = document.createElement('a');
+        link.download = `content-reader-${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        alert('✅ Imagen exportada exitosamente');
+      } else {
+        alert('⚠️ html2canvas no está disponible. Instala la librería para usar esta función.');
+      }
+    } catch (error) {
+      logger.error('Error exporting image:', error, 'ContentReader');
+      alert('❌ Error al exportar imagen');
+    }
+  };
+
+  /**
+   * Toggle modo presentación
+   */
+  const togglePresentationMode = () => {
+    setIsPresentationMode(!isPresentationMode);
+    if (!isPresentationMode) {
+      // Al entrar en modo presentación, cerrar paneles
+      setShowLayersPanel(false);
+      setShowSearchPanel(false);
+      setShowAdvancedColorPicker(false);
+    }
+  };
 
   /**
    * Keyboard Shortcuts
@@ -309,21 +479,49 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
         return;
       }
 
-      // ESC - Cerrar modales/forms
+      // CTRL+F - Búsqueda
+      if (isCtrl && e.key === 'f') {
+        e.preventDefault();
+        setShowSearchPanel(!showSearchPanel);
+        return;
+      }
+
+      // CTRL+L - Capas
+      if (isCtrl && e.key === 'l') {
+        e.preventDefault();
+        setShowLayersPanel(!showLayersPanel);
+        return;
+      }
+
+      // P o F11 - Modo presentación
+      if (e.key === 'p' || e.key === 'F11') {
+        e.preventDefault();
+        togglePresentationMode();
+        return;
+      }
+
+      // ESC - Cerrar modales/forms/panels
       if (e.key === 'Escape') {
         e.preventDefault();
-        if (showInstructionsModal) setShowInstructionsModal(false);
-        if (showNoteForm) {
+        if (isPresentationMode) {
+          setIsPresentationMode(false);
+        } else if (showInstructionsModal) {
+          setShowInstructionsModal(false);
+        } else if (showNoteForm) {
           setShowNoteForm(false);
           setCurrentNote({ text: '', position: null });
           setEditingNote(null);
-        }
-        if (showTextForm) {
+        } else if (showTextForm) {
           setShowTextForm(false);
           setCurrentText({ text: '', position: null });
           setEditingText(null);
+        } else if (showAdvancedColorPicker) {
+          setShowAdvancedColorPicker(false);
+        } else if (showSearchPanel) {
+          setShowSearchPanel(false);
+        } else if (showLayersPanel) {
+          setShowLayersPanel(false);
         }
-        if (showAdvancedColorPicker) setShowAdvancedColorPicker(false);
         return;
       }
 
@@ -340,7 +538,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isEditMode, showOriginal, selectedTool, showInstructionsModal, showNoteForm, showTextForm, showAdvancedColorPicker, readOnly, isErasing]);
+  }, [isEditMode, showOriginal, selectedTool, showInstructionsModal, showNoteForm, showTextForm, showAdvancedColorPicker, readOnly, isErasing, showSearchPanel, showLayersPanel, isPresentationMode]);
 
   /**
    * Cargar anotaciones desde Firebase
@@ -350,6 +548,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       loadAnnotations();
     }
   }, [contentId, userId]);
+
+  /**
+   * Re-dibujar canvas cuando cambia la visibilidad de la capa de dibujos
+   */
+  useEffect(() => {
+    redrawCanvas(annotations.drawings);
+  }, [layersVisible.drawings]);
 
   const loadAnnotations = async () => {
     try {
@@ -932,6 +1137,9 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Solo dibujar si la capa está visible
+    if (!layersVisible.drawings) return;
+
     drawings.forEach(drawing => {
       // Aplicar alpha del tipo de pincel
       const alpha = BRUSH_TYPES[drawing.brushType]?.alpha || 1.0;
@@ -1100,7 +1308,8 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   return (
     <div className="flex flex-col h-screen bg-primary-50 dark:bg-primary-950">
       {/* Toolbar Principal */}
-      <div className="bg-white dark:bg-primary-900 border-b border-primary-200 dark:border-primary-800 shadow-sm">
+      {!isPresentationMode && (
+        <div className="bg-white dark:bg-primary-900 border-b border-primary-200 dark:border-primary-800 shadow-sm">
         <div className="flex items-center justify-between gap-2 p-3">
           {/* Herramientas principales */}
           <div className="flex items-center gap-2">
@@ -1149,13 +1358,47 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            {/* FASE 3 - Búsqueda */}
+            <button
+              onClick={() => setShowSearchPanel(!showSearchPanel)}
+              className={`icon-btn ${showSearchPanel ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
+              title="Buscar (CTRL+F)"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
+            {/* FASE 3 - Capas */}
+            <button
+              onClick={() => setShowLayersPanel(!showLayersPanel)}
+              className={`icon-btn ${showLayersPanel ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
+              title="Capas (CTRL+L)"
+            >
+              <Layers className="w-5 h-5" />
+            </button>
+
+            {/* FASE 3 - Exportar imagen */}
+            <button onClick={handleExportImage} className="icon-btn" title="Exportar como imagen">
+              <FileImage className="w-5 h-5" />
+            </button>
+
+            {/* FASE 3 - Modo presentación */}
+            <button
+              onClick={togglePresentationMode}
+              className={`icon-btn ${isPresentationMode ? 'bg-accent-500 text-white' : ''}`}
+              title="Modo presentación (P / F11)"
+            >
+              <Presentation className="w-5 h-5" />
+            </button>
+
+            <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+
             <button onClick={() => setShowInstructionsModal(true)} className="icon-btn" title="Ayuda">
               <HelpCircle className="w-5 h-5" />
             </button>
-            <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar">
+            <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar JSON">
               <Download className="w-5 h-5" />
             </button>
-            <label className="icon-btn cursor-pointer" title="Importar">
+            <label className="icon-btn cursor-pointer" title="Importar JSON">
               <Upload className="w-5 h-5" />
               <input type="file" accept=".json" onChange={handleImportAnnotations} className="hidden" />
             </label>
@@ -1167,6 +1410,128 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             )}
           </div>
         </div>
+
+        {/* FASE 3 - Panel de búsqueda */}
+        {showSearchPanel && (
+          <div className="px-3 py-2 bg-gradient-to-r from-blue-50 to-primary-50 dark:from-blue-900/30 dark:to-primary-800/30 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center gap-3">
+              <Search className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                placeholder="Buscar en anotaciones..."
+                className="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-primary-900 border border-primary-300 dark:border-primary-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              {searchResults.length > 0 && (
+                <>
+                  <span className="text-xs text-primary-700 dark:text-primary-300 whitespace-nowrap">
+                    {currentSearchIndex + 1} / {searchResults.length}
+                  </span>
+                  <button
+                    onClick={() => navigateSearch('prev')}
+                    className="icon-btn text-xs p-1"
+                    title="Anterior"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => navigateSearch('next')}
+                    className="icon-btn text-xs p-1"
+                    title="Siguiente"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => setShowSearchPanel(false)}
+                className="icon-btn text-xs p-1"
+                title="Cerrar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {searchResults.length > 0 && searchResults[currentSearchIndex] && (
+              <div className="mt-2 p-2 bg-white dark:bg-primary-900 rounded text-xs">
+                <span className="font-semibold text-blue-600 dark:text-blue-400">
+                  {searchResults[currentSearchIndex].type === 'highlight' && '🖍️ Subrayado'}
+                  {searchResults[currentSearchIndex].type === 'note' && '📝 Nota'}
+                  {searchResults[currentSearchIndex].type === 'floatingText' && '✍️ Texto'}
+                </span>
+                <p className="mt-1 text-primary-700 dark:text-primary-300">
+                  {searchResults[currentSearchIndex].preview}
+                  {searchResults[currentSearchIndex].preview.length >= 100 && '...'}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* FASE 3 - Panel de capas */}
+        {showLayersPanel && (
+          <div className="px-3 py-2 bg-gradient-to-r from-purple-50 to-primary-50 dark:from-purple-900/30 dark:to-primary-800/30 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-xs font-semibold text-primary-900 dark:text-primary-100">Capas Visibles</span>
+              </div>
+              <button
+                onClick={() => setShowLayersPanel(false)}
+                className="icon-btn text-xs p-1"
+                title="Cerrar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <label className="flex items-center gap-2 p-2 bg-white dark:bg-primary-900 rounded cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={layersVisible.highlights}
+                  onChange={() => toggleLayer('highlights')}
+                  className="w-4 h-4 text-accent-500 rounded focus:ring-2 focus:ring-accent-500"
+                />
+                <span className="text-xs text-primary-700 dark:text-primary-300">
+                  🖍️ Subrayados ({annotations.highlights.length})
+                </span>
+              </label>
+              <label className="flex items-center gap-2 p-2 bg-white dark:bg-primary-900 rounded cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={layersVisible.notes}
+                  onChange={() => toggleLayer('notes')}
+                  className="w-4 h-4 text-accent-500 rounded focus:ring-2 focus:ring-accent-500"
+                />
+                <span className="text-xs text-primary-700 dark:text-primary-300">
+                  📝 Notas ({annotations.notes.length})
+                </span>
+              </label>
+              <label className="flex items-center gap-2 p-2 bg-white dark:bg-primary-900 rounded cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={layersVisible.drawings}
+                  onChange={() => toggleLayer('drawings')}
+                  className="w-4 h-4 text-accent-500 rounded focus:ring-2 focus:ring-accent-500"
+                />
+                <span className="text-xs text-primary-700 dark:text-primary-300">
+                  🎨 Dibujos ({annotations.drawings.length})
+                </span>
+              </label>
+              <label className="flex items-center gap-2 p-2 bg-white dark:bg-primary-900 rounded cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={layersVisible.floatingTexts}
+                  onChange={() => toggleLayer('floatingTexts')}
+                  className="w-4 h-4 text-accent-500 rounded focus:ring-2 focus:ring-accent-500"
+                />
+                <span className="text-xs text-primary-700 dark:text-primary-300">
+                  ✍️ Textos ({annotations.floatingTexts.length})
+                </span>
+              </label>
+            </div>
+          </div>
+        )}
 
         {/* Panel de opciones por herramienta */}
         {selectedTool === 'select' && (
@@ -1575,10 +1940,11 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             </div>
           </div>
         )}
-      </div>
+        </div>
+      )}
 
       {/* Edit Mode Banner */}
-      {isEditMode && (
+      {isEditMode && !isPresentationMode && (
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 text-center shadow-md">
           <div className="flex items-center justify-center gap-2 text-sm">
             <Edit3 className="w-4 h-4" />
@@ -1686,7 +2052,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           )}
 
           {/* Floating Texts */}
-          {annotations.floatingTexts.map(floatingText => (
+          {layersVisible.floatingTexts && annotations.floatingTexts.map(floatingText => (
             <div
               key={floatingText.id}
               onMouseDown={(e) => !readOnly && handleFloatingTextMouseDown(e, floatingText.id)}
@@ -1725,7 +2091,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           ))}
 
           {/* Notes */}
-          {annotations.notes.map(note => (
+          {layersVisible.notes && annotations.notes.map(note => (
             <div
               key={note.id}
               onMouseDown={(e) => !readOnly && handleNoteMouseDown(e, note.id)}
@@ -1818,7 +2184,8 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       </div>
 
       {/* Footer */}
-      <div className="p-3 bg-white dark:bg-primary-900 border-t border-primary-200 dark:border-primary-800">
+      {!isPresentationMode && (
+        <div className="p-3 bg-white dark:bg-primary-900 border-t border-primary-200 dark:border-primary-800">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-sm text-primary-600 dark:text-primary-400">
           <div className="flex items-center gap-6">
             <span>{annotations.highlights.length} subrayados</span>
@@ -1830,7 +2197,20 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             Última modificación: {new Date().toLocaleString('es-ES')}
           </div>
         </div>
-      </div>
+        </div>
+      )}
+
+      {/* Modo Presentación - Botón flotante para salir */}
+      {isPresentationMode && (
+        <button
+          onClick={togglePresentationMode}
+          className="fixed top-4 right-4 z-50 px-4 py-2 bg-accent-500 text-white rounded-lg shadow-lg hover:bg-accent-600 transition-all flex items-center gap-2"
+          title="Salir del modo presentación (ESC o P)"
+        >
+          <X className="w-4 h-4" />
+          <span className="text-sm font-medium">Salir presentación</span>
+        </button>
+      )}
 
       {/* Instructions Modal */}
       {showInstructionsModal && (
@@ -1964,6 +2344,39 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                       <p className="text-xs mt-1">Vuelve al contenido original eliminando todas las ediciones</p>
                     </div>
                   </div>
+
+                  {/* FASE 3 - Nuevas funcionalidades */}
+                  <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <span className="text-2xl">🔍</span>
+                    <div>
+                      <strong className="text-blue-700 dark:text-blue-300">Búsqueda:</strong>
+                      <p className="text-xs mt-1">Busca en todas tus anotaciones (CTRL+F). Navega entre resultados con flechas.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg border border-purple-200 dark:border-purple-700">
+                    <span className="text-2xl">📚</span>
+                    <div>
+                      <strong className="text-purple-700 dark:text-purple-300">Capas:</strong>
+                      <p className="text-xs mt-1">Oculta/muestra tipos de anotaciones (CTRL+L). Ideal para enfocarte en un tipo específico.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-lg border border-green-200 dark:border-green-700">
+                    <span className="text-2xl">🖼️</span>
+                    <div>
+                      <strong className="text-green-700 dark:text-green-300">Exportar Imagen:</strong>
+                      <p className="text-xs mt-1">Captura el contenido completo con anotaciones como imagen PNG.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg border border-orange-200 dark:border-orange-700">
+                    <span className="text-2xl">📺</span>
+                    <div>
+                      <strong className="text-orange-700 dark:text-orange-300">Modo Presentación:</strong>
+                      <p className="text-xs mt-1">Vista limpia sin toolbar para presentar (P o F11). Presiona ESC para salir.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1976,24 +2389,27 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 <div className="grid md:grid-cols-2 gap-3 text-xs text-primary-600 dark:text-primary-400">
                   <div>
                     <p className="mb-2">
-                      <strong>Doble Click:</strong> Haz doble click en notas o textos flotantes para editarlos nuevamente (texto, fuente, tamaño, color).
+                      <strong>Doble Click:</strong> Haz doble click en notas o textos flotantes para editarlos nuevamente.
                     </p>
                     <p className="mb-2">
-                      <strong>Apple Pencil:</strong> El dibujo detecta presión del stylus para líneas dinámicas. Usa el resaltador para marcas semitransparentes.
+                      <strong>Apple Pencil:</strong> El dibujo detecta presión del stylus para líneas dinámicas.
+                    </p>
+                    <p className="mb-2">
+                      <strong>Borrador:</strong> Presiona E para activar/desactivar. Ajusta el tamaño con el slider.
                     </p>
                     <p>
-                      <strong>Borrador:</strong> Presiona E o click en el ícono para activar/desactivar el borrador. Ajusta el tamaño para borrar más o menos área.
+                      <strong>Templates:</strong> 8 templates con iconos para diferentes tipos de notas.
                     </p>
                   </div>
                   <div>
                     <p className="mb-2">
-                      <strong>Atajos de Teclado:</strong> CTRL+S (guardar), CTRL+Z/Y (undo/redo), CTRL+B/I/U (formato), ESC (cerrar modales), 1-5 (herramientas).
+                      <strong>Atajos FASE 1-2:</strong> CTRL+S (guardar), CTRL+Z/Y (undo/redo), CTRL+B/I/U (formato), ESC (cerrar), 1-5 (herramientas), E (borrador).
                     </p>
                     <p className="mb-2">
-                      <strong>Templates de Notas:</strong> 8 templates con iconos para diferentes tipos de notas (importante, pregunta, idea, tarea, etc.).
+                      <strong>Atajos FASE 3:</strong> CTRL+F (búsqueda), CTRL+L (capas), P o F11 (presentación).
                     </p>
                     <p>
-                      <strong>Persistencia:</strong> Los colores personalizados se guardan automáticamente y estarán disponibles en futuras sesiones.
+                      <strong>Persistencia:</strong> Colores personalizados y preferencias de capas se guardan automáticamente.
                     </p>
                   </div>
                 </div>
