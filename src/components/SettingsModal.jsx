@@ -4,7 +4,7 @@
  * @module components/SettingsModal
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Settings,
@@ -41,6 +41,8 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
     fontScale: 100,
     showMetadataBadges: true
   });
+  const [saveMessage, setSaveMessage] = useState(null); // { type: 'success' | 'error', text: string }
+  const viewCustomizerSaveRef = useRef(null); // Referencia a la función de guardado de ViewCustomizer
 
   // Cargar configuración de pantalla
   useEffect(() => {
@@ -156,6 +158,24 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
     }
   ];
 
+  // Manejar guardado de configuración
+  const handleSaveSettings = () => {
+    // Guardar ViewCustomizer si existe la referencia
+    if (viewCustomizerSaveRef.current) {
+      viewCustomizerSaveRef.current();
+    }
+
+    setSaveMessage({ type: 'success', text: '✓ Configuración guardada correctamente' });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  // Callback para recibir la función de guardado de ViewCustomizer
+  const handleViewCustomizerChange = (data) => {
+    if (data && typeof data.saveSettings === 'function') {
+      viewCustomizerSaveRef.current = data.saveSettings;
+    }
+  };
+
   return (
     <BaseModal
       isOpen={isOpen}
@@ -189,13 +209,17 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-4">
           {/* ========================================= */}
           {/* TAB 1: APARIENCIA (Visual + Tipografía) */}
           {/* ========================================= */}
           {activeTab === 'appearance' && (
             <div>
-              <ViewCustomizer alwaysOpen={true} />
+              <ViewCustomizer
+                alwaysOpen={true}
+                autoSave={false}
+                onSettingsChange={handleViewCustomizerChange}
+              />
             </div>
           )}
 
@@ -600,6 +624,37 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Footer Sticky con botón Guardar */}
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex-shrink-0">
+          {saveMessage && (
+            <div className={`mb-3 p-3 rounded-lg flex items-center gap-2 text-sm ${
+              saveMessage.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
+                : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+            }`}>
+              {saveMessage.text}
+            </div>
+          )}
+          <div className="flex gap-3">
+            <BaseButton
+              variant="ghost"
+              size="md"
+              onClick={onClose}
+              className="flex-1"
+            >
+              Cerrar
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              size="md"
+              onClick={handleSaveSettings}
+              className="flex-1"
+            >
+              Guardar Configuración
+            </BaseButton>
+          </div>
         </div>
       </div>
     </BaseModal>
