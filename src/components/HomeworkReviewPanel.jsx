@@ -33,6 +33,7 @@ import {
   BaseEmptyState
 } from './common';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
+import HighlightedTranscription from './homework/HighlightedTranscription';
 import {
   getPendingReviews,
   approveReview,
@@ -355,17 +356,21 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
           </div>
         </div>
 
-        {/* Transcription */}
+        {/* Transcription with highlighted errors */}
         {review.transcription && (
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
               <FileText size={18} strokeWidth={2} />
               Texto Extraído
+              <BaseBadge variant="orange" size="sm">
+                Errores resaltados
+              </BaseBadge>
             </h3>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-                {review.transcription}
-              </p>
+              <HighlightedTranscription
+                transcription={review.transcription}
+                corrections={updatedCorrections}
+              />
             </div>
           </div>
         )}
