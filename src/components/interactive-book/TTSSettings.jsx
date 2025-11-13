@@ -21,7 +21,13 @@ function TTSSettings({ alwaysOpen = false }) {
   const [elevenLabsApiKey, setElevenLabsApiKey] = useState('');
   const [hasElevenLabsKey, setHasElevenLabsKey] = useState(false);
 
+  // Debug: Log cuando cambia el estado
   useEffect(() => {
+    console.log('🔄 [TTSSettings] hasElevenLabsKey changed to:', hasElevenLabsKey);
+  }, [hasElevenLabsKey]);
+
+  useEffect(() => {
+    console.log('🚀 [TTSSettings] Component mounted, loading configuration...');
     loadVoices();
     loadElevenLabsKey();
 
@@ -49,9 +55,19 @@ function TTSSettings({ alwaysOpen = false }) {
 
   const loadElevenLabsKey = () => {
     const storedKey = localStorage.getItem('ai_credentials_elevenlabs');
+    console.log('🔍 [TTSSettings] Checking ElevenLabs key:', {
+      exists: !!storedKey,
+      length: storedKey?.length,
+      hasContent: !!(storedKey && storedKey.trim())
+    });
+
     if (storedKey && storedKey.trim()) {
       setHasElevenLabsKey(true);
       setElevenLabsApiKey('••••••••••••••••'); // Mostrar ofuscado
+      console.log('✅ [TTSSettings] ElevenLabs key detected and loaded');
+    } else {
+      setHasElevenLabsKey(false);
+      console.log('❌ [TTSSettings] No ElevenLabs key found');
     }
   };
 
