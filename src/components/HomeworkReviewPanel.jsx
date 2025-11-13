@@ -139,6 +139,8 @@ export default function HomeworkReviewPanel({ teacherId }) {
       {showDetailModal && selectedReview && (
         <ReviewDetailModal
           review={selectedReview}
+          teacherId={teacherId}
+          user={user}
           onClose={() => {
             setShowDetailModal(false);
             setSelectedReview(null);
@@ -217,7 +219,7 @@ function ReviewCard({ review, onSelect }) {
 /**
  * Review Detail Modal Component
  */
-function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
+function ReviewDetailModal({ review, teacherId, user, onClose, onApproveSuccess }) {
   const [isApproving, setIsApproving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState(review.overallFeedback || '');
