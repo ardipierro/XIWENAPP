@@ -1,5 +1,5 @@
 /**
- * @fileoverview Sistema de tabs para extras de diálogo (Audio, Traducción, Vocabulario, Ejercicio)
+ * @fileoverview Sistema de tabs para extras de diálogo - RECREADO DESDE CERO
  * @module components/interactive-book/DialogueExtras
  */
 
@@ -10,10 +10,6 @@ import AudioPlayer from './AudioPlayer';
 import FillInBlankExercise from './FillInBlankExercise';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
 
-/**
- * Componente de tabs para mostrar extras de una línea de diálogo
- * Solo un tab activo a la vez - sin overlapping
- */
 function DialogueExtras({
   audioUrl,
   text,
@@ -25,58 +21,74 @@ function DialogueExtras({
   exercise,
   onExerciseComplete
 }) {
-  // Determinar qué tabs están disponibles
-  const availableTabs = [];
+  // Determinar tabs disponibles
+  const tabs = [];
 
   if (audioUrl) {
-    availableTabs.push({
-      id: 'audio',
-      label: 'Audio',
-      icon: Volume2,
-      color: 'blue'
-    });
+    tabs.push({ id: 'audio', label: 'Audio', icon: Volume2, color: 'blue' });
   }
-
   if (translation) {
-    availableTabs.push({
-      id: 'translation',
-      label: 'Traducción',
-      icon: Languages,
-      color: 'amber'
-    });
+    tabs.push({ id: 'translation', label: 'Traducción', icon: Languages, color: 'amber' });
   }
-
   if (notes && notes.length > 0) {
-    availableTabs.push({
-      id: 'vocabulary',
-      label: 'Vocabulario',
-      icon: BookOpen,
-      color: 'purple'
-    });
+    tabs.push({ id: 'vocabulary', label: 'Vocabulario', icon: BookOpen, color: 'purple' });
   }
-
   if (exercise) {
-    availableTabs.push({
-      id: 'exercise',
-      label: 'Ejercicio',
-      icon: HelpCircle,
-      color: 'green'
-    });
+    tabs.push({ id: 'exercise', label: 'Ejercicio', icon: HelpCircle, color: 'green' });
   }
 
-  // Tab activo por defecto: el primero disponible
-  const [activeTab, setActiveTab] = useState(availableTabs[0]?.id || 'audio');
+  const [activeTab, setActiveTab] = useState(tabs[0]?.id || 'audio');
 
-  if (availableTabs.length === 0) {
-    return null;
-  }
+  if (tabs.length === 0) return null;
 
-  // Renderizar contenido del tab activo
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'audio':
-        return (
-          <div className="mb-8">
+  // Estilos de tabs
+  const tabColors = {
+    blue: {
+      active: 'bg-blue-500 text-white border-blue-600',
+      inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+    },
+    amber: {
+      active: 'bg-amber-500 text-white border-amber-600',
+      inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+    },
+    purple: {
+      active: 'bg-purple-500 text-white border-purple-600',
+      inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+    },
+    green: {
+      active: 'bg-green-500 text-white border-green-600',
+      inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20'
+    }
+  };
+
+  return (
+    <div className="mt-4 w-full space-y-4">
+      {/* Tabs horizontales */}
+      <div className="flex gap-2">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          const colorClass = isActive ? tabColors[tab.color].active : tabColors[tab.color].inactive;
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all border-2 ${colorClass} ${
+                isActive ? 'shadow-md scale-105' : 'border-gray-300 dark:border-gray-600'
+              }`}
+            >
+              <Icon size={18} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Contenido - TODOS con mismo wrapper p-6 */}
+      <div className="animate-in fade-in duration-200">
+        {activeTab === 'audio' && (
+          <div className="rounded-xl p-6 bg-blue-50/30 dark:bg-blue-900/10">
             <AudioPlayer
               audioUrl={audioUrl}
               text={text}
@@ -84,14 +96,12 @@ function DialogueExtras({
               characterName={characterName}
               characters={characters}
               showText={false}
-              className="text-xs"
             />
           </div>
-        );
+        )}
 
-      case 'translation':
-        return (
-          <div className="bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-300 dark:border-amber-700 rounded-xl p-6 shadow-md">
+        {activeTab === 'translation' && (
+          <div className="rounded-xl p-6 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-700">
             <div className="flex items-center gap-3 mb-4">
               <Languages size={24} className="text-amber-600 dark:text-amber-400" />
               <h3 className="text-lg font-bold text-amber-900 dark:text-amber-100">
@@ -102,11 +112,10 @@ function DialogueExtras({
               {translation}
             </div>
           </div>
-        );
+        )}
 
-      case 'vocabulary':
-        return (
-          <div className="bg-purple-50 dark:bg-purple-900/30 border-2 border-purple-300 dark:border-purple-700 rounded-xl p-6 shadow-md">
+        {activeTab === 'vocabulary' && (
+          <div className="rounded-xl p-6 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-700">
             <div className="flex items-center gap-3 mb-4">
               <BookOpen size={24} className="text-purple-600 dark:text-purple-400" />
               <h3 className="text-lg font-bold text-purple-900 dark:text-purple-100">
@@ -124,7 +133,7 @@ function DialogueExtras({
                   </div>
                   {note.rioplatenseNote && (
                     <div className="text-sm text-purple-700 dark:text-purple-400 mt-3 flex items-start gap-2 p-2 bg-purple-100 dark:bg-purple-900/40 rounded">
-                      <span className="text-lg flex-shrink-0">🇦🇷</span>
+                      <span className="text-lg">🇦🇷</span>
                       <span>{note.rioplatenseNote}</span>
                     </div>
                   )}
@@ -137,11 +146,10 @@ function DialogueExtras({
               ))}
             </div>
           </div>
-        );
+        )}
 
-      case 'exercise':
-        return (
-          <div className="bg-green-50 dark:bg-green-900/30 border-2 border-green-300 dark:border-green-700 rounded-xl p-6 shadow-md">
+        {activeTab === 'exercise' && (
+          <div className="rounded-xl p-6 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700">
             <div className="flex items-center gap-3 mb-4">
               <HelpCircle size={24} className="text-green-600 dark:text-green-400" />
               <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
@@ -161,63 +169,7 @@ function DialogueExtras({
               />
             )}
           </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="mt-4 mb-8 w-full">
-      {/* Tabs horizontales */}
-      <div className="flex gap-2 mb-4">
-        {availableTabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-
-          // Colores según el tab
-          const colorClasses = {
-            blue: {
-              active: 'bg-blue-500 text-white border-blue-600',
-              inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300 dark:border-gray-600'
-            },
-            amber: {
-              active: 'bg-amber-500 text-white border-amber-600',
-              inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-gray-300 dark:border-gray-600'
-            },
-            purple: {
-              active: 'bg-purple-500 text-white border-purple-600',
-              inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-gray-300 dark:border-gray-600'
-            },
-            green: {
-              active: 'bg-green-500 text-white border-green-600',
-              inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 border-gray-300 dark:border-gray-600'
-            }
-          };
-
-          const classes = isActive
-            ? colorClasses[tab.color].active
-            : colorClasses[tab.color].inactive;
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all border-2 ${classes} ${
-                isActive ? 'shadow-md transform scale-105' : ''
-              }`}
-            >
-              <Icon size={18} />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Contenido del tab activo */}
-      <div className="animate-in fade-in-50 duration-200">
-        {renderTabContent()}
+        )}
       </div>
     </div>
   );
@@ -230,14 +182,7 @@ DialogueExtras.propTypes = {
   characterName: PropTypes.string,
   characters: PropTypes.array,
   translation: PropTypes.string,
-  notes: PropTypes.arrayOf(
-    PropTypes.shape({
-      word: PropTypes.string.isRequired,
-      definition: PropTypes.string.isRequired,
-      example: PropTypes.string,
-      rioplatenseNote: PropTypes.string
-    })
-  ),
+  notes: PropTypes.array,
   exercise: PropTypes.object,
   onExerciseComplete: PropTypes.func
 };
