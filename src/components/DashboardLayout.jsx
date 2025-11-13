@@ -55,7 +55,7 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-none">
+    <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-none ${isViewingAs ? 'has-banner' : ''}`}>
       {/* Banner "Ver como" (solo visible cuando está activo) */}
       <ViewAsBanner />
 
