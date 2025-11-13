@@ -1,0 +1,283 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    CLASSMANAGER MODALS - DETAILED STRUCTURE                   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+╭───────────────────────────────────────────────────────────────────────────────╮
+│ MODAL #1: CREATE/EDIT CLASS MODAL (lines 756-959)                            │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ State: showModal                                                              │
+│ Trigger: handleCreateClass() or handleEditClass(classData)                    │
+│ Type: Custom modal-overlay + modal-box (will refactor to BaseModal)           │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│ <BaseModal> (to refactor)                                                     │
+│ ├─ HEADER (FIXED)                                                             │
+│ │  ├─ Title: "Nueva Clase" or "Editar Clase"                                  │
+│ │  └─ Close button [X]                                                         │
+│ ├─ TABS (FIXED - but only 1 tab shown currently)                              │
+│ │  └─ "Información" (could expand for future features)                        │
+│ ├─ BODY (SCROLLABLE)                                                          │
+│ │  ├─ FORM FIELD 1:                                                           │
+│ │  │  Label: "Nombre de la Clase *"                                           │
+│ │  │  Type: <BaseInput> text                                                  │
+│ │  │  State: formData.name                                                    │
+│ │  │  Required: YES                                                           │
+│ │  ├─ FORM FIELD 2:                                                           │
+│ │  │  Label: "Fecha de Inicio *"                                              │
+│ │  │  Type: <BaseInput> date                                                  │
+│ │  │  State: formData.startDate                                               │
+│ │  │  Required: YES                                                           │
+│ │  │  Help: "Las instancias se generarán a partir de esta fecha"              │
+│ │  ├─ FORM FIELD 3:                                                           │
+│ │  │  Label: "Descripción"                                                    │
+│ │  │  Type: <BaseInput> textarea                                              │
+│ │  │  State: formData.description                                             │
+│ │  │  Required: NO                                                            │
+│ │  ├─ FORM FIELD 4-5 (TWO COLUMN ROW):                                        │
+│ │  │  ├─ FIELD 4A:                                                            │
+│ │  │  │  Label: "Curso Asociado"                                              │
+│ │  │  │  Type: <BaseSelect>                                                   │
+│ │  │  │  State: formData.courseId                                             │
+│ │  │  │  Options: courses[] + "-- Sin curso --"                               │
+│ │  │  │  Required: NO                                                         │
+│ │  │  └─ FIELD 4B:                                                            │
+│ │  │     Label: "Costo en Créditos"                                           │
+│ │  │     Type: <BaseInput> number                                             │
+│ │  │     State: formData.creditCost                                           │
+│ │  │     Min/Max: 0-10                                                        │
+│ │  │     Required: NO                                                         │
+│ │  ├─ FORM FIELD 6:                                                           │
+│ │  │  Label: "Link de Videollamada"                                           │
+│ │  │  Type: <BaseInput> URL                                                   │
+│ │  │  State: formData.meetingLink                                             │
+│ │  │  Required: NO                                                            │
+│ │  └─ SCHEDULES SECTION (CUSTOM):                                             │
+│ │     ├─ Display Added Schedules (if any):                                    │
+│ │     │  └─ .schedule-chip elements (keep custom style)                       │
+│ │     │     ├─ Text: "{day} {startTime} - {endTime}"                          │
+│ │     │     └─ Button: Remove [×]                                             │
+│ │     ├─ ADD SCHEDULE FORM:                                                   │
+│ │     │  ├─ Days Selection (7 checkboxes):                                    │
+│ │     │  │  "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"                   │
+│ │     │  │  State: scheduleForm.daysOfWeek[]                                  │
+│ │     │  ├─ Time Inputs (2 columns):                                          │
+│ │     │  │  ├─ Start Time:                                                    │
+│ │     │  │  │  Type: <BaseInput> time (HH:mm)                                 │
+│ │     │  │  │  State: scheduleForm.startTime                                  │
+│ │     │  │  └─ End Time:                                                      │
+│ │     │  │     Type: <BaseInput> time (HH:mm)                                 │
+│ │     │  │     State: scheduleForm.endTime                                    │
+│ │     │  └─ <BaseButton> "Agregar Horario" (outline)                          │
+│ │     │     onClick: handleAddSchedule()                                      │
+│ │     └─ Help: "Selecciona varios días para crear horarios múltiples"         │
+│ ├─ FOOTER (FIXED)                                                             │
+│ │  ├─ <BaseButton> "Cancelar" (outline)                                       │
+│ │  │  onClick: setShowModal(false)                                            │
+│ │  └─ <BaseButton> "Crear/Guardar Clase" (primary)                            │
+│ │     onClick: handleSaveClass()                                              │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+
+╭───────────────────────────────────────────────────────────────────────────────╮
+│ MODAL #2: CLASS DETAILS & CONFIGURATION (lines 961-1569)                      │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ State: showDetailsModal                                                       │
+│ Trigger: handleViewDetails(classData)                                         │
+│ Type: Custom modal-overlay + modal-box with IIFE (will refactor to BaseModal) │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│ <BaseModal> (to refactor)                                                     │
+│ ├─ HEADER (FIXED)                                                             │
+│ │  ├─ Title: {selectedClass.name}                                             │
+│ │  └─ Close button [X]                                                         │
+│ ├─ NOTIFICATION (conditional)                                                │
+│ │  └─ .cm-message (success/error)                                             │
+│ ├─ TABS (FIXED) - 5 tabs with manual styling                                  │
+│ │  ├─ [General] ← Default tab                                                 │
+│ │  ├─ [Horarios]                                                              │
+│ │  ├─ [Curso]                                                                 │
+│ │  ├─ [Estudiantes]                                                           │
+│ │  └─ [Contenidos] ← INCOMPLETE                                               │
+│ ├─ BODY (SCROLLABLE) - Only ONE tab visible at a time                         │
+│ │  │                                                                           │
+│ │  ├─ TAB CONTENT 1: GENERAL (detailsTab === 'general') ─────────────────────┤
+│ │  │                                                                           │
+│ │  │  ├─ FORM: Nombre                                                         │
+│ │  │  │  Type: <BaseInput> text                                               │
+│ │  │  │  State: formData.name                                                 │
+│ │  │  ├─ FORM: Fecha de Inicio                                                │
+│ │  │  │  Type: <BaseInput> date                                               │
+│ │  │  │  State: formData.startDate                                            │
+│ │  │  │  Help: "Las nuevas instancias se generarán a partir de esta fecha"    │
+│ │  │  ├─ FORM: Descripción                                                    │
+│ │  │  │  Type: <BaseInput> textarea                                           │
+│ │  │  │  State: formData.description                                          │
+│ │  │  ├─ FORM ROW (2 columns):                                                │
+│ │  │  │  ├─ Costo en Créditos                                                 │
+│ │  │  │  │  Type: <BaseInput> number                                          │
+│ │  │  │  │  State: formData.creditCost                                        │
+│ │  │  │  └─ Link de Videollamada                                              │
+│ │  │  │     Type: <BaseInput> URL                                             │
+│ │  │  │     State: formData.meetingLink                                       │
+│ │  │  └─ IMAGE UPLOAD:                                                        │
+│ │  │     ├─ If formData.imageUrl:                                             │
+│ │  │     │  ├─ <img> preview (h-48)                                           │
+│ │  │     │  └─ <BaseButton> "Eliminar Imagen" (danger, sm)                    │
+│ │  │     │     onClick: handleImageDelete()                                   │
+│ │  │     └─ Else:                                                             │
+│ │  │        ├─ <input type="file" accept="image/*">                           │
+│ │  │        │  onChange: handleImageUpload()                                  │
+│ │  │        │  disabled: uploadingImage                                       │
+│ │  │        └─ Help: "PNG, JPG, GIF or WEBP (max 5MB)"                        │
+│ │  │                                                                           │
+│ │  ├─ TAB CONTENT 2: HORARIOS (detailsTab === 'horarios') ────────────────────┤
+│ │  │                                                                           │
+│ │  │  ├─ SECTION 1: Horarios Configurados                                     │
+│ │  │  │  ├─ h4 "Horarios Configurados"                                        │
+│ │  │  │  └─ List of configured schedules (map formData.schedules):            │
+│ │  │  │     ├─ Display: "{day} {startTime} - {endTime}"                       │
+│ │  │  │     ├─ Instances count: "({count} sesiones pendientes)"               │
+│ │  │  │     └─ <BaseButton> "Eliminar" (danger, sm)                           │
+│ │  │  │        onClick: handleRemoveSchedule(idx)                             │
+│ │  │  │                                                                       │
+│ │  │  └─ SECTION 2: Agregar Horario                                           │
+│ │  │     ├─ Days Selection (7 button toggles in grid):                        │
+│ │  │     │  Label: "Días de la semana"                                        │
+│ │  │     │  State: scheduleForm.daysOfWeek[]                                  │
+│ │  │     ├─ Time Inputs (2 columns, using <select> for hour/minute):          │
+│ │  │     │  ├─ Start Time:                                                    │
+│ │  │     │  │  <select> hours (0-23) + <select> minutes (0,5,10,...,55)       │
+│ │  │     │  │  onChange: updateTime('startTime', 'hour'/'minute', value)      │
+│ │  │     │  └─ End Time:                                                      │
+│ │  │     │     <select> hours (0-23) + <select> minutes (0,5,10,...,55)       │
+│ │  │     │     onChange: updateTime('endTime', 'hour'/'minute', value)        │
+│ │  │     ├─ Weeks to Generate:                                                │
+│ │  │     │  Label: "Semanas a generar"                                        │
+│ │  │     │  Type: <BaseSelect>                                                │
+│ │  │     │  State: scheduleForm.weeksToGenerate                               │
+│ │  │     │  Options: [4 semanas, 8 semanas, 12 semanas, 16 semanas]           │
+│ │  │     ├─ <BaseButton> "Agregar" (success)                                  │
+│ │  │     │  onClick: handleAddSchedule()                                      │
+│ │  │     └─ Auto-Renew Checkbox:                                              │
+│ │  │        Label: "Auto-renovar instancias"                                  │
+│ │  │        State: scheduleForm.autoRenew                                     │
+│ │  │        Help: "Genera automáticamente {autoRenewWeeks} semanas..."         │
+│ │  │                                                                           │
+│ │  ├─ TAB CONTENT 3: ASIGNACIONES (detailsTab === 'asignaciones') ─────────────┤
+│ │  │                                                                           │
+│ │  │  ├─ SECTION 1: Curso Asociado                                            │
+│ │  │  │  ├─ h4 "Curso Asociado"                                               │
+│ │  │  │  └─ If formData.courseId:                                             │
+│ │  │  │     ├─ Display: course name                                           │
+│ │  │  │     └─ <BaseButton> "Eliminar" (danger, sm)                           │
+│ │  │  │        onClick: unassign + handleSaveClassChanges()                   │
+│ │  │  │  └─ Else: "No hay curso asociado"                                     │
+│ │  │  │                                                                       │
+│ │  │  └─ SECTION 2: Asignar Curso                                             │
+│ │  │     ├─ If already assigned: "Elimínalo para asignar otro"                │
+│ │  │     ├─ Else if no courses: "No hay cursos disponibles"                   │
+│ │  │     └─ Else:                                                             │
+│ │  │        ├─ <BaseSelect> + <BaseButton> "Agregar"                          │
+│ │  │        │  onChange/onClick: handleSaveClassChanges()                     │
+│ │  │                                                                           │
+│ │  ├─ TAB CONTENT 4: ESTUDIANTES (detailsTab === 'estudiantes') ──────────────┤
+│ │  │                                                                           │
+│ │  │  ├─ SECTION 1: Estudiantes Asignados                                     │
+│ │  │  │  ├─ h4 "Estudiantes Asignados"                                        │
+│ │  │  │  └─ List of assigned students:                                        │
+│ │  │  │     ├─ Display: name + email                                          │
+│ │  │  │     └─ <BaseButton> "Eliminar" (danger, sm)                           │
+│ │  │  │        onClick: handleUnassignStudent(id)                             │
+│ │  │  │                                                                       │
+│ │  │  └─ SECTION 2: Asignar Estudiante                                        │
+│ │  │     ├─ If all assigned: "Todos los estudiantes ya están asignados"       │
+│ │  │     └─ Else:                                                             │
+│ │  │        ├─ <BaseSelect> + <BaseButton> "Agregar"                          │
+│ │  │        │  onChange/onClick: handleAssignStudent(id)                      │
+│ │  │                                                                           │
+│ │  └─ TAB CONTENT 5: CONTENIDOS (detailsTab === 'contenidos') ─ INCOMPLETE ────┤
+│ │                                                                           │
+│ │     [NO CONTENT RENDERED - Button exists but tab is empty]                   │
+│ │     [SHOULD FOLLOW SAME PATTERN AS ESTUDIANTES TAB]                         │
+│ │                                                                           │
+│ ├─ FOOTER (FIXED)                                                             │
+│ │  ├─ <BaseButton> "Eliminar" (danger) icon=Trash2                            │
+│ │  │  onClick: setShowConfirmDelete(true)                                     │
+│ │  ├─ <BaseButton> "Cancelar" (outline)                                       │
+│ │  │  onClick: setShowDetailsModal(false)                                     │
+│ │  └─ <BaseButton> "Guardar Cambios" (primary) icon=Save                      │
+│ │     onClick: handleSaveClassChanges()                                       │
+│                                                                               │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+
+╭───────────────────────────────────────────────────────────────────────────────╮
+│ MODAL #3: DELETE CONFIRMATION (lines 1572-1585)                               │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ State: showConfirmDelete                                                      │
+│ Trigger: Delete button in Details Modal footer                                │
+│ Type: ConfirmModal (specialized component - already refactored)                │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│ <ConfirmModal>                                                                │
+│ ├─ Props:                                                                     │
+│ │  ├─ isOpen: showConfirmDelete                                               │
+│ │  ├─ title: "Eliminar Clase"                                                 │
+│ │  ├─ message: "¿Estás seguro...?\n\n                                         │
+│ │  │           Esta acción eliminará permanentemente...\n\n                    │
+│ │  │           Esta acción no se puede deshacer."                              │
+│ │  ├─ confirmText: "Eliminar"                                                 │
+│ │  ├─ cancelText: "Cancelar"                                                  │
+│ │  ├─ isDanger: true (red warning)                                            │
+│ │  ├─ onConfirm: handleDeleteClass(selectedClass.id)                          │
+│ │  └─ onCancel: setShowConfirmDelete(false)                                   │
+│                                                                               │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                         KEY REFACTORING POINTS                                ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+1. SCHEDULE CHIPS
+   Currently: .schedule-chip + .schedule-item (custom CSS)
+   Status: KEEP AS-IS or refactor to small BaseCard component
+   Current Styling:
+     - padding: 8px 12px
+     - background: var(--color-bg-secondary)
+     - border: 2px solid #6366f1
+     - border-radius: 20px
+     - font-size: 14px
+     - color: #4f46e5
+     - font-weight: 600
+
+2. MESSAGE DISPLAY
+   Currently: .cm-message (custom CSS notification)
+   Status: Consider integrating with app-wide notification/toast system
+   Current Variants:
+     - .cm-message.success (green)
+     - .cm-message.error (red)
+
+3. TIME INPUTS
+   Currently: Native <input type="time"> in Create/Edit modal
+              <select> pairs (hour:minute) in Details Horarios tab
+   Status: KEEP AS-IS for UX consistency
+           Hour/minute selects allow finer control for configuration
+
+4. FORM VALIDATION
+   Currently: Alert dialogs (alert(), confirm(), prompt())
+   Status: Consider replacing with better UX dialogs
+   Current Validation:
+     - name required
+     - schedules required (at least 1)
+     - daysOfWeek required
+     - startTime/endTime required
+     - confirm before deletion
+     - prompt for cancellation reason
+
+5. DIALOG PATTERNS
+   Create/Edit: alert() for errors
+   Delete: confirm() dialog + prompt() for reason
+   Status: Consider refactoring to use BaseModal for all dialogs
+
+═══════════════════════════════════════════════════════════════════════════════

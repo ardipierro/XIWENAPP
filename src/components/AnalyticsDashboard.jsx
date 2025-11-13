@@ -23,9 +23,15 @@ import {
   getCourseStats,
   getPopularExercises
 } from '../firebase/analytics';
+import { DashboardContainer, SectionHeader } from './common';
+import BaseCard from './common/BaseCard';
 
 const COLORS = ['#52525b', '#71717a', '#a1a1aa', '#f59e0b', '#10b981', '#d4d4d8', '#ef4444', '#3f3f46'];
 
+/**
+ * AnalyticsDashboard - Dashboard de análisis y estadísticas
+ * Refactorizado para usar Design System 3.0 (DashboardContainer + BaseCard)
+ */
 function AnalyticsDashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [activityData, setActivityData] = useState([]);
@@ -55,17 +61,28 @@ function AnalyticsDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="spinner"></div>
-        <p className="ml-4" style={{ color: 'var(--color-text-secondary)' }}>Cargando análisis...</p>
-      </div>
+      <DashboardContainer>
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="spinner"></div>
+          <p className="ml-4" style={{ color: 'var(--color-text-secondary)' }}>Cargando análisis...</p>
+        </div>
+      </DashboardContainer>
     );
   }
 
+  const totalGames = activityData.reduce((sum, d) => sum + d.games, 0);
+  const activeStudents = topStudents.length;
+  const activeCourses = courseStats.length;
+
   return (
-    <div className="analytics-dashboard">
+    <DashboardContainer>
+      <SectionHeader
+        title="Analytics"
+        subtitle="Estadísticas y métricas de rendimiento"
+      />
+
       {/* Activity by Day */}
-      <div className="card mb-6">
+      <BaseCard className="mb-6">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
           <BarChart3 size={20} strokeWidth={2} /> Actividad de Juegos (Últimos 7 Días)
         </h3>
@@ -103,12 +120,12 @@ function AnalyticsDashboard({ user }) {
             </LineChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </BaseCard>
 
       {/* Top Students and Course Stats Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Top Students */}
-        <div className="card">
+        <BaseCard>
           <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <Trophy size={20} strokeWidth={2} /> Top 10 Estudiantes
           </h3>
@@ -139,10 +156,10 @@ function AnalyticsDashboard({ user }) {
               </BarChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </BaseCard>
 
         {/* Course Stats */}
-        <div className="card">
+        <BaseCard>
           <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <BookOpen size={20} strokeWidth={2} /> Rendimiento por Curso
           </h3>
@@ -178,11 +195,11 @@ function AnalyticsDashboard({ user }) {
               </PieChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </BaseCard>
       </div>
 
       {/* Popular Exercises */}
-      <div className="card">
+      <BaseCard className="mb-6">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
           <Gamepad2 size={20} strokeWidth={2} /> Ejercicios Más Jugados
         </h3>
@@ -215,39 +232,53 @@ function AnalyticsDashboard({ user }) {
             </BarChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </BaseCard>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <div className="card text-center">
-          <div className="text-4xl mb-2 flex justify-center">
-            <Target size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <BaseCard>
+          <div className="text-center py-4">
+            <div className="text-4xl mb-2 flex justify-center">
+              <Target size={40} strokeWidth={2} style={{ color: 'var(--color-info)' }} />
+            </div>
+            <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              {totalGames}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Juegos Totales (7 días)
+            </div>
           </div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {activityData.reduce((sum, d) => sum + d.games, 0)}
+        </BaseCard>
+
+        <BaseCard>
+          <div className="text-center py-4">
+            <div className="text-4xl mb-2 flex justify-center">
+              <Users size={40} strokeWidth={2} style={{ color: 'var(--color-success)' }} />
+            </div>
+            <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              {activeStudents}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Estudiantes Activos
+            </div>
           </div>
-          <div style={{ color: 'var(--color-text-secondary)' }}>Juegos Totales (7 días)</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-4xl mb-2 flex justify-center">
-            <Users size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
+        </BaseCard>
+
+        <BaseCard>
+          <div className="text-center py-4">
+            <div className="text-4xl mb-2 flex justify-center">
+              <BookOpen size={40} strokeWidth={2} style={{ color: 'var(--color-warning)' }} />
+            </div>
+            <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              {activeCourses}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Cursos con Actividad
+            </div>
           </div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {topStudents.length}
-          </div>
-          <div style={{ color: 'var(--color-text-secondary)' }}>Estudiantes Activos</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-4xl mb-2 flex justify-center">
-            <BookOpen size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
-          </div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {courseStats.length}
-          </div>
-          <div style={{ color: 'var(--color-text-secondary)' }}>Cursos con Actividad</div>
-        </div>
+        </BaseCard>
       </div>
-    </div>
+    </DashboardContainer>
   );
 }
 
