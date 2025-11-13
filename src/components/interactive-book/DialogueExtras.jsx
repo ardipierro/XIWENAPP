@@ -76,17 +76,15 @@ function DialogueExtras({
     switch (activeTab) {
       case 'audio':
         return (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-blue-200 dark:border-blue-800 p-6 shadow-sm">
-            <AudioPlayer
-              audioUrl={audioUrl}
-              text={text}
-              voiceConfig={voiceConfig}
-              characterName={characterName}
-              characters={characters}
-              showText={false}
-              className="text-xs"
-            />
-          </div>
+          <AudioPlayer
+            audioUrl={audioUrl}
+            text={text}
+            voiceConfig={voiceConfig}
+            characterName={characterName}
+            characters={characters}
+            showText={false}
+            className="text-xs"
+          />
         );
 
       case 'translation':
