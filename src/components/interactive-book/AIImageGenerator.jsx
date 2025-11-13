@@ -173,13 +173,16 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
 
       {/* Panel principal */}
       {isOpen && (
-        <BaseCard
-          icon={Image}
-          title="Generador de Imágenes con IA"
-          subtitle="Crea imágenes educativas basadas en el contenido del libro"
-        >
-          {/* Configuración de API Keys */}
-          {showSettings && (
+        <>
+          {/* ✅ BaseCard solo cuando NO es alwaysOpen */}
+          {!alwaysOpen ? (
+            <BaseCard
+              icon={Image}
+              title="Generador de Imágenes con IA"
+              subtitle="Crea imágenes educativas basadas en el contenido del libro"
+            >
+              {/* Configuración de API Keys */}
+              {showSettings && (
             <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 space-y-4">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -456,7 +459,32 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
               </div>
             </div>
           </div>
-        </BaseCard>
+            </BaseCard>
+          ) : (
+            /* ✅ Contenido SIN BaseCard cuando alwaysOpen=true */
+            <div className="space-y-4">
+              {/* Mensaje de credenciales */}
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Key size={20} className="text-purple-600 dark:text-purple-400 mt-1" />
+                  <div>
+                    <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                      Configurar credenciales de proveedores IA
+                    </h4>
+                    <p className="text-xs text-purple-800 dark:text-purple-200">
+                      Para generar imágenes, configura tus API keys en:<br />
+                      <strong>Menú Lateral → Configuración → Credenciales IA</strong>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center text-sm text-gray-600 dark:text-gray-400">
+                Generador de imágenes disponible después de configurar credenciales
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

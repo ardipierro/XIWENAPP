@@ -144,9 +144,9 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
           </button>
         )}
 
-        {/* Panel expandible con extras - Accordion con ESPACIO REAL */}
+        {/* Panel expandible con extras - Accordion con ESPACIO MAYOR */}
         {showExtras && (
-          <div className="mt-4 w-full space-y-6 animate-in slide-in-from-top-2 duration-200">
+          <div className="mt-4 w-full space-y-8 animate-in slide-in-from-top-2 duration-200">
             {/* Audio Player - SIEMPRE VISIBLE sin accordion */}
             {line.audioUrl && (
               <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-blue-200 dark:border-blue-800 p-4 shadow-sm">

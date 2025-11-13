@@ -348,8 +348,10 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
       {/* Panel expandible */}
       {isOpen && (
         <BaseCard
-          title="Configuración de Voces por Personaje"
-          subtitle="Asigna diferentes voces y configuraciones a cada personaje del diálogo"
+          {...(!alwaysOpen && {
+            title: "Configuración de Voces por Personaje",
+            subtitle: "Asigna diferentes voces y configuraciones a cada personaje del diálogo"
+          })}
         >
           <div className="space-y-4">
             {characters.length === 0 ? (
