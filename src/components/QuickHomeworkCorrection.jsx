@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { uploadMessageAttachment } from '../firebase/storage';
 import { createHomeworkReview, getReviewsByStudent, subscribeToReview, REVIEW_STATUS } from '../firebase/homework_reviews';
-import { getStudentData } from '../firebase/users';
+import { getUserById } from '../firebase/users';
 import BaseButton from './common/BaseButton';
 import { BaseLoading } from './common';
 import logger from '../utils/logger';
@@ -36,7 +36,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
   useEffect(() => {
     const loadTeacherId = async () => {
       try {
-        const studentData = await getStudentData(studentId);
+        const studentData = await getUserById(studentId);
         if (studentData && studentData.teacherId) {
           setTeacherId(studentData.teacherId);
         }
