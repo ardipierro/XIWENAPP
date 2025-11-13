@@ -365,6 +365,123 @@ export async function initializeDefaultProfiles(teacherId) {
   }
 }
 
+/**
+ * Assign a profile to an individual student
+ * @param {string} profileId - Profile ID
+ * @param {string} studentId - Student ID
+ * @param {string} teacherId - Teacher ID
+ * @returns {Promise<Object>} Result with assignment ID
+ */
+export async function assignProfileToStudent(profileId, studentId, teacherId) {
+  try {
+    const assignmentsRef = collection(db, 'profile_students');
+
+    // Check if assignment already exists
+    const q = query(
+      assignmentsRef,
+      where('studentId', '==', studentId),
+      where('teacherId', '==', teacherId)
+    );
+    const existing = await getDocs(q);
+
+    if (!existing.empty) {
+      // Update existing assignment
+      const docRef = existing.docs[0].ref;
+      await updateDoc(docRef, {
+        profileId,
+        updatedAt: serverTimestamp()
+      });
+      logger.info(`Updated profile assignment for student ${studentId}`, 'CorrectionProfiles');
+      return { success: true, id: existing.docs[0].id };
+    } else {
+      // Create new assignment
+      const docRef = await addDoc(assignmentsRef, {
+        profileId,
+        studentId,
+        teacherId,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      logger.info(`Assigned profile ${profileId} to student ${studentId}`, 'CorrectionProfiles');
+      return { success: true, id: docRef.id };
+    }
+  } catch (error) {
+    logger.error(`Error assigning profile to student ${studentId}`, 'CorrectionProfiles', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get the correction profile for a student
+ * Returns individual assignment or teacher's default profile
+ * @param {string} studentId - Student ID
+ * @param {string} teacherId - Teacher ID
+ * @returns {Promise<Object|null>} Profile or null
+ */
+export async function getStudentProfile(studentId, teacherId) {
+  try {
+    // First, check for individual assignment
+    const assignmentsRef = collection(db, 'profile_students');
+    const q = query(
+      assignmentsRef,
+      where('studentId', '==', studentId),
+      where('teacherId', '==', teacherId)
+    );
+    const assignmentSnapshot = await getDocs(q);
+
+    if (!assignmentSnapshot.empty) {
+      const assignment = assignmentSnapshot.docs[0].data();
+      const profile = await getCorrectionProfile(assignment.profileId);
+      if (profile) {
+        logger.info(`Found individual profile for student ${studentId}`, 'CorrectionProfiles');
+        return profile;
+      }
+    }
+
+    // Fallback to teacher's default profile
+    const defaultProfile = await getDefaultProfile(teacherId);
+    if (defaultProfile) {
+      logger.info(`Using default profile for student ${studentId}`, 'CorrectionProfiles');
+      return defaultProfile;
+    }
+
+    logger.warn(`No profile found for student ${studentId}`, 'CorrectionProfiles');
+    return null;
+  } catch (error) {
+    logger.error(`Error getting profile for student ${studentId}`, 'CorrectionProfiles', error);
+    return null;
+  }
+}
+
+/**
+ * Remove profile assignment from a student
+ * @param {string} studentId - Student ID
+ * @param {string} teacherId - Teacher ID
+ * @returns {Promise<Object>} Result
+ */
+export async function removeStudentProfileAssignment(studentId, teacherId) {
+  try {
+    const assignmentsRef = collection(db, 'profile_students');
+    const q = query(
+      assignmentsRef,
+      where('studentId', '==', studentId),
+      where('teacherId', '==', teacherId)
+    );
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      await deleteDoc(snapshot.docs[0].ref);
+      logger.info(`Removed profile assignment for student ${studentId}`, 'CorrectionProfiles');
+      return { success: true };
+    }
+
+    return { success: true, message: 'No assignment found' };
+  } catch (error) {
+    logger.error(`Error removing profile assignment for student ${studentId}`, 'CorrectionProfiles', error);
+    return { success: false, error: error.message };
+  }
+}
+
 export default {
   createCorrectionProfile,
   updateCorrectionProfile,
@@ -373,6 +490,9 @@ export default {
   deleteCorrectionProfile,
   assignProfileToStudents,
   assignProfileToGroups,
+  assignProfileToStudent,
+  getStudentProfile,
+  removeStudentProfileAssignment,
   setDefaultProfile,
   getDefaultProfile,
   initializeDefaultProfiles,

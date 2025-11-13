@@ -287,6 +287,38 @@ export async function approveReview(reviewId, teacherEdits = {}) {
 }
 
 /**
+ * Request reanalysis of a homework with a different profile
+ * @param {string} reviewId - Review ID
+ * @param {string} profileId - Correction profile ID to use
+ * @returns {Promise<Object>} Result
+ */
+export async function requestReanalysis(reviewId, profileId) {
+  try {
+    const docRef = doc(db, 'homework_reviews', reviewId);
+    await updateDoc(docRef, {
+      status: REVIEW_STATUS.PROCESSING,
+      correctionProfileId: profileId,
+      requestReanalysis: true,
+      reanalysisRequestedAt: serverTimestamp(),
+      // Clear previous corrections
+      aiSuggestions: [],
+      aiErrorSummary: {},
+      detailedCorrections: [],
+      errorSummary: {},
+      overallFeedback: '',
+      suggestedGrade: 0,
+      teacherReviewed: false
+    });
+
+    logger.info(`Requested reanalysis for review ${reviewId} with profile ${profileId}`, 'HomeworkReviews');
+    return { success: true };
+  } catch (error) {
+    logger.error(`Error requesting reanalysis for review ${reviewId}`, 'HomeworkReviews', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Subscribe to review updates (real-time)
  * @param {string} reviewId - Review ID
  * @param {Function} callback - Callback function

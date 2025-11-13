@@ -34,10 +34,12 @@ import {
 } from './common';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
+import ProfileSelector from './homework/ProfileSelector';
 import {
   getPendingReviews,
   approveReview,
   subscribeToReview,
+  requestReanalysis,
   REVIEW_STATUS
 } from '../firebase/homework_reviews';
 import logger from '../utils/logger';
@@ -355,6 +357,26 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
             />
           </div>
         </div>
+
+        {/* Profile Selector */}
+        <ProfileSelector
+          studentId={review.studentId}
+          teacherId={review.teacherId}
+          currentReviewId={review.id}
+          onReanalyze={async (profileId) => {
+            const result = await requestReanalysis(review.id, profileId);
+            if (result.success) {
+              alert('Re-análisis solicitado. La tarea se procesará en unos momentos...');
+              onClose();
+              // Reload reviews after a delay to show the processing status
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            } else {
+              alert('Error al solicitar re-análisis: ' + result.error);
+            }
+          }}
+        />
 
         {/* Transcription with highlighted errors */}
         {review.transcription && (

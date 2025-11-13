@@ -5,9 +5,105 @@
  * Analiza imágenes de tareas usando AI Vision (Claude o GPT-4)
  */
 
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
+
+// ============================================================================
+// CORRECTION PROFILE HELPERS
+// ============================================================================
+
+/**
+ * Get correction profile for a student
+ * Returns individual assignment or teacher's default profile
+ */
+async function getStudentCorrectionProfile(studentId, teacherId, db) {
+  try {
+    // Check for individual profile assignment
+    const assignmentsRef = db.collection('profile_students');
+    const assignmentQuery = assignmentsRef
+      .where('studentId', '==', studentId)
+      .where('teacherId', '==', teacherId)
+      .limit(1);
+
+    const assignmentSnapshot = await assignmentQuery.get();
+
+    if (!assignmentSnapshot.empty) {
+      const assignment = assignmentSnapshot.docs[0].data();
+      const profileDoc = await db.collection('correction_profiles').doc(assignment.profileId).get();
+      if (profileDoc.exists) {
+        console.log(`[getStudentCorrectionProfile] Found individual profile for student ${studentId}`);
+        return { id: profileDoc.id, ...profileDoc.data() };
+      }
+    }
+
+    // Fallback to teacher's default profile
+    const profilesRef = db.collection('correction_profiles');
+    const defaultQuery = profilesRef
+      .where('teacherId', '==', teacherId)
+      .where('isDefault', '==', true)
+      .limit(1);
+
+    const defaultSnapshot = await defaultQuery.get();
+
+    if (!defaultSnapshot.empty) {
+      const profileDoc = defaultSnapshot.docs[0];
+      console.log(`[getStudentCorrectionProfile] Using default profile for student ${studentId}`);
+      return { id: profileDoc.id, ...profileDoc.data() };
+    }
+
+    console.log(`[getStudentCorrectionProfile] No profile found for student ${studentId}`);
+    return null;
+  } catch (error) {
+    console.error(`[getStudentCorrectionProfile] Error:`, error);
+    return null;
+  }
+}
+
+/**
+ * Map correction profile to analysis parameters
+ */
+function mapProfileToParams(profile) {
+  if (!profile) {
+    return {
+      strictnessLevel: 'intermediate',
+      correctionTypes: {
+        spelling: true,
+        grammar: true,
+        punctuation: true,
+        vocabulary: true
+      },
+      feedbackStyle: 'encouraging',
+      detailedExplanations: true,
+      includeSynonyms: false,
+      includeExamples: true
+    };
+  }
+
+  // Map profile strictness to function parameters
+  const strictnessMap = {
+    lenient: 'beginner',
+    moderate: 'intermediate',
+    strict: 'advanced'
+  };
+
+  // Map check types array to correctionTypes object
+  const correctionTypes = {
+    spelling: profile.checkTypes.includes('spelling'),
+    grammar: profile.checkTypes.includes('grammar'),
+    punctuation: profile.checkTypes.includes('punctuation'),
+    vocabulary: profile.checkTypes.includes('vocabulary')
+  };
+
+  return {
+    strictnessLevel: strictnessMap[profile.strictness] || 'intermediate',
+    correctionTypes,
+    feedbackStyle: 'encouraging',
+    detailedExplanations: profile.showDetailedExplanations !== false,
+    includeSynonyms: false,
+    includeExamples: true
+  };
+}
 
 // ============================================================================
 // AI VISION HELPERS
