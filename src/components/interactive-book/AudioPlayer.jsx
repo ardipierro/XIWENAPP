@@ -20,6 +20,7 @@ function AudioPlayer({
   voice = null,          // Voz específica del personaje (ej: 'es-AR-male-1') - DEPRECATED
   voiceConfig = null,    // Configuración completa de voz del personaje
   characterName = null,  // Nombre del personaje (para logs)
+  characters = [],       // Lista de personajes (para encontrar ID)
   autoPlay = false,
   showText = true,
   className = '',
@@ -33,10 +34,19 @@ function AudioPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [useTTS, setUseTTS] = useState(false);
   const [ttsSupported, setTtsSupported] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1.0); // 0.5 - 2.0
+  // ✅ SINCRONIZAR playbackSpeed con voiceConfig.rate al montar
+  const initialSpeed = voiceConfig?.rate || 1.0;
+  const [playbackSpeed, setPlaybackSpeed] = useState(initialSpeed);
   const audioRef = useRef(null);
   const ttsIntervalRef = useRef(null);
   const ttsAudioRef = useRef(null); // Audio generado por TTS/ElevenLabs
+
+  // ✅ Sincronizar con voiceConfig cuando cambie desde fuera
+  useEffect(() => {
+    if (voiceConfig?.rate && voiceConfig.rate !== playbackSpeed) {
+      setPlaybackSpeed(voiceConfig.rate);
+    }
+  }, [voiceConfig?.rate]);
 
   useEffect(() => {
     // Verificar si TTS está disponible
@@ -401,6 +411,31 @@ function AudioPlayer({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // ✅ Guardar cambios de velocidad en localStorage
+  const handleSpeedChange = (newSpeed) => {
+    setPlaybackSpeed(newSpeed);
+
+    // Guardar en la configuración del personaje
+    if (characterName) {
+      try {
+        const saved = localStorage.getItem('xiwen_character_voices');
+        if (saved) {
+          const configs = JSON.parse(saved);
+          const character = characters.find(c => c.name === characterName);
+          const charId = character?.id || characterName;
+
+          if (configs[charId]) {
+            configs[charId].voiceConfig.rate = newSpeed;
+            localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+            logger.info(`💾 Velocidad guardada para ${characterName}: ${newSpeed}x`);
+          }
+        }
+      } catch (err) {
+        logger.error('Error saving speed:', err);
+      }
+    }
+  };
+
   // Determinar el provider actual basado en voiceConfig
   const effectiveVoiceConfig = voiceConfig || { provider: 'browser', rate: playbackSpeed };
   const isElevenLabs = effectiveVoiceConfig.provider === 'elevenlabs';
@@ -504,51 +539,58 @@ function AudioPlayer({
             </div>
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center gap-1">
-          {useTTS && (
-            <div
-              className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg"
-              title="Usando Text-to-Speech con IA"
+          {/* Controls - Reorganizados y más grandes */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={resetAudio}
+              className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Reiniciar"
             >
-              <Mic size={18} className="text-amber-600 dark:text-amber-400" />
+              <RotateCcw size={20} className="text-gray-600 dark:text-gray-400" />
+            </button>
+
+            <button
+              onClick={toggleMute}
+              className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title={isMuted ? 'Activar sonido' : 'Silenciar'}
+            >
+              {isMuted ? (
+                <VolumeX size={20} className="text-gray-600 dark:text-gray-400" />
+              ) : (
+                <Volume2 size={20} className="text-gray-600 dark:text-gray-400" />
+              )}
+            </button>
+
+            {/* Separador vertical */}
+            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
+
+            {/* Control de velocidad - REDISEÑADO con botones grandes */}
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <button
+                onClick={() => handleSpeedChange(Math.max(0.5, playbackSpeed - 0.25))}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 rounded transition-colors font-bold text-gray-700 dark:text-gray-300"
+                title="Más lento"
+                disabled={playbackSpeed <= 0.5}
+              >
+                −
+              </button>
+              <div className="px-3 py-1 min-w-[60px] text-center">
+                <div className="text-sm font-bold text-gray-900 dark:text-white">
+                  {playbackSpeed.toFixed(2)}x
+                </div>
+                <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                  velocidad
+                </div>
+              </div>
+              <button
+                onClick={() => handleSpeedChange(Math.min(2.0, playbackSpeed + 0.25))}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 rounded transition-colors font-bold text-gray-700 dark:text-gray-300"
+                title="Más rápido"
+                disabled={playbackSpeed >= 2.0}
+              >
+                +
+              </button>
             </div>
-          )}
-
-          <button
-            onClick={resetAudio}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            title="Reiniciar"
-          >
-            <RotateCcw size={18} className="text-gray-600 dark:text-gray-400" />
-          </button>
-
-          <button
-            onClick={toggleMute}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            title={isMuted ? 'Activar sonido' : 'Silenciar'}
-          >
-            {isMuted ? (
-              <VolumeX size={18} className="text-gray-600 dark:text-gray-400" />
-            ) : (
-              <Volume2 size={18} className="text-gray-600 dark:text-gray-400" />
-            )}
-          </button>
-
-            {/* Control de velocidad - Mejorado */}
-            <select
-              value={playbackSpeed}
-              onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-              className="px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-              title="Velocidad de reproducción"
-            >
-              <option value="0.5">0.5x</option>
-              <option value="0.75">0.75x</option>
-              <option value="1.0">1x</option>
-              <option value="1.25">1.25x</option>
-              <option value="1.5">1.5x</option>
-              <option value="2.0">2x</option>
-            </select>
           </div>
         </div>
       </div>
@@ -581,6 +623,12 @@ AudioPlayer.propTypes = {
     volume: PropTypes.number
   }),
   characterName: PropTypes.string,
+  characters: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired
+    })
+  ),
   autoPlay: PropTypes.bool,
   showText: PropTypes.bool,
   className: PropTypes.string,
