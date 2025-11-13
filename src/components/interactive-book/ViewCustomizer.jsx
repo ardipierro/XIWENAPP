@@ -280,13 +280,10 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
 
       {/* Panel expandible */}
       {isOpen && (
-        <BaseCard
-          {...(!alwaysOpen && {
-            title: "Configuración de Aspecto Visual",
-            subtitle: "Personaliza cada detalle de la apariencia"
-          })}
-        >
-          <div className="space-y-6">
+        <>
+          {alwaysOpen ? (
+            /* Sin BaseCard cuando alwaysOpen=true */
+            <div className="space-y-6">
             {/* Tabs */}
             <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
               {[
@@ -846,27 +843,63 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
               </div>
             )}
 
-            {/* Botón reset */}
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
-              <BaseButton
-                variant="ghost"
-                size="sm"
-                onClick={resetSettings}
-                className="flex-1"
-              >
-                Restaurar valores por defecto
-              </BaseButton>
-              <BaseButton
-                variant="primary"
-                size="sm"
-                onClick={() => setIsOpen(false)}
-                className="flex-1"
-              >
-                Cerrar
-              </BaseButton>
             </div>
-          </div>
-        </BaseCard>
+          ) : (
+            /* Con BaseCard cuando alwaysOpen=false */
+            <BaseCard
+              title="Configuración de Aspecto Visual"
+              subtitle="Personaliza cada detalle de la apariencia"
+            >
+              <div className="space-y-6">
+                {/* Tabs */}
+                <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+                  {[
+                    { id: 'typography', label: 'Tipografía', icon: Type },
+                    { id: 'colors', label: 'Colores', icon: Palette },
+                    { id: 'layout', label: 'Diseño', icon: Layout },
+                    { id: 'effects', label: 'Efectos', icon: Sparkles }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                        activeTab === tab.id
+                          ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
+                    >
+                      <tab.icon size={16} />
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* DUPLICAR TODO EL CONTENIDO DE LAS TABS AQUÍ - Por ahora solo estructura */}
+                <div>Contenido de tabs (a duplicar)</div>
+
+                {/* Botón reset - solo cuando NO es alwaysOpen */}
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetSettings}
+                    className="flex-1"
+                  >
+                    Restaurar valores por defecto
+                  </BaseButton>
+                  <BaseButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setIsOpen(false)}
+                    className="flex-1"
+                  >
+                    Cerrar
+                  </BaseButton>
+                </div>
+              </div>
+            </BaseCard>
+          )}
+        </>
       )}
 
       {/* Preview de configuración actual */}

@@ -375,24 +375,39 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
 
       {/* Panel expandible */}
       {isOpen && (
-        <BaseCard
-          {...(!alwaysOpen && {
-            title: "Configuración de Voces por Personaje",
-            subtitle: "Asigna diferentes voces y configuraciones a cada personaje del diálogo"
-          })}
-        >
-          <div className="space-y-4">
-            {characters.length === 0 ? (
-              <div className="p-6 text-center text-gray-600 dark:text-gray-400">
-                <Volume2 size={48} className="mx-auto mb-4 opacity-50" />
-                <p>No hay personajes disponibles aún.</p>
-                <p className="text-sm mt-2">Los personajes aparecerán automáticamente cuando cargues un diálogo.</p>
+        <>
+          {!alwaysOpen ? (
+            <BaseCard
+              title="Configuración de Voces por Personaje"
+              subtitle="Asigna diferentes voces y configuraciones a cada personaje del diálogo"
+            >
+              <div className="space-y-4">
+                {characters.length === 0 ? (
+                  <div className="p-6 text-center text-gray-600 dark:text-gray-400">
+                    <Volume2 size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>No hay personajes disponibles aún.</p>
+                    <p className="text-sm mt-2">Los personajes aparecerán automáticamente cuando cargues un diálogo.</p>
+                  </div>
+                ) : (
+                  characters.map(char => renderCharacterCard(char.id))
+                )}
               </div>
-            ) : (
-              characters.map(char => renderCharacterCard(char.id))
-            )}
-          </div>
-        </BaseCard>
+            </BaseCard>
+          ) : (
+            /* Contenido SIN BaseCard cuando alwaysOpen=true */
+            <div className="space-y-4">
+              {characters.length === 0 ? (
+                <div className="p-6 text-center text-gray-600 dark:text-gray-400">
+                  <Volume2 size={48} className="mx-auto mb-4 opacity-50" />
+                  <p>No hay personajes disponibles aún.</p>
+                  <p className="text-sm mt-2">Los personajes aparecerán automáticamente cuando cargues un diálogo.</p>
+                </div>
+              ) : (
+                characters.map(char => renderCharacterCard(char.id))
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
