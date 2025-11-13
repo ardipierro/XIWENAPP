@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock } from 'lucide-react';
+import { Eye, Trash2, Edit, Plus, Calendar, BookOpen, BookMarked, Video, Link, FileText, BarChart3, Settings, Gamepad2, Trash2 as TrashIcon, Clock, Layers } from 'lucide-react';
 import { useContent } from '../hooks/useContent.js';
 import ContentRepository from '../services/ContentRepository.js';
 import { assignUnassignedContentToCourse } from '../utils/assignContentToCourse.js';
@@ -59,7 +59,8 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
     type: 'lesson',
     body: '',
     courseIds: [], // Changed from courseId to courseIds array
-    imageUrl: ''
+    imageUrl: '',
+    childContentIds: [] // Para cursos/containers: IDs de contenidos incluidos
   });
 
   // Cargar relaciones de cursos cuando cambia el contenido
@@ -107,7 +108,10 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       title: formData.title,
       type: formData.type,
       body: formData.body,
-      createdBy: user.uid
+      createdBy: user.uid,
+      metadata: {
+        ...(formData.childContentIds.length > 0 && { childContentIds: formData.childContentIds })
+      }
     });
 
     if (result.success && result.id) {
@@ -120,7 +124,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
       await refetch();
 
       setShowCreateModal(false);
-      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '' });
+      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '', childContentIds: [] });
 
       logger.info('Contenido creado exitosamente', 'ContentManager');
     } else {
@@ -150,7 +154,8 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
           type: contentItem.type || 'lesson',
           body: contentItem.body || '',
           courseIds: courseIds,
-          imageUrl: contentItem.imageUrl || ''
+          imageUrl: contentItem.imageUrl || '',
+          childContentIds: contentItem.metadata?.childContentIds || []
         });
         setShowEditModal(true);
       } else {
@@ -173,7 +178,11 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
     const result = await updateContentHook(selectedContent.id, {
       title: formData.title,
       type: formData.type,
-      body: formData.body
+      body: formData.body,
+      metadata: {
+        ...selectedContent.metadata,
+        ...(formData.childContentIds.length > 0 && { childContentIds: formData.childContentIds })
+      }
     });
 
     if (result.success) {
@@ -185,7 +194,7 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
 
       setShowEditModal(false);
       setSelectedContent(null);
-      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '' });
+      setFormData({ title: '', type: 'lesson', body: '', courseIds: [], imageUrl: '', childContentIds: [] });
 
       logger.info('Contenido actualizado exitosamente', 'ContentManager');
     } else {
@@ -318,10 +327,14 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
 
   const getTypeLabel = (type) => {
     const types = {
+      course: 'Curso',
+      container: 'Contenedor',
       lesson: 'Lección',
       reading: 'Lectura',
       video: 'Video',
       link: 'Enlace',
+      unit: 'Unidad',
+      exercise: 'Ejercicio',
       multiple_choice: 'Ejercicio: Opción Múltiple',
       fill_blank: 'Ejercicio: Completar Espacios',
       drag_drop: 'Ejercicio: Drag & Drop',
@@ -574,6 +587,24 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                 >
                   <FileText size={18} strokeWidth={2} className="inline-icon" /> General
                 </button>
+                {(formData.type === 'course' || formData.type === 'container') && (
+                  <button
+                    onClick={() => setActiveTab('contents')}
+                    className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                    style={{
+                      borderColor: activeTab === 'contents' ? 'var(--color-border)' : 'transparent',
+                      color: activeTab === 'contents' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (activeTab !== 'contents') e.currentTarget.style.color = 'var(--color-text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activeTab !== 'contents') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }}
+                  >
+                    <Layers size={18} strokeWidth={2} className="inline-icon" /> Asignar Contenidos ({formData.childContentIds.length})
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveTab('config')}
                   className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
@@ -615,6 +646,9 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                         value={formData.type}
                         onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                       >
+                        <option value="course">🎓 Curso</option>
+                        <option value="container">📦 Contenedor/Unidad</option>
+                        <option disabled>──────────</option>
                         <option value="lesson">Lección</option>
                         <option value="reading">Lectura</option>
                         <option value="video">Video</option>
@@ -691,6 +725,91 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                         </p>
                       )}
                     </div>
+                  </div>
+                )}
+
+                {/* TAB: ASIGNAR CONTENIDOS */}
+                {activeTab === 'contents' && (
+                  <div className="space-y-6 pt-6">
+                    <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+                      Selecciona los contenidos que formarán parte de este {formData.type === 'course' ? 'curso' : 'contenedor'}:
+                    </p>
+
+                    {/* Filtro rápido */}
+                    <div className="flex gap-2 mb-4 flex-wrap">
+                      {['all', 'lesson', 'reading', 'video', 'exercise', 'unit'].map(filterType => (
+                        <button
+                          key={filterType}
+                          onClick={() => setFilter(filterType)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                            filter === filterType
+                              ? 'bg-zinc-800 text-white dark:bg-zinc-200 dark:text-zinc-900'
+                              : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          {filterType === 'all' ? 'Todos' : getTypeLabel(filterType)}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Lista de contenidos */}
+                    <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+                      {content && content.length > 0 ? (
+                        content
+                          .filter(item => filter === 'all' || item.type === filter ||
+                            (filter === 'exercise' && item.type && item.type.includes('choice')) ||
+                            (filter === 'unit' && item.type === 'unit'))
+                          .map(item => (
+                            <label
+                              key={item.id}
+                              className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                              style={{
+                                borderColor: 'var(--color-border)',
+                                backgroundColor: formData.childContentIds.includes(item.id)
+                                  ? 'var(--color-bg-secondary)'
+                                  : 'transparent'
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={formData.childContentIds.includes(item.id)}
+                                onChange={(e) => {
+                                  const newIds = e.target.checked
+                                    ? [...formData.childContentIds, item.id]
+                                    : formData.childContentIds.filter(id => id !== item.id);
+                                  setFormData({ ...formData, childContentIds: newIds });
+                                }}
+                                className="mt-1 w-4 h-4 rounded"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                                    {item.title || 'Sin título'}
+                                  </span>
+                                  <span className="badge badge-info text-xs shrink-0">
+                                    {getTypeLabel(item.type)}
+                                  </span>
+                                </div>
+                                <p className="text-xs line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                  {item.body?.substring(0, 100) || 'Sin contenido'}
+                                </p>
+                              </div>
+                            </label>
+                          ))
+                      ) : (
+                        <p className="text-sm text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
+                          No hay contenidos disponibles para asignar
+                        </p>
+                      )}
+                    </div>
+
+                    {formData.childContentIds.length > 0 && (
+                      <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                        <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                          {formData.childContentIds.length} contenido(s) seleccionado(s)
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -770,6 +889,24 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                 >
                   <FileText size={18} strokeWidth={2} className="inline-icon" /> General
                 </button>
+                {(formData.type === 'course' || formData.type === 'container') && (
+                  <button
+                    onClick={() => setActiveTab('contents')}
+                    className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                    style={{
+                      borderColor: activeTab === 'contents' ? 'var(--color-border)' : 'transparent',
+                      color: activeTab === 'contents' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (activeTab !== 'contents') e.currentTarget.style.color = 'var(--color-text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activeTab !== 'contents') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }}
+                  >
+                    <Layers size={18} strokeWidth={2} className="inline-icon" /> Asignar Contenidos ({formData.childContentIds.length})
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveTab('config')}
                   className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
@@ -811,6 +948,9 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                         value={formData.type}
                         onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                       >
+                        <option value="course">🎓 Curso</option>
+                        <option value="container">📦 Contenedor/Unidad</option>
+                        <option disabled>──────────</option>
                         <option value="lesson">Lección</option>
                         <option value="reading">Lectura</option>
                         <option value="video">Video</option>
@@ -887,6 +1027,91 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
                         </p>
                       )}
                     </div>
+                  </div>
+                )}
+
+                {/* TAB: ASIGNAR CONTENIDOS */}
+                {activeTab === 'contents' && (
+                  <div className="space-y-6 pt-6">
+                    <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+                      Selecciona los contenidos que formarán parte de este {formData.type === 'course' ? 'curso' : 'contenedor'}:
+                    </p>
+
+                    {/* Filtro rápido */}
+                    <div className="flex gap-2 mb-4 flex-wrap">
+                      {['all', 'lesson', 'reading', 'video', 'exercise', 'unit'].map(filterType => (
+                        <button
+                          key={filterType}
+                          onClick={() => setFilter(filterType)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                            filter === filterType
+                              ? 'bg-zinc-800 text-white dark:bg-zinc-200 dark:text-zinc-900'
+                              : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          {filterType === 'all' ? 'Todos' : getTypeLabel(filterType)}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Lista de contenidos */}
+                    <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+                      {content && content.length > 0 ? (
+                        content
+                          .filter(item => filter === 'all' || item.type === filter ||
+                            (filter === 'exercise' && item.type && item.type.includes('choice')) ||
+                            (filter === 'unit' && item.type === 'unit'))
+                          .map(item => (
+                            <label
+                              key={item.id}
+                              className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                              style={{
+                                borderColor: 'var(--color-border)',
+                                backgroundColor: formData.childContentIds.includes(item.id)
+                                  ? 'var(--color-bg-secondary)'
+                                  : 'transparent'
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={formData.childContentIds.includes(item.id)}
+                                onChange={(e) => {
+                                  const newIds = e.target.checked
+                                    ? [...formData.childContentIds, item.id]
+                                    : formData.childContentIds.filter(id => id !== item.id);
+                                  setFormData({ ...formData, childContentIds: newIds });
+                                }}
+                                className="mt-1 w-4 h-4 rounded"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                                    {item.title || 'Sin título'}
+                                  </span>
+                                  <span className="badge badge-info text-xs shrink-0">
+                                    {getTypeLabel(item.type)}
+                                  </span>
+                                </div>
+                                <p className="text-xs line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                  {item.body?.substring(0, 100) || 'Sin contenido'}
+                                </p>
+                              </div>
+                            </label>
+                          ))
+                      ) : (
+                        <p className="text-sm text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
+                          No hay contenidos disponibles para asignar
+                        </p>
+                      )}
+                    </div>
+
+                    {formData.childContentIds.length > 0 && (
+                      <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                        <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                          {formData.childContentIds.length} contenido(s) seleccionado(s)
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
