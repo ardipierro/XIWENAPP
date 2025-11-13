@@ -19,6 +19,7 @@ import ConfirmModal from './ConfirmModal';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import BaseButton from './common/BaseButton';
+import ContentViewer from './ContentViewer';
 
 /**
  * Componente para gestión de contenido educativo
@@ -932,104 +933,13 @@ function ContentManager({ user, courses = [], onBack, openCreateModal = false })
         </div>
       )}
 
-      {/* Modal Ver Contenido */}
-      {showViewModal && selectedContent && (
-        <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">
-                {selectedContent.title}
-              </h3>
-              <button
-                className="modal-close-btn"
-                onClick={() => setShowViewModal(false)}
-                aria-label="Cerrar modal"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-
-            <div className="modal-content">
-              <div className="mb-4 flex flex-wrap gap-2">
-                <span className="badge badge-info">
-                  {getTypeLabel(selectedContent.type)}
-                </span>
-                {contentCourses[selectedContent.id]?.map(course => (
-                  <span key={course.id} className="badge badge-success">
-                    <BookMarked size={14} strokeWidth={2} className="inline-icon" /> {course.name}
-                  </span>
-                ))}
-                {(!contentCourses[selectedContent.id] || contentCourses[selectedContent.id].length === 0) && (
-                  <span className="badge badge-secondary">Sin cursos asignados</span>
-                )}
-              </div>
-
-              {selectedContent.type === 'video' && selectedContent.body.includes('youtube.com') ? (
-                <div className="mb-4">
-                  <iframe
-                    width="100%"
-                    height="400"
-                    src={selectedContent.body.replace('watch?v=', 'embed/')}
-                    title={selectedContent.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              ) : selectedContent.type === 'link' ? (
-                <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                  <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>Enlace:</p>
-                  <a
-                    href={selectedContent.body}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline break-all"
-                    style={{ color: 'var(--color-text-primary)' }}
-                  >
-                    {selectedContent.body}
-                  </a>
-                </div>
-              ) : (
-                <div className="prose dark:prose-invert max-w-none">
-                  <div className="whitespace-pre-wrap">{selectedContent.body}</div>
-                </div>
-              )}
-
-              <div className="mt-6 pt-6 border-t" style={{ borderColor: 'var(--color-border)' }}>
-                <p className="text-sm flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-                  <Calendar size={14} strokeWidth={2} /> Creado: {selectedContent.createdAt && new Date(selectedContent.createdAt.seconds * 1000).toLocaleString('es-AR')}
-                </p>
-                {selectedContent.updatedAt && (
-                  <p className="text-sm mt-1 flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-                    <Edit size={14} strokeWidth={2} /> Actualizado: {new Date(selectedContent.updatedAt.seconds * 1000).toLocaleString('es-AR')}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="modal-footer">
-                <BaseButton
-                  variant="outline"
-                  onClick={() => setShowViewModal(false)}
-                >
-                  Cerrar
-                </BaseButton>
-                <BaseButton
-                  variant="primary"
-                  onClick={() => {
-                    setShowViewModal(false);
-                    handleEdit(selectedContent.id);
-                  }}
-                >
-                  Editar
-                </BaseButton>
-              </div>
-          </div>
-        </div>
-      )}
+      {/* Visualizador de contenido con ExpandableModal */}
+      <ContentViewer
+        content={selectedContent}
+        isOpen={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        courses={contentCourses[selectedContent?.id] || []}
+      />
 
       {/* Modal de confirmación de eliminación */}
       <ConfirmModal

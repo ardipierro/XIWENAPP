@@ -18,6 +18,7 @@ export { default as BaseTextarea } from './BaseTextarea';
 // Layout & Display
 export { default as BaseCard } from './BaseCard';
 export { default as BaseModal, useModal } from './BaseModal';
+export { default as ExpandableModal } from './ExpandableModal';
 
 // Feedback & Status
 export { default as BaseBadge } from './BaseBadge';

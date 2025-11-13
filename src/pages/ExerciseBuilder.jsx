@@ -13,11 +13,14 @@ import {
   Upload,
   Home,
   Star,
-  TrendingUp
+  TrendingUp,
+  Save
 } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge, BaseEmptyState, BaseLoading } from '../components/common';
+import { BaseButton, BaseCard, BaseBadge, BaseEmptyState, BaseLoading, BaseAlert } from '../components/common';
 import { TextToExerciseParser } from '../components/exercisebuilder/TextToExerciseParser';
 import { SettingsPanel } from '../components/exercisebuilder/SettingsPanel';
+import { useContentExport } from '../hooks/useContentExport';
+import { useAuth } from '../contexts/AuthContext';
 import {
   MultipleChoiceExercise,
   FillInBlankExercise,
@@ -45,6 +48,8 @@ import logger from '../utils/logger';
  */
 export function ExerciseBuilder() {
   const { config, loading } = useExerciseBuilderConfig();
+  const { exportContent, loading: exportLoading, error: exportError, success: exportSuccess } = useContentExport();
+  const { user } = useAuth();
   const [activeView, setActiveView] = useState('home'); // home | parser | examples | stats
   const [generatedExercises, setGeneratedExercises] = useState([]);
   const [stats, setStats] = useState({
@@ -53,6 +58,7 @@ export function ExerciseBuilder() {
     averageScore: 0,
     totalPoints: 0
   });
+  const [saveMessage, setSaveMessage] = useState(null); // { type: 'success' | 'error', text: string }
 
   const handleExerciseGenerated = (exercise) => {
     setGeneratedExercises((prev) => [...prev, { ...exercise, id: Date.now() }]);
@@ -81,6 +87,64 @@ export function ExerciseBuilder() {
     link.download = `design-lab-exercises-${Date.now()}.json`;
     link.click();
     logger.info('Exercises exported');
+  };
+
+  /**
+   * Guarda todos los ejercicios generados en el sistema unificado de contenidos
+   */
+  const handleSaveToContents = async () => {
+    if (!user) {
+      setSaveMessage({ type: 'error', text: 'Debes iniciar sesión para guardar contenidos' });
+      setTimeout(() => setSaveMessage(null), 4000);
+      return;
+    }
+
+    if (generatedExercises.length === 0) {
+      setSaveMessage({ type: 'error', text: 'No hay ejercicios para guardar' });
+      setTimeout(() => setSaveMessage(null), 4000);
+      return;
+    }
+
+    let savedCount = 0;
+    let errorCount = 0;
+
+    for (const exercise of generatedExercises) {
+      const result = await exportContent({
+        type: 'exercise',
+        title: exercise.title || exercise.question || 'Ejercicio sin título',
+        description: exercise.explanation || exercise.instructions || '',
+        body: JSON.stringify(exercise),
+        metadata: {
+          exerciseType: exercise.type || 'custom',
+          difficulty: exercise.difficulty || config.difficulty || 'intermediate',
+          cefrLevel: exercise.cefrLevel || config.cefrLevel || 'A1',
+          points: exercise.points || 100,
+          source: 'ExerciseBuilder'
+        },
+        createdBy: user.uid
+      });
+
+      if (result.success) {
+        savedCount++;
+      } else {
+        errorCount++;
+        logger.error('Error guardando ejercicio', result.error, 'ExerciseBuilder');
+      }
+    }
+
+    if (errorCount === 0) {
+      setSaveMessage({
+        type: 'success',
+        text: `✅ ${savedCount} ejercicio(s) guardado(s) exitosamente en Contenidos`
+      });
+    } else {
+      setSaveMessage({
+        type: 'error',
+        text: `⚠️ Guardados: ${savedCount} | Errores: ${errorCount}`
+      });
+    }
+
+    setTimeout(() => setSaveMessage(null), 5000);
   };
 
   const views = [
@@ -556,19 +620,40 @@ export function ExerciseBuilder() {
         {/* Examples */}
         {activeView === 'examples' && (
           <div className="space-y-6">
+            {/* Feedback message */}
+            {saveMessage && (
+              <BaseAlert
+                variant={saveMessage.type === 'success' ? 'success' : 'error'}
+                onClose={() => setSaveMessage(null)}
+              >
+                {saveMessage.text}
+              </BaseAlert>
+            )}
+
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Ejemplos de Ejercicios
               </h2>
               {generatedExercises.length > 0 && (
-                <BaseButton
-                  variant="outline"
-                  icon={Download}
-                  onClick={exportExercises}
-                  size="sm"
-                >
-                  Exportar ({generatedExercises.length})
-                </BaseButton>
+                <div className="flex items-center gap-2">
+                  <BaseButton
+                    variant="primary"
+                    icon={Save}
+                    onClick={handleSaveToContents}
+                    size="sm"
+                    loading={exportLoading}
+                  >
+                    Guardar en Contenidos ({generatedExercises.length})
+                  </BaseButton>
+                  <BaseButton
+                    variant="outline"
+                    icon={Download}
+                    onClick={exportExercises}
+                    size="sm"
+                  >
+                    Exportar JSON
+                  </BaseButton>
+                </div>
               )}
             </div>
 
