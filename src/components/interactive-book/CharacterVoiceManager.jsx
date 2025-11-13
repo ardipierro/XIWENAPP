@@ -42,6 +42,18 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
     loadConfigs();
     loadBrowserVoices();
     checkElevenLabsKey();
+
+    // Escuchar cambios en configuración (ej: credenciales guardadas en otro lugar)
+    const handleSettingsChange = () => {
+      checkElevenLabsKey();
+      loadConfigs();
+    };
+
+    window.addEventListener('xiwen_settings_changed', handleSettingsChange);
+
+    return () => {
+      window.removeEventListener('xiwen_settings_changed', handleSettingsChange);
+    };
   }, []);
 
   useEffect(() => {

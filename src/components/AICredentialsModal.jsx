@@ -59,6 +59,9 @@ function AICredentialsModal({ isOpen, onClose, provider, onSave, isConfigured = 
       // Guardar en localStorage
       localStorage.setItem(`ai_credentials_${provider.name}`, apiKey.trim());
 
+      // Disparar evento de cambio de configuración
+      window.dispatchEvent(new Event('xiwen_settings_changed'));
+
       // Llamar callback si existe
       if (onSave) {
         await onSave(provider.name, apiKey.trim());
@@ -82,6 +85,10 @@ function AICredentialsModal({ isOpen, onClose, provider, onSave, isConfigured = 
   const handleDelete = () => {
     if (confirm(`¿Estás seguro de eliminar las credenciales de ${provider?.label}?`)) {
       localStorage.removeItem(`ai_credentials_${provider.name}`);
+
+      // Disparar evento de cambio de configuración
+      window.dispatchEvent(new Event('xiwen_settings_changed'));
+
       setApiKey('');
       setSuccess(true);
       logger.info('API key deleted:', provider.name);
