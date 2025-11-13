@@ -75,12 +75,54 @@ class PremiumTTSService {
   }
 
   /**
-   * Genera audio usando ElevenLabs (mejor calidad, requiere API key)
+   * Obtiene todas las voces disponibles en la cuenta de ElevenLabs
+   * @returns {Promise<Array>} - Array de voces con metadata
    */
-  async generateWithElevenLabs(text, voiceId = 'EXAVITQu4vr4xnSDxMaL') {
+  async getAllVoices() {
     if (!this.apiKey) {
       throw new Error('ElevenLabs API key no configurada');
     }
+
+    try {
+      const response = await fetch('https://api.elevenlabs.io/v1/voices', {
+        method: 'GET',
+        headers: {
+          'xi-api-key': this.apiKey
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`ElevenLabs API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      logger.info(`🎤 Loaded ${data.voices?.length || 0} voices from ElevenLabs`);
+
+      return data.voices || [];
+    } catch (err) {
+      logger.error('❌ Error fetching ElevenLabs voices:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * Genera audio usando ElevenLabs (mejor calidad, requiere API key)
+   * @param {string} text - Texto a convertir a audio
+   * @param {string} voiceId - ID de la voz
+   * @param {Object} voiceSettings - Configuración de voz (opcional)
+   */
+  async generateWithElevenLabs(text, voiceId = 'EXAVITQu4vr4xnSDxMaL', voiceSettings = null) {
+    if (!this.apiKey) {
+      throw new Error('ElevenLabs API key no configurada');
+    }
+
+    // Configuración por defecto o personalizada
+    const settings = voiceSettings || {
+      stability: 0.5,
+      similarity_boost: 0.75,
+      style: 0.5,
+      use_speaker_boost: true
+    };
 
     try {
       const response = await fetch(
@@ -95,12 +137,7 @@ class PremiumTTSService {
           body: JSON.stringify({
             text: text,
             model_id: 'eleven_multilingual_v2',
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-              style: 0.5, // Más expresivo
-              use_speaker_boost: true
-            }
+            voice_settings: settings
           })
         }
       );

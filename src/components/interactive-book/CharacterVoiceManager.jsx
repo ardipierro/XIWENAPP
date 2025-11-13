@@ -5,12 +5,13 @@
  */
 
 import { useState, useEffect } from 'react';
-import { User, Volume2, Settings as SettingsIcon, Play, Sparkles, Globe } from 'lucide-react';
+import { User, Volume2, Settings as SettingsIcon, Play, Sparkles, Globe, Save } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { BaseCard, BaseButton, BaseBadge } from '../common';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
 import { getAICredential } from '../../utils/credentialsHelper';
+import { getVoicePresetsByTeacher } from '../../firebase/voicePresets';
 import logger from '../../utils/logger';
 
 const ELEVENLABS_VOICES = [
@@ -32,22 +33,30 @@ const DEFAULT_CHARACTER_CONFIG = {
 /**
  * Gestor de voces por personaje
  */
-function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = false }) {
+function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = false, teacherId = null }) {
   const [isOpen, setIsOpen] = useState(alwaysOpen);
   const [characterConfigs, setCharacterConfigs] = useState({});
   const [browserVoices, setBrowserVoices] = useState([]);
   const [testingVoice, setTestingVoice] = useState(null);
   const [hasElevenLabsKey, setHasElevenLabsKey] = useState(false);
+  const [voicePresets, setVoicePresets] = useState([]);
+  const [loadingPresets, setLoadingPresets] = useState(false);
 
   useEffect(() => {
     loadConfigs();
     loadBrowserVoices();
     checkElevenLabsKey();
+    if (teacherId) {
+      loadVoicePresets();
+    }
 
     // Escuchar cambios en configuración (ej: credenciales guardadas en otro lugar)
     const handleSettingsChange = () => {
       checkElevenLabsKey();
       loadConfigs();
+      if (teacherId) {
+        loadVoicePresets();
+      }
     };
 
     window.addEventListener('xiwen_settings_changed', handleSettingsChange);
@@ -55,7 +64,7 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
     return () => {
       window.removeEventListener('xiwen_settings_changed', handleSettingsChange);
     };
-  }, []);
+  }, [teacherId]);
 
   useEffect(() => {
     // Inicializar configs para personajes nuevos
@@ -112,6 +121,40 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
       logger.error('Error checking ElevenLabs key:', err);
       setHasElevenLabsKey(false);
     }
+  };
+
+  const loadVoicePresets = async () => {
+    if (!teacherId) return;
+
+    setLoadingPresets(true);
+    try {
+      const presets = await getVoicePresetsByTeacher(teacherId);
+      setVoicePresets(presets);
+      logger.info(`Loaded ${presets.length} voice presets`);
+    } catch (err) {
+      logger.error('Error loading voice presets:', err);
+    } finally {
+      setLoadingPresets(false);
+    }
+  };
+
+  const applyPresetToCharacter = (characterId, preset) => {
+    const newConfig = {
+      provider: 'elevenlabs',
+      voiceId: preset.voiceId,
+      voiceName: preset.voiceName,
+      rate: 1.0, // Mantener rate por defecto o del character actual
+      volume: 1.0, // Mantener volumen por defecto o del character actual
+      // Guardar los parámetros del preset (aunque no se usan directamente aquí, los guardamos para referencia)
+      stability: preset.stability,
+      similarity_boost: preset.similarity_boost,
+      style: preset.style,
+      use_speaker_boost: preset.use_speaker_boost
+    };
+
+    updateCharacterVoice(characterId, newConfig);
+
+    logger.info(`Applied preset "${preset.name}" to character ${characterId}`);
   };
 
   const saveConfigs = (newConfigs) => {
@@ -273,24 +316,54 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
             Voz
           </label>
           {isElevenLabs ? (
-            <select
-              value={config.voiceConfig.voiceId || ''}
-              onChange={(e) => {
-                const voice = ELEVENLABS_VOICES.find(v => v.id === e.target.value);
-                updateCharacterVoice(characterId, {
-                  voiceId: voice.id,
-                  voiceName: voice.name
-                });
-              }}
-              className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            >
-              <option value="">Seleccionar voz...</option>
-              {ELEVENLABS_VOICES.map(voice => (
-                <option key={voice.id} value={voice.id}>
-                  {voice.name} - {voice.gender === 'female' ? '👩' : '👨'} {voice.accent}
-                </option>
-              ))}
-            </select>
+            <div className="space-y-2">
+              {/* Selector de presets guardados */}
+              {voicePresets.length > 0 && (
+                <div>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
+                    Usar preset guardado
+                  </label>
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const preset = voicePresets.find(p => p.id === e.target.value);
+                        if (preset) {
+                          applyPresetToCharacter(characterId, preset);
+                        }
+                      }
+                    }}
+                    className="w-full px-3 py-2 border-2 border-purple-300 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-2"
+                  >
+                    <option value="">⭐ Seleccionar preset...</option>
+                    {voicePresets.map(preset => (
+                      <option key={preset.id} value={preset.id}>
+                        {preset.name} ({preset.voiceName})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Selector manual de voces */}
+              <select
+                value={config.voiceConfig.voiceId || ''}
+                onChange={(e) => {
+                  const voice = ELEVENLABS_VOICES.find(v => v.id === e.target.value);
+                  updateCharacterVoice(characterId, {
+                    voiceId: voice.id,
+                    voiceName: voice.name
+                  });
+                }}
+                className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              >
+                <option value="">Seleccionar voz manualmente...</option>
+                {ELEVENLABS_VOICES.map(voice => (
+                  <option key={voice.id} value={voice.id}>
+                    {voice.name} - {voice.gender === 'female' ? '👩' : '👨'} {voice.accent}
+                  </option>
+                ))}
+              </select>
+            </div>
           ) : (
             <select
               value={config.voiceConfig.voiceName}
@@ -421,7 +494,8 @@ CharacterVoiceManager.propTypes = {
     })
   ),
   onConfigChange: PropTypes.func,
-  alwaysOpen: PropTypes.bool
+  alwaysOpen: PropTypes.bool,
+  teacherId: PropTypes.string
 };
 
 /**
