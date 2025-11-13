@@ -29,7 +29,9 @@ import {
   HelpCircle,
   Bold,
   Italic,
-  Underline as UnderlineIcon
+  Underline as UnderlineIcon,
+  Plus,
+  Pipette
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import {
@@ -65,14 +67,22 @@ const HIGHLIGHTER_STYLES = {
 };
 
 /**
- * Tipos de pincel
+ * Tipos de pincel con soporte para resaltador
  */
 const BRUSH_TYPES = {
-  thin: { name: 'Fino', width: 2 },
-  medium: { name: 'Medio', width: 4 },
-  thick: { name: 'Grueso', width: 6 },
-  marker: { name: 'Marcador', width: 10 },
+  thin: { name: 'Fino', width: 2, alpha: 1.0 },
+  medium: { name: 'Medio', width: 4, alpha: 1.0 },
+  thick: { name: 'Grueso', width: 6, alpha: 1.0 },
+  marker: { name: 'Marcador', width: 10, alpha: 1.0 },
+  highlighter: { name: 'Resaltador', width: 20, alpha: 0.3 },
 };
+
+/**
+ * Rangos de zoom
+ */
+const MIN_FONT_SIZE = 8;
+const MAX_FONT_SIZE = 72;
+const FONT_SIZE_STEP = 2;
 
 /**
  * Fuentes disponibles
@@ -130,6 +140,60 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   // Estados de edición rica
   const [textColor, setTextColor] = useState('#000000');
   const [showTextColorPicker, setShowTextColorPicker] = useState(false);
+
+  // Estados para edición de notas/textos existentes
+  const [editingNote, setEditingNote] = useState(null);
+  const [editingText, setEditingText] = useState(null);
+  const [selectedElement, setSelectedElement] = useState(null); // { type: 'note'|'text', id: string }
+
+  // Estados para selector de color avanzado
+  const [customColors, setCustomColors] = useState([]);
+  const [recentColors, setRecentColors] = useState([]);
+  const [currentCustomColor, setCurrentCustomColor] = useState('#ff6b6b');
+  const [colorAlpha, setColorAlpha] = useState(1.0);
+  const [showAdvancedColorPicker, setShowAdvancedColorPicker] = useState(false);
+
+  /**
+   * Agregar color personalizado
+   */
+  const handleAddCustomColor = () => {
+    const newColor = {
+      id: Date.now().toString(),
+      hex: currentCustomColor,
+      alpha: colorAlpha,
+      name: `Custom ${customColors.length + 1}`
+    };
+
+    setCustomColors(prev => [...prev, newColor]);
+
+    // Agregar a recientes (máximo 6)
+    setRecentColors(prev => {
+      const updated = [newColor, ...prev.filter(c => c.hex !== newColor.hex)];
+      return updated.slice(0, 6);
+    });
+  };
+
+  /**
+   * Usar color (agregar a recientes)
+   */
+  const handleUseColor = (color) => {
+    setSelectedColor(color);
+
+    // Agregar a recientes si es de la paleta predefinida
+    if (COLORS[color]) {
+      const colorObj = {
+        id: Date.now().toString(),
+        hex: COLORS[color].hex,
+        alpha: 1.0,
+        name: COLORS[color].name
+      };
+
+      setRecentColors(prev => {
+        const updated = [colorObj, ...prev.filter(c => c.hex !== colorObj.hex)];
+        return updated.slice(0, 6);
+      });
+    }
+  };
 
   // Estados de canvas
   const [isDrawing, setIsDrawing] = useState(false);
@@ -260,24 +324,54 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const handleAddNote = () => {
     if (!currentNote.text.trim()) return;
 
-    const newNote = {
-      id: Date.now().toString(),
-      text: currentNote.text,
-      selectedText,
-      position: currentNote.position,
-      width: 250,
-      height: 150,
-      timestamp: Date.now()
-    };
+    if (editingNote) {
+      // Actualizar nota existente
+      setAnnotations(prev => ({
+        ...prev,
+        notes: prev.notes.map(note =>
+          note.id === editingNote
+            ? { ...note, text: currentNote.text }
+            : note
+        )
+      }));
+      setEditingNote(null);
+    } else {
+      // Crear nueva nota
+      const newNote = {
+        id: Date.now().toString(),
+        text: currentNote.text,
+        selectedText,
+        position: currentNote.position,
+        width: 250,
+        height: 150,
+        timestamp: Date.now()
+      };
 
-    setAnnotations(prev => ({
-      ...prev,
-      notes: [...prev.notes, newNote]
-    }));
+      setAnnotations(prev => ({
+        ...prev,
+        notes: [...prev.notes, newNote]
+      }));
+    }
 
     setShowNoteForm(false);
     setCurrentNote({ text: '', position: null });
     setSelectedText('');
+  };
+
+  /**
+   * Editar nota existente con doble click
+   */
+  const handleEditNote = (noteId) => {
+    const note = annotations.notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    setEditingNote(noteId);
+    setCurrentNote({
+      text: note.text,
+      position: note.position
+    });
+    setSelectedText(note.selectedText || '');
+    setShowNoteForm(true);
   };
 
   /**
@@ -286,23 +380,62 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const handleAddFloatingText = () => {
     if (!currentText.text.trim()) return;
 
-    const newText = {
-      id: Date.now().toString(),
-      text: currentText.text,
-      position: currentText.position,
-      font: contentFont, // Usa el selector global
-      color: selectedColor, // Usa el selector global
-      size: fontSize, // Usa el selector global
-      timestamp: Date.now()
-    };
+    if (editingText) {
+      // Actualizar texto existente
+      setAnnotations(prev => ({
+        ...prev,
+        floatingTexts: prev.floatingTexts.map(text =>
+          text.id === editingText
+            ? {
+                ...text,
+                text: currentText.text,
+                font: contentFont,
+                color: selectedColor,
+                size: fontSize
+              }
+            : text
+        )
+      }));
+      setEditingText(null);
+    } else {
+      // Crear nuevo texto
+      const newText = {
+        id: Date.now().toString(),
+        text: currentText.text,
+        position: currentText.position,
+        font: contentFont, // Usa el selector global
+        color: selectedColor, // Usa el selector global
+        size: fontSize, // Usa el selector global
+        timestamp: Date.now()
+      };
 
-    setAnnotations(prev => ({
-      ...prev,
-      floatingTexts: [...prev.floatingTexts, newText]
-    }));
+      setAnnotations(prev => ({
+        ...prev,
+        floatingTexts: [...prev.floatingTexts, newText]
+      }));
+    }
 
     setShowTextForm(false);
     setCurrentText({ text: '', position: null });
+  };
+
+  /**
+   * Editar texto flotante existente con doble click
+   */
+  const handleEditFloatingText = (textId) => {
+    const text = annotations.floatingTexts.find(t => t.id === textId);
+    if (!text) return;
+
+    setEditingText(textId);
+    setCurrentText({
+      text: text.text,
+      position: text.position
+    });
+    // Establecer los selectores con los valores del texto
+    setContentFont(text.font || 'sans');
+    setSelectedColor(text.color || 'yellow');
+    setFontSize(text.size || 16);
+    setShowTextForm(true);
   };
 
   /**
@@ -626,6 +759,10 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
+    // Aplicar alpha del tipo de pincel (resaltador es semitransparente)
+    const alpha = BRUSH_TYPES[brushType].alpha || 1.0;
+    ctx.globalAlpha = alpha;
+
     ctx.strokeStyle = COLORS[selectedColor].hex;
 
     // Grosor dinámico basado en presión del Apple Pencil
@@ -644,6 +781,9 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       ctx.lineTo(x, y);
       ctx.stroke();
     }
+
+    // Restaurar alpha
+    ctx.globalAlpha = 1.0;
   };
 
   const redrawCanvas = (drawings = annotations.drawings) => {
@@ -654,6 +794,10 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawings.forEach(drawing => {
+      // Aplicar alpha del tipo de pincel
+      const alpha = BRUSH_TYPES[drawing.brushType]?.alpha || 1.0;
+      ctx.globalAlpha = alpha;
+
       ctx.strokeStyle = COLORS[drawing.color]?.hex || '#000000';
       const baseWidth = BRUSH_TYPES[drawing.brushType]?.width || 4;
       ctx.lineCap = 'round';
@@ -676,6 +820,9 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           ctx.stroke();
         }
       }
+
+      // Restaurar alpha
+      ctx.globalAlpha = 1.0;
     });
   };
 
@@ -845,13 +992,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Zoom:</span>
-                <button onClick={() => setFontSize(Math.max(12, fontSize - 2))} className="icon-btn text-xs p-1">
+                <button onClick={() => setFontSize(Math.max(MIN_FONT_SIZE, fontSize - FONT_SIZE_STEP))} className="icon-btn text-xs p-1">
                   <ZoomOut className="w-4 h-4" />
                 </button>
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
                   {fontSize}px
                 </span>
-                <button onClick={() => setFontSize(Math.min(32, fontSize + 2))} className="icon-btn text-xs p-1">
+                <button onClick={() => setFontSize(Math.min(MAX_FONT_SIZE, fontSize + FONT_SIZE_STEP))} className="icon-btn text-xs p-1">
                   <ZoomIn className="w-4 h-4" />
                 </button>
               </div>
@@ -927,13 +1074,22 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                   {Object.keys(COLORS).map(color => (
                     <button
                       key={color}
-                      onClick={() => setSelectedColor(color)}
+                      onClick={() => handleUseColor(color)}
                       className={`w-8 h-8 rounded-full ${COLORS[color].bg} border-2 ${
                         selectedColor === color ? 'border-accent-500 scale-110' : 'border-primary-300 dark:border-primary-600'
                       } transition-all hover:scale-110`}
                       title={COLORS[color].name}
                     />
                   ))}
+                  <button
+                    onClick={() => setShowAdvancedColorPicker(!showAdvancedColorPicker)}
+                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
+                      showAdvancedColorPicker ? 'border-accent-500 bg-accent-100 dark:bg-accent-900' : 'border-primary-300 dark:border-primary-600 bg-white dark:bg-primary-700'
+                    } transition-all hover:scale-110`}
+                    title="Selector avanzado"
+                  >
+                    <Pipette className="w-4 h-4 text-primary-700 dark:text-primary-300" />
+                  </button>
                 </div>
               </div>
               <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
@@ -962,6 +1118,121 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 </button>
               </div>
             </div>
+
+            {/* Advanced Color Picker Panel */}
+            {showAdvancedColorPicker && (
+              <div className="mt-3 p-3 bg-white dark:bg-primary-900 rounded-lg border border-primary-200 dark:border-primary-700 shadow-lg">
+                <h4 className="text-xs font-bold text-primary-900 dark:text-primary-100 mb-2 flex items-center gap-2">
+                  <Palette className="w-4 h-4" />
+                  Selector Avanzado
+                </h4>
+
+                {/* Custom Color Picker */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-primary-700 dark:text-primary-300">Color:</label>
+                    <input
+                      type="color"
+                      value={currentCustomColor}
+                      onChange={(e) => setCurrentCustomColor(e.target.value)}
+                      className="w-16 h-8 rounded cursor-pointer border border-primary-300 dark:border-primary-600"
+                    />
+                    <input
+                      type="text"
+                      value={currentCustomColor}
+                      onChange={(e) => setCurrentCustomColor(e.target.value)}
+                      className="flex-1 px-2 py-1 text-xs bg-primary-50 dark:bg-primary-800 border border-primary-300 dark:border-primary-600 rounded focus:ring-2 focus:ring-accent-500"
+                      placeholder="#ff6b6b"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-primary-700 dark:text-primary-300">Opacidad:</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={colorAlpha}
+                      onChange={(e) => setColorAlpha(parseFloat(e.target.value))}
+                      className="flex-1"
+                    />
+                    <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px]">
+                      {Math.round(colorAlpha * 100)}%
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-10 h-10 rounded border-2 border-primary-300 dark:border-primary-600"
+                      style={{
+                        backgroundColor: currentCustomColor,
+                        opacity: colorAlpha
+                      }}
+                    />
+                    <button
+                      onClick={handleAddCustomColor}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-accent-500 text-white text-xs rounded hover:bg-accent-600 transition-all font-medium"
+                    >
+                      <Plus className="w-3 h-3" />
+                      Agregar Color
+                    </button>
+                  </div>
+                </div>
+
+                {/* Custom Colors */}
+                {customColors.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-primary-200 dark:border-primary-700">
+                    <h5 className="text-xs font-semibold text-primary-700 dark:text-primary-300 mb-2">
+                      Colores Personalizados
+                    </h5>
+                    <div className="flex flex-wrap gap-1">
+                      {customColors.map(color => (
+                        <button
+                          key={color.id}
+                          onClick={() => {
+                            setCurrentCustomColor(color.hex);
+                            setColorAlpha(color.alpha);
+                          }}
+                          className="w-8 h-8 rounded border-2 border-primary-300 dark:border-primary-600 hover:scale-110 transition-transform"
+                          style={{
+                            backgroundColor: color.hex,
+                            opacity: color.alpha
+                          }}
+                          title={`${color.name} (${Math.round(color.alpha * 100)}%)`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recent Colors */}
+                {recentColors.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-primary-200 dark:border-primary-700">
+                    <h5 className="text-xs font-semibold text-primary-700 dark:text-primary-300 mb-2">
+                      Colores Recientes
+                    </h5>
+                    <div className="flex flex-wrap gap-1">
+                      {recentColors.map(color => (
+                        <button
+                          key={color.id}
+                          onClick={() => {
+                            setCurrentCustomColor(color.hex);
+                            setColorAlpha(color.alpha);
+                          }}
+                          className="w-8 h-8 rounded border-2 border-primary-300 dark:border-primary-600 hover:scale-110 transition-transform"
+                          style={{
+                            backgroundColor: color.hex,
+                            opacity: color.alpha
+                          }}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -999,13 +1270,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
               <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300">Tamaño:</span>
-                <button onClick={() => setFontSize(Math.max(12, fontSize - 2))} className="icon-btn text-xs p-1">
+                <button onClick={() => setFontSize(Math.max(MIN_FONT_SIZE, fontSize - FONT_SIZE_STEP))} className="icon-btn text-xs p-1">
                   <ZoomOut className="w-4 h-4" />
                 </button>
                 <span className="text-xs font-medium text-primary-700 dark:text-primary-300 min-w-[40px] text-center">
                   {fontSize}px
                 </span>
-                <button onClick={() => setFontSize(Math.min(32, fontSize + 2))} className="icon-btn text-xs p-1">
+                <button onClick={() => setFontSize(Math.min(MAX_FONT_SIZE, fontSize + FONT_SIZE_STEP))} className="icon-btn text-xs p-1">
                   <ZoomIn className="w-4 h-4" />
                 </button>
               </div>
@@ -1209,6 +1480,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             <div
               key={floatingText.id}
               onMouseDown={(e) => !readOnly && handleFloatingTextMouseDown(e, floatingText.id)}
+              onDoubleClick={(e) => {
+                if (!readOnly) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleEditFloatingText(floatingText.id);
+                }
+              }}
               className={`absolute ${!readOnly ? 'cursor-move' : ''}`}
               style={{
                 left: floatingText.position?.x || 0,
@@ -1219,7 +1497,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 fontFamily: FONTS[floatingText.font]?.style || 'inherit'
               }}
             >
-              <div className="flex items-start gap-1 bg-white/80 dark:bg-primary-900/80 px-2 py-1 rounded shadow-md">
+              <div className="flex items-start gap-1 bg-white/80 dark:bg-primary-900/80 px-2 py-1 rounded shadow-md hover:bg-white/90 dark:hover:bg-primary-900/90 transition-colors">
                 {!readOnly && (
                   <Move className="w-3 h-3 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
                 )}
@@ -1241,7 +1519,14 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             <div
               key={note.id}
               onMouseDown={(e) => !readOnly && handleNoteMouseDown(e, note.id)}
-              className={`absolute bg-yellow-100 dark:bg-yellow-900 border-l-4 border-yellow-500 p-3 rounded-lg shadow-lg ${
+              onDoubleClick={(e) => {
+                if (!readOnly) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleEditNote(note.id);
+                }
+              }}
+              className={`absolute bg-yellow-100 dark:bg-yellow-900 border-l-4 border-yellow-500 p-3 rounded-lg shadow-lg hover:shadow-xl transition-shadow ${
                 !readOnly ? 'cursor-move' : ''
               }`}
               style={{
@@ -1299,7 +1584,9 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
               onCancel={() => {
                 setShowNoteForm(false);
                 setCurrentNote({ text: '', position: null });
+                setEditingNote(null);
               }}
+              isEditing={editingNote !== null}
             />
           )}
 
@@ -1312,7 +1599,9 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
               onCancel={() => {
                 setShowTextForm(false);
                 setCurrentText({ text: '', position: null, font: 'sans', color: 'black', size: 16 });
+                setEditingText(null);
               }}
+              isEditing={editingText !== null}
             />
           )}
         </div>
@@ -1375,7 +1664,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">📝</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Notas:</strong>
-                      <p className="text-xs mt-1">Click para crear notas. Arrastra desde el ícono de mover. Redimensiona desde la esquina.</p>
+                      <p className="text-xs mt-1">Click para crear notas. Arrastra desde el ícono de mover. Redimensiona desde la esquina. <strong>Doble click para editar</strong> el contenido.</p>
                     </div>
                   </div>
 
@@ -1383,7 +1672,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">🎨</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Dibujar:</strong>
-                      <p className="text-xs mt-1">4 grosores disponibles: fino, medio, grueso y marcador. Dibuja directamente sobre el contenido.</p>
+                      <p className="text-xs mt-1">5 grosores: fino, medio, grueso, marcador y <strong>resaltador</strong> (ancho, semitransparente). Soporta Apple Pencil con sensibilidad a presión. Selector avanzado con colores personalizados y opacidad.</p>
                     </div>
                   </div>
 
@@ -1391,7 +1680,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">✍️</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Texto Flotante:</strong>
-                      <p className="text-xs mt-1">Click para agregar texto personalizado. Puedes moverlo arrastrándolo a cualquier posición.</p>
+                      <p className="text-xs mt-1">Click para agregar texto personalizado. Arrastra para mover. <strong>Doble click para editar</strong> texto, fuente, tamaño y color.</p>
                     </div>
                   </div>
 
@@ -1414,7 +1703,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">🎨</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Colores:</strong>
-                      <p className="text-xs mt-1">8 colores disponibles para todas las herramientas de anotación</p>
+                      <p className="text-xs mt-1">8 colores predefinidos + <strong>selector avanzado</strong> con colores personalizados, control de opacidad y colores recientes</p>
                     </div>
                   </div>
 
@@ -1422,7 +1711,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">🔍</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Zoom:</strong>
-                      <p className="text-xs mt-1">Ajusta el tamaño del texto de 12px a 32px usando los botones +/-</p>
+                      <p className="text-xs mt-1">Ajusta el tamaño del texto de <strong>8px a 72px</strong> usando los botones +/- (ideal para lectura ampliada)</p>
                     </div>
                   </div>
 
@@ -1476,13 +1765,13 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 </h3>
                 <div className="grid md:grid-cols-3 gap-3 text-xs text-primary-600 dark:text-primary-400">
                   <p>
-                    <strong>Notas:</strong> Arrastra desde el ícono de mover. Redimensiona desde la esquina inferior derecha.
+                    <strong>Doble Click:</strong> Haz doble click en notas o textos flotantes para editarlos nuevamente (texto, fuente, tamaño, color).
                   </p>
                   <p>
-                    <strong>Textos:</strong> Los textos flotantes se pueden mover a cualquier posición arrastrándolos.
+                    <strong>Apple Pencil:</strong> El dibujo detecta presión del stylus para líneas dinámicas. Usa el resaltador para marcas semitransparentes.
                   </p>
                   <p>
-                    <strong>Edición:</strong> En modo Editar usa las herramientas de formato (negrita, cursiva, color) para enriquecer el texto.
+                    <strong>Selector Avanzado:</strong> Click en el ícono pipeta para crear colores personalizados con opacidad ajustable.
                   </p>
                 </div>
               </div>
@@ -1525,7 +1814,7 @@ function ToolButton({ icon, label, active, onClick, disabled }) {
 /**
  * Note Form Component
  */
-function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }) {
+function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel, isEditing }) {
   return (
     <div
       className="absolute bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-700 p-4 rounded-lg shadow-xl max-w-sm z-30"
@@ -1536,7 +1825,7 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }
     >
       <div className="flex items-start justify-between gap-2 mb-3">
         <h4 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
-          Agregar Nota
+          {isEditing ? 'Editar Nota' : 'Agregar Nota'}
         </h4>
         <button onClick={onCancel} className="p-1 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-700 rounded">
           <X className="w-4 h-4" />
@@ -1562,7 +1851,7 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }
         onClick={onAdd}
         className="mt-3 w-full px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all font-medium"
       >
-        Agregar Nota
+        {isEditing ? 'Guardar Cambios' : 'Agregar Nota'}
       </button>
     </div>
   );
@@ -1571,7 +1860,7 @@ function NoteForm({ currentNote, setCurrentNote, selectedText, onAdd, onCancel }
 /**
  * Floating Text Form Component - Usa selectores globales del toolbar
  */
-function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
+function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel, isEditing }) {
   return (
     <div
       className="absolute bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-700 p-4 rounded-lg shadow-xl max-w-sm z-30"
@@ -1582,7 +1871,7 @@ function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
     >
       <div className="flex items-start justify-between gap-2 mb-3">
         <h4 className="text-sm font-semibold text-primary-900 dark:text-primary-100">
-          Agregar Texto
+          {isEditing ? 'Editar Texto' : 'Agregar Texto'}
         </h4>
         <button onClick={onCancel} className="p-1 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-700 rounded">
           <X className="w-4 h-4" />
@@ -1604,14 +1893,16 @@ function FloatingTextForm({ currentText, setCurrentText, onAdd, onCancel }) {
       />
 
       <p className="mt-2 text-xs text-primary-600 dark:text-primary-400">
-        Usa los selectores del toolbar para cambiar fuente, tamaño y color
+        {isEditing
+          ? 'Ajusta fuente, tamaño y color en el toolbar antes de guardar'
+          : 'Usa los selectores del toolbar para cambiar fuente, tamaño y color'}
       </p>
 
       <button
         onClick={onAdd}
         className="mt-3 w-full px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-all font-medium"
       >
-        Agregar Texto
+        {isEditing ? 'Guardar Cambios' : 'Agregar Texto'}
       </button>
     </div>
   );
@@ -1637,14 +1928,16 @@ NoteForm.propTypes = {
   setCurrentNote: PropTypes.func.isRequired,
   selectedText: PropTypes.string,
   onAdd: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired
+  onCancel: PropTypes.func.isRequired,
+  isEditing: PropTypes.bool
 };
 
 FloatingTextForm.propTypes = {
   currentText: PropTypes.object.isRequired,
   setCurrentText: PropTypes.func.isRequired,
   onAdd: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired
+  onCancel: PropTypes.func.isRequired,
+  isEditing: PropTypes.bool
 };
 
 export default ContentReader;
