@@ -350,9 +350,10 @@ Section.propTypes = {
 /**
  * Panel de personalización visual avanzado - VERSIÓN UNIFICADA
  */
-function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
+function ViewCustomizer({ onSettingsChange, alwaysOpen = false, autoSave = true }) {
   const [isOpen, setIsOpen] = useState(alwaysOpen);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     // Cargar configuración guardada
@@ -375,20 +376,48 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
   const updateSetting = (key, value) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
-    localStorage.setItem('xiwen_view_settings_v2', JSON.stringify(newSettings));
     applySettingsToDOM(newSettings);
 
-    if (onSettingsChange) {
-      onSettingsChange(newSettings);
+    // Solo guardar automáticamente si autoSave está habilitado
+    if (autoSave) {
+      localStorage.setItem('xiwen_view_settings_v2', JSON.stringify(newSettings));
+      if (onSettingsChange) {
+        onSettingsChange(newSettings);
+      }
+    } else {
+      // Si no es auto-save, marcar como cambios sin guardar
+      setHasUnsavedChanges(true);
     }
   };
 
+  // Función pública para guardar (llamada desde SettingsModal)
+  const saveSettings = () => {
+    localStorage.setItem('xiwen_view_settings_v2', JSON.stringify(settings));
+    setHasUnsavedChanges(false);
+    if (onSettingsChange) {
+      onSettingsChange(settings);
+    }
+  };
+
+  // Exponer saveSettings al componente padre
+  useEffect(() => {
+    if (!autoSave && onSettingsChange) {
+      // Pasar función de guardado al padre
+      onSettingsChange({ settings, saveSettings });
+    }
+  }, [settings, autoSave]);
+
   const resetSettings = () => {
     setSettings(DEFAULT_SETTINGS);
-    localStorage.setItem('xiwen_view_settings_v2', JSON.stringify(DEFAULT_SETTINGS));
     applySettingsToDOM(DEFAULT_SETTINGS);
-    if (onSettingsChange) {
-      onSettingsChange(DEFAULT_SETTINGS);
+
+    if (autoSave) {
+      localStorage.setItem('xiwen_view_settings_v2', JSON.stringify(DEFAULT_SETTINGS));
+      if (onSettingsChange) {
+        onSettingsChange(DEFAULT_SETTINGS);
+      }
+    } else {
+      setHasUnsavedChanges(true);
     }
   };
 
@@ -748,27 +777,41 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
               </div>
             </Section>
 
-            {/* Botones de acción */}
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
-              <BaseButton
-                variant="ghost"
-                size="sm"
-                onClick={resetSettings}
-                className="flex-1"
-              >
-                Restaurar valores por defecto
-              </BaseButton>
-              {!alwaysOpen && (
+            {/* Botones de acción - Solo mostrar si autoSave está habilitado */}
+            {autoSave && (
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
                 <BaseButton
-                  variant="primary"
+                  variant="ghost"
                   size="sm"
-                  onClick={() => setIsOpen(false)}
+                  onClick={resetSettings}
                   className="flex-1"
                 >
-                  Cerrar
+                  Restaurar valores por defecto
                 </BaseButton>
-              )}
-            </div>
+                {!alwaysOpen && (
+                  <BaseButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setIsOpen(false)}
+                    className="flex-1"
+                  >
+                    Cerrar
+                  </BaseButton>
+                )}
+              </div>
+            )}
+
+            {/* Indicador de cambios sin guardar (solo cuando autoSave = false) */}
+            {!autoSave && hasUnsavedChanges && (
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>Tienes cambios sin guardar. Haz click en "Guardar Configuración" abajo para aplicarlos.</span>
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </BaseCard>
       )}
@@ -864,7 +907,8 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
 
 ViewCustomizer.propTypes = {
   onSettingsChange: PropTypes.func,
-  alwaysOpen: PropTypes.bool
+  alwaysOpen: PropTypes.bool,
+  autoSave: PropTypes.bool
 };
 
 export default ViewCustomizer;

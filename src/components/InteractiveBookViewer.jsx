@@ -473,11 +473,17 @@ function InteractiveBookViewer() {
 
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center gap-1">
+              <div
+                className="flex items-center gap-1"
+                title={`${dialogueLineCount} líneas de diálogo`}
+              >
                 <MessageSquare size={16} />
                 <span>{dialogueLineCount}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div
+                className="flex items-center gap-1"
+                title={`${exerciseCount} ejercicios`}
+              >
                 <Award size={16} />
                 <span>{exerciseCount}</span>
               </div>
@@ -503,26 +509,6 @@ function InteractiveBookViewer() {
         {/* Content */}
         {isExpanded && (
           <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-6">
-            {/* Introducción */}
-            {unit.content?.introduction && (
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <Play size={20} className="text-blue-600 dark:text-blue-400 mt-1" />
-                  <div>
-                    <p className="text-gray-900 dark:text-white">
-                      {unit.content.introduction.text}
-                    </p>
-                    {unit.content.introduction.audioUrl && (
-                      <div className="mt-2 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                        <Volume2 size={16} />
-                        <span>Audio disponible</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Diálogo */}
             {unit.content?.dialogue && (
               <div>
