@@ -383,6 +383,68 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ============================================
+    // HOMEWORK CORRECTION PROFILES
+    // ============================================
+
+    // Correction profiles - Configuration for how to correct homework
+    match /correction_profiles/{profileId} {
+      // Teachers can create profiles with their own teacherId
+      allow create: if isAuthenticated() &&
+        (isTeacher() || isAdmin()) &&
+        request.resource.data.teacherId == request.auth.uid;
+
+      // Teachers can read their own profiles, admins can read all
+      allow read: if isAuthenticated() &&
+        (resource.data.teacherId == request.auth.uid ||
+         isAdmin());
+
+      // Teachers can update their own profiles, admins can update all
+      allow update: if isAuthenticated() &&
+        (resource.data.teacherId == request.auth.uid ||
+         isAdmin());
+
+      // Teachers can delete their own profiles, admins can delete all
+      allow delete: if isAuthenticated() &&
+        (resource.data.teacherId == request.auth.uid ||
+         isAdmin());
+    }
+
+    // Profile-student assignments - Assign profiles to individual students
+    match /profile_students/{assignmentId} {
+      // Teachers can create assignments for their students
+      allow create: if isAuthenticated() &&
+        (isTeacher() || isAdmin());
+
+      // Teachers can read assignments, students can read their own
+      allow read: if isAuthenticated() &&
+        (resource.data.studentId == request.auth.uid ||
+         isTeacher() ||
+         isAdmin());
+
+      // Teachers and admins can update assignments
+      allow update: if isTeacher() || isAdmin();
+
+      // Teachers and admins can delete assignments
+      allow delete: if isTeacher() || isAdmin();
+    }
+
+    // Profile-group assignments - Assign profiles to groups
+    match /profile_groups/{assignmentId} {
+      // Teachers can create assignments for their groups
+      allow create: if isAuthenticated() &&
+        (isTeacher() || isAdmin());
+
+      // Teachers and admins can read assignments
+      allow read: if isTeacher() || isAdmin();
+
+      // Teachers and admins can update assignments
+      allow update: if isTeacher() || isAdmin();
+
+      // Teachers and admins can delete assignments
+      allow delete: if isTeacher() || isAdmin();
+    }
+
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;
