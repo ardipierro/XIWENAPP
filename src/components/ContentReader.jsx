@@ -275,6 +275,10 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [magnifierZoom, setMagnifierZoom] = useState(2);
 
+  // Estado para detección de Apple Pencil/Stylus
+  const [isUsingStylusNow, setIsUsingStylusNow] = useState(false);
+  const [lastStylusPressure, setLastStylusPressure] = useState(0);
+
   // Referencias
   const contentRef = useRef(null);
   const canvasRef = useRef(null);
@@ -1429,9 +1433,20 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
   /**
    * Canvas - Dibujo con soporte Apple Pencil y Borrador
+   * Incluye Palm Rejection y detección mejorada de stylus
    */
   const handleCanvasPointerDown = (e) => {
     if (selectedTool !== 'draw') return;
+
+    // PALM REJECTION: Ignorar toques que no son de stylus cuando se espera stylus
+    // Si el último input fue un stylus y ahora es un touch, probablemente es la palma
+    if (e.pointerType === 'touch' && window.lastPointerType === 'pen') {
+      logger.info('Palm rejection: Ignoring touch after pen input', 'ContentReader');
+      return;
+    }
+
+    // Guardar tipo de puntero para palm rejection
+    window.lastPointerType = e.pointerType;
 
     // Prevenir comportamiento por defecto
     e.preventDefault();
@@ -1444,19 +1459,32 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     // Capturar el puntero para seguir recibiendo eventos
     canvas.setPointerCapture(e.pointerId);
 
+    // Detectar y mostrar indicador de Apple Pencil/Stylus
+    if (e.pointerType === 'pen') {
+      setIsUsingStylusNow(true);
+      setLastStylusPressure(e.pressure);
+      logger.info(`Apple Pencil/Stylus detected - Pressure: ${e.pressure.toFixed(3)}, Tilt: ${e.tiltX}°/${e.tiltY}°`, 'ContentReader');
+    }
+
     if (isErasing) {
       // Modo borrador
       handleEraseDrawing(x, y);
     } else {
       // Modo dibujo normal
-      const pressure = e.pressure || 0.5; // Default 0.5 si no hay presión
+      // Normalizar presión: algunos stylus reportan 0 cuando apenas tocan
+      const pressure = e.pressure > 0 ? e.pressure : 0.5;
       setIsDrawing(true);
-      setDrawingPoints([[x, y, pressure]]);
+      setDrawingPoints([[x, y, pressure, e.pointerType]]);
     }
   };
 
   const handleCanvasPointerMove = (e) => {
     if (selectedTool !== 'draw') return;
+
+    // PALM REJECTION: Ignorar movimientos táctiles cuando se está usando stylus
+    if (e.pointerType === 'touch' && window.lastPointerType === 'pen' && isDrawing) {
+      return;
+    }
 
     e.preventDefault();
 
@@ -1469,9 +1497,15 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       // Borrar mientras se mueve
       handleEraseDrawing(x, y);
     } else if (isDrawing) {
-      // Dibujar mientras se mueve
-      const pressure = e.pressure || 0.5;
-      setDrawingPoints(prev => [...prev, [x, y, pressure]]);
+      // Dibujar mientras se mueve con presión normalizada
+      const pressure = e.pressure > 0 ? e.pressure : 0.5;
+
+      // Actualizar presión actual para indicador visual
+      if (e.pointerType === 'pen') {
+        setLastStylusPressure(pressure);
+      }
+
+      setDrawingPoints(prev => [...prev, [x, y, pressure, e.pointerType]]);
       drawLine(x, y, pressure);
     }
   };
@@ -1485,6 +1519,11 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     }
 
     setIsDrawing(false);
+
+    // Ocultar indicador de stylus después de un breve delay
+    setTimeout(() => {
+      setIsUsingStylusNow(false);
+    }, 1500);
 
     const newDrawing = {
       id: Date.now().toString(),
@@ -1518,9 +1557,12 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
     ctx.strokeStyle = COLORS[selectedColor].hex;
 
-    // Grosor dinámico basado en presión del Apple Pencil
+    // Grosor dinámico basado en presión del Apple Pencil/Stylus
     const baseWidth = BRUSH_TYPES[brushType].width;
-    const pressureFactor = 0.5 + (pressure * 1.5); // Rango: 0.5x a 2x
+
+    // Rango mejorado de presión: 0.3x a 2.5x para mayor expresividad
+    // Esto da un rango más amplio para trazos artísticos con stylus
+    const pressureFactor = 0.3 + (pressure * 2.2);
     ctx.lineWidth = baseWidth * pressureFactor;
 
     ctx.lineCap = 'round';
@@ -1560,14 +1602,15 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       ctx.lineJoin = 'round';
 
       if (drawing.points && drawing.points.length > 1) {
-        // Dibujar con presión variable por segmento
+        // Dibujar con presión variable por segmento (soporte Apple Pencil)
         for (let i = 1; i < drawing.points.length; i++) {
           const [x1, y1, pressure1 = 0.5] = drawing.points[i - 1];
           const [x2, y2, pressure2 = 0.5] = drawing.points[i];
 
           // Grosor dinámico por segmento basado en presión promedio
+          // Rango mejorado: 0.3x a 2.5x para mayor expresividad con stylus
           const avgPressure = (pressure1 + pressure2) / 2;
-          const pressureFactor = 0.5 + (avgPressure * 1.5);
+          const pressureFactor = 0.3 + (avgPressure * 2.2);
           ctx.lineWidth = baseWidth * pressureFactor;
 
           ctx.beginPath();
@@ -2190,6 +2233,33 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
               <span className="text-xs text-primary-700 dark:text-primary-300">
                 Selecciona texto o haz click en cualquier parte para agregar una nota
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* Indicador de Apple Pencil/Stylus - MEJORADO */}
+        {isUsingStylusNow && selectedTool === 'draw' && (
+          <div className="px-3 py-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-t border-purple-200 dark:border-purple-700">
+            <div className="flex items-center justify-center gap-3 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+                <span className="font-semibold text-purple-700 dark:text-purple-300">
+                  ✏️ Apple Pencil / Stylus Detectado
+                </span>
+              </div>
+              <div className="h-4 w-px bg-purple-300 dark:bg-purple-600"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-purple-600 dark:text-purple-400">Presión:</span>
+                <div className="w-24 h-2 bg-purple-200 dark:bg-purple-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-400 to-pink-500 transition-all duration-75"
+                    style={{ width: `${lastStylusPressure * 100}%` }}
+                  ></div>
+                </div>
+                <span className="text-xs font-mono text-purple-700 dark:text-purple-300">
+                  {(lastStylusPressure * 100).toFixed(0)}%
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -3083,7 +3153,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <span className="text-2xl">🎨</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Dibujar:</strong>
-                      <p className="text-xs mt-1">5 grosores: fino, medio, grueso, marcador y <strong>resaltador</strong> (ancho, semitransparente). Soporta Apple Pencil con sensibilidad a presión. <strong>Borrador selectivo</strong> con tamaño ajustable (presiona E o click en el ícono). Selector avanzado con colores personalizados y opacidad.</p>
+                      <p className="text-xs mt-1">5 grosores: fino, medio, grueso, marcador y <strong>resaltador</strong> (ancho, semitransparente). <strong className="text-purple-600 dark:text-purple-400">✏️ Soporte MEJORADO para Apple Pencil/Stylus:</strong> detección automática, sensibilidad a presión avanzada (rango 0.3x-2.5x), palm rejection inteligente para iPad, e indicador visual con barra de presión en tiempo real. <strong>Borrador selectivo</strong> con tamaño ajustable (presiona E o click en el ícono). Selector avanzado con colores personalizados y opacidad.</p>
                     </div>
                   </div>
 
@@ -3261,7 +3331,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                       <strong>Doble Click:</strong> Haz doble click en notas o textos flotantes para editarlos nuevamente.
                     </p>
                     <p className="mb-2">
-                      <strong>Apple Pencil:</strong> El dibujo detecta presión del stylus para líneas dinámicas.
+                      <strong className="text-purple-600 dark:text-purple-400">✏️ Apple Pencil / iPad:</strong> Soporte completo mejorado - detección automática, sensibilidad a presión avanzada (0.3x-2.5x), palm rejection inteligente, e indicador visual con barra de presión en tiempo real mientras dibujas.
                     </p>
                     <p className="mb-2">
                       <strong>Borrador:</strong> Presiona E para activar/desactivar. Ajusta el tamaño con el slider.
