@@ -20,7 +20,6 @@ import {
   Layers,
   CheckCircle,
   ClipboardList,
-  UsersRound,
   CheckSquare,
   DollarSign,
 } from 'lucide-react';
@@ -113,13 +112,6 @@ const MENU_ITEMS = [
     path: '/dashboard-v2/homework-review',
     permission: 'grade-assignments',
     badge: 'IA',
-  },
-  {
-    id: 'groups',
-    label: 'Grupos',
-    icon: UsersRound,
-    path: '/dashboard-v2/groups',
-    permission: 'manage-groups',
   },
 
   // DIVIDER

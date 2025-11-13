@@ -20,6 +20,11 @@ const AdminPaymentsPanel = lazy(() => import('./AdminPaymentsPanel'));
 const UnifiedContentManager = lazy(() => import('./UnifiedContentManager'));
 const ExerciseBuilder = lazy(() => import('../pages/ExerciseBuilder'));
 const AttendanceView = lazy(() => import('./AttendanceView'));
+const ClassSessionManager = lazy(() => import('./ClassSessionManager'));
+const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
+const CreditManager = lazy(() => import('./CreditManager'));
+const AIConfigPanel = lazy(() => import('./AIConfigPanel'));
+const SettingsPanel = lazy(() => import('./SettingsPanel'));
 
 /**
  * Vista de inicio (placeholder)
@@ -145,10 +150,10 @@ export function UniversalDashboard() {
               if (!can('view-own-students')) return <PlaceholderView title="Sin acceso" />;
               return <PlaceholderView title="Mis Estudiantes" />;
 
-            // CLASES
+            // CLASES - ClassSessionManager integrado
             case '/dashboard-v2/classes':
               if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Clases" />;
+              return <ClassSessionManager user={user} />;
 
             // ASISTENCIAS
             case '/dashboard-v2/attendance':
@@ -159,11 +164,6 @@ export function UniversalDashboard() {
             case '/dashboard-v2/homework-review':
               if (!can('grade-assignments')) return <PlaceholderView title="Sin acceso" />;
               return <HomeworkReviewPanel user={user} />;
-
-            // GRUPOS
-            case '/dashboard-v2/groups':
-              if (!can('manage-groups')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Grupos" />;
 
             // MIS CURSOS (Students)
             case '/dashboard-v2/my-courses':
@@ -184,35 +184,35 @@ export function UniversalDashboard() {
               if (!can('view-own-credits')) return <PlaceholderView title="Sin acceso" />;
               return <PlaceholderView title="Mis Pagos" />;
 
-            // ANALYTICS
+            // ANALYTICS - AnalyticsDashboard integrado
             case '/dashboard-v2/analytics':
               if (!can('view-own-analytics')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Analytics" />;
+              return <AnalyticsDashboard user={user} />;
 
             // GESTIÓN DE USUARIOS (Admin)
             case '/dashboard-v2/users':
               if (!can('view-all-users')) return <PlaceholderView title="Sin acceso" />;
               return <PlaceholderView title="Gestión de Usuarios" />;
 
-            // GESTIÓN DE CRÉDITOS (Admin)
+            // GESTIÓN DE CRÉDITOS (Admin) - CreditManager integrado
             case '/dashboard-v2/credits':
               if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Gestión de Créditos" />;
+              return <CreditManager userId={user.uid} currentUser={user} />;
 
             // SISTEMA DE PAGOS (Admin)
             case '/dashboard-v2/payments':
               if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
               return <AdminPaymentsPanel />;
 
-            // CONFIGURAR IA (Admin)
+            // CONFIGURAR IA (Admin) - AIConfigPanel integrado
             case '/dashboard-v2/ai-config':
               if (!can('configure-ai')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Configurar IA" />;
+              return <AIConfigPanel user={user} />;
 
-            // CONFIGURACIÓN (Admin)
+            // CONFIGURACIÓN (Admin) - SettingsPanel integrado
             case '/dashboard-v2/system-settings':
               if (!can('manage-system-settings')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Configuración del Sistema" />;
+              return <SettingsPanel />;
 
             default:
               return <PlaceholderView title="Página no encontrada" />;
