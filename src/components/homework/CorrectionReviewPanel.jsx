@@ -258,9 +258,9 @@ export default function CorrectionReviewPanel({ review, onCorrectionsUpdate }) {
               {/* Corrections list */}
               {isExpanded && (
                 <div className="border-t border-zinc-200 dark:border-zinc-700 p-4 space-y-3">
-                  {typeCorrections.map(correction => (
+                  {typeCorrections.map((correction, idx) => (
                     <CorrectionItem
-                      key={correction.id}
+                      key={correction.id || `${type}_${idx}`}
                       correction={correction}
                       config={config}
                       onStatusChange={handleStatusChange}
