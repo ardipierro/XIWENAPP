@@ -389,25 +389,25 @@ service cloud.firestore {
 
     // Correction profiles - Configuration for how to correct homework
     match /correction_profiles/{profileId} {
-      // Teachers can create profiles with their own teacherId
+      // Teachers can create profiles with their own teacherId, admins can create for anyone
       allow create: if isAuthenticated() &&
-        (isTeacher() || isAdmin()) &&
-        request.resource.data.teacherId == request.auth.uid;
+        (isAdmin() ||
+         (isTeacher() && request.resource.data.teacherId == request.auth.uid));
 
       // Teachers can read their own profiles, admins can read all
       allow read: if isAuthenticated() &&
-        (resource.data.teacherId == request.auth.uid ||
-         isAdmin());
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
 
       // Teachers can update their own profiles, admins can update all
       allow update: if isAuthenticated() &&
-        (resource.data.teacherId == request.auth.uid ||
-         isAdmin());
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
 
       // Teachers can delete their own profiles, admins can delete all
       allow delete: if isAuthenticated() &&
-        (resource.data.teacherId == request.auth.uid ||
-         isAdmin());
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
     }
 
     // Profile-student assignments - Assign profiles to individual students
