@@ -1,6 +1,8 @@
 /**
  * @fileoverview Menú lateral de navegación del dashboard
  * @module components/SideMenu
+ *
+ * Refactorizado para usar Design System 3.0 (100% Tailwind, 0 CSS custom)
  */
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -35,7 +37,6 @@ import {
   Sparkles,
   BookMarked
 } from 'lucide-react';
-import './SideMenu.css';
 
 /**
  * Menú lateral de navegación
@@ -94,7 +95,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: Layers, label: 'Exercise Builder', path: '/admin', action: 'exerciseBuilder' },
               { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
               { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
-              // Theme Builder y Design Lab desactivados temporalmente
             ]
           }
         ]
@@ -117,7 +117,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: Layers, label: 'Exercise Builder', path: '/teacher', action: 'exerciseBuilder' },
           { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
           { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
-          // Theme Builder y Design Lab desactivados temporalmente
         ]
       };
     }
@@ -145,7 +144,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
   const menuData = getMenuItems();
 
   const isActive = (action) => {
-    // Comparar con currentScreen pasado desde el dashboard
     return currentScreen === action;
   };
 
@@ -156,24 +154,42 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
     return (
       <button
         key={index}
-        className={`sidemenu-item ${active ? 'active' : ''}`}
+        className={`
+          w-full flex items-center gap-3 px-4 py-2.5 rounded-lg
+          transition-all duration-150 text-left
+          ${active ? 'font-medium' : 'font-normal'}
+        `}
+        style={{
+          backgroundColor: active ? 'var(--color-primary-bg)' : 'transparent',
+          color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+          borderLeft: active ? '3px solid var(--color-primary)' : '3px solid transparent'
+        }}
+        onMouseEnter={(e) => {
+          if (!active) {
+            e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';
+            e.currentTarget.style.color = 'var(--color-text-primary)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!active) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'var(--color-text-secondary)';
+          }
+        }}
         onClick={() => handleNavigation(item.path, item.action)}
       >
-        <span className="sidemenu-item-icon">
-          <IconComponent size={18} strokeWidth={2} />
-        </span>
-        <span className="sidemenu-item-label">{item.label}</span>
+        <IconComponent size={18} strokeWidth={2} />
+        <span>{item.label}</span>
       </button>
     );
   };
 
   const renderSectionedMenu = () => {
     return (
-      <nav className="sidemenu-nav">
+      <nav className="flex flex-col gap-1">
         {menuData.sections?.map((section) => (
-          <div key={section.id} className="sidemenu-section">
-            {/* Section Items - Sin header, siempre expandido */}
-            <div className="sidemenu-section-items expanded">
+          <div key={section.id} className="mb-2">
+            <div className="flex flex-col">
               {section.items.map((item, index) => renderMenuItem(item, index))}
             </div>
           </div>
@@ -184,7 +200,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
 
   const renderFlatMenu = () => {
     return (
-      <nav className="sidemenu-nav">
+      <nav className="flex flex-col gap-1">
         {menuData.items?.map((item, index) => renderMenuItem(item, index))}
       </nav>
     );
@@ -195,15 +211,25 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       {/* Overlay para cerrar en móvil */}
       {isOpen && (
         <div
-          className="sidemenu-overlay"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
           onClick={onNavigate}
         ></div>
       )}
 
       {/* Menú lateral */}
-      <aside className={`sidemenu ${isOpen ? 'open' : ''}`}>
-        <div className="sidemenu-content custom-scrollbar">
-          {/* Items del menú */}
+      <aside
+        className={`
+          fixed left-0 top-0 h-full w-64 z-50
+          transform transition-transform duration-300 ease-in-out
+          md:translate-x-0 md:static md:z-0
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+        style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          borderRight: '1px solid var(--color-border)'
+        }}
+      >
+        <div className="h-full overflow-y-auto p-4 custom-scrollbar">
           {menuData.sections ? renderSectionedMenu() : renderFlatMenu()}
         </div>
       </aside>
