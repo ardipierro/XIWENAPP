@@ -22,13 +22,12 @@ import {
 } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
 import {
-  Button,
-  Card,
-  Modal,
-  Input,
-  Badge,
+  BaseButton,
+  BaseCard,
+  BaseModal,
+  BaseInput,
+  BaseBadge,
   BaseLoading,
-  StatCard,
   BaseEmptyState
 } from './common';
 import logger from '../utils/logger';
@@ -83,10 +82,10 @@ export default function AssignmentManager({ teacherId }) {
     <div className="p-6 space-y-6">
       {/* Header - Sin título principal */}
       <div className="flex justify-end items-center">
-        <Button variant="primary" onClick={handleCreate}>
+        <BaseButton variant="primary" onClick={handleCreate}>
           <Plus size={16} strokeWidth={2} />
           Nueva Tarea
-        </Button>
+        </BaseButton>
       </div>
 
       {/* Search and Filters */}
@@ -112,30 +111,27 @@ export default function AssignmentManager({ teacherId }) {
             <option value="archived">Archivadas</option>
           </select>
         </div>
-      </Card>
+      </BaseCard>
 
       {/* Stats Cards */}
       <div className="stats-grid">
-        <StatCard
-          title="Total"
-          value={assignments.length}
-          icon={FileText}
-          color="primary"
-        />
+        <BaseCard className="text-center p-6">
+          <FileText className="mx-auto mb-2" size={32} />
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Total</h3>
+          <p className="text-3xl font-bold text-purple-600">{assignments.length}</p>
+        </BaseCard>
 
-        <StatCard
-          title="Activas"
-          value={assignments.filter(a => a.status === 'active').length}
-          icon={CheckCircle}
-          color="secondary"
-        />
+        <BaseCard className="text-center p-6">
+          <CheckCircle className="mx-auto mb-2" size={32} />
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Activas</h3>
+          <p className="text-3xl font-bold text-green-600">{assignments.filter(a => a.status === 'active').length}</p>
+        </BaseCard>
 
-        <StatCard
-          title="Archivadas"
-          value={assignments.filter(a => a.status === 'archived').length}
-          icon={BarChart3}
-          color="primary"
-        />
+        <BaseCard className="text-center p-6">
+          <BarChart3 className="mx-auto mb-2" size={32} />
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Archivadas</h3>
+          <p className="text-3xl font-bold text-purple-600">{assignments.filter(a => a.status === 'archived').length}</p>
+        </BaseCard>
       </div>
 
       {/* Assignments List */}
@@ -145,10 +141,10 @@ export default function AssignmentManager({ teacherId }) {
           title="No hay tareas"
           description="Crea tu primera tarea para comenzar"
           action={
-            <Button variant="primary" onClick={handleCreate}>
+            <BaseButton variant="primary" onClick={handleCreate}>
               <Plus size={16} strokeWidth={2} />
               Nueva Tarea
-            </Button>
+            </BaseButton>
           }
         />
       ) : (
@@ -242,44 +238,44 @@ function AssignmentCard({ assignment, courses, onEdit, onDelete, onViewStats }) 
                   </div>
                 )}
 
-                <Badge variant={assignment.status === 'active' ? 'success' : 'info'}>
+                <BaseBadgevariant={assignment.status === 'active' ? 'success' : 'info'}>
                   {assignment.status === 'active' ? 'Activa' : 'Archivada'}
-                </Badge>
+                </BaseBadge>
               </div>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2 ml-4">
-          <Button
+          <BaseButton
             variant="ghost"
             size="sm"
             onClick={() => setShowStats(!showStats)}
             className="p-2"
           >
             <BarChart3 size={18} strokeWidth={2} />
-          </Button>
-          <Button
+          </BaseButton>
+          <BaseButton
             variant="ghost"
             size="sm"
             onClick={onEdit}
             className="p-2"
           >
             <Edit size={18} strokeWidth={2} />
-          </Button>
-          <Button
+          </BaseButton>
+          <BaseButton
             variant="ghost"
             size="sm"
             onClick={onDelete}
             className="p-2 text-error"
           >
             <Trash2 size={18} strokeWidth={2} />
-          </Button>
+          </BaseButton>
         </div>
       </div>
 
       {showStats && <AssignmentStats assignmentId={assignment.id} />}
-    </Card>
+    </BaseCard>
   );
 }
 
@@ -387,12 +383,12 @@ function AssignmentFormModal({ assignment, courses, teacherId, onCreate, onUpdat
       title={isEdit ? 'Editar Tarea' : 'Nueva Tarea'}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>
+          <BaseButton variant="ghost" onClick={onClose}>
             Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={loading}>
+          </BaseButton>
+          <BaseButton variant="primary" onClick={handleSubmit} disabled={loading}>
             {loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Crear')}
-          </Button>
+          </BaseButton>
         </>
       }
     >
@@ -464,6 +460,6 @@ function AssignmentFormModal({ assignment, courses, teacherId, onCreate, onUpdat
           </label>
         </div>
       </form>
-    </Modal>
+    </BaseModal>
   );
 }
