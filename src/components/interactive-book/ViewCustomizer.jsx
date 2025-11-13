@@ -281,8 +281,10 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
       {/* Panel expandible */}
       {isOpen && (
         <BaseCard
-          title="Configuración de Aspecto Visual"
-          subtitle="Personaliza cada detalle de la apariencia"
+          {...(!alwaysOpen && {
+            title: "Configuración de Aspecto Visual",
+            subtitle: "Personaliza cada detalle de la apariencia"
+          })}
         >
           <div className="space-y-6">
             {/* Tabs */}
