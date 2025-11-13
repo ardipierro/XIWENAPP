@@ -8,6 +8,7 @@
 const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
+const vision = require('@google-cloud/vision');
 
 // ============================================================================
 // CORRECTION PROFILE HELPERS
@@ -268,6 +269,81 @@ async function analyzeWithOpenAI(imageUrl, imageBase64, systemPrompt) {
 }
 
 /**
+ * Extract text with word coordinates using Google Vision API
+ * Returns transcription + word positions for overlay highlighting
+ */
+async function extractTextWithGoogleVision(imageUrl) {
+  try {
+    console.log('[Google Vision] Extracting text with coordinates...');
+
+    // Create Vision client
+    const client = new vision.ImageAnnotatorClient();
+
+    // Analyze image from URL
+    const [result] = await client.documentTextDetection(imageUrl);
+    const fullTextAnnotation = result.fullTextAnnotation;
+
+    if (!fullTextAnnotation) {
+      console.warn('[Google Vision] No text detected in image');
+      return {
+        transcription: '',
+        words: []
+      };
+    }
+
+    // Extract full transcription
+    const transcription = fullTextAnnotation.text || '';
+
+    // Extract words with bounding boxes
+    const words = [];
+
+    if (fullTextAnnotation.pages && fullTextAnnotation.pages[0]) {
+      const page = fullTextAnnotation.pages[0];
+
+      // Iterate through blocks, paragraphs, words
+      for (const block of (page.blocks || [])) {
+        for (const paragraph of (block.paragraphs || [])) {
+          for (const word of (paragraph.words || [])) {
+            // Get word text
+            const wordText = word.symbols
+              .map(symbol => symbol.text)
+              .join('');
+
+            // Get bounding box
+            const vertices = word.boundingBox.vertices;
+            const bounds = {
+              x: Math.min(...vertices.map(v => v.x || 0)),
+              y: Math.min(...vertices.map(v => v.y || 0)),
+              width: Math.max(...vertices.map(v => v.x || 0)) - Math.min(...vertices.map(v => v.x || 0)),
+              height: Math.max(...vertices.map(v => v.y || 0)) - Math.min(...vertices.map(v => v.y || 0))
+            };
+
+            words.push({
+              text: wordText,
+              bounds: bounds,
+              confidence: word.confidence || 0
+            });
+          }
+        }
+      }
+    }
+
+    console.log(`[Google Vision] Extracted ${words.length} words with coordinates`);
+    console.log(`[Google Vision] Transcription length: ${transcription.length} chars`);
+
+    return {
+      transcription,
+      words,
+      ocrProvider: 'google'
+    };
+
+  } catch (error) {
+    console.error('[Google Vision] Error extracting text:', error);
+    throw error;
+  }
+}
+
+/**
  * Parse AI response and extract JSON
  */
 function parseAIResponse(responseText) {
@@ -328,7 +404,8 @@ exports.analyzeHomeworkImage = onDocumentCreated({
     // Get homework_analyzer function config
     const functionConfig = aiConfig.homework_analyzer || {
       enabled: true,
-      provider: 'claude', // Default to Claude
+      analysis_provider: 'claude', // Who analyzes and corrects
+      ocr_provider: 'claude',      // Who extracts text (google for coordinates)
       model: 'claude-sonnet-4-5'
     };
 
@@ -336,7 +413,8 @@ exports.analyzeHomeworkImage = onDocumentCreated({
       throw new Error('Homework analyzer function is not enabled');
     }
 
-    console.log(`[analyzeHomeworkImage] Using provider: ${functionConfig.provider}`);
+    console.log(`[analyzeHomeworkImage] Using analysis provider: ${functionConfig.analysis_provider}`);
+    console.log(`[analyzeHomeworkImage] Using OCR provider: ${functionConfig.ocr_provider}`);
 
     // ✨ Get student's correction profile
     const correctionProfile = await getStudentCorrectionProfile(
@@ -351,7 +429,16 @@ exports.analyzeHomeworkImage = onDocumentCreated({
       console.log(`[analyzeHomeworkImage] No profile found, using default settings`);
     }
 
-    // Download image as base64
+    // ✨ STEP 1: Extract text with OCR (with or without coordinates)
+    let ocrResult = null;
+
+    if (functionConfig.ocr_provider === 'google') {
+      // Use Google Vision for OCR with word coordinates
+      console.log('[analyzeHomeworkImage] Using Google Vision for OCR with coordinates...');
+      ocrResult = await extractTextWithGoogleVision(reviewData.imageUrl);
+    }
+
+    // Download image as base64 for vision analysis
     console.log('[analyzeHomeworkImage] Downloading image...');
     const imageBase64 = await downloadImageAsBase64(reviewData.imageUrl);
     console.log('[analyzeHomeworkImage] Image downloaded successfully');
@@ -397,7 +484,65 @@ exports.analyzeHomeworkImage = onDocumentCreated({
     }
 
     // Build final system prompt with dynamic configuration
-    const systemPrompt = `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
+    const hasPreExtractedText = ocrResult && ocrResult.transcription;
+
+    const systemPrompt = hasPreExtractedText
+      ? `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar el texto escrito por un estudiante (ya extraído de la imagen) y proporcionar una corrección detallada y constructiva.
+
+TEXTO EXTRAÍDO:
+"""
+${ocrResult.transcription}
+"""
+
+NIVEL DE EXIGENCIA: ${strictnessLevel.toUpperCase()}
+${strictnessInstructions[strictnessLevel]}
+
+ESTILO DE FEEDBACK: ${feedbackStyle.toUpperCase()}
+${feedbackInstructions[feedbackStyle]}
+
+INSTRUCCIONES:
+1. Analiza el texto extraído mostrado arriba
+2. ${typesInstructions}
+3. Clasifica cada error por tipo
+4. Para cada error, proporciona:
+   - El texto original (con el error)
+   - La corrección apropiada
+   - ${detailedExplanations ? 'Una explicación clara, detallada y pedagógica del error' : 'Una explicación breve del error'}
+   - El número de línea aproximado donde aparece
+${optionalFeatures.length > 0 ? optionalFeatures.join('\n') : ''}
+5. Genera un resumen ejecutivo con conteo de errores por categoría
+6. Proporciona feedback general constructivo
+7. Sugiere una calificación (0-100) basada en:
+   - Exactitud gramatical (40%)
+   - Ortografía (20%)
+   - Vocabulario y uso apropiado (20%)
+   - Estructura y coherencia (20%)
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "transcription": "Repite exactamente el texto extraído proporcionado",
+  "errorSummary": {
+    "spelling": número,
+    "grammar": número,
+    "punctuation": número,
+    "vocabulary": número,
+    "total": número
+  },
+  "detailedCorrections": [
+    {
+      "type": "spelling|grammar|punctuation|vocabulary",
+      "original": "texto con error",
+      "correction": "texto corregido",
+      "explanation": "explicación pedagógica",
+      "line": número
+    }
+  ],
+  "overallFeedback": "Comentario general constructivo",
+  "suggestedGrade": número (0-100)
+}
+
+Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`
+      : `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
 
 NIVEL DE EXIGENCIA: ${strictnessLevel.toUpperCase()}
 ${strictnessInstructions[strictnessLevel]}
@@ -448,9 +593,9 @@ FORMATO DE RESPUESTA (JSON):
 
 Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
 
-    // Analyze with selected provider
+    // ✨ STEP 2: Analyze with selected provider for error correction
     let aiResponse;
-    if (functionConfig.provider === 'openai') {
+    if (functionConfig.analysis_provider === 'openai') {
       aiResponse = await analyzeWithOpenAI(reviewData.imageUrl, imageBase64, systemPrompt);
     } else {
       // Default to Claude
@@ -476,9 +621,10 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       teacherStatus: 'pending'
     }));
 
-    await reviewRef.update({
+    // Build update object
+    const updateData = {
       status: 'pending_review',  // ✨ Changed from 'completed' - now waits for teacher approval
-      aiProvider: functionConfig.provider,
+      aiProvider: functionConfig.analysis_provider,
       aiModel: functionConfig.model,
       correctionProfileId: correctionProfile?.id || null,  // ✨ Store which profile was used
       transcription: analysisResult.transcription,
@@ -496,7 +642,16 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       overallFeedback: analysisResult.overallFeedback || '',
       suggestedGrade: analysisResult.suggestedGrade || 0,
       analyzedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+    };
+
+    // ✨ Add word coordinates if available (from Google Vision)
+    if (ocrResult && ocrResult.words) {
+      updateData.words = ocrResult.words;
+      updateData.ocrProvider = ocrResult.ocrProvider;
+      console.log(`[analyzeHomeworkImage] Saved ${ocrResult.words.length} word coordinates from Google Vision`);
+    }
+
+    await reviewRef.update(updateData);
 
     console.log(`[analyzeHomeworkImage] ✅ Analysis completed for review: ${reviewId}`);
     console.log(`[analyzeHomeworkImage] Status set to: pending_review (awaiting teacher approval)`);
@@ -567,7 +722,8 @@ exports.reanalyzeHomework = onDocumentUpdated({
     // Get homework_analyzer function config
     const functionConfig = aiConfig.homework_analyzer || {
       enabled: true,
-      provider: 'claude',
+      analysis_provider: 'claude',
+      ocr_provider: 'claude',
       model: 'claude-sonnet-4-5'
     };
 
@@ -575,7 +731,8 @@ exports.reanalyzeHomework = onDocumentUpdated({
       throw new Error('Homework analyzer function is not enabled');
     }
 
-    console.log(`[reanalyzeHomework] Using provider: ${functionConfig.provider}`);
+    console.log(`[reanalyzeHomework] Using analysis provider: ${functionConfig.analysis_provider}`);
+    console.log(`[reanalyzeHomework] Using OCR provider: ${functionConfig.ocr_provider}`);
 
     // ✨ Get the specific correction profile (from correctionProfileId field)
     let correctionProfile = null;
@@ -596,6 +753,15 @@ exports.reanalyzeHomework = onDocumentUpdated({
         afterData.teacherId,
         db
       );
+    }
+
+    // ✨ STEP 1: Extract text with OCR (with or without coordinates)
+    let ocrResult = null;
+
+    if (functionConfig.ocr_provider === 'google') {
+      // Use Google Vision for OCR with word coordinates
+      console.log('[reanalyzeHomework] Using Google Vision for OCR with coordinates...');
+      ocrResult = await extractTextWithGoogleVision(afterData.imageUrl);
     }
 
     // Download image as base64
@@ -643,8 +809,66 @@ exports.reanalyzeHomework = onDocumentUpdated({
       optionalFeatures.push('- Incluye ejemplos de uso correcto para cada corrección cuando sea útil.');
     }
 
-    // Build final system prompt
-    const systemPrompt = `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
+    // Build final system prompt with dynamic configuration
+    const hasPreExtractedText = ocrResult && ocrResult.transcription;
+
+    const systemPrompt = hasPreExtractedText
+      ? `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar el texto escrito por un estudiante (ya extraído de la imagen) y proporcionar una corrección detallada y constructiva.
+
+TEXTO EXTRAÍDO:
+"""
+${ocrResult.transcription}
+"""
+
+NIVEL DE EXIGENCIA: ${strictnessLevel.toUpperCase()}
+${strictnessInstructions[strictnessLevel]}
+
+ESTILO DE FEEDBACK: ${feedbackStyle.toUpperCase()}
+${feedbackInstructions[feedbackStyle]}
+
+INSTRUCCIONES:
+1. Analiza el texto extraído mostrado arriba
+2. ${typesInstructions}
+3. Clasifica cada error por tipo
+4. Para cada error, proporciona:
+   - El texto original (con el error)
+   - La corrección apropiada
+   - ${detailedExplanations ? 'Una explicación clara, detallada y pedagógica del error' : 'Una explicación breve del error'}
+   - El número de línea aproximado donde aparece
+${optionalFeatures.length > 0 ? optionalFeatures.join('\n') : ''}
+5. Genera un resumen ejecutivo con conteo de errores por categoría
+6. Proporciona feedback general constructivo
+7. Sugiere una calificación (0-100) basada en:
+   - Exactitud gramatical (40%)
+   - Ortografía (20%)
+   - Vocabulario y uso apropiado (20%)
+   - Estructura y coherencia (20%)
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "transcription": "Repite exactamente el texto extraído proporcionado",
+  "errorSummary": {
+    "spelling": número,
+    "grammar": número,
+    "punctuation": número,
+    "vocabulary": número,
+    "total": número
+  },
+  "detailedCorrections": [
+    {
+      "type": "spelling|grammar|punctuation|vocabulary",
+      "original": "texto con error",
+      "correction": "texto corregido",
+      "explanation": "explicación pedagógica",
+      "line": número
+    }
+  ],
+  "overallFeedback": "Comentario general constructivo",
+  "suggestedGrade": número (0-100)
+}
+
+Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`
+      : `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar imágenes de tareas escritas por estudiantes y proporcionar una corrección detallada y constructiva.
 
 NIVEL DE EXIGENCIA: ${strictnessLevel.toUpperCase()}
 ${strictnessInstructions[strictnessLevel]}
@@ -695,9 +919,9 @@ FORMATO DE RESPUESTA (JSON):
 
 Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
 
-    // Analyze with selected provider
+    // ✨ STEP 2: Analyze with selected provider for error correction
     let aiResponse;
-    if (functionConfig.provider === 'openai') {
+    if (functionConfig.analysis_provider === 'openai') {
       aiResponse = await analyzeWithOpenAI(afterData.imageUrl, imageBase64, systemPrompt);
     } else {
       // Default to Claude
@@ -723,9 +947,10 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       teacherStatus: 'pending'
     }));
 
-    await reviewRef.update({
+    // Build update object
+    const updateData = {
       status: 'pending_review',
-      aiProvider: functionConfig.provider,
+      aiProvider: functionConfig.analysis_provider,
       aiModel: functionConfig.model,
       correctionProfileId: correctionProfile?.id || null,
       transcription: analysisResult.transcription,
@@ -747,7 +972,16 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       // ✨ Clear reanalysis flag
       requestReanalysis: false,
       reanalyzedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+    };
+
+    // ✨ Add word coordinates if available (from Google Vision)
+    if (ocrResult && ocrResult.words) {
+      updateData.words = ocrResult.words;
+      updateData.ocrProvider = ocrResult.ocrProvider;
+      console.log(`[reanalyzeHomework] Saved ${ocrResult.words.length} word coordinates from Google Vision`);
+    }
+
+    await reviewRef.update(updateData);
 
     console.log(`[reanalyzeHomework] ✅ Reanalysis completed for review: ${reviewId}`);
     console.log(`[reanalyzeHomework] Status set to: pending_review`);
