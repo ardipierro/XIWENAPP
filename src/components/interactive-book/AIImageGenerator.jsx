@@ -56,11 +56,15 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
     const stability = localStorage.getItem('ai_credentials_stability');
 
     if (openai && openai.trim()) {
+      // ✅ CRITICAL FIX: Initialize imageGenerationService with stored OpenAI key
+      imageGenerationService.setOpenAIKey(openai);
       setHasOpenAI(true);
       setOpenaiApiKey('••••••••••••••••');
     }
 
     if (stability && stability.trim()) {
+      // ✅ CRITICAL FIX: Initialize imageGenerationService with stored Stability key
+      imageGenerationService.setStabilityKey(stability);
       setHasStability(true);
       setStabilityApiKey('••••••••••••••••');
     }

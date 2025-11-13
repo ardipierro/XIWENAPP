@@ -98,7 +98,14 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
 
   const checkElevenLabsKey = () => {
     const key = localStorage.getItem('ai_credentials_elevenlabs');
-    setHasElevenLabsKey(!!key && key.trim() !== '');
+    const hasKey = !!key && key.trim() !== '';
+
+    // ✅ CRITICAL FIX: Initialize premiumTTSService when key exists
+    if (hasKey) {
+      premiumTTSService.setApiKey(key);
+    }
+
+    setHasElevenLabsKey(hasKey);
   };
 
   const saveConfigs = (newConfigs) => {
