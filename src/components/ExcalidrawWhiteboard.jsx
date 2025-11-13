@@ -8,7 +8,7 @@ const Excalidraw = lazy(() =>
 import '@excalidraw/excalidraw/index.css';
 import { X, Save } from 'lucide-react';
 import { saveExcalidrawContent } from '../firebase/excalidraw';
-import './ExcalidrawWhiteboard.css';
+import BaseButton from './common/BaseButton';
 
 /**
  * Componente de Pizarra usando Excalidraw
@@ -113,41 +113,43 @@ function ExcalidrawWhiteboard({ onBack, initialSession }) {
   }, []);
 
   return (
-    <div className="excalidraw-whiteboard-container">
+    <div className="fixed inset-0 w-screen h-screen flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--color-bg-primary)', zIndex: 9999 }}>
       {/* Header con botón de cerrar */}
-      <div className="excalidraw-header">
-        <button
+      <div className="flex items-center gap-4 px-5 py-3 h-[60px] border-b shadow-sm" style={{ backgroundColor: 'var(--color-bg-secondary)', borderColor: 'var(--color-border)' }}>
+        <BaseButton
           onClick={onBack}
-          className="excalidraw-close-btn"
+          variant="secondary"
+          icon={X}
+          size="sm"
           title="Volver"
         >
-          <X size={20} />
           Volver
-        </button>
-        <h2 className="excalidraw-title">
+        </BaseButton>
+        <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
           {initialSession?.title || 'Pizarra Excalidraw'}
         </h2>
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div className="ml-auto flex gap-3 items-center">
           {lastSaved && (
-            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               Guardado: {lastSaved.toLocaleTimeString()}
             </span>
           )}
-          <button
+          <BaseButton
             onClick={handleSave}
-            className="excalidraw-close-btn"
+            variant="primary"
+            icon={Save}
+            size="sm"
             disabled={saving || !initialSession?.id}
             title="Guardar"
           >
-            <Save size={18} />
             {saving ? 'Guardando...' : 'Guardar'}
-          </button>
+          </BaseButton>
         </div>
       </div>
 
       {/* Contenedor de Excalidraw con Suspense para lazy loading */}
-      <div className="excalidraw-content">
+      <div className="absolute top-[60px] left-0 right-0 bottom-0">
         <Suspense fallback={
           <div style={{
             display: 'flex',
