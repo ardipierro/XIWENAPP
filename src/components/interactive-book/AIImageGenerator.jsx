@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { Image, Sparkles, Download, RefreshCw, Key, Zap, Settings as SettingsIcon, CheckCircle } from 'lucide-react';
 import { BaseCard, BaseButton, BaseBadge, BaseInput, BaseTextarea, BaseSelect, BaseLoading, BaseAlert } from '../common';
 import imageGenerationService from '../../services/imageGenerationService';
+import { getAICredential } from '../../utils/credentialsHelper';
 import logger from '../../utils/logger';
 
 /**
@@ -51,22 +52,25 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
     };
   }, []);
 
-  const loadApiKeys = () => {
-    const openai = localStorage.getItem('ai_credentials_openai');
-    const stability = localStorage.getItem('ai_credentials_stability');
+  const loadApiKeys = async () => {
+    try {
+      // Usar helper centralizado que lee de Firebase Y localStorage
+      const openai = await getAICredential('openai');
+      const stability = await getAICredential('stability');
 
-    if (openai && openai.trim()) {
-      // ✅ CRITICAL FIX: Initialize imageGenerationService with stored OpenAI key
-      imageGenerationService.setOpenAIKey(openai);
-      setHasOpenAI(true);
-      setOpenaiApiKey('••••••••••••••••');
-    }
+      if (openai) {
+        imageGenerationService.setOpenAIKey(openai);
+        setHasOpenAI(true);
+        setOpenaiApiKey('••••••••••••••••');
+      }
 
-    if (stability && stability.trim()) {
-      // ✅ CRITICAL FIX: Initialize imageGenerationService with stored Stability key
-      imageGenerationService.setStabilityKey(stability);
-      setHasStability(true);
-      setStabilityApiKey('••••••••••••••••');
+      if (stability) {
+        imageGenerationService.setStabilityKey(stability);
+        setHasStability(true);
+        setStabilityApiKey('••••••••••••••••');
+      }
+    } catch (err) {
+      logger.error('Error loading API keys:', err);
     }
   };
 

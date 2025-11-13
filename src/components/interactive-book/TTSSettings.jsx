@@ -8,6 +8,7 @@ import { Settings, Volume2, Zap, Languages, Key, Sparkles, CheckCircle } from 'l
 import { BaseCard, BaseButton, BaseBadge, BaseInput } from '../common';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
+import { getAICredential } from '../../utils/credentialsHelper';
 import PropTypes from 'prop-types';
 
 /**
@@ -47,15 +48,20 @@ function TTSSettings({ alwaysOpen = false }) {
     }
   };
 
-  const loadElevenLabsKey = () => {
-    const storedKey = localStorage.getItem('ai_credentials_elevenlabs');
+  const loadElevenLabsKey = async () => {
+    try {
+      // Usar helper centralizado que lee de Firebase Y localStorage
+      const credential = await getAICredential('elevenlabs');
 
-    if (storedKey && storedKey.trim()) {
-      // ✅ CRITICAL FIX: Initialize premiumTTSService with the stored key
-      premiumTTSService.setApiKey(storedKey);
-      setHasElevenLabsKey(true);
-      setElevenLabsApiKey('••••••••••••••••'); // Mostrar ofuscado
-    } else {
+      if (credential) {
+        premiumTTSService.setApiKey(credential);
+        setHasElevenLabsKey(true);
+        setElevenLabsApiKey('••••••••••••••••');
+      } else {
+        setHasElevenLabsKey(false);
+      }
+    } catch (err) {
+      console.error('Error loading ElevenLabs key:', err);
       setHasElevenLabsKey(false);
     }
   };

@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import { BaseCard, BaseButton, BaseBadge } from '../common';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
+import { getAICredential } from '../../utils/credentialsHelper';
 import logger from '../../utils/logger';
 
 const ELEVENLABS_VOICES = [
@@ -96,16 +97,21 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
     setBrowserVoices(voices);
   };
 
-  const checkElevenLabsKey = () => {
-    const key = localStorage.getItem('ai_credentials_elevenlabs');
-    const hasKey = !!key && key.trim() !== '';
+  const checkElevenLabsKey = async () => {
+    try {
+      // Usar helper centralizado que lee de Firebase Y localStorage
+      const credential = await getAICredential('elevenlabs');
 
-    // ✅ CRITICAL FIX: Initialize premiumTTSService when key exists
-    if (hasKey) {
-      premiumTTSService.setApiKey(key);
+      if (credential) {
+        premiumTTSService.setApiKey(credential);
+        setHasElevenLabsKey(true);
+      } else {
+        setHasElevenLabsKey(false);
+      }
+    } catch (err) {
+      logger.error('Error checking ElevenLabs key:', err);
+      setHasElevenLabsKey(false);
     }
-
-    setHasElevenLabsKey(hasKey);
   };
 
   const saveConfigs = (newConfigs) => {
