@@ -2345,9 +2345,10 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
               </div>
             )}
             </div>
+          )}
 
-            {/* Advanced Color Picker Panel */}
-            {showAdvancedColorPicker && (
+          {/* Advanced Color Picker Panel */}
+          {selectedTool === 'draw' && showAdvancedColorPicker && (
               <div className="mt-3 p-3 bg-white dark:bg-primary-900 rounded-lg border border-primary-200 dark:border-primary-700 shadow-lg">
                 <h4 className="text-xs font-bold text-primary-900 dark:text-primary-100 mb-2 flex items-center gap-2">
                   <Palette className="w-4 h-4" />
@@ -2460,8 +2461,6 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 )}
               </div>
             )}
-          </div>
-        )}
 
         {selectedTool === 'text' && (
           <div className="px-3 py-2 bg-primary-50 dark:bg-primary-800 border-t border-primary-200 dark:border-primary-700">
