@@ -486,7 +486,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
 
               <button
                 onClick={exportCSS}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+                className="px-4 py-2 0 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2" style={{ background: 'var(--color-success-bg)' }}
               >
                 <Download size={18} />
                 Export CSS
@@ -645,7 +645,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
         <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={saveChanges}
-            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all shadow-lg flex items-center gap-2 font-semibold text-lg"
+            className="px-6 py-3 0 text-white rounded-lg hover:bg-green-600 transition-all shadow-lg flex items-center gap-2 font-semibold text-lg" style={{ background: 'var(--color-success-bg)' }}
           >
             <Save size={20} />
             Guardar Cambios
@@ -658,7 +658,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
         <div
           className="fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-4 bg-gray-900 text-white flex items-center gap-3 z-50 rounded-lg shadow-2xl"
         >
-          <CheckCircle size={20} className="text-green-400" />
+          <CheckCircle size={20} className="" style={{ color: 'var(--color-success)' }} />
           <span>{toastMessage}</span>
         </div>
       )}

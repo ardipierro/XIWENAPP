@@ -97,7 +97,7 @@ function BaseTextarea({
         {/* Error or helper text */}
         <div className="flex-1">
           {error && (
-            <div className="flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400">
+            <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--color-error)' }}>
               <AlertCircle size={14} />
               <span>{error}</span>
             </div>

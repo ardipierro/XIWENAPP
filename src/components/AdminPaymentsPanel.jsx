@@ -218,7 +218,7 @@ function AdminPaymentsPanel() {
             <p className="text-3xl font-bold text-zinc-900 dark:text-white">
               {stats.monthlyFees.pending + stats.monthlyFees.overdue}
             </p>
-            <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+            <p className="text-sm mt-1" style={{ color: 'var(--color-error)' }}>
               {stats.monthlyFees.overdue} vencidas
             </p>
           </BaseCard>
@@ -402,7 +402,7 @@ function AdminPaymentsPanel() {
                           {formatCurrency(fee.finalAmount + (fee.lateFee || 0))}
                         </p>
                         {fee.lateFee > 0 && (
-                          <p className="text-xs text-red-600 dark:text-red-400">
+                          <p className="text-xs" style={{ color: 'var(--color-error)' }}>
                             +{formatCurrency(fee.lateFee)} mora
                           </p>
                         )}
@@ -493,7 +493,7 @@ function AdminPaymentsPanel() {
                         Año: {enrollment.academicYear}
                       </p>
                       {enrollment.discount > 0 && (
-                        <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                        <p className="text-sm mt-1" style={{ color: 'var(--color-success)' }}>
                           Descuento: {enrollment.discount}% - {enrollment.discountReason}
                         </p>
                       )}
@@ -509,7 +509,7 @@ function AdminPaymentsPanel() {
                             {formatCurrency(enrollment.matriculaAmount)}
                           </p>
                           {enrollment.matriculaPaid ? (
-                            <CheckCircle size={16} className="text-green-500" strokeWidth={2} />
+                            <CheckCircle size={16} className="" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
                           ) : (
                             <AlertCircle size={16} className="text-amber-500" strokeWidth={2} />
                           )}
@@ -573,7 +573,7 @@ function AdminPaymentsPanel() {
 
               <div>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">Descuento</p>
-                <p className="font-medium text-green-600 dark:text-green-400">
+                <p className="font-medium" style={{ color: 'var(--color-success)' }}>
                   -{formatCurrency(selectedFee.discount || 0)}
                 </p>
               </div>
@@ -582,7 +582,7 @@ function AdminPaymentsPanel() {
                 <>
                   <div>
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">Recargo</p>
-                    <p className="font-medium text-red-600 dark:text-red-400">
+                    <p className="font-medium" style={{ color: 'var(--color-error)' }}>
                       +{formatCurrency(selectedFee.lateFee)}
                     </p>
                   </div>

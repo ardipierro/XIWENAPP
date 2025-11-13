@@ -156,7 +156,7 @@ export function DictationExercise({
       {showHint && hint && (
         <BaseCard variant="info" className="mb-4">
           <div className="flex gap-3">
-            <Lightbulb size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <Lightbulb size={20} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-info)' }} />
             <div>
               <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pista:</p>
               <p className="text-sm text-blue-800 dark:text-blue-200">{hint}</p>

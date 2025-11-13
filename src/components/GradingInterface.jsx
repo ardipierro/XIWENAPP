@@ -125,7 +125,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
             >
               <div className="flex items-start gap-2">
                 {submission.status === 'graded' ? (
-                  <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={18} strokeWidth={2} />
+                  <CheckCircle className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-success)' }} size={18} strokeWidth={2} />
                 ) : (
                   <Clock className="text-orange-500 flex-shrink-0 mt-0.5" size={18} strokeWidth={2} />
                 )}
@@ -137,7 +137,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                     {submission.submittedAt?.toDate().toLocaleDateString('es-ES')}
                   </p>
                   {submission.grade !== undefined && (
-                    <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1">
+                    <p className="text-xs font-medium mt-1" style={{ color: 'var(--color-success)' }}>
                       {submission.grade}/{assignment.points}
                     </p>
                   )}

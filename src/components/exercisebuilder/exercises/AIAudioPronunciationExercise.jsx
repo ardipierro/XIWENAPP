@@ -221,7 +221,7 @@ export function AIAudioPronunciationExercise({
               {phrase.phonetic && (
                 <button
                   onClick={() => setShowPhonetic(!showPhonetic)}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                  className="text-sm dark:text-blue-400 hover:underline" style={{ color: 'var(--color-info)' }}
                 >
                   {showPhonetic ? 'Ocultar' : 'Ver'} fonética
                 </button>
@@ -268,7 +268,7 @@ export function AIAudioPronunciationExercise({
             {phrase.tips && (
               <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <Volume2 size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  <Volume2 size={18} className="dark:text-amber-400 flex-shrink-0 mt-0.5" style={{ color: 'var(--color-warning)' }} strokeWidth={2} />
                   <div>
                     <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1">
                       Consejo de pronunciación:
@@ -295,10 +295,10 @@ export function AIAudioPronunciationExercise({
             )}
 
             {isCurrentCompleted && (
-              <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <div className="text-center p-3 border border-green-200 dark:border-green-800 rounded-lg" style={{ background: 'var(--color-success-bg)' }}>
                 <div className="flex items-center justify-center gap-2">
-                  <Check size={20} className="text-green-500" strokeWidth={2} />
-                  <span className="text-sm font-semibold text-green-700 dark:text-green-300">
+                  <Check size={20} className="" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
+                  <span className="text-sm font-semibold" style={{ color: 'var(--color-success)' }}>
                     ¡Frase completada!
                   </span>
                 </div>
@@ -342,9 +342,9 @@ export function AIAudioPronunciationExercise({
 
         {/* Feedback final */}
         {showFeedback && (
-          <div className="p-4 rounded-lg border-2 bg-green-50 dark:bg-green-900/20 border-green-500">
+          <div className="p-4 rounded-lg border-2 border-green-500" style={{ background: 'var(--color-success-bg)' }}>
             <div className="flex items-start gap-3">
-              <Check size={24} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+              <Check size={24} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
               <div className="flex-1">
                 <p className="font-semibold text-base text-gray-900 dark:text-white mb-1">
                   ¡Excelente trabajo! Completaste todas las frases

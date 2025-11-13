@@ -302,7 +302,7 @@ function StudentFeesPanel() {
                 <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                   {formatCurrency(enrollment.cuotaAmount || 8000)}
                   {enrollment.discount > 0 && (
-                    <span className="text-sm text-green-600 dark:text-green-400 ml-2">
+                    <span className="text-sm ml-2" style={{ color: 'var(--color-success)' }}>
                       (-{enrollment.discount}%)
                     </span>
                   )}
@@ -314,15 +314,15 @@ function StudentFeesPanel() {
                 <div className="flex items-center gap-2 mt-1">
                   {enrollment.matriculaPaid ? (
                     <>
-                      <CheckCircle size={20} className="text-green-500" strokeWidth={2} />
-                      <span className="text-green-600 dark:text-green-400 font-medium">
+                      <CheckCircle size={20} className="" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
+                      <span className="font-medium" style={{ color: 'var(--color-success)' }}>
                         Pagada
                       </span>
                     </>
                   ) : (
                     <>
                       <AlertCircle size={20} className="text-amber-500" strokeWidth={2} />
-                      <span className="text-amber-600 dark:text-amber-400 font-medium">
+                      <span className="dark:text-amber-400 font-medium" style={{ color: 'var(--color-warning)' }}>
                         Pendiente
                       </span>
                     </>
@@ -332,8 +332,8 @@ function StudentFeesPanel() {
             </div>
 
             {enrollment.discount > 0 && (
-              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <p className="text-sm text-green-800 dark:text-green-200">
+              <div className="p-3 rounded-lg border border-green-200 dark:border-green-800" style={{ background: 'var(--color-success-bg)' }}>
+                <p className="text-sm" style={{ color: 'var(--color-success)' }}>
                   <strong>Descuento aplicado:</strong> {enrollment.discountReason || `${enrollment.discount}% de descuento`}
                 </p>
               </div>
@@ -423,7 +423,7 @@ function StudentFeesPanel() {
                             {formatCurrency(totalAmount)}
                           </p>
                           {fee.lateFee > 0 && (
-                            <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                            <p className="text-sm mt-1" style={{ color: 'var(--color-error)' }}>
                               Incluye recargo: {formatCurrency(fee.lateFee)}
                             </p>
                           )}
@@ -456,8 +456,8 @@ function StudentFeesPanel() {
                       </div>
 
                       {isPaid && fee.paidAt && (
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <p className="text-sm text-green-800 dark:text-green-200">
+                        <div className="p-3 rounded-lg" style={{ background: 'var(--color-success-bg)' }}>
+                          <p className="text-sm" style={{ color: 'var(--color-success)' }}>
                             Pagado el {formatDate(fee.paidAt)}
                           </p>
                         </div>

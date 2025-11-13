@@ -223,7 +223,7 @@ function SetupScreen({
             </div>
             
             {availableStudents.length === 0 && (
-              <p className="mt-3 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg flex items-center gap-2">
+              <p className="mt-3 text-sm bg-orange-50 p-3 rounded-lg flex items-center gap-2" style={{ color: 'var(--color-warning)' }}>
                 <AlertTriangle size={18} strokeWidth={2} className="inline-icon flex-shrink-0" /> No hay alumnos creados. Ve al Panel del Profesor → Gestionar Alumnos para crear el primero.
               </p>
             )}

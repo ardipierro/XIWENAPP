@@ -176,7 +176,7 @@ function ListeningComprehensionExercise({ exercise, onComplete }) {
               }`}
             />
             {isChecked && !results[question.id] && (
-              <p className="mt-2 text-xs text-red-700 dark:text-red-400">
+              <p className="mt-2 text-xs" style={{ color: 'var(--color-error)' }}>
                 Respuesta correcta: {question.correctAnswers[0]}
               </p>
             )}

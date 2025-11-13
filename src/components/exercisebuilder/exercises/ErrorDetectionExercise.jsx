@@ -160,9 +160,9 @@ export function ErrorDetectionExercise({
           {errors.map((error, idx) => (
             <BaseCard key={idx} variant="flat" className="text-sm">
               <div className="flex items-start gap-2">
-                <span className="font-mono text-red-600 dark:text-red-400">❌ {error.word}</span>
+                <span className="font-mono" style={{ color: 'var(--color-error)' }}>❌ {error.word}</span>
                 <span>→</span>
-                <span className="font-mono text-green-600 dark:text-green-400">✓ {error.correction}</span>
+                <span className="font-mono" style={{ color: 'var(--color-success)' }}>✓ {error.correction}</span>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs italic">
                 {error.explanation}
@@ -176,7 +176,7 @@ export function ErrorDetectionExercise({
       {showHint && hint && (
         <BaseCard variant="info" className="mb-4">
           <div className="flex gap-3">
-            <Lightbulb size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <Lightbulb size={20} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-info)' }} />
             <div>
               <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pista:</p>
               <p className="text-sm text-blue-800 dark:text-blue-200">{hint}</p>

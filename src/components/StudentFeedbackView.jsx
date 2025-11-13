@@ -180,8 +180,8 @@ export default function StudentFeedbackView({ submission, studentId }) {
         </div>
 
         {review.errorSummary.total === 0 && (
-          <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-            <div className="flex items-start gap-3 text-green-700 dark:text-green-300">
+          <div className="mt-4 p-4 rounded-lg border border-green-200 dark:border-green-800" style={{ background: 'var(--color-success-bg)' }}>
+            <div className="flex items-start gap-3" style={{ color: 'var(--color-success)' }}>
               <CheckCircle2 size={20} strokeWidth={2} />
               <div>
                 <h5 className="font-semibold">¡Perfecto!</h5>
@@ -195,8 +195,8 @@ export default function StudentFeedbackView({ submission, studentId }) {
       {/* Feedback BaseCard */}
       <BaseCard>
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-            <Lightbulb size={20} strokeWidth={2} className="text-purple-600 dark:text-purple-400" />
+          <div className="p-2 dark:bg-purple-900/20 rounded-lg" style={{ background: 'var(--color-accent-bg)' }}>
+            <Lightbulb size={20} strokeWidth={2} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
           </div>
           <div className="flex-1">
             <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -341,7 +341,7 @@ function StudentFeedbackDetailModal({ review, onClose }) {
                         <span className="text-xs text-gray-500 dark:text-gray-400 w-16">
                           Error:
                         </span>
-                        <span className="text-sm text-red-600 dark:text-red-400 line-through flex-1">
+                        <span className="text-sm line-through flex-1" style={{ color: 'var(--color-error)' }}>
                           {correction.original}
                         </span>
                       </div>
@@ -349,7 +349,7 @@ function StudentFeedbackDetailModal({ review, onClose }) {
                         <span className="text-xs text-gray-500 dark:text-gray-400 w-16">
                           Correcto:
                         </span>
-                        <span className="text-sm text-green-600 dark:text-green-400 font-medium flex-1">
+                        <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-success)' }}>
                           {correction.correction}
                         </span>
                       </div>
@@ -358,7 +358,7 @@ function StudentFeedbackDetailModal({ review, onClose }) {
                     {/* Explanation */}
                     <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="flex items-start gap-2">
-                        <Lightbulb size={16} strokeWidth={2} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                        <Lightbulb size={16} strokeWidth={2} className="dark:text-blue-400 mt-0.5" style={{ color: 'var(--color-info)' }} />
                         <p className="text-xs text-blue-800 dark:text-blue-200">
                           {correction.explanation}
                         </p>
@@ -374,8 +374,8 @@ function StudentFeedbackDetailModal({ review, onClose }) {
         {/* Tips Section */}
         <BaseCard>
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <Target size={20} strokeWidth={2} className="text-purple-600 dark:text-purple-400" />
+            <div className="p-2 dark:bg-purple-900/20 rounded-lg" style={{ background: 'var(--color-accent-bg)' }}>
+              <Target size={20} strokeWidth={2} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
             </div>
             <div>
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">

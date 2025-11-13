@@ -165,7 +165,7 @@ function AICredentialsModal({ isOpen, onClose, provider, onSave, isConfigured = 
             </div>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-2">
-            📘 Obtén tu API key en: <a href={provider.docsUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">{provider.docsUrl}</a>
+            📘 Obtén tu API key en: <a href={provider.docsUrl} target="_blank" rel="noopener noreferrer" className="dark:text-blue-400 hover:underline" style={{ color: 'var(--color-info)' }}>{provider.docsUrl}</a>
           </p>
         </div>
 

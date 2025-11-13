@@ -186,13 +186,13 @@ export function DialogueCompletionExercise({
                             )}
                             {shouldShowCorrectness && isSelected && (
                               isThisCorrect ? (
-                                <CheckCircle size={20} className="text-green-600" />
+                                <CheckCircle size={20} className="" style={{ color: 'var(--color-success)' }} />
                               ) : (
-                                <XCircle size={20} className="text-red-600" />
+                                <XCircle size={20} className="" style={{ color: 'var(--color-error)' }} />
                               )
                             )}
                             {shouldShowCorrectness && !isSelected && isThisCorrect && (
-                              <span className="text-xs text-orange-600 dark:text-orange-400">
+                              <span className="text-xs dark:text-orange-400" style={{ color: 'var(--color-warning)' }}>
                                 ← Correcta
                               </span>
                             )}
@@ -212,7 +212,7 @@ export function DialogueCompletionExercise({
       {showHint && hint && (
         <BaseCard variant="info" className="mb-4">
           <div className="flex gap-3">
-            <Lightbulb size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <Lightbulb size={20} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-info)' }} />
             <div>
               <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pista:</p>
               <p className="text-sm text-blue-800 dark:text-blue-200">{hint}</p>

@@ -314,7 +314,7 @@ function ImageGenerationDemo() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center p-6 md:p-8 text-center aspect-square bg-gray-50 dark:bg-gray-900">
-                      <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-red-100 dark:bg-red-900/30 rounded-full mb-3">
+                      <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full mb-3" style={{ background: 'var(--color-error-bg)' }}>
                         <span className="text-2xl md:text-3xl">✗</span>
                       </div>
                       <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 m-0">

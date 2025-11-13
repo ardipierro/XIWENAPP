@@ -302,13 +302,13 @@ function CorrectionItem({ correction, config, onStatusChange, onNoteChange }) {
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 w-16">Error:</span>
-            <span className="text-sm text-red-600 dark:text-red-400 line-through flex-1">
+            <span className="text-sm line-through flex-1" style={{ color: 'var(--color-error)' }}>
               {correction.original}
             </span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 w-16">Correcto:</span>
-            <span className="text-sm text-green-600 dark:text-green-400 font-medium flex-1">
+            <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-success)' }}>
               {correction.correction}
             </span>
           </div>

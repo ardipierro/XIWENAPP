@@ -100,11 +100,11 @@ function PaymentResult() {
           <div className="text-center space-y-6">
             {/* Success Icon */}
             <div className="flex justify-center">
-              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'var(--color-success-bg)' }}>
                 <CheckCircle
                   size={48}
                   strokeWidth={2}
-                  className="text-green-600 dark:text-green-400"
+                  className="" style={{ color: 'var(--color-success)' }}
                 />
               </div>
             </div>
@@ -120,8 +120,8 @@ function PaymentResult() {
             </div>
 
             {/* Info Box */}
-            <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <p className="text-sm text-green-800 dark:text-green-200">
+            <div className="p-4 rounded-lg border border-green-200 dark:border-green-800" style={{ background: 'var(--color-success-bg)' }}>
+              <p className="text-sm" style={{ color: 'var(--color-success)' }}>
                 <strong>Confirmación:</strong> Recibirás un comprobante por email en los próximos minutos.
               </p>
             </div>
@@ -172,11 +172,11 @@ function PaymentResult() {
           <div className="text-center space-y-6">
             {/* Pending Icon */}
             <div className="flex justify-center">
-              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+              <div className="w-20 h-20 dark:bg-amber-900/30 rounded-full flex items-center justify-center" style={{ background: 'var(--color-warning-bg)' }}>
                 <Clock
                   size={48}
                   strokeWidth={2}
-                  className="text-amber-600 dark:text-amber-400"
+                  className="dark:text-amber-400" style={{ color: 'var(--color-warning)' }}
                 />
               </div>
             </div>
@@ -245,11 +245,11 @@ function PaymentResult() {
         <div className="text-center space-y-6">
           {/* Failure Icon */}
           <div className="flex justify-center">
-            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'var(--color-error-bg)' }}>
               <XCircle
                 size={48}
                 strokeWidth={2}
-                className="text-red-600 dark:text-red-400"
+                className="" style={{ color: 'var(--color-error)' }}
               />
             </div>
           </div>
@@ -265,18 +265,18 @@ function PaymentResult() {
           </div>
 
           {/* Info Box */}
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+          <div className="p-4 rounded-lg border border-red-200 dark:border-red-800" style={{ background: 'var(--color-error-bg)' }}>
             <div className="flex items-start gap-2">
               <AlertCircle
                 size={20}
                 strokeWidth={2}
-                className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
+                className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-error)' }}
               />
               <div className="text-left">
-                <p className="text-sm text-red-800 dark:text-red-200 font-medium mb-1">
+                <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-error)' }}>
                   El pago fue rechazado o cancelado
                 </p>
-                <p className="text-xs text-red-700 dark:text-red-300">
+                <p className="text-xs" style={{ color: 'var(--color-error)' }}>
                   Esto puede ocurrir por fondos insuficientes, datos incorrectos, o
                   si cancelaste la operación.
                 </p>

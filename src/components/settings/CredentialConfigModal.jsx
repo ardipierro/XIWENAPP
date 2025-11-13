@@ -62,7 +62,7 @@ function CredentialConfigModal({ provider, initialValue = '', onSave, onClose })
             </div>
           </div>
 
-          <a href={provider.docsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 mt-2">
+          <a href={provider.docsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm dark:text-purple-400 mt-2" style={{ color: 'var(--color-accent)' }}>
             <ExternalLink size={16} />
             ¿Dónde obtengo mi API key?
           </a>
@@ -72,7 +72,7 @@ function CredentialConfigModal({ provider, initialValue = '', onSave, onClose })
             <ul className="space-y-2">
               {provider.services.map((service, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <CheckCircle size={16} className="flex-shrink-0 mt-0.5 text-purple-600" />
+                  <CheckCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-accent)' }} />
                   {service}
                 </li>
               ))}

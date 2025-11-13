@@ -270,8 +270,8 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
 
         {/* Error message */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p className="text-sm text-red-800 dark:text-red-200">
+          <div className="border border-red-200 dark:border-red-800 rounded-lg p-4" style={{ background: 'var(--color-error-bg)' }}>
+            <p className="text-sm" style={{ color: 'var(--color-error)' }}>
               ⚠️ {error}
             </p>
           </div>
@@ -279,8 +279,8 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
 
         {/* Success message with generated password */}
         {generatedPassword && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div className="text-sm font-semibold text-green-800 dark:text-green-200 mb-3">
+          <div className="border border-green-200 dark:border-green-800 rounded-lg p-4" style={{ background: 'var(--color-success-bg)' }}>
+            <div className="text-sm font-semibold mb-3" style={{ color: 'var(--color-success)' }}>
               ✅ Usuario creado exitosamente
             </div>
             <div className="space-y-2">
@@ -302,7 +302,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                   📋 Copiar
                 </BaseButton>
               </div>
-              <p className="text-xs text-amber-700 dark:text-amber-400">
+              <p className="text-xs dark:text-amber-400" style={{ color: 'var(--color-warning-text)' }}>
                 ⚠️ Guarda esta contraseña. El usuario deberá usarla para su primer inicio de sesión.
               </p>
             </div>

@@ -372,9 +372,9 @@ export function FreeDragDropExercise({
                         {showCorrectness && (
                           <>
                             {isCorrectCategory ? (
-                              <Check size={16} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+                              <Check size={16} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
                             ) : (
-                              <X size={16} className="text-red-500 flex-shrink-0" strokeWidth={2} />
+                              <X size={16} className="flex-shrink-0" style={{ color: 'var(--color-error)' }} strokeWidth={2} />
                             )}
                           </>
                         )}
@@ -401,7 +401,7 @@ export function FreeDragDropExercise({
           >
             <div className="flex items-start gap-3">
               {isCorrect ? (
-                <Check size={24} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+                <Check size={24} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
               ) : (
                 <X size={24} className="text-orange-500 flex-shrink-0" strokeWidth={2} />
               )}

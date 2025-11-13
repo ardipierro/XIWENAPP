@@ -85,7 +85,7 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
       <div className="exercise-player">
         <div className="error-container">
           <div className="error-icon">
-            <AlertTriangle size={48} strokeWidth={2} className="text-red-500" />
+            <AlertTriangle size={48} strokeWidth={2} className="" style={{ color: 'var(--color-error)' }} />
           </div>
           <h2 className="error-title">Error</h2>
           <p className="error-message">{error}</p>
@@ -107,7 +107,7 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
               {results.percentage >= 70 ? (
                 <PartyPopper size={48} strokeWidth={2} className="text-yellow-500" />
               ) : results.percentage >= 50 ? (
-                <Smile size={48} strokeWidth={2} className="text-green-500" />
+                <Smile size={48} strokeWidth={2} className="" style={{ color: 'var(--color-success)' }} />
               ) : (
                 <Zap size={48} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
               )}

@@ -61,7 +61,7 @@ function MultipleChoiceExercise({ exercise, onComplete }) {
   return (
     <div className="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-green-300 dark:border-green-700">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-sm font-semibold text-green-900 dark:text-green-100">
+        <span className="text-sm font-semibold" style={{ color: 'var(--color-success)' }}>
           {exercise.prompt}
         </span>
         {isChecked && (
@@ -111,7 +111,7 @@ function MultipleChoiceExercise({ exercise, onComplete }) {
       {isChecked && exercise.explanation && (
         <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <div className="flex items-start gap-2">
-            <Lightbulb size={18} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <Lightbulb size={18} className="dark:text-blue-400 mt-0.5 flex-shrink-0" style={{ color: 'var(--color-info)' }} />
             <p className="text-sm text-blue-900 dark:text-blue-100">
               {exercise.explanation}
             </p>
@@ -143,7 +143,7 @@ function MultipleChoiceExercise({ exercise, onComplete }) {
 
       {/* Puntos */}
       {isChecked && isCorrect && (
-        <div className="mt-2 text-xs text-green-700 dark:text-green-400">
+        <div className="mt-2 text-xs" style={{ color: 'var(--color-success)' }}>
           +{exercise.points || 15} puntos
         </div>
       )}

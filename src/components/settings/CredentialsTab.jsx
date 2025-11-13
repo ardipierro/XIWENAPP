@@ -447,11 +447,11 @@ function CredentialsTab() {
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{provider.name}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{provider.description}</p>
                   {isConfigured ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full" style={{ background: 'var(--color-success-bg)' }} style={{ color: 'var(--color-success)' }}>
                       <CheckCircle size={14} />Configurado
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 dark:bg-amber-900/30 dark:text-amber-300 text-xs font-semibold rounded-full" style={{ background: 'var(--color-warning-bg)' }} style={{ color: 'var(--color-warning-text)' }}>
                       <XCircle size={14} />Sin Configurar
                     </span>
                   )}
@@ -494,11 +494,11 @@ function CredentialsTab() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">{provider.description}</p>
                   </div>
                   {isConfigured ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-full" style={{ background: 'var(--color-success-bg)' }} style={{ color: 'var(--color-success-text)' }}>
                       <CheckCircle size={16} />Configurado
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 text-sm font-semibold rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold rounded-full" style={{ background: 'var(--color-warning-bg)' }} style={{ color: 'var(--color-warning-text)' }}>
                       <XCircle size={16} />Sin Configurar
                     </span>
                   )}

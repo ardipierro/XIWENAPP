@@ -110,7 +110,7 @@ export function ExerciseLibrary({onTemplateSelected = () => {}, onTemplateCloned
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <BookOpen className="text-purple-600 dark:text-purple-400" size={28} />
+          <BookOpen className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} size={28} />
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               Biblioteca de Ejercicios
@@ -343,7 +343,7 @@ export function ExerciseLibrary({onTemplateSelected = () => {}, onTemplateCloned
                 <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">Tags:</h4>
                 <div className="flex flex-wrap gap-1">
                   {previewTemplate.tags?.map(tag => (
-                    <span key={tag} className="px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded text-sm">
+                    <span key={tag} className="px-2 py-1 dark:bg-purple-900/20 rounded text-sm" style={{ background: 'var(--color-accent-bg)' }}>
                       #{tag}
                     </span>
                   ))}

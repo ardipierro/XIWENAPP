@@ -96,7 +96,7 @@ function ResultsScreen({
             if (isFirst) {
               bgClass = 'bg-amber-200 dark:bg-amber-900/30'
               borderClass = 'border-4 border-yellow-400 dark:border-yellow-600'
-              trophyIcon = <Trophy size={64} strokeWidth={2} className="text-yellow-600 dark:text-yellow-400" />
+              trophyIcon = <Trophy size={64} strokeWidth={2} className="dark:text-yellow-400" style={{ color: 'var(--color-warning)' }} />
             } else if (isSecond) {
               bgClass = 'bg-gray-200 dark:bg-gray-700'
               borderClass = 'border-4 border-gray-400 dark:border-gray-500'
@@ -119,7 +119,7 @@ function ResultsScreen({
                     )}
                     <div className="flex-1">
                       <div className="text-2xl font-bold">{student}</div>
-                      {isFirst && <div className="text-xl text-yellow-700 font-bold">¡GANADOR!</div>}
+                      {isFirst && <div className="text-xl font-bold" style={{ color: 'var(--color-warning-text)' }}>¡GANADOR!</div>}
                       {isSecond && <div className="text-lg text-gray-600 dark:text-gray-400 font-semibold">Segundo Lugar</div>}
                       {isThird && <div className="text-lg text-gray-500 font-semibold">Tercer Lugar</div>}
                       <div className="mt-3">

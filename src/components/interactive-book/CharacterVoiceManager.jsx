@@ -236,7 +236,7 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
             </button>
           </div>
           {!hasElevenLabsKey && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+            <p className="text-xs dark:text-amber-400 mt-2" style={{ color: 'var(--color-warning)' }}>
               ⚠️ Configura tu API Key de ElevenLabs en la pestaña "Voz IA"
             </p>
           )}
@@ -337,7 +337,7 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
           className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all"
         >
           <div className="flex items-center gap-2">
-            <SettingsIcon size={18} className="text-purple-600 dark:text-purple-400" />
+            <SettingsIcon size={18} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
             <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
               Voces por Personaje
             </span>

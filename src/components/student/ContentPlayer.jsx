@@ -247,7 +247,7 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
       <div className="content-player">
         <div className="error-container">
           <div className="error-icon">
-            <AlertTriangle size={48} strokeWidth={2} className="text-red-500" />
+            <AlertTriangle size={48} strokeWidth={2} className="" style={{ color: 'var(--color-error)' }} />
           </div>
           <h2>Error</h2>
           <p>{error}</p>

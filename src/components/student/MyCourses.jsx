@@ -225,7 +225,7 @@ function MyCourses({ user, onSelectCourse }) {
                       </div>
                       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div
-                          className="bg-green-600 dark:bg-green-500 h-2 rounded-full transition-all"
+                          className="h-2 rounded-full transition-all" style={{ background: 'var(--color-success-bg)' }}
                           style={{ width: `${progressPercent}%` }}
                         />
                       </div>

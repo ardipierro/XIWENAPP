@@ -72,7 +72,7 @@ export default function EventDetailModal({
     return (
       <div className="flex items-center gap-2">
         <BaseBadge variant={config.color === 'red' ? 'danger' : config.color === 'gray' ? 'secondary' : 'info'}>
-          {config.pulse && <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse mr-1" />}
+          {config.pulse && <span className="inline-block w-2 h-2 0 rounded-full animate-pulse mr-1" style={{ background: 'var(--color-error-bg)' }} />}
           {config.label}
         </BaseBadge>
         {event.mode && (

@@ -155,10 +155,10 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
       {!alwaysOpen && (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+          className="w-full flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover: dark:hover:bg-purple-900/30 transition-colors" style={{ background: 'var(--color-accent-bg)' }}
         >
           <div className="flex items-center gap-2">
-            <Image size={18} className="text-purple-600 dark:text-purple-400" />
+            <Image size={18} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
             <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
               Generador de Imágenes con IA
             </span>
@@ -197,7 +197,7 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
               {/* OpenAI DALL-E */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Key size={16} className="text-blue-600 dark:text-blue-400" />
+                  <Key size={16} className="dark:text-blue-400" style={{ color: 'var(--color-info)' }} />
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     OpenAI (DALL-E)
                   </span>
@@ -234,7 +234,7 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
               {/* Stability AI */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Key size={16} className="text-purple-600 dark:text-purple-400" />
+                  <Key size={16} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     Stability AI (Stable Diffusion)
                   </span>
@@ -443,7 +443,7 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
           {/* Info */}
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <div className="flex items-start gap-2">
-              <Zap size={16} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+              <Zap size={16} className="dark:text-blue-400 mt-0.5" style={{ color: 'var(--color-info)' }} />
               <div className="text-xs text-blue-900 dark:text-blue-100">
                 <p className="font-semibold mb-1">Consejos:</p>
                 <ul className="list-disc list-inside space-y-1">

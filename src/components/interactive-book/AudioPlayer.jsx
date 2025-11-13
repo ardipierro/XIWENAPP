@@ -425,7 +425,7 @@ function AudioPlayer({
           </div>
           <div className="flex items-center gap-2">
             {/* Badge de velocidad */}
-            <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-bold">
+            <span className="px-2 py-1 dark:bg-amber-900/30 dark:text-amber-300 rounded text-xs font-bold" style={{ background: 'var(--color-warning-bg)' }} style={{ color: 'var(--color-warning-text)' }}>
               {currentSpeed.toFixed(2)}x
             </span>
             {/* Badge de provider */}
@@ -508,10 +508,10 @@ function AudioPlayer({
           <div className="flex items-center gap-1">
           {useTTS && (
             <div
-              className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg"
+              className="p-2 dark:bg-amber-900/30 rounded-lg" style={{ background: 'var(--color-warning-bg)' }}
               title="Usando Text-to-Speech con IA"
             >
-              <Mic size={18} className="text-amber-600 dark:text-amber-400" />
+              <Mic size={18} className="dark:text-amber-400" style={{ color: 'var(--color-warning)' }} />
             </div>
           )}
 

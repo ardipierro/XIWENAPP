@@ -77,7 +77,7 @@ function FillInBlankExercise({ exercise, onComplete }) {
   return (
     <div className="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-green-300 dark:border-green-700">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-sm font-semibold text-green-900 dark:text-green-100">
+        <span className="text-sm font-semibold" style={{ color: 'var(--color-success)' }}>
           {exercise.prompt}
         </span>
         {isChecked && (
@@ -122,9 +122,9 @@ function FillInBlankExercise({ exercise, onComplete }) {
         }`}>
           <div className="flex items-start gap-2">
             {isCorrect ? (
-              <Check size={20} className="text-green-600 dark:text-green-400 mt-0.5" />
+              <Check size={20} className="mt-0.5" style={{ color: 'var(--color-success)' }} />
             ) : (
-              <X size={20} className="text-red-600 dark:text-red-400 mt-0.5" />
+              <X size={20} className="mt-0.5" style={{ color: 'var(--color-error)' }} />
             )}
             <div className="flex-1">
               <p className={`text-sm ${
@@ -150,14 +150,14 @@ function FillInBlankExercise({ exercise, onComplete }) {
           {showHint ? (
             <div className="p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded text-sm text-amber-900 dark:text-amber-100">
               <div className="flex items-start gap-2">
-                <Lightbulb size={16} className="text-amber-600 dark:text-amber-400 mt-0.5" />
+                <Lightbulb size={16} className="dark:text-amber-400 mt-0.5" style={{ color: 'var(--color-warning)' }} />
                 <span>{getHint()}</span>
               </div>
             </div>
           ) : (
             <button
               onClick={() => setShowHint(true)}
-              className="text-xs text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1"
+              className="text-xs dark:text-amber-400 hover:underline flex items-center gap-1" style={{ color: 'var(--color-warning-text)' }}
             >
               <Lightbulb size={14} />
               Ver pista
@@ -190,7 +190,7 @@ function FillInBlankExercise({ exercise, onComplete }) {
 
       {/* Puntos */}
       {isChecked && isCorrect && (
-        <div className="mt-2 text-xs text-green-700 dark:text-green-400">
+        <div className="mt-2 text-xs" style={{ color: 'var(--color-success)' }}>
           +{getPoints()} puntos
         </div>
       )}

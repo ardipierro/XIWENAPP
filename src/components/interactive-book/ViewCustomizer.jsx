@@ -267,7 +267,7 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
           className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 transition-all"
         >
           <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-purple-600 dark:text-purple-400" />
+            <Sparkles size={18} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
             <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
               Personalización Avanzada
             </span>
@@ -698,7 +698,7 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
                       type="checkbox"
                       checked={settings.showAvatars}
                       onChange={(e) => updateSetting('showAvatars', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                      className="w-4 h-4 rounded border-gray-300 focus:ring-purple-500" style={{ color: 'var(--color-accent)' }}
                     />
                   </label>
 
@@ -710,7 +710,7 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
                       type="checkbox"
                       checked={settings.showBadges}
                       onChange={(e) => updateSetting('showBadges', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                      className="w-4 h-4 rounded border-gray-300 focus:ring-purple-500" style={{ color: 'var(--color-accent)' }}
                     />
                   </label>
 
@@ -722,7 +722,7 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
                       type="checkbox"
                       checked={settings.compactMode}
                       onChange={(e) => updateSetting('compactMode', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                      className="w-4 h-4 rounded border-gray-300 focus:ring-purple-500" style={{ color: 'var(--color-accent)' }}
                     />
                   </label>
                 </div>
@@ -825,7 +825,7 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
                       type="checkbox"
                       checked={settings.enableAnimations}
                       onChange={(e) => updateSetting('enableAnimations', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                      className="w-4 h-4 rounded border-gray-300 focus:ring-purple-500" style={{ color: 'var(--color-accent)' }}
                     />
                   </label>
 
@@ -837,7 +837,7 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
                       type="checkbox"
                       checked={settings.cardShadow}
                       onChange={(e) => updateSetting('cardShadow', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                      className="w-4 h-4 rounded border-gray-300 focus:ring-purple-500" style={{ color: 'var(--color-accent)' }}
                     />
                   </label>
                 </div>

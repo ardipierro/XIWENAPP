@@ -367,7 +367,7 @@ function InteractiveBookViewer() {
                   <strong>{exercise.questions.length}</strong> preguntas de comprensión
                 </div>
               )}
-              <div className="mt-2 text-xs text-amber-700 dark:text-amber-400">
+              <div className="mt-2 text-xs dark:text-amber-400" style={{ color: 'var(--color-warning-text)' }}>
                 ⚠️ Este tipo de ejercicio estará disponible pronto
               </div>
             </div>
@@ -439,13 +439,13 @@ function InteractiveBookViewer() {
             {unit.content?.introduction && (
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <Play size={20} className="text-blue-600 dark:text-blue-400 mt-1" />
+                  <Play size={20} className="dark:text-blue-400 mt-1" style={{ color: 'var(--color-info)' }} />
                   <div>
                     <p className="text-gray-900 dark:text-white">
                       {unit.content.introduction.text}
                     </p>
                     {unit.content.introduction.audioUrl && (
-                      <div className="mt-2 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                      <div className="mt-2 flex items-center gap-2 text-sm dark:text-blue-400" style={{ color: 'var(--color-info)' }}>
                         <Volume2 size={16} />
                         <span>Audio disponible</span>
                       </div>
@@ -616,13 +616,13 @@ function InteractiveBookViewer() {
           <div className="flex items-center gap-4">
             {/* Indicador de puntos */}
             {totalPoints > 0 && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg border-2 border-amber-500 dark:border-amber-600">
-                <Trophy size={20} className="text-amber-600 dark:text-amber-400" />
+              <div className="flex items-center gap-2 px-4 py-2 dark:bg-amber-900/30 rounded-lg border-2 border-amber-500 dark:border-amber-600" style={{ background: 'var(--color-warning-bg)' }}>
+                <Trophy size={20} className="dark:text-amber-400" style={{ color: 'var(--color-warning)' }} />
                 <div>
                   <div className="text-sm font-bold text-amber-900 dark:text-amber-100">
                     {totalPoints} pts
                   </div>
-                  <div className="text-xs text-amber-700 dark:text-amber-300">
+                  <div className="text-xs dark:text-amber-300" style={{ color: 'var(--color-warning-text)' }}>
                     {Object.keys(exerciseResults).length} ejercicios
                   </div>
                 </div>

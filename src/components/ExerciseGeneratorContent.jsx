@@ -74,7 +74,7 @@ export const FillGap = ({ sentence, answer, onComplete }) => {
       )}
 
       {feedback === 'correct' && (
-        <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+        <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--color-success)' }}>
           <Check className="w-5 h-5" />
           <span>¡Correcto!</span>
         </div>
@@ -82,12 +82,12 @@ export const FillGap = ({ sentence, answer, onComplete }) => {
 
       {feedback === 'incorrect' && (
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
+          <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--color-error)' }}>
             <X className="w-5 h-5" strokeWidth={2} />
             <span>Incorrecto</span>
           </div>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Respuesta correcta: <span className="font-semibold text-green-600 dark:text-green-400">{answer}</span>
+            Respuesta correcta: <span className="font-semibold" style={{ color: 'var(--color-success)' }}>{answer}</span>
           </p>
         </div>
       )}
@@ -141,10 +141,10 @@ export const MultipleChoice = ({ question, options, correctIndex, onComplete }) 
               </span>
               <span className="text-zinc-800 dark:text-zinc-200">{option.text}</span>
               {feedback !== null && index === correctIndex && (
-                <Check className="w-5 h-5 text-green-600 dark:text-green-400 ml-auto" />
+                <Check className="w-5 h-5 ml-auto" style={{ color: 'var(--color-success)' }} />
               )}
               {feedback === 'incorrect' && index === selectedIndex && index !== correctIndex && (
-                <X className="w-5 h-5 text-red-600 dark:text-red-400 ml-auto" />
+                <X className="w-5 h-5 ml-auto" style={{ color: 'var(--color-error)' }} />
               )}
             </div>
           </button>
@@ -158,14 +158,14 @@ export const MultipleChoice = ({ question, options, correctIndex, onComplete }) 
       )}
 
       {feedback === 'correct' && (
-        <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+        <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--color-success)' }}>
           <Check className="w-5 h-5" />
           <span>¡Correcto!</span>
         </div>
       )}
 
       {feedback === 'incorrect' && (
-        <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
+        <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--color-error)' }}>
           <X className="w-5 h-5" />
           <span>Incorrecto. La respuesta correcta es {options[correctIndex].label}</span>
         </div>
@@ -242,14 +242,14 @@ const DragMatch = ({ dragItems, dropItems, onComplete }) => {
       )}
 
       {feedback === 'correct' && (
-        <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+        <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--color-success)' }}>
           <Check className="w-5 h-5" />
           <span>¡Todas las coincidencias son correctas!</span>
         </div>
       )}
 
       {feedback === 'incorrect' && (
-        <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
+        <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--color-error)' }}>
           <X className="w-5 h-5" />
           <span>Algunas coincidencias son incorrectas</span>
         </div>
@@ -322,7 +322,7 @@ const ListeningExercise = ({ audioText, question, options, correctIndex, onCompl
               <span className="font-semibold text-zinc-700 dark:text-zinc-300">{option.label}</span>
               <span className="text-zinc-800 dark:text-zinc-200">{option.text}</span>
               {feedback !== null && index === correctIndex && (
-                <Check className="w-5 h-5 text-green-600 dark:text-green-400 ml-auto" />
+                <Check className="w-5 h-5 ml-auto" style={{ color: 'var(--color-success)' }} />
               )}
             </div>
           </button>
@@ -336,14 +336,14 @@ const ListeningExercise = ({ audioText, question, options, correctIndex, onCompl
       )}
 
       {feedback === 'correct' && (
-        <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+        <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--color-success)' }}>
           <Check className="w-5 h-5" />
           <span>¡Correcto!</span>
         </div>
       )}
 
       {feedback === 'incorrect' && (
-        <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-medium">
+        <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--color-error)' }}>
           <X className="w-5 h-5" />
           <span>Incorrecto. La respuesta correcta es {options[correctIndex].label}</span>
         </div>

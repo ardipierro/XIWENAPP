@@ -213,9 +213,9 @@ function InstantMeetModal({ isOpen, onClose, onCreateSession, teacherId, teacher
 
         {/* Asignación de Estudiantes/Grupos */}
         <div className="border-2 border-orange-200 dark:border-orange-800 rounded-lg overflow-hidden bg-orange-50/30 dark:bg-orange-900/10">
-          <div className="px-4 py-3 bg-orange-100 dark:bg-orange-900/20 border-b border-orange-200 dark:border-orange-800">
+          <div className="px-4 py-3 dark:bg-orange-900/20 border-b border-orange-200 dark:border-orange-800" style={{ background: 'var(--color-warning-bg)' }}>
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              <Users className="w-5 h-5 dark:text-orange-400" style={{ color: 'var(--color-warning)' }} />
               <h3 className="font-semibold text-orange-900 dark:text-orange-100">
                 Paso 2: Selecciona quién verá la notificación
               </h3>
@@ -369,12 +369,12 @@ function InstantMeetModal({ isOpen, onClose, onCreateSession, teacherId, teacher
         </div>
 
         {/* Quick Info */}
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
+        <div className="border border-green-200 dark:border-green-800 rounded-lg p-4" style={{ background: 'var(--color-success-bg)' }}>
+          <h4 className="font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--color-success)' }}>
             <Check className="w-5 h-5" />
             ¿Qué pasa cuando creas la clase?
           </h4>
-          <ul className="text-sm text-green-800 dark:text-green-200 space-y-1">
+          <ul className="text-sm space-y-1" style={{ color: 'var(--color-success)' }}>
             <li>✅ La clase se inicia <strong>inmediatamente</strong></li>
             <li>✅ Los estudiantes seleccionados reciben una <strong>notificación en tiempo real</strong></li>
             <li>✅ Podrán unirse con <strong>un solo click</strong> desde su dashboard</li>

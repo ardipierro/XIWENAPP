@@ -212,7 +212,7 @@ function HistoryModal({ isOpen, onClose, gameHistory, setGameHistory, parseQuest
                       <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center w-12">
                           {index === 0 ? (
-                            <Trophy size={40} strokeWidth={2} className="text-amber-600 dark:text-amber-500" />
+                            <Trophy size={40} strokeWidth={2} className="dark:text-amber-500" style={{ color: 'var(--color-warning)' }} />
                           ) : index === 1 ? (
                             <Medal size={40} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
                           ) : index === 2 ? (

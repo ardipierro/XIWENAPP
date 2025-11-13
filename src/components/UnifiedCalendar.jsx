@@ -113,10 +113,10 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Error al cargar calendario</h3>
-          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
-          <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+        <div className="border border-red-200 dark:border-red-700 rounded-lg p-4" style={{ background: 'var(--color-error-bg)' }}>
+          <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-error)' }}>Error al cargar calendario</h3>
+          <p className="text-sm" style={{ color: 'var(--color-error)' }}>{error}</p>
+          <p className="text-xs mt-2" style={{ color: 'var(--color-error)' }}>
             Puede que falten índices de Firestore. Revisa la consola del navegador para más detalles.
           </p>
         </div>
@@ -318,7 +318,7 @@ function MobileEventCard({ event, onClick }) {
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 flex-1">
           {event.type === 'session' && event.status === 'live' && (
-            <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="inline-block w-2 h-2 0 rounded-full animate-pulse" style={{ background: 'var(--color-error-bg)' }} />
           )}
           {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
             <Video size={16} strokeWidth={2} />
@@ -328,7 +328,7 @@ function MobileEventCard({ event, onClick }) {
           </h4>
         </div>
         {event.type === 'session' && event.status === 'live' && (
-          <span className="text-xs px-2 py-1 bg-red-500 text-white rounded-full font-medium shrink-0">
+          <span className="text-xs px-2 py-1 0 text-white rounded-full font-medium shrink-0" style={{ background: 'var(--color-error-bg)' }}>
             EN VIVO
           </span>
         )}
@@ -470,7 +470,7 @@ function MonthView({ currentDate, events, onEventClick }) {
                       }`}
                     >
                       {event.type === 'session' && event.status === 'live' && (
-                        <span className="inline-block w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                        <span className="inline-block w-1.5 h-1.5 0 rounded-full animate-pulse" style={{ background: 'var(--color-error-bg)' }} />
                       )}
                       {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
                         <Video size={10} />
@@ -591,7 +591,7 @@ function EventCard({ event, compact = false, onClick }) {
       >
         <div className="flex items-center gap-1 mb-1">
           {event.type === 'session' && event.status === 'live' && (
-            <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="inline-block w-2 h-2 0 rounded-full animate-pulse" style={{ background: 'var(--color-error-bg)' }} />
           )}
           {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
             <Video size={12} />
@@ -616,7 +616,7 @@ function EventCard({ event, compact = false, onClick }) {
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 flex-1">
           {event.type === 'session' && event.status === 'live' && (
-            <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="inline-block w-2 h-2 0 rounded-full animate-pulse" style={{ background: 'var(--color-error-bg)' }} />
           )}
           {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
             <Video size={16} />
@@ -625,7 +625,7 @@ function EventCard({ event, compact = false, onClick }) {
         </div>
         <div className="flex gap-1 items-center">
           {event.type === 'session' && event.status === 'live' && (
-            <span className="text-xs px-2 py-1 bg-red-500 text-white rounded font-medium">
+            <span className="text-xs px-2 py-1 0 text-white rounded font-medium" style={{ background: 'var(--color-error-bg)' }}>
               EN VIVO
             </span>
           )}

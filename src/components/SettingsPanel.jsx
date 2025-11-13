@@ -59,7 +59,7 @@ function SettingsPanel() {
           <div className="w-full space-y-6">
             <BaseCard className="p-6 w-full">
               <div className="flex items-center gap-3 mb-4">
-                <Globe size={24} className="text-purple-600 dark:text-purple-400" />
+                <Globe size={24} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white m-0">Idioma y Región</h3>
               </div>
               <div className="space-y-4">
@@ -92,7 +92,7 @@ function SettingsPanel() {
           <div className="w-full space-y-6">
             <BaseCard className="p-6 w-full">
               <div className="flex items-center gap-3 mb-4">
-                <Bell size={24} className="text-purple-600 dark:text-purple-400" />
+                <Bell size={24} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white m-0">Notificaciones</h3>
               </div>
               <div className="space-y-4">
@@ -112,7 +112,7 @@ function SettingsPanel() {
           <div className="w-full space-y-6">
             <BaseCard className="p-6 w-full">
               <div className="flex items-center gap-3 mb-4">
-                <User size={24} className="text-purple-600 dark:text-purple-400" />
+                <User size={24} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white m-0">Cuenta</h3>
               </div>
               <div className="space-y-4">

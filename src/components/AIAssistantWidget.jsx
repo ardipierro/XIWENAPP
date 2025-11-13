@@ -184,7 +184,7 @@ function AIAssistantWidget() {
                   </span>
                 )}
                 {item.daysOverdue !== undefined && (
-                  <span className="ml-2 text-red-600 dark:text-red-400">
+                  <span className="ml-2" style={{ color: 'var(--color-error)' }}>
                     ({item.daysOverdue} días vencido)
                   </span>
                 )}
@@ -219,7 +219,7 @@ function AIAssistantWidget() {
           aria-label="Abrir asistente de IA"
         >
           <Sparkles size={24} className="group-hover:scale-110 transition-transform" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-zinc-900"></span>
+          <span className="absolute -top-1 -right-1 w-3 h-3 0 rounded-full border-2 border-white dark:border-zinc-900" style={{ background: 'var(--color-success-bg)' }}></span>
         </BaseButton>
       )}
 
@@ -285,7 +285,7 @@ function AIAssistantWidget() {
                     } p-3`}
                   >
                     {msg.isError && (
-                      <div className="flex items-center gap-2 mb-2 text-red-600 dark:text-red-400">
+                      <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--color-error)' }}>
                         <AlertCircle size={16} />
                         <span className="text-xs font-medium">Error</span>
                       </div>

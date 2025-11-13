@@ -155,16 +155,16 @@ export function ClozeTestExercise({
                       {!isChecked && (
                         <button
                           onClick={() => handleRemoveWord(currentBlankIdx)}
-                          className="text-gray-400 hover:text-red-500 text-xs"
+                          className="text-gray-400 hover: text-xs" style={{ color: 'var(--color-error)' }}
                         >
                           ✕
                         </button>
                       )}
                       {isChecked && (
                         isThisCorrect ? (
-                          <CheckCircle size={16} className="text-green-500" />
+                          <CheckCircle size={16} className="" style={{ color: 'var(--color-success)' }} />
                         ) : (
-                          <XCircle size={16} className="text-red-500" />
+                          <XCircle size={16} className="" style={{ color: 'var(--color-error)' }} />
                         )
                       )}
                     </>
@@ -218,7 +218,7 @@ export function ClozeTestExercise({
       {showHint && hint && (
         <BaseCard variant="info" className="mb-4">
           <div className="flex gap-3">
-            <Lightbulb size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <Lightbulb size={20} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-info)' }} />
             <div>
               <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pista:</p>
               <p className="text-sm text-blue-800 dark:text-blue-200">{hint}</p>

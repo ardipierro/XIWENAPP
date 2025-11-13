@@ -116,7 +116,7 @@ function FullDialoguePlayer({ dialogue, onComplete }) {
     <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-2 border-purple-300 dark:border-purple-700 rounded-lg mb-6">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <List size={20} className="text-purple-600 dark:text-purple-400" />
+          <List size={20} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
           <h4 className="text-md font-semibold text-purple-900 dark:text-purple-100">
             Escuchar Diálogo Completo
           </h4>
@@ -133,7 +133,7 @@ function FullDialoguePlayer({ dialogue, onComplete }) {
             Línea {currentLineIndex + 1} de {dialogue.lines.length}
           </div>
           <div className="text-sm font-medium text-gray-900 dark:text-white">
-            <span className="text-purple-600 dark:text-purple-400">
+            <span className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }}>
               {dialogue.lines[currentLineIndex]?.character}:
             </span>{' '}
             {dialogue.lines[currentLineIndex]?.text}

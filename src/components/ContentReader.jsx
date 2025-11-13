@@ -913,7 +913,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
         {selectedTool === 'note' && (
           <div className="px-3 py-2 bg-primary-50 dark:bg-primary-800 border-t border-primary-200 dark:border-primary-700">
             <div className="flex items-center gap-2">
-              <StickyNote className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+              <StickyNote className="w-4 h-4 dark:text-yellow-400" style={{ color: 'var(--color-warning)' }} />
               <span className="text-xs text-primary-700 dark:text-primary-300">
                 Selecciona texto o haz click en cualquier parte para agregar una nota
               </span>
@@ -1287,7 +1287,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
             >
               <div className="flex items-start gap-2 h-full">
                 {!readOnly && (
-                  <Move className="w-4 h-4 text-yellow-700 dark:text-yellow-300 flex-shrink-0 mt-1" />
+                  <Move className="w-4 h-4 dark:text-yellow-300 flex-shrink-0 mt-1" style={{ color: 'var(--color-warning-text)' }} />
                 )}
                 <div className="flex-1 min-w-0 overflow-auto">
                   {note.selectedText && (
@@ -1316,7 +1316,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   onMouseDown={(e) => handleResizeStart(e, note.id, 'diagonal')}
                   title="Redimensionar"
                 >
-                  <GripHorizontal className="w-4 h-4 text-yellow-600 dark:text-yellow-400 rotate-45" />
+                  <GripHorizontal className="w-4 h-4 dark:text-yellow-400 rotate-45" style={{ color: 'var(--color-warning)' }} />
                 </div>
               )}
             </div>
@@ -1488,15 +1488,15 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
                     <span className="text-2xl">👁️</span>
                     <div>
-                      <strong className="text-blue-700 dark:text-blue-300">Vista Original:</strong>
+                      <strong className="dark:text-blue-300" style={{ color: 'var(--color-info-text)' }}>Vista Original:</strong>
                       <p className="text-xs mt-1">En modo edición, alterna entre versión editada y original</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 p-3 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-700">
+                  <div className="flex items-start gap-3 p-3 rounded-lg border border-red-200 dark:border-red-700" style={{ background: 'var(--color-error-bg)' }}>
                     <span className="text-2xl">🔄</span>
                     <div>
-                      <strong className="text-red-700 dark:text-red-300">Restaurar:</strong>
+                      <strong className="" style={{ color: 'var(--color-error)' }}>Restaurar:</strong>
                       <p className="text-xs mt-1">Vuelve al contenido original eliminando todas las ediciones</p>
                     </div>
                   </div>

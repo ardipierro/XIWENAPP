@@ -133,11 +133,11 @@ function ConjugationExercise({ exercise, onComplete }) {
               {isChecked && (
                 <div className="mt-2 text-xs">
                   {isCorrect ? (
-                    <span className="text-green-700 dark:text-green-400 flex items-center gap-1">
+                    <span className="flex items-center gap-1" style={{ color: 'var(--color-success)' }}>
                       <Check size={14} /> Correcto!
                     </span>
                   ) : (
-                    <span className="text-red-700 dark:text-red-400">
+                    <span className="" style={{ color: 'var(--color-error)' }}>
                       <X size={14} className="inline" /> Incorrecto. Respuesta correcta: <strong>{question.correctAnswers[0]}</strong>
                     </span>
                   )}
@@ -155,7 +155,7 @@ function ConjugationExercise({ exercise, onComplete }) {
                   ) : (
                     <button
                       onClick={() => toggleHint(question.id)}
-                      className="text-xs text-amber-700 dark:text-amber-400 hover:underline"
+                      className="text-xs dark:text-amber-400 hover:underline" style={{ color: 'var(--color-warning-text)' }}
                     >
                       Ver pista
                     </button>

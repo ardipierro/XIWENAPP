@@ -56,12 +56,12 @@ export default function StudentAssignmentsView({ studentId }) {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Mis Tareas</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
           {pendingCount > 0 && (
-            <span className="text-orange-600 dark:text-orange-400 font-medium">
+            <span className="dark:text-orange-400 font-medium" style={{ color: 'var(--color-warning)' }}>
               {pendingCount} pendiente{pendingCount !== 1 ? 's' : ''}
             </span>
           )}
           {overdueCount > 0 && (
-            <span className="text-red-600 dark:text-red-400 font-medium ml-2">
+            <span className="font-medium ml-2" style={{ color: 'var(--color-error)' }}>
               {overdueCount} vencida{overdueCount !== 1 ? 's' : ''}
             </span>
           )}
@@ -145,9 +145,9 @@ function AssignmentCard({ assignment, onClick }) {
           'bg-orange-100 dark:bg-orange-900'
         }`}>
           {isGraded ? (
-            <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
+            <CheckCircle className="" style={{ color: 'var(--color-success)' }} size={24} />
           ) : isOverdue ? (
-            <AlertCircle className="text-red-600 dark:text-red-400" size={24} />
+            <AlertCircle className="" style={{ color: 'var(--color-error)' }} size={24} />
           ) : (
             <FileText className={`${
               isSubmitted
@@ -185,7 +185,7 @@ function AssignmentCard({ assignment, onClick }) {
             )}
 
             {isGraded && assignment.submission?.grade !== undefined && (
-              <div className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded text-sm font-medium">
+              <div className="px-2 py-1 rounded text-sm font-medium" style={{ background: 'var(--color-success-bg)' }} style={{ color: 'var(--color-success)' }}>
                 Calificación: {assignment.submission.grade}/{assignment.points}
               </div>
             )}
@@ -197,7 +197,7 @@ function AssignmentCard({ assignment, onClick }) {
             )}
 
             {isOverdue && !isSubmitted && (
-              <div className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded text-xs font-medium">
+              <div className="px-2 py-1 rounded text-xs font-medium" style={{ background: 'var(--color-error-bg)' }} style={{ color: 'var(--color-error)' }}>
                 Vencida
               </div>
             )}
@@ -430,14 +430,14 @@ function SubmissionModal({ assignment, studentId, onClose }) {
 
           {/* Graded Feedback */}
           {isGraded && submission?.feedback && (
-            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg">
-              <h3 className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+            <div className="mb-6 p-4 border border-green-200 dark:border-green-700 rounded-lg" style={{ background: 'var(--color-success-bg)' }}>
+              <h3 className="text-sm font-medium mb-2" style={{ color: 'var(--color-success)' }}>
                 Retroalimentación del Profesor
               </h3>
-              <p className="text-sm text-green-800 dark:text-green-200 mb-2">
+              <p className="text-sm mb-2" style={{ color: 'var(--color-success)' }}>
                 Calificación: <span className="font-bold">{submission.grade}/{assignment.points}</span>
               </p>
-              <p className="text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap">
+              <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-success)' }}>
                 {submission.feedback}
               </p>
             </div>
@@ -505,7 +505,7 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(index)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-2 0 hover:bg-red-600 text-white rounded-lg" style={{ background: 'var(--color-error-bg)' }}
                           >
                             <Trash2 size={20} />
                           </button>

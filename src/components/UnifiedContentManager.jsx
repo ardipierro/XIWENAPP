@@ -325,11 +325,11 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
           </div>
           <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Lecciones</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.lessons}</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-success)' }}>{stats.lessons}</p>
           </div>
           <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Ejercicios</p>
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.exercises}</p>
+            <p className="text-2xl font-bold dark:text-amber-400" style={{ color: 'var(--color-warning)' }}>{stats.exercises}</p>
           </div>
           <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Juegos</p>
@@ -679,7 +679,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                         </div>
                       ));
                     } catch (e) {
-                      return <p className="text-red-600 dark:text-red-400">Error al parsear ejercicios: {e.message}</p>;
+                      return <p className="" style={{ color: 'var(--color-error)' }}>Error al parsear ejercicios: {e.message}</p>;
                     }
                   })()}
                 </div>

@@ -117,14 +117,14 @@ function DragDropMenuExercise({ exercise, onComplete }) {
           <div className="flex items-center gap-2">
             {Object.values(results).every(r => r) ? (
               <>
-                <Check size={20} className="text-green-600 dark:text-green-400" />
-                <span className="text-sm text-green-900 dark:text-green-100">
+                <Check size={20} className="" style={{ color: 'var(--color-success)' }} />
+                <span className="text-sm" style={{ color: 'var(--color-success)' }}>
                   {exercise.feedback?.allCorrect || '¡Perfecto! Armaste el menú correctamente.'}
                 </span>
               </>
             ) : (
               <>
-                <X size={20} className="text-amber-600 dark:text-amber-400" />
+                <X size={20} className="dark:text-amber-400" style={{ color: 'var(--color-warning)' }} />
                 <span className="text-sm text-amber-900 dark:text-amber-100">
                   {Object.values(results).filter(r => r).length} de {exercise.items.length} correctos. {exercise.feedback?.someCorrect}
                 </span>
@@ -199,15 +199,15 @@ function DragDropMenuExercise({ exercise, onComplete }) {
                       <div className="flex items-center gap-2">
                         {isChecked && (
                           isCorrect ? (
-                            <Check size={16} className="text-green-600" />
+                            <Check size={16} className="" style={{ color: 'var(--color-success)' }} />
                           ) : (
-                            <X size={16} className="text-red-600" />
+                            <X size={16} className="" style={{ color: 'var(--color-error)' }} />
                           )
                         )}
                         {!isChecked && (
                           <button
                             onClick={() => removeItemFromCategory(item.id)}
-                            className="text-gray-400 hover:text-red-600"
+                            className="text-gray-400 hover:" style={{ color: 'var(--color-error)' }}
                           >
                             <X size={16} />
                           </button>

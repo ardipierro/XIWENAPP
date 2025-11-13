@@ -69,7 +69,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Sparkles className="text-purple-600 dark:text-purple-400" size={28} />
+        <Sparkles className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} size={28} />
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Generador de Ejercicios con IA
@@ -266,7 +266,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
                     <p className="text-gray-900 dark:text-white mb-2">
                       {exercise.sentence}
                     </p>
-                    <p className="text-sm text-green-600 dark:text-green-400">
+                    <p className="text-sm" style={{ color: 'var(--color-success)' }}>
                       Respuesta: {exercise.correctAnswer?.[0]}
                     </p>
                   </div>
@@ -278,7 +278,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
                     <p className="text-gray-900 dark:text-white mb-2">
                       {exercise.statement}
                     </p>
-                    <p className="text-sm text-green-600 dark:text-green-400">
+                    <p className="text-sm" style={{ color: 'var(--color-success)' }}>
                       Respuesta: {exercise.correctAnswer ? 'Verdadero' : 'Falso'}
                     </p>
                   </div>

@@ -90,7 +90,7 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
           {settings.showBadges && (
             <div className="flex gap-1 mt-2 flex-wrap">
               {line.audioUrl && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-[10px] font-medium">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 dark:bg-blue-900/30 dark:text-blue-300 rounded text-[10px] font-medium" style={{ background: 'var(--color-info-bg)' }} style={{ color: 'var(--color-info-text)' }}>
                   <Volume2 size={10} />
                   Audio
                 </span>
@@ -102,7 +102,7 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
                 </span>
               )}
               {hasExercise && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-[10px] font-medium">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ background: 'var(--color-success-bg)' }} style={{ color: 'var(--color-success)' }}>
                   <HelpCircle size={10} />
                   Ejercicio
                 </span>
@@ -115,7 +115,7 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
         {(hasExtras || hasExercise) && (
           <button
             onClick={() => setShowExtras(!showExtras)}
-            className="mt-2 px-3 py-1 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full flex items-center gap-1 transition-colors"
+            className="mt-2 px-3 py-1 text-xs dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full flex items-center gap-1 transition-colors" style={{ color: 'var(--color-info)' }}
           >
             {showExtras ? (
               <>
@@ -153,7 +153,7 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
               <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-xl overflow-hidden">
                 <button
                   onClick={() => setShowTranslation(!showTranslation)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                  className="w-full p-4 flex items-center justify-between hover: dark:hover:bg-amber-900/30 transition-colors" style={{ background: 'var(--color-warning-bg)' }}
                 >
                   <span className="flex items-center gap-3 text-base font-bold text-amber-900 dark:text-amber-100">
                     <Languages size={20} />
@@ -174,7 +174,7 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
               <div className="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl overflow-hidden">
                 <button
                   onClick={() => setShowVocabulary(!showVocabulary)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+                  className="w-full p-4 flex items-center justify-between hover: dark:hover:bg-purple-900/30 transition-colors" style={{ background: 'var(--color-accent-bg)' }}
                 >
                   <span className="flex items-center gap-3 text-base font-bold text-purple-900 dark:text-purple-100">
                     📝 Vocabulario ({line.notes.length})
@@ -206,8 +206,8 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
 
             {/* Ejercicio interactivo - Card destacado */}
             {hasExercise && (
-              <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3 text-base font-bold text-green-900 dark:text-green-100">
+              <div className="border-2 border-green-200 dark:border-green-800 rounded-xl p-4" style={{ background: 'var(--color-success-bg)' }}>
+                <div className="flex items-center gap-2 mb-3 text-base font-bold" style={{ color: 'var(--color-success)' }}>
                   <HelpCircle size={20} />
                   Ejercicio Interactivo
                 </div>

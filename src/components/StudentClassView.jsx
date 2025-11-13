@@ -198,7 +198,7 @@ function StudentClassView({ student }) {
       return {
         status: 'active',
         label: 'Link activo - Únete ahora',
-        icon: <CircleDot size={16} strokeWidth={2} className="inline-icon text-green-500" />,
+        icon: <CircleDot size={16} strokeWidth={2} className="inline-icon" style={{ color: 'var(--color-success)' }} />,
         canJoin: true
       };
     }

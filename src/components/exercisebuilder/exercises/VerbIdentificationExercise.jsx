@@ -250,7 +250,7 @@ export function VerbIdentificationExercise({
           >
             <div className="flex items-start gap-3 mb-3">
               {isCorrect ? (
-                <Check size={24} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+                <Check size={24} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
               ) : (
                 <X size={24} className="text-orange-500 flex-shrink-0" strokeWidth={2} />
               )}
@@ -291,7 +291,7 @@ export function VerbIdentificationExercise({
                   >
                     <div className="flex items-center gap-2">
                       {selectedWords.has(verb.text) ? (
-                        <Check size={16} className="text-green-500" strokeWidth={2} />
+                        <Check size={16} className="" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
                       ) : (
                         <X size={16} className="text-orange-500" strokeWidth={2} />
                       )}

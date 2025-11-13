@@ -100,8 +100,8 @@ function TTSSettings({ alwaysOpen = false }) {
 
   if (!ttsService.isAvailable()) {
     return (
-      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-        <p className="text-sm text-red-900 dark:text-red-100">
+      <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg" style={{ background: 'var(--color-error-bg)' }}>
+        <p className="text-sm" style={{ color: 'var(--color-error)' }}>
           ⚠️ Text-to-Speech no está disponible en este navegador
         </p>
       </div>
@@ -114,10 +114,10 @@ function TTSSettings({ alwaysOpen = false }) {
       {!alwaysOpen && (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+          className="w-full flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover: dark:hover:bg-purple-900/30 transition-colors" style={{ background: 'var(--color-accent-bg)' }}
         >
           <div className="flex items-center gap-2">
-            <Settings size={18} className="text-purple-600 dark:text-purple-400" />
+            <Settings size={18} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
             <span className="text-sm font-medium text-purple-900 dark:text-purple-100">
               Configuración de Voz IA
             </span>
@@ -176,7 +176,7 @@ function TTSSettings({ alwaysOpen = false }) {
                       <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
                         Voz actual: {selectedVoice.name}
                       </div>
-                      <div className="text-xs text-blue-700 dark:text-blue-300 mt-1 flex items-center gap-2">
+                      <div className="text-xs dark:text-blue-300 mt-1 flex items-center gap-2" style={{ color: 'var(--color-info-text)' }}>
                         <Languages size={12} />
                         {selectedVoice.lang}
                         {selectedVoice.lang.includes('AR') && ' 🇦🇷'}
@@ -257,7 +257,7 @@ function TTSSettings({ alwaysOpen = false }) {
               {/* Info adicional */}
               <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <Zap size={16} className="text-amber-600 dark:text-amber-400 mt-0.5" />
+                  <Zap size={16} className="dark:text-amber-400 mt-0.5" style={{ color: 'var(--color-warning)' }} />
                   <div className="text-xs text-amber-900 dark:text-amber-100">
                     <p className="font-semibold mb-1">Consejos:</p>
                     <ul className="list-disc list-inside space-y-1">
@@ -280,7 +280,7 @@ function TTSSettings({ alwaysOpen = false }) {
               {!hasElevenLabsKey ? (
                 <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
                   <div className="flex items-start gap-3 mb-3">
-                    <Key size={20} className="text-purple-600 dark:text-purple-400 mt-1" />
+                    <Key size={20} className="dark:text-purple-400 mt-1" style={{ color: 'var(--color-accent)' }} />
                     <div>
                       <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-1">
                         Configurar ElevenLabs API Key
@@ -308,11 +308,11 @@ function TTSSettings({ alwaysOpen = false }) {
                   </div>
                 </div>
               ) : (
-                <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <div className="p-3 border border-green-200 dark:border-green-800 rounded-lg" style={{ background: 'var(--color-success-bg)' }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Key size={18} className="text-green-600 dark:text-green-400" />
-                      <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                      <Key size={18} className="" style={{ color: 'var(--color-success)' }} />
+                      <span className="text-sm font-medium" style={{ color: 'var(--color-success)' }}>
                         API Key configurada
                       </span>
                     </div>
@@ -330,7 +330,7 @@ function TTSSettings({ alwaysOpen = false }) {
               {/* Voces Premium de ElevenLabs */}
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <Sparkles size={16} className="text-purple-600 dark:text-purple-400" />
+                  <Sparkles size={16} className="dark:text-purple-400" style={{ color: 'var(--color-accent)' }} />
                   Voces Premium con Acento Argentino
                 </h4>
 
@@ -440,7 +440,7 @@ function TTSSettings({ alwaysOpen = false }) {
               {/* Info de ElevenLabs */}
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <Zap size={16} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                  <Zap size={16} className="dark:text-blue-400 mt-0.5" style={{ color: 'var(--color-info)' }} />
                   <div className="text-xs text-blue-900 dark:text-blue-100">
                     <p className="font-semibold mb-1">Características de ElevenLabs:</p>
                     <ul className="list-disc list-inside space-y-1">

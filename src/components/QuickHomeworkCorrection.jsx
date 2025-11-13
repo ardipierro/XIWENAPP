@@ -218,7 +218,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
                       type="button"
                       onClick={() => handleRemoveImage(index)}
                       disabled={isUploading}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg disabled:opacity-50"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-2 0 hover:bg-red-600 text-white rounded-lg disabled:opacity-50" style={{ background: 'var(--color-error-bg)' }}
                     >
                       <Trash2 size={20} />
                     </button>
@@ -409,17 +409,17 @@ function ReviewCard({ review, onClick }) {
         {review.status === 'completed' && review.errorSummary && (
           <div className="flex gap-2 mt-2 text-xs">
             {review.errorSummary.spelling > 0 && (
-              <span className="text-orange-600 dark:text-orange-400">
+              <span className="dark:text-orange-400" style={{ color: 'var(--color-warning)' }}>
                 {review.errorSummary.spelling} ortografía
               </span>
             )}
             {review.errorSummary.grammar > 0 && (
-              <span className="text-red-600 dark:text-red-400">
+              <span className="" style={{ color: 'var(--color-error)' }}>
                 {review.errorSummary.grammar} gramática
               </span>
             )}
             {review.errorSummary.punctuation > 0 && (
-              <span className="text-yellow-600 dark:text-yellow-400">
+              <span className="dark:text-yellow-400" style={{ color: 'var(--color-warning)' }}>
                 {review.errorSummary.punctuation} puntuación
               </span>
             )}
@@ -535,7 +535,7 @@ function ReviewDetailModal({ review, onClose }) {
           {isWaitingForTeacher && (
             <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
               <div className="flex items-center gap-3">
-                <Clock className="text-yellow-600 dark:text-yellow-400" size={24} />
+                <Clock className="dark:text-yellow-400" style={{ color: 'var(--color-warning)' }} size={24} />
                 <div>
                   <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
                     En revisión
@@ -546,8 +546,8 @@ function ReviewDetailModal({ review, onClose }) {
           )}
 
           {liveReview.status === REVIEW_STATUS.FAILED && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg">
-              <p className="text-sm text-red-800 dark:text-red-200">
+            <div className="mb-6 p-4 border border-red-200 dark:border-red-700 rounded-lg" style={{ background: 'var(--color-error-bg)' }}>
+              <p className="text-sm" style={{ color: 'var(--color-error)' }}>
                 <strong>Error:</strong> {liveReview.errorMessage || 'No se pudo analizar la imagen'}
               </p>
             </div>
@@ -580,7 +580,7 @@ function ReviewDetailModal({ review, onClose }) {
                         Ortografía
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="w-3 h-3 bg-red-200 dark:bg-red-900/50 rounded"></span>
+                        <span className="w-3 h-3 rounded" style={{ background: 'var(--color-error-bg)' }}></span>
                         Gramática
                       </span>
                       <span className="flex items-center gap-1">
@@ -611,25 +611,25 @@ function ReviewDetailModal({ review, onClose }) {
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                      <div className="text-2xl font-bold dark:text-orange-400" style={{ color: 'var(--color-warning)' }}>
                         {liveReview.errorSummary.spelling || 0}
                       </div>
                       <div className="text-gray-600 dark:text-gray-400">Ortografía</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      <div className="text-2xl font-bold" style={{ color: 'var(--color-error)' }}>
                         {liveReview.errorSummary.grammar || 0}
                       </div>
                       <div className="text-gray-600 dark:text-gray-400">Gramática</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                      <div className="text-2xl font-bold dark:text-yellow-400" style={{ color: 'var(--color-warning)' }}>
                         {liveReview.errorSummary.punctuation || 0}
                       </div>
                       <div className="text-gray-600 dark:text-gray-400">Puntuación</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      <div className="text-2xl font-bold dark:text-purple-400" style={{ color: 'var(--color-accent)' }}>
                         {liveReview.errorSummary.vocabulary || 0}
                       </div>
                       <div className="text-gray-600 dark:text-gray-400">Vocabulario</div>
@@ -694,11 +694,11 @@ function ReviewDetailModal({ review, onClose }) {
 
               {/* Suggested Grade */}
               {liveReview.suggestedGrade !== undefined && (
-                <div className="p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg">
-                  <h3 className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                <div className="p-4 border border-green-200 dark:border-green-700 rounded-lg" style={{ background: 'var(--color-success-bg)' }}>
+                  <h3 className="text-sm font-medium mb-2" style={{ color: 'var(--color-success)' }}>
                     Calificación Sugerida
                   </h3>
-                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  <div className="text-3xl font-bold" style={{ color: 'var(--color-success)' }}>
                     {liveReview.suggestedGrade}/100
                   </div>
                 </div>

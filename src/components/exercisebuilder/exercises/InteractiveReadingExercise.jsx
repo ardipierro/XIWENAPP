@@ -259,7 +259,7 @@ export function InteractiveReadingExercise({
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-blue-500 dark:border-blue-400 p-4 max-w-sm animate-in fade-in duration-200">
               {/* Palabra en español */}
               <div className="mb-3">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                <div className="text-2xl font-bold dark:text-blue-400 mb-1" style={{ color: 'var(--color-info)' }}>
                   {clickedWord.spanish}
                 </div>
                 {clickedWord.audioUrl && (
@@ -359,7 +359,7 @@ export function InteractiveReadingExercise({
           >
             <div className="flex items-start gap-3">
               {isCorrect ? (
-                <Check size={24} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+                <Check size={24} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
               ) : (
                 <X size={24} className="text-orange-500 flex-shrink-0" strokeWidth={2} />
               )}

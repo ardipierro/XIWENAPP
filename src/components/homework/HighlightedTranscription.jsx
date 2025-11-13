@@ -53,7 +53,7 @@ export default function HighlightedTranscription({ transcription, corrections })
         return (
           <mark
             key={index}
-            className="bg-red-200 dark:bg-red-900/40 text-red-900 dark:text-red-200 px-1 rounded"
+            className="px-1 rounded" style={{ background: 'var(--color-error-bg)' }} style={{ color: 'var(--color-error)' }}
             title="Error identificado"
           >
             {part}

@@ -161,8 +161,8 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
 
           {/* Error de imagen */}
           {isImageFunction && imageError && (
-            <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-xs text-red-600 dark:text-red-400 m-0">
+            <div className="mb-3 p-2 border border-red-200 dark:border-red-800 rounded-lg" style={{ background: 'var(--color-error-bg)' }}>
+              <p className="text-xs m-0" style={{ color: 'var(--color-error)' }}>
                 {imageError}
               </p>
             </div>

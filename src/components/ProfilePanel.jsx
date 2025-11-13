@@ -126,12 +126,12 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
         <div className="flex-1 overflow-y-auto p-6">
           {/* Mensajes */}
           {error && (
-            <div className="p-3 px-4 rounded-md mb-5 text-sm font-semibold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
+            <div className="p-3 px-4 rounded-md mb-5 text-sm font-semibold border border-red-200 dark:border-red-800" style={{ background: 'var(--color-error-bg)' }} style={{ color: 'var(--color-error)' }}>
               {error}
             </div>
           )}
           {success && (
-            <div className="p-3 px-4 rounded-md mb-5 text-sm font-semibold bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">
+            <div className="p-3 px-4 rounded-md mb-5 text-sm font-semibold border border-green-200 dark:border-green-800" style={{ background: 'var(--color-success-bg)' }} style={{ color: 'var(--color-success)' }}>
               {success}
             </div>
           )}

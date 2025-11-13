@@ -130,14 +130,14 @@ function VocabularyMatchingExercise({ exercise, onComplete }) {
           <div className="flex items-center gap-2">
             {Object.values(results).every(r => r) ? (
               <>
-                <Check size={20} className="text-green-600 dark:text-green-400" />
-                <span className="text-sm text-green-900 dark:text-green-100">
+                <Check size={20} className="" style={{ color: 'var(--color-success)' }} />
+                <span className="text-sm" style={{ color: 'var(--color-success)' }}>
                   {exercise.feedback?.allCorrect || '¡Excelente! Todos correctos.'}
                 </span>
               </>
             ) : (
               <>
-                <X size={20} className="text-amber-600 dark:text-amber-400" />
+                <X size={20} className="dark:text-amber-400" style={{ color: 'var(--color-warning)' }} />
                 <span className="text-sm text-amber-900 dark:text-amber-100">
                   {Object.values(results).filter(r => r).length} de {exercise.pairs.length} correctos. {exercise.feedback?.someCorrect}
                 </span>
@@ -176,7 +176,7 @@ function VocabularyMatchingExercise({ exercise, onComplete }) {
                   <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
                     {pair.spanish}
                     {pair.rioplatenseNote && (
-                      <span className="text-xs px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded">
+                      <span className="text-xs px-1.5 py-0.5 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded" style={{ background: 'var(--color-warning-bg)' }}>
                         🇦🇷
                       </span>
                     )}
@@ -190,7 +190,7 @@ function VocabularyMatchingExercise({ exercise, onComplete }) {
                 {matchedChinese && !isChecked && (
                   <button
                     onClick={() => removeMatch(pair.id)}
-                    className="ml-2 text-gray-400 hover:text-red-600"
+                    className="ml-2 text-gray-400 hover:" style={{ color: 'var(--color-error)' }}
                   >
                     <X size={18} />
                   </button>
@@ -198,9 +198,9 @@ function VocabularyMatchingExercise({ exercise, onComplete }) {
                 {isChecked && (
                   <div className="ml-2">
                     {isCorrect ? (
-                      <Check size={20} className="text-green-600" />
+                      <Check size={20} className="" style={{ color: 'var(--color-success)' }} />
                     ) : (
-                      <X size={20} className="text-red-600" />
+                      <X size={20} className="" style={{ color: 'var(--color-error)' }} />
                     )}
                   </div>
                 )}

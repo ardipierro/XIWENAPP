@@ -206,10 +206,9 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
                 <span
                   className="absolute top-1 right-1
                              min-w-[18px] h-[18px] px-1.5
-                             flex items-center justify-center
-                             bg-red-500 text-white
+                             flex items-center justify-center 0 text-white
                              text-[10px] font-bold leading-none
-                             rounded-full"
+                             rounded-full" style={{ background: 'var(--color-error-bg)' }}
                   aria-label={`${notificationCount} notificaciones`}
                 >
                   {notificationCount}
@@ -234,10 +233,9 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
                 <span
                   className="absolute top-1 right-1
                              min-w-[18px] h-[18px] px-1.5
-                             flex items-center justify-center
-                             bg-red-500 text-white
+                             flex items-center justify-center 0 text-white
                              text-[10px] font-bold leading-none
-                             rounded-full"
+                             rounded-full" style={{ background: 'var(--color-error-bg)' }}
                   aria-label={`${messageCount} mensajes sin leer`}
                 >
                   {messageCount}

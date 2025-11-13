@@ -200,7 +200,7 @@ export function TextSelectionExercise({
                   Palabra seleccionada:
                 </p>
                 <div className="flex items-center gap-3">
-                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  <span className="text-lg font-bold dark:text-blue-400" style={{ color: 'var(--color-info)' }}>
                     {selectedWord.spanish}
                   </span>
                   <span className="text-gray-400">→</span>
@@ -234,9 +234,9 @@ export function TextSelectionExercise({
           >
             <div className="flex items-start gap-3">
               {isCorrect ? (
-                <Check size={24} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+                <Check size={24} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
               ) : (
-                <X size={24} className="text-red-500 flex-shrink-0" strokeWidth={2} />
+                <X size={24} className="flex-shrink-0" style={{ color: 'var(--color-error)' }} strokeWidth={2} />
               )}
               <div className="flex-1">
                 <p className="font-semibold text-base text-gray-900 dark:text-white mb-2">
@@ -249,7 +249,7 @@ export function TextSelectionExercise({
                       La palabra correcta era:
                     </p>
                     <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                      <span className="text-lg font-bold" style={{ color: 'var(--color-success)' }}>
                         {targetWordData.spanish}
                       </span>
                       <span className="text-gray-400">→</span>

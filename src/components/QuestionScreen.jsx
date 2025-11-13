@@ -308,7 +308,7 @@ function QuestionScreen({
               )}
               <button
                 onClick={endGame}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-base"
+                className="px-4 py-2 0 hover:bg-red-600 text-white rounded-lg font-semibold text-base" style={{ background: 'var(--color-error-bg)' }}
               >
                 Terminar
               </button>

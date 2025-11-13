@@ -232,7 +232,7 @@ function ProfileCard({ profile, onEdit, onDelete, onSetDefault }) {
             </button>
             <button
               onClick={onDelete}
-              className="p-1.5 text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
+              className="p-1.5 text-zinc-600 dark:text-zinc-400 hover: dark:hover: hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors" style={{ color: 'var(--color-error)' }} style={{ color: 'var(--color-error)' }}
             >
               <Trash2 size={16} strokeWidth={2} />
             </button>

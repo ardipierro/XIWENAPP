@@ -236,10 +236,10 @@ export function DragDropOrderExercise({
                 {showFeedback && (
                   <>
                     {isCorrectPosition && (
-                      <Check size={24} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+                      <Check size={24} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
                     )}
                     {isIncorrectPosition && (
-                      <X size={24} className="text-red-500 flex-shrink-0" strokeWidth={2} />
+                      <X size={24} className="flex-shrink-0" style={{ color: 'var(--color-error)' }} strokeWidth={2} />
                     )}
                   </>
                 )}
@@ -274,9 +274,9 @@ export function DragDropOrderExercise({
           >
             <div className="flex items-start gap-3">
               {isCorrect ? (
-                <Check size={24} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+                <Check size={24} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
               ) : (
-                <X size={24} className="text-red-500 flex-shrink-0" strokeWidth={2} />
+                <X size={24} className="flex-shrink-0" style={{ color: 'var(--color-error)' }} strokeWidth={2} />
               )}
               <div className="flex-1">
                 <p className="font-semibold text-base text-gray-900 dark:text-white mb-2">
@@ -288,7 +288,7 @@ export function DragDropOrderExercise({
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                       Orden correcto:
                     </p>
-                    <p className="text-base font-medium text-green-600 dark:text-green-400">
+                    <p className="text-base font-medium" style={{ color: 'var(--color-success)' }}>
                       {correctOrder.join(' ')}
                     </p>
                   </div>

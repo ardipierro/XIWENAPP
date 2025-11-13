@@ -244,7 +244,7 @@ export function AudioListeningExercise({
         {showTranscript && transcript && (
           <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
             <div className="flex items-start gap-2 mb-2">
-              <Volume2 size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-1" strokeWidth={2} />
+              <Volume2 size={18} className="dark:text-amber-400 flex-shrink-0 mt-1" style={{ color: 'var(--color-warning)' }} strokeWidth={2} />
               <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">
                 Transcripción
               </h4>
@@ -325,7 +325,7 @@ export function AudioListeningExercise({
           >
             <div className="flex items-start gap-3 mb-4">
               {isCorrect ? (
-                <Check size={24} className="text-green-500 flex-shrink-0" strokeWidth={2} />
+                <Check size={24} className="flex-shrink-0" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
               ) : (
                 <HelpCircle size={24} className="text-orange-500 flex-shrink-0" strokeWidth={2} />
               )}
@@ -363,9 +363,9 @@ export function AudioListeningExercise({
                     </p>
                     <div className="flex items-center gap-2 text-sm">
                       {correct ? (
-                        <Check size={16} className="text-green-600" strokeWidth={2} />
+                        <Check size={16} className="" style={{ color: 'var(--color-success)' }} strokeWidth={2} />
                       ) : (
-                        <X size={16} className="text-red-600" strokeWidth={2} />
+                        <X size={16} className="" style={{ color: 'var(--color-error)' }} strokeWidth={2} />
                       )}
                       <span className="text-gray-700 dark:text-gray-300">
                         {correct ? 'Correcto' : `Correcto: ${correctOption?.label}`}

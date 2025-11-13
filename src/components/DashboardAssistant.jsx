@@ -248,7 +248,7 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
           aria-label="Abrir asistente AI"
         >
           <Sparkles size={24} className="group-hover:scale-110 transition-transform" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-zinc-900 animate-pulse"></span>
+          <span className="absolute -top-1 -right-1 w-3 h-3 0 rounded-full border-2 border-white dark:border-zinc-900 animate-pulse" style={{ background: 'var(--color-success-bg)' }}></span>
         </BaseButton>
       )}
 

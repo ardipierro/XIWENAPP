@@ -61,8 +61,8 @@ export default function GamificationPanel({ userId }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-lg">
-              <Award className="text-orange-600 dark:text-orange-400" size={24} />
+            <div className="p-3 dark:bg-orange-900 rounded-lg" style={{ background: 'var(--color-warning-bg)' }}>
+              <Award className="dark:text-orange-400" style={{ color: 'var(--color-warning)' }} size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Insignias</p>
@@ -75,8 +75,8 @@ export default function GamificationPanel({ userId }) {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-red-100 dark:bg-red-900 rounded-lg">
-              <Zap className="text-red-600 dark:text-red-400" size={24} />
+            <div className="p-3 rounded-lg" style={{ background: 'var(--color-error-bg)' }}>
+              <Zap className="" style={{ color: 'var(--color-error)' }} size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Racha</p>
@@ -274,7 +274,7 @@ function LeaderboardTab({ leaderboard, currentUserId }) {
               <div className="text-2xl">
                 {index === 0 && <Crown size={24} strokeWidth={2} className="text-yellow-500" />}
                 {index === 1 && <Medal size={24} strokeWidth={2} className="text-gray-400" />}
-                {index === 2 && <Medal size={24} strokeWidth={2} className="text-orange-600" />}
+                {index === 2 && <Medal size={24} strokeWidth={2} className="" style={{ color: 'var(--color-warning)' }} />}
               </div>
             )}
 
@@ -291,7 +291,7 @@ function LeaderboardTab({ leaderboard, currentUserId }) {
                   <>
                     <span>•</span>
                     <span className="flex items-center gap-1">
-                      <Zap size={14} className="text-red-500" />
+                      <Zap size={14} className="" style={{ color: 'var(--color-error)' }} />
                       {user.streakDays} días
                     </span>
                   </>
