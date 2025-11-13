@@ -76,7 +76,7 @@ function DialogueExtras({
     switch (activeTab) {
       case 'audio':
         return (
-          <div className="pb-6">
+          <div className="pb-2">
             <AudioPlayer
               audioUrl={audioUrl}
               text={text}
