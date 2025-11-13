@@ -167,9 +167,9 @@ function DialogueExtras({
   };
 
   return (
-    <div className="mt-4 w-full">
+    <div className="mt-4 mb-8 w-full">
       {/* Tabs horizontales */}
-      <div className="flex gap-2 mb-4 border-b-2 border-gray-200 dark:border-gray-700 pb-2">
+      <div className="flex gap-2 mb-4">
         {availableTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
