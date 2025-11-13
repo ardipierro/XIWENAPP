@@ -43,6 +43,7 @@ import {
   REVIEW_STATUS
 } from '../firebase/homework_reviews';
 import logger from '../utils/logger';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Homework Review Panel Component
@@ -50,6 +51,7 @@ import logger from '../utils/logger';
  * @param {string} props.teacherId - Teacher ID (optional, for filtering)
  */
 export default function HomeworkReviewPanel({ teacherId }) {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedReview, setSelectedReview] = useState(null);
@@ -361,7 +363,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess }) {
         {/* Profile Selector */}
         <ProfileSelector
           studentId={review.studentId}
-          teacherId={review.teacherId}
+          teacherId={review.teacherId || teacherId || user?.uid}
           currentReviewId={review.id}
           onReanalyze={async (profileId) => {
             const result = await requestReanalysis(review.id, profileId);

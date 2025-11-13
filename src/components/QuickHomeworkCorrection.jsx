@@ -17,11 +17,13 @@ import {
 } from 'lucide-react';
 import { uploadMessageAttachment } from '../firebase/storage';
 import { createHomeworkReview, getReviewsByStudent, subscribeToReview, REVIEW_STATUS } from '../firebase/homework_reviews';
+import { getStudentData } from '../firebase/users';
 import BaseButton from './common/BaseButton';
 import { BaseLoading } from './common';
 import logger from '../utils/logger';
 
 export default function QuickHomeworkCorrection({ studentId, studentName }) {
+  const [teacherId, setTeacherId] = useState(null);
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -29,6 +31,21 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
   const [recentReviews, setRecentReviews] = useState([]);
   const [selectedReview, setSelectedReview] = useState(null);
   const [loadingReviews, setLoadingReviews] = useState(true);
+
+  // Load teacher ID from student data
+  useEffect(() => {
+    const loadTeacherId = async () => {
+      try {
+        const studentData = await getStudentData(studentId);
+        if (studentData && studentData.teacherId) {
+          setTeacherId(studentData.teacherId);
+        }
+      } catch (error) {
+        logger.error('Error loading teacher ID', 'QuickHomeworkCorrection', error);
+      }
+    };
+    loadTeacherId();
+  }, [studentId]);
 
   // Load recent reviews
   useEffect(() => {
@@ -121,6 +138,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
         const reviewData = {
           studentId,
           studentName: studentName || 'Estudiante',
+          teacherId: teacherId || null, // Include teacherId if available
           imageUrl: uploadResult.url, // Extract URL from upload result
           filename: file.name,
           imageSize: file.size,
