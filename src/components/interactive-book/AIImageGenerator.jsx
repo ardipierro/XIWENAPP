@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Image, Sparkles, Download, RefreshCw, Key, Zap, Settings as SettingsIcon } from 'lucide-react';
+import { Image, Sparkles, Download, RefreshCw, Key, Zap, Settings as SettingsIcon, CheckCircle } from 'lucide-react';
 import { BaseCard, BaseButton, BaseBadge, BaseInput, BaseTextarea, BaseSelect, BaseLoading, BaseAlert } from '../common';
 import imageGenerationService from '../../services/imageGenerationService';
 import logger from '../../utils/logger';
@@ -38,6 +38,17 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
 
   useEffect(() => {
     loadApiKeys();
+
+    // Escuchar cambios en configuración (ej: credenciales guardadas en otro lugar)
+    const handleSettingsChange = () => {
+      loadApiKeys();
+    };
+
+    window.addEventListener('xiwen_settings_changed', handleSettingsChange);
+
+    return () => {
+      window.removeEventListener('xiwen_settings_changed', handleSettingsChange);
+    };
   }, []);
 
   const loadApiKeys = () => {
@@ -463,25 +474,50 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
           ) : (
             /* ✅ Contenido SIN BaseCard cuando alwaysOpen=true */
             <div className="space-y-4">
-              {/* Mensaje de credenciales */}
-              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Key size={20} className="text-purple-600 dark:text-purple-400 mt-1" />
-                  <div>
-                    <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-1">
-                      Configurar credenciales de proveedores IA
-                    </h4>
-                    <p className="text-xs text-purple-800 dark:text-purple-200">
-                      Para generar imágenes, configura tus API keys en:<br />
-                      <strong>Menú Lateral → Configuración → Credenciales IA</strong>
-                    </p>
+              {/* Mensaje de credenciales - Solo si NO hay ninguna */}
+              {!hasOpenAI && !hasStability && (
+                <>
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <Key size={20} className="text-purple-600 dark:text-purple-400 mt-1" />
+                      <div>
+                        <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                          Configurar credenciales de proveedores IA
+                        </h4>
+                        <p className="text-xs text-purple-800 dark:text-purple-200">
+                          Para generar imágenes, configura tus API keys en:<br />
+                          <strong>Menú Lateral → Configuración → Credenciales IA</strong>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center text-sm text-gray-600 dark:text-gray-400">
+                    Generador de imágenes disponible después de configurar credenciales
+                  </div>
+                </>
+              )}
+
+              {/* Mensaje de éxito - Si hay al menos una credencial configurada */}
+              {(hasOpenAI || hasStability) && (
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle size={20} className="text-green-600 dark:text-green-400 mt-1" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-green-900 dark:text-green-100 mb-1">
+                        ✓ Proveedores IA configurados
+                      </h4>
+                      <p className="text-xs text-green-800 dark:text-green-200">
+                        {hasOpenAI && 'OpenAI (DALL-E) ✓'}
+                        {hasOpenAI && hasStability && ' • '}
+                        {hasStability && 'Stability AI ✓'}
+                        <br />
+                        El generador de imágenes está disponible.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center text-sm text-gray-600 dark:text-gray-400">
-                Generador de imágenes disponible después de configurar credenciales
-              </div>
+              )}
             </div>
           )}
         </>

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Settings, Volume2, Zap, Languages, Key, Sparkles } from 'lucide-react';
+import { Settings, Volume2, Zap, Languages, Key, Sparkles, CheckCircle } from 'lucide-react';
 import { BaseCard, BaseButton, BaseBadge, BaseInput } from '../common';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
@@ -611,21 +611,40 @@ function TTSSettings({ alwaysOpen = false }) {
               {/* Tab: ElevenLabs Premium - SIN CAMPOS DE CREDENCIALES */}
               {activeTab === 'elevenlabs' && (
                 <div className="space-y-4">
-                  {/* Mensaje de credenciales */}
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <Key size={20} className="text-purple-600 dark:text-purple-400 mt-1" />
-                      <div>
-                        <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-1">
-                          Configurar credenciales ElevenLabs
-                        </h4>
-                        <p className="text-xs text-purple-800 dark:text-purple-200">
-                          Para usar voces premium de ElevenLabs, configura tu API key en:<br />
-                          <strong>Menú Lateral → Configuración → Credenciales IA</strong>
-                        </p>
+                  {/* Mensaje de credenciales - SOLO SI NO HAY KEY */}
+                  {!hasElevenLabsKey && (
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <Key size={20} className="text-purple-600 dark:text-purple-400 mt-1" />
+                        <div>
+                          <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                            Configurar credenciales ElevenLabs
+                          </h4>
+                          <p className="text-xs text-purple-800 dark:text-purple-200">
+                            Para usar voces premium de ElevenLabs, configura tu API key en:<br />
+                            <strong>Menú Lateral → Configuración → Credenciales IA</strong>
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Mensaje de éxito - SOLO SI HAY KEY */}
+                  {hasElevenLabsKey && (
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle size={20} className="text-green-600 dark:text-green-400 mt-1" />
+                        <div>
+                          <h4 className="text-sm font-semibold text-green-900 dark:text-green-100 mb-1">
+                            ✓ ElevenLabs configurado correctamente
+                          </h4>
+                          <p className="text-xs text-green-800 dark:text-green-200">
+                            Las voces premium están disponibles. Puedes probarlas a continuación.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Voces Premium preview (solo visual) */}
                   <div className="space-y-2">
