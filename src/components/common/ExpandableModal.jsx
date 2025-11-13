@@ -136,25 +136,27 @@ function ExpandableModal({
 
             {/* Action buttons */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* Expand/Contract button */}
+              {/* Expand/Contract button - MEJORADO PARA VISIBILIDAD */}
               <button
                 className="
-                  flex items-center justify-center w-8 h-8 rounded-lg
-                  text-gray-500 dark:text-gray-400
-                  hover:bg-gray-100 dark:hover:bg-gray-700
-                  hover:text-gray-900 dark:hover:text-white
+                  flex items-center justify-center w-9 h-9 rounded-lg
+                  bg-zinc-100 dark:bg-zinc-800
+                  text-zinc-700 dark:text-zinc-300
+                  hover:bg-zinc-200 dark:hover:bg-zinc-700
+                  hover:text-zinc-900 dark:hover:text-white
                   active:scale-95 transition-all
                   disabled:opacity-50 disabled:cursor-not-allowed
+                  border border-zinc-300 dark:border-zinc-600
                 "
                 onClick={toggleFullscreen}
                 aria-label={isFullscreen ? 'Contraer' : 'Expandir a pantalla completa'}
-                title={isFullscreen ? 'Contraer' : 'Expandir a pantalla completa'}
+                title={isFullscreen ? 'Contraer ventana' : 'Expandir a pantalla completa'}
                 disabled={loading}
               >
                 {isFullscreen ? (
-                  <Minimize2 size={18} strokeWidth={2} />
+                  <Minimize2 size={20} strokeWidth={2.5} />
                 ) : (
-                  <Maximize2 size={18} strokeWidth={2} />
+                  <Maximize2 size={20} strokeWidth={2.5} />
                 )}
               </button>
 
