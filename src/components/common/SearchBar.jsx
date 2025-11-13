@@ -21,7 +21,11 @@ function SearchBar({
   onViewModeChange,
   viewModes = ['grid', 'list']
 }) {
-  const handleClear = () => {
+  const handleClear = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     onChange('');
   };
 
@@ -37,7 +41,12 @@ function SearchBar({
         <input
           type="text"
           name="search-bar-unique"
-          autoComplete="off"
+          autoComplete="new-password"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
+          data-form-type="other"
+          data-lpignore="true"
           value={value}
           onChange={(e) => {
             e.stopPropagation();
@@ -45,6 +54,7 @@ function SearchBar({
           }}
           onInput={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
+          onFocus={(e) => e.stopPropagation()}
           placeholder={placeholder}
           className="input w-full pl-10 pr-10"
         />
@@ -71,7 +81,12 @@ function SearchBar({
       <input
         type="text"
         name="search-bar-unique-inline"
-        autoComplete="off"
+        autoComplete="new-password"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck="false"
+        data-form-type="other"
+        data-lpignore="true"
         value={value}
         onChange={(e) => {
           e.stopPropagation();
@@ -79,6 +94,7 @@ function SearchBar({
         }}
         onInput={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
+        onFocus={(e) => e.stopPropagation()}
         placeholder={placeholder}
         style={{
           flex: 1,
@@ -112,7 +128,11 @@ function SearchBar({
         {viewModes.includes('table') && (
           <button
             className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
-            onClick={() => onViewModeChange('table')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onViewModeChange('table');
+            }}
             title="Vista de tabla"
           >
             <Table size={18} />
@@ -121,7 +141,11 @@ function SearchBar({
         {viewModes.includes('grid') && (
           <button
             className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-            onClick={() => onViewModeChange('grid')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onViewModeChange('grid');
+            }}
             title="Vista de cuadrícula"
           >
             <Grid size={18} />
@@ -130,7 +154,11 @@ function SearchBar({
         {viewModes.includes('list') && (
           <button
             className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-            onClick={() => onViewModeChange('list')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onViewModeChange('list');
+            }}
             title="Vista de lista"
           >
             <List size={18} />

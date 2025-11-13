@@ -57,8 +57,15 @@ function StudentCard({
   if (viewMode === 'list') {
     return (
       <div
-        className="flex md:flex-row flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.15)] hover:-translate-y-1 hover:border-zinc-400 dark:hover:border-zinc-700 min-h-[100px] cursor-pointer animate-fade-in"
+        className="flex md:flex-row flex-col rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-1 min-h-[100px] cursor-pointer animate-fade-in"
         onClick={() => onView && onView(student)}
+        style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          border: '1px solid var(--color-border)',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)'}
+        onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'}
       >
         {/* Avatar Header - Horizontal in list view */}
         <div className="md:w-[100px] w-full md:h-auto h-[100px] md:min-h-[100px] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center flex-shrink-0">
@@ -139,8 +146,15 @@ function StudentCard({
   // Grid view: vertical layout (default)
   return (
     <div
-      className="flex flex-col bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.15)] hover:-translate-y-1 hover:border-zinc-400 dark:hover:border-zinc-700 h-full cursor-pointer animate-fade-in"
+      className="flex flex-col rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-1 h-full cursor-pointer animate-fade-in"
       onClick={() => onView && onView(student)}
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        border: '1px solid var(--color-border)',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)'}
+      onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)'}
     >
       {/* Avatar Header */}
       <div className="w-full h-[140px] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center flex-shrink-0">

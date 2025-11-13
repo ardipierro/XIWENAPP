@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { LiveKitRoom, VideoConference, RoomAudioRenderer, useToken } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { generateLiveKitToken, LIVEKIT_URL, joinLiveClass, leaveLiveClass, startLiveClass, endLiveClass } from '../firebase/liveClasses';
+import { addParticipantToSession, removeParticipantFromSession, endClassSession } from '../firebase/classSessions';
 import { PhoneOff, Users, Clock, ArrowLeft } from 'lucide-react';
 import { BaseButton } from './common';
 
@@ -21,6 +22,9 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
   const [isTeacher, setIsTeacher] = useState(false);
+
+  // Detectar si es una sesión del nuevo sistema (class_sessions) o del antiguo (live_classes)
+  const isClassSession = !!liveClass.meetSessionId || liveClass.status === 'live';
 
   useEffect(() => {
     const initialize = async () => {
@@ -45,12 +49,24 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
 
         setToken(jwtToken);
 
-        // Registrar participante en Firebase
-        await joinLiveClass(liveClass.id, user.uid, user.displayName || user.email);
+        // Registrar participante en Firebase según el sistema
+        if (isClassSession) {
+          // Nuevo sistema: class_sessions
+          await addParticipantToSession(liveClass.id, {
+            userId: user.uid,
+            userName: user.displayName || user.email,
+            role: userRole,
+            isTeacher: teacherCheck,
+            joinedAt: new Date()
+          });
+        } else {
+          // Sistema antiguo: live_classes
+          await joinLiveClass(liveClass.id, user.uid, user.displayName || user.email);
 
-        // Si es el profesor y la clase está programada, iniciarla
-        if (teacherCheck && liveClass.status === 'scheduled') {
-          await startLiveClass(liveClass.id);
+          // Si es el profesor y la clase está programada, iniciarla
+          if (teacherCheck && liveClass.status === 'scheduled') {
+            await startLiveClass(liveClass.id);
+          }
         }
 
         setIsConnected(true);
@@ -65,19 +81,36 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
     // Cleanup al desmontar
     return () => {
       if (user && liveClass) {
-        leaveLiveClass(liveClass.id, user.uid).catch(logger.error);
+        if (isClassSession) {
+          // Nuevo sistema
+          removeParticipantFromSession(liveClass.id, user.uid).catch(logger.error);
+        } else {
+          // Sistema antiguo
+          leaveLiveClass(liveClass.id, user.uid).catch(logger.error);
+        }
       }
     };
-  }, [liveClass, user, userRole]);
+  }, [liveClass, user, userRole, isClassSession]);
 
   const handleLeave = async () => {
     try {
-      // Remover participante de Firebase
-      await leaveLiveClass(liveClass.id, user.uid);
+      // Remover participante de Firebase según el sistema
+      if (isClassSession) {
+        // Nuevo sistema
+        await removeParticipantFromSession(liveClass.id, user.uid);
 
-      // Si es el profesor, finalizar la clase
-      if (isTeacher) {
-        await endLiveClass(liveClass.id);
+        // Si es el profesor, finalizar la clase
+        if (isTeacher) {
+          await endClassSession(liveClass.id);
+        }
+      } else {
+        // Sistema antiguo
+        await leaveLiveClass(liveClass.id, user.uid);
+
+        // Si es el profesor, finalizar la clase
+        if (isTeacher) {
+          await endLiveClass(liveClass.id);
+        }
       }
 
       onLeave();

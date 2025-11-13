@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Target, BookOpen, Trash2, Plus, Check, AlertTriangle, Settings, Clock } from 'lucide-react'
 import HistoryModal from './HistoryModal'
 import { loadStudents } from '../firebase/firestore'
+import logger from '../utils/logger'
+import { BaseButton, BaseInput, BaseSelect, BaseTextarea } from './common'
 
 function SetupScreen({
   students,
@@ -31,6 +33,8 @@ function SetupScreen({
   const [newCategoryQuestions, setNewCategoryQuestions] = useState('')
   const [availableStudents, setAvailableStudents] = useState([])
   const [selectedStudentId, setSelectedStudentId] = useState('')
+  const [loadingStudents, setLoadingStudents] = useState(true)
+  const [errorStudents, setErrorStudents] = useState(null)
 
   // Cargar alumnos al montar el componente
   useEffect(() => {
@@ -39,8 +43,19 @@ function SetupScreen({
 
   // Función para cargar alumnos desde Firebase
   const loadAvailableStudents = async () => {
-    const studentsList = await loadStudents()
-    setAvailableStudents(studentsList.filter(s => s.active !== false))
+    try {
+      setLoadingStudents(true)
+      setErrorStudents(null)
+      const studentsList = await loadStudents()
+      const activeStudents = studentsList.filter(s => s.active !== false)
+      setAvailableStudents(activeStudents)
+      logger.info('Students loaded successfully:', activeStudents.length)
+    } catch (err) {
+      logger.error('Error loading students:', err)
+      setErrorStudents('Error al cargar la lista de alumnos. Por favor, recarga la página.')
+    } finally {
+      setLoadingStudents(false)
+    }
   }
 
   // Función para agregar alumno seleccionado a la partida
@@ -149,18 +164,18 @@ function SetupScreen({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-8">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto p-4 md:p-8">
       <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-8">
         <div className="flex items-center justify-between mb-8">
           {onBack && (
-            <button
+            <BaseButton
+              variant="secondary"
               onClick={onBack}
-              className="px-4 py-2 bg-gray-50 dark:bg-gray-9000 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
             >
               ← Volver
-            </button>
+            </BaseButton>
           )}
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white dark:text-gray-100 flex-1 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex-1 text-center">
             Juego de Preguntas por Turnos
           </h1>
           {onBack && <div className="w-24"></div>}
@@ -169,7 +184,7 @@ function SetupScreen({
         {/* ============================================ */}
         {/* SECCIÓN: SELECCIÓN DE ALUMNOS (NUEVO) */}
         {/* ============================================ */}
-        <div className="mb-8 p-6 bg-gray-100 dark:bg-gray-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 dark:border-gray-700">
+        <div className="mb-8 p-6 bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-gray-300 dark:border-gray-600">
           <div className="mb-4">
             <h2 className="text-xl md:text-2xl font-semibold flex items-center text-gray-800 dark:text-gray-200">
               <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,29 +194,32 @@ function SetupScreen({
             </h2>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Seleccionar alumno para agregar a la partida:
-            </label>
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-lg mb-4">
             <div className="flex gap-2">
-              <select
+              <BaseSelect
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-              >
-                <option value="">-- Selecciona un alumno --</option>
-                {availableStudents.map(student => (
-                  <option key={student.id} value={student.id}>
-                    {student.name} {student.grade ? `(${student.grade}${student.section || ''})` : ''}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={addSelectedStudent}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center gap-2"
-              >
-                <Plus size={18} strokeWidth={2} className="inline-icon" /> Agregar
-              </button>
+                options={[
+                  { value: '', label: '-- Selecciona un alumno --' },
+                  ...availableStudents.map(student => ({
+                    value: student.id,
+                    label: `${student.name}${student.grade ? ` (${student.grade}${student.section || ''})` : ''}`
+                  }))
+                ]}
+                label="Seleccionar alumno para agregar a la partida"
+                disabled={loadingStudents}
+                error={errorStudents}
+              />
+              <div className="flex items-end">
+                <BaseButton
+                  variant="success"
+                  onClick={addSelectedStudent}
+                  icon={Plus}
+                  disabled={loadingStudents || !selectedStudentId}
+                >
+                  Agregar
+                </BaseButton>
+              </div>
             </div>
             
             {availableStudents.length === 0 && (
@@ -212,28 +230,30 @@ function SetupScreen({
           </div>
 
           {/* Lista de alumnos seleccionados */}
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+          <div className="bg-white dark:bg-gray-900 p-4 rounded-lg">
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               Alumnos en esta partida ({students.length}):
             </h3>
             {students.length > 0 ? (
               <div className="space-y-2">
                 {students.map((student, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                    <span className="font-medium text-gray-800">{student}</span>
-                    <button
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="font-medium text-gray-800 dark:text-gray-200">{student}</span>
+                    <BaseButton
+                      variant="danger"
+                      size="sm"
+                      icon={Trash2}
                       onClick={() => removeStudent(index)}
-                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm flex items-center gap-1"
                       disabled={students.length <= 1}
                       title={students.length <= 1 ? "Debe haber al menos 1 alumno" : "Quitar alumno"}
                     >
-                      <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Quitar
-                    </button>
+                      Quitar
+                    </BaseButton>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-4">
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                 No hay alumnos seleccionados para esta partida
               </p>
             )}
@@ -243,15 +263,15 @@ function SetupScreen({
         {/* ============================================ */}
         {/* SECCIÓN: PREGUNTAS POR TEMA */}
         {/* ============================================ */}
-        <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
+        <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl md:text-2xl font-semibold flex items-center">
-              <svg className="w-6 h-6 mr-2 text-gray-700 dark:text-gray-300 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h2 className="text-xl md:text-2xl font-semibold flex items-center text-gray-800 dark:text-gray-200">
+              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               Preguntas por Tema
             </h2>
-            <label className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-50 dark:bg-gray-9000 cursor-pointer transition-colors text-sm md:text-base">
+            <label className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 cursor-pointer transition-colors text-sm md:text-base">
               Importar archivos .txt
               <input
                 type="file"
@@ -264,121 +284,115 @@ function SetupScreen({
 
           {Object.keys(questionsByCategory).length > 0 && (
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Selecciona qué preguntas usar:
-              </label>
-              <select
+              <BaseSelect
                 value={selectedCategory}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
-              >
-                <option value="all">
-                  Mezclar TODAS ({Object.keys(questionsByCategory).length} temas)
-                </option>
-                {Object.keys(questionsByCategory).map(category => (
-                  <option key={category} value={category}>
-                    {category} ({parseQuestions(questionsByCategory[category]).length} preguntas)
-                  </option>
-                ))}
-              </select>
+                options={[
+                  { value: 'all', label: `Mezclar TODAS (${Object.keys(questionsByCategory).length} temas)` },
+                  ...Object.keys(questionsByCategory).map(category => ({
+                    value: category,
+                    label: `${category} (${parseQuestions(questionsByCategory[category]).length} preguntas)`
+                  }))
+                ]}
+                label="Selecciona qué preguntas usar"
+              />
             </div>
           )}
 
           {Object.entries(questionsByCategory).map(([categoryName, categoryQuestions]) => (
-            <details key={categoryName} className="mb-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200">
-              <summary className="cursor-pointer p-4 font-semibold hover:bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center gap-2">
+            <details key={categoryName} className="mb-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+              <summary className="cursor-pointer p-4 font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
                 <BookOpen size={18} strokeWidth={2} className="inline-icon" /> {categoryName} ({parseQuestions(categoryQuestions).length} preguntas)
               </summary>
-              <div className="p-4 border-t border-gray-200">
-                <textarea
+              <div className="p-4 border-t border-gray-200 dark:border-gray-600">
+                <BaseTextarea
                   value={categoryQuestions}
                   onChange={(e) => updateCategory(categoryName, e.target.value)}
                   rows={10}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm mb-3"
+                  className="font-mono text-sm mb-3"
                 />
-                <button
+                <BaseButton
+                  variant="danger"
+                  icon={Trash2}
                   onClick={() => deleteCategory(categoryName)}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
                 >
-                  <Trash2 size={18} strokeWidth={2} className="inline-icon" /> Eliminar tema
-                </button>
+                  Eliminar tema
+                </BaseButton>
               </div>
             </details>
           ))}
 
-          <details className="mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-gray-300 dark:border-gray-600 dark:border-gray-700">
-            <summary className="cursor-pointer p-4 font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
+          <details className="mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-gray-300 dark:border-gray-600">
+            <summary className="cursor-pointer p-4 font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg flex items-center gap-2">
               <Plus size={18} strokeWidth={2} className="inline-icon" /> Agregar nuevo tema
             </summary>
-            <div className="p-4 border-t border-gray-300 dark:border-gray-600 dark:border-gray-700">
-              <input
+            <div className="p-4 border-t border-gray-300 dark:border-gray-600">
+              <BaseInput
                 type="text"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="Nombre del tema (ej: Matemáticas)"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3"
+                label="Nombre del tema"
               />
-              <textarea
+              <BaseTextarea
                 value={newCategoryQuestions}
                 onChange={(e) => setNewCategoryQuestions(e.target.value)}
                 placeholder="Pega aquí las preguntas del nuevo tema..."
                 rows={10}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm mb-3"
+                className="font-mono text-sm mb-3"
+                label="Preguntas"
               />
-              <button
+              <BaseButton
+                variant="success"
+                icon={Check}
                 onClick={addNewCategory}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
               >
-                <Check size={18} strokeWidth={2} className="inline-icon" /> Guardar tema
-              </button>
+                Guardar tema
+              </BaseButton>
             </div>
           </details>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">O escribe/pega tus preguntas manualmente:</p>
-          <textarea
+          <BaseTextarea
             value={questions}
             onChange={(e) => setQuestions(e.target.value)}
             placeholder="Ingresa tus preguntas aquí..."
             rows={12}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm"
+            className="font-mono text-sm"
+            label="O escribe/pega tus preguntas manualmente"
           />
         </div>
 
         {/* ============================================ */}
         {/* SECCIÓN: CONFIGURACIÓN */}
         {/* ============================================ */}
-        <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
-          <h2 className="text-xl md:text-2xl font-semibold mb-4 flex items-center gap-2">
+        <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl">
+          <h2 className="text-xl md:text-2xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-200">
             <Settings size={24} strokeWidth={2} className="inline-icon" /> Configuración
           </h2>
-          
+
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Modo de juego:
-            </label>
-            <select
+            <BaseSelect
               value={gameMode}
               onChange={(e) => setGameMode(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
-            >
-              <option value="classic">Clásico (solo puntos positivos)</option>
-              <option value="penalty">Con Penalización (-1 por error)</option>
-            </select>
+              options={[
+                { value: 'classic', label: 'Clásico (solo puntos positivos)' },
+                { value: 'penalty', label: 'Con Penalización (-1 por error)' }
+              ]}
+              label="Modo de juego"
+            />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Repetición de preguntas:
-            </label>
-            <select
+            <BaseSelect
               value={repeatMode}
               onChange={(e) => setRepeatMode(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
-            >
-              <option value="shuffle">Reinserción aleatoria (pregunta incorrecta vuelve al mazo)</option>
-              <option value="repeat">Repetir hasta correcta (no avanza hasta responder bien)</option>
-              <option value="none">Sin repetición (una sola vez cada pregunta)</option>
-            </select>
+              options={[
+                { value: 'shuffle', label: 'Reinserción aleatoria (pregunta incorrecta vuelve al mazo)' },
+                { value: 'repeat', label: 'Repetir hasta correcta (no avanza hasta responder bien)' },
+                { value: 'none', label: 'Sin repetición (una sola vez cada pregunta)' }
+              ]}
+              label="Repetición de preguntas"
+            />
           </div>
 
           <div className="mb-4">
@@ -387,9 +401,9 @@ function SetupScreen({
                 type="checkbox"
                 checked={unlimitedTime}
                 onChange={(e) => setUnlimitedTime(e.target.checked)}
-                className="mr-3 w-5 h-5 text-gray-600 dark:text-gray-400 dark:text-gray-500 rounded focus:ring-2 focus:ring-gray-500"
+                className="mr-3 w-5 h-5 text-gray-600 dark:text-gray-400 rounded focus:ring-2 focus:ring-gray-500"
               />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:text-gray-300 flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <Clock size={18} strokeWidth={2} className="inline-icon" /> Tiempo ilimitado por pregunta
               </span>
             </label>
@@ -415,20 +429,25 @@ function SetupScreen({
         {/* ============================================ */}
         {/* BOTONES DE ACCIÓN */}
         {/* ============================================ */}
-        <button
+        <BaseButton
           onClick={startGame}
-          className="w-full py-4 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold text-xl mb-3 transition-colors"
+          variant="success"
+          size="xl"
+          fullWidth
+          className="mb-3"
         >
           Iniciar Juego
-        </button>
+        </BaseButton>
 
         {gameHistory.length > 0 && (
-          <button
+          <BaseButton
             onClick={() => setShowHistory(!showHistory)}
-            className="w-full py-3 bg-gray-50 dark:bg-gray-9000 text-white rounded-lg hover:bg-gray-600 font-semibold transition-colors"
+            variant="secondary"
+            size="lg"
+            fullWidth
           >
             {showHistory ? 'Ocultar Historial' : `Ver Historial (${gameHistory.length} partidas)`}
-          </button>
+          </BaseButton>
         )}
       </div>
 

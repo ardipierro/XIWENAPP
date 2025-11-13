@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import logger from '../utils/logger';
 import { useSubmission } from '../hooks/useAssignments';
 import { CheckCircle, XCircle, Clock, User, Calendar, FileText, Send } from 'lucide-react';
-import { Button, Modal, BaseLoading, Alert, Badge } from './common';
+import { BaseButton, BaseModal, BaseLoading, BaseAlert, BaseBadge } from './common';
 
 export default function GradingInterface({ assignment, teacherId, onClose }) {
   const { submissions, grade: gradeSubmission, loading } = useSubmission(assignment.id);
@@ -62,16 +62,16 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
 
   if (loading) {
     return (
-      <Modal isOpen={true} onClose={onClose} title="Cargando...">
+      <BaseModal isOpen={true} onClose={onClose} title="Cargando...">
         <div className="flex items-center justify-center h-64">
           <BaseLoading variant="spinner" size="lg" />
         </div>
-      </Modal>
+      </BaseModal>
     );
   }
 
   return (
-    <Modal
+    <BaseModal
       isOpen={true}
       onClose={onClose}
       title={`Calificar: ${assignment.title}`}
@@ -80,25 +80,25 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
       <div className="mb-4">
         <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
           <span>{submissions.length} entregas</span>
-          <Badge variant="warning">
+          <BaseBadge variant="warning">
             {pendingSubmissions.length} pendientes
-          </Badge>
-          <Badge variant="success">
+          </BaseBadge>
+          <BaseBadge variant="success">
             {gradedSubmissions.length} calificadas
-          </Badge>
+          </BaseBadge>
         </div>
       </div>
 
       {error && (
-        <Alert variant="danger" onClose={() => setError(null)} className="mb-4">
+        <BaseAlert variant="danger" onClose={() => setError(null)} className="mb-4">
           {error}
-        </Alert>
+        </BaseAlert>
       )}
 
       {success && (
-        <Alert variant="success" onClose={() => setSuccess(null)} className="mb-4">
+        <BaseAlert variant="success" onClose={() => setSuccess(null)} className="mb-4">
           {success}
-        </Alert>
+        </BaseAlert>
       )}
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -175,7 +175,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                   Entregada: {selectedSubmission.submittedAt?.toDate().toLocaleString('es-ES')}
                 </div>
                 {selectedSubmission.isLate && (
-                  <Badge variant="danger">Tardía</Badge>
+                  <BaseBadge variant="danger">Tardía</BaseBadge>
                 )}
               </div>
             </div>
@@ -225,7 +225,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                   />
                 </div>
 
-                <Button
+                <BaseButton
                   variant="primary"
                   onClick={handleGrade}
                   disabled={isGrading || !gradeValue}
@@ -234,13 +234,13 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                 >
                   <Send size={18} strokeWidth={2} />
                   {isGrading ? 'Guardando...' : 'Guardar Calificación'}
-                </Button>
+                </BaseButton>
               </div>
             )}
 
             {/* Already Graded */}
             {selectedSubmission.status === 'graded' && (
-              <Alert variant="success">
+              <BaseAlert variant="success">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle size={20} strokeWidth={2} />
                   <p className="font-medium">
@@ -257,7 +257,7 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
                     </p>
                   </div>
                 )}
-              </Alert>
+              </BaseAlert>
             )}
           </div>
         ) : (
@@ -268,6 +268,6 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
           </div>
         )}
       </div>
-    </Modal>
+    </BaseModal>
   );
 }

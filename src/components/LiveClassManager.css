@@ -221,14 +221,51 @@
   color: var(--color-text-secondary);
 }
 
+.card-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f0f9ff;
+  color: #0369a1;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.link-badge:hover {
+  background: #0369a1;
+  color: white;
+}
+
+.dark .link-badge {
+  background: #075985;
+  color: #bae6fd;
+}
+
+.dark .link-badge:hover {
+  background: #0284c7;
+  color: white;
+}
+
 .card-actions {
   display: flex;
   gap: 8px;
   margin-top: auto;
+  flex-wrap: wrap;
 }
 
 .card-actions .btn {
   flex: 1;
+  min-width: 120px;
 }
 
 /* Empty State */

@@ -1,6 +1,13 @@
 /**
  * @fileoverview Barra superior del dashboard con navegación y menú de usuario
  * @module components/TopBar
+ *
+ * Mobile First:
+ * - Altura 48px (móvil) → 64px (desktop)
+ * - Touch targets mínimo 48px
+ * - 100% Tailwind CSS
+ * - Dark mode completo
+ * - Safe areas para iOS
  */
 
 import { useState, useEffect } from 'react';
@@ -14,7 +21,7 @@ import AIAssistantModal from './AIAssistantModal.jsx';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
 import { isAdminEmail } from '../firebase/roleConfig.js';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.js';
-import './TopBar.css';
+import logger from '../utils/logger.js';
 
 /**
  * Barra superior del dashboard
@@ -48,8 +55,12 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
 
   const loadUserAvatar = async () => {
     if (user?.uid) {
-      const avatar = await getUserAvatar(user.uid);
-      setUserAvatar(avatar);
+      try {
+        const avatar = await getUserAvatar(user.uid);
+        setUserAvatar(avatar);
+      } catch (err) {
+        logger.error('TopBar: Error loading avatar', err);
+      }
     }
   };
 
@@ -79,10 +90,15 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
   // Manejar cambio de avatar
   const handleAvatarChange = async (avatarId) => {
     if (user?.uid) {
-      const success = await updateUserAvatar(user.uid, avatarId);
-      if (success) {
-        setUserAvatar(avatarId);
-        setShowAvatarSelector(false);
+      try {
+        const success = await updateUserAvatar(user.uid, avatarId);
+        if (success) {
+          setUserAvatar(avatarId);
+          setShowAvatarSelector(false);
+          logger.info('TopBar: Avatar updated successfully', { avatarId });
+        }
+      } catch (err) {
+        logger.error('TopBar: Error updating avatar', err);
       }
     }
   };
@@ -95,119 +111,218 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
 
 
   return (
-    <div className="topbar">
-      <div className="topbar-content">
-        {/* Sección Izquierda: Menú Hamburguesa + Logo */}
-        <div className="topbar-left">
-          <button
-            className="sidebar-toggle"
-            onClick={onToggleSidebar}
-            aria-label="Toggle sidebar"
-          >
-            <span className="hamburger">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-          </button>
-
-          <div className="topbar-brand" onClick={() => handleNavigate('/')}>
-            <span className="brand-title">XIWEN</span>
-          </div>
-        </div>
-
-        {/* Sección Derecha: Theme Switcher + AI Assistant + Admin Panel + Notificaciones + Mensajes + Avatar */}
-        <div className="topbar-right">
-          {/* Theme Switcher */}
-          <ThemeSwitcher />
-
-          {/* AI Assistant Button */}
-          <button
-            className="icon-button ai-assistant-button"
-            onClick={() => setShowAIModal(true)}
-            aria-label="Asistente IA"
-            title="Asistente IA"
-          >
-            <Lightbulb size={20} strokeWidth={2} className="text-yellow-500" />
-          </button>
-
-          {/* Admin Panel Button (solo para admins) */}
-          {isAdmin && (
+    <>
+      {/* TopBar - Mobile First: 48px (móvil) → 56px (md) → 64px (lg) */}
+      <header
+        className="fixed top-0 left-0 right-0 z-50
+                   h-12 md:h-14 lg:h-16
+                   bg-white dark:bg-zinc-900
+                   border-b border-zinc-200 dark:border-zinc-800
+                   pt-safe
+                   transition-all duration-300"
+      >
+        <div className="flex items-center justify-between h-full px-3 md:px-5">
+          {/* Sección Izquierda: Menú Hamburguesa + Logo */}
+          <div className="flex items-center gap-3 md:gap-4">
+            {/* Hamburger Button */}
             <button
-              className={`icon-button admin-panel-button ${location.pathname.startsWith('/admin') ? 'active' : ''}`}
-              onClick={() => handleNavigate('/admin')}
-              aria-label="Panel de Administración"
-              title="Panel de Administración"
+              onClick={onToggleSidebar}
+              className="flex flex-col justify-between
+                         w-5 h-3.5 p-0
+                         bg-transparent border-none cursor-pointer
+                         hover:opacity-70 transition-opacity"
+              aria-label="Toggle sidebar"
+              aria-expanded={sidebarOpen}
             >
-              <Shield size={20} strokeWidth={2} />
-            </button>
-          )}
-
-          {/* Notificaciones */}
-          <button className="icon-button" aria-label="Notificaciones">
-            <Bell size={20} strokeWidth={2} />
-            {notificationCount > 0 && (
-              <span className="badge">{notificationCount}</span>
-            )}
-          </button>
-
-          {/* Mensajes */}
-          <button
-            className="icon-button"
-            aria-label="Mensajes"
-            onClick={() => onMenuAction?.('messages')}
-            title="Mensajes"
-          >
-            <MessageCircle size={20} strokeWidth={2} />
-            {messageCount > 0 && (
-              <span className="badge">{messageCount}</span>
-            )}
-          </button>
-
-          {/* Separador */}
-          <div className="topbar-divider"></div>
-
-          {/* Avatar + User Menu */}
-          <div className="user-section">
-            <button
-              className="user-button"
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              aria-label="Menú de usuario"
-            >
-              <div className="user-avatar">
-                {userAvatar && userAvatar.startsWith('http') ? (
-                  <img src={userAvatar} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                ) : (
-                  (() => {
-                    const AvatarIcon = AVATARS[userAvatar]?.icon || AVATARS.default.icon;
-                    return <AvatarIcon size={20} strokeWidth={2} className="avatar-icon-display" />;
-                  })()
-                )}
-              </div>
-              <div className="user-info">
-                <span className="user-name">{getDisplayName()}</span>
-              </div>
+              <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
+              <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
+              <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
             </button>
 
-            {/* User Dropdown Menu */}
-            {showUserMenu && (
-              <UserMenu
-                user={user}
-                userRole={userRole}
-                onClose={() => setShowUserMenu(false)}
-                onChangeAvatar={() => {
-                  setShowUserMenu(false);
-                  setShowAvatarSelector(true);
-                }}
-                onViewProfile={() => {
-                  setShowUserMenu(false);
-                  setShowProfilePanel(true);
-                }}
-              />
+            {/* Logo - Oculto en móvil */}
+            <button
+              onClick={() => handleNavigate('/')}
+              className="hidden md:flex items-center gap-2
+                         text-lg font-bold text-zinc-900 dark:text-white
+                         tracking-wide cursor-pointer select-none
+                         hover:opacity-80 transition-opacity"
+              aria-label="Ir al inicio"
+            >
+              XIWEN
+            </button>
+          </div>
+
+          {/* Sección Derecha: Acciones + Avatar */}
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Theme Switcher */}
+            <ThemeSwitcher />
+
+            {/* AI Assistant Button */}
+            <button
+              onClick={() => setShowAIModal(true)}
+              className="relative flex items-center justify-center
+                         w-9 h-9 p-2
+                         bg-transparent border-none cursor-pointer
+                         rounded-md
+                         hover:bg-zinc-100 dark:hover:bg-zinc-800
+                         transition-colors"
+              aria-label="Asistente IA"
+              title="Asistente IA"
+            >
+              <Lightbulb size={20} strokeWidth={2} className="text-amber-500" />
+            </button>
+
+            {/* Admin Panel Button - Solo admins */}
+            {isAdmin && (
+              <button
+                onClick={() => handleNavigate('/admin')}
+                className={`relative flex items-center justify-center
+                           w-9 h-9 p-2
+                           border-none cursor-pointer rounded-md
+                           transition-colors
+                           ${location.pathname.startsWith('/admin')
+                             ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700'
+                             : 'bg-transparent text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                           }`}
+                aria-label="Panel de Administración"
+                title="Panel de Administración"
+              >
+                <Shield size={20} strokeWidth={2} />
+              </button>
             )}
+
+            {/* Notificaciones */}
+            <button
+              className="relative flex items-center justify-center
+                         w-9 h-9 p-2
+                         bg-transparent border-none cursor-pointer
+                         rounded-md text-zinc-900 dark:text-white
+                         hover:bg-zinc-100 dark:hover:bg-zinc-800
+                         transition-colors"
+              aria-label="Notificaciones"
+            >
+              <Bell size={20} strokeWidth={2} />
+              {notificationCount > 0 && (
+                <span
+                  className="absolute top-1 right-1
+                             min-w-[18px] h-[18px] px-1.5
+                             flex items-center justify-center
+                             bg-red-500 text-white
+                             text-[10px] font-bold leading-none
+                             rounded-full"
+                  aria-label={`${notificationCount} notificaciones`}
+                >
+                  {notificationCount}
+                </span>
+              )}
+            </button>
+
+            {/* Mensajes */}
+            <button
+              onClick={() => onMenuAction?.('messages')}
+              className="relative flex items-center justify-center
+                         w-9 h-9 p-2
+                         bg-transparent border-none cursor-pointer
+                         rounded-md text-zinc-900 dark:text-white
+                         hover:bg-zinc-100 dark:hover:bg-zinc-800
+                         transition-colors"
+              aria-label="Mensajes"
+              title="Mensajes"
+            >
+              <MessageCircle size={20} strokeWidth={2} />
+              {messageCount > 0 && (
+                <span
+                  className="absolute top-1 right-1
+                             min-w-[18px] h-[18px] px-1.5
+                             flex items-center justify-center
+                             bg-red-500 text-white
+                             text-[10px] font-bold leading-none
+                             rounded-full"
+                  aria-label={`${messageCount} mensajes sin leer`}
+                >
+                  {messageCount}
+                </span>
+              )}
+            </button>
+
+            {/* Divider - Oculto en móvil */}
+            <div
+              className="hidden md:block
+                         w-px h-8 mx-2
+                         bg-zinc-200 dark:bg-zinc-700"
+              aria-hidden="true"
+            />
+
+            {/* User Section */}
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-3
+                           p-2 md:px-3 md:pr-3
+                           bg-transparent border-none cursor-pointer
+                           rounded-lg text-zinc-900 dark:text-white
+                           hover:bg-zinc-100 dark:hover:bg-zinc-800
+                           transition-colors"
+                aria-label="Menú de usuario"
+                aria-expanded={showUserMenu}
+              >
+                {/* Avatar */}
+                <div
+                  className="relative flex items-center justify-center
+                             w-8 h-8 flex-shrink-0
+                             rounded-full"
+                >
+                  {userAvatar && userAvatar.startsWith('http') ? (
+                    <img
+                      src={userAvatar}
+                      alt="Avatar"
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    (() => {
+                      const AvatarIcon = AVATARS[userAvatar]?.icon || AVATARS.default.icon;
+                      return (
+                        <AvatarIcon
+                          size={20}
+                          strokeWidth={2}
+                          className="text-zinc-900 dark:text-white"
+                        />
+                      );
+                    })()
+                  )}
+                </div>
+
+                {/* User Name - Oculto en móvil */}
+                <span
+                  className="hidden md:block
+                             text-sm font-semibold
+                             text-zinc-900 dark:text-white
+                             max-w-[150px] truncate"
+                >
+                  {getDisplayName()}
+                </span>
+              </button>
+
+              {/* User Dropdown Menu */}
+              {showUserMenu && (
+                <UserMenu
+                  user={user}
+                  userRole={userRole}
+                  onClose={() => setShowUserMenu(false)}
+                  onChangeAvatar={() => {
+                    setShowUserMenu(false);
+                    setShowAvatarSelector(true);
+                  }}
+                  onViewProfile={() => {
+                    setShowUserMenu(false);
+                    setShowProfilePanel(true);
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Avatar Selector Modal */}
       {showAvatarSelector && (
@@ -233,7 +348,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
         isOpen={showAIModal}
         onClose={() => setShowAIModal(false)}
       />
-    </div>
+    </>
   );
 }
 

@@ -1,7 +1,10 @@
 import logger from '../utils/logger';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { Excalidraw } from '@excalidraw/excalidraw';
+import { useState, useCallback, useEffect, useRef, Suspense, lazy } from 'react';
+// Lazy load Excalidraw to avoid circular dependency issues
+const Excalidraw = lazy(() =>
+  import('@excalidraw/excalidraw').then(module => ({ default: module.Excalidraw }))
+);
 import '@excalidraw/excalidraw/index.css';
 import { X, Save } from 'lucide-react';
 import { saveExcalidrawContent } from '../firebase/excalidraw';
@@ -143,24 +146,37 @@ function ExcalidrawWhiteboard({ onBack, initialSession }) {
         </div>
       </div>
 
-      {/* Contenedor de Excalidraw */}
+      {/* Contenedor de Excalidraw con Suspense para lazy loading */}
       <div className="excalidraw-content">
-        <Excalidraw
-          excalidrawAPI={(api) => setExcalidrawAPI(api)}
-          initialData={{
-            elements: typeof initialSession?.elements === 'string'
-              ? JSON.parse(initialSession.elements)
-              : (initialSession?.elements || []),
-            appState: typeof initialSession?.appState === 'string'
-              ? JSON.parse(initialSession.appState)
-              : (initialSession?.appState || {}),
-            files: typeof initialSession?.files === 'string'
-              ? JSON.parse(initialSession.files)
-              : (initialSession?.files || {}),
-          }}
-          onChange={handleChange}
-          theme="light"
-        />
+        <Suspense fallback={
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            fontSize: '18px',
+            color: 'var(--text-secondary)'
+          }}>
+            Cargando pizarra...
+          </div>
+        }>
+          <Excalidraw
+            excalidrawAPI={(api) => setExcalidrawAPI(api)}
+            initialData={{
+              elements: typeof initialSession?.elements === 'string'
+                ? JSON.parse(initialSession.elements)
+                : (initialSession?.elements || []),
+              appState: typeof initialSession?.appState === 'string'
+                ? JSON.parse(initialSession.appState)
+                : (initialSession?.appState || {}),
+              files: typeof initialSession?.files === 'string'
+                ? JSON.parse(initialSession.files)
+                : (initialSession?.files || {}),
+            }}
+            onChange={handleChange}
+            theme="light"
+          />
+        </Suspense>
       </div>
     </div>
   );

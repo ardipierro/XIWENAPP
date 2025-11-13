@@ -58,24 +58,29 @@ function BaseModal({
     // Overlay con backdrop blur
     <div
       className={`
-        fixed inset-0 z-[9999] flex items-center justify-center p-4
+        fixed inset-0 flex items-center justify-center p-4
         bg-black/50 dark:bg-black/70 backdrop-blur-sm
         animate-in fade-in duration-200
         ${isDanger ? 'bg-red-500/10' : ''}
       `}
+      style={{ zIndex: 'var(--z-modal-backdrop)' }}
       onClick={handleOverlayClick}
     >
       {/* Modal box */}
       <div
         className={`
           relative w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
-          bg-white dark:bg-gray-800
-          rounded-xl border border-gray-200 dark:border-gray-700
+          bg-white dark:bg-primary-900
+          rounded-xl
           flex flex-col
           animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
           ${loading ? 'pointer-events-none opacity-70' : ''}
           ${className}
         `}
+        style={{
+          zIndex: 'var(--z-modal)',
+          border: '1px solid var(--color-border)'
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Loading spinner overlay */}
@@ -87,7 +92,10 @@ function BaseModal({
 
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 dark:border-gray-700 shrink-0">
+          <div
+            className="flex items-center justify-between px-6 py-5 shrink-0"
+            style={{ borderBottom: '1px solid var(--color-border)' }}
+          >
             <div className="flex items-center gap-3 flex-1">
               {/* Icon */}
               {Icon && (
@@ -129,13 +137,19 @@ function BaseModal({
         )}
 
         {/* Body - scrollable */}
-        <div className="flex-1 px-6 py-6 overflow-y-auto text-gray-900 dark:text-white">
+        <div
+          className="flex-1 px-6 py-6 overflow-y-auto"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-5 border-t border-gray-200 dark:border-gray-700 shrink-0">
+          <div
+            className="flex items-center justify-end gap-3 px-6 py-5 shrink-0"
+            style={{ borderTop: '1px solid var(--color-border)' }}
+          >
             {footer}
           </div>
         )}

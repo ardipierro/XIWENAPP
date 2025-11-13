@@ -4,27 +4,41 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { getStudentGameHistory, getStudentProfile, ensureStudentProfile, getStudentEnrollments } from '../firebase/firestore';
-import { getInstancesForStudent } from '../firebase/classInstances';
-// REMOVED: getStudentAvailableLiveClasses - using unified class sessions now
-import { getAssignedWhiteboards, subscribeToLiveWhiteboards } from '../firebase/whiteboard';
-import { Gamepad2, Target, BookOpen, ClipboardList, ScrollText, Calendar, Clock, CreditCard, Video, Presentation, AlertTriangle, Trophy, CalendarDays, DollarSign, MessageCircle } from 'lucide-react';
+import {
+  Gamepad2,
+  Target,
+  BookOpen,
+  ScrollText,
+  Calendar,
+  Clock,
+  CreditCard,
+  Presentation,
+  AlertTriangle,
+  Sparkles,
+  Upload
+} from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import MyCourses from './student/MyCourses';
-import MyAssignments from './student/MyAssignments';
 import CourseViewer from './student/CourseViewer';
 import ContentPlayer from './student/ContentPlayer';
 import StudentClassView from './StudentClassView';
-// REMOVED: LiveClassRoom - using unified ClassSessionRoom now
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
-import StudentAssignmentsView from './StudentAssignmentsView';
+import QuickHomeworkCorrection from './QuickHomeworkCorrection';
 import GamificationPanel from './GamificationPanel';
 import UnifiedCalendar from './UnifiedCalendar';
 import MessagesPanel from './MessagesPanel';
 import StudentFeesPanel from './StudentFeesPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
+import LiveClassCard from './LiveClassCard';
+import NotificationCenter from './NotificationCenter';
+import ClassCountdownBanner from './ClassCountdownBanner';
+import { useStudentDashboard } from '../hooks/useStudentDashboard';
+import AIAssistantWidget from './AIAssistantWidget';
+import useRealtimeClassStatus from '../hooks/useRealtimeClassStatus';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 // Base Components
 import {
@@ -37,7 +51,64 @@ import {
 
 function StudentDashboard({ user, userRole, student: studentProp, onLogout, onStartGame }) {
   const navigate = useNavigate();
-  const [student, setStudent] = useState(studentProp);
+
+  // Use custom hook for dashboard data
+  const {
+    student,
+    gameHistory,
+    enrolledCourses,
+    upcomingClasses,
+    liveWhiteboards,
+    loading,
+    stats,
+    points,
+    level,
+    pointsToNextLevel,
+    progressPercentage
+  } = useStudentDashboard(user, studentProp);
+
+  // View state
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [selectedCourseData, setSelectedCourseData] = useState(null);
+  const [selectedContentId, setSelectedContentId] = useState(null);
+  const [selectedExerciseId, setSelectedExerciseId] = useState(null);
+  const [selectedWhiteboardSession, setSelectedWhiteboardSession] = useState(null);
+  const [selectedLiveClass, setSelectedLiveClass] = useState(null);
+
+  // Live classes state
+  const [liveClassSessions, setLiveClassSessions] = useState([]);
+
+  // Upcoming classes hook (countdown banner)
+  const { upcomingSessions, shouldShowCountdown } = useRealtimeClassStatus(
+    user?.uid,
+    'student',
+    { minutesAhead: 10, includeScheduled: true }
+  );
+
+  // Listener para clases en vivo asignadas al estudiante
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const q = query(
+      collection(db, 'class_sessions'),
+      where('status', '==', 'live'),
+      where('assignedStudents', 'array-contains', user.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const sessions = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setLiveClassSessions(sessions);
+      logger.debug('🔴 Clases en vivo actualizadas:', sessions.length);
+    }, (error) => {
+      logger.error('❌ Error listening to live class sessions:', error);
+    });
+
+    return () => unsubscribe();
+  }, [user?.uid]);
 
   // Helper to format relative time
   const formatRelativeTime = (timestamp) => {
@@ -54,123 +125,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     const diffDays = Math.floor(diffHours / 24);
     return `hace ${diffDays}d`;
   };
-  const [gameHistory, setGameHistory] = useState([]);
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [upcomingClasses, setUpcomingClasses] = useState([]);
-  // REMOVED: liveClasses state - using unified class sessions now
-  const [liveWhiteboards, setLiveWhiteboards] = useState([]);
-  const [selectedLiveClass, setSelectedLiveClass] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'courses', 'assignments', 'assignmentsView', 'gamification', 'calendar', 'messages', 'payments', 'classes', 'classSessions', 'classSessionRoom', 'whiteboardSessions', 'whiteboard', 'courseView', 'contentPlayer'
-  const [selectedCourseId, setSelectedCourseId] = useState(null);
-  const [selectedCourseData, setSelectedCourseData] = useState(null);
-  const [selectedContentId, setSelectedContentId] = useState(null);
-  const [selectedExerciseId, setSelectedExerciseId] = useState(null);
-  const [selectedWhiteboardSession, setSelectedWhiteboardSession] = useState(null);
-  const [stats, setStats] = useState({
-    totalGames: 0,
-    averageScore: 0,
-    bestScore: 0,
-    totalCorrect: 0,
-    totalQuestions: 0
-  });
 
-  // Cargar perfil del estudiante al montar el componente
-  useEffect(() => {
-    const loadProfile = async () => {
-      setLoading(true);
-      const startTime = performance.now();
-
-      if (!studentProp && user) {
-        logger.debug('Cargando perfil de estudiante para:', user.uid);
-        const profile = await ensureStudentProfile(user.uid);
-
-        if (profile) {
-          logger.debug('Perfil de estudiante cargado/creado:', profile);
-          setStudent(profile);
-
-          // Cargar datos en paralelo
-          const dataStart = performance.now();
-          const [history, enrollments, instances] = await Promise.all([
-            getStudentGameHistory(profile.id),
-            getStudentEnrollments(profile.id),
-            getInstancesForStudent(profile.id, 10)
-          ]);
-
-          logger.debug(`⏱️ [StudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
-
-          setGameHistory(history);
-          calculateStats(history);
-          setEnrolledCourses(enrollments);
-
-          const now = new Date();
-          const futureInstances = instances.filter(inst => {
-            const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
-            return instanceDate >= now;
-          });
-          setUpcomingClasses(futureInstances.slice(0, 1));
-        } else {
-          logger.warn('No se pudo cargar ni crear perfil de estudiante para:', user.uid);
-        }
-      } else if (studentProp) {
-        setStudent(studentProp);
-
-        // Cargar datos en paralelo
-        const dataStart = performance.now();
-        const [history, enrollments, instances] = await Promise.all([
-          getStudentGameHistory(studentProp.id),
-          getStudentEnrollments(studentProp.id),
-          getInstancesForStudent(studentProp.id, 10)
-        ]);
-
-        logger.debug(`⏱️ [StudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
-
-        setGameHistory(history);
-        calculateStats(history);
-        setEnrolledCourses(enrollments);
-
-        const now = new Date();
-        const futureInstances = instances.filter(inst => {
-          const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
-          return instanceDate >= now;
-        });
-        setUpcomingClasses(futureInstances.slice(0, 1));
-      }
-
-      logger.debug(`⏱️ [StudentDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
-      setLoading(false);
-    };
-
-    loadProfile();
-  }, []);
-
-  const calculateStats = (history) => {
-    if (!history || history.length === 0) {
-      setStats({
-        totalGames: 0,
-        averageScore: 0,
-        bestScore: 0,
-        totalCorrect: 0,
-        totalQuestions: 0
-      });
-      return;
-    }
-
-    const totalGames = history.length;
-    const totalCorrect = history.reduce((sum, game) => sum + (game.correctAnswers || 0), 0);
-    const totalQuestions = history.reduce((sum, game) => sum + (game.totalQuestions || 0), 0);
-    const averageScore = Math.round(history.reduce((sum, game) => sum + (game.percentage || 0), 0) / totalGames) || 0;
-    const bestScore = Math.max(...history.map(game => game.percentage || 0)) || 0;
-
-    setStats({
-      totalGames,
-      averageScore: isNaN(averageScore) ? 0 : averageScore,
-      bestScore: isNaN(bestScore) ? 0 : bestScore,
-      totalCorrect,
-      totalQuestions
-    });
-  };
-
+  // Navigation handlers
   const handleBackToLogin = async () => {
     try {
       await signOut(auth);
@@ -209,7 +165,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   };
 
   const handlePlayExercise = (exerciseId) => {
-    // TODO: Implementar - abrir ExercisePlayer
+    setSelectedExerciseId(exerciseId);
     logger.debug('Jugar ejercicio:', exerciseId);
     alert('Funcionalidad de ejercicios próximamente');
   };
@@ -220,47 +176,21 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   };
 
   const handleContentComplete = () => {
-    // Recargar datos del curso para actualizar progreso
     logger.debug('Contenido completado');
   };
 
-  const handleViewMyAssignments = () => {
-    setCurrentView('assignments');
-  };
-
-  const handleBackToAssignments = () => {
-    setCurrentView('assignments');
-    setSelectedContentId(null);
-    setSelectedExerciseId(null);
-  };
-
-  const handlePlayAssignmentContent = (contentId) => {
-    setSelectedContentId(contentId);
-    setSelectedCourseId(null); // No course context for direct assignments
-    setCurrentView('contentPlayer');
-  };
-
-  const handlePlayAssignmentExercise = (exerciseId) => {
-    // TODO: Implementar - abrir ExercisePlayer
-    setSelectedExerciseId(exerciseId);
-    logger.debug('Jugar ejercicio asignado:', exerciseId);
-    alert('Funcionalidad de ejercicios próximamente');
-  };
 
   const handleMenuAction = (action) => {
-    // Mapear las acciones del menú lateral a las vistas del dashboard
     const actionMap = {
       'dashboard': 'dashboard',
       'courses': 'courses',
-      'assignments': 'assignments',
-      'assignmentsView': 'assignmentsView',
+      'quickCorrection': 'quickCorrection',
       'gamification': 'gamification',
       'calendar': 'calendar',
       'messages': 'messages',
       'payments': 'payments',
       'classes': 'classes',
-      'classSessions': 'classSessions', // Unified Class Sessions (LiveKit + Whiteboards)
-      // REMOVED: 'liveClasses' - using unified classSessions now
+      'classSessions': 'classSessions',
       'whiteboardSessions': 'whiteboardSessions'
     };
 
@@ -275,8 +205,6 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     }
   };
 
-  // REMOVED: handleJoinLiveClass and handleLeaveLiveClass - using unified class sessions now
-
   const handleOpenWhiteboard = () => {
     setSelectedWhiteboardSession(null);
     setCurrentView('whiteboard');
@@ -284,7 +212,6 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
   const handleLoadWhiteboardSession = (session) => {
     logger.debug('📋 [StudentDashboard] Loading whiteboard session:', session);
-    logger.debug('📋 [StudentDashboard] Session slides:', session?.slides);
     setSelectedWhiteboardSession(session);
     setCurrentView('whiteboard');
   };
@@ -304,25 +231,12 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     setCurrentView('whiteboard');
   };
 
-  // REMOVED: loadLiveClasses useEffect - using unified class sessions now
+  const handleJoinLiveClass = (session) => {
+    logger.debug('🔴 [StudentDashboard] Joining live class:', session);
+    navigate(`/class-session/${session.id}`);
+  };
 
-  // Subscribe to live whiteboards assigned to this student
-  useEffect(() => {
-    if (!student?.id) return;
-
-    logger.debug('🟢 [StudentDashboard] Subscribing to live whiteboards for student:', student.id);
-    const unsubscribe = subscribeToLiveWhiteboards(student.id, (whiteboards) => {
-      logger.debug('🟢 [StudentDashboard] Live whiteboards updated:', whiteboards);
-      setLiveWhiteboards(whiteboards);
-    });
-
-    return () => {
-      logger.debug('🟡 [StudentDashboard] Unsubscribing from live whiteboards');
-      unsubscribe();
-    };
-  }, [student?.id]);
-
-  // Mostrar loading mientras se carga el perfil
+  // Loading state
   if (loading) {
     return (
       <BaseLoading
@@ -332,24 +246,24 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     );
   }
 
-  // Solo mostrar error si terminó de cargar Y no hay perfil
+  // Error state - no student profile
   if (!student || !student.id) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="flex items-center justify-center min-h-screen p-4" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
         <div className="max-w-md w-full">
           <BaseCard className="text-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                <AlertTriangle size={32} className="text-red-600 dark:text-red-400" />
+              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-danger-light)' }}>
+                <AlertTriangle size={32} style={{ color: 'var(--color-danger)' }} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
                   Error de Configuración
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-2">
+                <p className="mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                   No se pudo cargar tu perfil de estudiante.
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-500">
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   Contacta al administrador si el problema persiste.
                 </p>
               </div>
@@ -367,16 +281,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     );
   }
 
-  // Calcular valores de progreso
-  const points = student.profile?.totalPoints || 0;
-  const level = student.profile?.level || 1;
-  const pointsInLevel = points % 100;
-  const pointsToNextLevel = 100 - pointsInLevel;
-  const progressPercentage = pointsInLevel;
-
-  // Render Collaborative Whiteboard (TEST - Remove later)
-
-  // Render Whiteboard view (when viewing/editing a whiteboard)
+  // Render Whiteboard view
   if (currentView === 'whiteboard') {
     const isCollaborative = selectedWhiteboardSession?.isCollaborative || false;
     const collaborativeSessionId = selectedWhiteboardSession?.collaborativeSessionId || null;
@@ -395,14 +300,12 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   if (currentView === 'whiteboardSessions') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <WhiteboardManager
-              onOpenWhiteboard={handleOpenWhiteboard}
-              onLoadSession={handleLoadWhiteboardSession}
-              onBack={handleBackToDashboard}
-            />
-          </div>
+        <div className="p-4 md:p-6">
+          <WhiteboardManager
+            onOpenWhiteboard={handleOpenWhiteboard}
+            onLoadSession={handleLoadWhiteboardSession}
+            onBack={handleBackToDashboard}
+          />
         </div>
       </DashboardLayout>
     );
@@ -412,49 +315,29 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   if (currentView === 'courses') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <MyCourses user={user} onSelectCourse={handleSelectCourse} />
-          </div>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <MyCourses user={user} onSelectCourse={handleSelectCourse} />
         </div>
       </DashboardLayout>
     );
   }
 
-  // Render MyAssignments view
-  if (currentView === 'assignments') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <MyAssignments
-              user={user}
-              onPlayContent={handlePlayAssignmentContent}
-              onPlayExercise={handlePlayAssignmentExercise}
-            />
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
 
-  // Render StudentAssignmentsView (new component from parallel-work)
-  if (currentView === 'assignmentsView') {
+  // Render Quick Homework Correction
+  if (currentView === 'quickCorrection') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <StudentAssignmentsView studentId={student?.id} />
-          </div>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <QuickHomeworkCorrection
+            studentId={student?.id}
+            studentName={student?.name || user?.displayName}
+          />
         </div>
       </DashboardLayout>
     );
@@ -464,13 +347,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   if (currentView === 'gamification') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <GamificationPanel userId={student?.id} />
-          </div>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <GamificationPanel userId={student?.id} />
         </div>
       </DashboardLayout>
     );
@@ -480,20 +361,18 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   if (currentView === 'calendar') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <UnifiedCalendar
-              userId={user?.uid}
-              userRole="student"
-              onJoinSession={(session) => {
-                setSelectedLiveClass(session);
-                setCurrentView('classSessionRoom');
-              }}
-            />
-          </div>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <UnifiedCalendar
+            userId={user?.uid}
+            userRole="student"
+            onJoinSession={(session) => {
+              setSelectedLiveClass(session);
+              setCurrentView('classSessionRoom');
+            }}
+          />
         </div>
       </DashboardLayout>
     );
@@ -503,13 +382,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   if (currentView === 'messages') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <MessagesPanel user={user} />
-          </div>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <MessagesPanel user={user} />
         </div>
       </DashboardLayout>
     );
@@ -519,43 +396,37 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
   if (currentView === 'payments') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <StudentFeesPanel user={user} />
-          </div>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <StudentFeesPanel user={user} />
         </div>
       </DashboardLayout>
     );
   }
 
-  // REMOVED: Old LiveClassRoom view - Replaced by unified ClassSessionRoom
-
-  // Render Class Session Manager (Sistema Unificado) - WITH Layout
+  // Render Class Session Manager
   if (currentView === 'classSessions') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <ClassSessionManager
-              user={user}
-              onJoinSession={(session) => {
-                setSelectedLiveClass(session);
-                setCurrentView('classSessionRoom');
-              }}
-            />
-          </div>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <ClassSessionManager
+            user={user}
+            onJoinSession={(session) => {
+              setSelectedLiveClass(session);
+              setCurrentView('classSessionRoom');
+            }}
+          />
         </div>
       </DashboardLayout>
     );
   }
 
-  // Render Class Session Room (Sala unificada) - NO Layout (fullscreen)
+  // Render Class Session Room (fullscreen)
   if (currentView === 'classSessionRoom' && selectedLiveClass) {
     return (
       <ClassSessionRoom
@@ -570,38 +441,32 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     );
   }
 
-  // Render Classes view (traditional scheduled classes only)
+  // Render Classes view
   if (currentView === 'classes') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <div className="dashboard-content">
-            <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-              ← Volver a Inicio
-            </BaseButton>
-            <StudentClassView student={student} />
-          </div>
+        <div className="p-4 md:p-6">
+          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
+            ← Volver a Inicio
+          </BaseButton>
+          <StudentClassView student={student} />
         </div>
       </DashboardLayout>
     );
   }
 
-  // REMOVED: Old 'liveClasses' view - Replaced by unified ClassSessionManager
-
   // Render CourseViewer view
   if (currentView === 'courseView' && selectedCourseId) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="student-dashboard">
-          <CourseViewer
-            user={user}
-            courseId={selectedCourseId}
-            courseData={selectedCourseData}
-            onBack={handleBackToCourses}
-            onPlayContent={handlePlayContent}
-            onPlayExercise={handlePlayExercise}
-          />
-        </div>
+        <CourseViewer
+          user={user}
+          courseId={selectedCourseId}
+          courseData={selectedCourseData}
+          onBack={handleBackToCourses}
+          onPlayContent={handlePlayContent}
+          onPlayExercise={handlePlayExercise}
+        />
       </DashboardLayout>
     );
   }
@@ -613,8 +478,8 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
         <ContentPlayer
           user={user}
           contentId={selectedContentId}
-          courseId={selectedCourseId} // May be null for direct assignments
-          onBack={selectedCourseId ? handleBackToCourseViewer : handleBackToAssignments}
+          courseId={selectedCourseId}
+          onBack={selectedCourseId ? handleBackToCourseViewer : handleBackToDashboard}
           onComplete={handleContentComplete}
         />
       </DashboardLayout>
@@ -623,327 +488,378 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
 
   // Main Dashboard view
   return (
-    <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-      <div className="student-dashboard">
-        <div className="dashboard-content">
-          {/* Live Whiteboards - Priority Section */}
-          {liveWhiteboards.length > 0 && (
-            <div className="live-whiteboards-section card" style={{
-              background: '#10b981',
-              color: 'white',
-              border: 'none'
-            }}>
-              <div className="section-header">
-                <h3 className="section-title flex items-center gap-2" style={{ color: 'white' }}>
-                  <Presentation size={20} strokeWidth={2} />
-                  Pizarras en Vivo
-                </h3>
-                <div className="live-indicator" style={{ background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: '12px' }}>
-                  <span className="live-dot" style={{ background: 'white' }}></span>
-                  <span className="live-text" style={{ color: 'white' }}>EN VIVO</span>
-                </div>
-              </div>
-              <div className="live-whiteboards-list" style={{ marginTop: '16px' }}>
-                {liveWhiteboards.map((whiteboard) => (
-                  <div key={whiteboard.id} className="live-whiteboard-card" style={{
-                    background: 'rgba(255,255,255,0.15)',
-                    backdropFilter: 'blur(10px)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    marginBottom: '12px',
-                    border: '1px solid rgba(255,255,255,0.2)'
-                  }}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-lg" style={{ color: 'white', marginBottom: '8px' }}>
-                          {whiteboard.title}
-                        </h4>
-                        <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                          <Clock size={14} />
-                          <span>Iniciada {formatRelativeTime(whiteboard.liveStartedAt)}</span>
-                        </div>
-                      </div>
-                      <BaseButton
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleJoinLiveWhiteboard(whiteboard)}
-                        className="bg-white dark:bg-gray-800 text-green-600 hover:bg-green-50 border-none font-semibold"
-                      >
-                        Unirse →
-                      </BaseButton>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+    <>
+      <DashboardLayout
+        user={user}
+        userRole={userRole}
+        onLogout={onLogout}
+        onMenuAction={handleMenuAction}
+        headerContent={<NotificationCenter userId={user?.uid} showToasts={true} />}
+      >
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        {/* Live Classes - TOP PRIORITY */}
+        {liveClassSessions.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              🔴 Clases en Vivo Ahora
+            </h2>
+            {liveClassSessions.map((session) => (
+              <LiveClassCard
+                key={session.id}
+                session={session}
+                onJoin={handleJoinLiveClass}
+              />
+            ))}
+          </div>
+        )}
 
-          {/* Próxima Clase - Quick Access */}
-          <div className="upcoming-classes-section card">
-            <div className="section-header">
-              <h3 className="section-title flex items-center gap-2">
-                <Calendar size={20} strokeWidth={2} />
-                Próxima Clase
+        {/* Live Whiteboards - Priority Section */}
+        {liveWhiteboards.length > 0 && (
+          <div className="text-white rounded-xl p-4 md:p-6 shadow-lg" style={{ backgroundColor: 'var(--color-success)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg md:text-xl font-bold flex items-center gap-2">
+                <Presentation size={20} strokeWidth={2} />
+                Pizarras en Vivo
               </h3>
-              {upcomingClasses.length > 0 && (
-                <BaseButton variant="ghost" size="sm" onClick={() => setCurrentView('classes')}>
-                  Ver todas →
-                </BaseButton>
-              )}
+              <div className="bg-white/20 px-3 py-1 rounded-full flex items-center gap-2">
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                <span className="text-xs md:text-sm font-semibold">EN VIVO</span>
+              </div>
             </div>
-            {upcomingClasses.length > 0 ? (
-              <div className="classes-preview">
-                {upcomingClasses.map((instance) => {
-                  const instanceDate = instance.date.toDate ? instance.date.toDate() : new Date(instance.date);
-                  const today = new Date();
-                  const tomorrow = new Date(today);
-                  tomorrow.setDate(tomorrow.getDate() + 1);
-
-                  const isToday = instanceDate.toDateString() === today.toDateString();
-                  const isTomorrow = instanceDate.toDateString() === tomorrow.toDateString();
-
-                  let dateLabel;
-                  if (isToday) {
-                    dateLabel = `Hoy, ${instance.startTime}`;
-                  } else if (isTomorrow) {
-                    dateLabel = `Mañana, ${instance.startTime}`;
-                  } else {
-                    dateLabel = instanceDate.toLocaleDateString('es-ES', {
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short'
-                    }) + ', ' + instance.startTime;
-                  }
-
-                  return (
-                    <div key={instance.id} className="class-preview-item">
-                      <div className="class-preview-header">
-                        <div className="class-preview-name">{instance.className}</div>
-                        <div className="class-preview-cost">
-                          <CreditCard size={14} strokeWidth={2} />
-                          {instance.creditCost}
-                        </div>
-                      </div>
-                      <div className="class-preview-datetime">
-                        <Clock size={14} strokeWidth={2} />
-                        <span>{dateLabel}</span>
+            <div className="space-y-3">
+              {liveWhiteboards.map((whiteboard) => (
+                <div
+                  key={whiteboard.id}
+                  className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20"
+                >
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-base md:text-lg mb-2">
+                        {whiteboard.title}
+                      </h4>
+                      <div className="flex items-center gap-2 text-xs md:text-sm text-white/90">
+                        <Clock size={14} />
+                        <span>Iniciada {formatRelativeTime(whiteboard.liveStartedAt)}</span>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="empty-classes-preview">
-                <p>No tienes clases programadas próximamente</p>
-                <BaseButton variant="outline" onClick={() => setCurrentView('classes')}>
-                  Ver calendario de clases
-                </BaseButton>
-              </div>
+                    <BaseButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleJoinLiveWhiteboard(whiteboard)}
+                      className="border-0 font-semibold w-full sm:w-auto"
+                      style={{
+                        backgroundColor: 'var(--color-bg-secondary)',
+                        color: 'var(--color-success)'
+                      }}
+                    >
+                      Unirse →
+                    </BaseButton>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Próxima Clase - Quick Access */}
+        <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg md:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+              <Calendar size={20} strokeWidth={2} />
+              Próxima Clase
+            </h3>
+            {upcomingClasses.length > 0 && (
+              <BaseButton variant="ghost" size="sm" onClick={() => setCurrentView('classes')}>
+                Ver todas →
+              </BaseButton>
             )}
           </div>
+          {upcomingClasses.length > 0 ? (
+            <div className="space-y-3">
+              {upcomingClasses.map((instance) => {
+                const instanceDate = instance.date.toDate ? instance.date.toDate() : new Date(instance.date);
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
 
-          {/* Progress Section */}
-          <div className="progress-section card">
-            <div className="progress-header">
-              <div className="progress-info">
-                <span className="progress-label">Puntos totales</span>
-                <span className="progress-value">{points} pts</span>
-              </div>
-              <div className="progress-next">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {pointsToNextLevel} pts para nivel {level + 1}
-                </span>
-              </div>
-            </div>
-            <div className="level-progress">
-              <div
-                className="level-progress-fill student-progress"
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </div>
-          </div>
+                const isToday = instanceDate.toDateString() === today.toDateString();
+                const isTomorrow = instanceDate.toDateString() === tomorrow.toDateString();
 
-          {/* Stats Grid */}
-          <div className="stats-grid">
-            <BaseCard
-              variant="elevated"
-              icon={Gamepad2}
-              className="stat-card"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                  {stats.totalGames}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Ejercicios completados
-                </div>
-              </div>
-            </BaseCard>
+                let dateLabel;
+                if (isToday) {
+                  dateLabel = `Hoy, ${instance.startTime}`;
+                } else if (isTomorrow) {
+                  dateLabel = `Mañana, ${instance.startTime}`;
+                } else {
+                  dateLabel = instanceDate.toLocaleDateString('es-ES', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short'
+                  }) + ', ' + instance.startTime;
+                }
 
-            <BaseCard
-              variant="elevated"
-              icon={Target}
-              className="stat-card"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                  {stats.averageScore}%
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Promedio
-                </div>
-              </div>
-            </BaseCard>
-
-            <BaseCard
-              variant="elevated"
-              icon={Target}
-              className="stat-card"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                  {stats.bestScore}%
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Mejor puntaje
-                </div>
-              </div>
-            </BaseCard>
-
-            <BaseCard
-              variant="elevated"
-              icon={Target}
-              className="stat-card"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                  {stats.totalCorrect}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Respuestas correctas
-                </div>
-              </div>
-            </BaseCard>
-          </div>
-
-          {/* Mis Cursos - Quick Access */}
-          <div className="courses-quick-access card">
-            <div className="section-header">
-              <h3 className="section-title flex items-center gap-2">
-                <BookOpen size={20} strokeWidth={2} />
-                Mis Cursos
-              </h3>
-              {enrolledCourses.length > 0 && (
-                <BaseButton variant="ghost" size="sm" onClick={handleViewMyCourses}>
-                  Ver todos →
-                </BaseButton>
-              )}
-            </div>
-            {enrolledCourses.length > 0 ? (
-              <div className="courses-preview">
-                {enrolledCourses.slice(0, 3).map((enrollment) => (
-                  <div key={enrollment.enrollmentId} className="course-preview-item">
-                    <div className="course-header">
-                      <div className="course-name">{enrollment.course.name}</div>
-                      {enrollment.course.level && (
-                        <BaseBadge variant="primary" size="sm">
-                          Nivel {enrollment.course.level}
-                        </BaseBadge>
-                      )}
-                    </div>
-                    <div className="course-progress-mini">
-                      <div className="progress-track">
-                        <div
-                          className="progress-fill"
-                          style={{ width: `${enrollment.progress?.percentComplete || 0}%` }}
-                        ></div>
+                return (
+                  <div
+                    key={instance.id}
+                    className="rounded-lg p-4"
+                    style={{ backgroundColor: 'var(--color-bg-tertiary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                        {instance.className}
                       </div>
-                      <span className="progress-text">{enrollment.progress?.percentComplete || 0}%</span>
-                    </div>
-                  </div>
-                ))}
-                {enrolledCourses.length > 3 && (
-                  <BaseButton variant="outline" onClick={handleViewMyCourses}>
-                    Ver todos mis cursos ({enrolledCourses.length})
-                  </BaseButton>
-                )}
-              </div>
-            ) : (
-              <div className="empty-courses">
-                <p>No tienes cursos asignados aún</p>
-                <BaseButton variant="primary" onClick={handleViewMyCourses}>
-                  Explorar Cursos
-                </BaseButton>
-              </div>
-            )}
-          </div>
-
-          {/* Asignado a Mí - Quick Access */}
-          <div className="assignments-quick-access card">
-            <div className="section-header">
-              <h3 className="section-title flex items-center gap-2">
-                <ClipboardList size={20} strokeWidth={2} />
-                Asignado a Mí
-              </h3>
-              <BaseButton variant="ghost" size="sm" onClick={handleViewMyAssignments}>
-                Ver todos →
-              </BaseButton>
-            </div>
-            <div className="assignments-info">
-              <p className="assignments-description">
-                Contenidos y ejercicios asignados directamente por tu profesor para práctica adicional
-              </p>
-              <BaseButton variant="primary" onClick={handleViewMyAssignments}>
-                Ver mis asignaciones
-              </BaseButton>
-            </div>
-          </div>
-
-          {/* Game History */}
-          {gameHistory.length > 0 ? (
-            <div className="history-section card">
-              <h3 className="section-title flex items-center gap-2">
-                <ScrollText size={20} strokeWidth={2} />
-                Historial Reciente
-              </h3>
-              <div className="history-list">
-                {gameHistory.slice(0, 5).map((game, index) => (
-                  <div key={index} className="history-item">
-                    <div className="history-main">
-                      <div className="history-category">{game.category}</div>
-                      <div className="history-date">
-                        {new Date(game.date).toLocaleDateString('es-AR')}
+                      <div className="flex items-center gap-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        <CreditCard size={14} strokeWidth={2} />
+                        {instance.creditCost}
                       </div>
                     </div>
-                    <div className="history-score">
-                      <span className="score-value">{game.score} pts</span>
-                      <span className="score-percentage">({game.percentage}%)</span>
-                    </div>
-                    <div className={`history-position position-${game.position}`}>
-                      #{game.position}
+                    <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      <Clock size={14} strokeWidth={2} />
+                      <span>{dateLabel}</span>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
           ) : (
-            <div className="card">
-              <BaseEmptyState
-                icon={Target}
-                title="¡Aún no has completado ejercicios!"
-                description="Comienza tu primer ejercicio y empieza a ganar puntos"
-                action={
-                  <BaseButton variant="primary" icon={Gamepad2} onClick={onStartGame}>
-                    Comenzar ejercicios
-                  </BaseButton>
-                }
-                size="md"
-              />
+            <div className="text-center py-8">
+              <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+                No tienes clases programadas próximamente
+              </p>
+              <BaseButton variant="outline" onClick={() => setCurrentView('classes')}>
+                Ver calendario de clases
+              </BaseButton>
             </div>
           )}
         </div>
+
+        {/* Progress Section */}
+        <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Puntos totales</span>
+              <div className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                {points} pts
+              </div>
+            </div>
+            <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {pointsToNextLevel} pts para nivel {level + 1}
+            </div>
+          </div>
+          <div className="w-full rounded-full h-3" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+            <div
+              className="h-3 rounded-full transition-all duration-300"
+              style={{ backgroundColor: 'var(--color-success)', width: `${progressPercentage}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <BaseCard variant="elevated" icon={Gamepad2}>
+            <div className="flex flex-col items-center text-center">
+              <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                {stats.totalGames}
+              </div>
+              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                Ejercicios completados
+              </div>
+            </div>
+          </BaseCard>
+
+          <BaseCard variant="elevated" icon={Target}>
+            <div className="flex flex-col items-center text-center">
+              <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                {stats.averageScore}%
+              </div>
+              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                Promedio
+              </div>
+            </div>
+          </BaseCard>
+
+          <BaseCard variant="elevated" icon={Target}>
+            <div className="flex flex-col items-center text-center">
+              <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                {stats.bestScore}%
+              </div>
+              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                Mejor puntaje
+              </div>
+            </div>
+          </BaseCard>
+
+          <BaseCard variant="elevated" icon={Target}>
+            <div className="flex flex-col items-center text-center">
+              <div className="text-3xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                {stats.totalCorrect}
+              </div>
+              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                Respuestas correctas
+              </div>
+            </div>
+          </BaseCard>
+        </div>
+
+        {/* Quick Homework Correction - Featured Card */}
+        <div className="rounded-xl p-6 md:p-8 bg-gradient-to-br from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20" style={{ borderWidth: '2px', borderStyle: 'solid', borderColor: 'var(--color-primary)' }}>
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+              <Upload className="text-primary-600 dark:text-primary-400" size={32} strokeWidth={2} />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl md:text-2xl font-bold mb-3 text-gray-900 dark:text-white">
+                Enviar Tareas
+              </h3>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                Subí fotos de tus tareas. <strong>Asegurate de sacar la foto desde arriba (perpendicular a la hoja)</strong> para que no se vea deformada o distorsionada. Usá <strong>buena iluminación y sin sombras</strong> para que el texto se lea claramente.
+              </p>
+              <BaseButton
+                variant="primary"
+                size="lg"
+                icon={Upload}
+                onClick={() => handleMenuAction('quickCorrection')}
+                className="shadow-lg"
+              >
+                Enviar Tareas
+              </BaseButton>
+            </div>
+          </div>
+        </div>
+
+        {/* Mis Cursos - Quick Access */}
+        <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg md:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+              <BookOpen size={20} strokeWidth={2} />
+              Mis Cursos
+            </h3>
+            {enrolledCourses.length > 0 && (
+              <BaseButton variant="ghost" size="sm" onClick={handleViewMyCourses}>
+                Ver todos →
+              </BaseButton>
+            )}
+          </div>
+          {enrolledCourses.length > 0 ? (
+            <div className="space-y-3">
+              {enrolledCourses.slice(0, 3).map((enrollment) => (
+                <div
+                  key={enrollment.enrollmentId}
+                  className="rounded-lg p-4"
+                  style={{ backgroundColor: 'var(--color-bg-tertiary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+                >
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
+                    <div className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                      {enrollment.course.name}
+                    </div>
+                    {enrollment.course.level && (
+                      <BaseBadge variant="primary" size="sm">
+                        Nivel {enrollment.course.level}
+                      </BaseBadge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 rounded-full h-2" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                      <div
+                        className="h-2 rounded-full transition-all duration-300"
+                        style={{ backgroundColor: 'var(--color-success)', width: `${enrollment.progress?.percentComplete || 0}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                      {enrollment.progress?.percentComplete || 0}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {enrolledCourses.length > 3 && (
+                <BaseButton variant="outline" onClick={handleViewMyCourses} fullWidth>
+                  Ver todos mis cursos ({enrolledCourses.length})
+                </BaseButton>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+                No tienes cursos asignados aún
+              </p>
+              <BaseButton variant="primary" onClick={handleViewMyCourses}>
+                Explorar Cursos
+              </BaseButton>
+            </div>
+          )}
+        </div>
+
+
+        {/* Game History */}
+        {gameHistory.length > 0 ? (
+          <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
+            <h3 className="text-lg md:text-xl font-bold flex items-center gap-2 mb-4" style={{ color: 'var(--color-text-primary)' }}>
+              <ScrollText size={20} strokeWidth={2} />
+              Historial Reciente
+            </h3>
+            <div className="space-y-2">
+              {gameHistory.slice(0, 5).map((game, index) => (
+                <div
+                  key={index}
+                  className="rounded-lg p-4"
+                  style={{ backgroundColor: 'var(--color-bg-tertiary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}
+                >
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                        {game.category}
+                      </div>
+                      <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        {new Date(game.date).toLocaleDateString('es-AR')}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                          {game.score} pts
+                        </span>
+                        <span className="text-sm ml-1" style={{ color: 'var(--color-text-secondary)' }}>
+                          ({game.percentage}%)
+                        </span>
+                      </div>
+                      <div className="px-2 py-1 rounded text-sm font-medium" style={{ backgroundColor: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}>
+                        #{game.position}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
+            <BaseEmptyState
+              icon={Target}
+              title="¡Aún no has completado ejercicios!"
+              description="Comienza tu primer ejercicio y empieza a ganar puntos"
+              action={
+                <BaseButton variant="primary" icon={Gamepad2} onClick={onStartGame}>
+                  Comenzar ejercicios
+                </BaseButton>
+              }
+              size="md"
+            />
+          </div>
+        )}
       </div>
+
+      {/* AI Assistant Widget */}
+      <AIAssistantWidget />
     </DashboardLayout>
+
+      {/* Countdown Banner para clase próxima */}
+      {upcomingSessions.length > 0 && shouldShowCountdown(upcomingSessions[0], 10) && (
+        <ClassCountdownBanner
+          session={upcomingSessions[0]}
+          onJoin={handleJoinLiveClass}
+        />
+      )}
+    </>
   );
 }
 

@@ -153,6 +153,60 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "assignments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teacherId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "class_sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "assignedStudents",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scheduledStart",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "homework_reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teacherReviewed",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

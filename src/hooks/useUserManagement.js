@@ -30,10 +30,14 @@ export function useUserManagement(currentUser, permissions = {}) {
       let loadedUsers;
       if (permissions.canViewAll) {
         // Admin: ver todos
+        logger.debug('🔍 Loading ALL users (admin mode)');
         loadedUsers = await getAllUsers({ activeOnly: true });
+        logger.debug(`📋 Found ${loadedUsers.length} users from getAllUsers:`, loadedUsers.map(u => ({ id: u.id, email: u.email, role: u.role, active: u.active })));
       } else {
         // Teacher: solo estudiantes
+        logger.debug('🔍 Loading STUDENTS only (teacher mode)');
         loadedUsers = await getAllUsers({ role: 'student', activeOnly: true });
+        logger.debug(`📋 Found ${loadedUsers.length} students from getAllUsers`);
       }
 
       // Cargar créditos para cada usuario en paralelo
@@ -54,6 +58,7 @@ export function useUserManagement(currentUser, permissions = {}) {
 
       setUsers(usersWithCredits);
       logger.debug(`✅ Loaded ${usersWithCredits.length} users with credits`);
+      logger.debug('👥 Final users list:', usersWithCredits.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role })));
       return usersWithCredits;
     } catch (error) {
       logger.error('❌ Error loading users:', error);

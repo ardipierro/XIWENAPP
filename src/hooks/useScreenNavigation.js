@@ -13,6 +13,7 @@ export function useScreenNavigation() {
   const [selectedExcalidrawSession, setSelectedExcalidrawSession] = useState(null);
   const [selectedLiveClass, setSelectedLiveClass] = useState(null);
   const [liveGameSessionId, setLiveGameSessionId] = useState(null);
+  const [editSessionId, setEditSessionId] = useState(null); // For editing session from calendar
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserProfile, setSelectedUserProfile] = useState(null);
 
@@ -66,12 +67,15 @@ export function useScreenNavigation() {
     'setup': 'setup', // Game Setup (GameContainer)
     'assignments': 'assignments', // Assignment Manager (Teacher)
     'grading': 'grading', // Grading Interface (Teacher)
+    'homeworkReview': 'homeworkReview', // Homework Review Panel (Teacher/Admin)
     'calendar': 'calendar', // Unified Calendar (Teacher/Student)
     'assignmentsView': 'assignmentsView', // Student Assignments View
+    'quickCorrection': 'quickCorrection', // Quick Homework Correction (Student)
     'gamification': 'gamification', // Gamification Panel (Student)
     'messages': 'messages', // Messages Panel (Teacher/Student)
     'payments': 'payments', // Payments Panel (Admin)
     'aiConfig': 'aiConfig', // AI Configuration (Admin)
+    'imageProviders': 'imageProviders', // Image Providers Configuration (Admin)
     'settings': 'settings', // Settings (Admin)
     'themeBuilder': 'themeBuilder', // Theme Builder (Admin/Teacher)
     'exerciseBuilder': 'exerciseBuilder', // Exercise Builder (Admin/Teacher)
@@ -209,6 +213,7 @@ export function useScreenNavigation() {
     selectedExcalidrawSession,
     selectedLiveClass,
     liveGameSessionId,
+    editSessionId,
     showUserProfile,
     selectedUserProfile,
 
@@ -246,6 +251,7 @@ export function useScreenNavigation() {
     setSelectedExcalidrawSession,
     setSelectedLiveClass,
     setLiveGameSessionId,
+    setEditSessionId,
     setShowUserProfile,
     setSelectedUserProfile,
     setOpenCourseModal,

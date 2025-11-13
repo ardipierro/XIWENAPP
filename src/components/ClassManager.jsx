@@ -16,6 +16,8 @@ import {
   unassignGroupFromClass,
   assignStudentToClass,
   unassignStudentFromClass,
+  assignContentToClass,
+  unassignContentFromClass,
   getDayName
 } from '../firebase/classes';
 import {
@@ -28,9 +30,11 @@ import { getAllGroups } from '../firebase/groups';
 import { getAllUsers } from '../firebase/firestore';
 import { isAdminEmail } from '../firebase/roleConfig';
 import { uploadImage, deleteImage } from '../firebase/storage';
+import { getAllContent } from '../firebase/content';
 import ConfirmModal from './ConfirmModal';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
+import BaseButton from './common/BaseButton';
 import './ClassManager.css';
 
 /**
@@ -42,6 +46,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
+  const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(openCreateModal);
   const [editingClass, setEditingClass] = useState(null);
@@ -105,20 +110,22 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
     try {
       const startTime = performance.now();
 
-      const [classesData, groupsData, usersData, instancesData] = await Promise.all([
+      const [classesData, groupsData, usersData, instancesData, contentsData] = await Promise.all([
         isAdmin ? getAllClasses() : getClassesByTeacher(user.uid),
         getAllGroups(),
         getAllUsers(),
-        getUpcomingInstances(100)
+        getUpcomingInstances(100),
+        getAllContent()
       ]);
 
       logger.debug(`⏱️ [ClassManager] Queries paralelas: ${(performance.now() - startTime).toFixed(0)}ms`);
-      logger.debug(`⏱️ [ClassManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${classesData.length} clases, ${instancesData.length} instancias`);
+      logger.debug(`⏱️ [ClassManager] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms - ${classesData.length} clases, ${instancesData.length} instancias, ${contentsData.length} contenidos`);
 
       setClasses(classesData);
       setGroups(groupsData);
       setStudents(usersData.filter(u => ['student', 'trial'].includes(u.role)));
       setInstances(instancesData);
+      setContents(contentsData);
     } catch (error) {
       logger.error('Error cargando datos:', error);
     } finally {
@@ -511,6 +518,36 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
     }
   };
 
+  const handleAssignContent = async (contentId) => {
+    if (!selectedClass) return;
+
+    const result = await assignContentToClass(selectedClass.id, contentId);
+    if (result.success) {
+      showMessage('success', ' Contenido asignado');
+      loadData();
+      const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
+      const updatedClass = updated.find(c => c.id === selectedClass.id);
+      setSelectedClass(updatedClass);
+    } else {
+      showMessage('error', 'Error: ' + result.error);
+    }
+  };
+
+  const handleUnassignContent = async (contentId) => {
+    if (!selectedClass) return;
+
+    const result = await unassignContentFromClass(selectedClass.id, contentId);
+    if (result.success) {
+      showMessage('success', ' Contenido removido');
+      loadData();
+      const updated = isAdmin ? await getAllClasses() : await getClassesByTeacher(user.uid);
+      const updatedClass = updated.find(c => c.id === selectedClass.id);
+      setSelectedClass(updatedClass);
+    } else {
+      showMessage('error', 'Error: ' + result.error);
+    }
+  };
+
   // Filtrar clases por búsqueda
   const filteredClasses = classes.filter(cls =>
     cls.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -532,9 +569,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
       <div className="class-manager">
         {/* Botón Volver */}
         {onBack && (
-          <button onClick={onBack} className="btn btn-ghost mb-4">
+          <BaseButton onClick={onBack} variant="ghost" className="mb-4">
             ← Volver a Inicio
-          </button>
+          </BaseButton>
         )}
 
         {/* Header */}
@@ -565,9 +602,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
           <div className="empty-state">
             <p>{searchTerm ? 'No se encontraron clases' : 'No hay clases creadas aún'}</p>
             {!searchTerm && (
-              <button onClick={handleCreateClass} className="btn btn-primary">
+              <BaseButton onClick={handleCreateClass} variant="primary">
                 Crear primera clase
-              </button>
+              </BaseButton>
             )}
           </div>
         ) : viewMode === 'grid' ? (
@@ -575,10 +612,12 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
             {filteredClasses.map(cls => (
               <div
                 key={cls.id}
-                className="class-card card card-grid-item cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300 flex flex-col overflow-hidden"
+                className="class-card card card-grid-item cursor-pointer transition-all duration-300 flex flex-col overflow-hidden"
                 onClick={() => handleViewDetails(cls)}
                 title="Click para configurar clase"
-                style={{ padding: 0 }}
+                style={{ padding: 0, borderColor: 'var(--color-border)' }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}
               >
                 {/* Class Image - Mitad superior sin bordes */}
                 {cls.imageUrl ? (
@@ -642,9 +681,12 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
             {filteredClasses.map(cls => (
               <div
                 key={cls.id}
-                className="card card-list cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300"
+                className="card card-list cursor-pointer transition-all duration-300"
                 onClick={() => handleViewDetails(cls)}
                 title="Click para configurar clase"
+                style={{ borderColor: 'var(--color-border)' }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}
               >
                 {/* Class Image - Smaller in list view */}
                 {cls.imageUrl ? (
@@ -669,11 +711,11 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                 <div className="flex-1 min-w-0 p-4">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                      <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
                         {cls.name}
                       </h3>
                       {cls.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                        <p className="text-sm line-clamp-2 mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                           {cls.description}
                         </p>
                       )}
@@ -685,10 +727,10 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                   {/* Horarios */}
                   <div className="mb-2">
-                    <strong className="text-sm text-gray-700 dark:text-gray-300">Horarios:</strong>
+                    <strong className="text-sm" style={{ color: 'var(--color-text-primary)' }}>Horarios:</strong>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {cls.schedules?.map((schedule, idx) => (
-                        <span key={idx} className="text-sm text-gray-600 dark:text-gray-400">
+                        <span key={idx} className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                           {getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}
                         </span>
                       ))}
@@ -696,7 +738,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                   </div>
 
                   {/* Stats */}
-                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     <span className="flex items-center gap-1">
                       <CreditCard size={16} strokeWidth={2} /> {cls.creditCost} crédito{cls.creditCost !== 1 ? 's' : ''}
                     </span>
@@ -728,7 +770,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
               <div className="flex flex-col flex-1 min-h-0">
                 <div className="modal-tabs-container">
                   <div className="modal-tabs">
-                    <button className="py-2 px-4 font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-gray-400 dark:border-gray-500">
+                    <button className="py-2 px-4 font-semibold border-b-2" style={{ color: 'var(--color-text-primary)', borderColor: 'var(--color-border)' }}>
                       <Calendar size={18} className="inline-block mr-1 mb-0.5" />
                       Información
                     </button>
@@ -757,7 +799,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                         value={formData.startDate}
                         onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                       />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                         Las instancias se generarán a partir de esta fecha
                       </p>
                     </div>
@@ -831,7 +873,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                       <div className="space-y-3">
                         <div className="mb-3">
-                          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--color-text-primary)' }}>
                             Días de la semana (selecciona uno o más)
                           </label>
                           <div className="flex flex-wrap gap-2">
@@ -844,14 +886,23 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               { value: 6, label: 'Sáb' },
                               { value: 0, label: 'Dom' }
                             ].map(day => (
-                              <label key={day.value} className="flex items-center gap-1 cursor-pointer bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                              <label
+                                key={day.value}
+                                className="flex items-center gap-1 cursor-pointer px-3 py-1 rounded-md"
+                                style={{
+                                  backgroundColor: 'var(--color-bg-secondary)',
+                                  transition: 'background-color 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)'}
+                              >
                                 <input
                                   type="checkbox"
                                   checked={scheduleForm?.daysOfWeek?.includes(day.value) || false}
                                   onChange={() => handleDayToggle(day.value)}
                                   className="rounded"
                                 />
-                                <span className="text-sm text-gray-700 dark:text-gray-300">{day.label}</span>
+                                <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{day.label}</span>
                               </label>
                             ))}
                           </div>
@@ -859,7 +910,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--color-text-primary)' }}>
                               Hora de inicio
                             </label>
                             <input
@@ -870,7 +921,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                             />
                           </div>
                           <div>
-                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--color-text-primary)' }}>
                               Hora de fin
                             </label>
                             <input
@@ -882,10 +933,10 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                           </div>
                         </div>
 
-                        <button onClick={handleAddSchedule} className="btn btn-outline">
+                        <BaseButton onClick={handleAddSchedule} variant="outline">
                           + Agregar Horario
-                        </button>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        </BaseButton>
+                        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                           <Lightbulb size={14} strokeWidth={2} className="inline-icon" /> Selecciona varios días para crear horarios múltiples a la vez
                         </p>
                       </div>
@@ -895,12 +946,12 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                 {/* Footer - Fixed */}
                 <div className="modal-footer">
-                  <button onClick={() => setShowModal(false)} className="btn btn-outline">
+                  <BaseButton onClick={() => setShowModal(false)} variant="outline">
                     Cancelar
-                  </button>
-                  <button onClick={handleSaveClass} className="btn btn-primary">
+                  </BaseButton>
+                  <BaseButton onClick={handleSaveClass} variant="primary">
                     {editingClass ? 'Guardar Cambios' : 'Crear Clase'}
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -945,43 +996,83 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                   <div className="modal-tabs">
                   <button
                     onClick={() => setDetailsTab('general')}
-                    className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                      detailsTab === 'general'
-                        ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
+                    className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                    style={{
+                      borderColor: detailsTab === 'general' ? 'var(--color-border)' : 'transparent',
+                      color: detailsTab === 'general' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (detailsTab !== 'general') e.currentTarget.style.color = 'var(--color-text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (detailsTab !== 'general') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }}
                   >
                     <FileText size={18} strokeWidth={2} className="inline-icon" /> General
                   </button>
                   <button
                     onClick={() => setDetailsTab('horarios')}
-                    className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                      detailsTab === 'horarios'
-                        ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
+                    className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                    style={{
+                      borderColor: detailsTab === 'horarios' ? 'var(--color-border)' : 'transparent',
+                      color: detailsTab === 'horarios' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (detailsTab !== 'horarios') e.currentTarget.style.color = 'var(--color-text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (detailsTab !== 'horarios') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }}
                   >
                     <Calendar size={18} strokeWidth={2} className="inline-icon" /> Horarios
                   </button>
                   <button
                     onClick={() => setDetailsTab('asignaciones')}
-                    className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                      detailsTab === 'asignaciones'
-                        ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
+                    className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                    style={{
+                      borderColor: detailsTab === 'asignaciones' ? 'var(--color-border)' : 'transparent',
+                      color: detailsTab === 'asignaciones' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (detailsTab !== 'asignaciones') e.currentTarget.style.color = 'var(--color-text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (detailsTab !== 'asignaciones') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }}
                   >
                     <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Curso
                   </button>
                   <button
                     onClick={() => setDetailsTab('estudiantes')}
-                    className={`py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                      detailsTab === 'estudiantes'
-                        ? 'border-gray-400 text-gray-900 dark:border-gray-500 dark:text-gray-100'
-                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
+                    className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                    style={{
+                      borderColor: detailsTab === 'estudiantes' ? 'var(--color-border)' : 'transparent',
+                      color: detailsTab === 'estudiantes' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (detailsTab !== 'estudiantes') e.currentTarget.style.color = 'var(--color-text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (detailsTab !== 'estudiantes') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }}
                   >
                     <Users size={18} strokeWidth={2} className="inline-icon" /> Estudiantes
+                  </button>
+                  <button
+                    onClick={() => setDetailsTab('contenidos')}
+                    className="py-2 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap"
+                    style={{
+                      borderColor: detailsTab === 'contenidos' ? 'var(--color-border)' : 'transparent',
+                      color: detailsTab === 'contenidos' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (detailsTab !== 'contenidos') e.currentTarget.style.color = 'var(--color-text-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (detailsTab !== 'contenidos') e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    }}
+                  >
+                    <ClipboardList size={18} strokeWidth={2} className="inline-icon" /> Contenidos
                   </button>
                   </div>
                 </div>
@@ -1010,7 +1101,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                           value={formData.startDate || new Date().toISOString().split('T')[0]}
                           onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                         />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                           Las nuevas instancias se generarán a partir de esta fecha
                         </p>
                       </div>
@@ -1060,14 +1151,15 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               alt="Preview"
                               className="w-full h-48 object-cover rounded-lg mb-2"
                             />
-                            <button
+                            <BaseButton
                               type="button"
                               onClick={handleImageDelete}
                               disabled={uploadingImage}
-                              className="btn btn-danger btn-sm"
+                              variant="danger"
+                              size="sm"
                             >
                               {uploadingImage ? 'Eliminando...' : 'Eliminar Imagen'}
-                            </button>
+                            </BaseButton>
                           </div>
                         ) : (
                           <div>
@@ -1076,21 +1168,22 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               accept="image/*"
                               onChange={handleImageUpload}
                               disabled={uploadingImage}
-                              className="block w-full text-sm text-gray-900 dark:text-gray-100
+                              className="block w-full text-sm
                                 file:mr-4 file:py-2 file:px-4
                                 file:rounded-md file:border-0
                                 file:text-sm file:font-semibold
                                 file:bg-primary file:text-white
                                 hover:file:bg-primary-light
                                 file:cursor-pointer cursor-pointer"
+                              style={{ color: 'var(--color-text-primary)' }}
                             />
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                               PNG, JPG, GIF o WEBP (máx. 5MB)
                             </p>
                           </div>
                         )}
                         {uploadingImage && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-1">
+                          <p className="text-sm mt-2 flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
                             <Clock size={14} strokeWidth={2} /> Subiendo imagen...
                           </p>
                         )}
@@ -1103,11 +1196,11 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                     <div className="space-y-6 pt-6">
                       {/* Horarios Configurados */}
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                        <h4 className="text-lg font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
                           Horarios Configurados
                         </h4>
                         {formData.schedules.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay horarios configurados</p>
+                          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>No hay horarios configurados</p>
                         ) : (
                           <div className="space-y-2">
                             {formData.schedules.map((schedule, idx) => {
@@ -1120,21 +1213,22 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               });
 
                               return (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                                <div key={idx} className="flex items-center justify-between p-3 rounded" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
                                   <div className="flex-1">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
                                       {getDayName(schedule.day)} {schedule.startTime} - {schedule.endTime}
                                     </span>
-                                    <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="ml-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                                       ({upcomingForSchedule.length} {upcomingForSchedule.length === 1 ? 'sesión pendiente' : 'sesiones pendientes'})
                                     </span>
                                   </div>
-                                  <button
-                                    className="btn btn-sm btn-danger"
+                                  <BaseButton
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => handleRemoveSchedule(idx)}
                                   >
                                     Eliminar
-                                  </button>
+                                  </BaseButton>
                                 </div>
                               );
                             })}
@@ -1143,15 +1237,15 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                       </div>
 
                       {/* Agregar Horario */}
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <div className="border-t pt-4" style={{ borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center gap-2 mb-3">
-                          <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Agregar Horario</h4>
+                          <Plus size={18} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
+                          <h4 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Agregar Horario</h4>
                         </div>
 
                         <div className="space-y-4">
                           <div>
-                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                            <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--color-text-primary)' }}>
                               Días de la semana
                             </label>
                             <div className="grid grid-cols-7 gap-2">
@@ -1164,14 +1258,20 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 { value: 6, label: 'Sáb' },
                                 { value: 0, label: 'Dom' }
                               ].map(day => (
-                                <label key={day.value} className="flex flex-col items-center justify-center cursor-pointer bg-gray-100 dark:bg-gray-700 px-2 py-3 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                <label
+                                  key={day.value}
+                                  className="flex flex-col items-center justify-center cursor-pointer px-2 py-3 rounded-md transition-colors"
+                                  style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+                                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'}
+                                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)'}
+                                >
                                   <input
                                     type="checkbox"
                                     checked={scheduleForm.daysOfWeek.includes(day.value)}
                                     onChange={() => handleDayToggle(day.value)}
                                     className="rounded mb-1"
                                   />
-                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{day.label}</span>
+                                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{day.label}</span>
                                 </label>
                               ))}
                             </div>
@@ -1179,7 +1279,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                              <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--color-text-primary)' }}>
                                 Hora de inicio
                               </label>
                               <div className="flex gap-2">
@@ -1193,7 +1293,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                     return <option key={hour} value={hour}>{hour}</option>;
                                   })}
                                 </select>
-                                <span className="flex items-center text-gray-500 dark:text-gray-400 font-bold">:</span>
+                                <span className="flex items-center font-bold" style={{ color: 'var(--color-text-secondary)' }}>:</span>
                                 <select
                                   className="select flex-1"
                                   value={scheduleForm.startTime.split(':')[1]}
@@ -1207,7 +1307,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               </div>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                              <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--color-text-primary)' }}>
                                 Hora de fin
                               </label>
                               <div className="flex gap-2">
@@ -1221,7 +1321,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                     return <option key={hour} value={hour}>{hour}</option>;
                                   })}
                                 </select>
-                                <span className="flex items-center text-gray-500 dark:text-gray-400 font-bold">:</span>
+                                <span className="flex items-center font-bold" style={{ color: 'var(--color-text-secondary)' }}>:</span>
                                 <select
                                   className="select flex-1"
                                   value={scheduleForm.endTime.split(':')[1]}
@@ -1238,7 +1338,7 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                           <div className="flex gap-3">
                             <div className="flex-1">
-                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                              <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--color-text-primary)' }}>
                                 Semanas a generar
                               </label>
                               <select
@@ -1253,13 +1353,13 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               </select>
                             </div>
                             <div className="flex items-end">
-                              <button onClick={handleAddSchedule} className="btn btn-success">
-                                <Plus size={16} strokeWidth={2} /> Agregar
-                              </button>
+                              <BaseButton onClick={handleAddSchedule} variant="success" icon={Plus}>
+                                Agregar
+                              </BaseButton>
                             </div>
                           </div>
 
-                          <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                          <div className="flex items-start gap-3 p-3 rounded" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
                             <input
                               type="checkbox"
                               checked={scheduleForm.autoRenew}
@@ -1267,10 +1367,10 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                               className="rounded mt-1"
                             />
                             <div className="flex-1">
-                              <label className="text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer">
+                              <label className="text-sm font-medium cursor-pointer" style={{ color: 'var(--color-text-primary)' }}>
                                 Auto-renovar instancias
                               </label>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                                 Genera automáticamente {scheduleForm.autoRenewWeeks} semanas más cuando queden menos de 3 instancias
                               </p>
                             </div>
@@ -1284,42 +1384,43 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                   {detailsTab === 'asignaciones' && (
                     <div className="space-y-6 pt-6">
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                        <h4 className="text-lg font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
                           Curso Asociado
                         </h4>
                         {formData.courseId ? (
                           <div className="space-y-2">
-                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                            <div className="flex items-center justify-between p-3 rounded" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
                               <div className="flex-1">
-                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
                                   {courses.find(c => c.id === formData.courseId)?.name || 'Curso no encontrado'}
                                 </span>
                               </div>
-                              <button
-                                className="btn btn-sm btn-danger"
+                              <BaseButton
+                                variant="danger"
+                                size="sm"
                                 onClick={() => {
                                   setFormData({ ...formData, courseId: '' });
                                   handleSaveClassChanges();
                                 }}
                               >
                                 Eliminar
-                              </button>
+                              </BaseButton>
                             </div>
                           </div>
                         ) : (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay curso asociado a esta clase</p>
+                          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>No hay curso asociado a esta clase</p>
                         )}
                       </div>
 
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <div className="border-t pt-4" style={{ borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center gap-2 mb-3">
-                          <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asignar Curso</h4>
+                          <Plus size={18} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
+                          <h4 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Asignar Curso</h4>
                         </div>
                         {formData.courseId ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">Ya hay un curso asignado. Elimínalo para asignar otro.</p>
+                          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Ya hay un curso asignado. Elimínalo para asignar otro.</p>
                         ) : courses.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay cursos disponibles</p>
+                          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>No hay cursos disponibles</p>
                         ) : (
                           <div className="flex gap-3">
                             <select
@@ -1339,8 +1440,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 </option>
                               ))}
                             </select>
-                            <button
-                              className="btn btn-success"
+                            <BaseButton
+                              variant="success"
+                              icon={Plus}
                               onClick={() => {
                                 const select = document.querySelector('.select');
                                 if (select && select.value) {
@@ -1350,8 +1452,8 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 }
                               }}
                             >
-                              <Plus size={16} strokeWidth={2} /> Agregar
-                            </button>
+                              Agregar
+                            </BaseButton>
                           </div>
                         )}
                       </div>
@@ -1362,38 +1464,39 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                   {detailsTab === 'estudiantes' && (
                     <div className="space-y-6 pt-6">
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                        <h4 className="text-lg font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
                           Estudiantes Asignados
                         </h4>
                         {assignedStudentsList.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">No hay estudiantes asignados a esta clase</p>
+                          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>No hay estudiantes asignados a esta clase</p>
                         ) : (
                           <div className="space-y-2">
                             {assignedStudentsList.map(student => (
-                              <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                              <div key={student.id} className="flex items-center justify-between p-3 rounded" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
                                 <div className="flex-1">
-                                  <div className="font-medium text-gray-900 dark:text-gray-100">{student.name}</div>
-                                  <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
+                                  <div className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{student.name}</div>
+                                  <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{student.email}</div>
                                 </div>
-                                <button
-                                  className="btn btn-sm btn-danger"
+                                <BaseButton
+                                  variant="danger"
+                                  size="sm"
                                   onClick={() => handleUnassignStudent(student.id)}
                                 >
                                   Eliminar
-                                </button>
+                                </BaseButton>
                               </div>
                             ))}
                           </div>
                         )}
                       </div>
 
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <div className="border-t pt-4" style={{ borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center gap-2 mb-3">
-                          <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asignar Estudiante</h4>
+                          <Plus size={18} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
+                          <h4 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Asignar Estudiante</h4>
                         </div>
                         {unassignedStudents.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los estudiantes ya están asignados</p>
+                          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Todos los estudiantes ya están asignados</p>
                         ) : (
                           <div className="flex gap-3">
                             <select
@@ -1413,8 +1516,9 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 </option>
                               ))}
                             </select>
-                            <button
-                              className="btn btn-success"
+                            <BaseButton
+                              variant="success"
+                              icon={Plus}
                               onClick={() => {
                                 const select = document.querySelector('.select');
                                 if (select.value) {
@@ -1423,8 +1527,8 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
                                 }
                               }}
                             >
-                              <Plus size={16} strokeWidth={2} /> Agregar
-                            </button>
+                              Agregar
+                            </BaseButton>
                           </div>
                         )}
                       </div>
@@ -1434,27 +1538,29 @@ function ClassManager({ user, courses, onBack, openCreateModal = false }) {
 
                 {/* Footer con botones */}
                 <div className="modal-footer">
-                  <button
+                  <BaseButton
                     type="button"
-                    className="btn btn-danger"
+                    variant="danger"
+                    icon={Trash2}
                     onClick={() => setShowConfirmDelete(true)}
                   >
-                    <Trash2 size={16} strokeWidth={2} className="inline-icon" /> Eliminar
-                  </button>
-                  <button
+                    Eliminar
+                  </BaseButton>
+                  <BaseButton
                     type="button"
-                    className="btn btn-outline"
+                    variant="outline"
                     onClick={() => setShowDetailsModal(false)}
                   >
                     Cancelar
-                  </button>
-                  <button
+                  </BaseButton>
+                  <BaseButton
                     type="button"
-                    className="btn btn-primary"
+                    variant="primary"
+                    icon={Save}
                     onClick={handleSaveClassChanges}
                   >
-                    <Save size={18} strokeWidth={2} className="inline-icon" /> Guardar Cambios
-                  </button>
+                    Guardar Cambios
+                  </BaseButton>
                 </div>
 
               </div>

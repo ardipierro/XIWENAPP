@@ -13,8 +13,8 @@ import {
   getDocs,
   serverTimestamp
 } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { db, auth } from './config';
+import { createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword } from 'firebase/auth';
+import { db, auth, createSecondaryApp } from './config';
 import { BaseRepository } from './BaseRepository';
 
 // ============================================
@@ -132,8 +132,20 @@ function generateTemporaryPassword() {
  * @returns {Promise<Object>} - {success: boolean, id?: string, password?: string, error?: string}
  */
 export async function createUser(userData) {
-  // Guardar usuario actual antes de crear uno nuevo
+  // Verificar que hay un admin autenticado
   const currentUser = auth.currentUser;
+  if (!currentUser) {
+    return {
+      success: false,
+      error: 'No hay sesión activa. Por favor, inicia sesión.'
+    };
+  }
+
+  logger.debug('💾 Admin session before creating user:', currentUser.email);
+
+  // Crear una instancia secundaria de Firebase para crear el usuario
+  // Esto previene que se cierre la sesión del admin
+  const { app: secondaryApp, auth: secondaryAuth } = createSecondaryApp();
 
   try {
     const usersRef = collection(db, 'users');
@@ -146,13 +158,20 @@ export async function createUser(userData) {
     let emailAlreadyExisted = false;
 
     try {
-      // IMPORTANTE: Intentar crear usuario en Firebase Authentication
+      // CRÍTICO: Crear usuario en la instancia SECUNDARIA de Auth
+      // Esto NO afecta la sesión principal del admin
+      logger.debug('🔐 Creating user in secondary auth instance...');
       const userCredential = await createUserWithEmailAndPassword(
-        auth,
+        secondaryAuth,  // ← Usar la instancia SECUNDARIA
         userData.email,
         password
       );
       newAuthUser = userCredential.user;
+      logger.debug('✅ User created in secondary auth:', newAuthUser.uid);
+
+      // Cerrar la sesión en la instancia secundaria (no afecta al admin)
+      await signOut(secondaryAuth);
+      logger.debug('🔓 Signed out from secondary auth (admin session preserved)');
     } catch (authError) {
       // Si el email ya existe en Auth, buscar el usuario existente
       if (authError.code === 'auth/email-already-in-use') {
@@ -193,10 +212,12 @@ export async function createUser(userData) {
       notes: userData.notes || ''
     }, { merge: true, addTimestamps: true });
 
-    // CRÍTICO: Cerrar sesión del nuevo usuario si se creó uno nuevo
-    if (!emailAlreadyExisted) {
-      await signOut(auth);
-    }
+    // Verificar que el admin sigue autenticado
+    const adminStillLoggedIn = auth.currentUser?.email === currentUser.email;
+    logger.debug('✅ Admin session after user creation:', {
+      stillLoggedIn: adminStillLoggedIn,
+      currentEmail: auth.currentUser?.email
+    });
 
     return {
       success: true,
@@ -205,12 +226,21 @@ export async function createUser(userData) {
       isGenerated: emailAlreadyExisted ? false : isGenerated,
       warning: emailAlreadyExisted
         ? 'Usuario actualizado (el email ya estaba registrado)'
-        : 'Serás desconectado y deberás volver a iniciar sesión',
+        : null,
       emailAlreadyExisted: emailAlreadyExisted
     };
   } catch (error) {
     logger.error('Error al crear usuario:', error);
     return { success: false, error: error.message };
+  } finally {
+    // IMPORTANTE: Limpiar la instancia secundaria de Firebase
+    try {
+      const { deleteApp } = await import('firebase/app');
+      await deleteApp(secondaryApp);
+      logger.debug('🧹 Secondary Firebase app deleted');
+    } catch (cleanupError) {
+      logger.warn('Error cleaning up secondary app:', cleanupError);
+    }
   }
 }
 

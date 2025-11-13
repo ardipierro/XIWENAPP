@@ -22,16 +22,26 @@ import {
   FlaskConical,
   Plus,
   Trash2,
-  UsersRound
+  UsersRound,
+  FileText,
+  X
 } from 'lucide-react';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { updateUser, deleteUser } from '../firebase/users';
 import {
   getStudentEnrollments,
   enrollStudentInCourse,
-  unenrollStudentFromCourse
+  unenrollStudentFromCourse,
+  getStudentContentAssignments,
+  assignContentToStudent,
+  unassignContentFromStudent,
+  getTeacherStudents,
+  assignStudentToTeacher,
+  unassignStudentFromTeacher,
+  getAvailableStudents
 } from '../firebase/firestore';
 import { loadCourses } from '../firebase/firestore';
+import { getAllContent } from '../firebase/content';
 import { getUserCredits } from '../firebase/credits';
 import {
   getStudentGuardians,
@@ -42,6 +52,8 @@ import CreditManager from './CreditManager';
 import StudentClassView from './StudentClassView';
 import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
+import { BaseAlert } from './common';
+import BaseButton from './common/BaseButton';
 import './UserProfile.css';
 
 // Icon mapping for role icons from roleConfig
@@ -78,6 +90,18 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [selectedCourseToAdd, setSelectedCourseToAdd] = useState('');
 
+  // Estados para contenidos
+  const [assignedContents, setAssignedContents] = useState([]);
+  const [availableContents, setAvailableContents] = useState([]);
+  const [loadingContents, setLoadingContents] = useState(false);
+  const [selectedContentToAdd, setSelectedContentToAdd] = useState('');
+
+  // Estados para alumnos (solo para profesores)
+  const [teacherStudents, setTeacherStudents] = useState([]);
+  const [availableStudentsToAssign, setAvailableStudentsToAssign] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [selectedStudentToAdd, setSelectedStudentToAdd] = useState('');
+
   // Estado para créditos
   const [userCredits, setUserCredits] = useState(selectedUser?.credits || 0);
 
@@ -103,6 +127,10 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   useEffect(() => {
     if (activeTab === 'courses') {
       loadCoursesData();
+    } else if (activeTab === 'contents') {
+      loadContentsData();
+    } else if (activeTab === 'students') {
+      loadStudentsData();
     } else if (activeTab === 'guardians') {
       loadGuardiansData();
     }
@@ -144,6 +172,42 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
     }
   };
 
+  const loadContentsData = async () => {
+    setLoadingContents(true);
+    try {
+      // Cargar contenidos asignados
+      const assignments = await getStudentContentAssignments(selectedUser.id);
+      setAssignedContents(assignments);
+
+      // Cargar todos los contenidos disponibles
+      const allContents = await getAllContent();
+      setAvailableContents(allContents);
+    } catch (error) {
+      logger.error('Error al cargar contenidos:', error);
+      showMessage('error', 'Error al cargar contenidos');
+    } finally {
+      setLoadingContents(false);
+    }
+  };
+
+  const loadStudentsData = async () => {
+    setLoadingStudents(true);
+    try {
+      // Cargar alumnos asignados al profesor
+      const students = await getTeacherStudents(selectedUser.id);
+      setTeacherStudents(students);
+
+      // Cargar todos los estudiantes disponibles
+      const allStudents = await getAvailableStudents();
+      setAvailableStudentsToAssign(allStudents);
+    } catch (error) {
+      logger.error('Error al cargar alumnos:', error);
+      showMessage('error', 'Error al cargar alumnos');
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
+
   const loadGuardiansData = async () => {
     setLoadingGuardians(true);
     try {
@@ -151,7 +215,11 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       setGuardians(guardianLinks);
     } catch (error) {
       logger.error('Error al cargar tutores:', error);
-      showMessage('error', 'Error al cargar tutores');
+      // Si es un error de permisos, no mostrar mensaje de error
+      if (error.code !== 'permission-denied') {
+        showMessage('error', 'Error al cargar tutores');
+      }
+      setGuardians([]); // Establecer array vacío en caso de error
     } finally {
       setLoadingGuardians(false);
     }
@@ -273,6 +341,58 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
     }
   };
 
+  const handleAssignContent = async (contentId) => {
+    try {
+      const assignmentId = await assignContentToStudent(selectedUser.id, contentId);
+      if (assignmentId) {
+        showMessage('success', 'Contenido asignado exitosamente');
+        await loadContentsData();
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      showMessage('error', 'Error al asignar contenido');
+    }
+  };
+
+  const handleUnassignContent = async (contentId) => {
+    try {
+      const success = await unassignContentFromStudent(selectedUser.id, contentId);
+      if (success) {
+        showMessage('success', 'Contenido desasignado exitosamente');
+        await loadContentsData();
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      showMessage('error', 'Error al desasignar contenido');
+    }
+  };
+
+  const handleAssignStudent = async (studentId) => {
+    try {
+      const assignmentId = await assignStudentToTeacher(selectedUser.id, studentId);
+      if (assignmentId) {
+        showMessage('success', 'Alumno asignado exitosamente');
+        await loadStudentsData();
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      showMessage('error', 'Error al asignar alumno');
+    }
+  };
+
+  const handleUnassignStudent = async (studentId) => {
+    try {
+      const success = await unassignStudentFromTeacher(selectedUser.id, studentId);
+      if (success) {
+        showMessage('success', 'Alumno desasignado exitosamente');
+        await loadStudentsData();
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+      showMessage('error', 'Error al desasignar alumno');
+    }
+  };
+
   const handleViewAs = () => {
     // Guardar userId para reabrir el perfil al volver
     sessionStorage.setItem('viewAsReturnUserId', selectedUser.id);
@@ -286,6 +406,14 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
   const isCourseEnrolled = (courseId) => {
     return enrolledCourses.some(e => e.courseId === courseId);
+  };
+
+  const isContentAssigned = (contentId) => {
+    return assignedContents.some(a => a.contentId === contentId);
+  };
+
+  const isStudentAssigned = (studentId) => {
+    return teacherStudents.some(s => s.studentId === studentId);
   };
 
   const formatDate = (timestamp) => {
@@ -374,44 +502,118 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
       {/* Message */}
       {message.text && (
-        <div className={`profile-message ${message.type}`}>
-          {message.type === 'success' ? <CheckCircle size={18} strokeWidth={2} /> : <AlertTriangle size={18} strokeWidth={2} />} {message.text}
-        </div>
+        <BaseAlert
+          variant={message.type === 'success' ? 'success' : 'danger'}
+          dismissible
+          onDismiss={() => setMessage({ type: '', text: '' })}
+        >
+          {message.text}
+        </BaseAlert>
       )}
 
-      {/* Tabs */}
-      <div className="modal-tabs-container">
-        <div className="modal-tabs">
+      {/* Tabs - Mobile First: Scroll horizontal */}
+      <div className="border-b border-zinc-200 dark:border-zinc-700">
+        <div className="flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide px-4 md:px-0">
           <button
-            className={activeTab === 'info' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('info')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'info'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
           >
-            <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> Información
+            <BarChart3 size={18} strokeWidth={2} />
+            <span>Información</span>
           </button>
           <button
-            className={activeTab === 'courses' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('courses')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'courses'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
           >
-            <BookOpen size={18} strokeWidth={2} className="inline-icon" /> Cursos
+            <BookOpen size={18} strokeWidth={2} />
+            <span>Cursos</span>
           </button>
           <button
-            className={activeTab === 'credits' ? 'tab-active' : 'tab'}
             onClick={() => setActiveTab('credits')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'credits'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
           >
-            <CreditCard size={18} strokeWidth={2} className="inline-icon" /> Créditos
+            <CreditCard size={18} strokeWidth={2} />
+            <span>Créditos</span>
           </button>
           <button
-            className={activeTab === 'classes' ? 'tab-active' : 'tab'}
-            onClick={() => setActiveTab('classes')}
+            onClick={() => setActiveTab('contents')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'contents'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
           >
-            <Calendar size={18} strokeWidth={2} className="inline-icon" /> Clases
+            <FileText size={18} strokeWidth={2} />
+            <span>Contenidos</span>
+          </button>
+          {(['teacher', 'trial_teacher', 'admin'].includes(selectedUser?.role)) && (
+            <button
+              onClick={() => setActiveTab('students')}
+              className={`
+                flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+                border-b-2 font-medium text-sm transition-colors
+                ${activeTab === 'students'
+                  ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                  : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+                }
+              `}
+            >
+              <GraduationCap size={18} strokeWidth={2} />
+              <span>Alumnos</span>
+            </button>
+          )}
+          <button
+            onClick={() => setActiveTab('classes')}
+            className={`
+              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+              border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'classes'
+                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+              }
+            `}
+          >
+            <Calendar size={18} strokeWidth={2} />
+            <span>Clases</span>
           </button>
           {(['student', 'listener', 'trial'].includes(selectedUser?.role)) && (
             <button
-              className={activeTab === 'guardians' ? 'tab-active' : 'tab'}
               onClick={() => setActiveTab('guardians')}
+              className={`
+                flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
+                border-b-2 font-medium text-sm transition-colors
+                ${activeTab === 'guardians'
+                  ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
+                  : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
+                }
+              `}
             >
-              <UsersRound size={18} strokeWidth={2} className="inline-icon" /> Tutores
+              <UsersRound size={18} strokeWidth={2} />
+              <span>Tutores</span>
             </button>
           )}
         </div>
@@ -583,12 +785,13 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                               (Asignado: {formatDate(enrollment.enrolledAt)})
                             </span>
                           </div>
-                          <button
-                            className="btn btn-sm btn-danger"
+                          <BaseButton
+                            variant="danger"
+                            size="sm"
                             onClick={() => handleUnenrollCourse(enrollment.courseId)}
                           >
                             Eliminar
-                          </button>
+                          </BaseButton>
                         </div>
                       ))}
                     </div>
@@ -619,8 +822,9 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                             </option>
                           ))}
                       </select>
-                      <button
-                        className="btn btn-success"
+                      <BaseButton
+                        variant="success"
+                        icon={Plus}
                         onClick={() => {
                           if (selectedCourseToAdd) {
                             handleEnrollCourse(selectedCourseToAdd);
@@ -628,6 +832,189 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                           }
                         }}
                         disabled={!selectedCourseToAdd}
+                      >
+                        Agregar
+                      </BaseButton>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Contenidos */}
+        {activeTab === 'contents' && (
+          <div>
+            {loadingContents ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-12 h-12 border-4 border-zinc-200 dark:border-zinc-800 border-t-zinc-900 dark:border-t-white rounded-full animate-spin mb-4"></div>
+                <p className="text-zinc-600 dark:text-zinc-400">Cargando contenidos...</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Contenidos asignados */}
+                <div>
+                  <h4 className="text-lg font-semibold text-zinc-900 dark:text-white mb-3">
+                    Contenidos Asignados
+                  </h4>
+                  {assignedContents.length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">No hay contenidos asignados</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {assignedContents.map(assignment => (
+                        <div key={assignment.id} className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-zinc-900 dark:text-white">{assignment.contentName}</span>
+                              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+                                {assignment.contentType}
+                              </span>
+                            </div>
+                            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                              Asignado: {formatDate(assignment.assignedAt)}
+                            </span>
+                          </div>
+                          <button
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                            onClick={() => handleUnassignContent(assignment.contentId)}
+                          >
+                            <X size={16} strokeWidth={2} />
+                            Eliminar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Agregar contenido */}
+                <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Plus size={18} strokeWidth={2} className="text-zinc-700 dark:text-zinc-300" />
+                    <h4 className="text-lg font-semibold text-zinc-900 dark:text-white">Asignar Contenido</h4>
+                  </div>
+                  {availableContents.filter(c => !isContentAssigned(c.id)).length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">Todos los contenidos ya están asignados</p>
+                  ) : (
+                    <div className="flex gap-3">
+                      <select
+                        className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                        value={selectedContentToAdd}
+                        onChange={(e) => setSelectedContentToAdd(e.target.value)}
+                      >
+                        <option value="">Selecciona un contenido...</option>
+                        {availableContents
+                          .filter(c => !isContentAssigned(c.id))
+                          .map(content => (
+                            <option key={content.id} value={content.id}>
+                              [{content.type}] {content.title || content.name}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        className="flex items-center gap-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          if (selectedContentToAdd) {
+                            handleAssignContent(selectedContentToAdd);
+                            setSelectedContentToAdd('');
+                          }
+                        }}
+                        disabled={!selectedContentToAdd}
+                      >
+                        <Plus size={16} strokeWidth={2} /> Agregar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Alumnos (solo profesores) */}
+        {activeTab === 'students' && (
+          <div>
+            {loadingStudents ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-12 h-12 border-4 border-zinc-200 dark:border-zinc-800 border-t-zinc-900 dark:border-t-white rounded-full animate-spin mb-4"></div>
+                <p className="text-zinc-600 dark:text-zinc-400">Cargando alumnos...</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Alumnos asignados */}
+                <div>
+                  <h4 className="text-lg font-semibold text-zinc-900 dark:text-white mb-3">
+                    Alumnos Asignados
+                  </h4>
+                  {teacherStudents.length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">No hay alumnos asignados a este profesor</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {teacherStudents.map(student => (
+                        <div key={student.assignmentId} className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-zinc-900 dark:text-white">{student.studentName}</span>
+                              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+                                {student.studentRole}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                                {student.studentEmail}
+                              </span>
+                              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                                • Asignado: {formatDate(student.assignedAt)}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                            onClick={() => handleUnassignStudent(student.studentId)}
+                          >
+                            <X size={16} strokeWidth={2} />
+                            Eliminar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Agregar alumno */}
+                <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Plus size={18} strokeWidth={2} className="text-zinc-700 dark:text-zinc-300" />
+                    <h4 className="text-lg font-semibold text-zinc-900 dark:text-white">Asignar Alumno</h4>
+                  </div>
+                  {availableStudentsToAssign.filter(s => !isStudentAssigned(s.id)).length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">Todos los alumnos ya están asignados</p>
+                  ) : (
+                    <div className="flex gap-3">
+                      <select
+                        className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                        value={selectedStudentToAdd}
+                        onChange={(e) => setSelectedStudentToAdd(e.target.value)}
+                      >
+                        <option value="">Selecciona un alumno...</option>
+                        {availableStudentsToAssign
+                          .filter(s => !isStudentAssigned(s.id))
+                          .map(student => (
+                            <option key={student.id} value={student.id}>
+                              {student.name || student.email} ({student.role})
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        className="flex items-center gap-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          if (selectedStudentToAdd) {
+                            handleAssignStudent(selectedStudentToAdd);
+                            setSelectedStudentToAdd('');
+                          }
+                        }}
+                        disabled={!selectedStudentToAdd}
                       >
                         <Plus size={16} strokeWidth={2} /> Agregar
                       </button>
@@ -671,13 +1058,20 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
                 <p className="text-gray-600 dark:text-gray-400 mt-2">Cargando tutores...</p>
               </div>
             ) : guardians.length === 0 ? (
-              <div className="empty-state">
-                <UsersRound size={48} strokeWidth={1.5} className="empty-state-icon" />
-                <p className="empty-state-text">Este estudiante no tiene tutores vinculados</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  Los tutores pueden ser vinculados desde el panel de Gestión de Tutores
-                </p>
-              </div>
+              <BaseAlert variant="info" className="mb-4">
+                <div className="flex items-start gap-3">
+                  <UsersRound size={20} strokeWidth={2} className="flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-1">Sin tutores vinculados</p>
+                    <p className="text-sm">
+                      Este estudiante no tiene tutores asignados. La funcionalidad de tutores permite a padres o responsables acceder a información del estudiante.
+                    </p>
+                    <p className="text-xs mt-2 opacity-75">
+                      Nota: Esta función requiere configuración de permisos en Firebase.
+                    </p>
+                  </div>
+                </div>
+              </BaseAlert>
             ) : (
               <div className="space-y-3">
                 {guardians.map((guardian) => (
@@ -713,25 +1107,26 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         {!editing ? (
           <>
             {isAdmin && !isAdminEmail(selectedUser.email) && currentUser.uid !== selectedUser.id && (
-              <button
-                className="btn btn-danger"
+              <BaseButton
+                variant="danger"
+                icon={Trash2}
                 onClick={handleDeleteClick}
                 disabled={saving}
               >
-                <Trash2 size={18} strokeWidth={2} /> Eliminar
-              </button>
+                Eliminar
+              </BaseButton>
             )}
-            <button className="btn btn-outline" onClick={onBack}>
+            <BaseButton variant="outline" onClick={onBack}>
               Cancelar
-            </button>
-            <button className="btn btn-primary" onClick={() => setEditing(true)}>
-              <Edit size={18} strokeWidth={2} /> Editar
-            </button>
+            </BaseButton>
+            <BaseButton variant="primary" icon={Edit} onClick={() => setEditing(true)}>
+              Editar
+            </BaseButton>
           </>
         ) : (
           <>
-            <button
-              className="btn btn-outline"
+            <BaseButton
+              variant="outline"
               onClick={() => {
                 setEditing(false);
                 setFormData({
@@ -746,14 +1141,15 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               disabled={saving}
             >
               Cancelar
-            </button>
-            <button
-              className="btn btn-primary"
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              icon={Save}
               onClick={handleSave}
               disabled={saving}
             >
-              <Save size={18} strokeWidth={2} /> {saving ? 'Guardando...' : 'Guardar'}
-            </button>
+              {saving ? 'Guardando...' : 'Guardar'}
+            </BaseButton>
           </>
         )}
       </div>

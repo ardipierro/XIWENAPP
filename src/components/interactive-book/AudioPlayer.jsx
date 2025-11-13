@@ -4,9 +4,10 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, RotateCcw, Mic } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, RotateCcw, Mic, User, Globe, Sparkles } from 'lucide-react';
 import PropTypes from 'prop-types';
 import ttsService from '../../services/ttsService';
+import premiumTTSService from '../../services/premiumTTSService';
 import logger from '../../utils/logger';
 
 /**
@@ -16,6 +17,10 @@ import logger from '../../utils/logger';
 function AudioPlayer({
   audioUrl,
   text,
+  voice = null,          // Voz específica del personaje (ej: 'es-AR-male-1') - DEPRECATED
+  voiceConfig = null,    // Configuración completa de voz del personaje
+  characterName = null,  // Nombre del personaje (para logs)
+  characters = [],       // Lista de personajes (para encontrar ID)
   autoPlay = false,
   showText = true,
   className = '',
@@ -29,8 +34,19 @@ function AudioPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [useTTS, setUseTTS] = useState(false);
   const [ttsSupported, setTtsSupported] = useState(false);
+  // ✅ SINCRONIZAR playbackSpeed con voiceConfig.rate al montar
+  const initialSpeed = voiceConfig?.rate || 1.0;
+  const [playbackSpeed, setPlaybackSpeed] = useState(initialSpeed);
   const audioRef = useRef(null);
   const ttsIntervalRef = useRef(null);
+  const ttsAudioRef = useRef(null); // Audio generado por TTS/ElevenLabs
+
+  // ✅ Sincronizar con voiceConfig cuando cambie desde fuera
+  useEffect(() => {
+    if (voiceConfig?.rate && voiceConfig.rate !== playbackSpeed) {
+      setPlaybackSpeed(voiceConfig.rate);
+    }
+  }, [voiceConfig?.rate]);
 
   useEffect(() => {
     // Verificar si TTS está disponible
@@ -74,13 +90,27 @@ function AudioPlayer({
     }
   }, [autoPlay]);
 
+  // ✅ Aplicar velocidad de reproducción cuando cambie (audio real Y TTS)
+  useEffect(() => {
+    if (audioRef.current && !useTTS) {
+      audioRef.current.playbackRate = playbackSpeed;
+    }
+    if (ttsAudioRef.current) {
+      ttsAudioRef.current.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed, useTTS]);
+
   useEffect(() => {
     return () => {
-      // Limpiar al desmontar
+      // ✅ Limpiar al desmontar
       if (ttsIntervalRef.current) {
         clearInterval(ttsIntervalRef.current);
       }
       ttsService.stop();
+      if (ttsAudioRef.current) {
+        ttsAudioRef.current.pause();
+        ttsAudioRef.current = null;
+      }
     };
   }, []);
 
@@ -98,16 +128,14 @@ function AudioPlayer({
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
-      setUseTTS(false);
     }
   };
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      const current = audioRef.current.currentTime;
-      const dur = audioRef.current.duration;
-      setCurrentTime(current);
-      setProgress((current / dur) * 100);
+      setCurrentTime(audioRef.current.currentTime);
+      const prog = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+      setProgress(prog || 0);
     }
   };
 
@@ -121,141 +149,258 @@ function AudioPlayer({
   };
 
   const handleAudioError = (e) => {
-    logger.warn('⚠️ Audio no disponible, usando TTS:', e);
-    if (text && ttsSupported) {
-      setUseTTS(true);
-      setDuration(estimateDuration(text));
-    }
+    logger.error('Error cargando audio, fallback a TTS:', e);
+    setUseTTS(true);
+    setDuration(estimateDuration(text));
   };
 
   const playAudio = async () => {
-    try {
-      if (useTTS) {
-        await playTTS();
-      } else if (audioRef.current) {
+    if (isPlaying) return;
+
+    setIsPlaying(true);
+
+    if (useTTS) {
+      playTTS();
+    } else if (audioRef.current) {
+      try {
         await audioRef.current.play();
-        setIsPlaying(true);
-        if (onPlay) {
-          onPlay();
-        }
-      }
-    } catch (err) {
-      logger.error('Error al reproducir:', err);
-      // Intentar con TTS como fallback
-      if (text && ttsSupported && !useTTS) {
+      } catch (err) {
+        logger.error('Error reproduciendo audio:', err);
         setUseTTS(true);
-        await playTTS();
+        playTTS();
       }
+    }
+  };
+
+  const pauseAudio = () => {
+    setIsPlaying(false);
+
+    if (useTTS) {
+      ttsService.stop();
+      if (ttsIntervalRef.current) {
+        clearInterval(ttsIntervalRef.current);
+      }
+      // ✅ Pausar audio generado por TTS/ElevenLabs
+      if (ttsAudioRef.current) {
+        ttsAudioRef.current.pause();
+      }
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  };
+
+  const resetAudio = () => {
+    setProgress(0);
+    setCurrentTime(0);
+
+    if (useTTS) {
+      ttsService.stop();
+      if (ttsIntervalRef.current) {
+        clearInterval(ttsIntervalRef.current);
+      }
+      // ✅ Reiniciar audio generado por TTS/ElevenLabs
+      if (ttsAudioRef.current) {
+        ttsAudioRef.current.currentTime = 0;
+      }
+    } else if (audioRef.current) {
+      audioRef.current.currentTime = 0;
     }
   };
 
   const playTTS = async () => {
     if (!text) return;
 
-    setIsPlaying(true);
-    setProgress(0);
-    setCurrentTime(0);
-
     if (onPlay) {
       onPlay();
     }
 
-    // Simular progreso durante la reproducción TTS
-    const estimatedDuration = estimateDuration(text);
-    const startTime = Date.now();
+    // Usar voiceConfig si está disponible, sino fallback a voice o config default
+    const effectiveVoiceConfig = voiceConfig || {
+      provider: 'browser',
+      voiceId: voice,
+      rate: playbackSpeed,
+      volume: 1.0
+    };
 
-    ttsIntervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
-      const currentProgress = (elapsed / estimatedDuration) * 100;
+    const speedToUse = effectiveVoiceConfig.rate || playbackSpeed;
+    const volumeToUse = isMuted ? 0 : (effectiveVoiceConfig.volume || 1.0);
 
-      if (currentProgress >= 100) {
-        clearInterval(ttsIntervalRef.current);
-        setProgress(100);
-        setCurrentTime(estimatedDuration);
-        setTimeout(() => {
-          setIsPlaying(false);
-          setProgress(0);
-          setCurrentTime(0);
-          if (onComplete) {
-            onComplete();
-          }
-        }, 100);
-      } else {
-        setProgress(currentProgress);
-        setCurrentTime(elapsed);
-      }
-    }, 100);
+    logger.info(`🎤 TTS para ${characterName || 'personaje'}: provider=${effectiveVoiceConfig.provider}, rate=${speedToUse}x`);
 
     try {
-      await ttsService.speak(text, {
-        rate: 0.9, // Un poco más lento para español argentino
-        volume: isMuted ? 0 : 1.0
-      });
-    } catch (err) {
-      logger.error('Error en TTS:', err);
-      clearInterval(ttsIntervalRef.current);
-      setIsPlaying(false);
-    }
-  };
+      // Si está configurado para usar ElevenLabs y tiene voiceId
+      if (effectiveVoiceConfig.provider === 'elevenlabs' && effectiveVoiceConfig.voiceId) {
+        const result = await premiumTTSService.generateWithElevenLabs(
+          text,
+          effectiveVoiceConfig.voiceId
+        );
 
-  const pauseAudio = () => {
-    if (useTTS) {
-      ttsService.pause();
-      setIsPlaying(false);
+        if (result.audioUrl) {
+          try {
+            // Si se generó un archivo de audio, reproducirlo con velocidad ajustable
+            await new Promise((resolve, reject) => {
+              const audio = new Audio(result.audioUrl);
+              ttsAudioRef.current = audio;
+
+              // ✅ APLICAR VELOCIDAD Y VOLUMEN DE LA CONFIG
+              audio.playbackRate = speedToUse;
+              audio.volume = volumeToUse;
+
+              audio.onloadedmetadata = () => {
+                setDuration(audio.duration);
+              };
+
+              // ✅ PROGRESO CONTINUO REAL (no estimado)
+              audio.ontimeupdate = () => {
+                setCurrentTime(audio.currentTime);
+                const prog = (audio.currentTime / audio.duration) * 100;
+                setProgress(prog || 0);
+              };
+
+              audio.onended = () => {
+                setIsPlaying(false);
+                setProgress(0);
+                setCurrentTime(0);
+                premiumTTSService.cleanup(result.audioUrl);
+                ttsAudioRef.current = null;
+                if (onComplete) {
+                  onComplete();
+                }
+                resolve();
+              };
+
+              audio.onerror = (error) => {
+                reject(new Error('Audio file failed to load'));
+              };
+
+              audio.play().catch(reject);
+            });
+
+            return; // Exit successfully if audio plays
+          } catch (audioError) {
+            logger.warn('ElevenLabs audio playback failed, falling back to Web Speech:', audioError);
+            premiumTTSService.cleanup(result.audioUrl);
+            ttsAudioRef.current = null;
+          }
+        }
+      }
+
+      // Fallback a Web Speech API (navegador) o si no hay ElevenLabs configurado
+      const result = await premiumTTSService.generateSpeech(text, {
+        voice: effectiveVoiceConfig.voiceName || voice,
+        gender: 'female',
+        preferPremium: false // Forzar uso de navegador
+      });
+
+      if (result.audioUrl) {
+        try {
+          // Si se generó un archivo de audio, reproducirlo con velocidad ajustable
+          await new Promise((resolve, reject) => {
+            const audio = new Audio(result.audioUrl);
+            ttsAudioRef.current = audio;
+
+            // ✅ APLICAR VELOCIDAD DE REPRODUCCIÓN
+            audio.playbackRate = playbackSpeed;
+            audio.volume = isMuted ? 0 : 1.0;
+
+            audio.onloadedmetadata = () => {
+              setDuration(audio.duration);
+            };
+
+            // ✅ PROGRESO CONTINUO REAL (no estimado)
+            audio.ontimeupdate = () => {
+              setCurrentTime(audio.currentTime);
+              const prog = (audio.currentTime / audio.duration) * 100;
+              setProgress(prog || 0);
+            };
+
+            audio.onended = () => {
+              setIsPlaying(false);
+              setProgress(0);
+              setCurrentTime(0);
+              premiumTTSService.cleanup(result.audioUrl);
+              ttsAudioRef.current = null;
+              if (onComplete) {
+                onComplete();
+              }
+              resolve();
+            };
+
+            audio.onerror = (error) => {
+              reject(new Error('Audio file failed to load'));
+            };
+
+            audio.play().catch(reject);
+          });
+
+          return; // Exit successfully if audio plays
+        } catch (audioError) {
+          // Si falla el audio, hacer fallback a Web Speech
+          logger.warn('Audio playback failed, falling back to Web Speech:', audioError);
+          premiumTTSService.cleanup(result.audioUrl);
+          ttsAudioRef.current = null;
+        }
+      }
+
+      // Web Speech API (navegador) - buscar voz específica si está configurada
+      const estimatedDuration = estimateDuration(text) / speedToUse;
+      const startTime = Date.now();
+
+      // ✅ Progreso suave (cada 50ms para mejor fluidez)
+      ttsIntervalRef.current = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const currentProgress = Math.min((elapsed / estimatedDuration) * 100, 100);
+        setProgress(currentProgress);
+        setCurrentTime(elapsed);
+
+        if (currentProgress >= 100) {
+          clearInterval(ttsIntervalRef.current);
+        }
+      }, 50);
+
+      // Buscar voz específica del navegador si está configurada
+      let selectedVoice = null;
+      if (effectiveVoiceConfig.voiceName && effectiveVoiceConfig.voiceName !== 'Auto') {
+        const voices = ttsService.getSpanishVoices();
+        selectedVoice = voices.find(v => v.name === effectiveVoiceConfig.voiceName);
+      }
+
+      // ✅ VELOCIDAD Y VOLUMEN APLICADOS a Web Speech
+      await ttsService.speak(text, {
+        voice: selectedVoice,
+        rate: speedToUse,
+        volume: volumeToUse
+      });
+
+      // Limpiar cuando termina
       if (ttsIntervalRef.current) {
         clearInterval(ttsIntervalRef.current);
       }
-    } else if (audioRef.current) {
-      audioRef.current.pause();
       setIsPlaying(false);
-    }
-  };
-
-  const togglePlay = () => {
-    if (isPlaying) {
-      pauseAudio();
-    } else {
-      playAudio();
+      setProgress(0);
+      setCurrentTime(0);
+      if (onComplete) {
+        onComplete();
+      }
+    } catch (err) {
+      logger.error('Error en TTS:', err);
+      if (ttsIntervalRef.current) {
+        clearInterval(ttsIntervalRef.current);
+      }
+      setIsPlaying(false);
     }
   };
 
   const toggleMute = () => {
-    if (useTTS) {
-      setIsMuted(!isMuted);
-    } else if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
 
-  const restart = () => {
-    if (useTTS) {
-      ttsService.stop();
-      if (ttsIntervalRef.current) {
-        clearInterval(ttsIntervalRef.current);
-      }
-      setProgress(0);
-      setCurrentTime(0);
-      playTTS();
-    } else if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      setProgress(0);
-      setCurrentTime(0);
-      playAudio();
+    if (audioRef.current) {
+      audioRef.current.muted = newMuted;
     }
-  };
-
-  const handleProgressClick = (e) => {
-    if (useTTS) {
-      // TTS no soporta seek, reiniciar desde el principio
-      restart();
-    } else if (audioRef.current) {
-      const bounds = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - bounds.left;
-      const width = bounds.width;
-      const percentage = x / width;
-      const newTime = percentage * duration;
-      audioRef.current.currentTime = newTime;
+    // ✅ Aplicar mute a audio generado por TTS/ElevenLabs
+    if (ttsAudioRef.current) {
+      ttsAudioRef.current.muted = newMuted;
     }
   };
 
@@ -266,85 +411,200 @@ function AudioPlayer({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // ✅ Guardar cambios de velocidad en localStorage
+  const handleSpeedChange = (newSpeed) => {
+    setPlaybackSpeed(newSpeed);
+
+    // Guardar en la configuración del personaje
+    if (characterName) {
+      try {
+        const saved = localStorage.getItem('xiwen_character_voices');
+        if (saved) {
+          const configs = JSON.parse(saved);
+          const character = characters.find(c => c.name === characterName);
+          const charId = character?.id || characterName;
+
+          if (configs[charId]) {
+            configs[charId].voiceConfig.rate = newSpeed;
+            localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+            logger.info(`💾 Velocidad guardada para ${characterName}: ${newSpeed}x`);
+          }
+        }
+      } catch (err) {
+        logger.error('Error saving speed:', err);
+      }
+    }
+  };
+
+  // Determinar el provider actual basado en voiceConfig
+  const effectiveVoiceConfig = voiceConfig || { provider: 'browser', rate: playbackSpeed };
+  const isElevenLabs = effectiveVoiceConfig.provider === 'elevenlabs';
+  const currentSpeed = effectiveVoiceConfig.rate || playbackSpeed;
+
   return (
-    <div className={`bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 ${className}`}>
-      {/* Audio element (solo si no usamos TTS) */}
-      {!useTTS && <audio ref={audioRef} src={audioUrl} preload="metadata" />}
-
-      <div className="flex items-center gap-3">
-        {/* Controles */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={togglePlay}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-          >
-            {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
-          </button>
-
-          <button
-            onClick={toggleMute}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
-          >
-            {isMuted ? (
-              <VolumeX size={18} className="text-gray-600 dark:text-gray-400" />
-            ) : (
-              <Volume2 size={18} className="text-blue-600 dark:text-blue-400" />
+    <div className={`audio-player ${className}`}>
+      <div className="flex flex-col gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        {/* Header con info del personaje y provider */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {characterName && (
+              <>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                  <User size={16} className="text-white" />
+                </div>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">
+                  {characterName}
+                </span>
+              </>
             )}
-          </button>
-
-          <button
-            onClick={restart}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"
-          >
-            <RotateCcw size={16} className="text-gray-600 dark:text-gray-400" />
-          </button>
-
-          {/* Indicador TTS */}
-          {useTTS && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-              <Mic size={12} className="text-purple-600 dark:text-purple-400" />
-              <span className="text-xs text-purple-700 dark:text-purple-300 font-medium">
-                IA
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Badge de velocidad */}
+            <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-bold">
+              {currentSpeed.toFixed(2)}x
+            </span>
+            {/* Badge de provider */}
+            {useTTS && (
+              <span className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${
+                isElevenLabs
+                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                  : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+              }`}>
+                {isElevenLabs ? (
+                  <>
+                    <Sparkles size={12} />
+                    ElevenLabs
+                  </>
+                ) : (
+                  <>
+                    <Globe size={12} />
+                    Navegador
+                  </>
+                )}
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="flex-1">
-          <div
-            onClick={handleProgressClick}
-            className="h-2 bg-blue-200 dark:bg-blue-800 rounded-full cursor-pointer overflow-hidden"
+        {/* Controles principales */}
+        <div className="flex items-center gap-3">
+          {/* Play/Pause Button - Hero style con animación de pulso */}
+          <button
+            onClick={isPlaying ? pauseAudio : playAudio}
+            className={`flex-shrink-0 w-12 h-12 flex items-center justify-center bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 hover:from-zinc-600 hover:to-zinc-800 dark:hover:from-zinc-500 dark:hover:to-zinc-700 text-white rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
+              isPlaying ? 'animate-pulse' : ''
+            }`}
+            title={isPlaying ? 'Pausar' : 'Reproducir'}
           >
+            {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
+          </button>
+
+          {/* Progress Bar - Modernizada */}
+          <div className="flex-1 space-y-2">
+            {/* Barra de progreso con animación */}
+            <div className="relative h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden group">
+            {/* Background glow effect */}
             <div
-              className="h-full bg-blue-600 dark:bg-blue-500 transition-all"
+              className="absolute inset-0 bg-gradient-to-r from-zinc-400 via-zinc-500 to-zinc-600 dark:from-zinc-500 dark:via-zinc-600 dark:to-zinc-700 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
               style={{ width: `${progress}%` }}
             />
+
+            {/* Progress fill con gradiente */}
+            <div
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-zinc-600 via-zinc-700 to-zinc-800 dark:from-zinc-500 dark:via-zinc-600 dark:to-zinc-700 transition-all duration-300 ease-out rounded-full"
+              style={{ width: `${progress}%` }}
+            >
+              {/* Animated shine effect */}
+              {isPlaying && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"
+                     style={{
+                       backgroundSize: '200% 100%',
+                       animation: 'shimmer 2s linear infinite'
+                     }}
+                />
+              )}
+            </div>
+
+            {/* Progress indicator dot */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white dark:bg-gray-100 rounded-full shadow-md border-2 border-zinc-700 dark:border-zinc-600 transition-all duration-300 opacity-0 group-hover:opacity-100"
+              style={{ left: `calc(${progress}% - 8px)` }}
+            />
           </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              {formatTime(currentTime)}
-            </span>
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              {formatTime(duration)}
-            </span>
+
+            {/* Time indicators */}
+            <div className="flex justify-between items-center text-xs font-medium text-gray-600 dark:text-gray-400">
+              <span className="tabular-nums">{formatTime(currentTime)}</span>
+              <span className="tabular-nums">{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          {/* Controls - Reorganizados y más grandes */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={resetAudio}
+              className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Reiniciar"
+            >
+              <RotateCcw size={20} className="text-gray-600 dark:text-gray-400" />
+            </button>
+
+            <button
+              onClick={toggleMute}
+              className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title={isMuted ? 'Activar sonido' : 'Silenciar'}
+            >
+              {isMuted ? (
+                <VolumeX size={20} className="text-gray-600 dark:text-gray-400" />
+              ) : (
+                <Volume2 size={20} className="text-gray-600 dark:text-gray-400" />
+              )}
+            </button>
+
+            {/* Separador vertical */}
+            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
+
+            {/* Control de velocidad - REDISEÑADO con botones grandes */}
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <button
+                onClick={() => handleSpeedChange(Math.max(0.5, playbackSpeed - 0.25))}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 rounded transition-colors font-bold text-gray-700 dark:text-gray-300"
+                title="Más lento"
+                disabled={playbackSpeed <= 0.5}
+              >
+                −
+              </button>
+              <div className="px-3 py-1 min-w-[60px] text-center">
+                <div className="text-sm font-bold text-gray-900 dark:text-white">
+                  {playbackSpeed.toFixed(2)}x
+                </div>
+                <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                  velocidad
+                </div>
+              </div>
+              <button
+                onClick={() => handleSpeedChange(Math.min(2.0, playbackSpeed + 0.25))}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 rounded transition-colors font-bold text-gray-700 dark:text-gray-300"
+                title="Más rápido"
+                disabled={playbackSpeed >= 2.0}
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Texto */}
+      {/* Show text if enabled */}
       {showText && text && (
-        <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+        <div className="mt-2 text-sm text-gray-700 dark:text-gray-300 px-3">
           {text}
         </div>
       )}
 
-      {/* Info TTS */}
-      {useTTS && (
-        <div className="mt-2 text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1">
-          <Mic size={12} />
-          <span>Voz generada por IA (Text-to-Speech)</span>
-        </div>
+      {/* Hidden audio element (usado solo si no es TTS) */}
+      {!useTTS && audioUrl && (
+        <audio ref={audioRef} src={audioUrl} preload="metadata" />
       )}
     </div>
   );
@@ -353,6 +613,22 @@ function AudioPlayer({
 AudioPlayer.propTypes = {
   audioUrl: PropTypes.string.isRequired,
   text: PropTypes.string,
+  voice: PropTypes.string,  // Voz específica (ej: 'es-AR-male-1') - DEPRECATED
+  voiceConfig: PropTypes.shape({
+    provider: PropTypes.oneOf(['browser', 'elevenlabs']),
+    voiceId: PropTypes.string,
+    voiceName: PropTypes.string,
+    rate: PropTypes.number,
+    pitch: PropTypes.number,
+    volume: PropTypes.number
+  }),
+  characterName: PropTypes.string,
+  characters: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired
+    })
+  ),
   autoPlay: PropTypes.bool,
   showText: PropTypes.bool,
   className: PropTypes.string,

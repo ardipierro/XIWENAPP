@@ -2,6 +2,7 @@ import logger from '../utils/logger';
 
 import { useState, useEffect } from 'react';
 import { subscribeToGameSession, markStudentConnected, submitStudentAnswer } from '../firebase/gameSession';
+import BaseButton from './common/BaseButton';
 import './LiveGameStudent.css';
 
 /**
@@ -65,9 +66,9 @@ function LiveGameStudent({ sessionId, studentName, onExit }) {
       <div className="live-game-student">
         <div className="student-error">
           <p>{error}</p>
-          <button onClick={onExit} className="btn btn-primary">
+          <BaseButton onClick={onExit} variant="primary">
             Volver
-          </button>
+          </BaseButton>
         </div>
       </div>
     );
@@ -78,9 +79,9 @@ function LiveGameStudent({ sessionId, studentName, onExit }) {
       <div className="live-game-student">
         <div className="student-error">
           <p>Sesión no encontrada</p>
-          <button onClick={onExit} className="btn btn-primary">
+          <BaseButton onClick={onExit} variant="primary">
             Volver
-          </button>
+          </BaseButton>
         </div>
       </div>
     );

@@ -2,6 +2,7 @@ import logger from '../utils/logger';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { subscribeToGameSession, startGame, pauseGame, resumeGame, finishGame, moveToNextQuestion } from '../firebase/gameSession';
+import BaseButton from './common/BaseButton';
 import './LiveGameProjection.css';
 
 /**
@@ -266,7 +267,7 @@ function LiveGameProjection({ sessionId, onBack }) {
       <div className="live-game-projection">
         <div className="error-state">
           <p>Sesión no encontrada</p>
-          <button onClick={onBack} className="btn btn-primary">Volver</button>
+          <BaseButton onClick={onBack} variant="primary">Volver</BaseButton>
         </div>
       </div>
     );
@@ -288,26 +289,26 @@ function LiveGameProjection({ sessionId, onBack }) {
         </div>
         <div className="projection-controls">
           {isWaiting && (
-            <button onClick={handleStart} className="btn btn-success btn-lg">
-              ▶ Iniciar Juego
-            </button>
+            <BaseButton onClick={handleStart} variant="success" size="lg" icon="▶">
+              Iniciar Juego
+            </BaseButton>
           )}
           {gameData.status === 'playing' && (
-            <button onClick={handlePause} className="btn btn-warning btn-lg">
-              ⏸ Pausar
-            </button>
+            <BaseButton onClick={handlePause} variant="warning" size="lg" icon="⏸">
+              Pausar
+            </BaseButton>
           )}
           {isPaused && (
-            <button onClick={handleResume} className="btn btn-success btn-lg">
-              ▶ Reanudar
-            </button>
+            <BaseButton onClick={handleResume} variant="success" size="lg" icon="▶">
+              Reanudar
+            </BaseButton>
           )}
-          <button onClick={handleEnd} className="btn btn-danger btn-lg">
-            ⏹ Terminar
-          </button>
-          <button onClick={onBack} className="btn btn-ghost btn-lg">
-            ← Salir
-          </button>
+          <BaseButton onClick={handleEnd} variant="danger" size="lg" icon="⏹">
+            Terminar
+          </BaseButton>
+          <BaseButton onClick={onBack} variant="ghost" size="lg" icon="←">
+            Salir
+          </BaseButton>
         </div>
       </div>
 

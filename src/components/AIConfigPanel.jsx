@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings } from 'lucide-react';
-import { getAIConfig, saveAIConfig, checkAICredentials } from '../firebase/aiConfig';
+import { Lightbulb, Filter, Settings, Play, CheckCircle } from 'lucide-react';
+import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 import {
   BaseButton,
@@ -18,7 +18,10 @@ import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
+import ImageGenerationDemo from './ImageGenerationDemo';
+import HomeworkCorrectionProfilesModal from './homework/HomeworkCorrectionProfilesModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
+import { useAuth } from '../contexts/AuthContext';
 
 function AIConfigPanel() {
   // ============================================================================
@@ -33,40 +36,18 @@ function AIConfigPanel() {
   const [viewMode, setViewMode] = useState('grid');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [credentials, setCredentials] = useState({
-    claude: true,
-    openai: true,
-    gemini: true,
-    grok: true
-  });
+  const [showImageDemo, setShowImageDemo] = useState(false);
+  const [showCorrectionProfiles, setShowCorrectionProfiles] = useState(false);
 
+  // Get current user and role
+  const { user, userRole } = useAuth();
 
   // ============================================================================
   // EFECTOS - Cargar config al montar
   // ============================================================================
   useEffect(() => {
     loadConfig();
-    loadCredentials();
   }, []);
-
-  /**
-   * Cargar estado de credenciales desde Secret Manager
-   */
-  const loadCredentials = async () => {
-    try {
-      logger.info('[AIConfigPanel] Loading credentials...');
-      const credStatus = await checkAICredentials();
-      logger.info('[AIConfigPanel] Credentials loaded:', credStatus);
-      setCredentials(credStatus);
-      logger.info('AI credentials status loaded:', credStatus);
-    } catch (err) {
-      logger.error('[AIConfigPanel] Failed to load credentials:', err);
-      logger.error('Failed to load credentials status:', err);
-      // Keep default values on error (already set in useState)
-      logger.info('[AIConfigPanel] Using default credentials');
-      logger.info('Using default credentials status');
-    }
-  };
 
   // ============================================================================
   // FUNCIONES - Lógica de negocio
@@ -202,12 +183,20 @@ function AIConfigPanel() {
    */
   const getEnabledCount = () => {
     if (!config || !config.functions) return 0;
-    return Object.values(config.functions).filter(f => f.enabled).length;
+    // Solo contar funciones que están en AI_FUNCTIONS (no custom)
+    return AI_FUNCTIONS.filter(func => {
+      const funcConfig = config.functions[func.id];
+      return funcConfig?.enabled;
+    }).length;
   };
 
   const getConfiguredCount = () => {
     if (!config || !config.functions) return 0;
-    return Object.values(config.functions).filter(f => f.provider && f.model).length;
+    // Solo contar funciones que están en AI_FUNCTIONS (no custom)
+    return AI_FUNCTIONS.filter(func => {
+      const funcConfig = config.functions[func.id];
+      return funcConfig?.provider && funcConfig?.model;
+    }).length;
   };
 
   // ============================================================================
@@ -241,40 +230,91 @@ function AIConfigPanel() {
     );
   }
 
+  // Si está mostrando el demo de imágenes, renderizar solo ese componente
+  if (showImageDemo) {
+    return (
+      <div className="ai-config-panel">
+        <BaseButton
+          variant="outline"
+          onClick={() => setShowImageDemo(false)}
+          className="mb-6"
+        >
+          ← Volver a Tareas IA
+        </BaseButton>
+        <ImageGenerationDemo />
+      </div>
+    );
+  }
+
   // ============================================================================
   // RENDER PRINCIPAL
   // ============================================================================
   return (
     <div className="ai-config-panel">
       {/* Header */}
-      <PageHeader
-        icon={Lightbulb}
-        title="Configuración de IA"
-        actionLabel="+ Crear Nueva Configuración"
-        onAction={() => {
-          const newFunction = {
-            id: `custom_${Date.now()}`,
-            name: 'Nueva Función de IA',
-            description: 'Configura esta función personalizada',
-            icon: Settings,
-            category: 'content',
-            defaultConfig: {
-              enabled: false,
-              provider: '',
-              model: '',
-              apiKey: '',
-              systemPrompt: '',
-              parameters: {
-                temperature: 0.7,
-                maxTokens: 2000,
-                topP: 1
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+        <PageHeader
+          icon={Lightbulb}
+          title="Tareas IA"
+          actionLabel="+ Crear Nueva Configuración"
+          onAction={() => {
+            const newFunction = {
+              id: `custom_${Date.now()}`,
+              name: 'Nueva Función de IA',
+              description: 'Configura esta función personalizada',
+              icon: Settings,
+              category: 'content',
+              defaultConfig: {
+                enabled: false,
+                provider: '',
+                model: '',
+                apiKey: '',
+                systemPrompt: '',
+                parameters: {
+                  temperature: 0.7,
+                  maxTokens: 2000,
+                  topP: 1
+                }
               }
-            }
-          };
-          setSelectedFunction(newFunction);
-          setModalOpen(true);
-        }}
-      />
+            };
+            setSelectedFunction(newFunction);
+            setModalOpen(true);
+          }}
+        />
+
+        {/* Botón de Tareas de Demostración */}
+        <BaseButton
+          variant="primary"
+          icon={Play}
+          onClick={() => setShowImageDemo(true)}
+          className="whitespace-nowrap"
+        >
+          Tareas de Demostración
+        </BaseButton>
+      </div>
+
+      {/* ✨ NEW: Homework Correction Profiles Section */}
+      <div className="mb-8 p-6 bg-zinc-50 dark:bg-zinc-900 rounded-lg border-2 border-primary-200 dark:border-primary-800">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="text-primary-600 dark:text-primary-400" size={24} strokeWidth={2} />
+            <div>
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                Perfiles de Corrección de Tareas
+              </h3>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Configura cómo se corrigen las tareas según el nivel de cada alumno
+              </p>
+            </div>
+          </div>
+          <BaseButton
+            variant="primary"
+            onClick={() => setShowCorrectionProfiles(true)}
+          >
+            Gestionar Perfiles
+          </BaseButton>
+        </div>
+      </div>
 
       {/* Description and Stats */}
       <div className="mb-6">
@@ -374,7 +414,6 @@ function AIConfigPanel() {
               config={config.functions[func.id]}
               onConfigure={() => handleConfigureFunction(func.id)}
               viewMode="grid"
-              credentials={credentials}
             />
           ))}
         </div>
@@ -388,7 +427,6 @@ function AIConfigPanel() {
               config={config.functions[func.id]}
               onConfigure={() => handleConfigureFunction(func.id)}
               viewMode="list"
-              credentials={credentials}
             />
           ))}
         </div>
@@ -405,6 +443,15 @@ function AIConfigPanel() {
           onSave={handleSaveFunction}
         />,
         document.body
+      )}
+
+      {/* ✨ NEW: Correction Profiles Modal */}
+      {showCorrectionProfiles && user && (
+        <HomeworkCorrectionProfilesModal
+          onClose={() => setShowCorrectionProfiles(false)}
+          teacherId={user.uid}
+          userRole={userRole}
+        />
       )}
     </div>
   );

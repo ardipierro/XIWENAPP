@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { X, Video, Presentation, PenTool, Maximize2, Minimize2 } from 'lucide-react';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { X, Video, Presentation, PenTool, Maximize2, Minimize2, Users, Clock } from 'lucide-react';
 import logger from '../utils/logger';
 import LiveClassRoom from './LiveClassRoom';
 import Whiteboard from './Whiteboard';
-import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
+const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import { BaseButton, BaseLoading, BaseAlert } from './common';
 import { getClassSession } from '../firebase/classSessions';
 import { createWhiteboardSession } from '../firebase/whiteboard';
@@ -121,6 +121,68 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
   const renderVideoPanel = () => {
     if (!sessionData || sessionData.mode !== 'live') return null;
 
+    // Si hay link de Google Meet, NO usar LiveKit - solo mostrar el link
+    if (sessionData.meetLink) {
+      return (
+        <div className="h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-8">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-2xl w-full text-center">
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Video className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {sessionData.name}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Clase en vivo con Google Meet
+              </p>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-gray-700 rounded-lg p-6 mb-6">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Link de la reunión:
+              </p>
+              <div className="flex items-center gap-3 bg-white dark:bg-gray-600 rounded-lg p-3 mb-4">
+                <code className="flex-1 text-sm text-gray-800 dark:text-gray-200 break-all">
+                  {sessionData.meetLink}
+                </code>
+                <BaseButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigator.clipboard.writeText(sessionData.meetLink)}
+                >
+                  Copiar
+                </BaseButton>
+              </div>
+              <BaseButton
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={() => window.open(sessionData.meetLink, '_blank')}
+                icon={Video}
+              >
+                Abrir Google Meet
+              </BaseButton>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <span className="flex items-center gap-2">
+                <Users size={16} />
+                {sessionData.participants?.length || 0} participantes
+              </span>
+              {sessionData.duration && (
+                <span className="flex items-center gap-2">
+                  <Clock size={16} />
+                  {sessionData.duration} min
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Si NO hay meetLink, usar LiveKit (videoconferencia integrada)
     return (
       <div className="h-full bg-gray-900">
         <LiveClassRoom
@@ -159,11 +221,13 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
     if (sessionData.whiteboardType === 'excalidraw') {
       return (
         <div className="h-full">
-          <ExcalidrawWhiteboard
-            sessionId={whiteboardSessionId}
-            isReadOnly={sessionData.teacherId !== user.uid}
-            mode="embedded"
-          />
+          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Cargando pizarra...</div>}>
+            <ExcalidrawWhiteboard
+              sessionId={whiteboardSessionId}
+              isReadOnly={sessionData.teacherId !== user.uid}
+              mode="embedded"
+            />
+          </Suspense>
         </div>
       );
     }

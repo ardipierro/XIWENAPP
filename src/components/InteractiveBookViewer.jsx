@@ -23,13 +23,15 @@ import {
   Trophy
 } from 'lucide-react';
 import logger from '../utils/logger';
+import './interactive-book/styles.css';
 import {
   BaseCard,
   BaseButton,
   BaseBadge,
   BaseLoading,
   BaseAlert,
-  BaseEmptyState
+  BaseEmptyState,
+  useModal
 } from './common';
 import {
   AudioPlayer,
@@ -37,10 +39,12 @@ import {
   MultipleChoiceExercise,
   VocabularyMatchingExercise,
   DragDropMenuExercise,
-  TTSSettings,
+  ConjugationExercise,
+  ListeningComprehensionExercise,
   DialogueBubble,
-  ViewCustomizer
+  FullDialoguePlayer
 } from './interactive-book';
+import SettingsModal from './SettingsModal';
 
 /**
  * Visualizador del libro interactivo ADE1
@@ -55,7 +59,49 @@ function InteractiveBookViewer() {
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [totalPoints, setTotalPoints] = useState(0);
   const [exerciseResults, setExerciseResults] = useState({});
-  const [viewSettings, setViewSettings] = useState(null);
+  const [viewSettings, setViewSettings] = useState({ spacing: 'normal' }); // View settings for layout
+  const [showMetadataBadges, setShowMetadataBadges] = useState(true); // Mostrar/ocultar badges
+  const [characters, setCharacters] = useState([]); // Personajes del libro
+  const settingsModal = useModal();
+
+  // Cargar configuración de badges desde localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('xiwen_display_settings');
+    if (saved) {
+      try {
+        const settings = JSON.parse(saved);
+        if (settings.showMetadataBadges !== undefined) {
+          setShowMetadataBadges(settings.showMetadataBadges);
+        }
+      } catch (err) {
+        console.error('Error loading display settings:', err);
+      }
+    }
+
+    // Escuchar cambios en localStorage (cuando se cambia en SettingsModal)
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('xiwen_display_settings');
+      if (saved) {
+        try {
+          const settings = JSON.parse(saved);
+          if (settings.showMetadataBadges !== undefined) {
+            setShowMetadataBadges(settings.showMetadataBadges);
+          }
+        } catch (err) {
+          console.error('Error loading display settings:', err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // También escuchar eventos custom para cambios en la misma pestaña
+    window.addEventListener('xiwen_settings_changed', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('xiwen_settings_changed', handleStorageChange);
+    };
+  }, []);
 
   useEffect(() => {
     loadBookData();
@@ -75,6 +121,18 @@ function InteractiveBookViewer() {
       const data = await response.json();
       setBookData(data);
       logger.info('📚 Libro interactivo cargado:', data.metadata);
+
+      // Extraer personajes únicos del diálogo
+      const allCharacters = new Set();
+      data.units?.forEach(unit => {
+        unit.content?.dialogue?.characters?.forEach(char => {
+          allCharacters.add(JSON.stringify({ id: char.id, name: char.name }));
+        });
+      });
+
+      const charactersList = Array.from(allCharacters).map(char => JSON.parse(char));
+      setCharacters(charactersList);
+      logger.info('👥 Personajes encontrados:', charactersList);
     } catch (err) {
       logger.error('Error cargando libro:', err);
       setError('No se pudo cargar el libro interactivo. Asegurate de que el archivo ADE1_enriched_SAMPLE.json esté en la carpeta public/');
@@ -170,39 +228,55 @@ function InteractiveBookViewer() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          <BaseBadge variant={metadata.features.interactiveExercises ? 'success' : 'default'}>
-            Ejercicios Interactivos
-          </BaseBadge>
-          <BaseBadge variant={metadata.features.audioPlayback ? 'success' : 'default'}>
-            Audio
-          </BaseBadge>
-          <BaseBadge variant={metadata.features.darkMode ? 'success' : 'default'}>
-            Modo Oscuro
-          </BaseBadge>
-          <BaseBadge variant={metadata.features.offlineMode ? 'success' : 'default'}>
-            Offline
-          </BaseBadge>
-          <BaseBadge variant={metadata.features.progressTracking ? 'success' : 'default'}>
-            Seguimiento
-          </BaseBadge>
-        </div>
+        {showMetadataBadges && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            <BaseBadge variant={metadata.features.interactiveExercises ? 'success' : 'default'}>
+              Ejercicios Interactivos
+            </BaseBadge>
+            <BaseBadge variant={metadata.features.audioPlayback ? 'success' : 'default'}>
+              Audio
+            </BaseBadge>
+            <BaseBadge variant={metadata.features.darkMode ? 'success' : 'default'}>
+              Modo Oscuro
+            </BaseBadge>
+            <BaseBadge variant={metadata.features.offlineMode ? 'success' : 'default'}>
+              Offline
+            </BaseBadge>
+            <BaseBadge variant={metadata.features.progressTracking ? 'success' : 'default'}>
+              Seguimiento
+            </BaseBadge>
+          </div>
+        )}
 
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-semibold">Creado:</span> {metadata.createdAt}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="font-semibold">Creado:</span> {metadata.createdAt}
+          </div>
+
+          {/* Botón de Configuración */}
+          <BaseButton
+            variant="primary"
+            icon={Settings}
+            onClick={settingsModal.open}
+            size="sm"
+          >
+            Configuración
+          </BaseButton>
         </div>
       </BaseCard>
     );
   };
 
-  const renderDialogueLine = (line, index, totalLines) => {
+  const renderDialogueLine = (line, index, totalLines, characters = []) => {
     return (
       <DialogueBubble
         key={line.lineId}
         line={line}
         index={index}
         totalLines={totalLines}
+        characters={characters}
         onExerciseComplete={handleExerciseComplete}
+        viewSettings={viewSettings}
       />
     );
   };
@@ -229,7 +303,25 @@ function InteractiveBookViewer() {
         );
 
       case 'conjugation_fill_blank':
+        return (
+          <ConjugationExercise
+            key={exercise.exerciseId || index}
+            exercise={exercise}
+            onComplete={(result) => handleExerciseComplete(exercise.exerciseId, result)}
+          />
+        );
+
       case 'listening_comprehension':
+        return (
+          <ListeningComprehensionExercise
+            key={exercise.exerciseId || index}
+            exercise={exercise}
+            onComplete={(result) => handleExerciseComplete(exercise.exerciseId, result)}
+          />
+        );
+
+      case 'role_play_creator':
+      case 'audio_comprehension':
       default:
         // Ejercicios no implementados aún - mostrar card informativa
         const ExerciseIcon = getExerciseIcon(exercise.type);
@@ -239,7 +331,7 @@ function InteractiveBookViewer() {
             icon={ExerciseIcon}
             title={exercise.title}
             subtitle={exercise.instructions}
-            badges={[
+            badges={showMetadataBadges ? [
               <BaseBadge key="type" variant="primary">
                 {exercise.type}
               </BaseBadge>,
@@ -262,7 +354,7 @@ function InteractiveBookViewer() {
                   {exercise.points} pts
                 </BaseBadge>
               )
-            ].filter(Boolean)}
+            ].filter(Boolean) : []}
           >
             <div className="text-sm text-gray-600 dark:text-gray-400">
               {exercise.type === 'conjugation_fill_blank' && exercise.questions && (
@@ -311,12 +403,16 @@ function InteractiveBookViewer() {
                 Unidad {unit.unitNumber}: {unit.title}
               </h3>
               <div className="flex items-center gap-2 mt-1">
-                <BaseBadge variant="primary" size="sm">
-                  {unit.type}
-                </BaseBadge>
-                <BaseBadge variant="info" size="sm">
-                  {unit.cefrLevel}
-                </BaseBadge>
+                {showMetadataBadges && (
+                  <>
+                    <BaseBadge variant="primary" size="sm">
+                      {unit.type}
+                    </BaseBadge>
+                    <BaseBadge variant="info" size="sm">
+                      {unit.cefrLevel}
+                    </BaseBadge>
+                  </>
+                )}
                 <span className="text-xs text-gray-600 dark:text-gray-400">
                   {unit.estimatedDuration} min
                 </span>
@@ -366,9 +462,20 @@ function InteractiveBookViewer() {
                   <MessageSquare size={18} />
                   Diálogo Interactivo
                 </h4>
-                <div className="space-y-1">
+
+                {/* Reproductor de diálogo completo */}
+                <FullDialoguePlayer
+                  dialogue={unit.content.dialogue}
+                  onComplete={() => logger.info('Diálogo completo reproducido')}
+                />
+
+                <div className={
+                  viewSettings?.spacing === 'compact' ? 'space-y-2' :
+                  viewSettings?.spacing === 'spacious' ? 'space-y-6' :
+                  'space-y-4'
+                }>
                   {unit.content.dialogue.lines.map((line, idx) =>
-                    renderDialogueLine(line, idx, unit.content.dialogue.lines.length)
+                    renderDialogueLine(line, idx, unit.content.dialogue.lines.length, unit.content.dialogue.characters)
                   )}
                 </div>
                 {unit.content.dialogue.fullAudioUrl && (
@@ -424,7 +531,7 @@ function InteractiveBookViewer() {
             )}
 
             {/* Tags */}
-            {unit.tags && unit.tags.length > 0 && (
+            {showMetadataBadges && unit.tags && unit.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {unit.tags.map((tag, idx) => (
                   <BaseBadge key={idx} variant="default" size="sm">
@@ -490,8 +597,8 @@ function InteractiveBookViewer() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="app-container min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="content-container interactive-book-container p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -556,11 +663,12 @@ function InteractiveBookViewer() {
             {/* Metadata */}
             {renderMetadata()}
 
-            {/* Configuración TTS */}
-            <TTSSettings />
-
-            {/* Configuración de Vista */}
-            <ViewCustomizer onSettingsChange={setViewSettings} />
+            {/* Modal de Configuración */}
+            <SettingsModal
+              isOpen={settingsModal.isOpen}
+              onClose={settingsModal.close}
+              characters={characters}
+            />
 
             {/* Unidades */}
             <div className="space-y-4">

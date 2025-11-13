@@ -9,7 +9,8 @@ import BaseButton from './common/BaseButton';
 import BaseSelect from './common/BaseSelect';
 import BaseTextarea from './common/BaseTextarea';
 import BaseAlert from './common/BaseAlert';
-import AIService from '../services/AIService';
+import BaseInput from './common/BaseInput';
+import aiService from '../services/aiService';
 import { AI_PROVIDERS } from '../constants/aiFunctions';
 import { callAI, getAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';
@@ -489,7 +490,7 @@ const ExerciseGeneratorContent = ({ onNavigateToAIConfig, onExercisesGenerated }
   });
 
   // AI Provider state
-  const [selectedProvider, setSelectedProvider] = useState(AIService.getCurrentProvider() || 'openai');
+  const [selectedProvider, setSelectedProvider] = useState(aiService.getCurrentProvider() || 'openai');
   const [availableProviders, setAvailableProviders] = useState([]);
 
   // AI Configuration state
@@ -509,7 +510,7 @@ const ExerciseGeneratorContent = ({ onNavigateToAIConfig, onExercisesGenerated }
 
   // Load available providers on mount
   useEffect(() => {
-    const providers = AIService.getAvailableProviders();
+    const providers = aiService.getAvailableProviders();
     setAvailableProviders(providers);
   }, []);
 
@@ -517,7 +518,7 @@ const ExerciseGeneratorContent = ({ onNavigateToAIConfig, onExercisesGenerated }
   const handleProviderChange = (e) => {
     const providerName = e.target.value;
     setSelectedProvider(providerName);
-    AIService.setProvider(providerName);
+    aiService.setProvider(providerName);
     setError(null);
   };
 
@@ -771,23 +772,16 @@ IMPORTANTE:
 
             {/* Max Tokens */}
             {currentProvider.supportsMaxTokens && (
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Max Tokens
-                </label>
-                <input
-                  type="number"
-                  min="100"
-                  max="4000"
-                  step="100"
-                  value={aiConfig.maxTokens}
-                  onChange={(e) => handleAiConfigChange('maxTokens', parseInt(e.target.value))}
-                  className="input w-full"
-                />
-                <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
-                  Longitud máxima de respuesta
-                </p>
-              </div>
+              <BaseInput
+                type="number"
+                label="Max Tokens"
+                min="100"
+                max="4000"
+                step="100"
+                value={aiConfig.maxTokens}
+                onChange={(e) => handleAiConfigChange('maxTokens', parseInt(e.target.value))}
+                helperText="Longitud máxima de respuesta"
+              />
             )}
 
             {/* Top P */}
@@ -902,12 +896,12 @@ IMPORTANTE:
 
       {/* Exercises Display */}
       {hasExercises && (
-        <div className="space-y-6 pt-6 border-t-2 border-gray-200 dark:border-gray-700">
+        <div className="space-y-6 pt-6 border-t-2 border-zinc-200 dark:border-zinc-700">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
               Ejercicios Generados ({exercises.length})
             </h3>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-sm text-zinc-600 dark:text-zinc-400">
               Completados: {Object.keys(completedExercises).length} / {exercises.length}
             </div>
           </div>
@@ -915,7 +909,7 @@ IMPORTANTE:
           {exercises.map((exercise, index) => (
             <div
               key={index}
-              className="p-6 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700"
+              className="p-6 bg-white dark:bg-zinc-800 rounded-xl border-2 border-zinc-200 dark:border-zinc-700"
             >
               <div className="flex items-center gap-2 mb-4">
                 <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full text-sm font-semibold">

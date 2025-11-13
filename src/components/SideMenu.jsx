@@ -24,16 +24,16 @@ import {
   CalendarDays,
   CheckSquare,
   FileCheck,
+  CheckCircle,
   MessageCircle,
   DollarSign,
   Shield,
   Settings,
   Lightbulb,
   UsersRound,
-  Palette,
   Layers,
   Sparkles,
-  FlaskConical
+  BookMarked
 } from 'lucide-react';
 import './SideMenu.css';
 
@@ -82,7 +82,8 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
               { icon: ClipboardList, label: 'Asistencias', path: '/admin', action: 'attendance' },
-              { icon: Lightbulb, label: 'Configuración IA', path: '/admin', action: 'aiConfig' },
+              { icon: CheckCircle, label: 'Revisar Tareas', path: '/admin', action: 'homeworkReview' },
+              { icon: Lightbulb, label: 'Tareas IA', path: '/admin', action: 'aiConfig' },
               { icon: Settings, label: 'Configuración', path: '/admin', action: 'settings' },
             ]
           },
@@ -90,11 +91,10 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
             id: 'ensenanza',
             label: 'Herramientas de Enseñanza',
             items: [
-              { icon: Palette, label: 'Theme Builder', path: '/admin', action: 'themeBuilder' },
               { icon: Layers, label: 'Exercise Builder', path: '/admin', action: 'exerciseBuilder' },
-              { icon: FlaskConical, label: 'Design Lab', path: '/admin', action: 'designLab' },
               { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
-              // Juego en Vivo movido a dashboard como acceso rápido
+              { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
+              // Theme Builder y Design Lab desactivados temporalmente
             ]
           }
         ]
@@ -110,14 +110,14 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
           { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classSessions' },
           { icon: CheckSquare, label: 'Tareas', path: '/teacher', action: 'assignments' },
           { icon: FileCheck, label: 'Calificar', path: '/teacher', action: 'grading' },
+          { icon: CheckCircle, label: 'Revisar Tareas', path: '/teacher', action: 'homeworkReview' },
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
-          { icon: Palette, label: 'Theme Builder', path: '/teacher', action: 'themeBuilder' },
           { icon: Layers, label: 'Exercise Builder', path: '/teacher', action: 'exerciseBuilder' },
-          { icon: FlaskConical, label: 'Design Lab', path: '/teacher', action: 'designLab' },
           { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
-          // Juego en Vivo movido a dashboard como acceso rápido
+          { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
+          // Theme Builder y Design Lab desactivados temporalmente
         ]
       };
     }
@@ -127,8 +127,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         items: [
           { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },
           { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
-          { icon: ClipboardList, label: 'Asignado a Mí', path: '/student', action: 'assignments' },
-          { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'assignmentsView' },
+          { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'quickCorrection' },
           { icon: Trophy, label: 'Gamificación', path: '/student', action: 'gamification' },
           { icon: CalendarDays, label: 'Calendario', path: '/student', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/student', action: 'messages' },

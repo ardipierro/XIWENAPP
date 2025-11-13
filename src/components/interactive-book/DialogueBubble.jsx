@@ -6,80 +6,118 @@
 import { useState } from 'react';
 import { User, ChevronDown, ChevronUp, Volume2, HelpCircle, Languages } from 'lucide-react';
 import PropTypes from 'prop-types';
-import AudioPlayer from './AudioPlayer';
-import FillInBlankExercise from './FillInBlankExercise';
-import MultipleChoiceExercise from './MultipleChoiceExercise';
+import DialogueExtras from './DialogueExtras';
 import { BaseBadge } from '../common';
+import { getCharacterVoiceConfig } from './CharacterVoiceManager';
 
 /**
  * Componente de burbuja de diálogo estilo WhatsApp/iMessage
  */
-function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
+function DialogueBubble({ line, index, totalLines, characters = [], onExerciseComplete, viewSettings }) {
   const [showExtras, setShowExtras] = useState(false);
-  const [showTranslation, setShowTranslation] = useState(false);
+
+  // Aplicar configuraciones de vista
+  const settings = viewSettings || {
+    bubbleStyle: 'rounded',
+    colorScheme: 'default',
+    fontSize: 'medium',
+    spacing: 'comfortable',
+    showAvatars: true,
+    showBadges: true
+  };
+
+  // Obtener la voz del personaje desde su configuración
+  const character = characters.find(c => c.id === line.character);
+  const characterId = character?.id || line.character;
+  const voiceConfig = getCharacterVoiceConfig(characterId);
 
   // Alternar entre derecha (par) e izquierda (impar) basado en el personaje
   const isRight = index % 2 === 0;
   const hasExtras = line.notes?.length > 0 || line.translation || line.audioUrl;
   const hasExercise = line.interactiveType && line.exercise;
 
-  // Colores por personaje (puedes personalizarlos)
-  const getCharacterColor = (character) => {
-    const colors = {
-      'mozo': 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700',
-      'sofia': 'bg-pink-100 dark:bg-pink-900/30 border-pink-300 dark:border-pink-700',
-      'andres': 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700',
-      'default': 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700'
-    };
-    return colors[character.toLowerCase()] || colors.default;
+  // ✅ Avatares SIEMPRE visibles (sin configuración)
+  // Colores según personaje (hash simple del nombre)
+  const getAvatarColor = (name) => {
+    const colors = [
+      'from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700',
+      'from-purple-400 to-purple-600 dark:from-purple-500 dark:to-purple-700',
+      'from-pink-400 to-pink-600 dark:from-pink-500 dark:to-pink-700',
+      'from-green-400 to-green-600 dark:from-green-500 dark:to-green-700',
+      'from-orange-400 to-orange-600 dark:from-orange-500 dark:to-orange-700',
+      'from-teal-400 to-teal-600 dark:from-teal-500 dark:to-teal-700'
+    ];
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
   };
 
-  const bubbleColor = getCharacterColor(line.character);
-
   return (
-    <div className={`flex gap-3 mb-4 ${isRight ? 'flex-row-reverse' : 'flex-row'}`}>
-      {/* Avatar */}
+    <div className={`flex gap-4 mb-6 ${isRight ? 'flex-row-reverse' : 'flex-row'}`}>
+      {/* Avatar - SIEMPRE VISIBLE, colores por personaje */}
       <div className="flex-shrink-0">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-md">
-          <User size={24} className="text-gray-700 dark:text-gray-300" />
+        <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${getAvatarColor(line.character)} flex items-center justify-center border-3 border-white dark:border-gray-800 shadow-lg`}>
+          <User size={32} className="text-white" />
         </div>
       </div>
 
       {/* Burbuja de diálogo */}
       <div className={`flex-1 max-w-[75%] ${isRight ? 'items-end' : 'items-start'} flex flex-col`}>
-        {/* Nombre del personaje */}
-        <div className={`text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1 px-2 ${isRight ? 'text-right' : 'text-left'}`}>
+        {/* Nombre del personaje - AUMENTADO 50% */}
+        <div className={`text-lg font-bold text-gray-900 dark:text-white mb-2 px-2 ${isRight ? 'text-right' : 'text-left'}`}>
           {line.character}
         </div>
 
         {/* Burbuja principal */}
-        <div className={`relative rounded-2xl border-2 ${bubbleColor} px-4 py-3 shadow-sm ${isRight ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
-          {/* Texto del diálogo */}
-          <p className="text-base text-gray-900 dark:text-white leading-relaxed">
+        <div
+          className={`relative ${isRight ? 'rounded-tr-none' : 'rounded-tl-none'}`}
+          style={{
+            backgroundColor: isRight ? 'var(--bubble-bg-right)' : 'var(--bubble-bg-left)',
+            color: isRight ? 'var(--bubble-text-right)' : 'var(--bubble-text-left)',
+            borderRadius: 'var(--bubble-border-radius)',
+            borderWidth: 'var(--bubble-border-width)',
+            borderStyle: 'var(--bubble-border-style)',
+            borderColor: 'var(--bubble-border-color)',
+            padding: 'var(--bubble-padding)',
+            fontFamily: 'var(--book-font-family)',
+            fontSize: 'var(--book-font-size)',
+            lineHeight: 'var(--book-line-height)',
+            fontWeight: 'var(--book-font-weight)',
+            boxShadow: 'var(--card-shadow)'
+          }}
+        >
+          {/* Texto del diálogo - AUMENTADO 25% con mínimo de 18px */}
+          <p style={{
+            margin: 0,
+            fontSize: 'max(18px, var(--book-font-size))',
+            lineHeight: 'var(--book-line-height, 1.6)',
+            fontWeight: 'var(--book-font-weight, 400)'
+          }}>
             {line.text}
           </p>
 
-          {/* Badges de interacción */}
-          <div className="flex gap-1 mt-2 flex-wrap">
-            {line.audioUrl && (
-              <BaseBadge variant="info" size="sm">
-                <Volume2 size={10} className="mr-1" />
-                Audio
-              </BaseBadge>
-            )}
-            {line.translation && (
-              <BaseBadge variant="default" size="sm">
-                <Languages size={10} className="mr-1" />
-                中文
-              </BaseBadge>
-            )}
-            {hasExercise && (
-              <BaseBadge variant="success" size="sm">
-                <HelpCircle size={10} className="mr-1" />
-                Ejercicio
-              </BaseBadge>
-            )}
-          </div>
+          {/* Badges de interacción - REDUCIDOS */}
+          {settings.showBadges && (
+            <div className="flex gap-1 mt-2 flex-wrap">
+              {line.audioUrl && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-[10px] font-medium">
+                  <Volume2 size={10} />
+                  Audio
+                </span>
+              )}
+              {line.translation && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-[10px] font-medium">
+                  <Languages size={10} />
+                  中文
+                </span>
+              )}
+              {hasExercise && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-[10px] font-medium">
+                  <HelpCircle size={10} />
+                  Ejercicio
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Botón para expandir extras */}
@@ -102,85 +140,19 @@ function DialogueBubble({ line, index, totalLines, onExerciseComplete }) {
           </button>
         )}
 
-        {/* Panel expandible con extras */}
+        {/* Panel expandible con extras - Sistema de tabs */}
         {showExtras && (
-          <div className="mt-3 w-full space-y-3 animate-in slide-in-from-top-2 duration-200">
-            {/* Audio Player */}
-            {line.audioUrl && (
-              <AudioPlayer
-                audioUrl={line.audioUrl}
-                text={line.text}
-                showText={false}
-                className="text-xs"
-              />
-            )}
-
-            {/* Traducción */}
-            {line.translation && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <button
-                  onClick={() => setShowTranslation(!showTranslation)}
-                  className="w-full flex items-center justify-between text-sm font-medium text-amber-900 dark:text-amber-100"
-                >
-                  <span className="flex items-center gap-2">
-                    <Languages size={14} />
-                    Traducción al chino
-                  </span>
-                  {showTranslation ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-                {showTranslation && (
-                  <p className="mt-2 text-sm text-amber-800 dark:text-amber-200">
-                    {line.translation}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Notas */}
-            {line.notes && line.notes.length > 0 && (
-              <div className="space-y-2">
-                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  📝 Notas y vocabulario
-                </div>
-                {line.notes.map((note, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded text-xs"
-                  >
-                    <span className="font-semibold text-purple-900 dark:text-purple-200">
-                      {note.word}:
-                    </span>{' '}
-                    <span className="text-purple-800 dark:text-purple-300">
-                      {note.definition}
-                    </span>
-                    {note.rioplatenseNote && (
-                      <div className="mt-1 text-purple-700 dark:text-purple-400">
-                        🇦🇷 {note.rioplatenseNote}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Ejercicio interactivo */}
-            {hasExercise && (
-              <div className="border-t-2 border-dashed border-gray-300 dark:border-gray-700 pt-3">
-                {line.exercise.type === 'fill_in_blank' && (
-                  <FillInBlankExercise
-                    exercise={line.exercise}
-                    onComplete={(result) => onExerciseComplete(line.exercise.exerciseId, result)}
-                  />
-                )}
-                {line.exercise.type === 'multiple_choice' && (
-                  <MultipleChoiceExercise
-                    exercise={line.exercise}
-                    onComplete={(result) => onExerciseComplete(line.exercise.exerciseId, result)}
-                  />
-                )}
-              </div>
-            )}
-          </div>
+          <DialogueExtras
+            audioUrl={line.audioUrl}
+            text={line.text}
+            voiceConfig={voiceConfig}
+            characterName={line.character}
+            characters={characters}
+            translation={line.translation}
+            notes={line.notes}
+            exercise={hasExercise ? line.exercise : null}
+            onExerciseComplete={onExerciseComplete}
+          />
         )}
       </div>
     </div>
@@ -200,7 +172,22 @@ DialogueBubble.propTypes = {
   }).isRequired,
   index: PropTypes.number.isRequired,
   totalLines: PropTypes.number.isRequired,
-  onExerciseComplete: PropTypes.func
+  characters: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      voice: PropTypes.string
+    })
+  ),
+  onExerciseComplete: PropTypes.func,
+  viewSettings: PropTypes.shape({
+    bubbleStyle: PropTypes.string,
+    colorScheme: PropTypes.string,
+    fontSize: PropTypes.string,
+    spacing: PropTypes.string,
+    showAvatars: PropTypes.bool,
+    showBadges: PropTypes.bool
+  })
 };
 
 export default DialogueBubble;

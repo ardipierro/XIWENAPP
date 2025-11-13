@@ -9,6 +9,7 @@ import {
 import { getCourseProgress, getNextContent } from '../../firebase/studentProgress';
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { getCourseContents, getCourseExercises } from '../../firebase/relationships';
+import BaseButton from '../common/BaseButton';
 import './CourseViewer.css';
 
 function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPlayExercise }) {
@@ -355,12 +356,12 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
               <div className="progress-message">
                 <p>Sigue avanzando para completar el curso</p>
                 {nextContent && (
-                  <button
-                    className="btn btn-primary"
+                  <BaseButton
+                    variant="primary"
                     onClick={() => onPlayContent(nextContent.id)}
                   >
                     Continuar con: {nextContent.title}
-                  </button>
+                  </BaseButton>
                 )}
               </div>
             )}

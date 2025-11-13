@@ -24,7 +24,8 @@ import {
   Calendar,
   Clock,
   Target,
-  Tag
+  Tag,
+  Play
 } from 'lucide-react';
 import {
   getAllContent,
@@ -137,6 +138,9 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [selectedContent, setSelectedContent] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingContent, setViewingContent] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [newlyCreatedId, setNewlyCreatedId] = useState(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   // Cargar contenidos
   useEffect(() => {
@@ -186,6 +190,13 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       });
     }
 
+    // Ordenar por más reciente primero
+    filtered = [...filtered].sort((a, b) => {
+      const dateA = a.createdAt?.toDate() || new Date(0);
+      const dateB = b.createdAt?.toDate() || new Date(0);
+      return dateB - dateA;
+    });
+
     return filtered;
   }, [contents, typeFilter, difficultyFilter, searchTerm]);
 
@@ -213,19 +224,42 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
   const handleSave = async (contentData) => {
     try {
+      let savedId = null;
+
       if (selectedContent) {
         // Editar
         await updateContent(selectedContent.id, contentData);
         logger.info('Content updated successfully', 'UnifiedContentManager');
+        setSuccessMessage('✅ Contenido actualizado exitosamente');
+        savedId = selectedContent.id;
       } else {
         // Crear
-        await createContent(contentData);
+        const result = await createContent(contentData);
+        savedId = result.id;
         logger.info('Content created successfully', 'UnifiedContentManager');
+        setSuccessMessage('✅ Contenido creado exitosamente');
+        setNewlyCreatedId(savedId);
+
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+          setSuccessMessage(null);
+          setNewlyCreatedId(null);
+        }, 5000);
       }
 
       await loadContents();
       setShowCreateModal(false);
       setSelectedContent(null);
+
+      // Scroll to new content after a brief delay
+      if (savedId) {
+        setTimeout(() => {
+          const element = document.getElementById(`content-${savedId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
     } catch (err) {
       logger.error('Error saving content:', err, 'UnifiedContentManager');
       throw err;
@@ -248,6 +282,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const handleView = (content) => {
     setViewingContent(content);
     setShowViewModal(true);
+    setIsVideoPlaying(false); // Resetear estado del video al abrir modal
     logger.info('Viewing content:', content);
   };
 
@@ -257,15 +292,15 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   }
 
   return (
-    <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
+    <div className="p-6 min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
               📚 Gestión de Contenidos
             </h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Sistema unificado para todos tus recursos educativos
             </p>
           </div>
@@ -280,25 +315,25 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Total</p>
-            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stats.total}</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Total</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
           </div>
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Cursos</p>
-            <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{stats.courses}</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Cursos</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.courses}</p>
           </div>
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Lecciones</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Lecciones</p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.lessons}</p>
           </div>
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Ejercicios</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Ejercicios</p>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.exercises}</p>
           </div>
-          <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Juegos</p>
-            <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">{stats.games}</p>
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Juegos</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.games}</p>
           </div>
         </div>
 
@@ -343,6 +378,22 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         </div>
       </div>
 
+      {/* Success Alert */}
+      {successMessage && (
+        <BaseAlert
+          variant="success"
+          title="Éxito"
+          dismissible
+          onDismiss={() => {
+            setSuccessMessage(null);
+            setNewlyCreatedId(null);
+          }}
+          className="mb-6"
+        >
+          {successMessage}
+        </BaseAlert>
+      )}
+
       {/* Error Alert */}
       {error && (
         <BaseAlert
@@ -384,6 +435,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onView={handleView}
+              isNew={content.id === newlyCreatedId}
             />
           ))}
         </div>
@@ -416,17 +468,17 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         {viewingContent && (
           <div className="space-y-4">
             {/* Metadata */}
-            <div className="grid grid-cols-2 gap-4 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
               <div>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Tipo</p>
-                <p className="text-base font-semibold text-zinc-900 dark:text-white">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tipo</p>
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
                   {CONTENT_TYPE_CONFIG[viewingContent.type]?.label || viewingContent.type}
                 </p>
               </div>
               {viewingContent.metadata?.difficulty && (
                 <div>
-                  <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Dificultad</p>
-                  <p className="text-base font-semibold text-zinc-900 dark:text-white">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Dificultad</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">
                     {viewingContent.metadata.difficulty}
                   </p>
                 </div>
@@ -436,26 +488,168 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
             {/* Description */}
             {viewingContent.description && (
               <div>
-                <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Descripción</h4>
-                <p className="text-zinc-600 dark:text-zinc-400">{viewingContent.description}</p>
+                <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Descripción</h4>
+                <p className="text-gray-600 dark:text-gray-400">{viewingContent.description}</p>
               </div>
             )}
 
             {/* Content Body */}
             <div>
-              <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Ejercicios</h4>
+              {/* Video Player */}
+              {viewingContent.type === CONTENT_TYPES.VIDEO && viewingContent.url && (
+                <div className="mb-4 space-y-4">
+                  <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Video</h4>
+
+                  {/* Video iframe player con thumbnail */}
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+                    {!isVideoPlaying && viewingContent.videoData?.thumbnailUrl ? (
+                      // Mostrar thumbnail con botón de play
+                      <>
+                        <img
+                          src={viewingContent.videoData.thumbnailUrl}
+                          alt={viewingContent.title}
+                          className="absolute top-0 left-0 w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <button
+                            onClick={() => setIsVideoPlaying(true)}
+                            className="group w-20 h-20 rounded-full bg-white/90 hover:bg-white hover:scale-110 transition-all flex items-center justify-center shadow-xl"
+                            aria-label="Reproducir video"
+                          >
+                            <Play className="w-10 h-10 ml-1 transition-colors text-gray-900 dark:text-gray-900" strokeWidth={2} fill="currentColor" />
+                          </button>
+                        </div>
+                      </>
+                    ) : isVideoPlaying ? (
+                      // Mostrar embed code personalizado o iframe estándar
+                      viewingContent.body ? (
+                        // Si hay código embed personalizado, usarlo
+                        <div
+                          className="absolute top-0 left-0 w-full h-full"
+                          dangerouslySetInnerHTML={{ __html: viewingContent.body }}
+                        />
+                      ) : (
+                        // Si no hay embed code, usar iframe con la URL
+                        <iframe
+                          src={viewingContent.url}
+                          className="absolute top-0 left-0 w-full h-full"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={viewingContent.title}
+                        />
+                      )
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      URL: <a href={viewingContent.url} target="_blank" rel="noopener noreferrer" className="hover:underline text-primary-600 dark:text-primary-400">{viewingContent.url}</a>
+                    </p>
+
+                    {viewingContent.body && (
+                      <details className="text-xs">
+                        <summary className="cursor-pointer text-gray-600 dark:text-gray-400">
+                          Ver código embed
+                        </summary>
+                        <pre className="mt-2 p-2 rounded text-[10px] overflow-x-auto bg-gray-100 dark:bg-gray-800">
+                          <code>{viewingContent.body}</code>
+                        </pre>
+                      </details>
+                    )}
+                  </div>
+
+                  {/* Bunny.net Metadata */}
+                  {viewingContent.videoData && (
+                    <div className="pt-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
+                      <h5 className="text-xs font-semibold flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                        <span className="text-orange-500">🐰</span>
+                        Datos de Bunny.net
+                      </h5>
+
+                      {/* Thumbnail */}
+                      {viewingContent.videoData.thumbnailUrl && (
+                        <div>
+                          <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Thumbnail:</p>
+                          <img
+                            src={viewingContent.videoData.thumbnailUrl}
+                            alt="Video thumbnail"
+                            className="w-full max-w-sm rounded-lg border border-gray-200 dark:border-gray-700"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Preview Animation */}
+                      {viewingContent.videoData.previewUrl && (
+                        <div>
+                          <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Vista Previa Animada:</p>
+                          <img
+                            src={viewingContent.videoData.previewUrl}
+                            alt="Video preview animation"
+                            className="w-full max-w-sm rounded-lg border border-gray-200 dark:border-gray-700"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        </div>
+                      )}
+
+                      {/* GUID and Collection ID */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        {viewingContent.videoData.videoGuid && (
+                          <div>
+                            <span className="font-medium text-gray-600 dark:text-gray-400">Video GUID:</span>
+                            <p className="font-mono text-[10px] break-all text-gray-900 dark:text-white">{viewingContent.videoData.videoGuid}</p>
+                          </div>
+                        )}
+                        {viewingContent.videoData.collectionId && (
+                          <div>
+                            <span className="font-medium text-gray-600 dark:text-gray-400">Collection ID:</span>
+                            <p className="font-mono text-gray-900 dark:text-white">{viewingContent.videoData.collectionId}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Link */}
+              {viewingContent.type === CONTENT_TYPES.LINK && viewingContent.url && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Enlace</h4>
+                  <a
+                    href={viewingContent.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
+                  >
+                    Abrir enlace
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              )}
+
+              {/* Exercises */}
+              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">
+                {viewingContent.type === CONTENT_TYPES.EXERCISE ? 'Ejercicios' : 'Contenido'}
+              </h4>
               {viewingContent.type === CONTENT_TYPES.EXERCISE ? (
                 <div className="space-y-4">
                   {(() => {
                     try {
                       const exercises = JSON.parse(viewingContent.body);
                       return exercises.map((ex, idx) => (
-                        <div key={idx} className="p-6 bg-white dark:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-600">
+                        <div key={idx} className="p-6 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                           <div className="flex items-center gap-2 mb-4">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-600 text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
                               {idx + 1}
                             </span>
-                            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+                            <span className="text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
                               {ex.type}
                             </span>
                           </div>
@@ -478,7 +672,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
                           {/* For other types, show JSON for now */}
                           {!['gap-fill', 'multiple-choice'].includes(ex.type) && (
-                            <pre className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                            <pre className="text-sm whitespace-pre-wrap text-gray-600 dark:text-gray-400">
                               {JSON.stringify(ex, null, 2)}
                             </pre>
                           )}
@@ -490,8 +684,8 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                   })()}
                 </div>
               ) : (
-                <div className="p-4 bg-white dark:bg-zinc-700 rounded-lg border border-zinc-200 dark:border-zinc-600">
-                  <pre className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
+                <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <pre className="text-sm whitespace-pre-wrap text-gray-600 dark:text-gray-400">
                     {viewingContent.body || 'Sin contenido'}
                   </pre>
                 </div>
@@ -508,7 +702,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 // CONTENT CARD COMPONENT
 // ============================================
 
-function ContentCard({ content, viewMode, onEdit, onDelete, onView }) {
+function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = false }) {
   const config = CONTENT_TYPE_CONFIG[content.type] || CONTENT_TYPE_CONFIG[CONTENT_TYPES.LESSON];
   const IconComponent = config.icon;
 
@@ -522,117 +716,236 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView }) {
     return variants[type] || 'default';
   };
 
-  const getDifficultyColor = (difficulty) => {
-    const colors = {
-      [DIFFICULTY_LEVELS.BEGINNER]: 'text-green-600 dark:text-green-400',
-      [DIFFICULTY_LEVELS.INTERMEDIATE]: 'text-amber-600 dark:text-amber-400',
-      [DIFFICULTY_LEVELS.ADVANCED]: 'text-red-600 dark:text-red-400'
+  const getDifficultyClasses = (difficulty) => {
+    const classes = {
+      [DIFFICULTY_LEVELS.BEGINNER]: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
+      [DIFFICULTY_LEVELS.INTERMEDIATE]: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/20',
+      [DIFFICULTY_LEVELS.ADVANCED]: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
     };
-    return colors[difficulty] || 'text-zinc-600 dark:text-zinc-400';
+    return classes[difficulty] || 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800';
+  };
+
+  const getIconColorClasses = (type) => {
+    const colorMap = {
+      [CONTENT_TYPES.LESSON]: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
+      [CONTENT_TYPES.VIDEO]: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
+      [CONTENT_TYPES.EXERCISE]: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+      [CONTENT_TYPES.COURSE]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+      [CONTENT_TYPES.READING]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+      [CONTENT_TYPES.LINK]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+      [CONTENT_TYPES.LIVE_GAME]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white'
+    };
+    return colorMap[type] || 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white';
+  };
+
+  // Determinar si tiene imagen (thumbnail de video u otra imagen)
+  const hasImage = content.type === CONTENT_TYPES.VIDEO && content.videoData?.thumbnailUrl;
+
+  // Renderizar zona de imagen/ícono
+  const renderImageOrIcon = () => {
+    if (hasImage) {
+      return (
+        <div className="relative w-full h-full">
+          <img
+            src={content.videoData.thumbnailUrl}
+            alt={content.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
+          {/* Overlay con icono de play - solo visible en hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-all duration-300">
+            <div className="w-16 h-16 rounded-full bg-white/0 group-hover:bg-white/90 flex items-center justify-center transition-all duration-300 scale-0 group-hover:scale-100">
+              <Play className="w-8 h-8 ml-1 text-gray-900" strokeWidth={2} fill="currentColor" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Fallback: Icono del tipo de contenido
+    const iconClasses = getIconColorClasses(content.type);
+    return (
+      <div className={`w-full h-full flex items-center justify-center ${iconClasses}`}>
+        <IconComponent className="w-12 h-12" strokeWidth={1.5} />
+      </div>
+    );
   };
 
   if (viewMode === 'list') {
     return (
-      <div className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all">
-        <div className="flex items-center gap-4">
-          <div className={`p-3 bg-${config.color}-100 dark:bg-${config.color}-900/20 rounded-lg`}>
-            <IconComponent className={`w-6 h-6 text-${config.color}-600 dark:text-${config.color}-400`} strokeWidth={2} />
+      <div
+        id={`content-${content.id}`}
+        className={`group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
+      >
+        <div className="flex items-stretch min-h-[140px]">
+          {/* Imagen o Icono - Cuadrado que ocupa toda la altura */}
+          <div className="w-[140px] flex-shrink-0 overflow-hidden">
+            {hasImage ? (
+              <img
+                src={content.videoData.thumbnailUrl}
+                alt={content.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  // Mostrar ícono de fallback
+                  const iconClasses = getIconColorClasses(content.type);
+                  const fallback = document.createElement('div');
+                  fallback.className = `w-full h-full flex items-center justify-center ${iconClasses}`;
+                  e.target.parentElement.appendChild(fallback);
+                }}
+              />
+            ) : (
+              (() => {
+                const iconClasses = getIconColorClasses(content.type);
+                return (
+                  <div className={`w-full h-full flex items-center justify-center ${iconClasses}`}>
+                    <IconComponent className="w-10 h-10" strokeWidth={2} />
+                  </div>
+                );
+              })()
+            )}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white truncate">
-                {content.title}
-              </h3>
-              <BaseBadge variant={getBadgeVariant(content.type)}>
+
+          {/* Badges, Título, Descripción */}
+          <div className="flex-1 min-w-0 py-4 px-4">
+            {/* Badges */}
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <BaseBadge variant={getBadgeVariant(content.type)} size="sm">
                 {config.label}
               </BaseBadge>
               {content.metadata?.difficulty && (
-                <span className={`text-xs font-medium ${getDifficultyColor(content.metadata.difficulty)}`}>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
                   {content.metadata.difficulty}
                 </span>
               )}
+              {content.metadata?.tags?.slice(0, 2).map((tag, idx) => (
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+                  {tag}
+                </span>
+              ))}
             </div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-1">
-              {content.description || 'Sin descripción'}
+
+            {/* Título */}
+            <h3 className="text-base font-semibold truncate mb-1 text-gray-900 dark:text-white">
+              {content.title}
+            </h3>
+
+            {/* Descripción */}
+            <p className="text-sm line-clamp-1 mb-2 text-gray-600 dark:text-gray-400">
+              {content.description || config.description}
             </p>
+
+            {/* Metadata (fecha, duración, puntos) */}
+            <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+              {content.createdAt && (
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
+                  {new Date(content.createdAt.toDate()).toLocaleDateString()}
+                </div>
+              )}
+              {content.metadata?.duration && (
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5" strokeWidth={2} />
+                  {content.metadata.duration} min
+                </div>
+              )}
+              {content.metadata?.points && (
+                <div className="flex items-center gap-1">
+                  <Target className="w-3.5 h-3.5" strokeWidth={2} />
+                  {content.metadata.points} pts
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {content.metadata?.duration && (
-              <div className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
-                <Clock className="w-4 h-4" strokeWidth={2} />
-                {content.metadata.duration} min
-              </div>
-            )}
-            <BaseButton variant="ghost" icon={Eye} size="sm" onClick={() => onView(content)} />
-            <BaseButton variant="ghost" icon={Edit} size="sm" onClick={() => onEdit(content)} />
-            <BaseButton variant="ghost" icon={Trash2} size="sm" onClick={() => onDelete(content.id)} />
+
+          {/* Footer - Action Buttons */}
+          <div className="flex items-center gap-2 flex-shrink-0 pr-4">
+            <BaseButton variant="ghost" icon={Eye} size="lg" onClick={() => onView(content)} />
+            <BaseButton variant="ghost" icon={Edit} size="lg" onClick={() => onEdit(content)} />
+            <BaseButton variant="ghost" icon={Trash2} size="lg" onClick={() => onDelete(content.id)} />
           </div>
         </div>
       </div>
     );
   }
 
+  // Grid View
   return (
-    <BaseCard className="group hover:border-zinc-500 dark:hover:border-zinc-400 transition-all">
-      <div className="relative">
-        {/* Icon Header */}
-        <div className={`absolute top-4 right-4 p-2 bg-${config.color}-100 dark:bg-${config.color}-900/20 rounded-lg`}>
-          <IconComponent className={`w-5 h-5 text-${config.color}-600 dark:text-${config.color}-400`} strokeWidth={2} />
+    <BaseCard
+      id={`content-${content.id}`}
+      className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
+      image={renderImageOrIcon()}
+    >
+      <div className="flex flex-col h-full">
+        {/* Badges Section */}
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <BaseBadge variant={getBadgeVariant(content.type)} size="sm">
+            {config.label}
+          </BaseBadge>
+          {content.metadata?.difficulty && (
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
+              {content.metadata.difficulty}
+            </span>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="pt-4">
-          <div className="flex items-start gap-2 mb-2">
-            <BaseBadge variant={getBadgeVariant(content.type)} size="sm">
-              {config.label}
-            </BaseBadge>
-            {content.metadata?.difficulty && (
-              <span className={`text-xs font-medium ${getDifficultyColor(content.metadata.difficulty)}`}>
-                {content.metadata.difficulty}
-              </span>
+        {/* Título */}
+        <h3 className="text-lg font-semibold mb-2 line-clamp-2 text-gray-900 dark:text-white">
+          {content.title}
+        </h3>
+
+        {/* Descripción */}
+        <p className="text-sm mb-4 line-clamp-3 flex-grow text-gray-600 dark:text-gray-400">
+          {content.description || config.description}
+        </p>
+
+        {/* Metadata (fecha, duración, puntos, tags) */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-3 text-xs flex-wrap text-gray-600 dark:text-gray-400">
+            {content.createdAt && (
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
+                {new Date(content.createdAt.toDate()).toLocaleDateString()}
+              </div>
             )}
-          </div>
-
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2 line-clamp-2">
-            {content.title}
-          </h3>
-
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-3">
-            {content.description || config.description}
-          </p>
-
-          {/* Metadata */}
-          <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 mb-4">
             {content.metadata?.duration && (
               <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" strokeWidth={2} />
+                <Clock className="w-3.5 h-3.5" strokeWidth={2} />
                 {content.metadata.duration} min
               </div>
             )}
             {content.metadata?.points && (
               <div className="flex items-center gap-1">
-                <Target className="w-4 h-4" strokeWidth={2} />
+                <Target className="w-3.5 h-3.5" strokeWidth={2} />
                 {content.metadata.points} pts
-              </div>
-            )}
-            {content.createdAt && (
-              <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" strokeWidth={2} />
-                {new Date(content.createdAt.toDate()).toLocaleDateString()}
               </div>
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-2">
-            <BaseButton variant="secondary" icon={Eye} size="sm" onClick={() => onView(content)} fullWidth>
-              Ver
-            </BaseButton>
-            <BaseButton variant="secondary" icon={Edit} size="sm" onClick={() => onEdit(content)} fullWidth>
-              Editar
-            </BaseButton>
-            <BaseButton variant="danger" icon={Trash2} size="sm" onClick={() => onDelete(content.id)} />
-          </div>
+          {/* Tags */}
+          {content.metadata?.tags?.length > 0 && (
+            <div className="flex items-center gap-1 flex-wrap">
+              <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+              {content.metadata.tags.slice(0, 3).map((tag, idx) => (
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer - Action Buttons */}
+        <div className="flex gap-2 mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+          <BaseButton variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
+            Ver
+          </BaseButton>
+          <BaseButton variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
+            Editar
+          </BaseButton>
+          <BaseButton variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
         </div>
       </div>
     </BaseCard>

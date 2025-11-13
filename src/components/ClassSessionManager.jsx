@@ -12,7 +12,8 @@ import {
   StopCircle,
   Users,
   Clock,
-  X
+  X,
+  Zap
 } from 'lucide-react';
 import logger from '../utils/logger';
 import {
@@ -22,10 +23,14 @@ import {
   deleteClassSession,
   startClassSession,
   endClassSession,
-  getDayName
+  getDayName,
+  createInstantMeetSession
 } from '../firebase/classSessions';
-import { loadCourses } from '../firebase/firestore';
+import { loadCourses, getAllUsers } from '../firebase/firestore';
+import { getAllGroups } from '../firebase/groups';
+import { getAllContent } from '../firebase/content';
 import ClassSessionModal from './ClassSessionModal';
+import InstantMeetModal from './InstantMeetModal';
 import {
   BaseButton,
   BaseCard,
@@ -39,11 +44,15 @@ import {
  * Gestor de Sesiones de Clase Unificadas
  * Integra: LiveKit + Pizarras + Programación
  */
-function ClassSessionManager({ user, onJoinSession }) {
+function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClearEditSession }) {
   const [sessions, setSessions] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showInstantMeetModal, setShowInstantMeetModal] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, scheduled, live, ended
@@ -55,17 +64,57 @@ function ClassSessionManager({ user, onJoinSession }) {
     loadData();
   }, [user]);
 
+  // Effect to handle initial session editing from calendar
+  useEffect(() => {
+    if (initialEditSessionId && sessions.length > 0 && !showModal) {
+      const sessionToEdit = sessions.find(s => s.id === initialEditSessionId);
+      if (sessionToEdit) {
+        setEditingSession(sessionToEdit);
+        setShowModal(true);
+        logger.info('Opening edit modal for session from calendar:', initialEditSessionId);
+      }
+    }
+  }, [initialEditSessionId, sessions, showModal]);
+
   const loadData = async () => {
     try {
       setLoading(true);
-      const [sessionsData, coursesData] = await Promise.all([
+      const [sessionsData, coursesData, usersData, groupsData, contentsData] = await Promise.all([
         getTeacherSessions(user.uid),
-        loadCourses()
+        loadCourses(),
+        getAllUsers(),
+        getAllGroups(),
+        getAllContent()
       ]);
 
       setSessions(sessionsData);
       setCourses(coursesData);
-      logger.info('Sesiones y cursos cargados:', sessionsData.length, coursesData.length);
+      setStudents(usersData.filter(u => ['student', 'trial'].includes(u.role)));
+      setGroups(groupsData);
+      setContents(contentsData);
+      logger.info('Datos cargados:', {
+        sesiones: sessionsData.length,
+        cursos: coursesData.length,
+        estudiantes: usersData.filter(u => ['student', 'trial'].includes(u.role)).length,
+        grupos: groupsData.length,
+        contenidos: contentsData.length
+      });
+
+      // Log para debug: ver estructura de sesiones recurrentes
+      const recurringSessions = sessionsData.filter(s => s.type === 'recurring');
+      if (recurringSessions.length > 0) {
+        logger.info('Sesiones recurrentes encontradas:', recurringSessions.map(s => ({
+          id: s.id,
+          name: s.name,
+          type: s.type,
+          hasRecurringStartDate: !!s.recurringStartDate,
+          recurringStartDate: s.recurringStartDate,
+          hasRecurringWeeks: !!s.recurringWeeks,
+          recurringWeeks: s.recurringWeeks,
+          hasSchedules: !!s.schedules,
+          schedules: s.schedules
+        })));
+      }
     } catch (error) {
       logger.error('Error cargando datos:', error);
       setMessage({ type: 'error', text: 'Error al cargar datos' });
@@ -95,6 +144,43 @@ function ClassSessionManager({ user, onJoinSession }) {
     } catch (error) {
       logger.error('Error en handleCreate:', error);
       setMessage({ type: 'error', text: 'Error al crear sesión' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCreateInstantMeet = async (config) => {
+    try {
+      setActionLoading('instant');
+
+      const result = await createInstantMeetSession({
+        teacherId: user.uid,
+        teacherName: user.displayName || user.email,
+        meetLink: config.meetLink || '',
+        assignedGroups: config.assignedGroups || [],
+        assignedStudents: config.assignedStudents || []
+      });
+
+      if (result.success) {
+        setMessage({ type: 'success', text: '¡Clase instantánea creada e iniciada!' });
+        setShowInstantMeetModal(false);
+        await loadData();
+
+        // Navegar a la sala de clase
+        if (onJoinSession) {
+          onJoinSession({
+            id: result.sessionId,
+            roomName: result.roomName
+          });
+        }
+
+        logger.info('✅ Clase instantánea creada:', result.sessionId);
+      } else {
+        setMessage({ type: 'error', text: result.error || 'Error al crear clase instantánea' });
+      }
+    } catch (error) {
+      logger.error('Error en handleCreateInstantMeet:', error);
+      setMessage({ type: 'error', text: 'Error al crear la clase instantánea' });
     } finally {
       setActionLoading(null);
     }
@@ -153,14 +239,34 @@ function ClassSessionManager({ user, onJoinSession }) {
       const result = await startClassSession(sessionId);
 
       if (result.success) {
-        setMessage({ type: 'success', text: 'Sesión iniciada' });
+        // Mensaje de éxito mejorado
+        const successMessages = [
+          '✅ Sesión iniciada correctamente'
+        ];
+
+        if (result.meetSessionId) {
+          successMessages.push('🎥 Sala MEET creada automáticamente');
+        }
+
+        const session = sessions.find(s => s.id === sessionId);
+        const studentCount = session?.assignedStudents?.length || 0;
+
+        if (studentCount > 0) {
+          successMessages.push(`📢 ${studentCount} estudiante${studentCount > 1 ? 's' : ''} notificado${studentCount > 1 ? 's' : ''}`);
+        }
+
+        setMessage({
+          type: 'success',
+          text: successMessages.join(' • ')
+        });
+
         await loadData();
         logger.info('Sesión iniciada:', sessionId);
 
-        // Abrir la sala
+        // Abrir la sala automáticamente
         if (onJoinSession) {
-          const session = sessions.find(s => s.id === sessionId);
-          onJoinSession(session);
+          const updatedSession = sessions.find(s => s.id === sessionId);
+          onJoinSession(updatedSession || session);
         }
       } else {
         setMessage({ type: 'error', text: result.error || 'Error al iniciar sesión' });
@@ -204,6 +310,10 @@ function ClassSessionManager({ user, onJoinSession }) {
   const closeModal = () => {
     setShowModal(false);
     setEditingSession(null);
+    // Limpiar editSessionId si fue abierto desde el calendario
+    if (onClearEditSession) {
+      onClearEditSession();
+    }
   };
 
   // Filtrar sesiones
@@ -276,6 +386,45 @@ function ClassSessionManager({ user, onJoinSession }) {
     return null;
   };
 
+  // Calcular sesiones restantes para sesiones recurrentes
+  const calculateRemainingSessions = (session) => {
+    if (session.type !== 'recurring' || !session.schedules || !session.recurringStartDate || !session.recurringWeeks) {
+      logger.warn('Session missing required fields for remaining calculation:', {
+        id: session.id,
+        name: session.name,
+        type: session.type,
+        hasSchedules: !!session.schedules,
+        hasRecurringStartDate: !!session.recurringStartDate,
+        hasRecurringWeeks: !!session.recurringWeeks
+      });
+      return null;
+    }
+
+    const startDate = session.recurringStartDate.toDate();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + (session.recurringWeeks * 7));
+
+    const now = new Date();
+    let total = 0;
+    let remaining = 0;
+
+    // Contar total y restantes
+    session.schedules.forEach(schedule => {
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        if (currentDate.getDay() === schedule.day) {
+          total++;
+          if (currentDate > now) {
+            remaining++;
+          }
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+
+    return { total, remaining };
+  };
+
   // Render información de programación
   const renderScheduleInfo = (session) => {
     if (session.type === 'single' && session.scheduledStart) {
@@ -296,9 +445,23 @@ function ClassSessionManager({ user, onJoinSession }) {
     if (session.type === 'recurring' && session.schedules?.length > 0) {
       const days = session.schedules.map(s => getDayName(s.day)).join(', ');
       const time = session.schedules[0];
+      const sessionsInfo = calculateRemainingSessions(session);
+
       return (
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          {days} • {time.startTime} - {time.endTime}
+        <div className="space-y-1">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {days} • {time.startTime} - {time.endTime}
+          </div>
+          {session.recurringStartDate && (
+            <div className="text-xs text-gray-500 dark:text-gray-500">
+              Inicio: {session.recurringStartDate.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </div>
+          )}
+          {sessionsInfo && (
+            <div className="text-xs text-gray-500 dark:text-gray-500">
+              {sessionsInfo.remaining} de {sessionsInfo.total} sesiones restantes
+            </div>
+          )}
         </div>
       );
     }
@@ -322,13 +485,22 @@ function ClassSessionManager({ user, onJoinSession }) {
             {sessions.length} sesiones totales
           </p>
         </div>
-        <BaseButton
-          variant="primary"
-          icon={Plus}
-          onClick={() => setShowModal(true)}
-        >
-          Nueva Sesión
-        </BaseButton>
+        <div className="flex items-center gap-3">
+          <BaseButton
+            variant="success"
+            icon={Zap}
+            onClick={() => setShowInstantMeetModal(true)}
+          >
+            Clase Instantánea
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            icon={Plus}
+            onClick={() => setShowModal(true)}
+          >
+            Nueva Sesión
+          </BaseButton>
+        </div>
       </div>
 
       {/* Mensaje */}
@@ -598,7 +770,21 @@ function ClassSessionManager({ user, onJoinSession }) {
         onSubmit={editingSession ? handleEdit : handleCreate}
         session={editingSession}
         courses={courses}
+        students={students}
+        groups={groups}
+        contents={contents}
         loading={actionLoading === 'create' || actionLoading === 'edit'}
+      />
+
+      {/* Instant Meet Modal */}
+      <InstantMeetModal
+        isOpen={showInstantMeetModal}
+        onClose={() => setShowInstantMeetModal(false)}
+        onCreateSession={handleCreateInstantMeet}
+        teacherId={user?.uid}
+        teacherName={user?.displayName || user?.email}
+        students={students}
+        groups={groups}
       />
     </div>
   );

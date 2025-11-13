@@ -5,6 +5,7 @@ import {
   BookMarked, Crown, Flame, Zap, Smile, Glasses,
   UserCog, Bot, X
 } from 'lucide-react';
+import BaseButton from './common/BaseButton';
 import './AvatarSelector.css';
 
 // Avatares disponibles con iconos de lucide-react
@@ -59,12 +60,13 @@ function AvatarSelector({ currentAvatar, onSelectAvatar, onClose }) {
           ))}
         </div>
 
-        <button
-          className="btn btn-secondary avatar-close-btn"
+        <BaseButton
+          variant="secondary"
           onClick={onClose}
+          fullWidth
         >
           Cerrar
-        </button>
+        </BaseButton>
       </div>
     </div>
   );

@@ -1515,5 +1515,92 @@ canvas {
 }
 
 /* ============================================
+   QUICK ACCESS CARDS - Vista Grid y Lista
+   ============================================ */
+
+/* Vista de grilla para QuickAccessCards */
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* Vista de lista para QuickAccessCards */
+.quick-access-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Adaptación de QuickAccessCard para vista lista */
+.quick-access-list > div {
+  flex-direction: row !important;
+  height: auto !important;
+}
+
+.quick-access-list > div > div:first-child {
+  width: 120px !important;
+  height: 100px !important;
+  flex-shrink: 0;
+}
+
+.quick-access-list > div > div:last-child {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 20px;
+}
+
+.quick-access-list > div h3 {
+  margin-bottom: 0 !important;
+  flex: 1;
+}
+
+.quick-access-list > div p {
+  display: none;
+}
+
+.quick-access-list > div > div:last-child > div:nth-child(2) {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .quick-access-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-access-list > div > div:first-child {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .quick-access-list > div h3 {
+    font-size: 16px;
+  }
+}
+
+/* ============================================
+   ANIMACIONES PERSONALIZADAS
+   ============================================ */
+
+/* Shimmer effect para audio player */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+/* ============================================
    FIN DEL ARCHIVO - TODO CENTRALIZADO EN TAILWIND
    ============================================ */

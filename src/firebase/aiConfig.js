@@ -212,7 +212,8 @@ export async function checkAICredentials() {
       claude: false,
       openai: false,
       grok: false,
-      gemini: false
+      gemini: false,
+      elevenlabs: false
     };
   }
 }

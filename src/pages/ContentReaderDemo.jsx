@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import ContentReader from '../components/ContentReader';
 import useAuth from '../hooks/useAuth';
+import { useTheme } from '../contexts/ThemeContext';
 
 /**
  * Contenido de ejemplo en HTML
@@ -83,6 +85,7 @@ const DEMO_CONTENT = `
  */
 function ContentReaderDemo() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-primary-50 dark:bg-primary-950">
@@ -93,6 +96,7 @@ function ContentReaderDemo() {
           initialContent={DEMO_CONTENT}
           userId={user.uid}
           readOnly={false}
+          onBack={() => navigate(-1)}
         />
       ) : (
         <div className="flex items-center justify-center min-h-screen">

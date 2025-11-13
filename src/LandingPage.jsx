@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import {
   GraduationCap, Gamepad2, Zap, BarChart3, Globe, Palette, Users,
-  CheckCircle, Check, BookOpen, Target
+  CheckCircle, Check, BookOpen, Target, Video, MessageSquare, Calendar,
+  Moon, Layout, CreditCard, Award, BookText, Mic
 } from 'lucide-react';
+import BaseButton from './components/common/BaseButton';
 import './LandingPage.css';
 
 function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
@@ -27,12 +29,12 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
             <a href="#features">Características</a>
             <a href="#pricing">Precios</a>
             <a href="#faq">FAQ</a>
-            <button className="btn btn-outline" onClick={onNavigateToLogin}>
+            <BaseButton variant="outline" onClick={onNavigateToLogin}>
               Iniciar Sesión
-            </button>
-            <button className="btn btn-primary" onClick={onNavigateToRegister}>
+            </BaseButton>
+            <BaseButton variant="primary" onClick={onNavigateToRegister}>
               Registrarse
-            </button>
+            </BaseButton>
           </div>
         </div>
       </nav>
@@ -43,40 +45,42 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
           <div className="hero-content">
             <div className="hero-text">
               <h1 className="hero-title">
-                Transforma tus Clases con
-                <span className="gradient-text"> Quiz Interactivos</span>
+                Plataforma Educativa
+                <span className="gradient-text"> Todo en Uno</span>
               </h1>
               <p className="hero-description">
-                La plataforma educativa que convierte el aprendizaje en una experiencia 
-                divertida e interactiva. Ideal para profesores de idiomas y estudiantes 
-                que quieren aprender jugando.
+                La solución completa para instituciones educativas modernas.
+                Gestión académica, pagos, comunicación, ejercicios interactivos y más,
+                todo en una sola plataforma.
               </p>
               <div className="hero-buttons">
-                <button 
-                  className="btn btn-primary btn-large"
+                <BaseButton
+                  variant="primary"
+                  size="lg"
                   onClick={onNavigateToRegister}
                 >
-                  Comenzar Gratis
-                </button>
-                <button 
-                  className="btn btn-outline btn-large"
+                  Comenzar Ahora
+                </BaseButton>
+                <BaseButton
+                  variant="outline"
+                  size="lg"
                   onClick={onNavigateToLogin}
                 >
-                  Ver Demo
-                </button>
+                  Iniciar Sesión
+                </BaseButton>
               </div>
               <div className="hero-stats">
                 <div className="stat">
-                  <div className="stat-number">500+</div>
-                  <div className="stat-label">Profesores</div>
+                  <div className="stat-number">8+</div>
+                  <div className="stat-label">Tipos de Ejercicios</div>
                 </div>
                 <div className="stat">
-                  <div className="stat-number">10K+</div>
-                  <div className="stat-label">Estudiantes</div>
+                  <div className="stat-number">4</div>
+                  <div className="stat-label">Roles de Usuario</div>
                 </div>
                 <div className="stat">
-                  <div className="stat-number">50K+</div>
-                  <div className="stat-label">Quiz Creados</div>
+                  <div className="stat-number">100%</div>
+                  <div className="stat-label">Online & PWA</div>
                 </div>
               </div>
             </div>
@@ -113,68 +117,98 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
           <div className="section-header">
             <h2 className="section-title">¿Por qué elegir XIWEN?</h2>
             <p className="section-subtitle">
-              Todo lo que necesitas para crear experiencias de aprendizaje inolvidables
+              La plataforma más completa para instituciones educativas
             </p>
           </div>
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">
-                <Gamepad2 size={40} strokeWidth={2} />
+                <BookText size={40} strokeWidth={2} />
               </div>
-              <h3>Gamificación Total</h3>
+              <h3>8 Tipos de Ejercicios</h3>
               <p>
-                Convierte cualquier lección en un juego interactivo. 
-                Puntajes en tiempo real, rankings y premios virtuales.
+                Opción múltiple, verdadero/falso, completar, matching, y más.
+                Content Reader interactivo con anotaciones y TTS.
               </p>
             </div>
             <div className="feature-card">
               <div className="feature-icon">
-                <Zap size={40} strokeWidth={2} />
+                <Video size={40} strokeWidth={2} />
               </div>
-              <h3>Resultados Instantáneos</h3>
+              <h3>VideoChat Integrado</h3>
               <p>
-                Feedback inmediato para estudiantes y análisis en tiempo real 
-                para profesores. Sin esperas, sin complicaciones.
+                Clases en vivo con LiveKit. Sala de espera virtual,
+                compartir pantalla y comunicación en tiempo real.
+              </p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <CreditCard size={40} strokeWidth={2} />
+              </div>
+              <h3>Sistema de Pagos</h3>
+              <p>
+                MercadoPago integrado. Gestión de matrículas, cuotas mensuales,
+                becas y descuentos familiares automáticos.
+              </p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <Gamepad2 size={40} strokeWidth={2} />
+              </div>
+              <h3>Gamificación</h3>
+              <p>
+                Sistema de puntos, niveles, badges y racha de días consecutivos.
+                Leaderboard para motivar a estudiantes.
+              </p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <MessageSquare size={40} strokeWidth={2} />
+              </div>
+              <h3>Mensajería Interna</h3>
+              <p>
+                Comunicación directa entre profesores, estudiantes y tutores.
+                Notificaciones en tiempo real y sistema de alertas.
+              </p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <Calendar size={40} strokeWidth={2} />
+              </div>
+              <h3>Calendario Integrado</h3>
+              <p>
+                Vista completa de asignaciones, fechas de entrega y eventos.
+                Recordatorios automáticos y sincronización.
+              </p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <Moon size={40} strokeWidth={2} />
+              </div>
+              <h3>Modo Oscuro & Temas</h3>
+              <p>
+                Interfaz adaptable con modo oscuro completo. Múltiples temas:
+                Ocean, Forest, Sunset y Midnight.
+              </p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <Layout size={40} strokeWidth={2} />
+              </div>
+              <h3>DesignLab & Whiteboard</h3>
+              <p>
+                Espacio colaborativo para crear ejercicios personalizados.
+                Herramientas de diseño integradas para profesores.
               </p>
             </div>
             <div className="feature-card">
               <div className="feature-icon">
                 <BarChart3 size={40} strokeWidth={2} />
               </div>
-              <h3>Análisis Avanzado</h3>
+              <h3>Analytics Avanzado</h3>
               <p>
-                Métricas detalladas de rendimiento, progreso individual y 
-                reportes automáticos para padres.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Globe size={40} strokeWidth={2} />
-              </div>
-              <h3>100% Online</h3>
-              <p>
-                Accesible desde cualquier dispositivo. Clases presenciales, 
-                híbridas o completamente remotas.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Palette size={40} strokeWidth={2} />
-              </div>
-              <h3>Personalizable</h3>
-              <p>
-                Crea quizzes adaptados a tu metodología. Imágenes, audio, 
-                videos y más formatos de preguntas.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Users size={40} strokeWidth={2} />
-              </div>
-              <h3>Colaborativo</h3>
-              <p>
-                Equipos de trabajo, competencias entre grupos y 
-                aprendizaje social integrado.
+                Dashboard completo con métricas de progreso, rendimiento
+                individual y reportes exportables a PDF/Excel.
               </p>
             </div>
           </div>
@@ -187,13 +221,13 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
           <div className="benefits-grid">
             <div className="benefit-item">
               <div className="benefit-content">
-                <h3>Para Profesores</h3>
+                <h3>👨‍🏫 Para Profesores</h3>
                 <ul className="benefit-list">
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Crea quizzes en minutos, no en horas</li>
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Gestiona múltiples clases desde un solo lugar</li>
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Evalúa automáticamente y ahorra tiempo</li>
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Exporta reportes para padres y directivos</li>
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Biblioteca de preguntas reutilizables</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Crea 8 tipos diferentes de ejercicios</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Gestiona cursos, grupos y asignaciones</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Califica automáticamente con feedback instantáneo</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> DesignLab para crear contenido personalizado</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Analytics completo de progreso estudiantil</li>
                 </ul>
               </div>
               <div className="benefit-image">
@@ -201,9 +235,9 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                   <div className="mockup-card">
                     <div className="card-header">Dashboard del Profesor</div>
                     <div className="card-stats">
-                      <div className="mini-stat"><BookOpen size={16} strokeWidth={2} className="inline-icon" /> 5 Cursos</div>
-                      <div className="mini-stat"><Users size={16} strokeWidth={2} className="inline-icon" /> 120 Alumnos</div>
-                      <div className="mini-stat"><Target size={16} strokeWidth={2} className="inline-icon" /> 95% Participación</div>
+                      <div className="mini-stat"><BookOpen size={16} strokeWidth={2} className="inline-icon" /> Cursos</div>
+                      <div className="mini-stat"><Users size={16} strokeWidth={2} className="inline-icon" /> Grupos</div>
+                      <div className="mini-stat"><Target size={16} strokeWidth={2} className="inline-icon" /> Analytics</div>
                     </div>
                   </div>
                 </div>
@@ -217,15 +251,15 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                     <div className="card-header">Mi Progreso</div>
                     <div className="progress-bars">
                       <div className="progress-item">
-                        <span>Español</span>
+                        <span>Nivel 12 - 2,450 pts</span>
                         <div className="progress-bar">
-                          <div className="progress-fill" style={{width: '85%'}}></div>
+                          <div className="progress-fill" style={{width: '75%'}}></div>
                         </div>
                       </div>
                       <div className="progress-item">
-                        <span>Matemáticas</span>
+                        <span>Racha: 15 días 🔥</span>
                         <div className="progress-bar">
-                          <div className="progress-fill" style={{width: '72%'}}></div>
+                          <div className="progress-fill" style={{width: '60%'}}></div>
                         </div>
                       </div>
                     </div>
@@ -233,13 +267,72 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
                 </div>
               </div>
               <div className="benefit-content">
-                <h3>Para Estudiantes</h3>
+                <h3>🎓 Para Estudiantes</h3>
                 <ul className="benefit-list">
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Aprende jugando y divirtiéndote</li>
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Ve tu progreso en tiempo real</li>
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Compite sanamente con compañeros</li>
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Recibe feedback instantáneo</li>
-                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Accede desde móvil o computadora</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Aprende con ejercicios interactivos variados</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Sistema de puntos, niveles y badges</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Content Reader con TTS y anotaciones</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Calendario de asignaciones y recordatorios</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> VideoChat para clases en vivo</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="benefit-item">
+              <div className="benefit-content">
+                <h3>👪 Para Tutores/Padres</h3>
+                <ul className="benefit-list">
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Dashboard de seguimiento académico completo</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Ve calificaciones y progreso en tiempo real</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Gestiona pagos de matrícula y cuotas</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Mensajería directa con profesores</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Notificaciones de asignaciones y eventos</li>
+                </ul>
+              </div>
+              <div className="benefit-image">
+                <div className="teacher-mockup">
+                  <div className="mockup-card">
+                    <div className="card-header">Dashboard Tutor</div>
+                    <div className="card-stats">
+                      <div className="mini-stat"><Users size={16} strokeWidth={2} className="inline-icon" /> Estudiantes</div>
+                      <div className="mini-stat"><Award size={16} strokeWidth={2} className="inline-icon" /> Progreso</div>
+                      <div className="mini-stat"><CreditCard size={16} strokeWidth={2} className="inline-icon" /> Pagos</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="benefit-item reverse">
+              <div className="benefit-image">
+                <div className="student-mockup">
+                  <div className="mockup-card">
+                    <div className="card-header">Panel de Administración</div>
+                    <div className="progress-bars">
+                      <div className="progress-item">
+                        <span>Ingresos del mes</span>
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{width: '90%'}}></div>
+                        </div>
+                      </div>
+                      <div className="progress-item">
+                        <span>Usuarios activos</span>
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{width: '85%'}}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="benefit-content">
+                <h3>👨‍💼 Para Administradores</h3>
+                <ul className="benefit-list">
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Panel completo de gestión institucional</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Control de pagos, matrículas y cuotas</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Gestión de becas y descuentos familiares</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Analytics avanzado y reportes exportables</li>
+                  <li><CheckCircle size={20} strokeWidth={2} className="inline-icon" /> Administración de usuarios y permisos</li>
                 </ul>
               </div>
             </div>
@@ -251,72 +344,76 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
       <section id="pricing" className="pricing-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">Precios Simples y Transparentes</h2>
+            <h2 className="section-title">Soluciones para Instituciones Educativas</h2>
             <p className="section-subtitle">
-              Elige el plan que mejor se adapte a tus necesidades
+              Sistema flexible de gestión académica y pagos integrados
             </p>
           </div>
           <div className="pricing-grid">
             <div className="pricing-card">
               <div className="pricing-header">
-                <h3>Gratis</h3>
+                <h3>Demo</h3>
                 <div className="price">
-                  <span className="price-amount">$0</span>
-                  <span className="price-period">/mes</span>
+                  <span className="price-amount">Prueba</span>
+                  <span className="price-period">Gratuita</span>
                 </div>
               </div>
               <ul className="pricing-features">
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Hasta 30 estudiantes</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> 10 quizzes por mes</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Reportes básicos</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Hasta 20 estudiantes</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Todas las funcionalidades</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> 30 días de prueba</li>
                 <li><Check size={16} strokeWidth={2} className="inline-icon" /> Soporte por email</li>
               </ul>
-              <button className="btn btn-outline btn-block" onClick={onNavigateToRegister}>
-                Comenzar Gratis
-              </button>
+              <BaseButton variant="outline" fullWidth onClick={onNavigateToRegister}>
+                Comenzar Demo
+              </BaseButton>
             </div>
 
             <div className="pricing-card featured">
-              <div className="popular-badge">Más Popular</div>
+              <div className="popular-badge">Instituciones</div>
               <div className="pricing-header">
-                <h3>Profesional</h3>
+                <h3>Institución</h3>
                 <div className="price">
-                  <span className="price-amount">$29</span>
-                  <span className="price-period">/mes</span>
+                  <span className="price-amount">Contactar</span>
+                  <span className="price-period">para cotización</span>
                 </div>
               </div>
               <ul className="pricing-features">
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Estudiantes ilimitados</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Quizzes ilimitados</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Análisis avanzado</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Soporte prioritario</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Exportar a Excel/PDF</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Personalización completa</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Usuarios ilimitados</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Sistema completo de pagos (MercadoPago)</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> VideoChat y mensajería integrada</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Dashboard multi-rol (Admin, Profesor, Estudiante, Tutor)</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Descuentos familiares automáticos</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Analytics avanzado y reportes</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Capacitación y soporte dedicado</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Personalización de marca</li>
               </ul>
-              <button className="btn btn-primary btn-block" onClick={onNavigateToRegister}>
-                Probar 14 días gratis
-              </button>
+              <BaseButton variant="primary" fullWidth onClick={onNavigateToRegister}>
+                Solicitar Demo
+              </BaseButton>
             </div>
 
             <div className="pricing-card">
               <div className="pricing-header">
-                <h3>Institución</h3>
+                <h3>Características</h3>
                 <div className="price">
-                  <span className="price-amount">$99</span>
-                  <span className="price-period">/mes</span>
+                  <span className="price-amount">Todo</span>
+                  <span className="price-period">incluido</span>
                 </div>
               </div>
               <ul className="pricing-features">
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Todo de Profesional</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Múltiples profesores</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> API access</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> SSO/SAML</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Capacitación incluida</li>
-                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Account manager dedicado</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> 8 tipos de ejercicios</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Content Reader + TTS</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> DesignLab & Whiteboard</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Gamificación completa</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Calendario y asignaciones</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Modo oscuro & temas</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> PWA (funciona offline)</li>
+                <li><Check size={16} strokeWidth={2} className="inline-icon" /> Exportación PDF/Excel</li>
               </ul>
-              <button className="btn btn-outline btn-block" onClick={onNavigateToRegister}>
-                Contactar Ventas
-              </button>
+              <BaseButton variant="outline" fullWidth onClick={onNavigateToLogin}>
+                Ver Funcionalidades
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -329,96 +426,103 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
             <h2 className="section-title">Preguntas Frecuentes</h2>
           </div>
           <div className="faq-container">
-            <div 
+            <div
               className={`faq-item ${activeFAQ === 0 ? 'active' : ''}`}
               onClick={() => toggleFAQ(0)}
             >
               <div className="faq-question">
-                <h4>¿Necesito conocimientos técnicos para usar la plataforma?</h4>
+                <h4>¿Qué tipos de ejercicios puedo crear en la plataforma?</h4>
                 <span className="faq-icon">{activeFAQ === 0 ? '−' : '+'}</span>
               </div>
               {activeFAQ === 0 && (
                 <div className="faq-answer">
                   <p>
-                    ¡Para nada! XIWEN está diseñado para ser intuitivo. Si sabes 
-                    usar WhatsApp o Instagram, puedes crear quizzes en minutos. 
-                    Además, tenemos tutoriales y soporte para ayudarte.
+                    XIWEN soporta 8 tipos diferentes de ejercicios: opción múltiple,
+                    verdadero/falso, completar espacios, matching, drag & drop, identificación de verbos,
+                    lectura interactiva y pronunciación con IA. Además, incluye un Content Reader
+                    con funciones de TTS (text-to-speech) y anotaciones.
                   </p>
                 </div>
               )}
             </div>
 
-            <div 
+            <div
               className={`faq-item ${activeFAQ === 1 ? 'active' : ''}`}
               onClick={() => toggleFAQ(1)}
             >
               <div className="faq-question">
-                <h4>¿Funciona en dispositivos móviles?</h4>
+                <h4>¿Cómo funciona el sistema de pagos integrado?</h4>
                 <span className="faq-icon">{activeFAQ === 1 ? '−' : '+'}</span>
               </div>
               {activeFAQ === 1 && (
                 <div className="faq-answer">
                   <p>
-                    Sí, perfectamente. Los estudiantes pueden participar desde celulares, 
-                    tablets o computadoras. La interfaz se adapta automáticamente a 
-                    cualquier tamaño de pantalla.
+                    La plataforma integra MercadoPago (Argentina) para gestionar matrículas y
+                    cuotas mensuales automáticamente. Incluye sistema de becas, descuentos
+                    familiares (20% segundo hermano, 30% tercero en adelante), y un dashboard
+                    completo para administradores. Los tutores pueden ver y gestionar pagos desde
+                    su panel.
                   </p>
                 </div>
               )}
             </div>
 
-            <div 
+            <div
               className={`faq-item ${activeFAQ === 2 ? 'active' : ''}`}
               onClick={() => toggleFAQ(2)}
             >
               <div className="faq-question">
-                <h4>¿Puedo usar mis propias preguntas y contenido?</h4>
+                <h4>¿Funciona en dispositivos móviles?</h4>
                 <span className="faq-icon">{activeFAQ === 2 ? '−' : '+'}</span>
               </div>
               {activeFAQ === 2 && (
                 <div className="faq-answer">
                   <p>
-                    Por supuesto. Tienes control total sobre el contenido. Puedes crear 
-                    preguntas desde cero, importarlas desde Google Sheets, o usar nuestra 
-                    biblioteca de preguntas como punto de partida.
+                    Sí, XIWEN es una Progressive Web App (PWA) completamente responsiva.
+                    Funciona perfectamente en celulares, tablets y computadoras. Incluso puede
+                    instalarse como aplicación nativa y funcionar offline. La interfaz se adapta
+                    automáticamente a cualquier tamaño de pantalla.
                   </p>
                 </div>
               )}
             </div>
 
-            <div 
+            <div
               className={`faq-item ${activeFAQ === 3 ? 'active' : ''}`}
               onClick={() => toggleFAQ(3)}
             >
               <div className="faq-question">
-                <h4>¿Qué pasa si necesito cancelar mi suscripción?</h4>
+                <h4>¿Qué roles de usuario están disponibles?</h4>
                 <span className="faq-icon">{activeFAQ === 3 ? '−' : '+'}</span>
               </div>
               {activeFAQ === 3 && (
                 <div className="faq-answer">
                   <p>
-                    Puedes cancelar en cualquier momento sin penalización. Tu cuenta 
-                    permanece activa hasta el final del período pagado. Todos tus datos 
-                    se conservan por 90 días por si decides volver.
+                    La plataforma soporta 4 roles: <strong>Administrador</strong> (gestión completa
+                    y control de pagos), <strong>Profesor</strong> (creación de cursos, ejercicios
+                    y calificaciones), <strong>Estudiante</strong> (acceso a contenido y actividades),
+                    y <strong>Tutor/Padre</strong> (seguimiento académico y gestión de pagos).
+                    Cada rol tiene su propio dashboard personalizado.
                   </p>
                 </div>
               )}
             </div>
 
-            <div 
+            <div
               className={`faq-item ${activeFAQ === 4 ? 'active' : ''}`}
               onClick={() => toggleFAQ(4)}
             >
               <div className="faq-question">
-                <h4>¿Ofrecen capacitación o soporte?</h4>
+                <h4>¿Incluye videoconferencia para clases en vivo?</h4>
                 <span className="faq-icon">{activeFAQ === 4 ? '−' : '+'}</span>
               </div>
               {activeFAQ === 4 && (
                 <div className="faq-answer">
                   <p>
-                    Sí. Todos los planes incluyen acceso a nuestra base de conocimientos, 
-                    tutoriales en video y soporte por email. Los planes Profesional e 
-                    Institución tienen soporte prioritario y capacitación personalizada.
+                    Sí, la plataforma integra LiveKit para videochat en tiempo real. Incluye
+                    sala de espera virtual, compartir pantalla, audio y video de alta calidad.
+                    Además, hay un sistema de mensajería interna para comunicación asíncrona
+                    entre profesores, estudiantes y tutores.
                   </p>
                 </div>
               )}
@@ -431,24 +535,26 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
       <section className="cta-section">
         <div className="container">
           <div className="cta-content">
-            <h2 className="cta-title">¿Listo para Comenzar?</h2>
+            <h2 className="cta-title">¿Listo para Transformar tu Institución?</h2>
             <p className="cta-description">
-              Únete a cientos de profesores y alumnos que ya están 
-              transformando la educación
+              Plataforma todo-en-uno para gestión académica, pagos, comunicación y más.
+              Comienza tu prueba gratuita de 30 días.
             </p>
             <div className="cta-buttons">
-              <button 
-                className="btn btn-white btn-large"
+              <BaseButton
+                variant="white"
+                size="lg"
                 onClick={onNavigateToRegister}
               >
-                Crear Cuenta Gratis
-              </button>
-              <button 
-                className="btn btn-outline btn-large"
+                Solicitar Demo
+              </BaseButton>
+              <BaseButton
+                variant="outline"
+                size="lg"
                 onClick={onNavigateToLogin}
               >
-                Ya Tengo Cuenta
-              </button>
+                Iniciar Sesión
+              </BaseButton>
             </div>
           </div>
         </div>

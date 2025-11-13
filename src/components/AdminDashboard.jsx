@@ -1,6 +1,6 @@
 import logger from '../utils/logger';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Crown,
@@ -39,7 +39,10 @@ import {
   TrendingUp,
   ClipboardList,
   DollarSign,
-  Zap
+  Zap,
+  Key,
+  Palette,
+  Info
 } from 'lucide-react';
 import {
   loadStudents,
@@ -47,10 +50,11 @@ import {
   loadCategories,
   loadCourses
 } from '../firebase/firestore';
-import { deleteUser } from '../firebase/users';
+import { deleteUser, createUser } from '../firebase/users';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
 import { getClassesByTeacher } from '../firebase/classes';
+import { getTeacherSessions } from '../firebase/classSessions';
 import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
@@ -70,28 +74,41 @@ import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
-import ExcalidrawWhiteboard from './ExcalidrawWhiteboard';
+// Lazy load Excalidraw to prevent vendor bundle issues
+const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
 import StudentCard from './StudentCard';
 import UserCard from './UserCard';
-import LiveClassManager from './LiveClassManager';
-import LiveClassRoom from './LiveClassRoom';
+import {
+  BaseButton,
+  BaseCard,
+  BaseModal,
+  BaseLoading,
+  BaseAlert,
+  BaseBadge
+} from './common';
+// REMOVED: Old LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
+// import LiveClassManager from './LiveClassManager';
+// import LiveClassRoom from './LiveClassRoom';
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
 import MessagesPanel from './MessagesPanel';
 import AdminPaymentsPanel from './AdminPaymentsPanel';
 import AIConfigPanel from './AIConfigPanel';
 import AICredentialsModal from './AICredentialsModal';
+import SettingsPanel from './SettingsPanel';
+import HomeworkReviewPanel from './HomeworkReviewPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
+import ClassSessionModal from './ClassSessionModal';
 import UnifiedCalendar from './UnifiedCalendar';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
 import DesignLab from './DesignLab';
 import InteractiveBookViewer from './InteractiveBookViewer';
-import AIService from '../services/AIService';
 import ThemeCustomizer from './ThemeCustomizer';
-import './AdminDashboard.css';
+import aiService from '../services/aiService';
+import DashboardAssistant from './DashboardAssistant';
 
 // Custom hooks
 import { useUserManagement } from '../hooks/useUserManagement';
@@ -131,12 +148,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAICredentialsModal, setShowAICredentialsModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
+  const [settingsTab, setSettingsTab] = useState('general'); // 'general' | 'credentials' | 'theme'
+  const [credentialsRefresh, setCredentialsRefresh] = useState(0); // Para forzar re-render
   const [aiCredentials, setAiCredentials] = useState({
     claude: true,
     openai: true,
     gemini: true,
     grok: true
   });
+  const [calendarEditSession, setCalendarEditSession] = useState(null); // Para modal de edición desde calendario
 
   // Admin-specific stats (extended from userManagement.stats)
   const [adminStats, setAdminStats] = useState({
@@ -152,6 +172,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   const [allContent, setAllContent] = useState([]);
   const [allExercises, setAllExercises] = useState([]);
   const [allClasses, setAllClasses] = useState([]);
+  const [classSessions, setClassSessions] = useState([]); // New unified class sessions
 
   // Load dashboard data on mount
   useEffect(() => {
@@ -202,13 +223,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
       const startTime = performance.now();
 
       // Load all data in parallel
-      const [students, games, categories, allCourses, teacherContent, teacherClasses] = await Promise.all([
+      const [students, games, categories, allCourses, teacherContent, teacherClasses, sessions] = await Promise.all([
         loadStudents(),
         loadGameHistory(),
         loadCategories(),
         loadCourses(),
         getContentByTeacher(user.uid),
         getClassesByTeacher(user.uid),
+        getTeacherSessions(user.uid), // New unified sessions
         userManagement.loadUsers() // Load users with credits via hook
       ]);
 
@@ -218,6 +240,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       setCourses(activeCourses);
       setAllContent(teacherContent);
       setAllClasses(teacherClasses);
+      setClassSessions(sessions); // Store new unified sessions
 
       // Calculate top students
       const studentGameCounts = {};
@@ -307,12 +330,28 @@ function AdminDashboard({ user, userRole, onLogout }) {
     userManagement.loadUsers();
   }, []);
 
-  // User created
-  const handleUserCreated = useCallback(() => {
-    setShowAddUserModal(false);
-    userManagement.loadUsers();
-    showSuccess('User created successfully');
-  }, []);
+  // Create user function for modal
+  const handleCreateUser = useCallback(async (userData) => {
+    try {
+      logger.debug('📝 Creating user:', userData);
+      const result = await createUser({
+        ...userData,
+        createdBy: user.uid
+      });
+      logger.debug('✅ User creation result:', result);
+
+      if (result.success) {
+        // Reload users list
+        await userManagement.loadUsers();
+        showSuccess('User created successfully');
+      }
+
+      return result;
+    } catch (error) {
+      logger.error('❌ Error creating user:', error);
+      return { success: false, error: error.message };
+    }
+  }, [user, userManagement]);
 
   const showSuccess = (message) => {
     setSuccessMessage(message);
@@ -373,10 +412,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (loading) {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
-          <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
-          <p>Loading admin panel...</p>
-        </div>
+        <BaseLoading variant="fullscreen" text="Loading admin panel..." />
       </DashboardLayout>
     );
   }
@@ -438,13 +474,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
   // Excalidraw Whiteboard - NO Layout (fullscreen)
   if (navigation.currentScreen === 'excalidrawWhiteboard') {
     return (
-      <ExcalidrawWhiteboard
-        onBack={() => {
-          navigation.setExcalidrawManagerKey(prev => prev + 1);
-          navigation.setCurrentScreen('excalidrawSessions');
-        }}
-        initialSession={navigation.selectedExcalidrawSession}
-      />
+      <Suspense fallback={<BaseLoading variant="fullscreen" text="Cargando pizarra..." />}>
+        <ExcalidrawWhiteboard
+          onBack={() => {
+            navigation.setExcalidrawManagerKey(prev => prev + 1);
+            navigation.setCurrentScreen('excalidrawSessions');
+          }}
+          initialSession={navigation.selectedExcalidrawSession}
+        />
+      </Suspense>
     );
   }
 
@@ -460,29 +498,17 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Live Class Room - NO Layout (fullscreen)
-  if (navigation.currentScreen === 'liveClassRoom' && navigation.selectedLiveClass) {
-    return (
-      <LiveClassRoom
-        liveClass={navigation.selectedLiveClass}
-        user={user}
-        userRole={userRole}
-        onLeave={() => {
-          navigation.setSelectedLiveClass(null);
-          navigation.setCurrentScreen('liveClasses');
-        }}
-      />
-    );
-  }
-
   // Class Session Manager (Sistema Unificado) - WITH Layout
   if (navigation.currentScreen === 'classSessions') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
         <ClassSessionManager
           user={user}
+          initialEditSessionId={navigation.editSessionId}
+          onClearEditSession={() => navigation.setEditSessionId(null)}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
+            navigation.setEditSessionId(null); // Clear edit state when joining
             navigation.setCurrentScreen('classSessionRoom');
           }}
         />
@@ -517,13 +543,47 @@ function AdminDashboard({ user, userRole, onLogout }) {
           userId={user?.uid}
           userRole="admin"
           onCreateSession={() => {
+            navigation.setEditSessionId(null); // Clear any edit state
             navigation.setCurrentScreen('classSessions');
           }}
           onJoinSession={(session) => {
             navigation.setSelectedLiveClass(session);
             navigation.setCurrentScreen('classSessionRoom');
           }}
+          onEditSession={async (sessionId) => {
+            // Cargar la sesión completa para pasarla al modal
+            try {
+              const { getClassSession } = await import('../firebase/classSessions');
+              const sessionData = await getClassSession(sessionId);
+              if (sessionData) {
+                setCalendarEditSession({ id: sessionId, ...sessionData });
+              }
+            } catch (error) {
+              logger.error('Error loading session for edit:', error);
+            }
+          }}
         />
+
+        {/* Modal de edición de sesión desde calendario */}
+        {calendarEditSession && (
+          <ClassSessionModal
+            isOpen={true}
+            session={calendarEditSession}
+            onClose={() => setCalendarEditSession(null)}
+            onSubmit={async (formData) => {
+              try {
+                const { updateClassSession } = await import('../firebase/classSessions');
+                await updateClassSession(calendarEditSession.id, formData);
+                setCalendarEditSession(null);
+                logger.info('Session updated successfully from calendar');
+              } catch (error) {
+                logger.error('Error updating session:', error);
+              }
+            }}
+            courses={[]} // TODO: Load courses if needed
+            loading={false}
+          />
+        )}
       </DashboardLayout>
     );
   }
@@ -532,12 +592,30 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'aiConfig') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+        <div className="p-4 md:p-6 lg:p-8">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AIConfigPanel />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Homework Review Panel - WITH Layout
+  if (navigation.currentScreen === 'homeworkReview') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <HomeworkReviewPanel />
+      </DashboardLayout>
+    );
+  }
+
+  // Settings Panel - WITH Layout
+  if (navigation.currentScreen === 'settings') {
+    return (
+      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
+        <SettingsPanel />
       </DashboardLayout>
     );
   }
@@ -578,19 +656,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Settings Panel - WITH Layout (Theme Customizer)
-  if (navigation.currentScreen === 'settings') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
-            ← Volver al Inicio
-          </button>
-          <ThemeCustomizer />
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   // Live Game Setup - WITH Layout
   if (navigation.currentScreen === 'liveGame') {
@@ -648,23 +713,14 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Class Manager - WITH Layout
-  if (navigation.currentScreen === 'classes') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
-      </DashboardLayout>
-    );
-  }
-
   // Analytics Dashboard - WITH Layout
   if (navigation.currentScreen === 'analytics') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+        <div className="p-4 md:p-6 lg:p-8">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AnalyticsDashboard user={user} />
         </div>
       </DashboardLayout>
@@ -684,10 +740,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'payments') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+        <div className="p-4 md:p-6 lg:p-8">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AdminPaymentsPanel user={user} />
         </div>
       </DashboardLayout>
@@ -698,166 +754,12 @@ function AdminDashboard({ user, userRole, onLogout }) {
   if (navigation.currentScreen === 'attendance') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+        <div className="p-4 md:p-6 lg:p-8">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
           <AttendanceView teacher={user} />
         </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Settings Panel - WITH Layout
-  if (navigation.currentScreen === 'settings') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1000px] mx-auto">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-6">
-            ← Back to Home
-          </button>
-
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold text-primary-900 dark:text-primary-100 mb-2">Settings</h1>
-              <p className="text-secondary-600 dark:text-secondary-400">
-                Manage system settings and preferences
-              </p>
-            </div>
-
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-primary-900 dark:text-primary-100 mb-4">System Information</h2>
-              <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
-                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
-                  <span className="font-medium">Application Version</span>
-                  <span>v1.0.0</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
-                  <span className="font-medium">Environment</span>
-                  <span>{import.meta.env.MODE}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-primary-200 dark:border-primary-700">
-                  <span className="font-medium">Admin Email</span>
-                  <span>{user.email}</span>
-                </div>
-                <div className="flex justify-between py-2">
-                  <span className="font-medium">Firebase Project</span>
-                  <span>xiwen-app-2026</span>
-                </div>
-              </div>
-            </div>
-
-            {/* AI Credentials Section */}
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                Credenciales de IA
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Configura las API keys de los proveedores de IA para usar funciones inteligentes en la plataforma
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {AIService.getAvailableProviders().map((provider) => {
-                  // Check credentials from Firebase Secret Manager
-                  const isConfigured = aiCredentials[provider.name] || false;
-
-                  return (
-                    <button
-                      key={provider.name}
-                      onClick={() => {
-                        setSelectedProvider({
-                          ...provider,
-                          docsUrl: provider.name === 'openai' ? 'https://platform.openai.com/api-keys' :
-                                   provider.name === 'gemini' ? 'https://aistudio.google.com/app/apikey' :
-                                   provider.name === 'grok' ? 'https://console.x.ai/' :
-                                   'https://console.anthropic.com/settings/keys'
-                        });
-                        setShowAICredentialsModal(true);
-                      }}
-                      className={`
-                        relative flex items-center gap-4 p-4 rounded-xl border-2
-                        transition-all duration-200
-                        ${isConfigured
-                          ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-                        }
-                        hover:border-zinc-500 dark:hover:border-zinc-400 active:scale-[0.98]
-                      `}
-                    >
-                      <div className="text-3xl">{provider.icon}</div>
-                      <div className="flex-1 text-left">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                          {provider.label}
-                        </h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {provider.model}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0">
-                        {isConfigured ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
-                            <CheckCircle className="w-3 h-3" />
-                            Configurado
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-semibold">
-                            <Settings className="w-3 h-3" />
-                            Configurar
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
-                <p className="text-xs text-zinc-700 dark:text-zinc-300">
-                  <strong>Nota:</strong> Las credenciales se guardan de forma segura en el navegador local. No se comparten con otros usuarios.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-              <div className="flex items-start gap-3">
-                <Settings className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-1" size={20} />
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                    Additional Settings Coming Soon
-                  </h3>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    More configuration options will be available in future updates, including:
-                  </p>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
-                    <li>• Email notifications preferences</li>
-                    <li>• System-wide defaults</li>
-                    <li>• Backup and restore options</li>
-                    <li>• Integration settings</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Credentials Modal */}
-        <AICredentialsModal
-          isOpen={showAICredentialsModal}
-          onClose={() => {
-            setShowAICredentialsModal(false);
-            setSelectedProvider(null);
-          }}
-          provider={selectedProvider}
-          isConfigured={selectedProvider ? aiCredentials[selectedProvider.name] : false}
-          onSave={async (providerName, apiKey) => {
-            logger.info('API Key saved for provider:', providerName);
-            // Reload providers to update configured status
-            setTimeout(() => {
-              window.location.reload();
-            }, 1500);
-          }}
-        />
       </DashboardLayout>
     );
   }
@@ -922,22 +824,6 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Live Class Manager - WITH Layout
-  if (navigation.currentScreen === 'liveClasses') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <LiveClassManager
-          user={user}
-          onBack={navigation.handleBackToDashboard}
-          onStartClass={(liveClass) => {
-            navigation.setSelectedLiveClass(liveClass);
-            navigation.setCurrentScreen('liveClassRoom');
-          }}
-        />
-      </DashboardLayout>
-    );
-  }
-
   // Students Panel -> REDIRECT to Users with filter
   if (navigation.currentScreen === 'students') {
     // Automatically redirect to users panel with students filter
@@ -951,23 +837,24 @@ function AdminDashboard({ user, userRole, onLogout }) {
     if (sessionStorage.getItem('viewAsReturning') === 'true' && !navigation.hasProcessedReturn) {
       return (
         <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-          <div className="min-h-[60vh] flex flex-col justify-center items-center">
-            <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin"></div>
-            <p>Returning...</p>
-          </div>
+          <BaseLoading variant="fullscreen" text="Returning..." />
         </DashboardLayout>
       );
     }
 
     // Filter users by role (using regular variables instead of useMemo to avoid hook order issues)
     let roleFilteredUsers = userManagement.users;
+    logger.debug(`🔍 [Users Filter] Total users: ${userManagement.users.length}, Role filter: ${navigation.usersRoleFilter}`);
 
     if (navigation.usersRoleFilter === 'students') {
       roleFilteredUsers = roleFilteredUsers.filter(u => ['student', 'listener', 'trial'].includes(u.role));
+      logger.debug(`🔍 [Users Filter] After students filter: ${roleFilteredUsers.length}`);
     } else if (navigation.usersRoleFilter === 'teachers') {
       roleFilteredUsers = roleFilteredUsers.filter(u => ['teacher', 'trial_teacher'].includes(u.role));
+      logger.debug(`🔍 [Users Filter] After teachers filter: ${roleFilteredUsers.length}`);
     } else if (navigation.usersRoleFilter === 'admins') {
       roleFilteredUsers = roleFilteredUsers.filter(u => u.role === 'admin');
+      logger.debug(`🔍 [Users Filter] After admins filter: ${roleFilteredUsers.length}`);
     }
 
     // Filter by search term
@@ -976,6 +863,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
       user.email?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase()) ||
       user.role?.toLowerCase().includes(navigation.usersSearchTerm.toLowerCase())
     );
+    logger.debug(`🔍 [Users Filter] After search filter (term: "${navigation.usersSearchTerm}"): ${filteredUsers.length}`);
 
     // Apply sorting
     filteredUsers = [...filteredUsers].sort((a, b) => {
@@ -1018,72 +906,60 @@ function AdminDashboard({ user, userRole, onLogout }) {
     return (
       <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <button onClick={navigation.handleBackToDashboard} className="btn btn-ghost mb-4">
+        <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto">
+          <BaseButton onClick={navigation.handleBackToDashboard} variant="ghost" className="mb-4">
             ← Back to Home
-          </button>
+          </BaseButton>
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
               <Shield size={32} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <button onClick={() => setShowAddUserModal(true)} className="btn btn-primary w-full sm:w-auto">
-                <Plus size={18} strokeWidth={2} /> New User
-              </button>
-              <button onClick={userManagement.loadUsers} className="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full sm:w-auto" title="Refresh user list">
-                <RefreshCw size={18} strokeWidth={2} /> Refresh
-              </button>
+              <BaseButton onClick={() => setShowAddUserModal(true)} variant="primary" fullWidth className="sm:w-auto" icon={Plus}>
+                New User
+              </BaseButton>
+              <BaseButton onClick={userManagement.loadUsers} variant="success" fullWidth className="sm:w-auto" icon={RefreshCw} title="Refresh user list">
+                Refresh
+              </BaseButton>
             </div>
           </div>
 
           {/* Role Filter Tabs */}
           <div className="flex gap-2 mb-4 flex-wrap">
-            <button
+            <BaseButton
               onClick={() => navigation.setUsersRoleFilter('all')}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                navigation.usersRoleFilter === 'all'
-                  ? 'bg-gray-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              variant={navigation.usersRoleFilter === 'all' ? 'primary' : 'ghost'}
+              icon={Users}
+              size="sm"
             >
-              <Users size={16} className="inline mr-2" strokeWidth={2} />
               All Users ({userManagement.users.length})
-            </button>
-            <button
+            </BaseButton>
+            <BaseButton
               onClick={() => navigation.setUsersRoleFilter('students')}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                navigation.usersRoleFilter === 'students'
-                  ? 'bg-gray-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              variant={navigation.usersRoleFilter === 'students' ? 'primary' : 'ghost'}
+              icon={GraduationCap}
+              size="sm"
             >
-              <GraduationCap size={16} className="inline mr-2" strokeWidth={2} />
               Students ({stats.students})
-            </button>
-            <button
+            </BaseButton>
+            <BaseButton
               onClick={() => navigation.setUsersRoleFilter('teachers')}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                navigation.usersRoleFilter === 'teachers'
-                  ? 'bg-gray-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              variant={navigation.usersRoleFilter === 'teachers' ? 'primary' : 'ghost'}
+              icon={UserCog}
+              size="sm"
             >
-              <UserCog size={16} className="inline mr-2" strokeWidth={2} />
               Teachers ({stats.teachers})
-            </button>
-            <button
+            </BaseButton>
+            <BaseButton
               onClick={() => navigation.setUsersRoleFilter('admins')}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                navigation.usersRoleFilter === 'admins'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
+              variant={navigation.usersRoleFilter === 'admins' ? 'warning' : 'ghost'}
+              icon={Crown}
+              size="sm"
             >
-              <Crown size={16} className="inline mr-2" strokeWidth={2} />
               Admins ({stats.admins})
-            </button>
+            </BaseButton>
           </div>
 
           {/* Search Bar with View Mode Toggle */}
@@ -1098,41 +974,38 @@ function AdminDashboard({ user, userRole, onLogout }) {
           />
 
           {successMessage && (
-            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-success-500 text-white animate-slide-down">
-              <CheckCircle size={18} strokeWidth={2} /> {successMessage}
-            </div>
+            <BaseAlert variant="success" className="mb-5 animate-slide-down" dismissible onDismiss={() => setSuccessMessage('')}>
+              {successMessage}
+            </BaseAlert>
           )}
           {errorMessage && (
-            <div className="max-w-[1200px] mx-auto mb-5 px-5 py-4 rounded-lg font-semibold flex items-center gap-3 bg-error-500 text-white animate-slide-down">
-              <AlertTriangle size={18} strokeWidth={2} /> {errorMessage}
-            </div>
+            <BaseAlert variant="danger" className="mb-5 animate-slide-down" dismissible onDismiss={() => setErrorMessage('')}>
+              {errorMessage}
+            </BaseAlert>
           )}
 
           {/* TABLE VIEW */}
           {navigation.usersViewMode === 'table' && (
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl overflow-hidden">
+            <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              {(() => {
+                logger.debug(`🔍 [Users Render] View mode: ${navigation.usersViewMode}, Rendering ${filteredUsers.length} users`);
+                return null;
+              })()}
               {sessionStorage.getItem('viewAsReturnUserId') && !navigation.hasProcessedReturn && userManagement.users.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[400px] text-secondary-600 dark:text-secondary-400">
-                  <div className="w-12 h-12 border-4 border-primary-200 dark:border-primary-800 border-t-accent-500 rounded-full animate-spin mb-4"></div>
-                  <p>Loading...</p>
-                </div>
+                <BaseLoading variant="spinner" text="Loading..." />
               ) : filteredUsers.length === 0 ? (
-                <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+                <div className="py-12 text-center text-gray-600 dark:text-gray-400">
                   <p>No users found with selected filters</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
-                  <thead className="bg-tertiary-50 dark:bg-tertiary-900 border-b-2 border-primary-200 dark:border-primary-800">
+                  <thead className="bg-gray-50 dark:bg-gray-700 border-b-2 border-gray-200 dark:border-gray-600">
                     <tr>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide min-w-[200px]">
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide min-w-[200px] text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('name')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'name'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'name' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>User</span>
                           {userManagement.sortField === 'name' ? (
@@ -1142,14 +1015,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('credits')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'credits'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'credits' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Credits</span>
                           {userManagement.sortField === 'credits' ? (
@@ -1159,14 +1028,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('role')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'role'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'role' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Role</span>
                           {userManagement.sortField === 'role' ? (
@@ -1176,14 +1041,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('status')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'status'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'status' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Status</span>
                           {userManagement.sortField === 'status' ? (
@@ -1193,14 +1054,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('createdAt')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'createdAt'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'createdAt' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Registration</span>
                           {userManagement.sortField === 'createdAt' ? (
@@ -1210,14 +1067,10 @@ function AdminDashboard({ user, userRole, onLogout }) {
                           )}
                         </div>
                       </th>
-                      <th className="p-4 text-left font-semibold text-[13px] text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">
+                      <th className="p-4 text-left font-semibold text-xs uppercase tracking-wide text-gray-600 dark:text-gray-300">
                         <div
                           onClick={() => userManagement.handleSort('email')}
-                          className={`flex items-center gap-2 cursor-pointer select-none ${
-                            userManagement.sortField === 'email'
-                              ? 'text-accent-600 dark:text-accent-400'
-                              : 'hover:text-accent-600 dark:hover:text-accent-400'
-                          }`}
+                          className={`flex items-center gap-2 cursor-pointer select-none ${userManagement.sortField === 'email' ? 'text-primary-600 dark:text-primary-400' : ''}`}
                         >
                           <span>Email</span>
                           {userManagement.sortField === 'email' ? (
@@ -1233,19 +1086,15 @@ function AdminDashboard({ user, userRole, onLogout }) {
                     {filteredUsers.map(userItem => (
                       <tr
                         key={userItem.id}
-                        className={`border-b border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors ${
-                          userItem.status !== 'active'
-                            ? 'opacity-60 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(239,68,68,0.05)_10px,rgba(239,68,68,0.05)_20px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(239,68,68,0.1)_10px,rgba(239,68,68,0.1)_20px)]'
-                            : ''
-                        }`}
+                        className={`transition-colors border-b border-gray-200 dark:border-gray-700 ${userItem.status !== 'active' ? 'opacity-60 bg-red-50 dark:bg-red-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                       >
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
+                        <td className="p-4 text-gray-900 dark:text-white">
                           <div
                             className="flex items-center gap-3 cursor-pointer"
                             onClick={() => handleViewUserProfile(userItem)}
                             title="View full profile"
                           >
-                            <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-white flex-shrink-0">
+                            <div className="w-9 h-9 rounded-full bg-zinc-800 dark:bg-zinc-700 flex items-center justify-center text-white flex-shrink-0">
                               {(() => {
                                 const iconName = ROLE_INFO[userItem.role]?.icon || 'User';
                                 const IconComponent = ICON_MAP[iconName] || User;
@@ -1253,47 +1102,45 @@ function AdminDashboard({ user, userRole, onLogout }) {
                               })()}
                             </div>
                             <div className="flex-1 min-w-[150px]">
-                              <div className="font-semibold text-primary-900 dark:text-primary-100 whitespace-nowrap hover:text-accent-600 hover:underline">
+                              <div className="font-semibold whitespace-nowrap hover:underline">
                                 {userItem.name || 'No name'}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <div className="inline-block px-3 py-1 rounded-xl bg-amber-600 text-white font-semibold text-[13px]">
-                            {userItem.credits || 0}
-                          </div>
+                        <td className="p-4">
+                          <BaseBadge variant="warning">{userItem.credits || 0}</BaseBadge>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <span className={`inline-block px-3 py-1 rounded-xl font-semibold text-xs uppercase tracking-wide text-white ${
-                            userItem.role === 'admin'
-                              ? 'bg-amber-600'
-                              : userItem.role === 'teacher' || userItem.role === 'trial_teacher'
-                              ? 'bg-zinc-800'
-                              : 'bg-gray-600'
-                          }`}>
+                        <td className="p-4">
+                          <BaseBadge
+                            variant={
+                              userItem.role === 'admin' ? 'warning' :
+                              (userItem.role === 'teacher' || userItem.role === 'trial_teacher') ? 'default' :
+                              'info'
+                            }
+                          >
                             {ROLE_INFO[userItem.role]?.name || userItem.role}
-                          </span>
+                          </BaseBadge>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
-                          <span className={`inline-block px-3 py-1 rounded-xl font-semibold text-xs text-white ${
-                            userItem.status === 'active'
-                              ? 'bg-success-500'
-                              : userItem.status === 'suspended'
-                              ? 'bg-error-500'
-                              : 'bg-warning-500'
-                          }`}>
+                        <td className="p-4">
+                          <BaseBadge
+                            variant={
+                              userItem.status === 'active' ? 'success' :
+                              userItem.status === 'suspended' ? 'danger' :
+                              'warning'
+                            }
+                          >
                             {userItem.status === 'active' ? 'Active' :
                              userItem.status === 'suspended' ? 'Suspended' :
                              'Pending'}
-                          </span>
+                          </BaseBadge>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
+                        <td className="p-4">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
                             {formatDate(userItem.createdAt)}
                           </span>
                         </td>
-                        <td className="p-4 text-primary-900 dark:text-primary-100">
+                        <td className="p-4">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
                             {userItem.email}
                           </span>
@@ -1310,11 +1157,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
           {/* GRID VIEW */}
           {navigation.usersViewMode === 'grid' && (
             filteredUsers.length === 0 ? (
-              <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+              <div className="py-12 text-center text-gray-600 dark:text-gray-400">
                 <p>No users found with selected filters</p>
               </div>
             ) : (
-              <div className="users-grid">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredUsers.map(userItem => (
                   <UserCard
                     key={userItem.id}
@@ -1332,11 +1179,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
           {/* LIST VIEW */}
           {navigation.usersViewMode === 'list' && (
             filteredUsers.length === 0 ? (
-              <div className="py-12 text-center text-secondary-600 dark:text-secondary-400">
+              <div className="py-12 text-center text-gray-600 dark:text-gray-400">
                 <p>No users found with selected filters</p>
               </div>
             ) : (
-              <div className="users-list">
+              <div className="space-y-4">
                 {filteredUsers.map(userItem => (
                   <UserCard
                     key={userItem.id}
@@ -1357,25 +1204,29 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
       {showAddUserModal && (
         <AddUserModal
+          isOpen={showAddUserModal}
           onClose={() => setShowAddUserModal(false)}
-          onUserCreated={handleUserCreated}
+          onUserCreated={handleCreateUser}
           currentUser={user}
           isAdmin={isAdmin}
         />
       )}
 
       {navigation.showUserProfile && navigation.selectedUserProfile && (
-        <div className="modal-overlay" onClick={handleCloseUserProfile}>
-          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <UserProfile
-              selectedUser={navigation.selectedUserProfile}
-              currentUser={user}
-              onBack={handleCloseUserProfile}
-              onUpdate={userManagement.loadUsers}
-              isAdmin={isAdmin}
-            />
-          </div>
-        </div>
+        <BaseModal
+          isOpen={navigation.showUserProfile}
+          onClose={handleCloseUserProfile}
+          title="User Profile"
+          size="xl"
+        >
+          <UserProfile
+            selectedUser={navigation.selectedUserProfile}
+            currentUser={user}
+            onBack={handleCloseUserProfile}
+            onUpdate={userManagement.loadUsers}
+            isAdmin={isAdmin}
+          />
+        </BaseModal>
       )}
     </>
     );
@@ -1440,13 +1291,12 @@ function AdminDashboard({ user, userRole, onLogout }) {
       id: 'classes',
       icon: Calendar,
       title: "Classes",
-      count: allClasses.length,
-      countLabel: allClasses.length === 1 ? "class" : "classes",
-      onClick: () => navigation.setCurrentScreen('classes'),
-      createLabel: "New Class",
+      count: classSessions.length,
+      countLabel: classSessions.length === 1 ? "session" : "sessions",
+      onClick: () => navigation.setCurrentScreen('classSessions'),
+      createLabel: "New Session",
       onCreateClick: () => {
-        navigation.setOpenClassModal(true);
-        navigation.setCurrentScreen('classes');
+        navigation.setCurrentScreen('classSessions');
       }
     },
     {
@@ -1498,74 +1348,68 @@ function AdminDashboard({ user, userRole, onLogout }) {
   return (
     <>
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <div className="p-6 md:p-8 max-w-[1400px] mx-auto">
-          <div className="mb-12 text-center">
+        <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto">
+          <div className="mb-8 md:mb-12 text-center">
             <div className="flex items-center gap-3 mb-2 justify-center">
-              <Crown size={40} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
+              <Crown size={32} md:size={40} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Admin Panel</h1>
             </div>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 mb-12">
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
-                <Users size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.total}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Total Users</div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+            <BaseCard
+              icon={Users}
+              title="Total Users"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.total}</div>
+            </BaseCard>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-amber-600">
-                <Crown size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.admins}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Administrators</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={Crown}
+              title="Administrators"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.admins}</div>
+            </BaseCard>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-zinc-800">
-                <UserCog size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.teachers}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Teachers</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={UserCog}
+              title="Teachers"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.teachers}</div>
+            </BaseCard>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-gray-600">
-                <GraduationCap size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.students}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Students</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={GraduationCap}
+              title="Students"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.students}</div>
+            </BaseCard>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-green-600">
-                <CheckCircle size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.active}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Active</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={CheckCircle}
+              title="Active"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.active}</div>
+            </BaseCard>
 
-            <div className="bg-secondary-50 dark:bg-secondary-900 border border-primary-200 dark:border-primary-800 rounded-xl p-6 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-500 dark:hover:border-zinc-400 dark:hover:border-zinc-500 dark:hover:border-zinc-400">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg text-white bg-red-600">
-                <Ban size={36} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[32px] font-bold text-primary-900 dark:text-primary-100 leading-none mb-2">{stats.suspended}</div>
-                <div className="text-sm font-medium text-secondary-600 dark:text-secondary-400 uppercase tracking-wide">Suspended</div>
-              </div>
-            </div>
+            <BaseCard
+              icon={Ban}
+              title="Suspended"
+              hover
+              className="bg-white dark:bg-gray-800"
+            >
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">{stats.suspended}</div>
+            </BaseCard>
           </div>
 
           <SearchBar
@@ -1577,7 +1421,7 @@ function AdminDashboard({ user, userRole, onLogout }) {
             className="mb-6"
           />
 
-          <div className={navigation.dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
+          <div className={navigation.dashboardViewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6' : 'space-y-4'}>
             {filteredDashboardCards.map(card => (
               <QuickAccessCard
                 key={card.id}
@@ -1596,26 +1440,33 @@ function AdminDashboard({ user, userRole, onLogout }) {
 
       {showAddUserModal && (
         <AddUserModal
+          isOpen={showAddUserModal}
           onClose={() => setShowAddUserModal(false)}
-          onUserCreated={handleUserCreated}
+          onUserCreated={handleCreateUser}
           currentUser={user}
           isAdmin={isAdmin}
         />
       )}
 
       {navigation.showUserProfile && navigation.selectedUserProfile && (
-        <div className="modal-overlay" onClick={handleCloseUserProfile}>
-          <div className="modal-box flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <UserProfile
-              selectedUser={navigation.selectedUserProfile}
-              currentUser={user}
-              onBack={handleCloseUserProfile}
-              onUpdate={userManagement.loadUsers}
-              isAdmin={isAdmin}
-            />
-          </div>
-        </div>
+        <BaseModal
+          isOpen={navigation.showUserProfile}
+          onClose={handleCloseUserProfile}
+          title="User Profile"
+          size="xl"
+        >
+          <UserProfile
+            selectedUser={navigation.selectedUserProfile}
+            currentUser={user}
+            onBack={handleCloseUserProfile}
+            onUpdate={userManagement.loadUsers}
+            isAdmin={isAdmin}
+          />
+        </BaseModal>
       )}
+
+      {/* AI Assistant Widget */}
+      <DashboardAssistant />
     </>
   );
 }

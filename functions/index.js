@@ -140,3 +140,31 @@ exports.getPaymentHistory = getPaymentHistory;
 const { callAI, checkAICredentials } = require('./aiProviders');
 exports.callAI = callAI;
 exports.checkAICredentials = checkAICredentials;
+
+// ============================================================================
+// HOMEWORK ANALYZER
+// ============================================================================
+
+// Export homework analyzer function
+const { analyzeHomeworkImage } = require('./homeworkAnalyzer');
+exports.analyzeHomeworkImage = analyzeHomeworkImage;
+
+// ============================================================================
+// DASHBOARD ASSISTANT
+// ============================================================================
+
+// Export dashboard assistant with rich context
+const { dashboardAssistant } = require('./dashboardAssistant');
+exports.dashboardAssistant = dashboardAssistant;
+
+// ============================================================================
+// CLASS SCHEDULER (Auto-start classes)
+// ============================================================================
+
+// Export class scheduler functions
+const {
+  scheduledClassStarter,
+  testScheduledClassStarter
+} = require('./classScheduler');
+exports.scheduledClassStarter = scheduledClassStarter;
+exports.testScheduledClassStarter = testScheduledClassStarter;

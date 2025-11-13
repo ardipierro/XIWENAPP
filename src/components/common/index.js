@@ -32,20 +32,5 @@ export { default as BaseEmptyState } from './BaseEmptyState';
 
 // Legacy components (mantener por compatibilidad)
 export { default as EmptyState } from './EmptyState';
-export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as PageHeader } from './PageHeader';
 export { default as ErrorBoundary } from './ErrorBoundary';
-
-// Componentes base reutilizables (Components.jsx legacy)
-export {
-  Button,
-  Card,
-  Input,
-  Badge,
-  Alert,
-  Modal,
-  Spinner,
-  Container,
-  Avatar,
-  StatCard
-} from './Components';

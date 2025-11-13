@@ -30,7 +30,12 @@ import {
   VerbIdentificationExercise,
   InteractiveReadingExercise,
   AIAudioPronunciationExercise,
-  FreeDragDropExercise
+  FreeDragDropExercise,
+  ClozeTestExercise,
+  SentenceBuilderExercise,
+  DictationExercise,
+  ErrorDetectionExercise,
+  CollocationMatchingExercise
 } from '../components/exercisebuilder/exercises';
 import { useExerciseBuilderConfig } from '../hooks/useExerciseBuilderConfig';
 import logger from '../utils/logger';

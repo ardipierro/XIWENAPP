@@ -68,10 +68,13 @@ service cloud.firestore {
     }
 
     // User credits - users can read/write their own, admins can manage all
-    match /user_credits/{userId} {
+    match /user_credits/{creditId} {
       allow read: if isAuthenticated() &&
-        (request.auth.uid == userId || isAdmin());
-      allow write: if request.auth.uid == userId || isAdmin();
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
     }
 
     // ============================================
@@ -229,7 +232,11 @@ service cloud.firestore {
 
     // Calendar events
     match /calendarEvents/{eventId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() &&
+        (resource.data.participants.hasAny([request.auth.uid]) ||
+         resource.data.createdBy == request.auth.uid ||
+         isAdmin() ||
+         isTeacher());
       allow write: if isTeacher() || isAdmin();
     }
 
@@ -338,6 +345,104 @@ service cloud.firestore {
     match /ai_config/{configId} {
       allow read: if isAdmin();
       allow write: if isAdmin();
+    }
+
+    // ============================================
+    // CONTENT READER ANNOTATIONS
+    // ============================================
+
+    // Annotations - users can read/write their own annotations
+    match /annotations/{annotationId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // ============================================
+    // HOMEWORK REVIEW SYSTEM
+    // ============================================
+
+    // Homework reviews - AI-analyzed homework submissions
+    match /homework_reviews/{reviewId} {
+      // Students can create reviews for their own homework
+      allow create: if isAuthenticated() &&
+        request.resource.data.studentId == request.auth.uid;
+
+      // Students can read their own reviews (only teacher-approved ones for assignments)
+      // Teachers and admins can read all reviews
+      allow read: if isAuthenticated() &&
+        (resource.data.studentId == request.auth.uid ||
+         isTeacher() ||
+         isAdmin());
+
+      // Only teachers and admins can update reviews (for approval)
+      allow update: if isTeacher() || isAdmin();
+
+      // Only admins can delete reviews
+      allow delete: if isAdmin();
+    }
+
+    // ============================================
+    // HOMEWORK CORRECTION PROFILES
+    // ============================================
+
+    // Correction profiles - Configuration for how to correct homework
+    match /correction_profiles/{profileId} {
+      // Teachers can create profiles with their own teacherId, admins can create for anyone
+      allow create: if isAuthenticated() &&
+        (isAdmin() ||
+         (isTeacher() && request.resource.data.teacherId == request.auth.uid));
+
+      // Admins can list/read all profiles, teachers can read their own
+      allow list, get: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
+
+      // Teachers can update their own profiles, admins can update all
+      allow update: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
+
+      // Teachers can delete their own profiles, admins can delete all
+      allow delete: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
+    }
+
+    // Profile-student assignments - Assign profiles to individual students
+    match /profile_students/{assignmentId} {
+      // Teachers can create assignments for their students
+      allow create: if isAuthenticated() &&
+        (isTeacher() || isAdmin());
+
+      // Teachers can read assignments, students can read their own
+      allow read: if isAuthenticated() &&
+        (resource.data.studentId == request.auth.uid ||
+         isTeacher() ||
+         isAdmin());
+
+      // Teachers and admins can update assignments
+      allow update: if isTeacher() || isAdmin();
+
+      // Teachers and admins can delete assignments
+      allow delete: if isTeacher() || isAdmin();
+    }
+
+    // Profile-group assignments - Assign profiles to groups
+    match /profile_groups/{assignmentId} {
+      // Teachers can create assignments for their groups
+      allow create: if isAuthenticated() &&
+        (isTeacher() || isAdmin());
+
+      // Teachers and admins can read assignments
+      allow read: if isTeacher() || isAdmin();
+
+      // Teachers and admins can update assignments
+      allow update: if isTeacher() || isAdmin();
+
+      // Teachers and admins can delete assignments
+      allow delete: if isTeacher() || isAdmin();
     }
 
     // Default deny all other collections

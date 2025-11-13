@@ -53,6 +53,12 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
     contentType: '', // Para ejercicios
     body: '',
     url: '',
+    videoData: {
+      thumbnailUrl: '',
+      previewUrl: '',
+      videoGuid: '',
+      collectionId: ''
+    },
     metadata: {
       difficulty: '',
       duration: '',
@@ -78,6 +84,12 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         contentType: initialData.contentType || '',
         body: initialData.body || '',
         url: initialData.url || '',
+        videoData: {
+          thumbnailUrl: initialData.videoData?.thumbnailUrl || '',
+          previewUrl: initialData.videoData?.previewUrl || '',
+          videoGuid: initialData.videoData?.videoGuid || '',
+          collectionId: initialData.videoData?.collectionId || ''
+        },
         metadata: {
           difficulty: initialData.metadata?.difficulty || '',
           duration: initialData.metadata?.duration || '',
@@ -102,6 +114,16 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
       ...prev,
       metadata: {
         ...prev.metadata,
+        [field]: value
+      }
+    }));
+  };
+
+  const handleVideoDataChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      videoData: {
+        ...prev.videoData,
         [field]: value
       }
     }));
@@ -135,26 +157,34 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
     e.preventDefault();
     setError(null);
 
+    logger.info('🔍 Form submitted with data:', formData);
+
     // Validaciones
     if (!formData.title.trim()) {
       setError('El título es requerido');
+      logger.warn('❌ Validation failed: Title is required');
       return;
     }
 
     if (formData.type === CONTENT_TYPES.VIDEO && !formData.url) {
       setError('La URL del video es requerida');
+      logger.warn('❌ Validation failed: Video URL is required');
       return;
     }
 
     if (formData.type === CONTENT_TYPES.LINK && !formData.url) {
       setError('La URL del link es requerida');
+      logger.warn('❌ Validation failed: Link URL is required');
       return;
     }
 
     if (formData.type === CONTENT_TYPES.EXERCISE && !formData.contentType) {
       setError('El tipo de ejercicio es requerido');
+      logger.warn('❌ Validation failed: Exercise type is required');
       return;
     }
+
+    logger.info('✅ All validations passed!');
 
     try {
       setSaving(true);
@@ -180,15 +210,27 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         active: true
       };
 
+      // Agregar videoData si es un video
+      if (formData.type === CONTENT_TYPES.VIDEO) {
+        contentData.videoData = {
+          thumbnailUrl: formData.videoData.thumbnailUrl || null,
+          previewUrl: formData.videoData.previewUrl || null,
+          videoGuid: formData.videoData.videoGuid || null,
+          collectionId: formData.videoData.collectionId || null
+        };
+      }
+
       // Agregar contentType si es ejercicio
       if (formData.type === CONTENT_TYPES.EXERCISE) {
         contentData.contentType = formData.contentType;
         contentData.questions = []; // Inicializar vacío, se editará después
       }
 
-      logger.info('Saving content:', contentData);
+      logger.info('📝 Saving content:', contentData);
 
       await onSave(contentData);
+
+      logger.info('✅ Content saved successfully!');
       handleClose();
     } catch (err) {
       logger.error('Error saving content:', err);
@@ -206,6 +248,12 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
       contentType: '',
       body: '',
       url: '',
+      videoData: {
+        thumbnailUrl: '',
+        previewUrl: '',
+        videoGuid: '',
+        collectionId: ''
+      },
       metadata: {
         difficulty: '',
         duration: '',
@@ -239,7 +287,8 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
           <BaseButton
             variant="primary"
             icon={Save}
-            onClick={handleSubmit}
+            type="submit"
+            form="content-form"
             loading={saving}
           >
             {saving ? 'Guardando...' : (initialData ? 'Actualizar' : 'Crear')}
@@ -247,7 +296,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form id="content-form" onSubmit={handleSubmit} className="space-y-6">
         {error && (
           <BaseAlert
             variant="danger"
@@ -333,13 +382,76 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
 
             {/* Campos específicos según tipo */}
             {(formData.type === CONTENT_TYPES.VIDEO || formData.type === CONTENT_TYPES.LINK) && (
-              <BaseInput
-                label={formData.type === CONTENT_TYPES.VIDEO ? "URL del Video" : "URL del Link"}
-                value={formData.url}
-                onChange={(e) => handleChange('url', e.target.value)}
-                placeholder="https://..."
-                required
-              />
+              <>
+                <BaseInput
+                  label={formData.type === CONTENT_TYPES.VIDEO ? "URL del Video" : "URL del Link"}
+                  value={formData.url}
+                  onChange={(e) => handleChange('url', e.target.value)}
+                  placeholder="https://..."
+                  required
+                />
+
+                {formData.type === CONTENT_TYPES.VIDEO && (
+                  <BaseTextarea
+                    label="Código Embed (Opcional)"
+                    value={formData.body}
+                    onChange={(e) => handleChange('body', e.target.value)}
+                    placeholder='<iframe src="..." frameborder="0" allowfullscreen></iframe>'
+                    rows={3}
+                    helperText="Si tienes un código embed personalizado, pégalo aquí. Si no, usaremos la URL del video."
+                  />
+                )}
+              </>
+            )}
+
+            {/* Campos adicionales de Bunny.net para videos */}
+            {formData.type === CONTENT_TYPES.VIDEO && (
+              <div className="space-y-4 border-t border-zinc-200 dark:border-zinc-700 pt-4 mt-4">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
+                  <span className="text-orange-500">🐰</span>
+                  Datos de Bunny.net (Opcional)
+                </h3>
+
+                <BaseInput
+                  label="Thumbnail URL"
+                  value={formData.videoData.thumbnailUrl}
+                  onChange={(e) => handleVideoDataChange('thumbnailUrl', e.target.value)}
+                  placeholder="https://vz-xxxxxxxx-xxx.b-cdn.net/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/thumbnail.jpg"
+                  helperText="URL de la imagen miniatura del video"
+                />
+
+                <BaseInput
+                  label="Preview Animation URL (WebP)"
+                  value={formData.videoData.previewUrl}
+                  onChange={(e) => handleVideoDataChange('previewUrl', e.target.value)}
+                  placeholder="https://vz-xxxxxxxx-xxx.b-cdn.net/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/preview.webp"
+                  helperText="URL de la animación de vista previa en formato WebP"
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <BaseInput
+                    label="Video GUID"
+                    value={formData.videoData.videoGuid}
+                    onChange={(e) => handleVideoDataChange('videoGuid', e.target.value)}
+                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                    helperText="Identificador único del video en Bunny.net"
+                  />
+
+                  <BaseInput
+                    label="Collection ID"
+                    value={formData.videoData.collectionId}
+                    onChange={(e) => handleVideoDataChange('collectionId', e.target.value)}
+                    placeholder="12345"
+                    helperText="ID de la colección en Bunny.net"
+                  />
+                </div>
+
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-xs text-blue-800 dark:text-blue-200">
+                    💡 <strong>Tip:</strong> Estos campos son opcionales pero ayudan a mejorar la presentación del video con miniaturas y vistas previas animadas.
+                  </p>
+                </div>
+              </div>
             )}
 
             {(formData.type === CONTENT_TYPES.LESSON || formData.type === CONTENT_TYPES.READING) && (

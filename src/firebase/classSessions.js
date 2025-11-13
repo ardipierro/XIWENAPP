@@ -15,6 +15,8 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from './config';
+import { createMeetSession, endMeetSessionByClassId } from './meetSessions';
+import { notifyClassStarted, notifyClassEnded } from './notifications';
 
 /**
  * Sistema Unificado de Sesiones de Clase
@@ -53,10 +55,13 @@ export async function createClassSession(sessionData) {
       // Asignación
       assignedGroups = [],
       assignedStudents = [],
+      contentIds = [],
 
       // Meta
       creditCost = 1,
-      meetingLink = '',
+      meetingLink = '', // deprecated
+      meetLink = '',
+      zoomLink = '',
       imageUrl = ''
     } = sessionData;
 
@@ -111,6 +116,7 @@ export async function createClassSession(sessionData) {
       // Asignación
       assignedGroups,
       assignedStudents,
+      contentIds,
 
       // Estado
       status: 'scheduled', // 'scheduled' | 'live' | 'ended' | 'cancelled'
@@ -120,7 +126,9 @@ export async function createClassSession(sessionData) {
 
       // Meta
       creditCost,
-      meetingLink,
+      meetingLink, // deprecated
+      meetLink,
+      zoomLink,
       imageUrl,
       active: true,
       createdAt: serverTimestamp(),
@@ -292,11 +300,22 @@ export async function getLiveSessions(teacherId = null) {
 
 /**
  * Iniciar una sesión (cambiar status a 'live')
+ * Crea automáticamente una meet session y notifica a los estudiantes asignados
  * @param {string} sessionId - ID de la sesión
- * @returns {Promise<Object>} - {success: boolean, error?: string}
+ * @returns {Promise<Object>} - {success: boolean, meetSessionId?: string, error?: string}
  */
 export async function startClassSession(sessionId) {
   try {
+    // 1. Obtener datos de la sesión
+    const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
+
+    if (!sessionDoc.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const sessionData = sessionDoc.data();
+
+    // 2. Actualizar status a 'live'
     const docRef = doc(db, 'class_sessions', sessionId);
     await updateDoc(docRef, {
       status: 'live',
@@ -304,8 +323,58 @@ export async function startClassSession(sessionId) {
       updatedAt: serverTimestamp()
     });
 
+    let meetSessionId = null;
+
+    // 3. Crear meet_session automáticamente si es modo 'live'
+    if (sessionData.mode === 'live') {
+      try {
+        meetSessionId = await createMeetSession({
+          classSessionId: sessionId,
+          ownerId: sessionData.teacherId,
+          ownerName: sessionData.teacherName,
+          roomName: sessionData.roomName,
+          sessionName: sessionData.name,
+          courseId: sessionData.courseId,
+          courseName: sessionData.courseName
+        });
+
+        // Guardar referencia al meet_session en class_session
+        await updateDoc(docRef, {
+          meetSessionId: meetSessionId
+        });
+
+        logger.info('✅ Meet session creada automáticamente:', meetSessionId);
+      } catch (meetError) {
+        logger.error('⚠️ Error creando meet session (no crítico):', meetError);
+        // No detenemos el flujo si falla la creación de meet_session
+      }
+    }
+
+    // 4. Notificar a estudiantes asignados
+    const assignedStudents = sessionData.assignedStudents || [];
+
+    if (assignedStudents.length > 0) {
+      try {
+        await notifyClassStarted(assignedStudents, {
+          sessionId: sessionId,
+          name: sessionData.name,
+          teacherId: sessionData.teacherId,
+          teacherName: sessionData.teacherName,
+          courseId: sessionData.courseId,
+          courseName: sessionData.courseName,
+          joinUrl: `${window.location.origin}/class-session/${sessionId}`,
+          roomName: sessionData.roomName
+        });
+
+        logger.info(`✅ ${assignedStudents.length} estudiantes notificados`);
+      } catch (notifyError) {
+        logger.error('⚠️ Error enviando notificaciones (no crítico):', notifyError);
+        // No detenemos el flujo si fallan las notificaciones
+      }
+    }
+
     logger.info('✅ Sesión iniciada:', sessionId);
-    return { success: true };
+    return { success: true, meetSessionId };
   } catch (error) {
     logger.error('❌ Error iniciando sesión:', error);
     return { success: false, error: error.message };
@@ -314,17 +383,59 @@ export async function startClassSession(sessionId) {
 
 /**
  * Finalizar una sesión (cambiar status a 'ended')
+ * Finaliza automáticamente la meet session y notifica a los estudiantes
  * @param {string} sessionId - ID de la sesión
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function endClassSession(sessionId) {
   try {
+    // 1. Obtener datos de la sesión
+    const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
+
+    if (!sessionDoc.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const sessionData = sessionDoc.data();
+
+    // 2. Actualizar status a 'ended'
     const docRef = doc(db, 'class_sessions', sessionId);
     await updateDoc(docRef, {
       status: 'ended',
       endedAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
+
+    // 3. Finalizar meet_session si existe
+    if (sessionData.mode === 'live') {
+      try {
+        await endMeetSessionByClassId(sessionId);
+        logger.info('✅ Meet session finalizada automáticamente');
+      } catch (meetError) {
+        logger.error('⚠️ Error finalizando meet session (no crítico):', meetError);
+        // No detenemos el flujo si falla la finalización de meet_session
+      }
+    }
+
+    // 4. Notificar a estudiantes que participaron
+    const assignedStudents = sessionData.assignedStudents || [];
+
+    if (assignedStudents.length > 0) {
+      try {
+        await notifyClassEnded(assignedStudents, {
+          sessionId: sessionId,
+          name: sessionData.name,
+          teacherId: sessionData.teacherId,
+          teacherName: sessionData.teacherName,
+          recordingUrl: sessionData.recordingUrl || null
+        });
+
+        logger.info(`✅ ${assignedStudents.length} estudiantes notificados del fin de clase`);
+      } catch (notifyError) {
+        logger.error('⚠️ Error enviando notificaciones (no crítico):', notifyError);
+        // No detenemos el flujo si fallan las notificaciones
+      }
+    }
 
     logger.info('✅ Sesión finalizada:', sessionId);
     return { success: true };
@@ -590,6 +701,70 @@ export async function removeParticipantFromSession(sessionId, userId) {
 }
 
 /**
+ * Asignar contenido a sesión
+ * @param {string} sessionId - ID de la sesión
+ * @param {string} contentId - ID del contenido
+ * @returns {Promise<Object>} - {success: boolean, error?: string}
+ */
+export async function assignContentToSession(sessionId, contentId) {
+  try {
+    const docRef = doc(db, 'class_sessions', sessionId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const currentContents = docSnap.data().contentIds || [];
+    if (currentContents.includes(contentId)) {
+      return { success: false, error: 'Contenido ya asignado' };
+    }
+
+    await updateDoc(docRef, {
+      contentIds: [...currentContents, contentId],
+      updatedAt: serverTimestamp()
+    });
+
+    logger.info('✅ Contenido asignado a sesión:', sessionId, contentId);
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error asignando contenido:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Desasignar contenido de sesión
+ * @param {string} sessionId - ID de la sesión
+ * @param {string} contentId - ID del contenido
+ * @returns {Promise<Object>} - {success: boolean, error?: string}
+ */
+export async function unassignContentFromSession(sessionId, contentId) {
+  try {
+    const docRef = doc(db, 'class_sessions', sessionId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const currentContents = docSnap.data().contentIds || [];
+    const updatedContents = currentContents.filter(id => id !== contentId);
+
+    await updateDoc(docRef, {
+      contentIds: updatedContents,
+      updatedAt: serverTimestamp()
+    });
+
+    logger.info('✅ Contenido desasignado de sesión:', sessionId, contentId);
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error desasignando contenido:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Obtener nombre del día de la semana
  * @param {number} day - Número del día (0-6)
  * @returns {string} - Nombre del día
@@ -597,4 +772,73 @@ export async function removeParticipantFromSession(sessionId, userId) {
 export function getDayName(day) {
   const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   return days[day] || '';
+}
+
+/**
+ * Crear clase instantánea con Google Meet
+ * Crea y inicia automáticamente una clase en vivo
+ *
+ * @param {Object} config - Configuración de la clase instantánea
+ * @param {string} config.teacherId - ID del profesor
+ * @param {string} config.teacherName - Nombre del profesor
+ * @param {string} config.meetLink - Link de Google Meet (opcional)
+ * @param {Array<string>} config.assignedGroups - IDs de grupos asignados
+ * @param {Array<string>} config.assignedStudents - IDs de estudiantes asignados
+ * @param {string} config.name - Nombre personalizado (opcional)
+ * @returns {Promise<Object>} - Resultado con sessionId, roomName, meetSessionId
+ */
+export async function createInstantMeetSession(config) {
+  try {
+    const {
+      teacherId,
+      teacherName,
+      meetLink = '',
+      assignedGroups = [],
+      assignedStudents = [],
+      name = null
+    } = config;
+
+    const now = new Date();
+    const defaultName = `Clase Instantánea - ${now.toLocaleDateString('es-ES')} ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+
+    const sessionData = {
+      name: name || defaultName,
+      description: 'Clase en vivo creada instantáneamente',
+      teacherId,
+      teacherName,
+      mode: 'live',
+      type: 'single',
+      scheduledStart: Timestamp.fromDate(now),
+      duration: 60,
+      maxParticipants: 30,
+      recordingEnabled: false,
+      whiteboardType: 'none',
+      meetLink: meetLink || '',
+      zoomLink: '',
+      assignedGroups,
+      assignedStudents
+    };
+
+    // Crear sesión
+    const result = await createClassSession(sessionData);
+
+    if (result.success) {
+      // Auto-iniciar la sesión
+      const startResult = await startClassSession(result.sessionId);
+
+      logger.info('✅ Clase instantánea creada e iniciada:', result.sessionId);
+
+      return {
+        success: true,
+        sessionId: result.sessionId,
+        roomName: result.roomName,
+        meetSessionId: startResult.meetSessionId
+      };
+    }
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Error creando clase instantánea:', error);
+    return { success: false, error: error.message };
+  }
 }
