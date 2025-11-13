@@ -47,7 +47,13 @@ const ERROR_TYPE_CONFIG = {
  * Panel for reviewing individual AI corrections
  */
 export default function CorrectionReviewPanel({ review, onCorrectionsUpdate }) {
-  const [corrections, setCorrections] = useState(review.aiSuggestions || []);
+  // Ensure all corrections have IDs (for backward compatibility with old reviews)
+  const correctionsWithIds = (review.aiSuggestions || []).map((corr, idx) => ({
+    ...corr,
+    id: corr.id || `corr_${idx}_${Date.now()}`
+  }));
+
+  const [corrections, setCorrections] = useState(correctionsWithIds);
   const [filterType, setFilterType] = useState(null);
   const [expandedType, setExpandedType] = useState('spelling');
 
