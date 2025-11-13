@@ -43,7 +43,9 @@ import {
   Filter,
   FileDown,
   Map,
-  Maximize2
+  Maximize2,
+  ArrowLeft,
+  ChevronDown
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import {
@@ -52,6 +54,7 @@ import {
   deleteAnnotations
 } from '../firebase/annotations';
 import logger from '../utils/logger';
+import './ContentReader.css';
 
 /**
  * Colores disponibles para anotaciones
@@ -128,7 +131,7 @@ const NOTE_TEMPLATES = {
 /**
  * Enhanced Content Reader Component
  */
-function ContentReader({ contentId, initialContent, userId, readOnly = false }) {
+function ContentReader({ contentId, initialContent, userId, readOnly = false, onClose }) {
   // Estados principales
   const [content, setContent] = useState(initialContent || '');
   const [originalContent, setOriginalContent] = useState(initialContent || '');
@@ -228,6 +231,14 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isErasing, setIsErasing] = useState(false);
   const [eraserSize, setEraserSize] = useState(20);
+
+  // Estados de toolbar flotante
+  const [toolbarPos, setToolbarPos] = useState({ x: 0, y: 0 });
+  const [isDraggingToolbar, setIsDraggingToolbar] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isVertical, setIsVertical] = useState(false);
+  const [verticalSide, setVerticalSide] = useState('right'); // 'left' or 'right'
+  const [expandedGroup, setExpandedGroup] = useState(null); // 'annotations', 'view', 'search', 'export'
 
   // Estados de drag & resize
   const [draggingNote, setDraggingNote] = useState(null);
@@ -832,6 +843,74 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
       alert('❌ Error al exportar PDF: ' + error.message);
     }
   };
+
+  /**
+   * Toolbar flotante - Drag handlers
+   */
+  const toolbarRef = useRef(null);
+
+  const handleToolbarMouseDown = (e) => {
+    // Solo permitir drag desde la toolbar, no desde los botones
+    if (e.target.closest('.tool-btn') || e.target.closest('button') || e.target.closest('select') || e.target.closest('input')) {
+      return;
+    }
+
+    setIsDraggingToolbar(true);
+    const toolbar = toolbarRef.current;
+    if (!toolbar) return;
+
+    const rect = toolbar.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  useEffect(() => {
+    if (!isDraggingToolbar) return;
+
+    const handleMouseMove = (e) => {
+      const newX = e.clientX - dragOffset.x;
+      const newY = e.clientY - dragOffset.y;
+
+      setToolbarPos({ x: newX, y: newY });
+
+      // Detectar si está cerca de los bordes para cambiar a vertical
+      const windowWidth = window.innerWidth;
+      const threshold = 100; // px desde el borde
+
+      if (newX < threshold) {
+        setIsVertical(true);
+        setVerticalSide('left');
+      } else if (newX > windowWidth - threshold) {
+        setIsVertical(true);
+        setVerticalSide('right');
+      } else {
+        setIsVertical(false);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingToolbar(false);
+
+      // Si está en modo vertical, ajustar posición al borde
+      if (isVertical) {
+        if (verticalSide === 'left') {
+          setToolbarPos(prev => ({ ...prev, x: 20 }));
+        } else {
+          setToolbarPos(prev => ({ ...prev, x: window.innerWidth - 70 }));
+        }
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDraggingToolbar, dragOffset, isVertical, verticalSide]);
 
   /**
    * Keyboard Shortcuts
@@ -1761,11 +1840,41 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   const displayedAnnotations = getFilteredAnnotations();
 
   return (
-    <div className="flex flex-col h-screen bg-primary-50 dark:bg-primary-950">
-      {/* Toolbar Principal */}
+    <div className="flex flex-col h-screen bg-primary-50 dark:bg-primary-950 content-reader-container">
+      {/* Botón flotante Volver al Dashboard */}
+      {!isPresentationMode && onClose && (
+        <button
+          onClick={onClose}
+          className="floating-back-btn-reader"
+          title="Volver al Dashboard"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Volver</span>
+        </button>
+      )}
+
+      {/* Toolbar Flotante */}
       {!isPresentationMode && (
-        <div className="bg-white dark:bg-primary-900 border-b border-primary-200 dark:border-primary-800 shadow-sm">
-        <div className="flex items-center justify-between gap-2 p-3">
+        <div
+          ref={toolbarRef}
+          className={`floating-toolbar-reader ${isDraggingToolbar ? 'dragging' : ''} ${isVertical ? 'vertical' : ''} ${isVertical && verticalSide === 'left' ? 'left' : ''}`}
+          style={{
+            left: toolbarPos.x ? `${toolbarPos.x}px` : '50%',
+            transform: toolbarPos.x ? 'none' : 'translateX(-50%)',
+            bottom: toolbarPos.y ? 'auto' : '20px',
+            top: toolbarPos.y ? `${toolbarPos.y}px` : 'auto'
+          }}
+          onMouseDown={handleToolbarMouseDown}
+        >
+        {/* Grip para drag */}
+        <div className="toolbar-drag-handle" title="Arrastra para mover">
+          <GripHorizontal className="w-5 h-5" />
+        </div>
+
+        <div className="toolbar-separator"></div>
+
+        <div className="toolbar-content-wrapper">
+        <div className="flex items-center justify-between gap-2">
           {/* Herramientas principales */}
           <div className="flex items-center gap-2">
             <ToolButton
@@ -2591,6 +2700,8 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
             </div>
           </div>
         )}
+        </div>
+        </div>
         </div>
       )}
 
@@ -3508,7 +3619,8 @@ ContentReader.propTypes = {
   contentId: PropTypes.string.isRequired,
   initialContent: PropTypes.string,
   userId: PropTypes.string.isRequired,
-  readOnly: PropTypes.bool
+  readOnly: PropTypes.bool,
+  onClose: PropTypes.func
 };
 
 ToolButton.propTypes = {
