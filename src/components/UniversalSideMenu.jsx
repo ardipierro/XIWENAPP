@@ -9,18 +9,20 @@ import {
   BookOpen,
   Users,
   Calendar,
-  PenTool,
   Sparkles,
   BarChart3,
   Settings,
   UserCog,
   CreditCard,
-  Boxes,
   MessageSquare,
   Gamepad2,
   Video,
-  Award,
-  FileText,
+  Layers,
+  CheckCircle,
+  ClipboardList,
+  UsersRound,
+  CheckSquare,
+  DollarSign,
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import './UniversalSideMenu.css';
@@ -44,37 +46,45 @@ const MENU_ITEMS = [
     path: '/dashboard-v2/content',
     permission: null,
   },
+  {
+    id: 'calendar',
+    label: 'Calendario',
+    icon: Calendar,
+    path: '/dashboard-v2/calendar',
+    permission: null, // Todos pueden ver el calendario
+  },
+  {
+    id: 'messages',
+    label: 'Mensajes',
+    icon: MessageSquare,
+    path: '/dashboard-v2/messages',
+    permission: 'send-messages',
+  },
 
   // DIVIDER
   { type: 'divider', id: 'div1' },
 
-  // CREACIÓN (Teachers + Admin)
+  // HERRAMIENTAS DE CREACIÓN (Teachers + Admin)
   {
-    id: 'create',
-    label: 'Crear Contenido',
-    icon: PenTool,
-    path: '/dashboard-v2/create',
+    id: 'unified-content',
+    label: 'Gestionar Contenidos',
+    icon: Layers,
+    path: '/dashboard-v2/unified-content',
     permission: 'create-content',
+    description: 'Crear y editar cursos, lecciones, ejercicios, videos y links',
   },
   {
     id: 'exercise-builder',
-    label: 'Constructor de Ejercicios',
+    label: 'Exercise Builder',
     icon: Sparkles,
     path: '/dashboard-v2/exercise-builder',
     permission: 'use-exercise-builder',
-  },
-  {
-    id: 'design-lab',
-    label: 'Design Lab',
-    icon: Boxes,
-    path: '/dashboard-v2/design-lab',
-    permission: 'use-design-lab',
   },
 
   // DIVIDER
   { type: 'divider', id: 'div2', showIf: ['create-content'] },
 
-  // GESTIÓN (Teachers + Admin)
+  // GESTIÓN DE CLASES Y TAREAS (Teachers + Admin)
   {
     id: 'students',
     label: 'Mis Estudiantes',
@@ -85,14 +95,29 @@ const MENU_ITEMS = [
   {
     id: 'classes',
     label: 'Clases',
-    icon: Calendar,
+    icon: Video,
     path: '/dashboard-v2/classes',
     permission: 'manage-classes',
   },
   {
+    id: 'attendance',
+    label: 'Asistencias',
+    icon: ClipboardList,
+    path: '/dashboard-v2/attendance',
+    permission: 'view-class-analytics',
+  },
+  {
+    id: 'homework-review',
+    label: 'Revisar Tareas IA',
+    icon: CheckCircle,
+    path: '/dashboard-v2/homework-review',
+    permission: 'grade-assignments',
+    badge: 'IA',
+  },
+  {
     id: 'groups',
     label: 'Grupos',
-    icon: Boxes,
+    icon: UsersRound,
     path: '/dashboard-v2/groups',
     permission: 'manage-groups',
   },
@@ -112,7 +137,7 @@ const MENU_ITEMS = [
   {
     id: 'my-assignments',
     label: 'Mis Tareas',
-    icon: FileText,
+    icon: CheckSquare,
     path: '/dashboard-v2/my-assignments',
     permission: 'view-own-assignments',
   },
@@ -124,15 +149,16 @@ const MENU_ITEMS = [
     permission: 'play-live-games',
   },
   {
-    id: 'gamification',
-    label: 'Logros',
-    icon: Award,
-    path: '/dashboard-v2/gamification',
-    permission: 'view-gamification',
+    id: 'my-payments',
+    label: 'Mis Pagos',
+    icon: DollarSign,
+    path: '/dashboard-v2/my-payments',
+    permission: 'view-own-credits',
+    hideIf: ['manage-credits'], // No mostrar a admins
   },
 
   // DIVIDER
-  { type: 'divider', id: 'div4', showIf: ['play-live-games'] },
+  { type: 'divider', id: 'div4', showIf: ['view-own-analytics'] },
 
   // ANALYTICS
   {
@@ -141,15 +167,6 @@ const MENU_ITEMS = [
     icon: BarChart3,
     path: '/dashboard-v2/analytics',
     permission: 'view-own-analytics',
-  },
-
-  // MESSAGES
-  {
-    id: 'messages',
-    label: 'Mensajes',
-    icon: MessageSquare,
-    path: '/dashboard-v2/messages',
-    permission: 'send-messages',
   },
 
   // DIVIDER
@@ -171,15 +188,22 @@ const MENU_ITEMS = [
     permission: 'manage-credits',
   },
   {
+    id: 'payments',
+    label: 'Sistema de Pagos',
+    icon: DollarSign,
+    path: '/dashboard-v2/payments',
+    permission: 'manage-credits',
+  },
+  {
     id: 'ai-config',
     label: 'Configurar IA',
-    icon: Settings,
+    icon: Sparkles,
     path: '/dashboard-v2/ai-config',
     permission: 'configure-ai',
   },
   {
     id: 'system-settings',
-    label: 'Configuración del Sistema',
+    label: 'Configuración',
     icon: Settings,
     path: '/dashboard-v2/system-settings',
     permission: 'manage-system-settings',
