@@ -6,9 +6,7 @@
 import { useState } from 'react';
 import { User, ChevronDown, ChevronUp, Volume2, HelpCircle, Languages } from 'lucide-react';
 import PropTypes from 'prop-types';
-import AudioPlayer from './AudioPlayer';
-import FillInBlankExercise from './FillInBlankExercise';
-import MultipleChoiceExercise from './MultipleChoiceExercise';
+import DialogueExtras from './DialogueExtras';
 import { BaseBadge } from '../common';
 import { getCharacterVoiceConfig } from './CharacterVoiceManager';
 
@@ -17,8 +15,6 @@ import { getCharacterVoiceConfig } from './CharacterVoiceManager';
  */
 function DialogueBubble({ line, index, totalLines, characters = [], onExerciseComplete, viewSettings }) {
   const [showExtras, setShowExtras] = useState(false);
-  const [showTranslation, setShowTranslation] = useState(false);
-  const [showVocabulary, setShowVocabulary] = useState(false);
 
   // Aplicar configuraciones de vista
   const settings = viewSettings || {
@@ -144,102 +140,19 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
           </button>
         )}
 
-        {/* Panel expandible con extras - Accordion con ESPACIO MAYOR */}
+        {/* Panel expandible con extras - Sistema de tabs */}
         {showExtras && (
-          <div className="mt-4 w-full space-y-8 animate-in slide-in-from-top-2 duration-200">
-            {/* Audio Player - SIEMPRE VISIBLE sin accordion */}
-            {line.audioUrl && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-blue-200 dark:border-blue-800 p-4 shadow-sm">
-                <AudioPlayer
-                  audioUrl={line.audioUrl}
-                  text={line.text}
-                  voiceConfig={voiceConfig}
-                  characterName={line.character}
-                  characters={characters}
-                  showText={false}
-                  className="text-xs"
-                />
-              </div>
-            )}
-
-            {/* Traducción - Accordion */}
-            {line.translation && (
-              <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setShowTranslation(!showTranslation)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
-                >
-                  <span className="flex items-center gap-3 text-base font-bold text-amber-900 dark:text-amber-100">
-                    <Languages size={20} />
-                    Traducción al Chino
-                  </span>
-                  {showTranslation ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                </button>
-                {showTranslation && (
-                  <div className="px-4 pb-4 text-base text-amber-900 dark:text-amber-200 leading-relaxed">
-                    {line.translation}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Vocabulario - Accordion */}
-            {line.notes && line.notes.length > 0 && (
-              <div className="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setShowVocabulary(!showVocabulary)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
-                >
-                  <span className="flex items-center gap-3 text-base font-bold text-purple-900 dark:text-purple-100">
-                    📝 Vocabulario ({line.notes.length})
-                  </span>
-                  {showVocabulary ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                </button>
-                {showVocabulary && (
-                  <div className="px-4 pb-4 space-y-3">
-                    {line.notes.map((note, idx) => (
-                      <div key={idx} className="p-3 bg-white dark:bg-purple-900/20 rounded-lg">
-                        <div className="text-sm font-bold text-purple-900 dark:text-purple-200">
-                          {note.word}
-                        </div>
-                        <div className="text-sm text-purple-800 dark:text-purple-300 mt-1">
-                          {note.definition}
-                        </div>
-                        {note.rioplatenseNote && (
-                          <div className="text-sm text-purple-700 dark:text-purple-400 mt-2 flex items-center gap-2">
-                            <span className="text-base">🇦🇷</span>
-                            {note.rioplatenseNote}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Ejercicio interactivo - Card destacado */}
-            {hasExercise && (
-              <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3 text-base font-bold text-green-900 dark:text-green-100">
-                  <HelpCircle size={20} />
-                  Ejercicio Interactivo
-                </div>
-                {line.exercise.type === 'fill_in_blank' && (
-                  <FillInBlankExercise
-                    exercise={line.exercise}
-                    onComplete={(result) => onExerciseComplete(line.exercise.exerciseId, result)}
-                  />
-                )}
-                {line.exercise.type === 'multiple_choice' && (
-                  <MultipleChoiceExercise
-                    exercise={line.exercise}
-                    onComplete={(result) => onExerciseComplete(line.exercise.exerciseId, result)}
-                  />
-                )}
-              </div>
-            )}
-          </div>
+          <DialogueExtras
+            audioUrl={line.audioUrl}
+            text={line.text}
+            voiceConfig={voiceConfig}
+            characterName={line.character}
+            characters={characters}
+            translation={line.translation}
+            notes={line.notes}
+            exercise={hasExercise ? line.exercise : null}
+            onExerciseComplete={onExerciseComplete}
+          />
         )}
       </div>
     </div>

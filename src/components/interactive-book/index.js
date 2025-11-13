@@ -12,6 +12,7 @@ export { default as ConjugationExercise } from './ConjugationExercise';
 export { default as ListeningComprehensionExercise } from './ListeningComprehensionExercise';
 export { default as TTSSettings } from './TTSSettings';
 export { default as DialogueBubble } from './DialogueBubble';
+export { default as DialogueExtras } from './DialogueExtras';
 export { default as ViewCustomizer } from './ViewCustomizer';
 export { default as FullDialoguePlayer } from './FullDialoguePlayer';
 export { default as AIImageGenerator } from './AIImageGenerator';
