@@ -4,13 +4,27 @@
  * @module components/UniversalDashboard
  */
 
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
 import { BaseLoading } from './common';
 import './UniversalDashboard.css';
+
+// Lazy load de componentes pesados
+const UnifiedCalendar = lazy(() => import('./UnifiedCalendar'));
+const MessagesPanel = lazy(() => import('./MessagesPanel'));
+const HomeworkReviewPanel = lazy(() => import('./HomeworkReviewPanel'));
+const AdminPaymentsPanel = lazy(() => import('./AdminPaymentsPanel'));
+const UnifiedContentManager = lazy(() => import('./UnifiedContentManager'));
+const ExerciseBuilder = lazy(() => import('../pages/ExerciseBuilder'));
+const AttendanceView = lazy(() => import('./AttendanceView'));
+const ClassSessionManager = lazy(() => import('./ClassSessionManager'));
+const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
+const CreditManager = lazy(() => import('./CreditManager'));
+const AIConfigPanel = lazy(() => import('./AIConfigPanel'));
+const SettingsPanel = lazy(() => import('./SettingsPanel'));
 
 /**
  * Vista de inicio (placeholder)
@@ -102,79 +116,110 @@ export function UniversalDashboard() {
    * Renderiza el contenido según la ruta actual
    */
   const renderContent = () => {
-    switch (currentPath) {
-      case '/dashboard-v2':
-        return <HomeView />;
+    return (
+      <Suspense fallback={<BaseLoading size="large" text="Cargando..." />}>
+        {(() => {
+          switch (currentPath) {
+            case '/dashboard-v2':
+              return <HomeView />;
 
-      case '/dashboard-v2/content':
-        return <PlaceholderView title="Mi Contenido" />;
+            case '/dashboard-v2/content':
+              return <PlaceholderView title="Mi Contenido" />;
 
-      case '/dashboard-v2/create':
-        if (!can('create-content')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Crear Contenido" />;
+            // CALENDARIO - Todos los roles
+            case '/dashboard-v2/calendar':
+              return <UnifiedCalendar user={user} userRole={initialized ? can('view-all-users') ? 'admin' : 'user' : 'user'} />;
 
-      case '/dashboard-v2/exercise-builder':
-        if (!can('use-exercise-builder')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Constructor de Ejercicios" />;
+            // MENSAJES - Todos con permiso
+            case '/dashboard-v2/messages':
+              if (!can('send-messages')) return <PlaceholderView title="Sin acceso" />;
+              return <MessagesPanel userId={user.uid} userRole={user.role} />;
 
-      case '/dashboard-v2/design-lab':
-        if (!can('use-design-lab')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Design Lab" />;
+            // GESTIONAR CONTENIDOS - Teachers + Admin
+            case '/dashboard-v2/unified-content':
+              if (!can('create-content')) return <PlaceholderView title="Sin acceso" />;
+              return <UnifiedContentManager user={user} userRole={user.role} />;
 
-      case '/dashboard-v2/students':
-        if (!can('view-own-students')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Mis Estudiantes" />;
+            // EXERCISE BUILDER
+            case '/dashboard-v2/exercise-builder':
+              if (!can('use-exercise-builder')) return <PlaceholderView title="Sin acceso" />;
+              return <ExerciseBuilder />;
 
-      case '/dashboard-v2/classes':
-        if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Clases" />;
+            // ESTUDIANTES
+            case '/dashboard-v2/students':
+              if (!can('view-own-students')) return <PlaceholderView title="Sin acceso" />;
+              return <PlaceholderView title="Mis Estudiantes" />;
 
-      case '/dashboard-v2/groups':
-        if (!can('manage-groups')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Grupos" />;
+            // CLASES - ClassSessionManager integrado
+            case '/dashboard-v2/classes':
+              if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
+              return <ClassSessionManager user={user} />;
 
-      case '/dashboard-v2/my-courses':
-        return <PlaceholderView title="Mis Cursos" />;
+            // ASISTENCIAS
+            case '/dashboard-v2/attendance':
+              if (!can('view-class-analytics')) return <PlaceholderView title="Sin acceso" />;
+              return <AttendanceView user={user} />;
 
-      case '/dashboard-v2/my-assignments':
-        if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Mis Tareas" />;
+            // REVISAR TAREAS IA - Feature estrella
+            case '/dashboard-v2/homework-review':
+              if (!can('grade-assignments')) return <PlaceholderView title="Sin acceso" />;
+              return <HomeworkReviewPanel user={user} />;
 
-      case '/dashboard-v2/games':
-        if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Juegos" />;
+            // MIS CURSOS (Students)
+            case '/dashboard-v2/my-courses':
+              return <PlaceholderView title="Mis Cursos" />;
 
-      case '/dashboard-v2/gamification':
-        if (!can('view-gamification')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Logros" />;
+            // MIS TAREAS (Students)
+            case '/dashboard-v2/my-assignments':
+              if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
+              return <PlaceholderView title="Mis Tareas" />;
 
-      case '/dashboard-v2/analytics':
-        if (!can('view-own-analytics')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Analytics" />;
+            // JUEGOS
+            case '/dashboard-v2/games':
+              if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
+              return <PlaceholderView title="Juegos" />;
 
-      case '/dashboard-v2/messages':
-        if (!can('send-messages')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Mensajes" />;
+            // MIS PAGOS (Students)
+            case '/dashboard-v2/my-payments':
+              if (!can('view-own-credits')) return <PlaceholderView title="Sin acceso" />;
+              return <PlaceholderView title="Mis Pagos" />;
 
-      case '/dashboard-v2/users':
-        if (!can('view-all-users')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Gestión de Usuarios" />;
+            // ANALYTICS - AnalyticsDashboard integrado
+            case '/dashboard-v2/analytics':
+              if (!can('view-own-analytics')) return <PlaceholderView title="Sin acceso" />;
+              return <AnalyticsDashboard user={user} />;
 
-      case '/dashboard-v2/credits':
-        if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Gestión de Créditos" />;
+            // GESTIÓN DE USUARIOS (Admin)
+            case '/dashboard-v2/users':
+              if (!can('view-all-users')) return <PlaceholderView title="Sin acceso" />;
+              return <PlaceholderView title="Gestión de Usuarios" />;
 
-      case '/dashboard-v2/ai-config':
-        if (!can('configure-ai')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Configurar IA" />;
+            // GESTIÓN DE CRÉDITOS (Admin) - CreditManager integrado
+            case '/dashboard-v2/credits':
+              if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
+              return <CreditManager userId={user.uid} currentUser={user} />;
 
-      case '/dashboard-v2/system-settings':
-        if (!can('manage-system-settings')) return <PlaceholderView title="Sin acceso" />;
-        return <PlaceholderView title="Configuración del Sistema" />;
+            // SISTEMA DE PAGOS (Admin)
+            case '/dashboard-v2/payments':
+              if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
+              return <AdminPaymentsPanel />;
 
-      default:
-        return <PlaceholderView title="Página no encontrada" />;
-    }
+            // CONFIGURAR IA (Admin) - AIConfigPanel integrado
+            case '/dashboard-v2/ai-config':
+              if (!can('configure-ai')) return <PlaceholderView title="Sin acceso" />;
+              return <AIConfigPanel user={user} />;
+
+            // CONFIGURACIÓN (Admin) - SettingsPanel integrado
+            case '/dashboard-v2/system-settings':
+              if (!can('manage-system-settings')) return <PlaceholderView title="Sin acceso" />;
+              return <SettingsPanel />;
+
+            default:
+              return <PlaceholderView title="Página no encontrada" />;
+          }
+        })()}
+      </Suspense>
+    );
   };
 
   return (
