@@ -30,6 +30,12 @@ export { default as BaseDropdown } from './BaseDropdown';
 // Empty States
 export { default as BaseEmptyState } from './BaseEmptyState';
 
+// Semantic Components (Design System 3.0)
+export { SemanticIcon, SemanticIconButton } from './SemanticIcon';
+export { SemanticBadge, SemanticBadgeGroup, StatusBadge } from './SemanticBadge';
+export { default as SectionHeader } from './SectionHeader';
+export { default as DashboardContainer } from './DashboardContainer';
+
 // Legacy components (mantener por compatibilidad)
 export { default as EmptyState } from './EmptyState';
 export { default as PageHeader } from './PageHeader';
