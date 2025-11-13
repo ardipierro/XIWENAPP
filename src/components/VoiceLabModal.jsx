@@ -63,7 +63,7 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
 
   // Estado de test de voz
   const [testText, setTestText] = useState('¡Hola! Soy una voz argentina. ¿Cómo andás?');
-  const [testing, setTesting] = useState(false);
+  const [testingVoiceId, setTestingVoiceId] = useState(null); // ID de la voz que se está probando
   const [testError, setTestError] = useState(null);
 
   // Estado de presets
@@ -141,7 +141,7 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
       return;
     }
 
-    setTesting(true);
+    setTestingVoiceId(voice.voice_id);
     setTestError(null);
 
     try {
@@ -163,6 +163,7 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
         audio.play();
         audio.onended = () => {
           premiumTTSService.cleanup(result.audioUrl);
+          setTestingVoiceId(null);
         };
       }
 
@@ -171,7 +172,7 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
       logger.error('Voice test failed:', err);
       setTestError(err.message || 'Error al probar la voz');
     } finally {
-      setTesting(false);
+      setTestingVoiceId(null);
     }
   };
 
@@ -346,7 +347,7 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
       onClose={onClose}
       title="Laboratorio de Voces"
       icon={Volume2}
-      size="2xl"
+      size="lg"
       footer={
         <>
           <BaseButton
@@ -455,7 +456,7 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
 
             {/* Grid de voces */}
             {!loadingVoices && !voicesError && filteredVoices.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[400px] overflow-y-auto">
                 {filteredVoices.map((voice) => (
                   <div
                     key={voice.voice_id}
@@ -502,10 +503,10 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
                         e.stopPropagation();
                         handleTestVoice(voice);
                       }}
-                      disabled={testing}
+                      disabled={testingVoiceId === voice.voice_id}
                       fullWidth
                     >
-                      {testing ? 'Reproduciendo...' : 'Probar voz'}
+                      {testingVoiceId === voice.voice_id ? 'Reproduciendo...' : 'Probar voz'}
                     </BaseButton>
                   </div>
                 ))}
@@ -629,12 +630,12 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
                   variant="primary"
                   icon={Play}
                   onClick={() => handleTestVoice(selectedVoice)}
-                  disabled={testing || !testText.trim()}
-                  loading={testing}
+                  disabled={testingVoiceId !== null || !testText.trim()}
+                  loading={testingVoiceId !== null}
                   fullWidth
                   size="lg"
                 >
-                  {testing ? 'Reproduciendo...' : 'Probar con esta configuración'}
+                  {testingVoiceId !== null ? 'Reproduciendo...' : 'Probar con esta configuración'}
                 </BaseButton>
 
                 {/* Guardar como preset */}
