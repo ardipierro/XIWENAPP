@@ -18,6 +18,7 @@ import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
+import VoiceLabModal from './VoiceLabModal';
 import ImageGenerationDemo from './ImageGenerationDemo';
 import HomeworkCorrectionProfilesModal from './homework/HomeworkCorrectionProfilesModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
@@ -434,14 +435,25 @@ function AIConfigPanel() {
 
       {/* Configuration Modal - Portal */}
       {modalOpen && selectedFunction && createPortal(
-        <AIFunctionConfigModal
-          key={selectedFunction.id}
-          isOpen={modalOpen}
-          onClose={handleCloseModal}
-          aiFunction={selectedFunction}
-          initialConfig={config.functions[selectedFunction.id] || selectedFunction.defaultConfig}
-          onSave={handleSaveFunction}
-        />,
+        selectedFunction.id === 'voice_lab' ? (
+          <VoiceLabModal
+            key={selectedFunction.id}
+            isOpen={modalOpen}
+            onClose={handleCloseModal}
+            aiFunction={selectedFunction}
+            initialConfig={config.functions[selectedFunction.id] || selectedFunction.defaultConfig}
+            onSave={handleSaveFunction}
+          />
+        ) : (
+          <AIFunctionConfigModal
+            key={selectedFunction.id}
+            isOpen={modalOpen}
+            onClose={handleCloseModal}
+            aiFunction={selectedFunction}
+            initialConfig={config.functions[selectedFunction.id] || selectedFunction.defaultConfig}
+            onSave={handleSaveFunction}
+          />
+        ),
         document.body
       )}
 
