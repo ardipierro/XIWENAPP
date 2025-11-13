@@ -470,7 +470,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
               <button
                 onClick={undo}
                 disabled={historyIndex === 0}
-                className={`p-2 rounded-lg transition-colors ${historyIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-800 ${historyIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                 title="Deshacer"
               >
                 <Undo2 size={18} className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'} />
@@ -478,7 +478,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
               <button
                 onClick={redo}
                 disabled={historyIndex === history.length - 1}
-                className={`p-2 rounded-lg transition-colors ${historyIndex === history.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-800 ${historyIndex === history.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                 title="Rehacer"
               >
                 <Redo2 size={18} className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'} />
