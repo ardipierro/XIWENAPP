@@ -74,7 +74,7 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
         const parsed = JSON.parse(saved);
         setCharacterConfigs(parsed);
       } catch (err) {
-        console.error('Error loading character voice configs:', err);
+        logger.error('Error loading character voice configs:', err);
       }
     }
   };
@@ -103,7 +103,10 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
       ...characterConfigs,
       [characterId]: {
         ...characterConfigs[characterId],
-        voiceConfig: { ...characterConfigs[characterId].voiceConfig, ...voiceConfig }
+        voiceConfig: {
+          ...(characterConfigs[characterId]?.voiceConfig || DEFAULT_CHARACTER_CONFIG),
+          ...voiceConfig
+        }
       }
     };
     saveConfigs(newConfigs);

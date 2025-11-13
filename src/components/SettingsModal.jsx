@@ -95,6 +95,42 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
     }
   };
 
+  // Aplicar preset de velocidad con validación
+  const applyPresetRate = (rate, presetName) => {
+    const saved = localStorage.getItem('xiwen_character_voices');
+
+    if (!saved) {
+      alert('⚠️ Aún no hay personajes configurados.\n\nPrimero carga un libro interactivo para que se detecten los personajes automáticamente.');
+      return;
+    }
+
+    try {
+      const configs = JSON.parse(saved);
+      const characterIds = Object.keys(configs);
+
+      if (characterIds.length === 0) {
+        alert('⚠️ No hay personajes configurados aún.\n\nAbre un libro interactivo primero para que se carguen los personajes.');
+        return;
+      }
+
+      // Aplicar velocidad a todos los personajes
+      characterIds.forEach(charId => {
+        if (configs[charId]?.voiceConfig) {
+          configs[charId].voiceConfig.rate = rate;
+        }
+      });
+
+      localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+      window.dispatchEvent(new Event('xiwen_settings_changed'));
+
+      // Feedback de éxito
+      console.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
+    } catch (err) {
+      console.error('Error aplicando preset:', err);
+      alert('❌ Error al aplicar el preset. Por favor intenta nuevamente.');
+    }
+  };
+
   const tabs = [
     {
       id: 'visual',
@@ -485,18 +521,7 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Preset: Estándar */}
                 <button
-                  onClick={() => {
-                    // Aplicar preset estándar (1.0x)
-                    const saved = localStorage.getItem('xiwen_character_voices');
-                    if (saved) {
-                      const configs = JSON.parse(saved);
-                      Object.keys(configs).forEach(charId => {
-                        configs[charId].voiceConfig.rate = 1.0;
-                      });
-                      localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
-                      window.dispatchEvent(new Event('xiwen_settings_changed'));
-                    }
-                  }}
+                  onClick={() => applyPresetRate(1.0, 'Estándar')}
                   className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -515,17 +540,7 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
 
                 {/* Preset: Principiante */}
                 <button
-                  onClick={() => {
-                    const saved = localStorage.getItem('xiwen_character_voices');
-                    if (saved) {
-                      const configs = JSON.parse(saved);
-                      Object.keys(configs).forEach(charId => {
-                        configs[charId].voiceConfig.rate = 0.75;
-                      });
-                      localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
-                      window.dispatchEvent(new Event('xiwen_settings_changed'));
-                    }
-                  }}
+                  onClick={() => applyPresetRate(0.75, 'Principiante')}
                   className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -544,17 +559,7 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
 
                 {/* Preset: Rápido */}
                 <button
-                  onClick={() => {
-                    const saved = localStorage.getItem('xiwen_character_voices');
-                    if (saved) {
-                      const configs = JSON.parse(saved);
-                      Object.keys(configs).forEach(charId => {
-                        configs[charId].voiceConfig.rate = 1.25;
-                      });
-                      localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
-                      window.dispatchEvent(new Event('xiwen_settings_changed'));
-                    }
-                  }}
+                  onClick={() => applyPresetRate(1.25, 'Rápido')}
                   className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -573,17 +578,7 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
 
                 {/* Preset: Narración */}
                 <button
-                  onClick={() => {
-                    const saved = localStorage.getItem('xiwen_character_voices');
-                    if (saved) {
-                      const configs = JSON.parse(saved);
-                      Object.keys(configs).forEach(charId => {
-                        configs[charId].voiceConfig.rate = 0.9;
-                      });
-                      localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
-                      window.dispatchEvent(new Event('xiwen_settings_changed'));
-                    }
-                  }}
+                  onClick={() => applyPresetRate(0.9, 'Narración')}
                   className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
                 >
                   <div className="flex items-center gap-3 mb-3">
