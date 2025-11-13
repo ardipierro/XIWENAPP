@@ -1,6 +1,7 @@
 /**
  * @fileoverview Configurador avanzado de aspecto visual del libro
  * Sistema completo de personalización con CSS variables
+ * VERSIÓN UNIFICADA - Todas las opciones en un solo lugar sin sub-pestañas
  * @module components/interactive-book/ViewCustomizer
  */
 
@@ -203,11 +204,154 @@ const hexToRgb = (hex) => {
 };
 
 /**
- * Panel de personalización visual avanzado
+ * Componentes helper para controles compactos
+ */
+
+// Select compacto inline
+const CompactSelect = ({ label, value, onChange, options, className = '' }) => (
+  <div className={`flex items-center gap-2 ${className}`}>
+    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap min-w-[60px]">
+      {label}
+    </label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="flex-1 px-2 py-1.5 text-xs border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 focus:ring-2 focus:ring-purple-500"
+    >
+      {options.map(opt => (
+        <option key={opt.value} value={opt.value}>{opt.label}</option>
+      ))}
+    </select>
+  </div>
+);
+
+CompactSelect.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.any.isRequired,
+  onChange: PropTypes.func.isRequired,
+  options: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.any.isRequired,
+    label: PropTypes.string.isRequired
+  })).isRequired,
+  className: PropTypes.string
+};
+
+// Slider compacto inline
+const CompactSlider = ({ label, value, onChange, min, max, step = 1, unit = '', className = '' }) => (
+  <div className={`flex items-center gap-2 ${className}`}>
+    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap min-w-[60px]">
+      {label}
+    </label>
+    <input
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(step === 1 ? parseInt(e.target.value) : parseFloat(e.target.value))}
+      className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+    />
+    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 min-w-[50px] text-right">
+      {value}{unit}
+    </span>
+  </div>
+);
+
+CompactSlider.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.number.isRequired,
+  onChange: PropTypes.func.isRequired,
+  min: PropTypes.number.isRequired,
+  max: PropTypes.number.isRequired,
+  step: PropTypes.number,
+  unit: PropTypes.string,
+  className: PropTypes.string
+};
+
+// Color picker inline
+const ColorInline = ({ label, value, onChange, className = '' }) => (
+  <div className={`flex items-center gap-2 ${className}`}>
+    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+      {label}
+    </label>
+    <input
+      type="color"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-12 h-7 rounded border border-gray-300 cursor-pointer"
+    />
+    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">{value}</span>
+  </div>
+);
+
+ColorInline.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  className: PropTypes.string
+};
+
+// Par de colores (fondo + texto)
+const ColorPair = ({ label, bgValue, textValue, onBgChange, onTextChange }) => (
+  <div className="flex items-center gap-3">
+    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[70px]">
+      {label}
+    </label>
+    <div className="flex items-center gap-2">
+      <span className="text-[10px] text-gray-500 dark:text-gray-400">Fondo</span>
+      <input
+        type="color"
+        value={bgValue}
+        onChange={(e) => onBgChange(e.target.value)}
+        className="w-10 h-7 rounded border border-gray-300 cursor-pointer"
+      />
+    </div>
+    <div className="flex items-center gap-2">
+      <span className="text-[10px] text-gray-500 dark:text-gray-400">Texto</span>
+      <input
+        type="color"
+        value={textValue}
+        onChange={(e) => onTextChange(e.target.value)}
+        className="w-10 h-7 rounded border border-gray-300 cursor-pointer"
+      />
+    </div>
+  </div>
+);
+
+ColorPair.propTypes = {
+  label: PropTypes.string.isRequired,
+  bgValue: PropTypes.string.isRequired,
+  textValue: PropTypes.string.isRequired,
+  onBgChange: PropTypes.func.isRequired,
+  onTextChange: PropTypes.func.isRequired
+};
+
+// Sección con título
+const Section = ({ title, icon: Icon, children }) => (
+  <div className="space-y-3">
+    <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+      {Icon && <Icon size={14} className="text-purple-600 dark:text-purple-400" />}
+      <h4 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wide">
+        {title}
+      </h4>
+    </div>
+    <div className="space-y-2.5">
+      {children}
+    </div>
+  </div>
+);
+
+Section.propTypes = {
+  title: PropTypes.string.isRequired,
+  icon: PropTypes.elementType,
+  children: PropTypes.node.isRequired
+};
+
+/**
+ * Panel de personalización visual avanzado - VERSIÓN UNIFICADA
  */
 function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
   const [isOpen, setIsOpen] = useState(alwaysOpen);
-  const [activeTab, setActiveTab] = useState('typography'); // 'typography' | 'colors' | 'layout' | 'effects'
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   useEffect(() => {
@@ -278,628 +422,355 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false }) {
         </button>
       )}
 
-      {/* Panel expandible */}
+      {/* Panel expandible - VERSIÓN UNIFICADA SIN TABS */}
       {isOpen && (
-        <>
-          {alwaysOpen ? (
-            /* Sin BaseCard cuando alwaysOpen=true */
-            <div className="space-y-6">
-            {/* Tabs */}
-            <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
-              {[
-                { id: 'typography', label: 'Tipografía', icon: Type },
-                { id: 'colors', label: 'Colores', icon: Palette },
-                { id: 'layout', label: 'Diseño', icon: Layout },
-                { id: 'effects', label: 'Efectos', icon: Sparkles }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-purple-600 text-purple-600 dark:text-purple-400'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
+        <BaseCard
+          {...(!alwaysOpen && {
+            title: "Configuración de Apariencia",
+            subtitle: "Todas las opciones unificadas"
+          })}
+        >
+          <div className="space-y-5">
+
+            {/* ━━━ TIPOGRAFÍA ━━━ */}
+            <Section title="Tipografía" icon={Type}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <CompactSelect
+                  label="Familia"
+                  value={settings.fontFamily}
+                  onChange={(val) => updateSetting('fontFamily', val)}
+                  options={[
+                    { value: 'system', label: 'Sistema' },
+                    { value: 'serif', label: 'Serif' },
+                    { value: 'mono', label: 'Monospace' },
+                    { value: 'rounded', label: 'Redondeada' }
+                  ]}
+                />
+                <CompactSelect
+                  label="Grosor"
+                  value={settings.fontWeight}
+                  onChange={(val) => updateSetting('fontWeight', val)}
+                  options={[
+                    { value: 'light', label: 'Ligera' },
+                    { value: 'normal', label: 'Normal' },
+                    { value: 'medium', label: 'Media' },
+                    { value: 'semibold', label: 'Semi-negrita' },
+                    { value: 'bold', label: 'Negrita' }
+                  ]}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <CompactSlider
+                  label="Tamaño"
+                  value={settings.fontSize}
+                  onChange={(val) => updateSetting('fontSize', val)}
+                  min={12}
+                  max={24}
+                  unit="px"
+                />
+                <CompactSlider
+                  label="Altura"
+                  value={settings.lineHeight}
+                  onChange={(val) => updateSetting('lineHeight', val)}
+                  min={1.2}
+                  max={2.0}
+                  step={0.1}
+                />
+              </div>
+            </Section>
+
+            {/* ━━━ BURBUJAS DE DIÁLOGO ━━━ */}
+            <Section title="Burbujas de Diálogo" icon={Layout}>
+              <div className="space-y-2">
+                <ColorPair
+                  label="Izquierda"
+                  bgValue={settings.bubbleBgLeft}
+                  textValue={settings.bubbleTextLeft}
+                  onBgChange={(val) => updateSetting('bubbleBgLeft', val)}
+                  onTextChange={(val) => updateSetting('bubbleTextLeft', val)}
+                />
+                <ColorPair
+                  label="Derecha"
+                  bgValue={settings.bubbleBgRight}
+                  textValue={settings.bubbleTextRight}
+                  onBgChange={(val) => updateSetting('bubbleBgRight', val)}
+                  onTextChange={(val) => updateSetting('bubbleTextRight', val)}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2">
+                <CompactSelect
+                  label="Estilo"
+                  value={settings.bubbleStyle}
+                  onChange={(val) => updateSetting('bubbleStyle', val)}
+                  options={[
+                    { value: 'rounded', label: 'Redondeadas' },
+                    { value: 'sharp', label: 'Cuadradas' },
+                    { value: 'pill', label: 'Píldora' }
+                  ]}
+                />
+                <CompactSlider
+                  label="Radio"
+                  value={settings.borderRadius}
+                  onChange={(val) => updateSetting('borderRadius', val)}
+                  min={0}
+                  max={32}
+                  unit="px"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                <ColorInline
+                  label="Borde"
+                  value={settings.bubbleBorderColor}
+                  onChange={(val) => updateSetting('bubbleBorderColor', val)}
+                />
+                <CompactSlider
+                  label="Grosor"
+                  value={settings.bubbleBorderWidth}
+                  onChange={(val) => updateSetting('bubbleBorderWidth', val)}
+                  min={0}
+                  max={4}
+                  unit="px"
+                />
+                <CompactSelect
+                  label="Estilo"
+                  value={settings.bubbleBorderStyle}
+                  onChange={(val) => updateSetting('bubbleBorderStyle', val)}
+                  options={[
+                    { value: 'solid', label: 'Sólido' },
+                    { value: 'dashed', label: 'Discontinuo' },
+                    { value: 'dotted', label: 'Punteado' },
+                    { value: 'none', label: 'Sin borde' }
+                  ]}
+                />
+              </div>
+
+              <CompactSlider
+                label="Relleno"
+                value={settings.bubblePadding}
+                onChange={(val) => updateSetting('bubblePadding', val)}
+                min={8}
+                max={32}
+                unit="px"
+              />
+            </Section>
+
+            {/* ━━━ BADGES ━━━ */}
+            <Section title="Badges (Etiquetas)" icon={Box}>
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { key: 'Primary', label: 'Primario', bg: 'badgePrimaryBg', text: 'badgePrimaryText' },
+                  { key: 'Success', label: 'Éxito', bg: 'badgeSuccessBg', text: 'badgeSuccessText' },
+                  { key: 'Warning', label: 'Advertencia', bg: 'badgeWarningBg', text: 'badgeWarningText' },
+                  { key: 'Danger', label: 'Peligro', bg: 'badgeDangerBg', text: 'badgeDangerText' },
+                  { key: 'Info', label: 'Info', bg: 'badgeInfoBg', text: 'badgeInfoText' }
+                ].map(badge => (
+                  <div key={badge.key} className="flex items-center gap-3">
+                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[80px]">
+                      {badge.label}
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400">Fondo</span>
+                      <input
+                        type="color"
+                        value={settings[badge.bg]}
+                        onChange={(e) => updateSetting(badge.bg, e.target.value)}
+                        className="w-10 h-7 rounded border border-gray-300 cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400">Texto</span>
+                      <input
+                        type="color"
+                        value={settings[badge.text]}
+                        onChange={(e) => updateSetting(badge.text, e.target.value)}
+                        className="w-10 h-7 rounded border border-gray-300 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            {/* ━━━ CONTENEDORES ━━━ */}
+            <Section title="Contenedores" icon={Square}>
+              <div className="grid grid-cols-2 gap-2.5">
+                <ColorInline
+                  label="Fondo tarjetas"
+                  value={settings.cardBg}
+                  onChange={(val) => updateSetting('cardBg', val)}
+                />
+                <ColorInline
+                  label="Borde tarjetas"
+                  value={settings.cardBorder}
+                  onChange={(val) => updateSetting('cardBorder', val)}
+                />
+                <ColorInline
+                  label="Fondo general"
+                  value={settings.containerBg}
+                  onChange={(val) => updateSetting('containerBg', val)}
+                />
+                <ColorInline
+                  label="Color acento"
+                  value={settings.accentColor}
+                  onChange={(val) => updateSetting('accentColor', val)}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <CompactSlider
+                  label="Radio"
+                  value={settings.borderRadius}
+                  onChange={(val) => updateSetting('borderRadius', val)}
+                  min={0}
+                  max={32}
+                  unit="px"
+                />
+                <CompactSlider
+                  label="Relleno"
+                  value={settings.cardPadding}
+                  onChange={(val) => updateSetting('cardPadding', val)}
+                  min={12}
+                  max={48}
+                  unit="px"
+                />
+              </div>
+            </Section>
+
+            {/* ━━━ ESPACIADO ━━━ */}
+            <Section title="Espaciado Global" icon={Sliders}>
+              <CompactSlider
+                label="General"
+                value={settings.spacing}
+                onChange={(val) => updateSetting('spacing', val)}
+                min={8}
+                max={32}
+                unit="px"
+              />
+            </Section>
+
+            {/* ━━━ SOMBRAS ━━━ */}
+            <Section title="Sombras" icon={Circle}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                <CompactSelect
+                  label="Tamaño"
+                  value={settings.shadowSize}
+                  onChange={(val) => updateSetting('shadowSize', val)}
+                  options={[
+                    { value: 'none', label: 'Sin sombra' },
+                    { value: 'small', label: 'Pequeña' },
+                    { value: 'medium', label: 'Media' },
+                    { value: 'large', label: 'Grande' },
+                    { value: 'xlarge', label: 'Extra grande' }
+                  ]}
+                />
+                <CompactSlider
+                  label="Opacidad"
+                  value={settings.shadowOpacity}
+                  onChange={(val) => updateSetting('shadowOpacity', val)}
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  unit="%"
+                />
+                <ColorInline
+                  label="Color"
+                  value={settings.shadowColor}
+                  onChange={(val) => updateSetting('shadowColor', val)}
+                />
+              </div>
+              <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                <input
+                  type="checkbox"
+                  checked={settings.cardShadow}
+                  onChange={(e) => updateSetting('cardShadow', e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                Mostrar sombras en tarjetas
+              </label>
+            </Section>
+
+            {/* ━━━ ANIMACIONES Y EFECTOS ━━━ */}
+            <Section title="Animaciones y Efectos" icon={Sparkles}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <CompactSelect
+                  label="Velocidad"
+                  value={settings.animationSpeed}
+                  onChange={(val) => updateSetting('animationSpeed', val)}
+                  options={[
+                    { value: 'slow', label: 'Lenta' },
+                    { value: 'normal', label: 'Normal' },
+                    { value: 'fast', label: 'Rápida' }
+                  ]}
+                />
+                <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={settings.enableAnimations}
+                    onChange={(e) => updateSetting('enableAnimations', e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  />
+                  Activar animaciones
+                </label>
+              </div>
+            </Section>
+
+            {/* ━━━ OPCIONES VISUALES ━━━ */}
+            <Section title="Opciones Visuales" icon={Eye}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={settings.showAvatars}
+                    onChange={(e) => updateSetting('showAvatars', e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  />
+                  Mostrar avatares
+                </label>
+                <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={settings.showBadges}
+                    onChange={(e) => updateSetting('showBadges', e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  />
+                  Mostrar badges
+                </label>
+                <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={settings.compactMode}
+                    onChange={(e) => updateSetting('compactMode', e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  />
+                  Modo compacto
+                </label>
+              </div>
+            </Section>
+
+            {/* Botones de acción */}
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+              <BaseButton
+                variant="ghost"
+                size="sm"
+                onClick={resetSettings}
+                className="flex-1"
+              >
+                Restaurar valores por defecto
+              </BaseButton>
+              {!alwaysOpen && (
+                <BaseButton
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setIsOpen(false)}
+                  className="flex-1"
                 >
-                  <tab.icon size={16} />
-                  {tab.label}
-                </button>
-              ))}
+                  Cerrar
+                </BaseButton>
+              )}
             </div>
-
-            {/* TYPOGRAPHY TAB */}
-            {activeTab === 'typography' && (
-              <div className="space-y-6">
-                {/* Font Family */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Familia de fuente
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { value: 'system', label: 'Sistema' },
-                      { value: 'serif', label: 'Serif' },
-                      { value: 'mono', label: 'Monospace' },
-                      { value: 'rounded', label: 'Redondeada' }
-                    ].map(option => (
-                      <button
-                        key={option.value}
-                        onClick={() => updateSetting('fontFamily', option.value)}
-                        className={`p-3 border-2 rounded-lg text-sm transition-all ${
-                          settings.fontFamily === option.value
-                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Font Size */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Tamaño de fuente: {settings.fontSize}px
-                  </label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="24"
-                    value={settings.fontSize}
-                    onChange={(e) => updateSetting('fontSize', parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>12px</span>
-                    <span>18px</span>
-                    <span>24px</span>
-                  </div>
-                </div>
-
-                {/* Line Height */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Altura de línea: {settings.lineHeight}
-                  </label>
-                  <input
-                    type="range"
-                    min="1.2"
-                    max="2.0"
-                    step="0.1"
-                    value={settings.lineHeight}
-                    onChange={(e) => updateSetting('lineHeight', parseFloat(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                  />
-                </div>
-
-                {/* Font Weight */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Grosor de fuente
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { value: 'light', label: 'Ligera' },
-                      { value: 'normal', label: 'Normal' },
-                      { value: 'medium', label: 'Media' },
-                      { value: 'semibold', label: 'Semi-negrita' },
-                      { value: 'bold', label: 'Negrita' }
-                    ].map(option => (
-                      <button
-                        key={option.value}
-                        onClick={() => updateSetting('fontWeight', option.value)}
-                        className={`p-2 border-2 rounded-lg text-xs transition-all ${
-                          settings.fontWeight === option.value
-                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* COLORS TAB */}
-            {activeTab === 'colors' && (
-              <div className="space-y-6">
-                {/* Burbujas */}
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
-                    Burbujas de diálogo
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        Fondo izquierda
-                      </label>
-                      <input
-                        type="color"
-                        value={settings.bubbleBgLeft}
-                        onChange={(e) => updateSetting('bubbleBgLeft', e.target.value)}
-                        className="w-full h-10 rounded border border-gray-300"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        Fondo derecha
-                      </label>
-                      <input
-                        type="color"
-                        value={settings.bubbleBgRight}
-                        onChange={(e) => updateSetting('bubbleBgRight', e.target.value)}
-                        className="w-full h-10 rounded border border-gray-300"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        Texto izquierda
-                      </label>
-                      <input
-                        type="color"
-                        value={settings.bubbleTextLeft}
-                        onChange={(e) => updateSetting('bubbleTextLeft', e.target.value)}
-                        className="w-full h-10 rounded border border-gray-300"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        Texto derecha
-                      </label>
-                      <input
-                        type="color"
-                        value={settings.bubbleTextRight}
-                        onChange={(e) => updateSetting('bubbleTextRight', e.target.value)}
-                        className="w-full h-10 rounded border border-gray-300"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Badges */}
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
-                    Badges (Etiquetas)
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { key: 'Primary', label: 'Primario', bg: 'badgePrimaryBg', text: 'badgePrimaryText' },
-                      { key: 'Success', label: 'Éxito', bg: 'badgeSuccessBg', text: 'badgeSuccessText' },
-                      { key: 'Warning', label: 'Advertencia', bg: 'badgeWarningBg', text: 'badgeWarningText' },
-                      { key: 'Danger', label: 'Peligro', bg: 'badgeDangerBg', text: 'badgeDangerText' },
-                      { key: 'Info', label: 'Info', bg: 'badgeInfoBg', text: 'badgeInfoText' }
-                    ].map(badge => (
-                      <div key={badge.key} className="space-y-2">
-                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                          {badge.label}
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="color"
-                            value={settings[badge.bg]}
-                            onChange={(e) => updateSetting(badge.bg, e.target.value)}
-                            className="w-1/2 h-8 rounded border"
-                            title="Fondo"
-                          />
-                          <input
-                            type="color"
-                            value={settings[badge.text]}
-                            onChange={(e) => updateSetting(badge.text, e.target.value)}
-                            className="w-1/2 h-8 rounded border"
-                            title="Texto"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Contenedores */}
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
-                    Contenedores
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        Fondo de tarjetas
-                      </label>
-                      <input
-                        type="color"
-                        value={settings.cardBg}
-                        onChange={(e) => updateSetting('cardBg', e.target.value)}
-                        className="w-full h-10 rounded border"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        Borde de tarjetas
-                      </label>
-                      <input
-                        type="color"
-                        value={settings.cardBorder}
-                        onChange={(e) => updateSetting('cardBorder', e.target.value)}
-                        className="w-full h-10 rounded border"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        Fondo general
-                      </label>
-                      <input
-                        type="color"
-                        value={settings.containerBg}
-                        onChange={(e) => updateSetting('containerBg', e.target.value)}
-                        className="w-full h-10 rounded border"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        Color de acento
-                      </label>
-                      <input
-                        type="color"
-                        value={settings.accentColor}
-                        onChange={(e) => updateSetting('accentColor', e.target.value)}
-                        className="w-full h-10 rounded border"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* LAYOUT TAB */}
-            {activeTab === 'layout' && (
-              <div className="space-y-6">
-                {/* Bubble Style */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Estilo de burbujas
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { value: 'rounded', label: 'Redondeadas', icon: Circle },
-                      { value: 'sharp', label: 'Cuadradas', icon: Square },
-                      { value: 'pill', label: 'Píldora', icon: Maximize2 }
-                    ].map(option => (
-                      <button
-                        key={option.value}
-                        onClick={() => updateSetting('bubbleStyle', option.value)}
-                        className={`p-3 border-2 rounded-lg text-xs transition-all ${
-                          settings.bubbleStyle === option.value
-                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                        }`}
-                      >
-                        <option.icon size={20} className="mx-auto mb-1" />
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Border Radius */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Radio de bordes: {settings.borderRadius}px
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="32"
-                    value={settings.borderRadius}
-                    onChange={(e) => updateSetting('borderRadius', parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                  />
-                </div>
-
-                {/* Spacing */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Espaciado general: {settings.spacing}px
-                  </label>
-                  <input
-                    type="range"
-                    min="8"
-                    max="32"
-                    value={settings.spacing}
-                    onChange={(e) => updateSetting('spacing', parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                  />
-                </div>
-
-                {/* Bubble Padding */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Relleno de burbujas: {settings.bubblePadding}px
-                  </label>
-                  <input
-                    type="range"
-                    min="8"
-                    max="32"
-                    value={settings.bubblePadding}
-                    onChange={(e) => updateSetting('bubblePadding', parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                  />
-                </div>
-
-                {/* Card Padding */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Relleno de tarjetas: {settings.cardPadding}px
-                  </label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="48"
-                    value={settings.cardPadding}
-                    onChange={(e) => updateSetting('cardPadding', parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                  />
-                </div>
-
-                {/* Border Width & Style */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Grosor de borde: {settings.bubbleBorderWidth}px
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="4"
-                      value={settings.bubbleBorderWidth}
-                      onChange={(e) => updateSetting('bubbleBorderWidth', parseInt(e.target.value))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Estilo de borde
-                    </label>
-                    <select
-                      value={settings.bubbleBorderStyle}
-                      onChange={(e) => updateSetting('bubbleBorderStyle', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-800 dark:border-gray-600"
-                    >
-                      <option value="solid">Sólido</option>
-                      <option value="dashed">Discontinuo</option>
-                      <option value="dotted">Punteado</option>
-                      <option value="none">Sin borde</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Border Color */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Color de borde
-                  </label>
-                  <input
-                    type="color"
-                    value={settings.bubbleBorderColor}
-                    onChange={(e) => updateSetting('bubbleBorderColor', e.target.value)}
-                    className="w-full h-12 rounded border border-gray-300"
-                  />
-                </div>
-
-                {/* Toggles */}
-                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <label className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Mostrar avatares
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={settings.showAvatars}
-                      onChange={(e) => updateSetting('showAvatars', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                  </label>
-
-                  <label className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Mostrar badges
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={settings.showBadges}
-                      onChange={(e) => updateSetting('showBadges', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                  </label>
-
-                  <label className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Modo compacto
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={settings.compactMode}
-                      onChange={(e) => updateSetting('compactMode', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                  </label>
-                </div>
-              </div>
-            )}
-
-            {/* EFFECTS TAB */}
-            {activeTab === 'effects' && (
-              <div className="space-y-6">
-                {/* Shadow Size */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Tamaño de sombra
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { value: 'none', label: 'Sin sombra' },
-                      { value: 'small', label: 'Pequeña' },
-                      { value: 'medium', label: 'Media' },
-                      { value: 'large', label: 'Grande' },
-                      { value: 'xlarge', label: 'Extra grande' }
-                    ].map(option => (
-                      <button
-                        key={option.value}
-                        onClick={() => updateSetting('shadowSize', option.value)}
-                        className={`p-3 border-2 rounded-lg text-xs transition-all ${
-                          settings.shadowSize === option.value
-                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Shadow Opacity */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Opacidad de sombra: {Math.round(settings.shadowOpacity * 100)}%
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={settings.shadowOpacity}
-                    onChange={(e) => updateSetting('shadowOpacity', parseFloat(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                  />
-                </div>
-
-                {/* Shadow Color */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Color de sombra
-                  </label>
-                  <input
-                    type="color"
-                    value={settings.shadowColor}
-                    onChange={(e) => updateSetting('shadowColor', e.target.value)}
-                    className="w-full h-12 rounded border border-gray-300"
-                  />
-                </div>
-
-                {/* Animation Speed */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Velocidad de animación
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { value: 'slow', label: 'Lenta' },
-                      { value: 'normal', label: 'Normal' },
-                      { value: 'fast', label: 'Rápida' }
-                    ].map(option => (
-                      <button
-                        key={option.value}
-                        onClick={() => updateSetting('animationSpeed', option.value)}
-                        className={`p-3 border-2 rounded-lg text-xs transition-all ${
-                          settings.animationSpeed === option.value
-                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Toggles */}
-                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <label className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Activar animaciones
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={settings.enableAnimations}
-                      onChange={(e) => updateSetting('enableAnimations', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                  </label>
-
-                  <label className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Mostrar sombras en tarjetas
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={settings.cardShadow}
-                      onChange={(e) => updateSetting('cardShadow', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                  </label>
-                </div>
-              </div>
-            )}
-
-            </div>
-          ) : (
-            /* Con BaseCard cuando alwaysOpen=false */
-            <BaseCard
-              title="Configuración de Aspecto Visual"
-              subtitle="Personaliza cada detalle de la apariencia"
-            >
-              <div className="space-y-6">
-                {/* Tabs */}
-                <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
-                  {[
-                    { id: 'typography', label: 'Tipografía', icon: Type },
-                    { id: 'colors', label: 'Colores', icon: Palette },
-                    { id: 'layout', label: 'Diseño', icon: Layout },
-                    { id: 'effects', label: 'Efectos', icon: Sparkles }
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                        activeTab === tab.id
-                          ? 'border-purple-600 text-purple-600 dark:text-purple-400'
-                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                      }`}
-                    >
-                      <tab.icon size={16} />
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* DUPLICAR TODO EL CONTENIDO DE LAS TABS AQUÍ - Por ahora solo estructura */}
-                <div>Contenido de tabs (a duplicar)</div>
-
-                {/* Botón reset - solo cuando NO es alwaysOpen */}
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
-                  <BaseButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={resetSettings}
-                    className="flex-1"
-                  >
-                    Restaurar valores por defecto
-                  </BaseButton>
-                  <BaseButton
-                    variant="primary"
-                    size="sm"
-                    onClick={() => setIsOpen(false)}
-                    className="flex-1"
-                  >
-                    Cerrar
-                  </BaseButton>
-                </div>
-              </div>
-            </BaseCard>
-          )}
-        </>
+          </div>
+        </BaseCard>
       )}
 
       {/* Preview de configuración actual */}
