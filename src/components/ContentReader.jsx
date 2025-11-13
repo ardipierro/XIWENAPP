@@ -38,7 +38,12 @@ import {
   FileImage,
   Presentation,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Paintbrush,
+  Filter,
+  FileDown,
+  Map,
+  Maximize2
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import {
@@ -249,6 +254,27 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   // Estados FASE 3 - Modo presentación
   const [isPresentationMode, setIsPresentationMode] = useState(false);
 
+  // Estados FASE 4 - Format Painter
+  const [isFormatPainterActive, setIsFormatPainterActive] = useState(false);
+  const [copiedFormat, setCopiedFormat] = useState(null); // { type, color, style, fontSize, fontFamily, bold, italic, underline }
+
+  // Estados FASE 4 - Filtros avanzados
+  const [showFiltersPanel, setShowFiltersPanel] = useState(false);
+  const [activeFilters, setActiveFilters] = useState({
+    dateFrom: null,
+    dateTo: null,
+    colors: [],
+    types: [] // 'highlight', 'note', 'drawing', 'floatingText'
+  });
+
+  // Estados FASE 4 - Mini mapa
+  const [showMiniMap, setShowMiniMap] = useState(false);
+
+  // Estados FASE 4 - Magnifier
+  const [showMagnifier, setShowMagnifier] = useState(false);
+  const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
+  const [magnifierZoom, setMagnifierZoom] = useState(2);
+
   // Referencias
   const contentRef = useRef(null);
   const canvasRef = useRef(null);
@@ -426,6 +452,384 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
   };
 
   /**
+   * FASE 4 - Format Painter: Copiar formato de una anotación
+   */
+  const handleCopyFormat = (annotation, type) => {
+    const format = {
+      type,
+      timestamp: Date.now()
+    };
+
+    if (type === 'highlight') {
+      format.color = annotation.color;
+      format.style = annotation.style || 'classic';
+    } else if (type === 'note') {
+      format.color = annotation.color || 'yellow';
+      format.fontSize = annotation.fontSize || 14;
+      format.fontFamily = annotation.fontFamily;
+      format.bold = annotation.bold;
+      format.italic = annotation.italic;
+      format.underline = annotation.underline;
+    } else if (type === 'floatingText') {
+      format.color = annotation.color;
+      format.fontSize = annotation.fontSize || 16;
+      format.fontFamily = annotation.fontFamily;
+      format.bold = annotation.bold;
+      format.italic = annotation.italic;
+      format.underline = annotation.underline;
+    }
+
+    setCopiedFormat(format);
+    setIsFormatPainterActive(true);
+    logger.info(`Formato copiado de ${type}:`, format, 'ContentReader');
+  };
+
+  /**
+   * FASE 4 - Format Painter: Aplicar formato copiado a una anotación
+   */
+  const handleApplyFormat = (annotationId, annotationType) => {
+    if (!copiedFormat || !isFormatPainterActive) return;
+
+    setAnnotations(prev => {
+      const updated = { ...prev };
+
+      if (annotationType === 'highlight' && copiedFormat.type === 'highlight') {
+        updated.highlights = prev.highlights.map(h =>
+          h.id === annotationId
+            ? { ...h, color: copiedFormat.color, style: copiedFormat.style }
+            : h
+        );
+      } else if (annotationType === 'note') {
+        updated.notes = prev.notes.map(n =>
+          n.id === annotationId
+            ? {
+                ...n,
+                color: copiedFormat.color || n.color,
+                fontSize: copiedFormat.fontSize || n.fontSize,
+                fontFamily: copiedFormat.fontFamily || n.fontFamily,
+                bold: copiedFormat.bold !== undefined ? copiedFormat.bold : n.bold,
+                italic: copiedFormat.italic !== undefined ? copiedFormat.italic : n.italic,
+                underline: copiedFormat.underline !== undefined ? copiedFormat.underline : n.underline
+              }
+            : n
+        );
+      } else if (annotationType === 'floatingText') {
+        updated.floatingTexts = prev.floatingTexts.map(t =>
+          t.id === annotationId
+            ? {
+                ...t,
+                color: copiedFormat.color || t.color,
+                fontSize: copiedFormat.fontSize || t.fontSize,
+                fontFamily: copiedFormat.fontFamily || t.fontFamily,
+                bold: copiedFormat.bold !== undefined ? copiedFormat.bold : t.bold,
+                italic: copiedFormat.italic !== undefined ? copiedFormat.italic : t.italic,
+                underline: copiedFormat.underline !== undefined ? copiedFormat.underline : t.underline
+              }
+            : t
+        );
+      }
+
+      return updated;
+    });
+
+    logger.info(`Formato aplicado a ${annotationType} ${annotationId}`, 'ContentReader');
+    // Desactivar format painter después de aplicar (modo single-use)
+    setIsFormatPainterActive(false);
+    setCopiedFormat(null);
+  };
+
+  /**
+   * FASE 4 - Toggle Format Painter
+   */
+  const toggleFormatPainter = () => {
+    if (isFormatPainterActive) {
+      setIsFormatPainterActive(false);
+      setCopiedFormat(null);
+    } else {
+      // Activar modo - el usuario debe hacer click en una anotación para copiar formato
+      if (!copiedFormat) {
+        alert('🎨 Modo Format Painter activado.\n\n1️⃣ Haz click en una anotación para copiar su formato\n2️⃣ Haz click en otra anotación para aplicar el formato');
+        setIsFormatPainterActive(true);
+      }
+    }
+  };
+
+  /**
+   * FASE 4 - Aplicar filtros a anotaciones
+   */
+  const getFilteredAnnotations = () => {
+    let filtered = { ...annotations };
+
+    // Si no hay filtros activos, retornar todas
+    if (!activeFilters.types.length && !activeFilters.colors.length && !activeFilters.dateFrom && !activeFilters.dateTo) {
+      return filtered;
+    }
+
+    // Filtrar por tipo
+    if (activeFilters.types.length > 0) {
+      if (!activeFilters.types.includes('highlight')) {
+        filtered.highlights = [];
+      }
+      if (!activeFilters.types.includes('note')) {
+        filtered.notes = [];
+      }
+      if (!activeFilters.types.includes('drawing')) {
+        filtered.drawings = [];
+      }
+      if (!activeFilters.types.includes('floatingText')) {
+        filtered.floatingTexts = [];
+      }
+    }
+
+    // Filtrar por color
+    if (activeFilters.colors.length > 0) {
+      filtered.highlights = filtered.highlights.filter(h => activeFilters.colors.includes(h.color));
+      filtered.notes = filtered.notes.filter(n => activeFilters.colors.includes(n.color));
+      filtered.floatingTexts = filtered.floatingTexts.filter(t => activeFilters.colors.includes(t.color));
+    }
+
+    // Filtrar por fecha
+    if (activeFilters.dateFrom || activeFilters.dateTo) {
+      const fromTime = activeFilters.dateFrom ? new Date(activeFilters.dateFrom).getTime() : 0;
+      const toTime = activeFilters.dateTo ? new Date(activeFilters.dateTo).getTime() : Date.now();
+
+      filtered.highlights = filtered.highlights.filter(h => {
+        const time = h.timestamp || 0;
+        return time >= fromTime && time <= toTime;
+      });
+      filtered.notes = filtered.notes.filter(n => {
+        const time = n.timestamp || 0;
+        return time >= fromTime && time <= toTime;
+      });
+      filtered.drawings = filtered.drawings.filter(d => {
+        const time = d.timestamp || 0;
+        return time >= fromTime && time <= toTime;
+      });
+      filtered.floatingTexts = filtered.floatingTexts.filter(t => {
+        const time = t.timestamp || 0;
+        return time >= fromTime && time <= toTime;
+      });
+    }
+
+    return filtered;
+  };
+
+  /**
+   * FASE 4 - Toggle filtro de tipo
+   */
+  const toggleTypeFilter = (type) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      types: prev.types.includes(type)
+        ? prev.types.filter(t => t !== type)
+        : [...prev.types, type]
+    }));
+  };
+
+  /**
+   * FASE 4 - Toggle filtro de color
+   */
+  const toggleColorFilter = (color) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      colors: prev.colors.includes(color)
+        ? prev.colors.filter(c => c !== color)
+        : [...prev.colors, color]
+    }));
+  };
+
+  /**
+   * FASE 4 - Limpiar filtros
+   */
+  const clearFilters = () => {
+    setActiveFilters({
+      dateFrom: null,
+      dateTo: null,
+      colors: [],
+      types: []
+    });
+  };
+
+  /**
+   * FASE 4 - Toggle Mini Mapa
+   */
+  const toggleMiniMap = () => {
+    setShowMiniMap(!showMiniMap);
+  };
+
+  /**
+   * FASE 4 - Toggle Magnifier
+   */
+  const toggleMagnifier = () => {
+    setShowMagnifier(!showMagnifier);
+  };
+
+  /**
+   * FASE 4 - Manejar movimiento del magnifier
+   */
+  const handleMagnifierMove = (e) => {
+    if (!showMagnifier || !containerRef.current) return;
+
+    const container = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - container.left;
+    const y = e.clientY - container.top;
+
+    setMagnifierPosition({ x, y });
+  };
+
+  /**
+   * FASE 4 - Exportar a PDF
+   */
+  const handleExportPDF = async () => {
+    try {
+      // Verificar si jsPDF está disponible
+      if (typeof window.jspdf === 'undefined') {
+        alert('⚠️ jsPDF no está disponible.\n\nPara usar esta función, agrega jsPDF a tu HTML:\n<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      let yPosition = 20;
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = 20;
+      const maxWidth = pageWidth - (margin * 2);
+
+      // Título
+      doc.setFontSize(18);
+      doc.setFont(undefined, 'bold');
+      doc.text('Content Reader - Anotaciones', margin, yPosition);
+      yPosition += 15;
+
+      // Fecha
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, margin, yPosition);
+      yPosition += 10;
+
+      // Línea separadora
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+
+      // Función para agregar nueva página si es necesario
+      const checkNewPage = (requiredSpace = 20) => {
+        if (yPosition + requiredSpace > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+      };
+
+      // Subrayados
+      if (annotations.highlights.length > 0) {
+        checkNewPage(30);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`🖍️ Subrayados (${annotations.highlights.length})`, margin, yPosition);
+        yPosition += 10;
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        annotations.highlights.forEach((highlight, index) => {
+          checkNewPage(25);
+          doc.setFont(undefined, 'bold');
+          doc.text(`${index + 1}. ${COLORS[highlight.color]?.name || highlight.color}`, margin + 5, yPosition);
+          yPosition += 5;
+
+          doc.setFont(undefined, 'normal');
+          const lines = doc.splitTextToSize(highlight.text, maxWidth - 10);
+          doc.text(lines, margin + 10, yPosition);
+          yPosition += (lines.length * 5) + 5;
+        });
+        yPosition += 5;
+      }
+
+      // Notas
+      if (annotations.notes.length > 0) {
+        checkNewPage(30);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`📝 Notas (${annotations.notes.length})`, margin, yPosition);
+        yPosition += 10;
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        annotations.notes.forEach((note, index) => {
+          checkNewPage(30);
+          doc.setFont(undefined, 'bold');
+          doc.text(`${index + 1}.`, margin + 5, yPosition);
+          yPosition += 5;
+
+          if (note.selectedText) {
+            doc.setFont(undefined, 'italic');
+            doc.setTextColor(100, 100, 100);
+            const refLines = doc.splitTextToSize(`"${note.selectedText}"`, maxWidth - 10);
+            doc.text(refLines, margin + 10, yPosition);
+            yPosition += (refLines.length * 5) + 3;
+            doc.setTextColor(0, 0, 0);
+          }
+
+          doc.setFont(undefined, 'normal');
+          const noteLines = doc.splitTextToSize(note.text, maxWidth - 10);
+          doc.text(noteLines, margin + 10, yPosition);
+          yPosition += (noteLines.length * 5) + 5;
+        });
+        yPosition += 5;
+      }
+
+      // Textos flotantes
+      if (annotations.floatingTexts.length > 0) {
+        checkNewPage(30);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`✍️ Textos Flotantes (${annotations.floatingTexts.length})`, margin, yPosition);
+        yPosition += 10;
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        annotations.floatingTexts.forEach((text, index) => {
+          checkNewPage(20);
+          const textLines = doc.splitTextToSize(`${index + 1}. ${text.text}`, maxWidth - 10);
+          doc.text(textLines, margin + 5, yPosition);
+          yPosition += (textLines.length * 5) + 3;
+        });
+        yPosition += 5;
+      }
+
+      // Estadísticas al final
+      checkNewPage(40);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Estadísticas', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`Total de subrayados: ${annotations.highlights.length}`, margin + 5, yPosition);
+      yPosition += 6;
+      doc.text(`Total de notas: ${annotations.notes.length}`, margin + 5, yPosition);
+      yPosition += 6;
+      doc.text(`Total de dibujos: ${annotations.drawings.length}`, margin + 5, yPosition);
+      yPosition += 6;
+      doc.text(`Total de textos: ${annotations.floatingTexts.length}`, margin + 5, yPosition);
+
+      // Guardar PDF
+      doc.save(`content-reader-anotaciones-${Date.now()}.pdf`);
+      logger.info('PDF exported successfully', 'ContentReader');
+      alert('✅ PDF exportado exitosamente');
+    } catch (error) {
+      logger.error('Error exporting PDF:', error, 'ContentReader');
+      alert('❌ Error al exportar PDF: ' + error.message);
+    }
+  };
+
+  /**
    * Keyboard Shortcuts
    */
   useEffect(() => {
@@ -500,11 +904,14 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
         return;
       }
 
-      // ESC - Cerrar modales/forms/panels
+      // ESC - Cerrar modales/forms/panels (cascada de prioridad)
       if (e.key === 'Escape') {
         e.preventDefault();
         if (isPresentationMode) {
           setIsPresentationMode(false);
+        } else if (isFormatPainterActive) {
+          setIsFormatPainterActive(false);
+          setCopiedFormat(null);
         } else if (showInstructionsModal) {
           setShowInstructionsModal(false);
         } else if (showNoteForm) {
@@ -517,6 +924,8 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           setEditingText(null);
         } else if (showAdvancedColorPicker) {
           setShowAdvancedColorPicker(false);
+        } else if (showFiltersPanel) {
+          setShowFiltersPanel(false);
         } else if (showSearchPanel) {
           setShowSearchPanel(false);
         } else if (showLayersPanel) {
@@ -1305,6 +1714,9 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
     setShowTextForm(true);
   };
 
+  // Obtener anotaciones filtradas
+  const displayedAnnotations = getFilteredAnnotations();
+
   return (
     <div className="flex flex-col h-screen bg-primary-50 dark:bg-primary-950">
       {/* Toolbar Principal */}
@@ -1392,11 +1804,53 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
 
             <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
 
+            {/* FASE 4 - Format Painter */}
+            <button
+              onClick={toggleFormatPainter}
+              className={`icon-btn ${isFormatPainterActive ? 'bg-blue-500 text-white' : ''}`}
+              title="Copiar formato (Format Painter)"
+              disabled={readOnly}
+            >
+              <Paintbrush className="w-5 h-5" />
+            </button>
+
+            {/* FASE 4 - Filtros */}
+            <button
+              onClick={() => setShowFiltersPanel(!showFiltersPanel)}
+              className={`icon-btn ${showFiltersPanel ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
+              title="Filtros avanzados"
+            >
+              <Filter className="w-5 h-5" />
+            </button>
+
+            {/* FASE 4 - Mini Mapa */}
+            <button
+              onClick={toggleMiniMap}
+              className={`icon-btn ${showMiniMap ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
+              title="Mini mapa de navegación"
+            >
+              <Map className="w-5 h-5" />
+            </button>
+
+            {/* FASE 4 - Magnifier */}
+            <button
+              onClick={toggleMagnifier}
+              className={`icon-btn ${showMagnifier ? 'bg-accent-100 dark:bg-accent-900' : ''}`}
+              title="Lupa / Zoom local"
+            >
+              <Maximize2 className="w-5 h-5" />
+            </button>
+
+            <div className="h-6 w-px bg-primary-300 dark:bg-primary-600"></div>
+
             <button onClick={() => setShowInstructionsModal(true)} className="icon-btn" title="Ayuda">
               <HelpCircle className="w-5 h-5" />
             </button>
             <button onClick={handleExportAnnotations} className="icon-btn" title="Exportar JSON">
               <Download className="w-5 h-5" />
+            </button>
+            <button onClick={handleExportPDF} className="icon-btn" title="Exportar PDF">
+              <FileDown className="w-5 h-5" />
             </button>
             <label className="icon-btn cursor-pointer" title="Importar JSON">
               <Upload className="w-5 h-5" />
@@ -1530,6 +1984,134 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                 </span>
               </label>
             </div>
+          </div>
+        )}
+
+        {/* FASE 4 - Panel de filtros */}
+        {showFiltersPanel && (
+          <div className="px-3 py-2 bg-gradient-to-r from-green-50 to-primary-50 dark:from-green-900/30 dark:to-primary-800/30 border-t border-primary-200 dark:border-primary-700">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <span className="text-xs font-semibold text-primary-900 dark:text-primary-100">Filtros Avanzados</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {(activeFilters.types.length > 0 || activeFilters.colors.length > 0 || activeFilters.dateFrom || activeFilters.dateTo) && (
+                  <button
+                    onClick={clearFilters}
+                    className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                  >
+                    Limpiar
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowFiltersPanel(false)}
+                  className="icon-btn text-xs p-1"
+                  title="Cerrar"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Filtros por tipo */}
+            <div className="mb-3">
+              <span className="text-xs font-medium text-primary-700 dark:text-primary-300 block mb-2">Por tipo:</span>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="flex items-center gap-2 p-2 bg-white dark:bg-primary-900 rounded cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={activeFilters.types.includes('highlight')}
+                    onChange={() => toggleTypeFilter('highlight')}
+                    className="w-4 h-4 text-green-500 rounded focus:ring-2 focus:ring-green-500"
+                  />
+                  <span className="text-xs text-primary-700 dark:text-primary-300">🖍️ Subrayados</span>
+                </label>
+                <label className="flex items-center gap-2 p-2 bg-white dark:bg-primary-900 rounded cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={activeFilters.types.includes('note')}
+                    onChange={() => toggleTypeFilter('note')}
+                    className="w-4 h-4 text-green-500 rounded focus:ring-2 focus:ring-green-500"
+                  />
+                  <span className="text-xs text-primary-700 dark:text-primary-300">📝 Notas</span>
+                </label>
+                <label className="flex items-center gap-2 p-2 bg-white dark:bg-primary-900 rounded cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={activeFilters.types.includes('drawing')}
+                    onChange={() => toggleTypeFilter('drawing')}
+                    className="w-4 h-4 text-green-500 rounded focus:ring-2 focus:ring-green-500"
+                  />
+                  <span className="text-xs text-primary-700 dark:text-primary-300">🎨 Dibujos</span>
+                </label>
+                <label className="flex items-center gap-2 p-2 bg-white dark:bg-primary-900 rounded cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={activeFilters.types.includes('floatingText')}
+                    onChange={() => toggleTypeFilter('floatingText')}
+                    className="w-4 h-4 text-green-500 rounded focus:ring-2 focus:ring-green-500"
+                  />
+                  <span className="text-xs text-primary-700 dark:text-primary-300">✍️ Textos</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Filtros por color */}
+            <div className="mb-3">
+              <span className="text-xs font-medium text-primary-700 dark:text-primary-300 block mb-2">Por color:</span>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(COLORS).map(([colorKey, colorData]) => (
+                  <button
+                    key={colorKey}
+                    onClick={() => toggleColorFilter(colorKey)}
+                    className={`px-2 py-1 text-xs rounded border-2 transition-all ${
+                      activeFilters.colors.includes(colorKey)
+                        ? 'border-green-500 scale-110'
+                        : 'border-transparent'
+                    }`}
+                    style={{ backgroundColor: colorData.hex }}
+                    title={colorData.name}
+                  >
+                    {activeFilters.colors.includes(colorKey) && '✓'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filtros por fecha */}
+            <div>
+              <span className="text-xs font-medium text-primary-700 dark:text-primary-300 block mb-2">Por fecha:</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-primary-600 dark:text-primary-400 block mb-1">Desde:</label>
+                  <input
+                    type="date"
+                    value={activeFilters.dateFrom || ''}
+                    onChange={(e) => setActiveFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
+                    className="w-full px-2 py-1 text-xs bg-white dark:bg-primary-900 border border-primary-300 dark:border-primary-600 rounded focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-primary-600 dark:text-primary-400 block mb-1">Hasta:</label>
+                  <input
+                    type="date"
+                    value={activeFilters.dateTo || ''}
+                    onChange={(e) => setActiveFilters(prev => ({ ...prev, dateTo: e.target.value }))}
+                    className="w-full px-2 py-1 text-xs bg-white dark:bg-primary-900 border border-primary-300 dark:border-primary-600 rounded focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Indicador de resultados */}
+            {(activeFilters.types.length > 0 || activeFilters.colors.length > 0 || activeFilters.dateFrom || activeFilters.dateTo) && (
+              <div className="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded text-xs text-center">
+                <span className="font-semibold text-green-700 dark:text-green-300">
+                  Filtros activos - Mostrando resultados filtrados
+                </span>
+              </div>
+            )}
           </div>
         )}
 
@@ -1962,11 +2544,35 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
         </div>
       )}
 
+      {/* Format Painter Banner - FASE 4 */}
+      {isFormatPainterActive && !isPresentationMode && (
+        <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 text-center shadow-md">
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <Paintbrush className="w-4 h-4" />
+            <span className="font-medium">
+              {!copiedFormat
+                ? '🎨 Format Painter: Haz click en una nota o texto para copiar su formato'
+                : `✨ Formato copiado de ${copiedFormat.type === 'note' ? 'nota' : 'texto'} - Click en otra anotación para aplicar`}
+            </span>
+            <button
+              onClick={() => {
+                setIsFormatPainterActive(false);
+                setCopiedFormat(null);
+              }}
+              className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded transition-colors text-xs font-medium"
+            >
+              Cancelar (ESC)
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <div className="flex-1 overflow-auto">
         <div
           ref={containerRef}
           className="relative w-full p-8"
+          onMouseMove={handleMagnifierMove}
         >
           {/* Canvas */}
           <canvas
@@ -2052,18 +2658,29 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           )}
 
           {/* Floating Texts */}
-          {layersVisible.floatingTexts && annotations.floatingTexts.map(floatingText => (
+          {layersVisible.floatingTexts && displayedAnnotations.floatingTexts.map(floatingText => (
             <div
               key={floatingText.id}
               onMouseDown={(e) => !readOnly && handleFloatingTextMouseDown(e, floatingText.id)}
+              onClick={(e) => {
+                if (!readOnly && isFormatPainterActive) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!copiedFormat) {
+                    handleCopyFormat(floatingText, 'floatingText');
+                  } else {
+                    handleApplyFormat(floatingText.id, 'floatingText');
+                  }
+                }
+              }}
               onDoubleClick={(e) => {
-                if (!readOnly) {
+                if (!readOnly && !isFormatPainterActive) {
                   e.preventDefault();
                   e.stopPropagation();
                   handleEditFloatingText(floatingText.id);
                 }
               }}
-              className={`absolute ${!readOnly ? 'cursor-move' : ''}`}
+              className={`absolute ${!readOnly ? (isFormatPainterActive ? 'cursor-crosshair' : 'cursor-move') : ''}`}
               style={{
                 left: floatingText.position?.x || 0,
                 top: floatingText.position?.y || 0,
@@ -2091,19 +2708,30 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           ))}
 
           {/* Notes */}
-          {layersVisible.notes && annotations.notes.map(note => (
+          {layersVisible.notes && displayedAnnotations.notes.map(note => (
             <div
               key={note.id}
               onMouseDown={(e) => !readOnly && handleNoteMouseDown(e, note.id)}
+              onClick={(e) => {
+                if (!readOnly && isFormatPainterActive) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!copiedFormat) {
+                    handleCopyFormat(note, 'note');
+                  } else {
+                    handleApplyFormat(note.id, 'note');
+                  }
+                }
+              }}
               onDoubleClick={(e) => {
-                if (!readOnly) {
+                if (!readOnly && !isFormatPainterActive) {
                   e.preventDefault();
                   e.stopPropagation();
                   handleEditNote(note.id);
                 }
               }}
               className={`absolute bg-yellow-100 dark:bg-yellow-900 border-l-4 border-yellow-500 p-3 rounded-lg shadow-lg hover:shadow-xl transition-shadow ${
-                !readOnly ? 'cursor-move' : ''
+                !readOnly ? (isFormatPainterActive ? 'cursor-crosshair' : 'cursor-move') : ''
               }`}
               style={{
                 left: note.position?.x || 0,
@@ -2210,6 +2838,199 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
           <X className="w-4 h-4" />
           <span className="text-sm font-medium">Salir presentación</span>
         </button>
+      )}
+
+      {/* Mini Mapa - FASE 4 */}
+      {showMiniMap && (
+        <div className="fixed bottom-4 right-4 z-40 bg-white dark:bg-primary-900 border-2 border-primary-300 dark:border-primary-600 rounded-lg shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Map className="w-4 h-4" />
+              <span className="text-xs font-semibold">Mini Mapa</span>
+            </div>
+            <button
+              onClick={toggleMiniMap}
+              className="hover:bg-white/20 rounded p-1 transition-colors"
+              title="Cerrar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="p-3 bg-primary-50 dark:bg-primary-800/50 w-64">
+            {/* Vista miniatura del contenido */}
+            <div className="bg-white dark:bg-primary-900 rounded border border-primary-200 dark:border-primary-700 p-2 text-[6px] leading-tight overflow-hidden max-h-96 relative">
+              {/* Indicadores de anotaciones en el mini mapa */}
+              <div className="space-y-1">
+                {annotations.highlights.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                    <span className="text-[8px] text-primary-600 dark:text-primary-400">
+                      {annotations.highlights.length} subrayados
+                    </span>
+                  </div>
+                )}
+                {annotations.notes.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span className="text-[8px] text-primary-600 dark:text-primary-400">
+                      {annotations.notes.length} notas
+                    </span>
+                  </div>
+                )}
+                {annotations.drawings.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-[8px] text-primary-600 dark:text-primary-400">
+                      {annotations.drawings.length} dibujos
+                    </span>
+                  </div>
+                )}
+                {annotations.floatingTexts.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-[8px] text-primary-600 dark:text-primary-400">
+                      {annotations.floatingTexts.length} textos
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Barra de progreso de scroll */}
+              <div className="mt-4 pt-4 border-t border-primary-200 dark:border-primary-700">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[8px] text-primary-500 dark:text-primary-400">Progreso de lectura</span>
+                  <span className="text-[8px] font-semibold text-indigo-600 dark:text-indigo-400">
+                    ~{Math.round((containerRef.current?.scrollTop || 0) / (containerRef.current?.scrollHeight || 1) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-primary-200 dark:bg-primary-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300"
+                    style={{
+                      width: `${Math.round((containerRef.current?.scrollTop || 0) / (containerRef.current?.scrollHeight || 1) * 100)}%`
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Botones de navegación rápida */}
+              <div className="mt-3 pt-3 border-t border-primary-200 dark:border-primary-700 space-y-1">
+                <button
+                  onClick={() => {
+                    if (containerRef.current) {
+                      containerRef.current.scrollTop = 0;
+                    }
+                  }}
+                  className="w-full px-2 py-1 text-[9px] bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
+                >
+                  ⬆️ Ir al inicio
+                </button>
+                <button
+                  onClick={() => {
+                    if (containerRef.current) {
+                      containerRef.current.scrollTop = containerRef.current.scrollHeight / 2;
+                    }
+                  }}
+                  className="w-full px-2 py-1 text-[9px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                >
+                  ➡️ Ir al medio
+                </button>
+                <button
+                  onClick={() => {
+                    if (containerRef.current) {
+                      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+                    }
+                  }}
+                  className="w-full px-2 py-1 text-[9px] bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors"
+                >
+                  ⬇️ Ir al final
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Magnifier - FASE 4 */}
+      {showMagnifier && (
+        <>
+          {/* Banner de instrucciones del magnifier */}
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-40 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
+            <div className="flex items-center gap-2 text-sm">
+              <Maximize2 className="w-4 h-4" />
+              <span className="font-medium">Modo Lupa activo - Mueve el cursor sobre el contenido</span>
+              <button
+                onClick={toggleMagnifier}
+                className="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded transition-colors text-xs font-medium"
+              >
+                Desactivar
+              </button>
+            </div>
+          </div>
+
+          {/* Lupa flotante */}
+          <div
+            className="fixed z-50 pointer-events-none"
+            style={{
+              left: magnifierPosition.x + 20,
+              top: magnifierPosition.y + 20,
+              width: `${150 * magnifierZoom}px`,
+              height: `${150 * magnifierZoom}px`
+            }}
+          >
+            <div className="relative w-full h-full rounded-full border-4 border-cyan-500 shadow-2xl overflow-hidden bg-white dark:bg-primary-900">
+              {/* Círculo de vista ampliada */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  transform: `scale(${magnifierZoom})`,
+                  transformOrigin: 'center center'
+                }}
+              >
+                <div
+                  className="bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30 w-full h-full flex items-center justify-center text-xs text-primary-700 dark:text-primary-300 font-semibold"
+                >
+                  <div className="text-center">
+                    <Maximize2 className="w-8 h-8 mx-auto mb-2 text-cyan-600 dark:text-cyan-400" />
+                    <p>Zoom {magnifierZoom}x</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Crosshair */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-px h-6 bg-cyan-500"></div>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-6 h-px bg-cyan-500"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Controles de zoom del magnifier */}
+          <div className="fixed bottom-4 left-4 z-40 bg-white dark:bg-primary-900 border-2 border-cyan-500 rounded-lg shadow-xl p-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-primary-700 dark:text-primary-300">Zoom:</span>
+              <button
+                onClick={() => setMagnifierZoom(Math.max(1.5, magnifierZoom - 0.5))}
+                className="px-2 py-1 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded hover:bg-cyan-200 dark:hover:bg-cyan-900/50 transition-colors"
+                title="Reducir zoom"
+              >
+                -
+              </button>
+              <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400 min-w-[40px] text-center">
+                {magnifierZoom}x
+              </span>
+              <button
+                onClick={() => setMagnifierZoom(Math.min(5, magnifierZoom + 0.5))}
+                className="px-2 py-1 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 rounded hover:bg-cyan-200 dark:hover:bg-cyan-900/50 transition-colors"
+                title="Aumentar zoom"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Instructions Modal */}
@@ -2375,6 +3196,54 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false }) 
                     <div>
                       <strong className="text-orange-700 dark:text-orange-300">Modo Presentación:</strong>
                       <p className="text-xs mt-1">Vista limpia sin toolbar para presentar (P o F11). Presiona ESC para salir.</p>
+                    </div>
+                  </div>
+
+                  {/* FASE 4 - Funcionalidades Avanzadas */}
+                  <div className="mt-4 pt-4 border-t-2 border-primary-200 dark:border-primary-700">
+                    <h4 className="font-bold text-sm text-primary-900 dark:text-primary-100 mb-3 flex items-center gap-2">
+                      <span className="text-lg">✨</span>
+                      FASE 4 - Funcionalidades Avanzadas
+                    </h4>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-pink-50 dark:bg-pink-900/30 rounded-lg border border-pink-200 dark:border-pink-700">
+                    <span className="text-2xl">🎨</span>
+                    <div>
+                      <strong className="text-pink-700 dark:text-pink-300">Format Painter:</strong>
+                      <p className="text-xs mt-1">Copia y aplica formato entre anotaciones. Click en una anotación para copiar formato, luego click en otra para aplicarlo.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-teal-50 dark:bg-teal-900/30 rounded-lg border border-teal-200 dark:border-teal-700">
+                    <span className="text-2xl">🔎</span>
+                    <div>
+                      <strong className="text-teal-700 dark:text-teal-300">Filtros Avanzados:</strong>
+                      <p className="text-xs mt-1">Filtra anotaciones por tipo, color y fecha. Ideal para revisar anotaciones específicas o de un período determinado.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-700">
+                    <span className="text-2xl">📄</span>
+                    <div>
+                      <strong className="text-red-700 dark:text-red-300">Exportar PDF:</strong>
+                      <p className="text-xs mt-1">Genera un documento PDF profesional con todas tus anotaciones organizadas por tipo con estadísticas.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-200 dark:border-indigo-700">
+                    <span className="text-2xl">🗺️</span>
+                    <div>
+                      <strong className="text-indigo-700 dark:text-indigo-300">Mini Mapa:</strong>
+                      <p className="text-xs mt-1">Vista general del documento con progreso de lectura y navegación rápida a inicio, medio o final del contenido.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-cyan-50 dark:bg-cyan-900/30 rounded-lg border border-cyan-200 dark:border-cyan-700">
+                    <span className="text-2xl">🔍</span>
+                    <div>
+                      <strong className="text-cyan-700 dark:text-cyan-300">Lupa / Magnifier:</strong>
+                      <p className="text-xs mt-1">Zoom local en áreas específicas del contenido. Mueve el cursor para magnificar y ajusta el nivel de zoom (1.5x - 5x).</p>
                     </div>
                   </div>
                 </div>
