@@ -4,6 +4,7 @@
  * @module components/UniversalDashboard
  */
 
+import logger from '../utils/logger';
 import { useState, lazy, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -26,6 +27,13 @@ const CreditManager = lazy(() => import('./CreditManager'));
 const AIConfigPanel = lazy(() => import('./AIConfigPanel'));
 const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const UniversalUserManager = lazy(() => import('./UniversalUserManager'));
+
+// Student views
+const MyCourses = lazy(() => import('./student/MyCourses'));
+const CourseViewer = lazy(() => import('./student/CourseViewer'));
+const ContentPlayer = lazy(() => import('./student/ContentPlayer'));
+const MyAssignmentsView = lazy(() => import('./student/MyAssignmentsView'));
+const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
 
 /**
  * Vista de inicio (placeholder)
@@ -83,6 +91,11 @@ export function UniversalDashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [currentPath, setCurrentPath] = useState('/dashboard-v2');
 
+  // Student course navigation states
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [selectedContentId, setSelectedContentId] = useState(null);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState(null);
+
   // Loading state
   if (authLoading || !initialized) {
     return (
@@ -111,6 +124,24 @@ export function UniversalDashboard() {
 
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  // Student course navigation handlers
+  const handleSelectCourse = (courseId) => {
+    setSelectedCourseId(courseId);
+  };
+
+  const handleSelectContent = (contentId) => {
+    setSelectedContentId(contentId);
+  };
+
+  const handleBackToCourses = () => {
+    setSelectedCourseId(null);
+    setSelectedContentId(null);
+  };
+
+  const handleBackToCourseViewer = () => {
+    setSelectedContentId(null);
   };
 
   /**
@@ -168,12 +199,46 @@ export function UniversalDashboard() {
 
             // MIS CURSOS (Students)
             case '/dashboard-v2/my-courses':
-              return <PlaceholderView title="Mis Cursos" />;
+              // Si hay contenido seleccionado, mostrar ContentPlayer
+              if (selectedContentId && selectedCourseId) {
+                return (
+                  <ContentPlayer
+                    user={user}
+                    courseId={selectedCourseId}
+                    contentId={selectedContentId}
+                    onBack={handleBackToCourseViewer}
+                  />
+                );
+              }
+
+              // Si hay curso seleccionado, mostrar CourseViewer
+              if (selectedCourseId) {
+                return (
+                  <CourseViewer
+                    user={user}
+                    courseId={selectedCourseId}
+                    onSelectContent={handleSelectContent}
+                    onBack={handleBackToCourses}
+                  />
+                );
+              }
+
+              // Por defecto, mostrar lista de cursos
+              return <MyCourses user={user} onSelectCourse={handleSelectCourse} />;
 
             // MIS TAREAS (Students)
             case '/dashboard-v2/my-assignments':
               if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Mis Tareas" />;
+              return (
+                <MyAssignmentsView
+                  user={user}
+                  onSelectAssignment={(assignmentId) => {
+                    setSelectedAssignmentId(assignmentId);
+                    // TODO: Navegar a vista de hacer/ver tarea
+                    logger.debug('Assignment seleccionado:', assignmentId);
+                  }}
+                />
+              );
 
             // JUEGOS
             case '/dashboard-v2/games':
@@ -183,7 +248,7 @@ export function UniversalDashboard() {
             // MIS PAGOS (Students)
             case '/dashboard-v2/my-payments':
               if (!can('view-own-credits')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Mis Pagos" />;
+              return <StudentFeesPanel user={user} />;
 
             // ANALYTICS - AnalyticsDashboard integrado
             case '/dashboard-v2/analytics':
