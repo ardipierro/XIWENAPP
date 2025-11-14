@@ -17,18 +17,48 @@ import {
   AlertTriangle,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  BookOpen,
+  DollarSign,
+  Mail,
+  Eye,
+  Trash2
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import { useUserManagement } from '../hooks/useUserManagement';
 import { createUser, deleteUser } from '../firebase/users';
 import SearchBar from './common/SearchBar';
 import { BaseButton, BaseLoading, BaseEmptyState } from './common';
-import StudentCard from './StudentCard';
+import { UniversalCard, CardGrid } from './cards';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
 import ConfirmModal from './ConfirmModal';
 import logger from '../utils/logger';
+
+// Helper functions for user cards
+const getAvatarColor = (role) => {
+  const colors = {
+    admin: '#f59e0b', // amber/orange
+    teacher: '#8b5cf6', // purple
+    trial_teacher: '#a78bfa', // light purple
+    student: '#3b82f6', // blue
+    listener: '#10b981', // green
+    trial: '#06b6d4', // cyan
+  };
+  return colors[role] || '#6b7280'; // gray fallback
+};
+
+const getRoleBadge = (role) => {
+  const badges = {
+    admin: { label: 'Admin', variant: 'warning' },
+    teacher: { label: 'Profesor', variant: 'info' },
+    trial_teacher: { label: 'Profesor Prueba', variant: 'info' },
+    student: { label: 'Alumno', variant: 'primary' },
+    listener: { label: 'Oyente', variant: 'success' },
+    trial: { label: 'Prueba', variant: 'secondary' }
+  };
+  return badges[role] || { label: role, variant: 'secondary' };
+};
 
 /**
  * UniversalUserManager - Componente universal para gestión de usuarios
@@ -279,50 +309,64 @@ export default function UniversalUserManager({ user, userRole }) {
                 : 'Agrega tu primer alumno con el botón de arriba'
             }
           />
-        ) : viewMode === 'grid' ? (
-          /* Vista Grid */
-          <div className="quick-access-grid">
-            {userManagement.filteredUsers.map((userItem) => (
-              <StudentCard
-                key={userItem.id}
-                student={userItem}
-                enrollmentCount={enrollmentCounts[userItem.id] || 0}
-                onView={handleViewUserProfile}
-                onDelete={
-                  can('delete-users')
-                    ? (student) => {
-                        setUserToDelete(student);
-                        setShowDeleteConfirm(true);
-                      }
-                    : null
-                }
-                isAdmin={isAdmin()}
-                viewMode="grid"
-              />
-            ))}
-          </div>
-        ) : viewMode === 'list' ? (
-          /* Vista List */
-          <div className="flex flex-col gap-4">
-            {userManagement.filteredUsers.map((userItem) => (
-              <StudentCard
-                key={userItem.id}
-                student={userItem}
-                enrollmentCount={enrollmentCounts[userItem.id] || 0}
-                onView={handleViewUserProfile}
-                onDelete={
-                  can('delete-users')
-                    ? (student) => {
-                        setUserToDelete(student);
-                        setShowDeleteConfirm(true);
-                      }
-                    : null
-                }
-                isAdmin={isAdmin()}
-                viewMode="list"
-              />
-            ))}
-          </div>
+        ) : viewMode === 'grid' || viewMode === 'list' ? (
+          /* Vista Grid/List con UniversalCard */
+          <CardGrid
+            columnsType={viewMode === 'list' ? 'wide' : 'default'}
+            gap={viewMode === 'list' ? 'gap-3' : 'gap-4 md:gap-6'}
+          >
+            {userManagement.filteredUsers.map((userItem) => {
+              const initial = userItem.name?.charAt(0).toUpperCase() || '?';
+              const avatarColor = getAvatarColor(userItem.role);
+              const roleBadge = getRoleBadge(userItem.role);
+
+              return (
+                <UniversalCard
+                  key={userItem.id}
+                  variant="user"
+                  size="md"
+                  layout={viewMode === 'list' ? 'horizontal' : 'vertical'}
+                  avatar={initial}
+                  avatarColor={avatarColor}
+                  title={userItem.name}
+                  subtitle={userItem.email}
+                  badges={[{ variant: roleBadge.variant, children: roleBadge.label }]}
+                  stats={[
+                    { label: 'Cursos', value: enrollmentCounts[userItem.id] || 0, icon: BookOpen },
+                    { label: 'Créditos', value: userItem.credits || 0, icon: DollarSign }
+                  ]}
+                  onClick={() => handleViewUserProfile(userItem)}
+                  actions={
+                    <>
+                      <BaseButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewUserProfile(userItem);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        icon={Eye}
+                      >
+                        Ver
+                      </BaseButton>
+                      {can('delete-users') && (
+                        <BaseButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUserToDelete(userItem);
+                            setShowDeleteConfirm(true);
+                          }}
+                          variant="danger"
+                          size="sm"
+                          icon={Trash2}
+                        />
+                      )}
+                    </>
+                  }
+                />
+              );
+            })}
+          </CardGrid>
         ) : (
           /* Vista Table */
           <div className="users-table-container">

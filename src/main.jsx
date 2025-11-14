@@ -10,6 +10,7 @@ import './globals.css';
 
 // Contexts
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
+import { FontProvider } from './contexts/FontContext.jsx';
 import { ViewAsProvider } from './contexts/ViewAsContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 
@@ -21,17 +22,20 @@ import ErrorBoundary from './components/common/ErrorBoundary.jsx';
  * 1. ErrorBoundary - Captura errores de toda la app
  * 2. AuthProvider - Estado de autenticación global
  * 3. ThemeProvider - Tema (claro/oscuro)
- * 4. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
- * 5. App - Componente principal
+ * 4. FontProvider - Fuente del logo de la aplicación
+ * 5. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
+ * 6. App - Componente principal
  */
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <AuthProvider>
         <ThemeProvider>
-          <ViewAsProvider>
-            <App />
-          </ViewAsProvider>
+          <FontProvider>
+            <ViewAsProvider>
+              <App />
+            </ViewAsProvider>
+          </FontProvider>
         </ThemeProvider>
       </AuthProvider>
     </ErrorBoundary>

@@ -7,7 +7,7 @@ import SpeechToTextService from './SpeechToTextService';
 import QueryAnalyzerService from './QueryAnalyzerService';
 import StudentAnalyticsService from './StudentAnalyticsService';
 import PaymentAnalyticsService from './PaymentAnalyticsService';
-import AIService from './AIService';
+import AIService from './aiService';
 import { createAssignment } from '../firebase/assignments';
 import { Timestamp } from 'firebase/firestore';
 import logger from '../utils/logger';

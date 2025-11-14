@@ -377,7 +377,7 @@ function AssignmentFormModal({ assignment, courses, teacherId, onCreate, onUpdat
   };
 
   return (
-    <Modal
+    <BaseModal
       isOpen={true}
       onClose={onClose}
       title={isEdit ? 'Editar Tarea' : 'Nueva Tarea'}
@@ -393,7 +393,7 @@ function AssignmentFormModal({ assignment, courses, teacherId, onCreate, onUpdat
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
+        <BaseInput
           label="Título"
           type="text"
           required
@@ -429,7 +429,7 @@ function AssignmentFormModal({ assignment, courses, teacherId, onCreate, onUpdat
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Input
+          <BaseInput
             label="Fecha límite"
             type="datetime-local"
             required
@@ -437,7 +437,7 @@ function AssignmentFormModal({ assignment, courses, teacherId, onCreate, onUpdat
             onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
           />
 
-          <Input
+          <BaseInput
             label="Puntos"
             type="number"
             required

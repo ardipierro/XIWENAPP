@@ -39,7 +39,7 @@ import {
   getAnalyticsByDateRange
 } from '../firebase/contentAnalytics';
 import { formatTimeSpent } from '../firebase/courseProgress';
-import ContentRepository from '../services/ContentRepository';
+import { getAllContent } from '../firebase/content';
 import logger from '../utils/logger';
 
 /**
