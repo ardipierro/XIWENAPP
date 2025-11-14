@@ -245,7 +245,6 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
   const [draggingText, setDraggingText] = useState(null);
   const [resizingNote, setResizingNote] = useState(null);
   const [resizeDirection, setResizeDirection] = useState(null); // 'horizontal', 'vertical', 'diagonal'
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   // Estados FASE 3 - Sistema de capas
   const [layersVisible, setLayersVisible] = useState({
@@ -2796,8 +2795,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
           </div>
         )}
         </div>
-        </div>
-        </div>
+      </div>
       )}
 
       {/* Edit Mode Banner */}

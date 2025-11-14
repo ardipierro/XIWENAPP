@@ -21,7 +21,8 @@ import {
   Image,
   Mic,
   Bookmark,
-  TrendingUp
+  TrendingUp,
+  Type
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge } from './common';
@@ -143,6 +144,12 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       label: 'Pantalla',
       icon: Monitor,
       description: 'Zoom, ancho y fullscreen'
+    },
+    {
+      id: 'fonts',
+      label: 'Fuentes',
+      icon: Type,
+      description: 'Prueba de fuentes chinas'
     },
     {
       id: 'audio',
@@ -570,7 +577,112 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
           )}
 
           {/* ========================================= */}
-          {/* TAB 3: AVANZADO (Progreso + Imágenes IA) */}
+          {/* TAB: FUENTES (Probador de fuentes chinas) */}
+          {/* ========================================= */}
+          {activeTab === 'fonts' && (
+            <div className="space-y-6 px-4">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
+                  🎨 Probador de Fuentes Chinas
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                  Visualiza cómo se ve el nombre de la aplicación con diferentes fuentes chinas
+                </p>
+
+                {/* Selector de fuente */}
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    Selecciona una fuente:
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { name: 'Microsoft YaHei', family: "'Microsoft YaHei', sans-serif" },
+                      { name: 'SimSun (宋体)', family: "SimSun, serif" },
+                      { name: 'SimHei (黑体)', family: "SimHei, sans-serif" },
+                      { name: 'STSong (华文宋体)', family: "STSong, serif" },
+                      { name: 'STHeiti (华文黑体)', family: "STHeiti, sans-serif" },
+                      { name: 'Noto Sans SC', family: "'Noto Sans SC', sans-serif" }
+                    ].map((font) => (
+                      <button
+                        key={font.name}
+                        onClick={() => {
+                          const preview = document.getElementById('font-preview');
+                          if (preview) preview.style.fontFamily = font.family;
+                        }}
+                        className="p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all text-left"
+                      >
+                        <div className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                          {font.name}
+                        </div>
+                        <div
+                          className="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                          style={{ fontFamily: font.family }}
+                        >
+                          西文教室 ABC
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Toggle de negrita */}
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    Peso de la fuente:
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        const preview = document.getElementById('font-preview');
+                        if (preview) preview.style.fontWeight = 'normal';
+                      }}
+                      className="flex-1 p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all"
+                    >
+                      Normal
+                    </button>
+                    <button
+                      onClick={() => {
+                        const preview = document.getElementById('font-preview');
+                        if (preview) preview.style.fontWeight = 'bold';
+                      }}
+                      className="flex-1 p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all"
+                    >
+                      Negrita
+                    </button>
+                  </div>
+                </div>
+
+                {/* Vista previa grande */}
+                <div className="mt-8 p-8 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-700">
+                  <div className="text-center">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                      Vista Previa:
+                    </div>
+                    <div
+                      id="font-preview"
+                      className="text-6xl text-gray-900 dark:text-gray-100 transition-all duration-300"
+                      style={{ fontFamily: "'Microsoft YaHei', sans-serif", fontWeight: 'bold' }}
+                    >
+                      西文教室
+                    </div>
+                    <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                      (Aula de Español)
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nota informativa */}
+                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>💡 Nota:</strong> Esta es una herramienta temporal para probar fuentes. La fuente seleccionada aquí no se aplicará automáticamente al resto de la aplicación.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================= */}
+          {/* TAB 4: AVANZADO (Progreso + Imágenes IA) */}
           {/* ========================================= */}
           {activeTab === 'advanced' && (
             <div className="space-y-8">
