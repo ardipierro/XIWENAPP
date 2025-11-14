@@ -5,7 +5,8 @@
 
 import { useState } from 'react';
 import { FileText, Sparkles, AlertCircle } from 'lucide-react';
-import { BaseButton, BaseCard, BaseTextarea, BaseAlert, BaseBadge } from '../common';
+import { BaseButton, BaseTextarea, BaseAlert, BaseBadge } from '../common';
+import { UniversalCard } from '../cards';
 import {
   MultipleChoiceExercise,
   FillInBlankExercise,
@@ -301,7 +302,9 @@ NIVEL: A2`
     <div className="space-y-6">
       {/* Input section */}
       {!parsedExercise && (
-        <BaseCard
+        <UniversalCard
+          variant="default"
+          size="md"
           icon={FileText}
           title="Parser de Texto a Ejercicio"
           subtitle="Escribe o pega el ejercicio en formato de texto"
@@ -351,7 +354,7 @@ NIVEL: A2`
               Generar Ejercicio
             </BaseButton>
           </div>
-        </BaseCard>
+        </UniversalCard>
       )}
 
       {/* Rendered exercise */}
