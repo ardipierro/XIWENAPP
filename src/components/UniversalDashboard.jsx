@@ -263,6 +263,10 @@ export function UniversalDashboard() {
             // VISTA DE TUTOR/GUARDIÁN
             case '/dashboard-v2/guardian':
               // Guardians ven el progreso de sus estudiantes asignados
+              // Admin también puede acceder para debugging/soporte
+              if (!can('view-linked-students') && !can('view-all-users')) {
+                return <PlaceholderView title="Sin acceso" />;
+              }
               return (
                 <GuardianView
                   user={user}
