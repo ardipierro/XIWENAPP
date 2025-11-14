@@ -38,6 +38,7 @@ import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
 import ManualHomeworkUpload from './homework/ManualHomeworkUpload';
+import ImageOverlay from './homework/ImageOverlay';
 import {
   getPendingReviews,
   approveReview,
@@ -267,6 +268,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
     corrections: true
   });
   const [showImageLightbox, setShowImageLightbox] = useState(false);
+  const [showErrorOverlay, setShowErrorOverlay] = useState(true);
 
   const handleApprove = async () => {
     try {
@@ -384,27 +386,62 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
           </div>
         </div>
 
-        {/* Image */}
+        {/* Image with Error Overlay */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <ImageIcon size={18} strokeWidth={2} />
               Imagen de la Tarea
+              {review.words && review.words.length > 0 && (
+                <BaseBadge variant="success" size="sm">
+                  {review.words.length} palabras detectadas
+                </BaseBadge>
+              )}
             </h3>
-            <BaseBadge variant="info" size="sm">
-              Click para ampliar
-            </BaseBadge>
+            <div className="flex items-center gap-2">
+              {review.words && review.words.length > 0 && (
+                <BaseButton
+                  variant={showErrorOverlay ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowErrorOverlay(!showErrorOverlay)}
+                >
+                  {showErrorOverlay ? '👁️ Ocultar' : '👁️ Mostrar'} Errores
+                </BaseButton>
+              )}
+              <BaseBadge variant="info" size="sm">
+                Click para ampliar
+              </BaseBadge>
+            </div>
           </div>
           <div
             className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
             onClick={() => setShowImageLightbox(true)}
           >
-            <img
-              src={review.imageUrl}
-              alt="Tarea del estudiante"
-              className="max-w-full max-h-96 object-contain"
+            <ImageOverlay
+              imageUrl={review.imageUrl}
+              words={review.words || []}
+              errors={updatedCorrections}
+              showOverlay={showErrorOverlay}
+              className="max-w-full max-h-96"
             />
           </div>
+          {review.words && review.words.length > 0 && (
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              💡 Las palabras con errores están resaltadas con colores:
+              <span className="ml-2 text-red-500">Ortografía</span>
+              <span className="mx-1">•</span>
+              <span className="text-orange-500">Gramática</span>
+              <span className="mx-1">•</span>
+              <span className="text-yellow-600">Puntuación</span>
+              <span className="mx-1">•</span>
+              <span className="text-blue-500">Vocabulario</span>
+            </div>
+          )}
+          {!review.words || review.words.length === 0 && (
+            <div className="mt-2 text-xs text-yellow-600 dark:text-yellow-500">
+              ⚠️ Esta tarea no tiene coordenadas de palabras. Configura Google Vision API para habilitar el resaltado visual.
+            </div>
+          )}
         </div>
 
         {/* Profile Selector */}
