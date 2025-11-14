@@ -53,9 +53,7 @@ import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
-import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
-import ContentManager from './ContentManager';
 import UnifiedContentManager from './UnifiedContentManager';
 import ClassManager from './ClassManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
@@ -587,15 +585,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // LEGACY: Renderizar CoursesScreen (Gestionar Cursos) - CON Layout
-  if (navigation.currentScreen === 'courses') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <CoursesScreen onBack={navigation.handleBackToDashboard} user={user} openCreateModal={navigation.openCourseModal} />
-      </DashboardLayout>
-    );
-  }
-
   // Renderizar ExercisePlayer (Jugar Ejercicio) - SIN Layout, pantalla completa
   if (navigation.currentScreen === 'playExercise' && navigation.selectedExerciseId) {
     return (
@@ -607,15 +596,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           logger.debug('Ejercicio completado:', results);
         }}
       />
-    );
-  }
-
-  // LEGACY: Renderizar Gestión de Contenido - CON Layout
-  if (navigation.currentScreen === 'content') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ContentManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openContentModal} />
-      </DashboardLayout>
     );
   }
 
