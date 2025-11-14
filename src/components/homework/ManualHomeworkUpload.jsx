@@ -100,11 +100,6 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
   };
 
   const handleSubmit = async () => {
-    if (!selectedStudentId) {
-      setError('Por favor selecciona un estudiante');
-      return;
-    }
-
     if (!selectedFile) {
       setError('Por favor selecciona una imagen');
       return;
@@ -119,7 +114,10 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
       // Upload image to Firebase Storage
       logger.info('Uploading homework image...', 'ManualHomeworkUpload');
       const timestamp = Date.now();
-      const storagePath = `homework/${teacherId}/${selectedStudentId}/${timestamp}_${selectedFile.name}`;
+
+      // If no student selected, store in 'unassigned' folder
+      const studentFolder = selectedStudentId || 'unassigned';
+      const storagePath = `homework/${teacherId}/${studentFolder}/${timestamp}_${selectedFile.name}`;
 
       const uploadResult = await uploadImage(selectedFile, storagePath);
 
@@ -131,15 +129,16 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
 
       // Create homework review record
       const reviewData = {
-        studentId: selectedStudentId,
-        studentName: selectedStudent?.name || selectedStudent?.email || 'Estudiante',
+        studentId: selectedStudentId || null,
+        studentName: selectedStudent?.name || selectedStudent?.email || 'Sin asignar',
         teacherId: teacherId,
         imageUrl: uploadResult.url,
         filename: selectedFile.name,
         imageSize: selectedFile.size,
         isManualUpload: true, // Flag to distinguish manual uploads
         uploadedBy: teacherId,
-        isFreeCorrection: false // Assuming manual uploads are not free corrections
+        isFreeCorrection: false, // Assuming manual uploads are not free corrections
+        needsStudentAssignment: !selectedStudentId // Flag to indicate if student needs to be assigned later
       };
 
       const result = await createHomeworkReview(reviewData);
@@ -174,21 +173,6 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
     );
   }
 
-  if (students.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
-          {userRole === 'admin'
-            ? 'No hay estudiantes registrados en el sistema'
-            : 'No hay estudiantes asignados a tu cuenta'}
-        </p>
-        <BaseButton variant="outline" onClick={onCancel}>
-          Cerrar
-        </BaseButton>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {error && (
@@ -200,7 +184,7 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
       {/* Student Selector */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Estudiante *
+          Estudiante (opcional)
         </label>
         <select
           value={selectedStudentId}
@@ -208,19 +192,28 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
           disabled={uploading}
           className="input w-full"
         >
-          <option value="">Selecciona un estudiante...</option>
-          {students.map(student => (
-            <option key={student.id} value={student.id}>
-              {student.name || student.email}
-            </option>
-          ))}
+          <option value="">Sin asignar (asignar después)</option>
+          {students.length > 0 ? (
+            students.map(student => (
+              <option key={student.id} value={student.id}>
+                {student.name || student.email}
+              </option>
+            ))
+          ) : (
+            <option value="" disabled>No hay estudiantes disponibles</option>
+          )}
         </select>
+        {!selectedStudentId && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Puedes asignar el estudiante más tarde al revisar la corrección
+          </p>
+        )}
       </div>
 
       {/* Image Upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Imagen de la Tarea *
+          Imagen de la Tarea
         </label>
 
         {!selectedFile ? (
@@ -287,7 +280,7 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
         <BaseButton
           variant="primary"
           onClick={handleSubmit}
-          disabled={!selectedStudentId || !selectedFile || uploading}
+          disabled={!selectedFile || uploading}
           loading={uploading}
           fullWidth
         >
