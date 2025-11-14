@@ -70,7 +70,7 @@ export default function UniversalUserManager({ user, userRole }) {
   // Hook de gestión de usuarios con permisos
   const userManagement = useUserManagement(user, {
     canViewAll: can('view-all-users'),
-    canManageRoles: can('manage-roles')
+    canManageRoles: can('edit-user-roles')
   });
 
   // Estados UI
