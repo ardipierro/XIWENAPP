@@ -6,7 +6,8 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Image, Sparkles, Download, RefreshCw, Key, Zap, Settings as SettingsIcon, CheckCircle } from 'lucide-react';
-import { BaseCard, BaseButton, BaseBadge, BaseInput, BaseTextarea, BaseSelect, BaseLoading, BaseAlert } from '../common';
+import { BaseButton, BaseBadge, BaseInput, BaseTextarea, BaseSelect, BaseLoading, BaseAlert } from '../common';
+import { UniversalCard } from '../cards';
 import imageGenerationService from '../../services/imageGenerationService';
 import { getAICredential } from '../../utils/credentialsHelper';
 import logger from '../../utils/logger';
@@ -193,9 +194,11 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
       {/* Panel principal */}
       {isOpen && (
         <>
-          {/* ✅ BaseCard solo cuando NO es alwaysOpen */}
+          {/* ✅ UniversalCard solo cuando NO es alwaysOpen */}
           {!alwaysOpen ? (
-            <BaseCard
+            <UniversalCard
+              variant="default"
+              size="md"
               icon={Image}
               title="Generador de Imágenes con IA"
               subtitle="Crea imágenes educativas basadas en el contenido del libro"
@@ -478,7 +481,7 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
               </div>
             </div>
           </div>
-            </BaseCard>
+            </UniversalCard>
           ) : (
             /* ✅ Contenido SIN BaseCard cuando alwaysOpen=true */
             <div className="space-y-4">

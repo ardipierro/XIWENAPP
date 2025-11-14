@@ -81,20 +81,17 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
         hasBanner={isViewingAs}
       />
 
-      {/* Contenido Principal */}
+      {/* Contenido Principal - Scrollbar definido en globals.css */}
       <main
         className={`
           ${isViewingAs
             ? 'mt-[86px] md:mt-[100px] lg:mt-[108px] h-[calc(100vh-86px)] md:h-[calc(100vh-100px)] lg:h-[calc(100vh-108px)]'
             : 'mt-12 md:mt-14 lg:mt-16 h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] lg:h-[calc(100vh-64px)]'}
           ${sidebarOpen ? 'ml-0 lg:ml-[200px]' : 'ml-0'}
-          overflow-y-auto overflow-x-hidden
           transition-[margin-left] duration-200 ease-in-out
-          scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-gray-300/30 dark:hover:scrollbar-thumb-gray-600/20
-          scrollbar-track-transparent
         `}
       >
-        <div className={`px-4 py-3 md:px-6 md:py-3 ${fullWidth ? '' : 'max-w-[1400px] mx-auto'}`}>
+        <div className={`min-h-full px-4 py-3 md:px-6 md:py-3 pb-6 md:pb-8 ${fullWidth ? '' : 'max-w-[1400px] mx-auto'}`}>
           {children}
         </div>
       </main>

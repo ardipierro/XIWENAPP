@@ -22,7 +22,8 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import { BaseCard, BaseButton, BaseBadge } from '../common';
+import { BaseButton, BaseBadge } from '../common';
+import { UniversalCard } from '../cards';
 import PropTypes from 'prop-types';
 
 const DEFAULT_SETTINGS = {
@@ -453,7 +454,9 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false, autoSave = true 
 
       {/* Panel expandible - VERSIÓN UNIFICADA SIN TABS */}
       {isOpen && (
-        <BaseCard
+        <UniversalCard
+          variant="default"
+          size="md"
           {...(!alwaysOpen && {
             title: "Configuración de Apariencia",
             subtitle: "Todas las opciones unificadas"
@@ -813,7 +816,7 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false, autoSave = true 
               </div>
             )}
           </div>
-        </BaseCard>
+        </UniversalCard>
       )}
 
       {/* Preview de configuración actual */}

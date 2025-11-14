@@ -5,7 +5,8 @@
 
 import { useState } from 'react';
 import { Sparkles, FileText, Wand2, Download, Eye } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge, BaseAlert } from '../common';
+import { BaseButton, BaseBadge, BaseAlert } from '../common';
+import { UniversalCard } from '../cards';
 import { generateExercisesFromText } from '../../services/aiService';
 import logger from '../../utils/logger';
 
@@ -94,7 +95,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
       </BaseAlert>
 
       {/* Área de texto fuente */}
-      <BaseCard title="Texto Fuente" icon={FileText}>
+      <UniversalCard variant="default" size="md" title="Texto Fuente" icon={FileText}>
         <textarea
           value={sourceText}
           onChange={(e) => setSourceText(e.target.value)}
@@ -108,10 +109,10 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
             {sourceText.split(/[.!?]+/).filter(s => s.trim().length > 10).length} oraciones
           </span>
         </div>
-      </BaseCard>
+      </UniversalCard>
 
       {/* Configuración */}
-      <BaseCard title="Configuración de Generación" icon={Wand2}>
+      <UniversalCard variant="default" size="md" title="Configuración de Generación" icon={Wand2}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Tipo de ejercicio */}
           <div>
@@ -185,7 +186,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
             </div>
           </div>
         </div>
-      </BaseCard>
+      </UniversalCard>
 
       {/* Botón de generar */}
       <div className="flex gap-3">
@@ -217,7 +218,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
 
       {/* Preview de ejercicios generados */}
       {showPreview && generatedExercises.length > 0 && (
-        <BaseCard title="Ejercicios Generados" variant="success">
+        <UniversalCard variant="default" size="md" title="Ejercicios Generados">
           <div className="space-y-4">
             {generatedExercises.map((exercise, idx) => (
               <div
@@ -286,7 +287,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
               </div>
             ))}
           </div>
-        </BaseCard>
+        </UniversalCard>
       )}
     </div>
   );

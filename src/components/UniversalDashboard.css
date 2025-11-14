@@ -32,7 +32,9 @@
   margin-top: 64px;
   margin-left: 0;
   padding: 2rem;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
+  overflow-y: scroll;
+  overflow-x: hidden;
   transition: margin-left 0.3s ease;
 }
 
@@ -140,8 +142,8 @@
 @media (max-width: 768px) {
   .universal-dashboard__content {
     margin-top: 56px;
+    height: calc(100vh - 56px);
     padding: 1rem;
-    min-height: calc(100vh - 56px);
   }
 
   .universal-dashboard__overlay {
