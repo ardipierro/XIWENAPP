@@ -6,7 +6,7 @@
  * @module components/UniversalUserManager
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Crown,
   Users,
@@ -86,13 +86,29 @@ export default function UniversalUserManager({ user, userRole }) {
   // Estados de enrollments (para StudentCard)
   const [enrollmentCounts, setEnrollmentCounts] = useState({});
 
-  // Cargar usuarios al montar (solo una vez)
+  // Ref para rastrear si ya se cargaron los usuarios en esta instancia
+  const hasLoadedRef = useRef(false);
+
+  // Cargar usuarios cuando el componente se monta
   useEffect(() => {
-    if (can('view-own-students') || can('view-all-users')) {
-      userManagement.loadUsers();
-    }
+    let isMounted = true;
+
+    const loadData = async () => {
+      if (!hasLoadedRef.current && user?.uid && (can('view-own-students') || can('view-all-users'))) {
+        hasLoadedRef.current = true;
+        if (isMounted) {
+          await userManagement.loadUsers();
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Solo ejecutar al montar, permisos no cambian durante la sesión
+  }, []); // Solo al montar - hasLoadedRef se resetea con cada nueva instancia del componente
 
   // Cargar enrollment counts cuando cambien los usuarios
   useEffect(() => {
