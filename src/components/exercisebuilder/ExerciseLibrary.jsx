@@ -14,7 +14,8 @@ import {
   Grid,
   List
 } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge, BaseAlert } from '../common';
+import { BaseButton, BaseBadge, BaseAlert } from '../common';
+import { UniversalCard } from '../cards';
 import {
   EXERCISE_TEMPLATES,
   getAllCategories,
@@ -155,7 +156,7 @@ export function ExerciseLibrary({onTemplateSelected = () => {}, onTemplateCloned
       </div>
 
       {/* Filtros */}
-      <BaseCard title="Filtros" icon={Filter}>
+      <UniversalCard variant="default" size="md" title="Filtros" icon={Filter}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Nivel CEFR */}
           <div>
@@ -227,7 +228,7 @@ export function ExerciseLibrary({onTemplateSelected = () => {}, onTemplateCloned
             </p>
           )}
         </div>
-      </BaseCard>
+      </UniversalCard>
 
       {/* Resultados */}
       {filteredTemplates.length === 0 ? (
@@ -241,7 +242,9 @@ export function ExerciseLibrary({onTemplateSelected = () => {}, onTemplateCloned
             : 'space-y-3'
         }>
           {filteredTemplates.map(template => (
-            <BaseCard
+            <UniversalCard
+              variant="default"
+              size="md"
               key={template.id}
               className="hover:shadow-lg transition-shadow"
             >
@@ -304,7 +307,7 @@ export function ExerciseLibrary({onTemplateSelected = () => {}, onTemplateCloned
                   Clonar
                 </BaseButton>
               </div>
-            </BaseCard>
+            </UniversalCard>
           ))}
         </div>
       )}
