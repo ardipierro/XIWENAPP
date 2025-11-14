@@ -86,19 +86,21 @@ export default function UniversalUserManager({ user, userRole }) {
   // Estados de enrollments (para StudentCard)
   const [enrollmentCounts, setEnrollmentCounts] = useState({});
 
-  // Cargar usuarios al montar
+  // Cargar usuarios al montar (solo una vez)
   useEffect(() => {
     if (can('view-own-students') || can('view-all-users')) {
       userManagement.loadUsers();
     }
-  }, [can]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar al montar, permisos no cambian durante la sesión
 
   // Cargar enrollment counts cuando cambien los usuarios
   useEffect(() => {
     if (userManagement.users.length > 0) {
       loadEnrollmentCounts();
     }
-  }, [userManagement.users]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userManagement.users.length]); // Solo cuando cambia la cantidad de usuarios
 
   /**
    * Cargar counts de cursos enrollados por estudiante
