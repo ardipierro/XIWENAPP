@@ -39,6 +39,13 @@ export const DIFFICULTY_LEVELS = {
   ADVANCED: 'advanced'
 };
 
+export const CONTENT_STATUS = {
+  DRAFT: 'draft',
+  REVIEW: 'review',
+  PUBLISHED: 'published',
+  ARCHIVED: 'archived'
+};
+
 // ============================================
 // REPOSITORY
 // ============================================
@@ -141,6 +148,33 @@ class UnifiedContentRepository extends BaseRepository {
   }
 
   /**
+   * Obtener contenido por status
+   */
+  async getByStatus(status) {
+    try {
+      const content = await this.findWhere([['status', '==', status]]);
+      return this.sortByCreatedAtDesc(content);
+    } catch (error) {
+      logger.error(`Error getting content by status:`, error, 'UnifiedContentRepository');
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar status de un contenido
+   */
+  async updateStatus(contentId, newStatus) {
+    try {
+      await this.update(contentId, { status: newStatus });
+      logger.info(`Content status updated to ${newStatus}`, 'UnifiedContentRepository', { contentId });
+      return { success: true };
+    } catch (error) {
+      logger.error(`Error updating content status:`, error, 'UnifiedContentRepository');
+      throw error;
+    }
+  }
+
+  /**
    * Búsqueda de contenido por término
    * Busca en título y descripción
    */
@@ -213,6 +247,10 @@ export const getExercises = (teacherId = null) => contentRepo.getExercises(teach
 export const getByDifficulty = (difficulty) => contentRepo.getByDifficulty(difficulty);
 export const getByTags = (tags) => contentRepo.getByTags(tags);
 export const searchContent = (searchTerm, teacherId = null) => contentRepo.searchContent(searchTerm, teacherId);
+
+// Status management
+export const getByStatus = (status) => contentRepo.getByStatus(status);
+export const updateContentStatus = (contentId, newStatus) => contentRepo.updateStatus(contentId, newStatus);
 
 // Exportar instancia del repository para uso directo
 export default contentRepo;

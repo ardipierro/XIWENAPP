@@ -25,7 +25,8 @@ import {
   Clock,
   Target,
   Tag,
-  Play
+  Play,
+  BarChart3
 } from 'lucide-react';
 import {
   getAllContent,
@@ -37,7 +38,8 @@ import {
   deleteContent,
   CONTENT_TYPES,
   EXERCISE_TYPES,
-  DIFFICULTY_LEVELS
+  DIFFICULTY_LEVELS,
+  CONTENT_STATUS
 } from '../firebase/content';
 import logger from '../utils/logger';
 import {
@@ -51,6 +53,7 @@ import {
   BaseEmptyState
 } from './common';
 import CreateContentModal from './CreateContentModal';
+import ContentAnalytics from './ContentAnalytics';
 import { BaseModal } from './common';
 import { FillGap, MultipleChoice } from './ExerciseGeneratorContent';
 
@@ -121,6 +124,14 @@ const DIFFICULTY_OPTIONS = [
   { value: DIFFICULTY_LEVELS.ADVANCED, label: 'Avanzado' }
 ];
 
+const STATUS_FILTER_OPTIONS = [
+  { value: 'all', label: 'Todos los estados' },
+  { value: CONTENT_STATUS.DRAFT, label: '📝 Borrador' },
+  { value: CONTENT_STATUS.REVIEW, label: '👀 En Revisión' },
+  { value: CONTENT_STATUS.PUBLISHED, label: '✅ Publicado' },
+  { value: CONTENT_STATUS.ARCHIVED, label: '📦 Archivado' }
+];
+
 // ============================================
 // COMPONENT
 // ============================================
@@ -133,6 +144,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
@@ -141,6 +153,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [successMessage, setSuccessMessage] = useState(null);
   const [newlyCreatedId, setNewlyCreatedId] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Cargar contenidos
   useEffect(() => {
@@ -180,6 +193,11 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       filtered = filtered.filter(item => item.metadata?.difficulty === difficultyFilter);
     }
 
+    // Filtro por status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(item => item.status === statusFilter);
+    }
+
     // Búsqueda por término
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
@@ -198,7 +216,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
     });
 
     return filtered;
-  }, [contents, typeFilter, difficultyFilter, searchTerm]);
+  }, [contents, typeFilter, difficultyFilter, statusFilter, searchTerm]);
 
   // Estadísticas
   const stats = useMemo(() => {
@@ -304,13 +322,22 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               Sistema unificado para todos tus recursos educativos
             </p>
           </div>
-          <BaseButton
-            variant="primary"
-            icon={Plus}
-            onClick={handleCreate}
-          >
-            Crear Contenido
-          </BaseButton>
+          <div className="flex items-center gap-3">
+            <BaseButton
+              variant="secondary"
+              icon={BarChart3}
+              onClick={() => setShowAnalytics(true)}
+            >
+              Ver Analytics
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              icon={Plus}
+              onClick={handleCreate}
+            >
+              Crear Contenido
+            </BaseButton>
+          </div>
         </div>
 
         {/* Stats */}
@@ -359,6 +386,13 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
             value={difficultyFilter}
             onChange={(e) => setDifficultyFilter(e.target.value)}
             options={DIFFICULTY_OPTIONS}
+            className="w-full md:w-64"
+          />
+          <BaseSelect
+            icon={FileText}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            options={STATUS_FILTER_OPTIONS}
             className="w-full md:w-64"
           />
           <div className="flex gap-2">
@@ -453,6 +487,22 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         userId={user.uid}
         onNavigateToAIConfig={onNavigateToAIConfig}
       />
+
+      {/* Analytics Modal */}
+      <BaseModal
+        isOpen={showAnalytics}
+        onClose={() => setShowAnalytics(false)}
+        title="📊 Analytics de Contenidos"
+        icon={BarChart3}
+        size="full"
+      >
+        {showAnalytics && (
+          <ContentAnalytics
+            teacherId={user.uid}
+            onClose={() => setShowAnalytics(false)}
+          />
+        )}
+      </BaseModal>
 
       {/* View Content Modal */}
       <BaseModal
@@ -725,6 +775,26 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return classes[difficulty] || 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800';
   };
 
+  const getStatusClasses = (status) => {
+    const classes = {
+      [CONTENT_STATUS.DRAFT]: 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800 border-gray-300 dark:border-gray-600',
+      [CONTENT_STATUS.REVIEW]: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600',
+      [CONTENT_STATUS.PUBLISHED]: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20 border-green-300 dark:border-green-600',
+      [CONTENT_STATUS.ARCHIVED]: 'text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20 border-orange-300 dark:border-orange-600'
+    };
+    return classes[status] || classes[CONTENT_STATUS.DRAFT];
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      [CONTENT_STATUS.DRAFT]: '📝 Borrador',
+      [CONTENT_STATUS.REVIEW]: '👀 Revisión',
+      [CONTENT_STATUS.PUBLISHED]: '✅ Publicado',
+      [CONTENT_STATUS.ARCHIVED]: '📦 Archivado'
+    };
+    return labels[status] || labels[CONTENT_STATUS.DRAFT];
+  };
+
   const getIconColorClasses = (type) => {
     const colorMap = {
       [CONTENT_TYPES.LESSON]: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
@@ -815,6 +885,10 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
               <BaseBadge variant={getBadgeVariant(content.type)} size="sm">
                 {config.label}
               </BaseBadge>
+              {/* FASE 10: Status badge */}
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`}>
+                {getStatusLabel(content.status || CONTENT_STATUS.DRAFT)}
+              </span>
               {content.metadata?.difficulty && (
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
                   {content.metadata.difficulty}
@@ -884,6 +958,10 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           <BaseBadge variant={getBadgeVariant(content.type)} size="sm">
             {config.label}
           </BaseBadge>
+          {/* FASE 10: Status badge */}
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`}>
+            {getStatusLabel(content.status || CONTENT_STATUS.DRAFT)}
+          </span>
           {content.metadata?.difficulty && (
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
               {content.metadata.difficulty}
