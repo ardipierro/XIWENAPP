@@ -1314,6 +1314,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
       onClick: () => navigation.setCurrentScreen('payments'),
       createLabel: "Manage Payments",
       onCreateClick: () => navigation.setCurrentScreen('payments')
+    },
+    {
+      id: 'universalDashboard',
+      icon: Rocket,
+      title: "🚀 Dashboard Universal (POC)",
+      count: 0,
+      countLabel: "beta",
+      onClick: () => navigate('/dashboard-v2'),
+      createLabel: "Go to Dashboard v2",
+      onCreateClick: () => navigate('/dashboard-v2')
     }
   ];
 
