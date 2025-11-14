@@ -39,11 +39,13 @@ import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
 import ManualHomeworkUpload from './homework/ManualHomeworkUpload';
 import ImageOverlay from './homework/ImageOverlay';
+import StudentAssigner from './homework/StudentAssigner';
 import {
   getPendingReviews,
   approveReview,
   subscribeToReview,
   requestReanalysis,
+  assignStudentToReview,
   REVIEW_STATUS
 } from '../firebase/homework_reviews';
 import logger from '../utils/logger';
@@ -263,12 +265,15 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
   const [editedGrade, setEditedGrade] = useState(review.suggestedGrade || 0);
   const [updatedCorrections, setUpdatedCorrections] = useState(review.aiSuggestions || review.detailedCorrections || []);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [expandedSections, setExpandedSections] = useState({
     errors: true,
     corrections: true
   });
   const [showImageLightbox, setShowImageLightbox] = useState(false);
   const [showErrorOverlay, setShowErrorOverlay] = useState(true);
+  const [assignedStudentId, setAssignedStudentId] = useState(review.studentId);
+  const [assignedStudentName, setAssignedStudentName] = useState(review.studentName);
 
   const handleApprove = async () => {
     try {
@@ -322,6 +327,27 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
     }));
   };
 
+  const handleStudentAssignment = async (studentId, studentName) => {
+    try {
+      setError(null);
+      setSuccess(null);
+
+      const result = await assignStudentToReview(review.id, studentId, studentName);
+
+      if (result.success) {
+        setAssignedStudentId(studentId);
+        setAssignedStudentName(studentName);
+        setSuccess(`Estudiante asignado correctamente: ${studentName}`);
+        logger.info(`Assigned student ${studentId} to review ${review.id}`, 'HomeworkReviewPanel');
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (err) {
+      logger.error('Error assigning student', 'HomeworkReviewPanel', err);
+      setError('Error al asignar estudiante. Intenta de nuevo.');
+    }
+  };
+
   const grade = isEditing ? editedGrade : review.suggestedGrade;
   const gradeColor = grade >= 90 ? 'success' : grade >= 70 ? 'primary' : grade >= 50 ? 'warning' : 'danger';
 
@@ -360,6 +386,12 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
           </BaseAlert>
         )}
 
+        {success && (
+          <BaseAlert variant="success" onClose={() => setSuccess(null)}>
+            {success}
+          </BaseAlert>
+        )}
+
         {/* Student & Date Info */}
         <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
           <div className="flex items-center justify-between">
@@ -367,7 +399,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
               <User className="text-gray-500" size={20} strokeWidth={2} />
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
-                  {review.studentName || 'Estudiante'}
+                  {assignedStudentName || 'Estudiante'}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
                   <Calendar size={14} strokeWidth={2} />
@@ -384,6 +416,26 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
               </BaseBadge>
             </div>
           </div>
+        </div>
+
+        {/* Student Assignment Section */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <User size={18} strokeWidth={2} />
+            Asignación de Estudiante
+            {review.needsStudentAssignment && (
+              <BaseBadge variant="warning" size="sm">
+                Requiere asignación
+              </BaseBadge>
+            )}
+          </h3>
+          <StudentAssigner
+            teacherId={review.teacherId || parentTeacherId || currentUser?.uid}
+            currentStudentId={assignedStudentId}
+            currentStudentName={assignedStudentName}
+            onAssign={handleStudentAssignment}
+            allowUnassigned={true}
+          />
         </div>
 
         {/* Image with Error Overlay */}
