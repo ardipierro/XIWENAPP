@@ -59,11 +59,8 @@ import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
-import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
-import ContentManager from './ContentManager';
 import ClassSessionManager from './ClassSessionManager';
-import ExerciseManager from './ExerciseManager';
 import UnifiedContentManager from './UnifiedContentManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
@@ -685,31 +682,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // LEGACY: Courses Screen - WITH Layout
-  if (navigation.currentScreen === 'courses') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <CoursesScreen onBack={navigation.handleBackToDashboard} user={user} openCreateModal={navigation.openCourseModal} />
-      </DashboardLayout>
-    );
-  }
-
-  // LEGACY: Content Manager - WITH Layout
-  if (navigation.currentScreen === 'content') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ContentManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openContentModal} />
-      </DashboardLayout>
-    );
-  }
-
-  // LEGACY: Exercise Manager - WITH Layout
-  if (navigation.currentScreen === 'exercises') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ExerciseManager user={user} onBack={navigation.handleBackToDashboard} />
-      </DashboardLayout>
-    );
+  // LEGACY SCREENS: Redirect to UnifiedContentManager
+  if (navigation.currentScreen === 'courses' || navigation.currentScreen === 'content' || navigation.currentScreen === 'exercises') {
+    // Auto-redirect to unified content manager
+    navigation.setCurrentScreen('unifiedContent');
+    return null;
   }
 
   // Analytics Dashboard - WITH Layout
