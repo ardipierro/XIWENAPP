@@ -25,7 +25,8 @@ import {
   Clock,
   Target,
   Tag,
-  Play
+  Play,
+  BarChart3
 } from 'lucide-react';
 import {
   getAllContent,
@@ -51,6 +52,7 @@ import {
   BaseEmptyState
 } from './common';
 import CreateContentModal from './CreateContentModal';
+import ContentAnalytics from './ContentAnalytics';
 import { BaseModal } from './common';
 import { FillGap, MultipleChoice } from './ExerciseGeneratorContent';
 
@@ -141,6 +143,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [successMessage, setSuccessMessage] = useState(null);
   const [newlyCreatedId, setNewlyCreatedId] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Cargar contenidos
   useEffect(() => {
@@ -304,13 +307,22 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               Sistema unificado para todos tus recursos educativos
             </p>
           </div>
-          <BaseButton
-            variant="primary"
-            icon={Plus}
-            onClick={handleCreate}
-          >
-            Crear Contenido
-          </BaseButton>
+          <div className="flex items-center gap-3">
+            <BaseButton
+              variant="secondary"
+              icon={BarChart3}
+              onClick={() => setShowAnalytics(true)}
+            >
+              Ver Analytics
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              icon={Plus}
+              onClick={handleCreate}
+            >
+              Crear Contenido
+            </BaseButton>
+          </div>
         </div>
 
         {/* Stats */}
@@ -453,6 +465,22 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         userId={user.uid}
         onNavigateToAIConfig={onNavigateToAIConfig}
       />
+
+      {/* Analytics Modal */}
+      <BaseModal
+        isOpen={showAnalytics}
+        onClose={() => setShowAnalytics(false)}
+        title="📊 Analytics de Contenidos"
+        icon={BarChart3}
+        size="full"
+      >
+        {showAnalytics && (
+          <ContentAnalytics
+            teacherId={user.uid}
+            onClose={() => setShowAnalytics(false)}
+          />
+        )}
+      </BaseModal>
 
       {/* View Content Modal */}
       <BaseModal
