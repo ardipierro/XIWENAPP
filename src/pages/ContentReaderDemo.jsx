@@ -96,7 +96,7 @@ function ContentReaderDemo() {
           initialContent={DEMO_CONTENT}
           userId={user.uid}
           readOnly={false}
-          onBack={() => navigate(-1)}
+          onClose={() => navigate(-1)}
         />
       ) : (
         <div className="flex items-center justify-center min-h-screen">
