@@ -45,7 +45,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         </button>
 
         <div className="universal-topbar__title">
-          <h1>XIWEN APP</h1>
+          <h1 style={{ fontFamily: "'Microsoft YaHei', sans-serif", fontSize: '1.25rem' }}>西文教室</h1>
           <span className="universal-topbar__subtitle">{getRoleLabel()}</span>
         </div>
       </div>
