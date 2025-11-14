@@ -63,7 +63,7 @@ import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
 // ContentManager removed - using UnifiedContentManager instead
 import ClassSessionManager from './ClassSessionManager';
-import ExerciseManager from './ExerciseManager';
+// ExerciseManager removed - exercises are now in UnifiedContentManager
 import UnifiedContentManager from './UnifiedContentManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
@@ -703,11 +703,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // LEGACY: Exercise Manager - WITH Layout
+  // LEGACY: Exercise Manager - Replaced with UnifiedContentManager
   if (navigation.currentScreen === 'exercises') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ExerciseManager user={user} onBack={navigation.handleBackToDashboard} />
+        <UnifiedContentManager user={user} />
       </DashboardLayout>
     );
   }
