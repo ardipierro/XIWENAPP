@@ -59,7 +59,7 @@ import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
-import CoursesScreen from './CoursesScreen';
+// CoursesScreen removed - courses are now in UnifiedContentManager
 import GameContainer from './GameContainer';
 // ContentManager removed - using UnifiedContentManager instead
 import ClassSessionManager from './ClassSessionManager';
@@ -685,11 +685,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // LEGACY: Courses Screen - WITH Layout
+  // LEGACY: Courses Screen - Replaced with UnifiedContentManager
   if (navigation.currentScreen === 'courses') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <CoursesScreen onBack={navigation.handleBackToDashboard} user={user} openCreateModal={navigation.openCourseModal} />
+        <UnifiedContentManager user={user} />
       </DashboardLayout>
     );
   }
