@@ -4,7 +4,8 @@
  */
 
 import { TrendingUp, Target, Clock, Award, BarChart } from 'lucide-react';
-import { BaseCard, BaseBadge } from '../common';
+import { BaseBadge } from '../common';
+import { UniversalCard } from '../cards';
 
 /**
  * Dashboard de Progreso del Estudiante
@@ -53,13 +54,6 @@ export function ProgressDashboard({ stats = {} }) {
     }
   ];
 
-  const colorMap = {
-    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-    green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
-    purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-    orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -77,30 +71,26 @@ export function ProgressDashboard({ stats = {} }) {
 
       {/* Estadísticas Principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <BaseCard key={idx} className={`${colorMap[stat.color]} border-2`}>
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <Icon size={24} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="text-xs font-medium opacity-80">{stat.label}</div>
-                </div>
-              </div>
-            </BaseCard>
-          );
-        })}
+        {statCards.map((stat, idx) => (
+          <UniversalCard
+            key={idx}
+            variant="stats"
+            size="md"
+            icon={stat.icon}
+            title={stat.label}
+            bigNumber={stat.value}
+          />
+        ))}
       </div>
 
       {/* Progreso por Tipo de Ejercicio */}
       {byType.length > 0 && (
-        <BaseCard>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Progreso por Tipo de Ejercicio
-          </h3>
+        <UniversalCard
+          variant="default"
+          size="md"
+          icon={BarChart}
+          title="Progreso por Tipo de Ejercicio"
+        >
           <div className="space-y-3">
             {byType.map((type, idx) => (
               <div key={idx} className="space-y-1">
@@ -121,14 +111,16 @@ export function ProgressDashboard({ stats = {} }) {
               </div>
             ))}
           </div>
-        </BaseCard>
+        </UniversalCard>
       )}
 
       {/* Niveles CEFR */}
-      <BaseCard>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Progreso por Nivel CEFR
-        </h3>
+      <UniversalCard
+        variant="default"
+        size="md"
+        icon={Target}
+        title="Progreso por Nivel CEFR"
+      >
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((level) => (
             <div
@@ -144,7 +136,7 @@ export function ProgressDashboard({ stats = {} }) {
             </div>
           ))}
         </div>
-      </BaseCard>
+      </UniversalCard>
     </div>
   );
 }
