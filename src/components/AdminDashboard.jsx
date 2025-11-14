@@ -69,9 +69,10 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
-import QuickAccessCard from './QuickAccessCard';
+import { UniversalCard, CardGrid } from './cards';
 import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
+import BaseButton from './common/BaseButton';
 import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
 // Lazy load Excalidraw to prevent vendor bundle issues
@@ -1420,20 +1421,36 @@ function AdminDashboard({ user, userRole, onLogout }) {
             className="mb-6"
           />
 
-          <div className={navigation.dashboardViewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6' : 'space-y-4'}>
+          <CardGrid
+            columnsType={navigation.dashboardViewMode === 'list' ? 'wide' : 'default'}
+            gap={navigation.dashboardViewMode === 'list' ? 'gap-3' : 'gap-4 md:gap-6'}
+          >
             {filteredDashboardCards.map(card => (
-              <QuickAccessCard
+              <UniversalCard
                 key={card.id}
+                variant="default"
+                size="md"
                 icon={card.icon}
                 title={card.title}
-                count={card.count}
-                countLabel={card.countLabel}
+                description={card.description}
+                stats={card.count !== undefined ? [{ value: card.count, label: card.countLabel }] : undefined}
                 onClick={card.onClick}
-                createLabel={card.createLabel}
-                onCreateClick={card.onCreateClick}
+                actions={card.createLabel && card.onCreateClick ? (
+                  <BaseButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      card.onCreateClick();
+                    }}
+                    icon={Plus}
+                  >
+                    {card.createLabel}
+                  </BaseButton>
+                ) : undefined}
               />
             ))}
-          </div>
+          </CardGrid>
         </div>
       </DashboardLayout>
 
