@@ -13,7 +13,8 @@ import {
   executeImageTask,
   getTasksSummary
 } from '../utils/imageGenerationTasks';
-import { BaseButton, BaseCard, BaseBadge, BaseEmptyState } from './common';
+import { BaseButton, BaseBadge, BaseEmptyState } from './common';
+import { UniversalCard } from './cards';
 
 function ImageGenerationDemo() {
   const [selectedTask, setSelectedTask] = useState(null);
@@ -168,20 +169,19 @@ function ImageGenerationDemo() {
         {/* Tasks Grid/List */}
         <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6' : 'flex flex-col gap-3 md:gap-4'}>
           {IMAGE_GENERATION_TASKS.map((task) => (
-            <BaseCard
+            <UniversalCard
               key={task.id}
-              hover
-              className="flex flex-col h-full"
+              variant="default"
+              size="md"
+              title={task.name}
+              badges={[
+                {
+                  variant: 'default',
+                  children: task.level,
+                  className: getLevelColor(task.level)
+                }
+              ]}
             >
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white m-0 flex-1">
-                  {task.name}
-                </h3>
-                <span className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold flex-shrink-0 ml-2 ${getLevelColor(task.level)}`}>
-                  {task.level}
-                </span>
-              </div>
-
               <div className="flex justify-between items-center p-2 md:p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3 text-xs md:text-sm">
                 <span className="font-mono text-gray-600 dark:text-gray-400 truncate">{task.functionId}</span>
                 <span className="font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0 ml-2">{task.items.length} imágenes</span>
@@ -214,7 +214,7 @@ function ImageGenerationDemo() {
               >
                 {isRunning && selectedTask === task.id ? 'Generando...' : 'Ejecutar Tarea'}
               </BaseButton>
-            </BaseCard>
+            </UniversalCard>
           ))}
         </div>
       </div>
@@ -275,34 +275,32 @@ function ImageGenerationDemo() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {results.results.map((result, index) => (
-                <BaseCard
+                <UniversalCard
                   key={index}
+                  variant="default"
+                  size="sm"
+                  title={result.word}
+                  badges={[
+                    {
+                      variant: result.success ? 'success' : 'danger',
+                      children: result.success ? '✓' : '✗'
+                    }
+                  ]}
                   className={`overflow-hidden ${
                     result.success
                       ? 'border-green-200 dark:border-green-800'
                       : 'border-red-200 dark:border-red-800'
                   }`}
                 >
-                  <div className="flex justify-between items-center p-3 md:p-4 bg-gray-50 dark:bg-gray-900">
-                    <h4 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white m-0">
-                      {result.word}
-                    </h4>
-                    {result.success ? (
-                      <BaseBadge variant="success">✓</BaseBadge>
-                    ) : (
-                      <BaseBadge variant="danger">✗</BaseBadge>
-                    )}
-                  </div>
-
                   {result.success && result.imageUrl ? (
                     <div className="relative group">
                       <img
                         src={result.imageUrl}
                         alt={result.word}
                         loading="lazy"
-                        className="w-full aspect-square object-cover"
+                        className="w-full aspect-square object-cover rounded-lg"
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
                         <a
                           href={result.imageUrl}
                           download={`${result.word}.png`}
@@ -313,7 +311,7 @@ function ImageGenerationDemo() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center p-6 md:p-8 text-center aspect-square bg-gray-50 dark:bg-gray-900">
+                    <div className="flex flex-col items-center justify-center p-6 md:p-8 text-center aspect-square bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-red-100 dark:bg-red-900/30 rounded-full mb-3">
                         <span className="text-2xl md:text-3xl">✗</span>
                       </div>
@@ -322,7 +320,7 @@ function ImageGenerationDemo() {
                       </p>
                     </div>
                   )}
-                </BaseCard>
+                </UniversalCard>
               ))}
             </div>
           )}
