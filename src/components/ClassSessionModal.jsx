@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Video, Calendar, PenTool, Presentation, Clock, Users, FileText, Plus, Trash2 } from 'lucide-react';
+import { Video, Calendar, PenTool, Presentation, Clock, Users, FileText, Plus, Trash2, Zap, ExternalLink } from 'lucide-react';
 import logger from '../utils/logger';
 import { BaseModal, BaseButton, BaseInput, BaseSelect, BaseTextarea } from './common';
 import { Timestamp } from 'firebase/firestore';
@@ -37,7 +37,7 @@ function ClassSessionModal({
     courseId: '',
     mode: 'async', // 'live' | 'async'
     whiteboardType: 'none', // 'none' | 'canvas' | 'excalidraw'
-    type: 'single', // 'single' | 'recurring'
+    type: 'single', // 'single' | 'recurring' | 'instant'
     scheduledDate: '',
     scheduledTime: '',
     duration: 60,
@@ -46,6 +46,7 @@ function ClassSessionModal({
     meetLink: '',
     zoomLink: '',
     meetingLink: '', // deprecated, mantener para compatibilidad
+    startImmediately: true, // Para tipo 'instant'
     // Recurring fields
     selectedDays: [],
     recurringStartTime: '10:00',
@@ -106,6 +107,7 @@ function ClassSessionModal({
         meetLink: '',
         zoomLink: '',
         meetingLink: '',
+        startImmediately: true,
         selectedDays: [],
         recurringStartTime: '10:00',
         recurringEndTime: '11:00',
@@ -164,6 +166,11 @@ function ClassSessionModal({
       if (!formData.recurringWeeks || formData.recurringWeeks < 1) {
         newErrors.recurringWeeks = 'Ingrese un número válido de semanas';
       }
+    }
+
+    if (formData.type === 'instant') {
+      // Para clase instantánea, validar que al menos haya un estudiante asignado si está en modo edición
+      // No validar meet link porque puede ser opcional
     }
 
     setErrors(newErrors);
@@ -225,6 +232,14 @@ function ClassSessionModal({
           // Si es nueva sesión y no se especifica, usar el momento de creación
           sessionData.recurringStartDate = Timestamp.now();
         }
+      }
+
+      // Instant session
+      if (formData.type === 'instant') {
+        // Programar para AHORA
+        sessionData.scheduledStart = Timestamp.now();
+        // Marcar que debe iniciarse inmediatamente
+        sessionData.startImmediately = formData.startImmediately;
       }
 
       await onSubmit(sessionData);
@@ -580,7 +595,7 @@ function ClassSessionModal({
                   Programación
                 </h3>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <button
                     type="button"
                     onClick={() => handleChange('type', 'single')}
@@ -592,6 +607,7 @@ function ClassSessionModal({
                       }
                     `}
                   >
+                    <Calendar size={24} strokeWidth={2} className="mx-auto mb-2 text-gray-700 dark:text-gray-300" />
                     <div className="text-sm font-medium text-gray-900 dark:text-white">Sesión Única</div>
                     <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Una sola vez</div>
                   </button>
@@ -607,8 +623,25 @@ function ClassSessionModal({
                       }
                     `}
                   >
+                    <Clock size={24} strokeWidth={2} className="mx-auto mb-2 text-gray-700 dark:text-gray-300" />
                     <div className="text-sm font-medium text-gray-900 dark:text-white">Recurrente</div>
                     <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Varios días/semanas</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleChange('type', 'instant')}
+                    className={`
+                      p-4 rounded-lg border-2 transition-all
+                      ${formData.type === 'instant'
+                        ? 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }
+                    `}
+                  >
+                    <Zap size={24} strokeWidth={2} className={`mx-auto mb-2 ${formData.type === 'instant' ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'}`} />
+                    <div className={`text-sm font-medium ${formData.type === 'instant' ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-white'}`}>Clase Ahora</div>
+                    <div className={`text-xs mt-1 ${formData.type === 'instant' ? 'text-green-700 dark:text-green-300' : 'text-gray-600 dark:text-gray-400'}`}>Instantánea</div>
                   </button>
                 </div>
 
@@ -630,6 +663,81 @@ function ClassSessionModal({
                       error={errors.scheduledTime}
                       required
                     />
+                  </div>
+                ) : formData.type === 'instant' ? (
+                  <div className="space-y-4">
+                    {/* Instant Session Fields */}
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Zap className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        <h4 className="font-semibold text-green-900 dark:text-green-100">Clase Instantánea</h4>
+                      </div>
+                      <p className="text-sm text-green-700 dark:text-green-300">
+                        La clase se creará con la fecha y hora actual. Puedes iniciarla inmediatamente después de crearla.
+                      </p>
+                    </div>
+
+                    {/* Google Meet Link */}
+                    <div className="space-y-3 border-2 border-primary-200 dark:border-primary-800 rounded-lg p-4 bg-primary-50/50 dark:bg-primary-900/10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Video className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                        <h4 className="font-semibold text-primary-900 dark:text-primary-100">Link de Google Meet</h4>
+                      </div>
+
+                      <BaseButton
+                        type="button"
+                        variant="primary"
+                        size="sm"
+                        icon={ExternalLink}
+                        onClick={() => window.open('https://meet.google.com/new', '_blank')}
+                        fullWidth
+                      >
+                        🎥 Crear link de Google Meet (abre nueva pestaña)
+                      </BaseButton>
+
+                      <BaseInput
+                        label="Pega el link de Meet aquí"
+                        type="url"
+                        value={formData.meetLink}
+                        onChange={(e) => handleChange('meetLink', e.target.value)}
+                        placeholder="https://meet.google.com/abc-defg-hij"
+                        helperText={formData.meetLink ? "✅ Link de Meet detectado" : "⚠️ Recuerda copiar y pegar el link de Meet"}
+                      />
+
+                      <BaseInput
+                        label="Link de Zoom (opcional)"
+                        type="url"
+                        value={formData.zoomLink}
+                        onChange={(e) => handleChange('zoomLink', e.target.value)}
+                        placeholder="https://zoom.us/j/..."
+                      />
+                    </div>
+
+                    {/* Start Immediately Checkbox */}
+                    <div className="flex items-start gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                      <input
+                        type="checkbox"
+                        id="startImmediately"
+                        checked={formData.startImmediately}
+                        onChange={(e) => handleChange('startImmediately', e.target.checked)}
+                        className="w-5 h-5 text-green-600 rounded border-gray-300 dark:border-gray-600 focus:ring-green-500 mt-0.5"
+                      />
+                      <label htmlFor="startImmediately" className="flex-1 cursor-pointer">
+                        <div className="text-sm font-medium text-orange-900 dark:text-orange-100">
+                          ☑️ Iniciar clase inmediatamente
+                        </div>
+                        <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                          La clase se iniciará automáticamente al crearla y se te redirigirá a la sala
+                        </p>
+                      </label>
+                    </div>
+
+                    {/* Info Alert */}
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        💡 <strong>Tip:</strong> Asegúrate de asignar estudiantes en el tab "Estudiantes" para que reciban la notificación instantánea.
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">

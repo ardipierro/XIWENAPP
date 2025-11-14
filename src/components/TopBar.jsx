@@ -33,8 +33,9 @@ import logger from '../utils/logger.js';
  * @param {Function} props.onToggleSidebar - Callback para toggle del sidebar
  * @param {boolean} props.sidebarOpen - Si el sidebar está abierto
  * @param {Function} props.onMenuAction - Callback para acciones del menú
+ * @param {boolean} props.hasBanner - Si hay un banner activo arriba
  */
-function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) {
+function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, hasBanner = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -114,12 +115,13 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction }) 
     <>
       {/* TopBar - Mobile First: 48px (móvil) → 56px (md) → 64px (lg) */}
       <header
-        className="fixed top-0 left-0 right-0 z-50
+        className={`topbar fixed left-0 right-0 z-50
                    h-12 md:h-14 lg:h-16
                    bg-white dark:bg-zinc-900
                    border-b border-zinc-200 dark:border-zinc-800
                    pt-safe
-                   transition-all duration-300"
+                   transition-all duration-300
+                   ${hasBanner ? 'top-[38px] sm:top-[44px]' : 'top-0'}`}
       >
         <div className="flex items-center justify-between h-full px-3 md:px-5">
           {/* Sección Izquierda: Menú Hamburguesa + Logo */}

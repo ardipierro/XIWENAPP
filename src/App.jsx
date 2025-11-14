@@ -25,6 +25,7 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const TeacherDashboard = lazy(() => import('./components/TeacherDashboard'));
 const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
 const GuardianDashboard = lazy(() => import('./components/GuardianDashboard'));
+const UniversalDashboard = lazy(() => import('./components/UniversalDashboard')); // POC: Universal Dashboard
 const TestPage = lazy(() => import('./TestPage'));
 const PaymentResult = lazy(() => import('./components/PaymentResult'));
 const DesignLab = lazy(() => import('./components/DesignLab'));
@@ -166,6 +167,20 @@ function App() {
                 allowedRoles={[...STUDENT_ROLES, ...TEACHER_ROLES, ...ADMIN_ROLES]}
               >
                 <ContentReaderPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* POC: Universal Dashboard - Dashboard unificado con permisos y créditos */}
+          <Route
+            path="/dashboard-v2/*"
+            element={
+              <ProtectedRoute
+                user={user}
+                userRole={effectiveRole}
+                allowedRoles={[...ADMIN_ROLES, ...TEACHER_ROLES, ...STUDENT_ROLES, ...GUARDIAN_ROLES]}
+              >
+                <UniversalDashboard />
               </ProtectedRoute>
             }
           />

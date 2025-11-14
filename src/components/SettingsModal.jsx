@@ -4,18 +4,14 @@
  * @module components/SettingsModal
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Settings,
   Palette,
-  Type,
-  Volume2,
   Monitor,
-  TrendingUp,
-  Mic,
+  Volume2,
   Gauge,
-  Bookmark,
   Maximize2,
   Minimize2,
   ZoomIn,
@@ -23,12 +19,13 @@ import {
   Eye,
   EyeOff,
   Image,
-  User
+  Mic,
+  Bookmark,
+  TrendingUp
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge } from './common';
 import ViewCustomizer from './interactive-book/ViewCustomizer';
-import TTSSettings from './interactive-book/TTSSettings';
 import AIImageGenerator from './interactive-book/AIImageGenerator';
 import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
 
@@ -36,14 +33,16 @@ import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
  * Modal de configuración completo con tabs
  */
 function SettingsModal({ isOpen, onClose, characters = [] }) {
-  const [activeTab, setActiveTab] = useState('appearance'); // Cambiado a 'appearance'
+  const [activeTab, setActiveTab] = useState('appearance');
   const [displaySettings, setDisplaySettings] = useState({
-    zoom: 100, // 50-200%
-    width: 'normal', // 'narrow' | 'normal' | 'wide' | 'full'
+    zoom: 100,
+    width: 'normal',
     fullscreen: false,
-    fontScale: 100, // 80-150% (adicional al tamaño de fuente del ViewCustomizer)
-    showMetadataBadges: true // Mostrar/ocultar badges de metadata
+    fontScale: 100,
+    showMetadataBadges: true
   });
+  const [saveMessage, setSaveMessage] = useState(null); // { type: 'success' | 'error', text: string }
+  const viewCustomizerSaveRef = useRef(null); // Referencia a la función de guardado de ViewCustomizer
 
   // Cargar configuración de pantalla
   useEffect(() => {
@@ -131,13 +130,19 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
     }
   };
 
-  // ✅ SIMPLIFICADO: Solo 3 tabs principales
+  // ✅ 4 tabs principales
   const tabs = [
     {
       id: 'appearance',
       label: 'Apariencia',
       icon: Palette,
-      description: 'Visual, tipografía y pantalla'
+      description: 'Visual, tipografía y diseño'
+    },
+    {
+      id: 'display',
+      label: 'Pantalla',
+      icon: Monitor,
+      description: 'Zoom, ancho y fullscreen'
     },
     {
       id: 'audio',
@@ -152,6 +157,24 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       description: 'Progreso, imágenes IA y más'
     }
   ];
+
+  // Manejar guardado de configuración
+  const handleSaveSettings = () => {
+    // Guardar ViewCustomizer si existe la referencia
+    if (viewCustomizerSaveRef.current) {
+      viewCustomizerSaveRef.current();
+    }
+
+    setSaveMessage({ type: 'success', text: '✓ Configuración guardada correctamente' });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  // Callback para recibir la función de guardado de ViewCustomizer
+  const handleViewCustomizerChange = (data) => {
+    if (data && typeof data.saveSettings === 'function') {
+      viewCustomizerSaveRef.current = data.saveSettings;
+    }
+  };
 
   return (
     <BaseModal
@@ -186,105 +209,25 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-4">
           {/* ========================================= */}
-          {/* TAB 1: APARIENCIA (Visual + Tipografía + Pantalla) */}
+          {/* TAB 1: APARIENCIA (Visual + Tipografía) */}
           {/* ========================================= */}
           {activeTab === 'appearance' && (
-            <div className="space-y-8">
-              {/* Sección: Visual (colores, bordes) */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
-                  🎨 Personalización Visual
-                </h3>
-                <ViewCustomizer alwaysOpen={true} />
-              </div>
+            <div>
+              <ViewCustomizer
+                alwaysOpen={true}
+                autoSave={false}
+                onSettingsChange={handleViewCustomizerChange}
+              />
+            </div>
+          )}
 
-              {/* Sección: Tipografía */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
-                  📝 Tipografía
-                </h3>
-                <div className="space-y-4">
-                  {/* Font Scale Global */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Escala de fuente global: {displaySettings.fontScale}%
-                    </label>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => updateDisplaySetting('fontScale', Math.max(80, displaySettings.fontScale - 10))}
-                        className="w-11 h-11 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
-                      >
-                        <ZoomOut size={20} />
-                      </button>
-                      <input
-                        type="range"
-                        min="80"
-                        max="150"
-                        step="10"
-                        value={displaySettings.fontScale}
-                        onChange={(e) => updateDisplaySetting('fontScale', parseInt(e.target.value))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                      />
-                      <button
-                        onClick={() => updateDisplaySetting('fontScale', Math.min(150, displaySettings.fontScale + 10))}
-                        className="w-11 h-11 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
-                      >
-                        <ZoomIn size={20} />
-                      </button>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>80%</span>
-                      <span>100%</span>
-                      <span>150%</span>
-                    </div>
-                  </div>
-
-                  {/* Presets rápidos */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Presets de lectura
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        onClick={() => updateDisplaySetting('fontScale', 90)}
-                        className="p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:border-purple-500 transition-colors"
-                      >
-                        <div className="font-medium">Compacto</div>
-                        <div className="text-xs text-gray-500">Más contenido</div>
-                      </button>
-                      <button
-                        onClick={() => updateDisplaySetting('fontScale', 100)}
-                        className="p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:border-purple-500 transition-colors"
-                      >
-                        <div className="font-medium">Estándar</div>
-                        <div className="text-xs text-gray-500">Balanceado</div>
-                      </button>
-                      <button
-                        onClick={() => updateDisplaySetting('fontScale', 130)}
-                        className="p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:border-purple-500 transition-colors"
-                      >
-                        <div className="font-medium">Lectura</div>
-                        <div className="text-xs text-gray-500">Más legible</div>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <p className="text-sm text-blue-900 dark:text-blue-100">
-                      💡 <strong>Tip:</strong> La escala de fuente global afecta todo el texto de la aplicación. Para ajustar solo las burbujas de diálogo, usa la sección "Visual" arriba.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sección: Pantalla */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
-                  📺 Configuración de Pantalla
-                </h3>
-                <div className="space-y-6">
+          {/* ========================================= */}
+          {/* TAB 2: PANTALLA (Zoom, ancho, fullscreen) */}
+          {/* ========================================= */}
+          {activeTab === 'display' && (
+            <div className="space-y-6">
                   {/* Zoom */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -457,33 +400,18 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
                       </button>
                     </div>
                   </div>
-                </div>
-              </div>
             </div>
           )}
 
           {/* ========================================= */}
-          {/* TAB 2: AUDIO Y VOCES (TTS + Personajes + Presets) */}
+          {/* TAB 3: AUDIO Y VOCES (CharacterVoiceManager + Presets) */}
           {/* ========================================= */}
           {activeTab === 'audio' && (
             <div className="space-y-8">
-              {/* Sección: TTS General */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
-                  🎤 Configuración de Voz (TTS)
-                </h3>
-                <TTSSettings alwaysOpen={true} />
-              </div>
+              {/* CharacterVoiceManager directo */}
+              <CharacterVoiceManager characters={characters} alwaysOpen={true} />
 
-              {/* Sección: Voces por Personaje */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
-                  👥 Voces por Personaje
-                </h3>
-                <CharacterVoiceManager characters={characters} alwaysOpen={true} />
-              </div>
-
-              {/* Sección: Presets de Escucha */}
+              {/* Sección: Presets de Velocidad */}
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
                   ⚡ Presets de Velocidad
@@ -696,6 +624,37 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Footer Sticky con botón Guardar */}
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex-shrink-0">
+          {saveMessage && (
+            <div className={`mb-3 p-3 rounded-lg flex items-center gap-2 text-sm ${
+              saveMessage.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
+                : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+            }`}>
+              {saveMessage.text}
+            </div>
+          )}
+          <div className="flex gap-3">
+            <BaseButton
+              variant="ghost"
+              size="md"
+              onClick={onClose}
+              className="flex-1"
+            >
+              Cerrar
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              size="md"
+              onClick={handleSaveSettings}
+              className="flex-1"
+            >
+              Guardar Configuración
+            </BaseButton>
+          </div>
         </div>
       </div>
     </BaseModal>

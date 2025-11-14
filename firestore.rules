@@ -445,6 +445,33 @@ service cloud.firestore {
       allow delete: if isTeacher() || isAdmin();
     }
 
+    // ============================================
+    // VOICE PRESETS (ELEVENLABS)
+    // ============================================
+
+    // Voice presets - ElevenLabs voice configurations
+    match /voicePresets/{presetId} {
+      // Teachers can create presets with their own teacherId, admins can create for anyone
+      allow create: if isAuthenticated() &&
+        (isAdmin() ||
+         (isTeacher() && request.resource.data.teacherId == request.auth.uid));
+
+      // Admins can list/read all presets, teachers can read their own
+      allow list, get: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
+
+      // Teachers can update their own presets, admins can update all
+      allow update: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
+
+      // Teachers can delete their own presets, admins can delete all
+      allow delete: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
+    }
+
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;

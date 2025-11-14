@@ -199,7 +199,7 @@ function ContentReaderPage() {
           initialContent={getContentHTML()}
           userId={user.uid}
           readOnly={false}
-          onBack={() => navigate(-1)}
+          onClose={() => navigate(-1)}
         />
       )}
     </div>

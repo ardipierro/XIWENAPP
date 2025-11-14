@@ -30,7 +30,8 @@ import {
   BaseLoading,
   BaseAlert,
   BaseBadge,
-  BaseEmptyState
+  BaseEmptyState,
+  ImageLightbox
 } from './common';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
@@ -139,13 +140,13 @@ export default function HomeworkReviewPanel({ teacherId }) {
       {showDetailModal && selectedReview && (
         <ReviewDetailModal
           review={selectedReview}
-          teacherId={teacherId}
-          user={user}
           onClose={() => {
             setShowDetailModal(false);
             setSelectedReview(null);
           }}
           onApproveSuccess={handleApproveSuccess}
+          teacherId={teacherId}
+          currentUser={user}
         />
       )}
     </div>
@@ -219,7 +220,7 @@ function ReviewCard({ review, onSelect }) {
 /**
  * Review Detail Modal Component
  */
-function ReviewDetailModal({ review, teacherId, user, onClose, onApproveSuccess }) {
+function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: parentTeacherId, currentUser }) {
   const [isApproving, setIsApproving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState(review.overallFeedback || '');
@@ -230,6 +231,7 @@ function ReviewDetailModal({ review, teacherId, user, onClose, onApproveSuccess 
     errors: true,
     corrections: true
   });
+  const [showImageLightbox, setShowImageLightbox] = useState(false);
 
   const handleApprove = async () => {
     try {
@@ -312,7 +314,7 @@ function ReviewDetailModal({ review, teacherId, user, onClose, onApproveSuccess 
       isOpen={true}
       onClose={onClose}
       title="Revisar Corrección de IA"
-      size="full"
+      size="xl"
     >
       <div className="space-y-6">
         {error && (
@@ -349,11 +351,19 @@ function ReviewDetailModal({ review, teacherId, user, onClose, onApproveSuccess 
 
         {/* Image */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <ImageIcon size={18} strokeWidth={2} />
-            Imagen de la Tarea
-          </h3>
-          <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <ImageIcon size={18} strokeWidth={2} />
+              Imagen de la Tarea
+            </h3>
+            <BaseBadge variant="info" size="sm">
+              Click para ampliar
+            </BaseBadge>
+          </div>
+          <div
+            className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+            onClick={() => setShowImageLightbox(true)}
+          >
             <img
               src={review.imageUrl}
               alt="Tarea del estudiante"
@@ -365,7 +375,7 @@ function ReviewDetailModal({ review, teacherId, user, onClose, onApproveSuccess 
         {/* Profile Selector */}
         <ProfileSelector
           studentId={review.studentId}
-          teacherId={review.teacherId || teacherId || user?.uid}
+          teacherId={review.teacherId || parentTeacherId || currentUser?.uid}
           currentReviewId={review.id}
           onReanalyze={async (profileId) => {
             const result = await requestReanalysis(review.id, profileId);
@@ -532,6 +542,14 @@ function ReviewDetailModal({ review, teacherId, user, onClose, onApproveSuccess 
           </BaseButton>
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        isOpen={showImageLightbox}
+        onClose={() => setShowImageLightbox(false)}
+        imageUrl={review.imageUrl}
+        alt="Tarea del estudiante"
+      />
     </BaseModal>
   );
 }
