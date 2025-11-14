@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import {
   BaseButton,
-  BaseCard,
   BaseModal,
   BaseBadge,
   BaseLoading,
@@ -36,6 +35,7 @@ import {
   BaseInput,
   BaseSelect
 } from './common';
+import { UniversalCard } from './cards';
 import {
   createGuardian,
   getGuardianByUserId,
@@ -248,7 +248,7 @@ function GuardianCard({ guardian, onViewDetails, onRefresh, setError, setSuccess
   };
 
   return (
-    <BaseCard hover>
+    <UniversalCard variant="default" size="md" hover>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -310,7 +310,7 @@ function GuardianCard({ guardian, onViewDetails, onRefresh, setError, setSuccess
           )}
         </div>
       </div>
-    </BaseCard>
+    </UniversalCard>
   );
 }
 

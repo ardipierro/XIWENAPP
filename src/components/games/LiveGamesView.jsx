@@ -18,11 +18,11 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import {
   BaseButton,
-  BaseCard,
   BaseLoading,
   BaseEmptyState,
   BaseBadge
 } from '../common';
+import { UniversalCard } from '../cards';
 
 /**
  * Vista de juegos en vivo para estudiantes
@@ -186,7 +186,9 @@ function LiveGamesView({ user, onJoinGame }) {
             const maxPlayers = game.maxPlayers || 30;
 
             return (
-              <BaseCard
+              <UniversalCard
+                variant="default"
+                size="md"
                 key={game.id}
                 className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
                 onClick={() => onJoinGame && onJoinGame(game.id)}
@@ -259,7 +261,7 @@ function LiveGamesView({ user, onJoinGame }) {
                     </BaseButton>
                   </div>
                 </div>
-              </BaseCard>
+              </UniversalCard>
             );
           })}
         </div>

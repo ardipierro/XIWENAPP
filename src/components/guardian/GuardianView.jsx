@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import {
   BaseButton,
-  BaseCard,
   BaseBadge,
   BaseLoading,
   BaseEmptyState,
@@ -168,7 +167,7 @@ function GuardianView({ user, onViewStudentDetails }) {
       {/* Info section */}
       {students.length > 0 && (
         <div className="mt-8">
-          <BaseCard>
+          <UniversalCard variant="default" size="md">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <BarChart3 size={20} />
@@ -216,7 +215,7 @@ function GuardianView({ user, onViewStudentDetails }) {
                 </div>
               </div>
             </div>
-          </BaseCard>
+          </UniversalCard>
         </div>
       )}
 
