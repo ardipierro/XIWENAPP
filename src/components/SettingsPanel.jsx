@@ -4,9 +4,10 @@
  */
 
 import { useState } from 'react';
-import { Settings, Key, Bell, User, Globe, Palette, Type } from 'lucide-react';
+import { Settings, Key, Bell, User, Globe, Palette, Type, Home } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import CredentialsTab from './settings/CredentialsTab';
+import LandingPageTab from './settings/LandingPageTab';
 import ThemeCustomizer from './ThemeCustomizer';
 import { BaseCard } from './common';
 import { useFont } from '../contexts/FontContext';
@@ -20,6 +21,7 @@ function SettingsPanel() {
     { id: 'theme', label: 'Temas', icon: Palette },
     { id: 'fonts', label: 'Fuentes', icon: Type },
     { id: 'credentials', label: 'Credenciales IA', icon: Key },
+    { id: 'landing', label: 'Landing Page', icon: Home },
     { id: 'notifications', label: 'Notificaciones', icon: Bell },
     { id: 'account', label: 'Cuenta', icon: User }
   ];
@@ -245,6 +247,12 @@ function SettingsPanel() {
         {activeTab === 'credentials' && (
           <div className="w-full">
             <CredentialsTab />
+          </div>
+        )}
+
+        {activeTab === 'landing' && (
+          <div className="w-full">
+            <LandingPageTab />
           </div>
         )}
 
