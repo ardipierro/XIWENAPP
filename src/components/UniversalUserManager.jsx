@@ -6,7 +6,7 @@
  * @module components/UniversalUserManager
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Crown,
   Users,
@@ -65,12 +65,12 @@ const getRoleBadge = (role) => {
  * Adapta UI y funcionalidad según rol del usuario actual
  */
 export default function UniversalUserManager({ user, userRole }) {
-  const { can, isAdmin } = usePermissions();
+  const { can, isAdmin, initialized: permissionsReady } = usePermissions();
 
   // Hook de gestión de usuarios con permisos
   const userManagement = useUserManagement(user, {
     canViewAll: can('view-all-users'),
-    canManageRoles: can('manage-roles')
+    canManageRoles: can('edit-user-roles')
   });
 
   // Estados UI
@@ -86,19 +86,52 @@ export default function UniversalUserManager({ user, userRole }) {
   // Estados de enrollments (para StudentCard)
   const [enrollmentCounts, setEnrollmentCounts] = useState({});
 
-  // Cargar usuarios al montar
+  // Ref para rastrear si ya se cargaron los usuarios en esta instancia
+  const hasLoadedRef = useRef(false);
+
+  // Cargar usuarios cuando el usuario esté autenticado Y los permisos estén listos
   useEffect(() => {
-    if (can('view-own-students') || can('view-all-users')) {
-      userManagement.loadUsers();
-    }
-  }, [can]);
+    let isMounted = true;
+
+    const loadData = async () => {
+      const hasUser = !!user?.uid;
+      const canViewStudents = can('view-own-students');
+      const canViewAll = can('view-all-users');
+      const alreadyLoaded = hasLoadedRef.current;
+
+      logger.debug(`🔍 useEffect triggered - hasUser: ${hasUser}, permissionsReady: ${permissionsReady}, canViewStudents: ${canViewStudents}, canViewAll: ${canViewAll}, alreadyLoaded: ${alreadyLoaded}`, 'UniversalUserManager');
+
+      // Solo cargar si: hay usuario, permisos listos, tiene permisos, y no se ha cargado aún en esta instancia
+      if (user?.uid && permissionsReady && (canViewStudents || canViewAll) && !alreadyLoaded) {
+        hasLoadedRef.current = true;
+        if (isMounted) {
+          logger.debug('✅ Loading users...', 'UniversalUserManager');
+          await userManagement.loadUsers();
+        }
+      } else {
+        const reason = !user?.uid ? 'No user' :
+                       !permissionsReady ? 'Permissions not ready' :
+                       alreadyLoaded ? 'Already loaded' :
+                       'No permissions';
+        logger.debug(`❌ Skipping user load - Reason: ${reason}`, 'UniversalUserManager');
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid, permissionsReady]); // Ejecutar cuando user.uid Y permissions estén listos
 
   // Cargar enrollment counts cuando cambien los usuarios
   useEffect(() => {
     if (userManagement.users.length > 0) {
       loadEnrollmentCounts();
     }
-  }, [userManagement.users]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userManagement.users.length]); // Solo cuando cambia la cantidad de usuarios
 
   /**
    * Cargar counts de cursos enrollados por estudiante

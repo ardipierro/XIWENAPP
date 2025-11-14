@@ -8,7 +8,7 @@ import { Settings, Key, Bell, User, Globe, Palette, Type } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import CredentialsTab from './settings/CredentialsTab';
 import ThemeCustomizer from './ThemeCustomizer';
-import { BaseCard } from './common';
+import { UniversalCard } from './cards';
 import { useFont } from '../contexts/FontContext';
 
 function SettingsPanel() {
@@ -56,15 +56,16 @@ function SettingsPanel() {
         </div>
       </div>
 
-      {/* Tab Content - TODO FULL WIDTH */}
+      {/* Tab Content */}
       <div className="w-full">
         {activeTab === 'general' && (
           <div className="w-full space-y-6">
-            <BaseCard className="p-6 w-full">
-              <div className="flex items-center gap-3 mb-4">
-                <Globe size={24} className="text-purple-600 dark:text-purple-400" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white m-0">Idioma y Región</h3>
-              </div>
+            <UniversalCard
+              variant="default"
+              size="md"
+              icon={Globe}
+              title="Idioma y Región"
+            >
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Idioma de la interfaz</label>
@@ -75,7 +76,7 @@ function SettingsPanel() {
                   </select>
                 </div>
               </div>
-            </BaseCard>
+            </UniversalCard>
           </div>
         )}
 
@@ -87,15 +88,13 @@ function SettingsPanel() {
 
         {activeTab === 'fonts' && (
           <div className="w-full space-y-6">
-            <BaseCard className="p-6 w-full">
-              <div className="flex items-center gap-3 mb-4">
-                <Type size={24} className="text-purple-600 dark:text-purple-400" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white m-0">Probador de Fuentes Chinas</h3>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Visualiza cómo se ve el nombre de la aplicación "西文教室" (Aula de Español) con diferentes fuentes chinas
-              </p>
-
+            <UniversalCard
+              variant="default"
+              size="md"
+              icon={Type}
+              title="Probador de Fuentes Chinas"
+              description="Visualiza cómo se ve el nombre de la aplicación \"西文教室\" (Aula de Español) con diferentes fuentes chinas"
+            >
               {/* Selector de fuente */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -238,7 +237,7 @@ function SettingsPanel() {
                   <strong>✨ Nota:</strong> Los cambios se aplican automáticamente al logo "西文教室" en la barra superior y se guardan en tu navegador.
                 </p>
               </div>
-            </BaseCard>
+            </UniversalCard>
           </div>
         )}
 
@@ -250,11 +249,12 @@ function SettingsPanel() {
 
         {activeTab === 'notifications' && (
           <div className="w-full space-y-6">
-            <BaseCard className="p-6 w-full">
-              <div className="flex items-center gap-3 mb-4">
-                <Bell size={24} className="text-purple-600 dark:text-purple-400" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white m-0">Notificaciones</h3>
-              </div>
+            <UniversalCard
+              variant="default"
+              size="md"
+              icon={Bell}
+              title="Notificaciones"
+            >
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                   <div>
@@ -264,24 +264,25 @@ function SettingsPanel() {
                   <input type="checkbox" className="w-5 h-5" defaultChecked />
                 </div>
               </div>
-            </BaseCard>
+            </UniversalCard>
           </div>
         )}
 
         {activeTab === 'account' && (
           <div className="w-full space-y-6">
-            <BaseCard className="p-6 w-full">
-              <div className="flex items-center gap-3 mb-4">
-                <User size={24} className="text-purple-600 dark:text-purple-400" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white m-0">Cuenta</h3>
-              </div>
+            <UniversalCard
+              variant="default"
+              size="md"
+              icon={User}
+              title="Cuenta"
+            >
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre completo</label>
                   <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="Tu nombre" />
                 </div>
               </div>
-            </BaseCard>
+            </UniversalCard>
           </div>
         )}
       </div>

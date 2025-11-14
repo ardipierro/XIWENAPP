@@ -5,7 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { RefreshCw, User, Check } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge } from '../common';
+import { BaseButton, BaseBadge } from '../common';
+import { UniversalCard } from '../cards';
 import {
   getCorrectionProfilesByTeacher,
   getStudentProfile,
@@ -77,29 +78,29 @@ export default function ProfileSelector({
 
   if (loading) {
     return (
-      <BaseCard className="mb-4">
+      <UniversalCard variant="default" size="md" className="mb-4">
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
           <RefreshCw className="animate-spin" size={16} />
           Cargando perfiles...
         </div>
-      </BaseCard>
+      </UniversalCard>
     );
   }
 
   if (profiles.length === 0) {
     return (
-      <BaseCard className="mb-4">
+      <UniversalCard variant="default" size="md" className="mb-4">
         <div className="text-sm text-gray-600 dark:text-gray-400">
           No hay perfiles de corrección configurados
         </div>
-      </BaseCard>
+      </UniversalCard>
     );
   }
 
   const isProfileChanged = selectedProfileId !== currentProfile?.id;
 
   return (
-    <BaseCard className="mb-4">
+    <UniversalCard variant="default" size="md" className="mb-4">
       <div className="space-y-3">
         {/* Current Profile Info */}
         <div className="flex items-center justify-between">
@@ -202,6 +203,6 @@ export default function ProfileSelector({
           </div>
         )}
       </div>
-    </BaseCard>
+    </UniversalCard>
   );
 }

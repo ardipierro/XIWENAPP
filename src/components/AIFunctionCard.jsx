@@ -4,8 +4,9 @@
  */
 
 import { useState } from 'react';
-import { Settings, CheckCircle, AlertCircle, XCircle, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { Settings, CheckCircle, XCircle, Sparkles } from 'lucide-react';
 import { BaseButton, BaseBadge } from './common';
+import { UniversalCard } from './cards';
 import { getProviderById } from '../constants/aiFunctions';
 import logger from '../utils/logger';
 import imageService from '../services/imageService';
@@ -70,200 +71,101 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
     }
   };
 
-  // Determinar badge de estado (simplificado)
+  // Determinar badge de estado
   const getStatusBadge = () => {
     if (!isConfigured) {
-      return (
-        <BaseBadge variant="default" size="sm" icon={XCircle}>
-          Sin configurar
-        </BaseBadge>
-      );
+      return { variant: 'default', children: 'Sin configurar' };
     }
-
     if (isEnabled) {
-      return (
-        <BaseBadge variant="success" size="sm" icon={CheckCircle}>
-          Activo
-        </BaseBadge>
-      );
+      return { variant: 'success', children: 'Activo' };
     }
-
-    return (
-      <BaseBadge variant="default" size="sm" icon={CheckCircle}>
-        Configurado
-      </BaseBadge>
-    );
+    return { variant: 'default', children: 'Configurado' };
   };
 
-  // Vista Grid (vertical)
-  if (viewMode === 'grid') {
-    return (
-      <div
-        className="card card-grid-item flex flex-col cursor-pointer transition-all duration-300 overflow-hidden hover:border-zinc-500 dark:hover:border-zinc-400"
-        style={{ padding: 0 }}
-        onClick={onConfigure}
-      >
-        {/* Icono grande superior */}
-        <div className="card-image-large-placeholder">
-          {FunctionIcon && (
-            <FunctionIcon
-              size={64}
-              strokeWidth={1.5}
-              className="text-zinc-400 dark:text-zinc-500"
+  return (
+    <UniversalCard
+      variant={viewMode === 'grid' ? 'default' : 'compact'}
+      size="md"
+      layout={viewMode === 'grid' ? 'vertical' : 'horizontal'}
+      icon={FunctionIcon}
+      title={aiFunction.name}
+      subtitle={aiFunction.description}
+      badges={[getStatusBadge()]}
+      onClick={onConfigure}
+    >
+      {/* Info de proveedor si está configurado */}
+      {isConfigured && provider && (
+        <div className="flex items-center gap-2 p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg mb-3">
+          {ProviderIcon && (
+            <ProviderIcon
+              size={18}
+              strokeWidth={2}
+              className="text-zinc-600 dark:text-zinc-400"
             />
           )}
-        </div>
-
-        {/* Contenido */}
-        <div className="flex-1 flex flex-col p-4">
-          {/* Header con título y badge */}
-          <div className="flex items-start justify-between mb-2 gap-2">
-            <h3 className="card-title flex-1">{aiFunction.name}</h3>
-            {getStatusBadge()}
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-zinc-900 dark:text-white truncate">
+              {provider.name}
+            </p>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 truncate">
+              {activeConfig.model}
+            </p>
           </div>
+        </div>
+      )}
 
-          {/* Descripción */}
-          <p className="card-description mb-3">
-            {aiFunction.description}
+      {/* Preview de imagen generada (solo para funciones de imagen) */}
+      {isImageFunction && generatedImageUrl && (
+        <div className="mb-3 rounded-lg overflow-hidden border-2 border-purple-300 dark:border-purple-700">
+          <img
+            src={generatedImageUrl}
+            alt="Generated preview"
+            className="w-full h-auto"
+          />
+        </div>
+      )}
+
+      {/* Error de imagen */}
+      {isImageFunction && imageError && (
+        <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p className="text-xs text-red-600 dark:text-red-400 m-0">
+            {imageError}
           </p>
+        </div>
+      )}
 
-          {/* Info de proveedor si está configurado */}
-          {isConfigured && provider && (
-            <div className="flex items-center gap-2 p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg mb-3">
-              {ProviderIcon && (
-                <ProviderIcon
-                  size={18}
-                  strokeWidth={2}
-                  className="text-zinc-600 dark:text-zinc-400"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-zinc-900 dark:text-white truncate">
-                  {provider.name}
-                </p>
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 truncate">
-                  {activeConfig.model}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Preview de imagen generada (solo para funciones de imagen) */}
-          {isImageFunction && generatedImageUrl && (
-            <div className="mb-3 rounded-lg overflow-hidden border-2 border-purple-300 dark:border-purple-700">
-              <img
-                src={generatedImageUrl}
-                alt="Generated preview"
-                className="w-full h-auto"
-              />
-            </div>
-          )}
-
-          {/* Error de imagen */}
-          {isImageFunction && imageError && (
-            <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-xs text-red-600 dark:text-red-400 m-0">
-                {imageError}
-              </p>
-            </div>
-          )}
-
-          {/* Spacer para empujar el botón abajo */}
-          <div className="flex-1"></div>
-
-          {/* Botones - Quick test para imágenes */}
-          {isImageFunction && isConfigured && (
-            <BaseButton
-              variant="outline"
-              icon={Sparkles}
-              onClick={handleQuickImageTest}
-              disabled={testingImage}
-              loading={testingImage}
-              fullWidth
-              size="sm"
-              className="mb-2"
-            >
-              {testingImage ? 'Generando...' : 'Prueba Rápida'}
-            </BaseButton>
-          )}
-
-          {/* Botón configurar */}
+      {/* Botones */}
+      <div className="flex flex-col gap-2 mt-auto">
+        {/* Quick test para imágenes */}
+        {isImageFunction && isConfigured && (
           <BaseButton
-            variant={isConfigured ? "secondary" : "primary"}
-            icon={Settings}
-            onClick={(e) => {
-              e.stopPropagation();
-              onConfigure();
-            }}
+            variant="outline"
+            icon={Sparkles}
+            onClick={handleQuickImageTest}
+            disabled={testingImage}
+            loading={testingImage}
             fullWidth
             size="sm"
           >
-            {isConfigured ? 'Configurar' : 'Configurar función'}
+            {testingImage ? 'Generando...' : 'Prueba Rápida'}
           </BaseButton>
-        </div>
-      </div>
-    );
-  }
-
-  // Vista List (horizontal)
-  return (
-    <div
-      className="card card-list cursor-pointer transition-all duration-300 hover:border-zinc-500 dark:hover:border-zinc-400"
-      onClick={onConfigure}
-    >
-      {/* Icono pequeño */}
-      <div className="card-image-placeholder-sm">
-        {FunctionIcon && (
-          <FunctionIcon
-            size={32}
-            strokeWidth={2}
-            className="text-zinc-400 dark:text-zinc-500"
-          />
         )}
+
+        {/* Botón configurar */}
+        <BaseButton
+          variant={isConfigured ? "secondary" : "primary"}
+          icon={Settings}
+          onClick={(e) => {
+            e.stopPropagation();
+            onConfigure();
+          }}
+          fullWidth
+          size="sm"
+        >
+          {isConfigured ? 'Configurar' : 'Configurar función'}
+        </BaseButton>
       </div>
-
-      {/* Contenido principal */}
-      <div className="flex-1 min-w-0 p-4">
-        <div className="flex gap-4 items-start">
-          <div className="flex-1 min-w-0">
-            <h3 className="card-title">{aiFunction.name}</h3>
-            <p className="card-description">{aiFunction.description}</p>
-
-            {/* Info de proveedor inline */}
-            {isConfigured && provider && (
-              <div className="flex items-center gap-2 mt-2">
-                {ProviderIcon && (
-                  <ProviderIcon
-                    size={14}
-                    strokeWidth={2}
-                    className="text-zinc-600 dark:text-zinc-400"
-                  />
-                )}
-                <span className="text-xs text-zinc-600 dark:text-zinc-400">
-                  {provider.name} · {activeConfig.model}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Badge y botón a la derecha */}
-          <div className="flex flex-col items-end gap-2">
-            {getStatusBadge()}
-            <BaseButton
-              variant={isConfigured ? "secondary" : "primary"}
-              icon={Settings}
-              onClick={(e) => {
-                e.stopPropagation();
-                onConfigure();
-              }}
-              size="sm"
-            >
-              Configurar
-            </BaseButton>
-          </div>
-        </div>
-      </div>
-    </div>
+    </UniversalCard>
   );
 }
 

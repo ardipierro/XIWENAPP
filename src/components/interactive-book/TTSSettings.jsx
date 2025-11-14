@@ -5,7 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { Settings, Volume2, Zap, Languages, Key, Sparkles, CheckCircle } from 'lucide-react';
-import { BaseCard, BaseButton, BaseBadge, BaseInput } from '../common';
+import { BaseButton, BaseBadge, BaseInput } from '../common';
+import { UniversalCard } from '../cards';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
 import { getAICredential } from '../../utils/credentialsHelper';
@@ -153,9 +154,11 @@ function TTSSettings({ alwaysOpen = false }) {
       {/* Panel expandible */}
       {isOpen && (
         <>
-          {/* ✅ Solo mostrar BaseCard cuando NO es alwaysOpen */}
+          {/* ✅ Solo mostrar UniversalCard cuando NO es alwaysOpen */}
           {!alwaysOpen ? (
-            <BaseCard
+            <UniversalCard
+              variant="default"
+              size="md"
               title="Configuración de Text-to-Speech"
               subtitle="Selecciona la voz para los audios generados por IA"
             >
@@ -479,7 +482,7 @@ function TTSSettings({ alwaysOpen = false }) {
               </div>
             </div>
           )}
-            </BaseCard>
+            </UniversalCard>
           ) : (
             /* ✅ Contenido SIN BaseCard cuando alwaysOpen=true */
             <div className="space-y-4">

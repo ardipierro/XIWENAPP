@@ -8,7 +8,8 @@ import { Send, Lightbulb, Sparkles } from 'lucide-react';
 import { getActiveAIProvider, getAIConfig, callAI } from '../firebase/aiConfig';
 import { safeAsync } from '../utils/errorHandler';
 import logger from '../utils/logger';
-import { BaseModal, BaseButton, BaseTextarea, BaseBadge, BaseCard } from './common';
+import { BaseModal, BaseButton, BaseTextarea, BaseBadge } from './common';
+import { UniversalCard } from './cards';
 
 const AI_MODES = [
   {
@@ -260,14 +261,16 @@ function AIAssistantModal({ isOpen, onClose }) {
 
             {/* Response */}
             {response && (
-              <BaseCard
+              <UniversalCard
+                variant="default"
+                size="md"
                 title="Respuesta"
-                variant="bordered"
+                icon={Sparkles}
               >
                 <div className="text-gray-900 dark:text-white whitespace-pre-wrap leading-relaxed">
                   {response}
                 </div>
-              </BaseCard>
+              </UniversalCard>
             )}
           </div>
         )}
