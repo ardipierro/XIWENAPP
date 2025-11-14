@@ -13,7 +13,7 @@ import { useFont } from '../contexts/FontContext';
 
 function SettingsPanel() {
   const [activeTab, setActiveTab] = useState('credentials');
-  const { selectedFont, setSelectedFont, fontWeight, setFontWeight, availableFonts } = useFont();
+  const { selectedFont, setSelectedFont, fontWeight, setFontWeight, fontSize, setFontSize, availableFonts } = useFont();
 
   const tabs = [
     { id: 'general', label: 'General', icon: Settings },
@@ -99,59 +99,99 @@ function SettingsPanel() {
               {/* Selector de fuente */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Selecciona una fuente:
+                  Selecciona una fuente ({availableFonts.length} disponibles):
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {availableFonts.map((font) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-96 overflow-y-auto pr-2">
+                  {availableFonts.map((font) => {
+                    const styleColors = {
+                      modern: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+                      classic: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
+                      artistic: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+                      rounded: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300',
+                      traditional: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                    };
+
+                    return (
+                      <button
+                        key={font.name}
+                        onClick={() => setSelectedFont(font.family)}
+                        className={`p-3 border-2 rounded-lg transition-all text-left ${
+                          selectedFont === font.family
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-md'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="font-medium text-gray-900 dark:text-gray-100 text-xs">
+                            {font.name}
+                          </div>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${styleColors[font.style]}`}>
+                            {font.style}
+                          </span>
+                        </div>
+                        <div
+                          className="text-sm text-gray-600 dark:text-gray-400 mt-1"
+                          style={{ fontFamily: font.family }}
+                        >
+                          西文教室
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Controles de peso y tamaño */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Toggle de negrita */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Peso de la fuente:
+                  </label>
+                  <div className="flex gap-3">
                     <button
-                      key={font.name}
-                      onClick={() => setSelectedFont(font.family)}
-                      className={`p-3 border-2 rounded-lg transition-all text-left ${
-                        selectedFont === font.family
+                      onClick={() => setFontWeight('normal')}
+                      className={`flex-1 p-3 border-2 rounded-lg transition-all font-medium ${
+                        fontWeight === 'normal'
                           ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
                           : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
                       }`}
                     >
-                      <div className="font-medium text-gray-900 dark:text-gray-100 text-sm">
-                        {font.name}
-                      </div>
-                      <div
-                        className="text-xs text-gray-500 dark:text-gray-400 mt-1"
-                        style={{ fontFamily: font.family }}
-                      >
-                        西文教室 ABC 123
-                      </div>
+                      Normal
                     </button>
-                  ))}
+                    <button
+                      onClick={() => setFontWeight('bold')}
+                      className={`flex-1 p-3 border-2 rounded-lg transition-all font-bold ${
+                        fontWeight === 'bold'
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                          : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                      }`}
+                    >
+                      Negrita
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Toggle de negrita */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Peso de la fuente:
-                </label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setFontWeight('normal')}
-                    className={`flex-1 p-3 border-2 rounded-lg transition-all font-medium ${
-                      fontWeight === 'normal'
-                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
-                    }`}
-                  >
-                    Normal
-                  </button>
-                  <button
-                    onClick={() => setFontWeight('bold')}
-                    className={`flex-1 p-3 border-2 rounded-lg transition-all font-bold ${
-                      fontWeight === 'bold'
-                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
-                    }`}
-                  >
-                    Negrita
-                  </button>
+                {/* Slider de tamaño */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Tamaño: <span className="text-purple-600 dark:text-purple-400 font-bold">{fontSize.toFixed(2)}rem</span>
+                  </label>
+                  <div className="space-y-2">
+                    <input
+                      type="range"
+                      min="0.75"
+                      max="2.5"
+                      step="0.05"
+                      value={fontSize}
+                      onChange={(e) => setFontSize(parseFloat(e.target.value))}
+                      className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider-purple"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span>Pequeño (0.75rem)</span>
+                      <span>Grande (2.5rem)</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -161,9 +201,28 @@ function SettingsPanel() {
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                     Vista Previa (así se verá en la barra superior):
                   </div>
+                  <div className="mb-6 p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                      TopBar Preview (tamaño real):
+                    </div>
+                    <div
+                      className="text-gray-900 dark:text-gray-100 transition-all duration-300"
+                      style={{
+                        fontFamily: selectedFont,
+                        fontWeight: fontWeight,
+                        fontSize: `${fontSize}rem`
+                      }}
+                    >
+                      西文教室
+                    </div>
+                  </div>
                   <div
-                    className="text-6xl lg:text-7xl text-gray-900 dark:text-gray-100 transition-all duration-300 mb-4"
-                    style={{ fontFamily: selectedFont, fontWeight: fontWeight }}
+                    className="text-gray-900 dark:text-gray-100 transition-all duration-300 mb-4"
+                    style={{
+                      fontFamily: selectedFont,
+                      fontWeight: fontWeight,
+                      fontSize: `${fontSize * 3}rem`
+                    }}
                   >
                     西文教室
                   </div>

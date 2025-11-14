@@ -46,7 +46,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
   const [userAvatar, setUserAvatar] = useState('default');
   const [notificationCount] = useState(0); // Placeholder para futuro
   const messageCount = useUnreadMessages(user?.uid); // Real-time unread count
-  const { selectedFont, fontWeight } = useFont(); // Fuente del logo
+  const { selectedFont, fontWeight, fontSize } = useFont(); // Fuente del logo
 
   // Verificar si es admin
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
@@ -147,12 +147,13 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
             <button
               onClick={() => handleNavigate('/')}
               className="hidden md:flex items-center gap-2
-                         text-xl text-zinc-900 dark:text-white
+                         text-zinc-900 dark:text-white
                          cursor-pointer select-none
                          hover:opacity-80 transition-all duration-300"
               style={{
                 fontFamily: selectedFont,
-                fontWeight: fontWeight
+                fontWeight: fontWeight,
+                fontSize: `${fontSize}rem`
               }}
               aria-label="Ir al inicio"
             >
