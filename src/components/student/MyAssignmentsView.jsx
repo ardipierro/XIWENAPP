@@ -17,12 +17,12 @@ import { getAssignmentsForStudent } from '../../firebase/assignments';
 import { ensureStudentProfile } from '../../firebase/firestore';
 import {
   BaseButton,
-  BaseCard,
   BaseLoading,
   BaseEmptyState,
   BaseBadge,
   BaseAlert
 } from '../common';
+import { UniversalCard } from '../cards';
 
 /**
  * Vista de Mis Tareas para estudiantes
@@ -192,7 +192,9 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
         /* Assignment cards */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredAssignments.map((assignment) => (
-            <BaseCard
+            <UniversalCard
+              variant="default"
+              size="md"
               key={assignment.id}
               className="cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() => onSelectAssignment && onSelectAssignment(assignment.id)}
@@ -260,7 +262,7 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
                   </BaseButton>
                 </div>
               </div>
-            </BaseCard>
+            </UniversalCard>
           ))}
         </div>
       )}
