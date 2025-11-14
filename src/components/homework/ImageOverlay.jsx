@@ -1,9 +1,15 @@
 /**
- * @fileoverview Image Overlay with Error Highlights
+ * @fileoverview Enhanced Image Overlay with Error Highlights
  * @module components/homework/ImageOverlay
  *
  * Displays homework image with colored bounding boxes highlighting errors
  * detected by AI. Uses word coordinates from Google Vision OCR.
+ *
+ * Features:
+ * - Wavy underlines (Word-style)
+ * - Zoom and pan controls
+ * - Toggle errors by type
+ * - Adjustable highlight opacity
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -21,7 +27,36 @@ const ERROR_COLORS = {
 };
 
 /**
- * Image Overlay Component
+ * Generate wavy line path (Word-style underline)
+ * @param {number} x1 - Start X
+ * @param {number} y - Y position
+ * @param {number} x2 - End X
+ * @param {number} amplitude - Wave height
+ * @param {number} frequency - Wave frequency
+ * @returns {string} SVG path
+ */
+function generateWavyPath(x1, y, x2, amplitude = 2, frequency = 4) {
+  const length = x2 - x1;
+  const numWaves = Math.max(1, Math.floor(length / frequency));
+  const waveWidth = length / numWaves;
+
+  let path = `M ${x1} ${y}`;
+
+  for (let i = 0; i < numWaves; i++) {
+    const x = x1 + (i * waveWidth);
+    const nextX = x + waveWidth;
+    const controlX1 = x + waveWidth / 4;
+    const controlX2 = x + (3 * waveWidth) / 4;
+
+    path += ` Q ${controlX1} ${y - amplitude}, ${x + waveWidth / 2} ${y}`;
+    path += ` Q ${controlX2} ${y + amplitude}, ${nextX} ${y}`;
+  }
+
+  return path;
+}
+
+/**
+ * Enhanced Image Overlay Component
  * Renders homework image with error highlights based on word coordinates
  *
  * @param {Object} props
@@ -29,6 +64,11 @@ const ERROR_COLORS = {
  * @param {Array} props.words - Word coordinates from OCR [{text, bounds: {x, y, width, height}}]
  * @param {Array} props.errors - Error corrections from AI [{errorText, errorType, suggestion}]
  * @param {boolean} props.showOverlay - Toggle overlay visibility
+ * @param {Object} props.visibleErrorTypes - Which error types to show {spelling: true, grammar: true, ...}
+ * @param {number} props.highlightOpacity - Opacity of highlight fill (0-1)
+ * @param {number} props.zoom - Zoom level (1 = 100%)
+ * @param {Object} props.pan - Pan offset {x, y}
+ * @param {boolean} props.useWavyUnderline - Use wavy underlines instead of straight
  * @param {string} props.className - Additional CSS classes
  */
 export default function ImageOverlay({
@@ -36,6 +76,16 @@ export default function ImageOverlay({
   words = [],
   errors = [],
   showOverlay = true,
+  visibleErrorTypes = {
+    spelling: true,
+    grammar: true,
+    punctuation: true,
+    vocabulary: true
+  },
+  highlightOpacity = 0.25,
+  zoom = 1,
+  pan = { x: 0, y: 0 },
+  useWavyUnderline = true,
   className = ''
 }) {
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
@@ -93,7 +143,12 @@ export default function ImageOverlay({
 
     errors.forEach((error, errorIndex) => {
       const errorText = error.errorText || error.text || '';
+      const errorType = error.errorType || error.type || 'default';
+
       if (!errorText) return;
+
+      // Filter by visible error types
+      if (!visibleErrorTypes[errorType]) return;
 
       // Normalize error text for matching
       const normalizedError = errorText.toLowerCase().trim();
@@ -111,8 +166,8 @@ export default function ImageOverlay({
             y: word.bounds.y * scaleY,
             width: word.bounds.width * scaleX,
             height: word.bounds.height * scaleY,
-            color: ERROR_COLORS[error.errorType] || ERROR_COLORS.default,
-            errorType: error.errorType,
+            color: ERROR_COLORS[errorType] || ERROR_COLORS.default,
+            errorType: errorType,
             errorText: errorText,
             suggestion: error.suggestion || error.correctedText || '',
             id: `error-${errorIndex}-word-${i}`
@@ -147,8 +202,8 @@ export default function ImageOverlay({
               y: minY * scaleY,
               width: (maxX - minX) * scaleX,
               height: (maxY - minY) * scaleY,
-              color: ERROR_COLORS[error.errorType] || ERROR_COLORS.default,
-              errorType: error.errorType,
+              color: ERROR_COLORS[errorType] || ERROR_COLORS.default,
+              errorType: errorType,
               errorText: errorText,
               suggestion: error.suggestion || error.correctedText || '',
               id: `error-${errorIndex}-phrase-${i}`
@@ -164,72 +219,102 @@ export default function ImageOverlay({
 
   const highlights = getErrorHighlights();
 
+  // Calculate container transform for zoom and pan
+  const containerTransform = `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`;
+
   return (
     <div
       ref={containerRef}
       className={`relative inline-block ${className}`}
-      style={{ maxWidth: '100%' }}
+      style={{ maxWidth: '100%', overflow: 'hidden' }}
     >
-      {/* Image */}
-      <img
-        ref={imageRef}
-        src={imageUrl}
-        alt="Homework"
-        className="w-full h-auto"
-        style={{ display: 'block' }}
-      />
+      {/* Image with zoom/pan transform */}
+      <div
+        style={{
+          transform: containerTransform,
+          transformOrigin: 'top left',
+          transition: 'transform 0.2s ease-out'
+        }}
+      >
+        <img
+          ref={imageRef}
+          src={imageUrl}
+          alt="Homework"
+          className="w-full h-auto"
+          style={{ display: 'block' }}
+        />
 
-      {/* Overlay SVG */}
-      {showOverlay && imageDimensions.width > 0 && (
-        <svg
-          className="absolute top-0 left-0 pointer-events-none"
-          width={imageDimensions.width}
-          height={imageDimensions.height}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0
-          }}
-        >
-          {highlights.map((highlight) => (
-            <g key={highlight.id}>
-              {/* Highlight rectangle with semi-transparent fill */}
-              <rect
-                x={highlight.x}
-                y={highlight.y}
-                width={highlight.width}
-                height={highlight.height}
-                fill={highlight.color}
-                fillOpacity="0.2"
-                stroke={highlight.color}
-                strokeWidth="2"
-                strokeOpacity="0.8"
-                rx="2"
-              />
+        {/* Overlay SVG */}
+        {showOverlay && imageDimensions.width > 0 && (
+          <svg
+            className="absolute top-0 left-0 pointer-events-none"
+            width={imageDimensions.width}
+            height={imageDimensions.height}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0
+            }}
+          >
+            {highlights.map((highlight) => (
+              <g key={highlight.id}>
+                {/* Highlight rectangle with semi-transparent fill */}
+                <rect
+                  x={highlight.x}
+                  y={highlight.y}
+                  width={highlight.width}
+                  height={highlight.height}
+                  fill={highlight.color}
+                  fillOpacity={highlightOpacity}
+                  stroke={highlight.color}
+                  strokeWidth="2"
+                  strokeOpacity="0.8"
+                  rx="2"
+                />
 
-              {/* Underline for error */}
-              <line
-                x1={highlight.x}
-                y1={highlight.y + highlight.height}
-                x2={highlight.x + highlight.width}
-                y2={highlight.y + highlight.height}
-                stroke={highlight.color}
-                strokeWidth="3"
-                strokeOpacity="1"
-                strokeLinecap="round"
-              />
-            </g>
-          ))}
-        </svg>
-      )}
+                {/* Underline for error - wavy or straight */}
+                {useWavyUnderline ? (
+                  <path
+                    d={generateWavyPath(
+                      highlight.x,
+                      highlight.y + highlight.height + 1,
+                      highlight.x + highlight.width,
+                      2,
+                      8
+                    )}
+                    stroke={highlight.color}
+                    strokeWidth="2"
+                    fill="none"
+                    strokeOpacity="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                ) : (
+                  <line
+                    x1={highlight.x}
+                    y1={highlight.y + highlight.height}
+                    x2={highlight.x + highlight.width}
+                    y2={highlight.y + highlight.height}
+                    stroke={highlight.color}
+                    strokeWidth="3"
+                    strokeOpacity="1"
+                    strokeLinecap="round"
+                  />
+                )}
+              </g>
+            ))}
+          </svg>
+        )}
+      </div>
 
       {/* Debug info (only in development) */}
       {import.meta.env.DEV && (
-        <div className="absolute top-2 left-2 bg-black/75 text-white text-xs p-2 rounded pointer-events-none">
+        <div className="absolute top-2 left-2 bg-black/75 text-white text-xs p-2 rounded pointer-events-none z-10">
           <div>Words: {words.length}</div>
           <div>Errors: {errors.length}</div>
-          <div>Highlights: {highlights.length}</div>
-          <div>Scale: {imageDimensions.width}x{imageDimensions.height} / {imageNaturalDimensions.width}x{imageNaturalDimensions.height}</div>
+          <div>Visible: {highlights.length}</div>
+          <div>Zoom: {(zoom * 100).toFixed(0)}%</div>
+          <div>Scale: {imageDimensions.width}x{imageDimensions.height}</div>
         </div>
       )}
     </div>
@@ -252,9 +337,18 @@ ImageOverlay.propTypes = {
     errorText: PropTypes.string,
     text: PropTypes.string,
     errorType: PropTypes.string,
+    type: PropTypes.string,
     suggestion: PropTypes.string,
     correctedText: PropTypes.string
   })),
   showOverlay: PropTypes.bool,
+  visibleErrorTypes: PropTypes.object,
+  highlightOpacity: PropTypes.number,
+  zoom: PropTypes.number,
+  pan: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number
+  }),
+  useWavyUnderline: PropTypes.bool,
   className: PropTypes.string
 };

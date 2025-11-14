@@ -39,6 +39,7 @@ import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
 import ManualHomeworkUpload from './homework/ManualHomeworkUpload';
 import ImageOverlay from './homework/ImageOverlay';
+import ImageOverlayControls from './homework/ImageOverlayControls';
 import StudentAssigner from './homework/StudentAssigner';
 import {
   getPendingReviews,
@@ -275,6 +276,17 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
   const [assignedStudentId, setAssignedStudentId] = useState(review.studentId);
   const [assignedStudentName, setAssignedStudentName] = useState(review.studentName);
 
+  // Image overlay visualization controls
+  const [visibleErrorTypes, setVisibleErrorTypes] = useState({
+    spelling: true,
+    grammar: true,
+    punctuation: true,
+    vocabulary: true
+  });
+  const [highlightOpacity, setHighlightOpacity] = useState(0.25);
+  const [zoom, setZoom] = useState(1);
+  const [useWavyUnderline, setUseWavyUnderline] = useState(true);
+
   const handleApprove = async () => {
     try {
       setIsApproving(true);
@@ -440,53 +452,76 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
 
         {/* Image with Error Overlay */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-              <ImageIcon size={18} strokeWidth={2} />
-              Imagen de la Tarea
-              {review.words && review.words.length > 0 && (
-                <BaseBadge variant="success" size="sm">
-                  {review.words.length} palabras detectadas
-                </BaseBadge>
-              )}
-            </h3>
-            <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <ImageIcon size={18} strokeWidth={2} />
+            Imagen de la Tarea
+            {review.words && review.words.length > 0 && (
+              <BaseBadge variant="success" size="sm">
+                {review.words.length} palabras detectadas
+              </BaseBadge>
+            )}
+          </h3>
+
+          {/* Visualization Controls */}
+          {review.words && review.words.length > 0 && showErrorOverlay && (
+            <div className="mb-3">
+              <ImageOverlayControls
+                visibleErrorTypes={visibleErrorTypes}
+                onVisibleErrorTypesChange={setVisibleErrorTypes}
+                highlightOpacity={highlightOpacity}
+                onOpacityChange={setHighlightOpacity}
+                zoom={zoom}
+                onZoomChange={setZoom}
+                useWavyUnderline={useWavyUnderline}
+                onWavyUnderlineChange={setUseWavyUnderline}
+                errorCounts={review.errorSummary || {}}
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-end gap-2">
               {review.words && review.words.length > 0 && (
                 <BaseButton
                   variant={showErrorOverlay ? 'primary' : 'outline'}
                   size="sm"
                   onClick={() => setShowErrorOverlay(!showErrorOverlay)}
                 >
-                  {showErrorOverlay ? '👁️ Ocultar' : '👁️ Mostrar'} Errores
+                  {showErrorOverlay ? '👁️ Ocultar' : '👁️ Mostrar'} Controles
                 </BaseButton>
               )}
               <BaseBadge variant="info" size="sm">
                 Click para ampliar
               </BaseBadge>
             </div>
-          </div>
-          <div
-            className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
-            onClick={() => setShowImageLightbox(true)}
-          >
-            <ImageOverlay
-              imageUrl={review.imageUrl}
-              words={review.words || []}
-              errors={updatedCorrections}
-              showOverlay={showErrorOverlay}
-              className="max-w-full max-h-96"
-            />
+
+            <div
+              className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+              onClick={() => setShowImageLightbox(true)}
+            >
+              <ImageOverlay
+                imageUrl={review.imageUrl}
+                words={review.words || []}
+                errors={updatedCorrections}
+                showOverlay={showErrorOverlay}
+                visibleErrorTypes={visibleErrorTypes}
+                highlightOpacity={highlightOpacity}
+                zoom={zoom}
+                useWavyUnderline={useWavyUnderline}
+                className="max-w-full max-h-96"
+              />
+            </div>
           </div>
           {review.words && review.words.length > 0 && (
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              💡 Las palabras con errores están resaltadas con colores:
-              <span className="ml-2 text-red-500">Ortografía</span>
+              💡 Usa los controles para:
+              <span className="ml-2">🔴 Filtrar por tipo</span>
               <span className="mx-1">•</span>
-              <span className="text-orange-500">Gramática</span>
+              <span>🔍 Zoom y pan</span>
               <span className="mx-1">•</span>
-              <span className="text-yellow-600">Puntuación</span>
+              <span>✨ Subrayado ondulado</span>
               <span className="mx-1">•</span>
-              <span className="text-blue-500">Vocabulario</span>
+              <span>🎨 Ajustar opacidad</span>
             </div>
           )}
           {!review.words || review.words.length === 0 && (
