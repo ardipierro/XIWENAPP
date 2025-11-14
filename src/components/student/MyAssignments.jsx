@@ -11,12 +11,12 @@ import { getStudentAssignments } from '../../firebase/relationships';
 // Base Components
 import {
   BaseButton,
-  BaseCard,
   BaseLoading,
   BaseEmptyState,
   BaseBadge,
   BaseAlert
 } from '../common';
+import { UniversalCard } from '../cards';
 
 function MyAssignments({ user, onPlayContent, onPlayExercise }) {
   const [assignments, setAssignments] = useState([]);
@@ -210,7 +210,9 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
               {contentAssignments.map(assignment => {
                 const ContentIcon = getContentIconComponent(assignment.itemDetails?.type);
                 return (
-                  <BaseCard
+                  <UniversalCard
+                    variant="default"
+                    size="md"
                     key={assignment.id}
                     icon={ContentIcon}
                     title={assignment.itemDetails?.title || 'Contenido sin título'}
@@ -244,7 +246,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Asignado {formatDate(assignment.assignedAt)}
                     </p>
-                  </BaseCard>
+                  </UniversalCard>
                 );
               })}
             </div>
@@ -267,7 +269,9 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
               {exerciseAssignments.map(assignment => {
                 const ExerciseIcon = getExerciseIconComponent(assignment.itemDetails?.type);
                 return (
-                  <BaseCard
+                  <UniversalCard
+                    variant="default"
+                    size="md"
                     key={assignment.id}
                     icon={ExerciseIcon}
                     title={assignment.itemDetails?.title || 'Ejercicio sin título'}
@@ -297,7 +301,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Asignado {formatDate(assignment.assignedAt)}
                     </p>
-                  </BaseCard>
+                  </UniversalCard>
                 );
               })}
             </div>
