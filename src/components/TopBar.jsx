@@ -145,12 +145,13 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
             <button
               onClick={() => handleNavigate('/')}
               className="hidden md:flex items-center gap-2
-                         text-lg font-bold text-zinc-900 dark:text-white
-                         tracking-wide cursor-pointer select-none
+                         text-xl font-bold text-zinc-900 dark:text-white
+                         cursor-pointer select-none
                          hover:opacity-80 transition-opacity"
+              style={{ fontFamily: "'Microsoft YaHei', sans-serif" }}
               aria-label="Ir al inicio"
             >
-              XIWEN
+              西文教室
             </button>
           </div>
 
