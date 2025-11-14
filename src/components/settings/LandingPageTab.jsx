@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import {
   Home, Save, RotateCcw, Plus, Trash2, Edit2,
   Info, ChevronDown, ChevronRight, Video, BookOpen,
-  Image as ImageIcon
+  Image as ImageIcon, Eye, EyeOff
 } from 'lucide-react';
 import logger from '../../utils/logger';
 import {
@@ -29,6 +29,7 @@ import {
   BaseSelect
 } from '../common';
 import useAuth from '../../hooks/useAuth';
+import LandingPagePreview from './LandingPagePreview';
 
 function LandingPageTab() {
   const { user } = useAuth();
@@ -37,6 +38,7 @@ function LandingPageTab() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     hero: true,
     features: false,
@@ -297,6 +299,14 @@ function LandingPageTab() {
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <BaseButton
+            variant={showPreview ? 'primary' : 'outline'}
+            icon={showPreview ? Eye : EyeOff}
+            onClick={() => setShowPreview(!showPreview)}
+            size="sm"
+          >
+            {showPreview ? 'Ocultar' : 'Preview'}
+          </BaseButton>
+          <BaseButton
             variant="outline"
             icon={RotateCcw}
             onClick={handleReset}
@@ -330,19 +340,25 @@ function LandingPageTab() {
       )}
 
       {/* Info Alert */}
-      <BaseAlert variant="info" border>
-        <div className="flex items-start gap-2">
-          <Info size={20} className="flex-shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-medium mb-1">Los cambios son visibles inmediatamente</p>
-            <p className="text-xs opacity-90">
-              Guarda los cambios para que persistan. Puedes restaurar a la configuración por defecto en cualquier momento.
+      {!showPreview && (
+        <BaseAlert variant="info" border>
+          <div className="flex items-start gap-2">
+            <Info size={20} className="flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium mb-1">Los cambios son visibles inmediatamente</p>
+              <p className="text-xs opacity-90">
+                Guarda los cambios para que persistan. Puedes restaurar a la configuración por defecto en cualquier momento.
             </p>
           </div>
         </div>
       </BaseAlert>
+      )}
 
-      {/* Hero Section */}
+      {/* Split Screen Layout */}
+      <div className={showPreview ? "grid grid-cols-1 lg:grid-cols-2 gap-6" : "space-y-6"}>
+        {/* Editor Column */}
+        <div className="space-y-6">
+          {/* Hero Section */}
       <BaseCard className="p-5">
         <button
           onClick={() => toggleSection('hero')}
@@ -704,6 +720,17 @@ function LandingPageTab() {
           </div>
         )}
       </BaseCard>
+        </div>
+
+        {/* Preview Column */}
+        {showPreview && (
+          <div className="sticky top-0 h-screen overflow-hidden">
+            <div className="h-full border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+              <LandingPagePreview config={config} />
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Feature Modal */}
       <FeatureModal

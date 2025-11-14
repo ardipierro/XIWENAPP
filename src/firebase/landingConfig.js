@@ -226,3 +226,85 @@ export async function resetLandingConfig(userId) {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Save a version to history before updating
+ * @param {Object} config - Current configuration to save
+ * @param {string} userId - User ID making the save
+ * @returns {Promise<{success: boolean, versionId?: string, error?: string}>}
+ */
+export async function saveLandingHistory(config, userId) {
+  try {
+    const historyRef = doc(db, 'landing_config_history', `${Date.now()}_${userId}`);
+
+    await setDoc(historyRef, {
+      config,
+      savedAt: serverTimestamp(),
+      savedBy: userId,
+      version: Date.now()
+    });
+
+    logger.info('Landing config version saved to history');
+    return { success: true, versionId: historyRef.id };
+  } catch (error) {
+    logger.error('Error saving landing history:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get landing config history
+ * @param {number} limit - Number of versions to retrieve (default: 10)
+ * @returns {Promise<Array>} Array of historical versions
+ */
+export async function getLandingHistory(limit = 10) {
+  try {
+    const { collection, query, orderBy, getDocs, limitToLast } = await import('firebase/firestore');
+
+    const historyRef = collection(db, 'landing_config_history');
+    const q = query(historyRef, orderBy('savedAt', 'desc'), limitToLast(limit));
+    const snapshot = await getDocs(q);
+
+    const history = [];
+    snapshot.forEach(doc => {
+      history.push({ id: doc.id, ...doc.data() });
+    });
+
+    logger.debug('Landing config history loaded:', history.length);
+    return history;
+  } catch (error) {
+    logger.error('Error loading landing history:', error);
+    return [];
+  }
+}
+
+/**
+ * Restore a specific version from history
+ * @param {string} versionId - Version ID to restore
+ * @param {string} userId - User ID making the restore
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+export async function restoreLandingVersion(versionId, userId) {
+  try {
+    const { getDoc } = await import('firebase/firestore');
+
+    const versionRef = doc(db, 'landing_config_history', versionId);
+    const versionSnap = await getDoc(versionRef);
+
+    if (!versionSnap.exists()) {
+      return { success: false, error: 'Versión no encontrada' };
+    }
+
+    const versionData = versionSnap.data();
+    const result = await updateLandingConfig(versionData.config, userId);
+
+    if (result.success) {
+      logger.info('Landing config restored from version:', versionId);
+    }
+
+    return result;
+  } catch (error) {
+    logger.error('Error restoring landing version:', error);
+    return { success: false, error: error.message };
+  }
+}

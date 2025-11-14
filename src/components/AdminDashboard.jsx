@@ -45,7 +45,8 @@ import {
   Info,
   Mail,
   Eye,
-  Trash2
+  Trash2,
+  Home
 } from 'lucide-react';
 import {
   loadStudents,
@@ -1359,6 +1360,16 @@ function AdminDashboard({ user, userRole, onLogout }) {
       onClick: () => navigation.setCurrentScreen('payments'),
       createLabel: "Manage Payments",
       onCreateClick: () => navigation.setCurrentScreen('payments')
+    },
+    {
+      id: 'landing',
+      icon: Home,
+      title: "Landing Page",
+      count: 0,
+      countLabel: "editable sections",
+      onClick: () => navigation.setCurrentScreen('settings'),
+      createLabel: "Edit Landing",
+      onCreateClick: () => navigation.setCurrentScreen('settings')
     },
     {
       id: 'universalDashboard',
