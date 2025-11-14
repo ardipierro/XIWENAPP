@@ -60,6 +60,25 @@ class UsersRepository extends BaseRepository {
   }
 
   /**
+   * Obtener estudiantes de un profesor
+   */
+  async getStudentsByTeacher(teacherId) {
+    const students = await this.findWhere([
+      ['role', '==', 'student'],
+      ['teacherId', '==', teacherId]
+    ]);
+
+    // Filtrar activos y ordenar por nombre
+    return students
+      .filter(student => student.active !== false)
+      .sort((a, b) => {
+        const nameA = a.name || a.email || '';
+        const nameB = b.name || b.email || '';
+        return nameA.localeCompare(nameB);
+      });
+  }
+
+  /**
    * Obtener usuario por email
    */
   async getUserByEmail(email) {
@@ -250,6 +269,7 @@ export async function createUser(userData) {
 
 export const getUserById = (userId) => usersRepo.getById(userId);
 export const getUserByEmail = (email) => usersRepo.getUserByEmail(email);
+export const getStudentsByTeacher = (teacherId) => usersRepo.getStudentsByTeacher(teacherId);
 export const updateUser = (userId, updates) => usersRepo.update(userId, updates);
 export const deleteUser = (userId) => usersRepo.deleteUser(userId);
 export const permanentlyDeleteUser = (userId) => usersRepo.permanentlyDeleteUser(userId);

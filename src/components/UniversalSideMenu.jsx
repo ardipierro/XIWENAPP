@@ -88,8 +88,9 @@ const MENU_ITEMS = [
     id: 'students',
     label: 'Mis Estudiantes',
     icon: Users,
-    path: '/dashboard-v2/students',
+    path: '/dashboard-v2/users', // Ruta unificada
     permission: 'view-own-students',
+    hideIf: ['view-all-users'], // Ocultar si es admin (verá "Gestión de Usuarios")
   },
   {
     id: 'classes',

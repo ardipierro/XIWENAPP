@@ -25,6 +25,7 @@ const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
 const CreditManager = lazy(() => import('./CreditManager'));
 const AIConfigPanel = lazy(() => import('./AIConfigPanel'));
 const SettingsPanel = lazy(() => import('./SettingsPanel'));
+const UniversalUserManager = lazy(() => import('./UniversalUserManager'));
 
 /**
  * Vista de inicio (placeholder)
@@ -145,10 +146,10 @@ export function UniversalDashboard() {
               if (!can('use-exercise-builder')) return <PlaceholderView title="Sin acceso" />;
               return <ExerciseBuilder />;
 
-            // ESTUDIANTES
+            // ESTUDIANTES (redirige a /users)
             case '/dashboard-v2/students':
               if (!can('view-own-students')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Mis Estudiantes" />;
+              return <UniversalUserManager user={user} userRole={user.role} />;
 
             // CLASES - ClassSessionManager integrado
             case '/dashboard-v2/classes':
@@ -189,10 +190,13 @@ export function UniversalDashboard() {
               if (!can('view-own-analytics')) return <PlaceholderView title="Sin acceso" />;
               return <AnalyticsDashboard user={user} />;
 
-            // GESTIÓN DE USUARIOS (Admin)
+            // GESTIÓN DE USUARIOS/ESTUDIANTES (Universal)
             case '/dashboard-v2/users':
-              if (!can('view-all-users')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Gestión de Usuarios" />;
+              // Permitir acceso a admin (view-all-users) y teachers (view-own-students)
+              if (!can('view-all-users') && !can('view-own-students')) {
+                return <PlaceholderView title="Sin acceso" />;
+              }
+              return <UniversalUserManager user={user} userRole={user.role} />;
 
             // GESTIÓN DE CRÉDITOS (Admin) - CreditManager integrado
             case '/dashboard-v2/credits':
