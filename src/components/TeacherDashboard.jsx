@@ -57,11 +57,10 @@ import { createExcalidrawSession } from '../firebase/excalidraw';
 import { createGameSession } from '../firebase/gameSession';
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
-import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
-import ContentManager from './ContentManager';
 import UnifiedContentManager from './UnifiedContentManager';
 import ClassSessionManager from './ClassSessionManager';
+import ClassSessionRoom from './ClassSessionRoom';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
@@ -87,8 +86,6 @@ import MessagesPanel from './MessagesPanel';
 import ClassCountdownBanner from './ClassCountdownBanner';
 import NotificationCenter from './NotificationCenter';
 import useRealtimeClassStatus from '../hooks/useRealtimeClassStatus';
-import ClassSessionManager from './ClassSessionManager';
-import ClassSessionRoom from './ClassSessionRoom';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
 import DesignLab from './DesignLab';
@@ -607,15 +604,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // LEGACY: Renderizar CoursesScreen (Gestionar Cursos) - CON Layout
-  if (navigation.currentScreen === 'courses') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <CoursesScreen onBack={navigation.handleBackToDashboard} user={user} openCreateModal={navigation.openCourseModal} />
-      </DashboardLayout>
-    );
-  }
-
   // Renderizar ExercisePlayer (Jugar Ejercicio) - SIN Layout, pantalla completa
   if (navigation.currentScreen === 'playExercise' && navigation.selectedExerciseId) {
     return (
@@ -627,15 +615,6 @@ function TeacherDashboard({ user, userRole, onLogout }) {
           logger.debug('Ejercicio completado:', results);
         }}
       />
-    );
-  }
-
-  // LEGACY: Renderizar Gestión de Contenido - CON Layout
-  if (navigation.currentScreen === 'content') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ContentManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openContentModal} />
-      </DashboardLayout>
     );
   }
 
@@ -1765,6 +1744,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       onClick: () => navigation.setCurrentScreen('testCollab'),
       createLabel: "Abrir Pizarra",
       onCreateClick: () => navigation.setCurrentScreen('testCollab')
+    },
+    {
+      id: 'universalDashboard',
+      icon: Rocket,
+      title: "🚀 Dashboard Universal (POC)",
+      count: 0,
+      countLabel: "beta",
+      onClick: () => navigate('/dashboard-v2'),
+      createLabel: "Ir a Dashboard v2",
+      onCreateClick: () => navigate('/dashboard-v2')
     }
   ];
 

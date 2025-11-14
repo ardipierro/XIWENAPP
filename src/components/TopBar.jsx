@@ -21,6 +21,7 @@ import AIAssistantModal from './AIAssistantModal.jsx';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
 import { isAdminEmail } from '../firebase/roleConfig.js';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.js';
+import { useFont } from '../contexts/FontContext.jsx';
 import logger from '../utils/logger.js';
 
 /**
@@ -45,6 +46,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
   const [userAvatar, setUserAvatar] = useState('default');
   const [notificationCount] = useState(0); // Placeholder para futuro
   const messageCount = useUnreadMessages(user?.uid); // Real-time unread count
+  const { selectedFont, fontWeight, fontSize } = useFont(); // Fuente del logo
 
   // Verificar si es admin
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
@@ -145,10 +147,14 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
             <button
               onClick={() => handleNavigate('/')}
               className="hidden md:flex items-center gap-2
-                         text-xl font-bold text-zinc-900 dark:text-white
+                         text-zinc-900 dark:text-white
                          cursor-pointer select-none
-                         hover:opacity-80 transition-opacity"
-              style={{ fontFamily: "'Microsoft YaHei', sans-serif" }}
+                         hover:opacity-80 transition-all duration-300"
+              style={{
+                fontFamily: selectedFont,
+                fontWeight: fontWeight,
+                fontSize: `${fontSize}rem`
+              }}
               aria-label="Ir al inicio"
             >
               西文教室

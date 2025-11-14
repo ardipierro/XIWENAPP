@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, FileText, Sparkles, Edit3 } from 'lucide-react';
+import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
@@ -13,8 +13,11 @@ import {
   BaseSelect,
   BaseAlert
 } from './common';
-import { CONTENT_TYPES, EXERCISE_TYPES, DIFFICULTY_LEVELS } from '../firebase/content';
+import { CONTENT_TYPES, EXERCISE_TYPES, DIFFICULTY_LEVELS, CONTENT_STATUS } from '../firebase/content';
+import { getAllContent } from '../firebase/content';
 import ExerciseGeneratorContent from './ExerciseGeneratorContent';
+import ContentOrderEditor from './ContentOrderEditor';
+import ContentStyleEditor from './ContentStyleEditor';
 import logger from '../utils/logger';
 
 const TYPE_OPTIONS = [
@@ -45,11 +48,19 @@ const EXERCISE_TYPE_OPTIONS = [
   { value: EXERCISE_TYPES.LISTENING, label: 'Comprensión Auditiva' }
 ];
 
+const STATUS_OPTIONS = [
+  { value: CONTENT_STATUS.DRAFT, label: '📝 Borrador', icon: Edit3 },
+  { value: CONTENT_STATUS.REVIEW, label: '👀 En Revisión', icon: Eye },
+  { value: CONTENT_STATUS.PUBLISHED, label: '✅ Publicado', icon: FileCheck },
+  { value: CONTENT_STATUS.ARCHIVED, label: '📦 Archivado', icon: Archive }
+];
+
 function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userId, onNavigateToAIConfig }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     type: CONTENT_TYPES.LESSON,
+    status: CONTENT_STATUS.DRAFT, // Estado del contenido
     contentType: '', // Para ejercicios
     body: '',
     url: '',
@@ -65,7 +76,10 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
       points: '',
       tags: '',
       language: 'es',
-      level: ''
+      level: '',
+      childContentIds: [], // Para cursos/contenedores
+      contentOrder: [], // Orden personalizado de contenidos
+      styles: null // Estilos visuales personalizados
     }
   });
 
@@ -74,6 +88,30 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
   const [activeTab, setActiveTab] = useState('manual'); // 'manual' | 'ai'
   const [generatedExercises, setGeneratedExercises] = useState(null);
 
+  // Estados para FASE 4-7
+  const [showOrderEditor, setShowOrderEditor] = useState(false);
+  const [showStyleEditor, setShowStyleEditor] = useState(false);
+  const [childContents, setChildContents] = useState([]);
+  const [loadingChildren, setLoadingChildren] = useState(false);
+  const [allContents, setAllContents] = useState([]);
+
+  // Cargar todos los contenidos disponibles para asignación
+  useEffect(() => {
+    if (isOpen) {
+      loadAllContents();
+    }
+  }, [isOpen]);
+
+  const loadAllContents = async () => {
+    try {
+      const result = await getAllContent();
+      setAllContents(result || []);
+      logger.debug(`Cargados ${result?.length || 0} contenidos disponibles`, 'CreateContentModal');
+    } catch (err) {
+      logger.error('Error cargando contenidos:', err, 'CreateContentModal');
+    }
+  };
+
   // Cargar datos iniciales si es edición
   useEffect(() => {
     if (initialData) {
@@ -81,6 +119,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         title: initialData.title || '',
         description: initialData.description || '',
         type: initialData.type || CONTENT_TYPES.LESSON,
+        status: initialData.status || CONTENT_STATUS.DRAFT,
         contentType: initialData.contentType || '',
         body: initialData.body || '',
         url: initialData.url || '',
@@ -96,7 +135,10 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
           points: initialData.metadata?.points || '',
           tags: initialData.metadata?.tags?.join(', ') || '',
           language: initialData.metadata?.language || 'es',
-          level: initialData.metadata?.level || ''
+          level: initialData.metadata?.level || '',
+          childContentIds: initialData.metadata?.childContentIds || [],
+          contentOrder: initialData.metadata?.contentOrder || [],
+          styles: initialData.metadata?.styles || null
         }
       });
     }
@@ -194,6 +236,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         title: formData.title.trim(),
         description: formData.description.trim(),
         type: formData.type,
+        status: formData.status, // FASE 10: Estado del contenido
         body: formData.body,
         url: formData.url,
         metadata: {
@@ -204,7 +247,17 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
             ? formData.metadata.tags.split(',').map(t => t.trim()).filter(Boolean)
             : [],
           language: formData.metadata.language,
-          level: formData.metadata.level || null
+          level: formData.metadata.level || null,
+          // FASE 4-7: Guardar childContentIds, contentOrder y styles
+          ...(formData.metadata.childContentIds && formData.metadata.childContentIds.length > 0 && {
+            childContentIds: formData.metadata.childContentIds
+          }),
+          ...(formData.metadata.contentOrder && formData.metadata.contentOrder.length > 0 && {
+            contentOrder: formData.metadata.contentOrder
+          }),
+          ...(formData.metadata.styles && {
+            styles: formData.metadata.styles
+          })
         },
         createdBy: userId,
         active: true
@@ -245,6 +298,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
       title: '',
       description: '',
       type: CONTENT_TYPES.LESSON,
+      status: CONTENT_STATUS.DRAFT,
       contentType: '',
       body: '',
       url: '',
@@ -260,14 +314,60 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         points: '',
         tags: '',
         language: 'es',
-        level: ''
+        level: '',
+        childContentIds: [],
+        contentOrder: [],
+        styles: null
       }
     });
     setError(null);
+    setActiveTab('manual');
+    setShowOrderEditor(false);
+    setShowStyleEditor(false);
     onClose();
   };
 
+  // FASE 6: Handlers para ContentOrderEditor
+  const handleOpenOrderEditor = async () => {
+    if (!formData.metadata.childContentIds || formData.metadata.childContentIds.length === 0) {
+      return;
+    }
+
+    try {
+      setLoadingChildren(true);
+      const loaded = allContents.filter(c => formData.metadata.childContentIds.includes(c.id));
+      setChildContents(loaded);
+      setShowOrderEditor(true);
+      logger.debug(`Cargados ${loaded.length} contenidos hijos para ordenar`, 'CreateContentModal');
+    } catch (err) {
+      logger.error('Error cargando contenidos hijos:', err, 'CreateContentModal');
+      setError('Error al cargar contenidos: ' + err.message);
+    } finally {
+      setLoadingChildren(false);
+    }
+  };
+
+  const handleOrderSaved = () => {
+    // El order se guarda en formData.metadata.contentOrder por ContentOrderEditor
+    setShowOrderEditor(false);
+    logger.info('Orden de contenidos guardado', 'CreateContentModal');
+  };
+
+  // FASE 7: Handlers para ContentStyleEditor
+  const handleStylesSaved = (styles) => {
+    setFormData({
+      ...formData,
+      metadata: {
+        ...formData.metadata,
+        styles
+      }
+    });
+    setShowStyleEditor(false);
+    logger.info('Estilos guardados', 'CreateContentModal');
+  };
+
   return (
+    <>
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
@@ -495,6 +595,36 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* FASE 10: Estado del contenido */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    Estado del Contenido
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {STATUS_OPTIONS.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = formData.status === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleChange('status', option.value)}
+                          className={`
+                            px-4 py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2
+                            ${isSelected
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                              : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 text-zinc-600 dark:text-zinc-400'
+                            }
+                          `}
+                        >
+                          <Icon size={16} />
+                          <span className="text-sm font-medium">{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <BaseSelect
                   label="Dificultad"
                   value={formData.metadata.difficulty}
@@ -536,6 +666,96 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
                 className="mt-4"
               />
             </div>
+
+            {/* FASE 4: Asignar Contenidos (solo para cursos) */}
+            {formData.type === CONTENT_TYPES.COURSE && (
+              <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Layers size={20} className="text-indigo-600 dark:text-indigo-400" />
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                      Contenidos del Curso
+                    </h3>
+                  </div>
+                  {formData.metadata.childContentIds.length > 0 && (
+                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+                      {formData.metadata.childContentIds.length} contenido(s)
+                    </span>
+                  )}
+                </div>
+
+                {/* Lista de contenidos disponibles */}
+                <div className="space-y-2 max-h-64 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-3">
+                  {allContents && allContents.length > 0 ? (
+                    allContents
+                      .filter(c => c.type !== CONTENT_TYPES.COURSE) // No permitir cursos dentro de cursos
+                      .map(content => (
+                        <label
+                          key={content.id}
+                          className="flex items-start gap-3 p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.metadata.childContentIds.includes(content.id)}
+                            onChange={(e) => {
+                              const newIds = e.target.checked
+                                ? [...formData.metadata.childContentIds, content.id]
+                                : formData.metadata.childContentIds.filter(id => id !== content.id);
+                              handleMetadataChange('childContentIds', newIds);
+                            }}
+                            className="mt-1 w-4 h-4 rounded border-zinc-300 dark:border-zinc-600"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-zinc-900 dark:text-white truncate">
+                              {content.title}
+                            </p>
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                              {CONTENT_TYPE_CONFIG[content.type]?.label || content.type}
+                            </p>
+                          </div>
+                        </label>
+                      ))
+                  ) : (
+                    <p className="text-sm text-center py-4 text-zinc-500 dark:text-zinc-400">
+                      No hay contenidos disponibles
+                    </p>
+                  )}
+                </div>
+
+                {/* Botones de acción */}
+                {formData.metadata.childContentIds.length >= 2 && (
+                  <div className="mt-4 flex gap-2">
+                    <BaseButton
+                      variant="secondary"
+                      icon={ArrowUpDown}
+                      onClick={handleOpenOrderEditor}
+                      disabled={loadingChildren}
+                      type="button"
+                    >
+                      {loadingChildren ? 'Cargando...' : 'Reordenar Contenidos'}
+                    </BaseButton>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* FASE 7: Botón para abrir editor de estilos */}
+            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+              <BaseButton
+                variant="secondary"
+                icon={Palette}
+                onClick={() => setShowStyleEditor(true)}
+                type="button"
+                className="w-full"
+              >
+                {formData.metadata.styles ? 'Editar Estilos Visuales' : 'Personalizar Estilos'}
+              </BaseButton>
+              {formData.metadata.styles && (
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400 text-center">
+                  ✓ Estilos personalizados aplicados
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -556,6 +776,33 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         )}
       </form>
     </BaseModal>
+
+    {/* FASE 6: Modal de reordenamiento de contenidos */}
+    {initialData && (
+      <ContentOrderEditor
+        course={initialData}
+        contents={childContents}
+        isOpen={showOrderEditor}
+        onClose={() => setShowOrderEditor(false)}
+        onSave={handleOrderSaved}
+      />
+    )}
+
+    {/* FASE 7: Modal de editor de estilos */}
+    <BaseModal
+      isOpen={showStyleEditor}
+      onClose={() => setShowStyleEditor(false)}
+      title="Personalizar Estilos Visuales"
+      icon={Palette}
+      size="2xl"
+    >
+      <ContentStyleEditor
+        initialStyles={formData.metadata.styles}
+        onSave={handleStylesSaved}
+        onCancel={() => setShowStyleEditor(false)}
+      />
+    </BaseModal>
+    </>
   );
 }
 

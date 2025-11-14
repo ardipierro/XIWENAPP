@@ -533,6 +533,62 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
     }
   };
 
+  /**
+   * Convierte estilos personalizados a CSS inline
+   */
+  const getCustomStyles = () => {
+    const styles = content.metadata?.styles;
+    if (!styles) return null;
+
+    const fontSizeMap = {
+      sm: '14px',
+      base: '16px',
+      lg: '18px',
+      xl: '20px'
+    };
+
+    const fontWeightMap = {
+      normal: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700'
+    };
+
+    const lineHeightMap = {
+      tight: '1.25',
+      normal: '1.5',
+      relaxed: '1.75',
+      loose: '2'
+    };
+
+    const paragraphSpacingMap = {
+      tight: '0.5rem',
+      normal: '1rem',
+      relaxed: '1.5rem'
+    };
+
+    const sectionSpacingMap = {
+      tight: '1rem',
+      normal: '2rem',
+      relaxed: '3rem',
+      loose: '4rem'
+    };
+
+    return {
+      fontFamily: styles.fontFamily === 'mono' ? 'monospace' : styles.fontFamily,
+      fontSize: fontSizeMap[styles.fontSize] || fontSizeMap.base,
+      fontWeight: fontWeightMap[styles.fontWeight] || fontWeightMap.normal,
+      lineHeight: lineHeightMap[styles.lineHeight] || lineHeightMap.normal,
+      color: styles.textColor,
+      backgroundColor: styles.backgroundColor,
+      '--paragraph-spacing': paragraphSpacingMap[styles.paragraphSpacing] || paragraphSpacingMap.normal,
+      '--section-spacing': sectionSpacingMap[styles.sectionSpacing] || sectionSpacingMap.normal,
+      '--accent-color': styles.accentColor
+    };
+  };
+
+  const customStyles = getCustomStyles();
+
   return (
     <ExpandableModal
       isOpen={isOpen}
@@ -556,8 +612,14 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
         </div>
       )}
 
-      {/* Contenido renderizado */}
-      {renderedContent}
+      {/* Contenido renderizado con estilos personalizados */}
+      {customStyles ? (
+        <div style={customStyles} className="p-4 rounded-lg transition-all">
+          {renderedContent}
+        </div>
+      ) : (
+        renderedContent
+      )}
     </ExpandableModal>
   );
 }

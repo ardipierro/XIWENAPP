@@ -19,11 +19,14 @@ import {
   X,
   ArrowLeft,
   Trophy,
-  Clock
+  Clock,
+  BarChart3
 } from 'lucide-react';
 import { BaseButton, BaseLoading, BaseAlert, BaseEmptyState } from './common';
 import ContentViewer from './ContentViewer';
 import ContentRepository from '../services/ContentRepository';
+import useCourseProgress from '../hooks/useCourseProgress';
+import { formatTimeSpent } from '../firebase/courseProgress';
 import logger from '../utils/logger';
 
 /**
@@ -42,11 +45,14 @@ function CoursePlayer({ courseId, userId, onBack }) {
   const [error, setError] = useState(null);
 
   // Estados de navegación
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Estados de progreso
-  const [completedIds, setCompletedIds] = useState(new Set());
+  // FASE 8: Hook de progreso
+  const progress = useCourseProgress(userId, courseId, contents.length);
+
+  // Alias para compatibilidad
+  const currentIndex = progress.currentIndex;
+  const completedIds = progress.completedContentIds;
 
   // Cargar curso y contenidos
   useEffect(() => {
@@ -90,6 +96,26 @@ function CoursePlayer({ courseId, userId, onBack }) {
         }
       }
 
+      // Aplicar orden guardado en metadata.contentOrder si existe
+      const contentOrder = courseData.metadata?.contentOrder;
+      if (contentOrder && Array.isArray(contentOrder) && contentOrder.length > 0) {
+        loadedContents.sort((a, b) => {
+          const indexA = contentOrder.indexOf(a.id);
+          const indexB = contentOrder.indexOf(b.id);
+
+          // Si ambos están en el orden, usar ese orden
+          if (indexA !== -1 && indexB !== -1) {
+            return indexA - indexB;
+          }
+          // Si solo uno está, poner el que está primero
+          if (indexA !== -1) return -1;
+          if (indexB !== -1) return 1;
+          // Si ninguno está, mantener orden actual
+          return 0;
+        });
+        logger.debug(`Contenidos ordenados según metadata.contentOrder`, 'CoursePlayer');
+      }
+
       setContents(loadedContents);
       logger.info(`Curso cargado: ${courseData.title} con ${loadedContents.length} contenidos`, 'CoursePlayer');
 
@@ -106,8 +132,19 @@ function CoursePlayer({ courseId, userId, onBack }) {
    */
   const goToPrevious = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      logger.debug(`Navegando a contenido anterior: ${currentIndex - 1}`, 'CoursePlayer');
+      // Stop tracking current content
+      progress.stopTracking();
+
+      // Navigate
+      const newIndex = currentIndex - 1;
+      progress.updateCurrentIndex(newIndex);
+
+      // Start tracking new content
+      if (contents[newIndex]) {
+        progress.startTracking(contents[newIndex].id);
+      }
+
+      logger.debug(`Navegando a contenido anterior: ${newIndex}`, 'CoursePlayer');
     }
   };
 
@@ -116,8 +153,19 @@ function CoursePlayer({ courseId, userId, onBack }) {
    */
   const goToNext = () => {
     if (currentIndex < contents.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      logger.debug(`Navegando a contenido siguiente: ${currentIndex + 1}`, 'CoursePlayer');
+      // Stop tracking current content
+      progress.stopTracking();
+
+      // Navigate
+      const newIndex = currentIndex + 1;
+      progress.updateCurrentIndex(newIndex);
+
+      // Start tracking new content
+      if (contents[newIndex]) {
+        progress.startTracking(contents[newIndex].id);
+      }
+
+      logger.debug(`Navegando a contenido siguiente: ${newIndex}`, 'CoursePlayer');
     }
   };
 
@@ -127,19 +175,27 @@ function CoursePlayer({ courseId, userId, onBack }) {
   const markAsCompleted = () => {
     if (contents[currentIndex]) {
       const contentId = contents[currentIndex].id;
-      setCompletedIds(prev => new Set([...prev, contentId]));
+      progress.markContentCompleted(contentId);
       logger.info(`Contenido marcado como completado: ${contentId}`, 'CoursePlayer');
-
-      // TODO: Guardar en Firebase cuando se implemente el hook de progreso
     }
   };
 
+  // FASE 8: Iniciar tracking al cambiar de contenido
+  useEffect(() => {
+    if (contents[currentIndex]) {
+      progress.startTracking(contents[currentIndex].id);
+    }
+
+    return () => {
+      progress.stopTracking();
+    };
+  }, [currentIndex, contents]);
+
   /**
-   * Calcula el porcentaje de progreso
+   * Calcula el porcentaje de progreso (usa el hook)
    */
   const getProgressPercentage = () => {
-    if (contents.length === 0) return 0;
-    return Math.round((completedIds.size / contents.length) * 100);
+    return progress.getCompletionPercentage();
   };
 
   /**
@@ -386,8 +442,8 @@ function CoursePlayer({ courseId, userId, onBack }) {
               </span>
             </div>
 
-            {/* Progress bar móvil */}
-            <div className="mt-3 md:hidden">
+            {/* Progress bar */}
+            <div className="mt-3">
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-gray-600 dark:text-gray-400">Progreso</span>
                 <span className="font-semibold text-indigo-600 dark:text-indigo-400">
@@ -401,6 +457,18 @@ function CoursePlayer({ courseId, userId, onBack }) {
                 />
               </div>
             </div>
+
+            {/* FASE 8: Métricas de progreso */}
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                <Clock size={14} />
+                <span>{formatTimeSpent(progress.getTotalTimeSpent())}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                <BarChart3 size={14} />
+                <span>{progress.totalSessions} sesión{progress.totalSessions !== 1 ? 'es' : ''}</span>
+              </div>
+            </div>
           </div>
 
           {/* Lista de contenidos */}
@@ -412,7 +480,16 @@ function CoursePlayer({ courseId, userId, onBack }) {
               return (
                 <button
                   key={content.id}
-                  onClick={() => setCurrentIndex(index)}
+                  onClick={() => {
+                    if (index !== currentIndex) {
+                      // Stop tracking current
+                      progress.stopTracking();
+                      // Update index
+                      progress.updateCurrentIndex(index);
+                      // Start tracking new
+                      progress.startTracking(content.id);
+                    }
+                  }}
                   className={`
                     w-full p-3 rounded-lg mb-2 text-left transition-all
                     ${isActive
