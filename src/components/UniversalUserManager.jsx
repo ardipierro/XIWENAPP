@@ -65,7 +65,7 @@ const getRoleBadge = (role) => {
  * Adapta UI y funcionalidad según rol del usuario actual
  */
 export default function UniversalUserManager({ user, userRole }) {
-  const { can, isAdmin } = usePermissions();
+  const { can, isAdmin, initialized: permissionsReady } = usePermissions();
 
   // Hook de gestión de usuarios con permisos
   const userManagement = useUserManagement(user, {
@@ -89,16 +89,31 @@ export default function UniversalUserManager({ user, userRole }) {
   // Ref para rastrear si ya se cargaron los usuarios en esta instancia
   const hasLoadedRef = useRef(false);
 
-  // Cargar usuarios cuando el componente se monta
+  // Cargar usuarios cuando el usuario esté autenticado Y los permisos estén listos
   useEffect(() => {
     let isMounted = true;
 
     const loadData = async () => {
-      if (!hasLoadedRef.current && user?.uid && (can('view-own-students') || can('view-all-users'))) {
+      const hasUser = !!user?.uid;
+      const canViewStudents = can('view-own-students');
+      const canViewAll = can('view-all-users');
+      const alreadyLoaded = hasLoadedRef.current;
+
+      logger.debug(`🔍 useEffect triggered - hasUser: ${hasUser}, permissionsReady: ${permissionsReady}, canViewStudents: ${canViewStudents}, canViewAll: ${canViewAll}, alreadyLoaded: ${alreadyLoaded}`, 'UniversalUserManager');
+
+      // Solo cargar si: hay usuario, permisos listos, tiene permisos, y no se ha cargado aún en esta instancia
+      if (user?.uid && permissionsReady && (canViewStudents || canViewAll) && !alreadyLoaded) {
         hasLoadedRef.current = true;
         if (isMounted) {
+          logger.debug('✅ Loading users...', 'UniversalUserManager');
           await userManagement.loadUsers();
         }
+      } else {
+        const reason = !user?.uid ? 'No user' :
+                       !permissionsReady ? 'Permissions not ready' :
+                       alreadyLoaded ? 'Already loaded' :
+                       'No permissions';
+        logger.debug(`❌ Skipping user load - Reason: ${reason}`, 'UniversalUserManager');
       }
     };
 
@@ -108,7 +123,7 @@ export default function UniversalUserManager({ user, userRole }) {
       isMounted = false;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Solo al montar - hasLoadedRef se resetea con cada nueva instancia del componente
+  }, [user?.uid, permissionsReady]); // Ejecutar cuando user.uid Y permissions estén listos
 
   // Cargar enrollment counts cuando cambien los usuarios
   useEffect(() => {
