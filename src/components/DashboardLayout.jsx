@@ -90,11 +90,11 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
           ${sidebarOpen ? 'ml-0 lg:ml-[200px]' : 'ml-0'}
           overflow-y-auto overflow-x-hidden
           transition-[margin-left] duration-200 ease-in-out
-          scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-gray-300/30 dark:hover:scrollbar-thumb-gray-600/20
-          scrollbar-track-transparent
+          scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500
+          scrollbar-track-gray-100 dark:scrollbar-track-gray-800
         `}
       >
-        <div className={`px-4 py-3 md:px-6 md:py-3 ${fullWidth ? '' : 'max-w-[1400px] mx-auto'}`}>
+        <div className={`px-4 py-3 md:px-6 md:py-3 pb-6 md:pb-8 ${fullWidth ? '' : 'max-w-[1400px] mx-auto'}`}>
           {children}
         </div>
       </main>

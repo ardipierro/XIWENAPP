@@ -8,6 +8,7 @@ import { Menu, Bell, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
 import CreditBadge from './common/CreditBadge';
 import './UniversalTopBar.css';
@@ -21,6 +22,7 @@ import './UniversalTopBar.css';
 export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { selectedFont, fontWeight, fontSize } = useFont();
   const { getRoleLabel } = usePermissions();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -45,14 +47,19 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         </button>
 
         <div className="universal-topbar__title">
-          <h1 style={{ fontFamily: "'Microsoft YaHei', sans-serif", fontSize: '1.25rem' }}>西文教室</h1>
-          <span className="universal-topbar__subtitle">{getRoleLabel()}</span>
+          <h1 style={{
+            fontFamily: selectedFont,
+            fontWeight: fontWeight,
+            fontSize: `${fontSize}rem`
+          }}>
+            西文教室
+          </h1>
         </div>
       </div>
 
-      {/* Center Section - Créditos */}
+      {/* Center Section - Removido CreditBadge */}
       <div className="universal-topbar__center">
-        <CreditBadge showLabel={true} />
+        {/* Badge de créditos eliminado */}
       </div>
 
       {/* Right Section */}
