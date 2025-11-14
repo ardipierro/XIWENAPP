@@ -1653,6 +1653,16 @@ function TeacherDashboard({ user, userRole, onLogout }) {
       onClick: () => navigation.setCurrentScreen('testCollab'),
       createLabel: "Abrir Pizarra",
       onCreateClick: () => navigation.setCurrentScreen('testCollab')
+    },
+    {
+      id: 'universalDashboard',
+      icon: Rocket,
+      title: "🚀 Dashboard Universal (POC)",
+      count: 0,
+      countLabel: "beta",
+      onClick: () => navigate('/dashboard-v2'),
+      createLabel: "Ir a Dashboard v2",
+      onCreateClick: () => navigate('/dashboard-v2')
     }
   ];
 
