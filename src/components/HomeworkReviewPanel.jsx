@@ -183,6 +183,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
         >
           <ManualHomeworkUpload
             teacherId={teacherId || user?.uid}
+            userRole={user?.role}
             onSuccess={handleUploadSuccess}
             onCancel={() => setShowUploadModal(false)}
           />

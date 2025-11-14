@@ -37,7 +37,11 @@ import {
   List,
   CalendarDays,
   CheckSquare,
-  Zap
+  Zap,
+  DollarSign,
+  Mail,
+  Eye,
+  Trash2
 } from 'lucide-react';
 import {
   loadStudents,
@@ -61,7 +65,7 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
-import QuickAccessCard from './QuickAccessCard';
+import { UniversalCard, CardGrid } from './cards';
 import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
 import Whiteboard from './Whiteboard';
@@ -69,8 +73,8 @@ import WhiteboardManager from './WhiteboardManager';
 // Lazy load Excalidraw to prevent vendor bundle issues
 const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
-import StudentCard from './StudentCard';
 import BaseButton from './common/BaseButton';
+import { BaseBadge } from './common';
 // REMOVED: LiveClassManager and LiveClassRoom - using unified ClassSessionManager/ClassSessionRoom now
 import LiveGameProjection from './LiveGameProjection';
 import LiveGameSetup from './LiveGameSetup';
@@ -102,6 +106,22 @@ const ICON_MAP = {
   'Target': Target,
   'FlaskConical': FlaskConical,
   'User': User
+};
+
+// Helper functions for user cards
+const getAvatarColor = (name) => {
+  const colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'];
+  const index = (name?.charCodeAt(0) || 0) % colors.length;
+  return colors[index];
+};
+
+const getRoleBadge = (role) => {
+  const badges = {
+    admin: { label: 'Admin', variant: 'warning' },
+    teacher: { label: 'Profesor', variant: 'info' },
+    student: { label: 'Alumno', variant: 'primary' }
+  };
+  return badges[role] || badges.student;
 };
 
 function TeacherDashboard({ user, userRole, onLogout }) {
@@ -837,21 +857,65 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <p>No se encontraron alumnos</p>
             </div>
           ) : (
-            <div className={navigation.studentsViewMode === 'grid' ? 'students-grid' : 'students-list'}>
-              {filteredStudents.map(student => (
-                <StudentCard
-                  key={student.id}
-                  student={student}
-                  enrollmentCount={resourceAssignment.enrollmentCounts[student.id] || 0}
-                  onView={(student) => {
-                    navigation.setSelectedUserProfile(student);
-                    navigation.setShowUserProfile(true);
-                  }}
-                  onDelete={(student) => handleDeleteUser(student.id)}
-                  isAdmin={isAdmin}
-                />
-              ))}
-            </div>
+            <CardGrid
+              columnsType={navigation.studentsViewMode === 'list' ? 'wide' : 'default'}
+              gap={navigation.studentsViewMode === 'list' ? 'gap-3' : 'gap-4 md:gap-6'}
+            >
+              {filteredStudents.map(student => {
+                const initial = student.name?.charAt(0).toUpperCase() || '?';
+                const avatarColor = getAvatarColor(student.name);
+                const roleBadge = getRoleBadge(student.role);
+
+                return (
+                  <UniversalCard
+                    key={student.id}
+                    variant="user"
+                    size="md"
+                    layout={navigation.studentsViewMode === 'list' ? 'horizontal' : 'vertical'}
+                    avatar={initial}
+                    avatarColor={avatarColor}
+                    title={student.name}
+                    subtitle={student.email}
+                    badges={[{ variant: roleBadge.variant, children: roleBadge.label }]}
+                    stats={[
+                      { label: 'Cursos', value: resourceAssignment.enrollmentCounts[student.id] || 0, icon: BookOpen },
+                      { label: 'Créditos', value: student.credits || 0, icon: DollarSign }
+                    ]}
+                    onClick={() => {
+                      navigation.setSelectedUserProfile(student);
+                      navigation.setShowUserProfile(true);
+                    }}
+                    actions={
+                      <>
+                        <BaseButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigation.setSelectedUserProfile(student);
+                            navigation.setShowUserProfile(true);
+                          }}
+                          variant="ghost"
+                          size="sm"
+                          icon={Eye}
+                        >
+                          Ver
+                        </BaseButton>
+                        {isAdmin && (
+                          <BaseButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteUser(student.id);
+                            }}
+                            variant="danger"
+                            size="sm"
+                            icon={Trash2}
+                          />
+                        )}
+                      </>
+                    }
+                  />
+                );
+              })}
+            </CardGrid>
           )}
         </div>
       </DashboardLayout>
@@ -934,36 +998,63 @@ function TeacherDashboard({ user, userRole, onLogout }) {
               <div className="no-users">
                 <p>No se encontraron usuarios con los filtros seleccionados</p>
               </div>
-            ) : navigation.studentsViewMode === 'grid' ? (
-              /* Vista de grilla con StudentCard */
-              <div className="quick-access-grid">
-                {userManagement.filteredUsers.map(userItem => (
-                  <StudentCard
-                    key={userItem.id}
-                    student={userItem}
-                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
-                    onView={handleViewUserProfile}
-                    onDelete={isAdmin ? handleDeleteUser : null}
-                    isAdmin={isAdmin}
-                    viewMode="grid"
-                  />
-                ))}
-              </div>
-            ) : navigation.studentsViewMode === 'list' ? (
-              /* Vista de lista con StudentCard */
-              <div className="flex flex-col gap-4">
-                {userManagement.filteredUsers.map(userItem => (
-                  <StudentCard
-                    key={userItem.id}
-                    student={userItem}
-                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
-                    onView={handleViewUserProfile}
-                    onDelete={isAdmin ? handleDeleteUser : null}
-                    isAdmin={isAdmin}
-                    viewMode="list"
-                  />
-                ))}
-              </div>
+            ) : navigation.studentsViewMode === 'grid' || navigation.studentsViewMode === 'list' ? (
+              /* Vista de grilla/lista con UniversalCard */
+              <CardGrid
+                columnsType={navigation.studentsViewMode === 'list' ? 'wide' : 'default'}
+                gap={navigation.studentsViewMode === 'list' ? 'gap-3' : 'gap-4 md:gap-6'}
+              >
+                {userManagement.filteredUsers.map(userItem => {
+                  const initial = userItem.name?.charAt(0).toUpperCase() || '?';
+                  const avatarColor = getAvatarColor(userItem.name);
+                  const roleBadge = getRoleBadge(userItem.role);
+
+                  return (
+                    <UniversalCard
+                      key={userItem.id}
+                      variant="user"
+                      size="md"
+                      layout={navigation.studentsViewMode === 'list' ? 'horizontal' : 'vertical'}
+                      avatar={initial}
+                      avatarColor={avatarColor}
+                      title={userItem.name}
+                      subtitle={userItem.email}
+                      badges={[{ variant: roleBadge.variant, children: roleBadge.label }]}
+                      stats={[
+                        { label: 'Cursos', value: resourceAssignment.enrollmentCounts[userItem.id] || 0, icon: BookOpen },
+                        { label: 'Créditos', value: userItem.credits || 0, icon: DollarSign }
+                      ]}
+                      onClick={() => handleViewUserProfile(userItem)}
+                      actions={
+                        <>
+                          <BaseButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewUserProfile(userItem);
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            icon={Eye}
+                          >
+                            Ver
+                          </BaseButton>
+                          {isAdmin && (
+                            <BaseButton
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteUser(userItem.id);
+                              }}
+                              variant="danger"
+                              size="sm"
+                              icon={Trash2}
+                            />
+                          )}
+                        </>
+                      }
+                    />
+                  );
+                })}
+              </CardGrid>
             ) : (
               /* Vista de tabla (default) */
               <div className="users-table-container">
@@ -1696,20 +1787,36 @@ function TeacherDashboard({ user, userRole, onLogout }) {
             />
 
             {/* Quick Access Cards */}
-            <div className={navigation.dashboardViewMode === 'grid' ? 'quick-access-grid' : 'quick-access-list'}>
+            <CardGrid
+              columnsType={navigation.dashboardViewMode === 'list' ? 'wide' : 'default'}
+              gap={navigation.dashboardViewMode === 'list' ? 'gap-3' : 'gap-4 md:gap-6'}
+            >
               {filteredDashboardCards.map(card => (
-                <QuickAccessCard
+                <UniversalCard
                   key={card.id}
+                  variant="default"
+                  size="md"
                   icon={card.icon}
                   title={card.title}
-                  count={card.count}
-                  countLabel={card.countLabel}
+                  description={card.description}
+                  stats={card.count !== undefined ? [{ value: card.count, label: card.countLabel }] : undefined}
                   onClick={card.onClick}
-                  createLabel={card.createLabel}
-                  onCreateClick={card.onCreateClick}
+                  actions={card.createLabel && card.onCreateClick ? (
+                    <BaseButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        card.onCreateClick();
+                      }}
+                      icon={Plus}
+                    >
+                      {card.createLabel}
+                    </BaseButton>
+                  ) : undefined}
                 />
               ))}
-            </div>
+            </CardGrid>
           </div>
       </div>
       </DashboardLayout>

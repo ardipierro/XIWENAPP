@@ -6,21 +6,22 @@
 import { useState, useEffect } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { BaseButton, BaseAlert, BaseLoading, BaseSelect } from '../common';
-import { getStudentsByTeacher } from '../../firebase/users';
+import { getStudentsByTeacher, getAllUsers } from '../../firebase/users';
 import { createHomeworkReview } from '../../firebase/homework_reviews';
 import { uploadImage } from '../../firebase/storage';
 import logger from '../../utils/logger';
 
 /**
  * Manual Homework Upload Component
- * Allows teachers to upload homework images for students manually
+ * Allows teachers/admins to upload homework images for students manually
  *
  * @param {Object} props
  * @param {string} props.teacherId - Current teacher ID
+ * @param {string} props.userRole - Current user role (admin/teacher)
  * @param {function} props.onSuccess - Callback when upload succeeds
  * @param {function} props.onCancel - Callback when cancelled
  */
-export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel }) {
+export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, onCancel }) {
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -32,14 +33,24 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
   // Load students on mount
   useEffect(() => {
     loadStudents();
-  }, [teacherId]);
+  }, [teacherId, userRole]);
 
   const loadStudents = async () => {
     try {
       setLoading(true);
-      const studentsList = await getStudentsByTeacher(teacherId);
+      let studentsList = [];
+
+      // Admin can see ALL students, Teacher only sees their own
+      if (userRole === 'admin') {
+        const allUsers = await getAllUsers({ role: 'student', activeOnly: true });
+        studentsList = allUsers;
+        logger.info(`[ADMIN] Loaded ${studentsList.length} students (all active)`, 'ManualHomeworkUpload');
+      } else {
+        studentsList = await getStudentsByTeacher(teacherId);
+        logger.info(`[TEACHER] Loaded ${studentsList.length} students for teacher ${teacherId}`, 'ManualHomeworkUpload');
+      }
+
       setStudents(studentsList);
-      logger.info(`Loaded ${studentsList.length} students for teacher ${teacherId}`, 'ManualHomeworkUpload');
     } catch (err) {
       logger.error('Error loading students', 'ManualHomeworkUpload', err);
       setError('Error al cargar la lista de estudiantes');
