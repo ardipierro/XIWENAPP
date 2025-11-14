@@ -1674,57 +1674,68 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
    ============================================ */
 
 /* Scrollbar siempre visible para el contenedor principal del dashboard */
-.dashboard-layout main {
+.dashboard-layout main,
+.universal-dashboard__content {
   /* Asegurar que el scrollbar sea visible */
   overflow-y: scroll !important;
   overflow-x: hidden;
 }
 
 /* Webkit (Chrome, Safari, Edge) */
-.dashboard-layout main::-webkit-scrollbar {
+.dashboard-layout main::-webkit-scrollbar,
+.universal-dashboard__content::-webkit-scrollbar {
   width: 12px;
 }
 
-.dashboard-layout main::-webkit-scrollbar-track {
+.dashboard-layout main::-webkit-scrollbar-track,
+.universal-dashboard__content::-webkit-scrollbar-track {
   background: #f1f5f9; /* gray-100 */
   border-radius: 0;
 }
 
-.dashboard-layout main::-webkit-scrollbar-thumb {
+.dashboard-layout main::-webkit-scrollbar-thumb,
+.universal-dashboard__content::-webkit-scrollbar-thumb {
   background: #cbd5e1; /* gray-300 */
   border-radius: 6px;
   border: 2px solid #f1f5f9; /* Padding visual */
 }
 
-.dashboard-layout main::-webkit-scrollbar-thumb:hover {
+.dashboard-layout main::-webkit-scrollbar-thumb:hover,
+.universal-dashboard__content::-webkit-scrollbar-thumb:hover {
   background: #94a3b8; /* gray-400 */
 }
 
-.dashboard-layout main::-webkit-scrollbar-button {
+.dashboard-layout main::-webkit-scrollbar-button,
+.universal-dashboard__content::-webkit-scrollbar-button {
   display: none;
 }
 
 /* Dark mode */
-.dark .dashboard-layout main::-webkit-scrollbar-track {
+.dark .dashboard-layout main::-webkit-scrollbar-track,
+.dark .universal-dashboard__content::-webkit-scrollbar-track {
   background: #18181b; /* zinc-900 */
 }
 
-.dark .dashboard-layout main::-webkit-scrollbar-thumb {
+.dark .dashboard-layout main::-webkit-scrollbar-thumb,
+.dark .universal-dashboard__content::-webkit-scrollbar-thumb {
   background: #52525b; /* zinc-600 */
   border-color: #18181b;
 }
 
-.dark .dashboard-layout main::-webkit-scrollbar-thumb:hover {
+.dark .dashboard-layout main::-webkit-scrollbar-thumb:hover,
+.dark .universal-dashboard__content::-webkit-scrollbar-thumb:hover {
   background: #71717a; /* zinc-500 */
 }
 
 /* Firefox */
-.dashboard-layout main {
+.dashboard-layout main,
+.universal-dashboard__content {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9; /* thumb track */
 }
 
-.dark .dashboard-layout main {
+.dark .dashboard-layout main,
+.dark .universal-dashboard__content {
   scrollbar-color: #52525b #18181b;
 }
 
