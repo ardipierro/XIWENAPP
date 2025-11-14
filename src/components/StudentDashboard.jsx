@@ -8,7 +8,6 @@ import {
   Gamepad2,
   Target,
   BookOpen,
-  ClipboardList,
   ScrollText,
   Calendar,
   Clock,
@@ -20,13 +19,11 @@ import {
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import MyCourses from './student/MyCourses';
-import MyAssignments from './student/MyAssignments';
 import CourseViewer from './student/CourseViewer';
 import ContentPlayer from './student/ContentPlayer';
 import StudentClassView from './StudentClassView';
 import WhiteboardManager from './WhiteboardManager';
 import Whiteboard from './Whiteboard';
-import StudentAssignmentsView from './StudentAssignmentsView';
 import QuickHomeworkCorrection from './QuickHomeworkCorrection';
 import GamificationPanel from './GamificationPanel';
 import UnifiedCalendar from './UnifiedCalendar';
@@ -182,34 +179,11 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     logger.debug('Contenido completado');
   };
 
-  const handleViewMyAssignments = () => {
-    setCurrentView('assignments');
-  };
-
-  const handleBackToAssignments = () => {
-    setCurrentView('assignments');
-    setSelectedContentId(null);
-    setSelectedExerciseId(null);
-  };
-
-  const handlePlayAssignmentContent = (contentId) => {
-    setSelectedContentId(contentId);
-    setSelectedCourseId(null);
-    setCurrentView('contentPlayer');
-  };
-
-  const handlePlayAssignmentExercise = (exerciseId) => {
-    setSelectedExerciseId(exerciseId);
-    logger.debug('Jugar ejercicio asignado:', exerciseId);
-    alert('Funcionalidad de ejercicios próximamente');
-  };
 
   const handleMenuAction = (action) => {
     const actionMap = {
       'dashboard': 'dashboard',
       'courses': 'courses',
-      'assignments': 'assignments',
-      'assignmentsView': 'assignmentsView',
       'quickCorrection': 'quickCorrection',
       'gamification': 'gamification',
       'calendar': 'calendar',
@@ -351,37 +325,6 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
     );
   }
 
-  // Render MyAssignments view
-  if (currentView === 'assignments') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="p-4 md:p-6">
-          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-            ← Volver a Inicio
-          </BaseButton>
-          <MyAssignments
-            user={user}
-            onPlayContent={handlePlayAssignmentContent}
-            onPlayExercise={handlePlayAssignmentExercise}
-          />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Render StudentAssignmentsView
-  if (currentView === 'assignmentsView') {
-    return (
-      <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={handleMenuAction}>
-        <div className="p-4 md:p-6">
-          <BaseButton variant="ghost" onClick={handleBackToDashboard} className="mb-4">
-            ← Volver a Inicio
-          </BaseButton>
-          <StudentAssignmentsView studentId={student?.id} />
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   // Render Quick Homework Correction
   if (currentView === 'quickCorrection') {
@@ -536,7 +479,7 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           user={user}
           contentId={selectedContentId}
           courseId={selectedCourseId}
-          onBack={selectedCourseId ? handleBackToCourseViewer : handleBackToAssignments}
+          onBack={selectedCourseId ? handleBackToCourseViewer : handleBackToDashboard}
           onComplete={handleContentComplete}
         />
       </DashboardLayout>
@@ -846,26 +789,6 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
           )}
         </div>
 
-        {/* Asignado a Mí - Quick Access */}
-        <div className="rounded-xl p-4 md:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--color-border)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg md:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-              <ClipboardList size={20} strokeWidth={2} />
-              Asignado a Mí
-            </h3>
-            <BaseButton variant="ghost" size="sm" onClick={handleViewMyAssignments}>
-              Ver todos →
-            </BaseButton>
-          </div>
-          <div className="text-center py-4">
-            <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-              Contenidos y ejercicios asignados directamente por tu profesor para práctica adicional
-            </p>
-            <BaseButton variant="primary" onClick={handleViewMyAssignments}>
-              Ver mis asignaciones
-            </BaseButton>
-          </div>
-        </div>
 
         {/* Game History */}
         {gameHistory.length > 0 ? (

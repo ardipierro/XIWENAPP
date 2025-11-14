@@ -1,0 +1,34 @@
+.credit-protected-button__content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.credit-protected-button__cost {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* Cuando no tiene créditos */
+.credit-protected-button:disabled .credit-protected-button__cost {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Dark mode */
+.dark .credit-protected-button__cost {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark .credit-protected-button:disabled .credit-protected-button__cost {
+  background: rgba(239, 68, 68, 0.3);
+}

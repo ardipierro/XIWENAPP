@@ -4,44 +4,45 @@
  * @module components/SettingsModal
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Settings,
   Palette,
-  Type,
-  Volume2,
   Monitor,
-  TrendingUp,
-  Mic,
+  Volume2,
   Gauge,
-  Bookmark,
   Maximize2,
   Minimize2,
   ZoomIn,
   ZoomOut,
   Eye,
   EyeOff,
-  Image
+  Image,
+  Mic,
+  Bookmark,
+  TrendingUp
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge } from './common';
 import ViewCustomizer from './interactive-book/ViewCustomizer';
-import TTSSettings from './interactive-book/TTSSettings';
 import AIImageGenerator from './interactive-book/AIImageGenerator';
+import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
 
 /**
  * Modal de configuración completo con tabs
  */
-function SettingsModal({ isOpen, onClose }) {
-  const [activeTab, setActiveTab] = useState('visual');
+function SettingsModal({ isOpen, onClose, characters = [] }) {
+  const [activeTab, setActiveTab] = useState('appearance');
   const [displaySettings, setDisplaySettings] = useState({
-    zoom: 100, // 50-200%
-    width: 'normal', // 'narrow' | 'normal' | 'wide' | 'full'
+    zoom: 100,
+    width: 'normal',
     fullscreen: false,
-    fontScale: 100, // 80-150% (adicional al tamaño de fuente del ViewCustomizer)
-    showMetadataBadges: true // Mostrar/ocultar badges de metadata
+    fontScale: 100,
+    showMetadataBadges: true
   });
+  const [saveMessage, setSaveMessage] = useState(null); // { type: 'success' | 'error', text: string }
+  const viewCustomizerSaveRef = useRef(null); // Referencia a la función de guardado de ViewCustomizer
 
   // Cargar configuración de pantalla
   useEffect(() => {
@@ -93,50 +94,87 @@ function SettingsModal({ isOpen, onClose }) {
     }
   };
 
+  // Aplicar preset de velocidad con validación
+  const applyPresetRate = (rate, presetName) => {
+    const saved = localStorage.getItem('xiwen_character_voices');
+
+    if (!saved) {
+      alert('⚠️ Aún no hay personajes configurados.\n\nPrimero carga un libro interactivo para que se detecten los personajes automáticamente.');
+      return;
+    }
+
+    try {
+      const configs = JSON.parse(saved);
+      const characterIds = Object.keys(configs);
+
+      if (characterIds.length === 0) {
+        alert('⚠️ No hay personajes configurados aún.\n\nAbre un libro interactivo primero para que se carguen los personajes.');
+        return;
+      }
+
+      // Aplicar velocidad a todos los personajes
+      characterIds.forEach(charId => {
+        if (configs[charId]?.voiceConfig) {
+          configs[charId].voiceConfig.rate = rate;
+        }
+      });
+
+      localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+      window.dispatchEvent(new Event('xiwen_settings_changed'));
+
+      // Feedback de éxito
+      console.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
+    } catch (err) {
+      console.error('Error aplicando preset:', err);
+      alert('❌ Error al aplicar el preset. Por favor intenta nuevamente.');
+    }
+  };
+
+  // ✅ 4 tabs principales
   const tabs = [
     {
-      id: 'visual',
-      label: 'Visual',
+      id: 'appearance',
+      label: 'Apariencia',
       icon: Palette,
-      description: 'Colores, bordes, sombras'
-    },
-    {
-      id: 'typography',
-      label: 'Tipografía',
-      icon: Type,
-      description: 'Fuentes y tamaños'
-    },
-    {
-      id: 'tts',
-      label: 'Voz IA',
-      icon: Volume2,
-      description: 'Text-to-Speech'
-    },
-    {
-      id: 'images',
-      label: 'Imágenes IA',
-      icon: Image,
-      description: 'Generación de imágenes'
+      description: 'Visual, tipografía y diseño'
     },
     {
       id: 'display',
       label: 'Pantalla',
       icon: Monitor,
-      description: 'Zoom, ancho, fullscreen'
+      description: 'Zoom, ancho y fullscreen'
     },
     {
-      id: 'practice',
-      label: 'Práctica',
-      icon: Mic,
-      description: 'Pronunciación y velocidad'
+      id: 'audio',
+      label: 'Audio y Voces',
+      icon: Volume2,
+      description: 'TTS, personajes y velocidad'
     },
     {
-      id: 'progress',
-      label: 'Progreso',
-      icon: TrendingUp,
-      description: 'Estadísticas y logros'
+      id: 'advanced',
+      label: 'Avanzado',
+      icon: Settings,
+      description: 'Progreso, imágenes IA y más'
     }
   ];
+
+  // Manejar guardado de configuración
+  const handleSaveSettings = () => {
+    // Guardar ViewCustomizer si existe la referencia
+    if (viewCustomizerSaveRef.current) {
+      viewCustomizerSaveRef.current();
+    }
+
+    setSaveMessage({ type: 'success', text: '✓ Configuración guardada correctamente' });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  // Callback para recibir la función de guardado de ViewCustomizer
+  const handleViewCustomizerChange = (data) => {
+    if (data && typeof data.saveSettings === 'function') {
+      viewCustomizerSaveRef.current = data.saveSettings;
+    }
+  };
 
   return (
     <BaseModal
@@ -171,388 +209,452 @@ function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          {/* TAB: VISUAL (ViewCustomizer directo, sin botón) */}
-          {activeTab === 'visual' && (
-            <ViewCustomizer alwaysOpen={true} />
-          )}
-
-          {/* TAB: TYPOGRAPHY */}
-          {activeTab === 'typography' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Tipografía Avanzada
-              </h3>
-
-              <div className="space-y-4">
-                {/* Font Scale Global */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Escala de fuente global: {displaySettings.fontScale}%
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => updateDisplaySetting('fontScale', Math.max(80, displaySettings.fontScale - 10))}
-                      className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                    >
-                      <ZoomOut size={18} />
-                    </button>
-                    <input
-                      type="range"
-                      min="80"
-                      max="150"
-                      step="10"
-                      value={displaySettings.fontScale}
-                      onChange={(e) => updateDisplaySetting('fontScale', parseInt(e.target.value))}
-                      className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                    />
-                    <button
-                      onClick={() => updateDisplaySetting('fontScale', Math.min(150, displaySettings.fontScale + 10))}
-                      className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                    >
-                      <ZoomIn size={18} />
-                    </button>
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>80% (Pequeño)</span>
-                    <span>100% (Normal)</span>
-                    <span>150% (Grande)</span>
-                  </div>
-                </div>
-
-                {/* Presets rápidos */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Presets de lectura
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      onClick={() => {
-                        updateDisplaySetting('fontScale', 90);
-                      }}
-                      className="p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:border-purple-500 transition-colors"
-                    >
-                      <div className="font-medium">Compacto</div>
-                      <div className="text-xs text-gray-500">Más contenido</div>
-                    </button>
-                    <button
-                      onClick={() => {
-                        updateDisplaySetting('fontScale', 100);
-                      }}
-                      className="p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:border-purple-500 transition-colors"
-                    >
-                      <div className="font-medium">Estándar</div>
-                      <div className="text-xs text-gray-500">Balanceado</div>
-                    </button>
-                    <button
-                      onClick={() => {
-                        updateDisplaySetting('fontScale', 130);
-                      }}
-                      className="p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:border-purple-500 transition-colors"
-                    >
-                      <div className="font-medium">Lectura</div>
-                      <div className="text-xs text-gray-500">Más legible</div>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <p className="text-sm text-blue-900 dark:text-blue-100">
-                    💡 <strong>Tip:</strong> La escala de fuente global afecta todo el texto de la aplicación. Para ajustar solo las burbujas de diálogo, usa la pestaña "Visual".
-                  </p>
-                </div>
-              </div>
+        <div className="flex-1 overflow-y-auto pb-4">
+          {/* ========================================= */}
+          {/* TAB 1: APARIENCIA (Visual + Tipografía) */}
+          {/* ========================================= */}
+          {activeTab === 'appearance' && (
+            <div>
+              <ViewCustomizer
+                alwaysOpen={true}
+                autoSave={false}
+                onSettingsChange={handleViewCustomizerChange}
+              />
             </div>
           )}
 
-          {/* TAB: TTS (directo, sin botón) */}
-          {activeTab === 'tts' && (
-            <TTSSettings alwaysOpen={true} />
-          )}
-
-          {/* TAB: IMAGES IA */}
-          {activeTab === 'images' && (
-            <AIImageGenerator alwaysOpen={true} />
-          )}
-
-          {/* TAB: DISPLAY */}
+          {/* ========================================= */}
+          {/* TAB 2: PANTALLA (Zoom, ancho, fullscreen) */}
+          {/* ========================================= */}
           {activeTab === 'display' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Configuración de Pantalla
-              </h3>
+                  {/* Zoom */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Zoom de aplicación: {displaySettings.zoom}%
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => updateDisplaySetting('zoom', Math.max(50, displaySettings.zoom - 10))}
+                        className="w-11 h-11 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
+                      >
+                        <ZoomOut size={20} />
+                      </button>
+                      <input
+                        type="range"
+                        min="50"
+                        max="200"
+                        step="10"
+                        value={displaySettings.zoom}
+                        onChange={(e) => updateDisplaySetting('zoom', parseInt(e.target.value))}
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                      />
+                      <button
+                        onClick={() => updateDisplaySetting('zoom', Math.min(200, displaySettings.zoom + 10))}
+                        className="w-11 h-11 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
+                      >
+                        <ZoomIn size={20} />
+                      </button>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>50%</span>
+                      <span>100%</span>
+                      <span>200%</span>
+                    </div>
+                  </div>
 
-              {/* Zoom */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Zoom de aplicación: {displaySettings.zoom}%
-                </label>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => updateDisplaySetting('zoom', Math.max(50, displaySettings.zoom - 10))}
-                    className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    <ZoomOut size={18} />
-                  </button>
-                  <input
-                    type="range"
-                    min="50"
-                    max="200"
-                    step="10"
-                    value={displaySettings.zoom}
-                    onChange={(e) => updateDisplaySetting('zoom', parseInt(e.target.value))}
-                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                  />
-                  <button
-                    onClick={() => updateDisplaySetting('zoom', Math.min(200, displaySettings.zoom + 10))}
-                    className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    <ZoomIn size={18} />
-                  </button>
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>50%</span>
-                  <span>100%</span>
-                  <span>200%</span>
-                </div>
-              </div>
+                  {/* Ancho del contenedor */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Ancho del contenedor
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { value: 'narrow', label: 'Estrecho', width: '800px' },
+                        { value: 'normal', label: 'Normal', width: '1200px' },
+                        { value: 'wide', label: 'Ancho', width: '1400px' },
+                        { value: 'full', label: 'Completo', width: '100%' }
+                      ].map(option => (
+                        <button
+                          key={option.value}
+                          onClick={() => updateDisplaySetting('width', option.value)}
+                          className={`p-3 border-2 rounded-lg text-sm transition-all ${
+                            displaySettings.width === option.value
+                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                          }`}
+                        >
+                          <div className="font-medium">{option.label}</div>
+                          <div className="text-xs text-gray-500">{option.width}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              {/* Ancho del contenedor */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Ancho del contenedor
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {[
-                    { value: 'narrow', label: 'Estrecho', width: '800px' },
-                    { value: 'normal', label: 'Normal', width: '1200px' },
-                    { value: 'wide', label: 'Ancho', width: '1400px' },
-                    { value: 'full', label: 'Completo', width: '100%' }
-                  ].map(option => (
+                  {/* Fullscreen */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Pantalla completa
+                    </label>
                     <button
-                      key={option.value}
-                      onClick={() => updateDisplaySetting('width', option.value)}
-                      className={`p-3 border-2 rounded-lg text-sm transition-all ${
-                        displaySettings.width === option.value
+                      onClick={() => updateDisplaySetting('fullscreen', !displaySettings.fullscreen)}
+                      className={`w-full p-4 border-2 rounded-lg flex items-center justify-between transition-all ${
+                        displaySettings.fullscreen
                           ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
                           : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
                       }`}
                     >
-                      <div className="font-medium">{option.label}</div>
-                      <div className="text-xs text-gray-500">{option.width}</div>
+                      <div className="flex items-center gap-3">
+                        {displaySettings.fullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                        <div className="text-left">
+                          <div className="font-medium">
+                            {displaySettings.fullscreen ? 'Salir de pantalla completa' : 'Activar pantalla completa'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Presiona F11 o ESC para alternar
+                          </div>
+                        </div>
+                      </div>
+                      <BaseBadge variant={displaySettings.fullscreen ? 'success' : 'default'}>
+                        {displaySettings.fullscreen ? 'Activado' : 'Desactivado'}
+                      </BaseBadge>
                     </button>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Fullscreen */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Pantalla completa
-                </label>
-                <button
-                  onClick={() => updateDisplaySetting('fullscreen', !displaySettings.fullscreen)}
-                  className={`w-full p-4 border-2 rounded-lg flex items-center justify-between transition-all ${
-                    displaySettings.fullscreen
-                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {displaySettings.fullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                    <div className="text-left">
-                      <div className="font-medium">
-                        {displaySettings.fullscreen ? 'Salir de pantalla completa' : 'Activar pantalla completa'}
+                  {/* Mostrar/Ocultar Badges de Metadata */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Mostrar información de metadata
+                    </label>
+                    <button
+                      onClick={() => updateDisplaySetting('showMetadataBadges', !displaySettings.showMetadataBadges)}
+                      className={`w-full p-4 border-2 rounded-lg flex items-center justify-between transition-all ${
+                        displaySettings.showMetadataBadges
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {displaySettings.showMetadataBadges ? <Eye size={20} /> : <EyeOff size={20} />}
+                        <div className="text-left">
+                          <div className="font-medium">
+                            {displaySettings.showMetadataBadges ? 'Ocultar badges' : 'Mostrar badges'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Badges de dificultad, tipo, nivel en títulos
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        Presiona F11 o ESC para alternar
+                      <BaseBadge variant={displaySettings.showMetadataBadges ? 'success' : 'default'}>
+                        {displaySettings.showMetadataBadges ? 'Visible' : 'Oculto'}
+                      </BaseBadge>
+                    </button>
+                  </div>
+
+                  {/* Presets para diferentes dispositivos */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Presets para dispositivos
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => {
+                          updateDisplaySetting('zoom', 90);
+                          updateDisplaySetting('width', 'normal');
+                        }}
+                        className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 transition-colors"
+                      >
+                        <div className="font-medium">💻 Desktop</div>
+                        <div className="text-xs text-gray-500">Normal, 90%</div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          updateDisplaySetting('zoom', 100);
+                          updateDisplaySetting('width', 'full');
+                        }}
+                        className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 transition-colors"
+                      >
+                        <div className="font-medium">📱 Móvil</div>
+                        <div className="text-xs text-gray-500">Completo, 100%</div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          updateDisplaySetting('zoom', 120);
+                          updateDisplaySetting('width', 'wide');
+                        }}
+                        className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 transition-colors"
+                      >
+                        <div className="font-medium">📺 TV / Proyector</div>
+                        <div className="text-xs text-gray-500">Ancho, 120%</div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          updateDisplaySetting('zoom', 150);
+                          updateDisplaySetting('width', 'full');
+                          updateDisplaySetting('fullscreen', true);
+                        }}
+                        className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 transition-colors"
+                      >
+                        <div className="font-medium">🎓 Aula / Presentación</div>
+                        <div className="text-xs text-gray-500">Fullscreen, 150%</div>
+                      </button>
+                    </div>
+                  </div>
+            </div>
+          )}
+
+          {/* ========================================= */}
+          {/* TAB 3: AUDIO Y VOCES (CharacterVoiceManager + Presets) */}
+          {/* ========================================= */}
+          {activeTab === 'audio' && (
+            <div className="space-y-8">
+              {/* CharacterVoiceManager directo */}
+              <CharacterVoiceManager characters={characters} alwaysOpen={true} />
+
+              {/* Sección: Presets de Velocidad */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
+                  ⚡ Presets de Velocidad
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Aplica configuraciones de velocidad predefinidas para diferentes estilos de aprendizaje.
+                  Estos presets se aplican globalmente a todos los personajes.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Preset: Estándar */}
+                  <button
+                    onClick={() => {
+                      const saved = localStorage.getItem('xiwen_character_voices');
+                      if (saved) {
+                        const configs = JSON.parse(saved);
+                        Object.keys(configs).forEach(charId => {
+                          configs[charId].voiceConfig.rate = 1.0;
+                        });
+                        localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+                        window.dispatchEvent(new Event('xiwen_settings_changed'));
+                      }
+                    }}
+                    className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                        <Gauge size={24} className="text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 dark:text-white">Estándar</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">1.0x normal</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Velocidad normal, ideal para la mayoría de los usuarios.
+                    </p>
+                  </button>
+
+                  {/* Preset: Principiante */}
+                  <button
+                    onClick={() => {
+                      const saved = localStorage.getItem('xiwen_character_voices');
+                      if (saved) {
+                        const configs = JSON.parse(saved);
+                        Object.keys(configs).forEach(charId => {
+                          configs[charId].voiceConfig.rate = 0.75;
+                        });
+                        localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+                        window.dispatchEvent(new Event('xiwen_settings_changed'));
+                      }
+                    }}
+                    className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
+                        <span className="text-2xl">🐌</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 dark:text-white">Principiante</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">0.75x lento</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Más lento para entender mejor. Perfecto para comenzar.
+                    </p>
+                  </button>
+
+                  {/* Preset: Rápido */}
+                  <button
+                    onClick={() => {
+                      const saved = localStorage.getItem('xiwen_character_voices');
+                      if (saved) {
+                        const configs = JSON.parse(saved);
+                        Object.keys(configs).forEach(charId => {
+                          configs[charId].voiceConfig.rate = 1.25;
+                        });
+                        localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+                        window.dispatchEvent(new Event('xiwen_settings_changed'));
+                      }
+                    }}
+                    className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center group-hover:bg-orange-200 dark:group-hover:bg-orange-800/50 transition-colors">
+                        <span className="text-2xl">⚡</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 dark:text-white">Rápido</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">1.25x rápido</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Para usuarios avanzados que quieren practicar a mayor velocidad.
+                    </p>
+                  </button>
+
+                  {/* Preset: Narración */}
+                  <button
+                    onClick={() => {
+                      const saved = localStorage.getItem('xiwen_character_voices');
+                      if (saved) {
+                        const configs = JSON.parse(saved);
+                        Object.keys(configs).forEach(charId => {
+                          configs[charId].voiceConfig.rate = 0.9;
+                        });
+                        localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+                        window.dispatchEvent(new Event('xiwen_settings_changed'));
+                      }
+                    }}
+                    className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                        <span className="text-2xl">📖</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 dark:text-white">Narración</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">0.9x suave</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Estilo audiolibro, relajado y fácil de seguir.
+                    </p>
+                  </button>
+                </div>
+
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mt-4">
+                  <p className="text-sm text-blue-900 dark:text-blue-100">
+                    💡 <strong>Tip:</strong> Los presets aplican la velocidad globalmente. Para configurar cada personaje individualmente, usa la sección "Voces por Personaje" arriba.
+                  </p>
+                </div>
+
+                {/* Próximas funcionalidades */}
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
+                  <h4 className="text-md font-bold text-gray-900 dark:text-white mb-3">
+                    Próximamente
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
+                      <Mic size={18} className="flex-shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Práctica de Pronunciación:</strong> Reconocimiento de voz y feedback en tiempo real
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
+                      <Bookmark size={18} className="flex-shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Notas y Marcadores:</strong> Guarda tus frases favoritas y crea vocabulario personalizado
                       </div>
                     </div>
                   </div>
-                  <BaseBadge variant={displaySettings.fullscreen ? 'success' : 'default'}>
-                    {displaySettings.fullscreen ? 'Activado' : 'Desactivado'}
-                  </BaseBadge>
-                </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================= */}
+          {/* TAB 3: AVANZADO (Progreso + Imágenes IA) */}
+          {/* ========================================= */}
+          {activeTab === 'advanced' && (
+            <div className="space-y-8">
+              {/* Sección: Imágenes IA */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
+                  🎨 Generación de Imágenes IA
+                </h3>
+                <AIImageGenerator alwaysOpen={true} />
               </div>
 
-              {/* Mostrar/Ocultar Badges de Metadata */}
+              {/* Sección: Progreso */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Mostrar información de metadata
-                </label>
-                <button
-                  onClick={() => updateDisplaySetting('showMetadataBadges', !displaySettings.showMetadataBadges)}
-                  className={`w-full p-4 border-2 rounded-lg flex items-center justify-between transition-all ${
-                    displaySettings.showMetadataBadges
-                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {displaySettings.showMetadataBadges ? <Eye size={20} /> : <EyeOff size={20} />}
-                    <div className="text-left">
-                      <div className="font-medium">
-                        {displaySettings.showMetadataBadges ? 'Ocultar badges' : 'Mostrar badges'}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Badges de dificultad, tipo, nivel en títulos
-                      </div>
-                    </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
+                  📊 Progreso y Estadísticas
+                </h3>
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp size={20} className="text-purple-600 dark:text-purple-400" />
+                    <span className="font-semibold text-purple-900 dark:text-purple-100">
+                      Próximamente: Sistema de Progreso
+                    </span>
                   </div>
-                  <BaseBadge variant={displaySettings.showMetadataBadges ? 'success' : 'default'}>
-                    {displaySettings.showMetadataBadges ? 'Visible' : 'Oculto'}
-                  </BaseBadge>
-                </button>
-              </div>
+                  <p className="text-sm text-purple-800 dark:text-purple-200">
+                    • Dashboard con estadísticas<br />
+                    • Gráficos de evolución<br />
+                    • Racha de días estudiados<br />
+                    • Puntos y niveles (gamificación)<br />
+                    • Guardado en Firebase por usuario
+                  </p>
+                </div>
 
-              {/* Presets para diferentes dispositivos */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Presets para dispositivos
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => {
-                      updateDisplaySetting('zoom', 90);
-                      updateDisplaySetting('width', 'normal');
-                    }}
-                    className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 transition-colors"
-                  >
-                    <div className="font-medium">💻 Desktop</div>
-                    <div className="text-xs text-gray-500">Normal, 90%</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      updateDisplaySetting('zoom', 100);
-                      updateDisplaySetting('width', 'full');
-                    }}
-                    className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 transition-colors"
-                  >
-                    <div className="font-medium">📱 Móvil</div>
-                    <div className="text-xs text-gray-500">Completo, 100%</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      updateDisplaySetting('zoom', 120);
-                      updateDisplaySetting('width', 'wide');
-                    }}
-                    className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 transition-colors"
-                  >
-                    <div className="font-medium">📺 TV / Proyector</div>
-                    <div className="text-xs text-gray-500">Ancho, 120%</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      updateDisplaySetting('zoom', 150);
-                      updateDisplaySetting('width', 'full');
-                      updateDisplaySetting('fullscreen', true);
-                    }}
-                    className="p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 transition-colors"
-                  >
-                    <div className="font-medium">🎓 Aula / Presentación</div>
-                    <div className="text-xs text-gray-500">Fullscreen, 150%</div>
-                  </button>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white">0</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Ejercicios completados</div>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white">0</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Puntos totales</div>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white">0</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Días de racha</div>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white">0%</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Progreso del libro</div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
+        </div>
 
-          {/* TAB: PRACTICE */}
-          {activeTab === 'practice' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Configuración de Práctica
-              </h3>
-
-              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Mic size={20} className="text-amber-600 dark:text-amber-400" />
-                  <span className="font-semibold text-amber-900 dark:text-amber-100">
-                    Próximamente: Práctica de Pronunciación
-                  </span>
-                </div>
-                <p className="text-sm text-amber-800 dark:text-amber-200">
-                  • Reconocimiento de voz con Speech Recognition API<br />
-                  • Evaluación de pronunciación<br />
-                  • Comparación con audio nativo<br />
-                  • Feedback en tiempo real
-                </p>
-              </div>
-
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Gauge size={20} className="text-blue-600 dark:text-blue-400" />
-                  <span className="font-semibold text-blue-900 dark:text-blue-100">
-                    Próximamente: Control de Velocidad de Audio
-                  </span>
-                </div>
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  • Velocidades: 0.5x, 0.75x, 1x, 1.25x, 1.5x, 2x<br />
-                  • Sin cambio de pitch<br />
-                  • Ideal para principiantes
-                </p>
-              </div>
-
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Bookmark size={20} className="text-green-600 dark:text-green-400" />
-                  <span className="font-semibold text-green-900 dark:text-green-100">
-                    Próximamente: Notas y Marcadores
-                  </span>
-                </div>
-                <p className="text-sm text-green-800 dark:text-green-200">
-                  • Marcar frases favoritas<br />
-                  • Agregar notas personales<br />
-                  • Crear vocabulario personalizado<br />
-                  • Exportar a PDF/TXT
-                </p>
-              </div>
+        {/* Footer Sticky con botón Guardar */}
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex-shrink-0">
+          {saveMessage && (
+            <div className={`mb-3 p-3 rounded-lg flex items-center gap-2 text-sm ${
+              saveMessage.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
+                : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+            }`}>
+              {saveMessage.text}
             </div>
           )}
-
-          {/* TAB: PROGRESS */}
-          {activeTab === 'progress' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Progreso y Estadísticas
-              </h3>
-
-              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp size={20} className="text-purple-600 dark:text-purple-400" />
-                  <span className="font-semibold text-purple-900 dark:text-purple-100">
-                    Próximamente: Sistema de Progreso
-                  </span>
-                </div>
-                <p className="text-sm text-purple-800 dark:text-purple-200">
-                  • Dashboard con estadísticas<br />
-                  • Gráficos de evolución<br />
-                  • Racha de días estudiados<br />
-                  • Puntos y niveles (gamificación)<br />
-                  • Guardado en Firebase por usuario
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white">0</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Ejercicios completados</div>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white">0</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Puntos totales</div>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white">0</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Días de racha</div>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white">0%</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Progreso del libro</div>
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="flex gap-3">
+            <BaseButton
+              variant="ghost"
+              size="md"
+              onClick={onClose}
+              className="flex-1"
+            >
+              Cerrar
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              size="md"
+              onClick={handleSaveSettings}
+              className="flex-1"
+            >
+              Guardar Configuración
+            </BaseButton>
+          </div>
         </div>
       </div>
     </BaseModal>
@@ -561,7 +663,13 @@ function SettingsModal({ isOpen, onClose }) {
 
 SettingsModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  characters: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired
+    })
+  )
 };
 
 export default SettingsModal;

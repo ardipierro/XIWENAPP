@@ -48,7 +48,7 @@ import './SideMenu.css';
  * @param {Function} props.onMenuAction - Callback para acciones del menú
  * @param {string} props.currentScreen - Pantalla actual activa
  */
-function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen }) {
+function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, hasBanner = false }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -127,9 +127,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
         items: [
           { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },
           { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
-          { icon: ClipboardList, label: 'Asignado a Mí', path: '/student', action: 'assignments' },
-          { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'assignmentsView' },
-          { icon: FileCheck, label: 'Corrección', path: '/student', action: 'quickCorrection' },
+          { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'quickCorrection' },
           { icon: Trophy, label: 'Gamificación', path: '/student', action: 'gamification' },
           { icon: CalendarDays, label: 'Calendario', path: '/student', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/student', action: 'messages' },
@@ -201,7 +199,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen })
       )}
 
       {/* Menú lateral */}
-      <aside className={`sidemenu ${isOpen ? 'open' : ''}`}>
+      <aside className={`sidemenu ${isOpen ? 'open' : ''} ${hasBanner ? 'top-[86px] md:top-[100px] lg:top-[108px]' : ''}`}>
         <div className="sidemenu-content custom-scrollbar">
           {/* Items del menú */}
           {menuData.sections ? renderSectionedMenu() : renderFlatMenu()}

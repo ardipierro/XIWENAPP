@@ -311,9 +311,10 @@ function CredentialsTab() {
 
       // 1. Guardar en localStorage
       const localStorageKey = `ai_credentials_${mapping.localStorageName}`;
-      if (value && value.trim()) {
-        localStorage.setItem(localStorageKey, value);
-        logger.info(`Saved to localStorage: ${localStorageKey}`, 'CredentialsTab');
+      const trimmedValue = value?.trim();
+      if (trimmedValue) {
+        localStorage.setItem(localStorageKey, trimmedValue);
+        logger.info(`Saved to localStorage: ${localStorageKey} (length: ${trimmedValue.length})`, 'CredentialsTab');
       } else {
         localStorage.removeItem(localStorageKey);
         logger.info(`Removed from localStorage: ${localStorageKey}`, 'CredentialsTab');
@@ -327,7 +328,7 @@ function CredentialsTab() {
           if (funcConfig.provider === mapping.firebaseName) {
             updatedConfig.functions[funcId] = {
               ...funcConfig,
-              apiKey: value || ''
+              apiKey: trimmedValue || ''
             };
           }
         }
@@ -337,7 +338,7 @@ function CredentialsTab() {
       if (!updatedConfig.credentials) {
         updatedConfig.credentials = {};
       }
-      updatedConfig.credentials[apiKeyField] = value;
+      updatedConfig.credentials[apiKeyField] = trimmedValue;
 
       // 4. Guardar en Firebase
       await saveAIConfig(updatedConfig);
@@ -347,7 +348,7 @@ function CredentialsTab() {
       setConfig(updatedConfig);
       setCredentials(prev => ({
         ...prev,
-        [apiKeyField]: value
+        [apiKeyField]: trimmedValue
       }));
 
       // Success feedback

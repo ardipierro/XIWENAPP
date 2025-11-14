@@ -12,7 +12,8 @@ import {
   StopCircle,
   Users,
   Clock,
-  X
+  X,
+  Zap
 } from 'lucide-react';
 import logger from '../utils/logger';
 import {
@@ -22,7 +23,8 @@ import {
   deleteClassSession,
   startClassSession,
   endClassSession,
-  getDayName
+  getDayName,
+  createInstantMeetSession
 } from '../firebase/classSessions';
 import { loadCourses, getAllUsers } from '../firebase/firestore';
 import { getAllGroups } from '../firebase/groups';
@@ -130,10 +132,46 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
       });
 
       if (result.success) {
-        setMessage({ type: 'success', text: 'Sesión creada exitosamente' });
-        setShowModal(false);
-        await loadData();
-        logger.info('Sesión creada:', result.sessionId);
+        // Si es tipo instant y debe iniciarse inmediatamente
+        if (sessionData.type === 'instant' && sessionData.startImmediately) {
+          // Iniciar la sesión automáticamente
+          const startResult = await startClassSession(result.sessionId);
+
+          if (startResult.success) {
+            setMessage({
+              type: 'success',
+              text: '✅ Clase instantánea creada e iniciada. Redirigiendo a la sala...'
+            });
+
+            setShowModal(false);
+            await loadData();
+
+            // Navegar a la sala de clase
+            if (onJoinSession) {
+              // Dar tiempo para que se vea el mensaje
+              setTimeout(() => {
+                onJoinSession({
+                  id: result.sessionId,
+                  roomName: startResult.roomName
+                });
+              }, 1000);
+            }
+
+            logger.info('✅ Clase instantánea creada e iniciada:', result.sessionId);
+          } else {
+            setMessage({
+              type: 'success',
+              text: '⚠️ Sesión creada pero no se pudo iniciar automáticamente. Inicia manualmente.'
+            });
+            setShowModal(false);
+            await loadData();
+          }
+        } else {
+          setMessage({ type: 'success', text: 'Sesión creada exitosamente' });
+          setShowModal(false);
+          await loadData();
+          logger.info('Sesión creada:', result.sessionId);
+        }
       } else {
         setMessage({ type: 'error', text: result.error || 'Error al crear sesión' });
       }
@@ -444,13 +482,15 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
             {sessions.length} sesiones totales
           </p>
         </div>
-        <BaseButton
-          variant="primary"
-          icon={Plus}
-          onClick={() => setShowModal(true)}
-        >
-          Nueva Sesión
-        </BaseButton>
+        <div className="flex items-center gap-3">
+          <BaseButton
+            variant="primary"
+            icon={Plus}
+            onClick={() => setShowModal(true)}
+          >
+            Nueva Sesión
+          </BaseButton>
+        </div>
       </div>
 
       {/* Mensaje */}
