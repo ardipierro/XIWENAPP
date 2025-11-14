@@ -35,6 +35,12 @@ const ContentPlayer = lazy(() => import('./student/ContentPlayer'));
 const MyAssignmentsView = lazy(() => import('./student/MyAssignmentsView'));
 const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
 
+// Games views
+const LiveGamesView = lazy(() => import('./games/LiveGamesView'));
+
+// Guardian views
+const GuardianView = lazy(() => import('./guardian/GuardianView'));
+
 /**
  * Vista de inicio (placeholder)
  */
@@ -243,7 +249,30 @@ export function UniversalDashboard() {
             // JUEGOS
             case '/dashboard-v2/games':
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Juegos" />;
+              return (
+                <LiveGamesView
+                  user={user}
+                  onJoinGame={(gameId) => {
+                    logger.debug('Unirse a juego:', gameId);
+                    // TODO: Implementar lógica para unirse al juego
+                    // Posiblemente navegar a /game/:gameId o abrir modal
+                  }}
+                />
+              );
+
+            // VISTA DE TUTOR/GUARDIÁN
+            case '/dashboard-v2/guardian':
+              // Guardians ven el progreso de sus estudiantes asignados
+              return (
+                <GuardianView
+                  user={user}
+                  onViewStudentDetails={(studentId) => {
+                    logger.debug('Ver detalles de estudiante:', studentId);
+                    // TODO: Navegar a vista detallada del estudiante
+                    // Posiblemente navegar a /student/:studentId o abrir modal
+                  }}
+                />
+              );
 
             // MIS PAGOS (Students)
             case '/dashboard-v2/my-payments':
