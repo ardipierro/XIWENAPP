@@ -5,7 +5,8 @@
 
 import { useState } from 'react';
 import { Settings, Sun, Moon, Type, Palette, Sparkles, Volume2, RotateCcw, Zap, Music } from 'lucide-react';
-import { BaseButton, BaseCard, BaseModal, BaseBadge, BaseAlert } from '../common';
+import { BaseButton, BaseModal, BaseBadge, BaseAlert } from '../common';
+import { UniversalCard } from '../cards';
 import { useExerciseBuilderConfig } from '../../hooks/useExerciseBuilderConfig';
 import { PRESET_THEMES, SOUND_PACKS } from '../../firebase/exerciseBuilderConfig';
 import logger from '../../utils/logger';
@@ -63,7 +64,7 @@ export function SettingsPanel() {
       >
         <div className="space-y-6">
           {/* Tema */}
-          <BaseCard title="Tema" variant="flat">
+          <UniversalCard variant="default" size="md" title="Tema">
             <div className="grid grid-cols-3 gap-2">
               {Object.entries(PRESET_THEMES).map(([key, theme]) => (
                 <button
@@ -103,10 +104,10 @@ export function SettingsPanel() {
                 </button>
               ))}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Tipografía */}
-          <BaseCard title="Tipografía" icon={Type} variant="flat">
+          <UniversalCard variant="default" size="md" title="Tipografía" icon={Type}>
             <div className="space-y-4">
               {/* Familia de fuente */}
               <div>
@@ -144,10 +145,10 @@ export function SettingsPanel() {
                 </div>
               </div>
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Tamaño de fuente */}
-          <BaseCard title="Tamaño de Fuente" variant="flat">
+          <UniversalCard variant="default" size="md" title="Tamaño de Fuente">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -172,10 +173,10 @@ export function SettingsPanel() {
                 <span>24px</span>
               </div>
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Colores de feedback */}
-          <BaseCard title="Colores de Feedback" icon={Palette} variant="flat">
+          <UniversalCard variant="default" size="md" title="Colores de Feedback" icon={Palette}>
             <div className="space-y-4">
               {[
                 { key: 'correct', label: 'Correcto', default: '#10b981' },
@@ -200,10 +201,10 @@ export function SettingsPanel() {
                 </div>
               ))}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Opciones de interacción */}
-          <BaseCard title="Interacción" icon={Sparkles} variant="flat">
+          <UniversalCard variant="default" size="md" title="Interacción" icon={Sparkles}>
             <div className="space-y-3">
               {[
                 { key: 'animations', label: 'Animaciones', icon: Sparkles },
@@ -231,10 +232,10 @@ export function SettingsPanel() {
                 </label>
               ))}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Velocidad de Animación */}
-          <BaseCard title="Velocidad de Animación" icon={Zap} variant="flat">
+          <UniversalCard variant="default" size="md" title="Velocidad de Animación" icon={Zap}>
             <div className="grid grid-cols-4 gap-2">
               {[
                 { value: 'slow', label: 'Lenta', desc: '500ms' },
@@ -262,10 +263,10 @@ export function SettingsPanel() {
                 </button>
               ))}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Pack de Sonidos */}
-          <BaseCard title="Pack de Sonidos" icon={Music} variant="flat">
+          <UniversalCard variant="default" size="md" title="Pack de Sonidos" icon={Music}>
             <div className="space-y-2">
               {Object.entries(SOUND_PACKS).map(([key, pack]) => (
                 <label
@@ -298,10 +299,10 @@ export function SettingsPanel() {
                 </label>
               ))}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Nivel CEFR */}
-          <BaseCard title="Nivel de Dificultad" variant="flat">
+          <UniversalCard variant="default" size="md" title="Nivel de Dificultad">
             <div className="grid grid-cols-3 gap-2">
               {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((level) => (
                 <BaseButton
@@ -314,10 +315,10 @@ export function SettingsPanel() {
                 </BaseButton>
               ))}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Modo Práctica vs Evaluación */}
-          <BaseCard title="Modo de Ejercicio" variant="flat">
+          <UniversalCard variant="default" size="md" title="Modo de Ejercicio">
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -372,10 +373,10 @@ export function SettingsPanel() {
                 </div>
               )}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Temporizador */}
-          <BaseCard title="Temporizador" variant="flat">
+          <UniversalCard variant="default" size="md" title="Temporizador">
             <div className="space-y-3">
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -423,10 +424,10 @@ export function SettingsPanel() {
                 </div>
               )}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Nivel de Feedback */}
-          <BaseCard title="Nivel de Feedback" variant="flat">
+          <UniversalCard variant="default" size="md" title="Nivel de Feedback">
             <div className="space-y-2">
               {[
                 { value: 'minimal', label: 'Mínimo', desc: 'Solo correcto/incorrecto' },
@@ -464,7 +465,7 @@ export function SettingsPanel() {
                 </label>
               ))}
             </div>
-          </BaseCard>
+          </UniversalCard>
 
           {/* Guardar/Resetear */}
           <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
