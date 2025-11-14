@@ -21,7 +21,8 @@ import {
   TrendingDown,
   Lightbulb,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Upload
 } from 'lucide-react';
 import {
   BaseButton,
@@ -36,6 +37,7 @@ import {
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
+import ManualHomeworkUpload from './homework/ManualHomeworkUpload';
 import {
   getPendingReviews,
   approveReview,
@@ -57,6 +59,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
   const [loading, setLoading] = useState(true);
   const [selectedReview, setSelectedReview] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     loadPendingReviews();
@@ -90,6 +93,12 @@ export default function HomeworkReviewPanel({ teacherId }) {
     setSelectedReview(null);
   };
 
+  const handleUploadSuccess = () => {
+    // Reload pending reviews to show the new one
+    loadPendingReviews();
+    setShowUploadModal(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -120,9 +129,19 @@ export default function HomeworkReviewPanel({ teacherId }) {
             Correcciones completadas por IA pendientes de tu aprobación
           </p>
         </div>
-        <BaseBadge variant="warning" size="lg">
-          {reviews.length} pendiente{reviews.length !== 1 ? 's' : ''}
-        </BaseBadge>
+        <div className="flex items-center gap-3">
+          <BaseButton
+            variant="primary"
+            size="md"
+            onClick={() => setShowUploadModal(true)}
+          >
+            <Upload size={18} strokeWidth={2} />
+            Subir Tarea
+          </BaseButton>
+          <BaseBadge variant="warning" size="lg">
+            {reviews.length} pendiente{reviews.length !== 1 ? 's' : ''}
+          </BaseBadge>
+        </div>
       </div>
 
       {/* Reviews Grid */}
@@ -148,6 +167,22 @@ export default function HomeworkReviewPanel({ teacherId }) {
           teacherId={teacherId}
           currentUser={user}
         />
+      )}
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <BaseModal
+          isOpen={true}
+          onClose={() => setShowUploadModal(false)}
+          title="Subir Tarea Manual"
+          size="lg"
+        >
+          <ManualHomeworkUpload
+            teacherId={teacherId || user?.uid}
+            onSuccess={handleUploadSuccess}
+            onCancel={() => setShowUploadModal(false)}
+          />
+        </BaseModal>
       )}
     </div>
   );
