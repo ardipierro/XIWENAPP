@@ -9,9 +9,11 @@ import PageHeader from './common/PageHeader';
 import CredentialsTab from './settings/CredentialsTab';
 import ThemeCustomizer from './ThemeCustomizer';
 import { BaseCard } from './common';
+import { useFont } from '../contexts/FontContext';
 
 function SettingsPanel() {
   const [activeTab, setActiveTab] = useState('credentials');
+  const { selectedFont, setSelectedFont, fontWeight, setFontWeight, availableFonts } = useFont();
 
   const tabs = [
     { id: 'general', label: 'General', icon: Settings },
@@ -100,21 +102,15 @@ function SettingsPanel() {
                   Selecciona una fuente:
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[
-                    { name: 'Microsoft YaHei', family: "'Microsoft YaHei', sans-serif" },
-                    { name: 'SimSun (宋体)', family: "SimSun, serif" },
-                    { name: 'SimHei (黑体)', family: "SimHei, sans-serif" },
-                    { name: 'STSong (华文宋体)', family: "STSong, serif" },
-                    { name: 'STHeiti (华文黑体)', family: "STHeiti, sans-serif" },
-                    { name: 'Noto Sans SC', family: "'Noto Sans SC', sans-serif" }
-                  ].map((font) => (
+                  {availableFonts.map((font) => (
                     <button
                       key={font.name}
-                      onClick={() => {
-                        const preview = document.getElementById('font-preview-settings');
-                        if (preview) preview.style.fontFamily = font.family;
-                      }}
-                      className="p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all text-left"
+                      onClick={() => setSelectedFont(font.family)}
+                      className={`p-3 border-2 rounded-lg transition-all text-left ${
+                        selectedFont === font.family
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                          : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                      }`}
                     >
                       <div className="font-medium text-gray-900 dark:text-gray-100 text-sm">
                         {font.name}
@@ -137,20 +133,22 @@ function SettingsPanel() {
                 </label>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => {
-                      const preview = document.getElementById('font-preview-settings');
-                      if (preview) preview.style.fontWeight = 'normal';
-                    }}
-                    className="flex-1 p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all font-medium"
+                    onClick={() => setFontWeight('normal')}
+                    className={`flex-1 p-3 border-2 rounded-lg transition-all font-medium ${
+                      fontWeight === 'normal'
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                    }`}
                   >
                     Normal
                   </button>
                   <button
-                    onClick={() => {
-                      const preview = document.getElementById('font-preview-settings');
-                      if (preview) preview.style.fontWeight = 'bold';
-                    }}
-                    className="flex-1 p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all font-bold"
+                    onClick={() => setFontWeight('bold')}
+                    className={`flex-1 p-3 border-2 rounded-lg transition-all font-bold ${
+                      fontWeight === 'bold'
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                    }`}
                   >
                     Negrita
                   </button>
@@ -161,12 +159,11 @@ function SettingsPanel() {
               <div className="mt-8 p-8 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-700">
                 <div className="text-center">
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    Vista Previa:
+                    Vista Previa (así se verá en la barra superior):
                   </div>
                   <div
-                    id="font-preview-settings"
                     className="text-6xl lg:text-7xl text-gray-900 dark:text-gray-100 transition-all duration-300 mb-4"
-                    style={{ fontFamily: "'Microsoft YaHei', sans-serif", fontWeight: 'bold' }}
+                    style={{ fontFamily: selectedFont, fontWeight: fontWeight }}
                   >
                     西文教室
                   </div>
@@ -177,9 +174,9 @@ function SettingsPanel() {
               </div>
 
               {/* Nota informativa */}
-              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  <strong>💡 Nota:</strong> Esta es una herramienta temporal para probar diferentes fuentes chinas. Los cambios aquí son solo para visualización y no se aplican automáticamente al logo de la aplicación.
+              <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  <strong>✨ Nota:</strong> Los cambios se aplican automáticamente al logo "西文教室" en la barra superior y se guardan en tu navegador.
                 </p>
               </div>
             </BaseCard>
