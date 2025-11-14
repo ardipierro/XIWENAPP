@@ -57,7 +57,7 @@ import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
 import ContentManager from './ContentManager';
 import UnifiedContentManager from './UnifiedContentManager';
-import ClassManager from './ClassManager';
+import ClassSessionManager from './ClassSessionManager';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import AttendanceView from './AttendanceView';
 import AddUserModal from './AddUserModal';
@@ -619,11 +619,17 @@ function TeacherDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // Renderizar Class Manager (Clases Recurrentes) - CON Layout
+  // Renderizar Class Session Manager (Sistema Unificado) - CON Layout
   if (navigation.currentScreen === 'classes') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ClassManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openClassModal} />
+        <ClassSessionManager
+          user={user}
+          onJoinSession={(session) => {
+            navigation.setSelectedLiveClass(session);
+            navigation.setCurrentScreen('classSessionRoom');
+          }}
+        />
       </DashboardLayout>
     );
   }

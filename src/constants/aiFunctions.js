@@ -24,7 +24,8 @@ import {
   CheckCircle2,
   Image,
   Palette,
-  Sparkles
+  Sparkles,
+  Volume2
 } from 'lucide-react';
 
 /**
@@ -156,6 +157,28 @@ export const AI_PROVIDERS = [
       { value: '768x1344', label: '768x1344 (Vertical)' },
       { value: '1344x768', label: '1344x768 (Horizontal)' }
     ]
+  },
+  {
+    id: 'elevenlabs',
+    name: 'ElevenLabs',
+    icon: Volume2,
+    description: 'Text-to-Speech ultra-natural con voces personalizables. Soporta voces multilingües con acento argentino.',
+    models: [
+      { value: 'eleven_multilingual_v2', label: 'Multilingual v2 (Recomendado)' },
+      { value: 'eleven_turbo_v2_5', label: 'Turbo v2.5 (Más rápido)' },
+      { value: 'eleven_turbo_v2', label: 'Turbo v2 (Legacy)' },
+      { value: 'eleven_monolingual_v1', label: 'Monolingual v1 (Legacy)' }
+    ],
+    supportsTemperature: false,
+    supportsTopP: false,
+    supportsMaxTokens: false,
+    supportsVoiceSettings: true,
+    voiceSettings: {
+      stability: { min: 0, max: 1, step: 0.01, default: 0.5 },
+      similarity_boost: { min: 0, max: 1, step: 0.01, default: 0.75 },
+      style: { min: 0, max: 1, step: 0.01, default: 0.5 },
+      use_speaker_boost: { type: 'boolean', default: true }
+    }
   }
 ];
 
@@ -449,6 +472,28 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
         quality: 'hd',
         n: 1
       }
+    }
+  },
+  {
+    id: 'voice_lab',
+    name: 'Laboratorio de Voces',
+    description: 'Explora, prueba y configura voces premium de ElevenLabs con parámetros personalizables',
+    icon: Volume2,
+    category: 'tools',
+    defaultConfig: {
+      enabled: false,
+      provider: 'elevenlabs',
+      model: 'eleven_multilingual_v2',
+      systemPrompt: '',
+      parameters: {
+        stability: 0.5,
+        similarity_boost: 0.75,
+        style: 0.5,
+        use_speaker_boost: true
+      },
+      selectedVoiceId: null,
+      selectedVoiceName: null,
+      presets: []
     }
   }
 ];

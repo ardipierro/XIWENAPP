@@ -20,10 +20,13 @@ import {
   MessageSquare,
   CheckCircle,
   Award,
-  Trophy
+  Trophy,
+  Save
 } from 'lucide-react';
 import logger from '../utils/logger';
 import './interactive-book/styles.css';
+import { useContentExport } from '../hooks/useContentExport';
+import { useAuth } from '../contexts/AuthContext';
 import {
   BaseCard,
   BaseButton,
@@ -51,6 +54,8 @@ import SettingsModal from './SettingsModal';
  * Muestra el JSON enriquecido de forma estructurada y navegable
  */
 function InteractiveBookViewer() {
+  const { exportContent, loading: exportLoading } = useContentExport();
+  const { user } = useAuth();
   const [bookData, setBookData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -62,6 +67,7 @@ function InteractiveBookViewer() {
   const [viewSettings, setViewSettings] = useState({ spacing: 'normal' }); // View settings for layout
   const [showMetadataBadges, setShowMetadataBadges] = useState(true); // Mostrar/ocultar badges
   const [characters, setCharacters] = useState([]); // Personajes del libro
+  const [exportMessage, setExportMessage] = useState(null); // { type: 'success' | 'error', text: string }
   const settingsModal = useModal();
 
   // Cargar configuración de badges desde localStorage
@@ -162,6 +168,51 @@ function InteractiveBookViewer() {
     if (result.correct && result.points) {
       setTotalPoints(prev => prev + result.points);
     }
+  };
+
+  /**
+   * Exporta una unidad completa al sistema unificado de contenidos
+   */
+  const handleExportUnit = async (unit) => {
+    if (!user) {
+      setExportMessage({ type: 'error', text: 'Debes iniciar sesión para exportar unidades' });
+      setTimeout(() => setExportMessage(null), 4000);
+      return;
+    }
+
+    const result = await exportContent({
+      type: 'unit',
+      title: `Unidad ${unit.unitNumber}: ${unit.title}`,
+      description: unit.content?.introduction?.text || `Unidad ${unit.unitNumber} del libro ADE1`,
+      body: JSON.stringify(unit),
+      metadata: {
+        unitNumber: unit.unitNumber,
+        cefrLevel: unit.cefrLevel,
+        estimatedDuration: unit.estimatedDuration,
+        type: unit.type,
+        tags: unit.tags || [],
+        dialogueLineCount: unit.content?.dialogue?.lines?.length || 0,
+        exerciseCount: unit.content?.exercises?.length || 0,
+        source: 'InteractiveBookViewer'
+      },
+      createdBy: user.uid
+    });
+
+    if (result.success) {
+      setExportMessage({
+        type: 'success',
+        text: `✅ Unidad ${unit.unitNumber} exportada exitosamente a Contenidos`
+      });
+      logger.info(`Unidad ${unit.unitNumber} exportada con ID: ${result.id}`, 'InteractiveBookViewer');
+    } else {
+      setExportMessage({
+        type: 'error',
+        text: `❌ Error al exportar unidad: ${result.error}`
+      });
+      logger.error('Error exportando unidad', result.error, 'InteractiveBookViewer');
+    }
+
+    setTimeout(() => setExportMessage(null), 5000);
   };
 
   const getExerciseIcon = (type) => {
@@ -420,41 +471,44 @@ function InteractiveBookViewer() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-1">
-              <MessageSquare size={16} />
-              <span>{dialogueLineCount}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <div
+                className="flex items-center gap-1"
+                title={`${dialogueLineCount} líneas de diálogo`}
+              >
+                <MessageSquare size={16} />
+                <span>{dialogueLineCount}</span>
+              </div>
+              <div
+                className="flex items-center gap-1"
+                title={`${exerciseCount} ejercicios`}
+              >
+                <Award size={16} />
+                <span>{exerciseCount}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Award size={16} />
-              <span>{exerciseCount}</span>
-            </div>
+
+            {/* Botón Exportar Unidad */}
+            <BaseButton
+              variant="outline"
+              icon={Save}
+              onClick={(e) => {
+                e.stopPropagation(); // Evitar que se expanda/colapse la unidad
+                handleExportUnit(unit);
+              }}
+              size="sm"
+              loading={exportLoading}
+              title="Exportar unidad a Contenidos"
+            >
+              Exportar
+            </BaseButton>
           </div>
         </button>
 
         {/* Content */}
         {isExpanded && (
           <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-6">
-            {/* Introducción */}
-            {unit.content?.introduction && (
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <Play size={20} className="text-blue-600 dark:text-blue-400 mt-1" />
-                  <div>
-                    <p className="text-gray-900 dark:text-white">
-                      {unit.content.introduction.text}
-                    </p>
-                    {unit.content.introduction.audioUrl && (
-                      <div className="mt-2 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                        <Volume2 size={16} />
-                        <span>Audio disponible</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Diálogo */}
             {unit.content?.dialogue && (
               <div>
@@ -672,6 +726,16 @@ function InteractiveBookViewer() {
 
             {/* Unidades */}
             <div className="space-y-4">
+              {/* Feedback message */}
+              {exportMessage && (
+                <BaseAlert
+                  variant={exportMessage.type === 'success' ? 'success' : 'error'}
+                  onClose={() => setExportMessage(null)}
+                >
+                  {exportMessage.text}
+                </BaseAlert>
+              )}
+
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Unidades ({bookData.units?.length || 0})
               </h2>

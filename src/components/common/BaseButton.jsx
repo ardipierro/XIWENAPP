@@ -43,9 +43,9 @@ function BaseButton({
   const getVariantStyles = () => {
     const baseStyles = {
       primary: {
-        backgroundColor: 'var(--color-primary)',
+        backgroundColor: 'var(--color-accent)', // Fix: usar accent en vez de primary
         color: 'white',
-        hover: { backgroundColor: 'var(--color-primary-dark)' }
+        hover: { backgroundColor: 'var(--color-accent-dark)' }
       },
       secondary: {
         backgroundColor: 'var(--color-bg-tertiary)',
@@ -62,17 +62,17 @@ function BaseButton({
         hover: { backgroundColor: 'var(--color-success-dark)' }
       },
       danger: {
-        backgroundColor: 'var(--color-danger)',
+        backgroundColor: 'var(--color-error)', // Fix: usar error en vez de danger
         color: 'white',
-        hover: { backgroundColor: 'var(--color-danger-dark)' }
+        hover: { backgroundColor: 'var(--color-error-dark)' }
       },
       warning: {
-        backgroundColor: 'var(--color-warning)',
+        backgroundColor: '#f59e0b', // amber-500 - Fix: valor directo (no existe variable)
         color: 'white',
-        hover: { backgroundColor: 'var(--color-warning-dark)' }
+        hover: { backgroundColor: '#d97706' } // amber-600
       },
       ghost: {
-        backgroundColor: 'transparent',
+        backgroundColor: 'var(--color-bg-secondary)', // Fondo sutil visible
         color: 'var(--color-text-primary)',
         border: '1px solid transparent',
         hover: {

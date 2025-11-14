@@ -566,7 +566,7 @@ function ThemeBuilder() {
                     </button>
                     <button
                       onClick={() => deletePreset(key)}
-                      className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30"
+                      className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/30"
                     >
                       <Trash2 size={14} className="text-red-500" />
                     </button>
