@@ -81,7 +81,6 @@ import MessagesPanel from './MessagesPanel';
 import ClassCountdownBanner from './ClassCountdownBanner';
 import NotificationCenter from './NotificationCenter';
 import useRealtimeClassStatus from '../hooks/useRealtimeClassStatus';
-import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import ThemeBuilder from './ThemeBuilder';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
