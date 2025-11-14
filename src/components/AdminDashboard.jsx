@@ -61,7 +61,7 @@ import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import DashboardLayout from './DashboardLayout';
 import CoursesScreen from './CoursesScreen';
 import GameContainer from './GameContainer';
-import ContentManager from './ContentManager';
+// ContentManager removed - using UnifiedContentManager instead
 import ClassSessionManager from './ClassSessionManager';
 import ExerciseManager from './ExerciseManager';
 import UnifiedContentManager from './UnifiedContentManager';
@@ -694,11 +694,11 @@ function AdminDashboard({ user, userRole, onLogout }) {
     );
   }
 
-  // LEGACY: Content Manager - WITH Layout
+  // LEGACY: Content Manager - Replaced with UnifiedContentManager
   if (navigation.currentScreen === 'content') {
     return (
       <DashboardLayout user={user} userRole={userRole} onLogout={onLogout} onMenuAction={navigation.handleMenuAction} currentScreen={navigation.currentScreen}>
-        <ContentManager user={user} courses={courses} onBack={navigation.handleBackToDashboard} openCreateModal={navigation.openContentModal} />
+        <UnifiedContentManager user={user} />
       </DashboardLayout>
     );
   }
