@@ -31,7 +31,8 @@ import MessagesPanel from './MessagesPanel';
 import StudentFeesPanel from './StudentFeesPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
-import LiveClassCard from './LiveClassCard';
+import { UniversalCard } from './cards';
+import { BaseButton } from './common';
 import NotificationCenter from './NotificationCenter';
 import ClassCountdownBanner from './ClassCountdownBanner';
 import { useStudentDashboard } from '../hooks/useStudentDashboard';
@@ -503,13 +504,58 @@ function StudentDashboard({ user, userRole, student: studentProp, onLogout, onSt
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               🔴 Clases en Vivo Ahora
             </h2>
-            {liveClassSessions.map((session) => (
-              <LiveClassCard
-                key={session.id}
-                session={session}
-                onJoin={handleJoinLiveClass}
-              />
-            ))}
+            {liveClassSessions.map((session) => {
+              // Calculate participants
+              const participantCount = session.participants?.length || 0;
+              const maxParticipants = session.maxParticipants || 30;
+
+              // Calculate time in live
+              let timeText = '';
+              if (session.startedAt) {
+                const startTime = session.startedAt.toDate ? session.startedAt.toDate() : new Date(session.startedAt);
+                const now = new Date();
+                const diffMinutes = Math.floor((now - startTime) / (1000 * 60));
+
+                if (diffMinutes < 1) timeText = 'Recién iniciada';
+                else if (diffMinutes < 60) timeText = `Hace ${diffMinutes} min`;
+                else {
+                  const diffHours = Math.floor(diffMinutes / 60);
+                  const remainingMinutes = diffMinutes % 60;
+                  timeText = `Hace ${diffHours}h ${remainingMinutes}m`;
+                }
+              }
+
+              return (
+                <UniversalCard
+                  key={session.id}
+                  variant="class"
+                  size="md"
+                  showLiveIndicator
+                  liveText="EN VIVO"
+                  title={session.name}
+                  subtitle={session.teacherName}
+                  meta={[
+                    { icon: '📚', text: session.courseName || 'Sin curso' },
+                    { icon: '👥', text: `${participantCount}/${maxParticipants} participantes` },
+                    { icon: '⏱️', text: timeText },
+                    ...(session.whiteboardType && session.whiteboardType !== 'none' ? [{ icon: '🎨', text: session.whiteboardType }] : [])
+                  ]}
+                  onClick={() => handleJoinLiveClass(session)}
+                  actions={
+                    <BaseButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinLiveClass(session);
+                      }}
+                      variant="primary"
+                      size="md"
+                    >
+                      Unirse a la Clase
+                    </BaseButton>
+                  }
+                />
+              );
+            })}
           </div>
         )}
 

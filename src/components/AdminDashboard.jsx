@@ -42,7 +42,10 @@ import {
   Zap,
   Key,
   Palette,
-  Info
+  Info,
+  Mail,
+  Eye,
+  Trash2
 } from 'lucide-react';
 import {
   loadStudents,
@@ -78,8 +81,6 @@ import WhiteboardManager from './WhiteboardManager';
 // Lazy load Excalidraw to prevent vendor bundle issues
 const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
 import ExcalidrawManager from './ExcalidrawManager';
-import StudentCard from './StudentCard';
-import UserCard from './UserCard';
 import {
   BaseButton,
   BaseCard,
@@ -124,6 +125,31 @@ const ICON_MAP = {
   'Target': Target,
   'FlaskConical': FlaskConical,
   'User': User
+};
+
+// Helper functions for user cards
+const getAvatarColor = (role) => {
+  const colors = {
+    admin: '#f59e0b', // amber/orange
+    teacher: '#8b5cf6', // purple
+    trial_teacher: '#a78bfa', // light purple
+    student: '#3b82f6', // blue
+    listener: '#10b981', // green
+    trial: '#06b6d4', // cyan
+  };
+  return colors[role] || '#6b7280'; // gray fallback
+};
+
+const getRoleBadge = (role) => {
+  const badges = {
+    admin: { label: 'Admin', variant: 'warning' },
+    teacher: { label: 'Profesor', variant: 'info' },
+    trial_teacher: { label: 'Profesor Prueba', variant: 'info' },
+    student: { label: 'Alumno', variant: 'primary' },
+    listener: { label: 'Oyente', variant: 'success' },
+    trial: { label: 'Prueba', variant: 'secondary' }
+  };
+  return badges[role] || { label: role, variant: 'secondary' };
 };
 
 function AdminDashboard({ user, userRole, onLogout }) {
@@ -1154,47 +1180,66 @@ function AdminDashboard({ user, userRole, onLogout }) {
           </div>
         )}
 
-          {/* GRID VIEW */}
-          {navigation.usersViewMode === 'grid' && (
+          {/* GRID & LIST VIEW */}
+          {(navigation.usersViewMode === 'grid' || navigation.usersViewMode === 'list') && (
             filteredUsers.length === 0 ? (
               <div className="py-12 text-center text-gray-600 dark:text-gray-400">
                 <p>No users found with selected filters</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {filteredUsers.map(userItem => (
-                  <UserCard
-                    key={userItem.id}
-                    user={userItem}
-                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
-                    onView={handleViewUserProfile}
-                    onDelete={handleDeleteUser}
-                    isAdmin={isAdmin}
-                  />
-                ))}
-              </div>
-            )
-          )}
+              <CardGrid
+                columnsType={navigation.usersViewMode === 'list' ? 'wide' : 'default'}
+                gap={navigation.usersViewMode === 'list' ? 'gap-3' : 'gap-4 md:gap-6'}
+              >
+                {filteredUsers.map(userItem => {
+                  const initial = userItem.name?.charAt(0).toUpperCase() || '?';
+                  const avatarColor = getAvatarColor(userItem.role);
+                  const roleBadge = getRoleBadge(userItem.role);
 
-          {/* LIST VIEW */}
-          {navigation.usersViewMode === 'list' && (
-            filteredUsers.length === 0 ? (
-              <div className="py-12 text-center text-gray-600 dark:text-gray-400">
-                <p>No users found with selected filters</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredUsers.map(userItem => (
-                  <UserCard
-                    key={userItem.id}
-                    user={userItem}
-                    enrollmentCount={resourceAssignment.enrollmentCounts[userItem.id] || 0}
-                    onView={handleViewUserProfile}
-                    onDelete={handleDeleteUser}
-                    isAdmin={isAdmin}
-                  />
-                ))}
-              </div>
+                  return (
+                    <UniversalCard
+                      key={userItem.id}
+                      variant="user"
+                      size="md"
+                      layout={navigation.usersViewMode === 'list' ? 'horizontal' : 'vertical'}
+                      avatar={initial}
+                      avatarColor={avatarColor}
+                      title={userItem.name}
+                      subtitle={userItem.email}
+                      badges={[{ variant: roleBadge.variant, children: roleBadge.label }]}
+                      stats={[
+                        { label: 'Cursos', value: resourceAssignment.enrollmentCounts[userItem.id] || 0, icon: BookOpen },
+                        { label: 'Créditos', value: userItem.credits || 0, icon: DollarSign }
+                      ]}
+                      onClick={() => handleViewUserProfile(userItem)}
+                      actions={
+                        <>
+                          <BaseButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewUserProfile(userItem);
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            icon={Eye}
+                          >
+                            Ver
+                          </BaseButton>
+                          <BaseButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteUser(userItem.id);
+                            }}
+                            variant="danger"
+                            size="sm"
+                            icon={Trash2}
+                          />
+                        </>
+                      }
+                    />
+                  );
+                })}
+              </CardGrid>
             )
           )}
 
