@@ -72,7 +72,6 @@ import UserProfile from './UserProfile';
 import { UniversalCard, CardGrid } from './cards';
 import ExercisePlayer from './exercises/ExercisePlayer';
 import SearchBar from './common/SearchBar';
-import BaseButton from './common/BaseButton';
 import Whiteboard from './Whiteboard';
 import WhiteboardManager from './WhiteboardManager';
 // Lazy load Excalidraw to prevent vendor bundle issues
@@ -1520,3 +1519,4 @@ function AdminDashboard({ user, userRole, onLogout }) {
 }
 
 export default AdminDashboard;
+
