@@ -188,7 +188,7 @@ function AssignmentCard({ assignment, courses, onEdit, onDelete, onViewStats }) 
   const isOverdue = deadline && deadline < new Date();
 
   return (
-    <Card>
+    <BaseCard>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-start gap-3">
