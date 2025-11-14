@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette } from 'lucide-react';
+import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
@@ -13,7 +13,7 @@ import {
   BaseSelect,
   BaseAlert
 } from './common';
-import { CONTENT_TYPES, EXERCISE_TYPES, DIFFICULTY_LEVELS } from '../firebase/content';
+import { CONTENT_TYPES, EXERCISE_TYPES, DIFFICULTY_LEVELS, CONTENT_STATUS } from '../firebase/content';
 import { getAllContent } from '../firebase/content';
 import ExerciseGeneratorContent from './ExerciseGeneratorContent';
 import ContentOrderEditor from './ContentOrderEditor';
@@ -48,11 +48,19 @@ const EXERCISE_TYPE_OPTIONS = [
   { value: EXERCISE_TYPES.LISTENING, label: 'Comprensión Auditiva' }
 ];
 
+const STATUS_OPTIONS = [
+  { value: CONTENT_STATUS.DRAFT, label: '📝 Borrador', icon: Edit3 },
+  { value: CONTENT_STATUS.REVIEW, label: '👀 En Revisión', icon: Eye },
+  { value: CONTENT_STATUS.PUBLISHED, label: '✅ Publicado', icon: FileCheck },
+  { value: CONTENT_STATUS.ARCHIVED, label: '📦 Archivado', icon: Archive }
+];
+
 function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userId, onNavigateToAIConfig }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     type: CONTENT_TYPES.LESSON,
+    status: CONTENT_STATUS.DRAFT, // Estado del contenido
     contentType: '', // Para ejercicios
     body: '',
     url: '',
@@ -111,6 +119,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         title: initialData.title || '',
         description: initialData.description || '',
         type: initialData.type || CONTENT_TYPES.LESSON,
+        status: initialData.status || CONTENT_STATUS.DRAFT,
         contentType: initialData.contentType || '',
         body: initialData.body || '',
         url: initialData.url || '',
@@ -227,6 +236,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
         title: formData.title.trim(),
         description: formData.description.trim(),
         type: formData.type,
+        status: formData.status, // FASE 10: Estado del contenido
         body: formData.body,
         url: formData.url,
         metadata: {
@@ -288,6 +298,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
       title: '',
       description: '',
       type: CONTENT_TYPES.LESSON,
+      status: CONTENT_STATUS.DRAFT,
       contentType: '',
       body: '',
       url: '',
@@ -584,6 +595,36 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* FASE 10: Estado del contenido */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    Estado del Contenido
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {STATUS_OPTIONS.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = formData.status === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleChange('status', option.value)}
+                          className={`
+                            px-4 py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2
+                            ${isSelected
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                              : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 text-zinc-600 dark:text-zinc-400'
+                            }
+                          `}
+                        >
+                          <Icon size={16} />
+                          <span className="text-sm font-medium">{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <BaseSelect
                   label="Dificultad"
                   value={formData.metadata.difficulty}
