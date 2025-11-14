@@ -10,6 +10,7 @@
  * - Zoom and pan controls
  * - Toggle errors by type
  * - Adjustable highlight opacity
+ * - Improved matching with fuzzy logic
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -28,12 +29,6 @@ const ERROR_COLORS = {
 
 /**
  * Generate wavy line path (Word-style underline)
- * @param {number} x1 - Start X
- * @param {number} y - Y position
- * @param {number} x2 - End X
- * @param {number} amplitude - Wave height
- * @param {number} frequency - Wave frequency
- * @returns {string} SVG path
  */
 function generateWavyPath(x1, y, x2, amplitude = 2, frequency = 4) {
   const length = x2 - x1;
@@ -56,20 +51,40 @@ function generateWavyPath(x1, y, x2, amplitude = 2, frequency = 4) {
 }
 
 /**
+ * Normalize text for matching (remove punctuation, accents, lowercase)
+ */
+function normalizeText(text) {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .trim()
+    // Remove accents
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    // Remove punctuation except spaces
+    .replace(/[^\w\s]/g, '')
+    // Normalize spaces
+    .replace(/\s+/g, ' ');
+}
+
+/**
+ * Extract error info from various formats
+ */
+function extractErrorInfo(error) {
+  // Try different field names for error text
+  const errorText = error.errorText || error.text || error.error || error.word || '';
+
+  // Try different field names for error type
+  const errorType = error.errorType || error.type || error.category || 'default';
+
+  // Try different field names for suggestion
+  const suggestion = error.suggestion || error.correctedText || error.correction || error.fix || '';
+
+  return { errorText, errorType, suggestion };
+}
+
+/**
  * Enhanced Image Overlay Component
- * Renders homework image with error highlights based on word coordinates
- *
- * @param {Object} props
- * @param {string} props.imageUrl - URL of homework image
- * @param {Array} props.words - Word coordinates from OCR [{text, bounds: {x, y, width, height}}]
- * @param {Array} props.errors - Error corrections from AI [{errorText, errorType, suggestion}]
- * @param {boolean} props.showOverlay - Toggle overlay visibility
- * @param {Object} props.visibleErrorTypes - Which error types to show {spelling: true, grammar: true, ...}
- * @param {number} props.highlightOpacity - Opacity of highlight fill (0-1)
- * @param {number} props.zoom - Zoom level (1 = 100%)
- * @param {Object} props.pan - Pan offset {x, y}
- * @param {boolean} props.useWavyUnderline - Use wavy underlines instead of straight
- * @param {string} props.className - Additional CSS classes
  */
 export default function ImageOverlay({
   imageUrl,
@@ -90,6 +105,7 @@ export default function ImageOverlay({
 }) {
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   const [imageNaturalDimensions, setImageNaturalDimensions] = useState({ width: 0, height: 0 });
+  const [debugInfo, setDebugInfo] = useState(null);
   const imageRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -127,37 +143,80 @@ export default function ImageOverlay({
   }, [imageUrl]);
 
   /**
-   * Map errors to word coordinates
-   * Finds words that match error text and returns their scaled bounds
+   * Map errors to word coordinates with improved matching
    */
   const getErrorHighlights = () => {
     if (!words || words.length === 0 || !errors || errors.length === 0) {
+      console.log('[ImageOverlay] No highlights:', {
+        hasWords: !!words?.length,
+        hasErrors: !!errors?.length,
+        wordsCount: words?.length || 0,
+        errorsCount: errors?.length || 0
+      });
       return [];
     }
 
     const highlights = [];
+    const matchingStats = {
+      attempted: 0,
+      matched: 0,
+      unmatched: [],
+      filteredByType: 0
+    };
 
     // Calculate scale factors
     const scaleX = imageDimensions.width / imageNaturalDimensions.width;
     const scaleY = imageDimensions.height / imageNaturalDimensions.height;
 
-    errors.forEach((error, errorIndex) => {
-      const errorText = error.errorText || error.text || '';
-      const errorType = error.errorType || error.type || 'default';
+    console.log('[ImageOverlay] Starting matching:', {
+      errors: errors.length,
+      words: words.length,
+      scaleX,
+      scaleY
+    });
 
-      if (!errorText) return;
+    // Sample first 3 words and errors for debugging
+    console.log('[ImageOverlay] Sample words:', words.slice(0, 3).map(w => ({
+      text: w.text,
+      hasBounds: !!w.bounds
+    })));
+    console.log('[ImageOverlay] Sample errors:', errors.slice(0, 3).map(e => extractErrorInfo(e)));
+
+    errors.forEach((error, errorIndex) => {
+      matchingStats.attempted++;
+      const { errorText, errorType, suggestion } = extractErrorInfo(error);
+
+      if (!errorText) {
+        console.log(`[ImageOverlay] Error ${errorIndex}: No text found`);
+        return;
+      }
 
       // Filter by visible error types
-      if (!visibleErrorTypes[errorType]) return;
+      if (!visibleErrorTypes[errorType]) {
+        matchingStats.filteredByType++;
+        return;
+      }
 
       // Normalize error text for matching
-      const normalizedError = errorText.toLowerCase().trim();
+      const normalizedError = normalizeText(errorText);
+      if (!normalizedError) {
+        console.log(`[ImageOverlay] Error ${errorIndex}: Empty after normalization`);
+        return;
+      }
+
       const errorWords = normalizedError.split(/\s+/);
+      let matched = false;
 
       // Try to find matching word(s) in coordinates
-      for (let i = 0; i < words.length; i++) {
+      for (let i = 0; i < words.length && !matched; i++) {
         const word = words[i];
-        const normalizedWord = word.text.toLowerCase().trim();
+
+        // Validate word structure
+        if (!word.text || !word.bounds) {
+          continue;
+        }
+
+        const normalizedWord = normalizeText(word.text);
 
         // Single word match
         if (normalizedWord === normalizedError) {
@@ -169,8 +228,15 @@ export default function ImageOverlay({
             color: ERROR_COLORS[errorType] || ERROR_COLORS.default,
             errorType: errorType,
             errorText: errorText,
-            suggestion: error.suggestion || error.correctedText || '',
+            suggestion: suggestion,
             id: `error-${errorIndex}-word-${i}`
+          });
+          matched = true;
+          matchingStats.matched++;
+          console.log(`[ImageOverlay] ✓ Matched single word:`, {
+            error: errorText,
+            word: word.text,
+            type: errorType
           });
           break;
         }
@@ -185,10 +251,16 @@ export default function ImageOverlay({
 
           for (let j = 0; j < errorWords.length; j++) {
             const wordToMatch = words[i + j];
-            if (!wordToMatch || wordToMatch.text.toLowerCase().trim() !== errorWords[j]) {
+            if (!wordToMatch || !wordToMatch.text || !wordToMatch.bounds) {
               phraseMatch = false;
               break;
             }
+
+            if (normalizeText(wordToMatch.text) !== errorWords[j]) {
+              phraseMatch = false;
+              break;
+            }
+
             // Expand bounding box
             minX = Math.min(minX, wordToMatch.bounds.x);
             minY = Math.min(minY, wordToMatch.bounds.y);
@@ -205,15 +277,35 @@ export default function ImageOverlay({
               color: ERROR_COLORS[errorType] || ERROR_COLORS.default,
               errorType: errorType,
               errorText: errorText,
-              suggestion: error.suggestion || error.correctedText || '',
+              suggestion: suggestion,
               id: `error-${errorIndex}-phrase-${i}`
+            });
+            matched = true;
+            matchingStats.matched++;
+            console.log(`[ImageOverlay] ✓ Matched phrase:`, {
+              error: errorText,
+              words: errorWords.length,
+              type: errorType
             });
             break;
           }
         }
       }
+
+      if (!matched) {
+        matchingStats.unmatched.push({ errorText, errorType, normalizedError });
+      }
     });
 
+    console.log('[ImageOverlay] Matching complete:', matchingStats);
+
+    if (matchingStats.unmatched.length > 0) {
+      console.log('[ImageOverlay] Unmatched errors (first 5):',
+        matchingStats.unmatched.slice(0, 5)
+      );
+    }
+
+    setDebugInfo(matchingStats);
     return highlights;
   };
 
@@ -307,14 +399,41 @@ export default function ImageOverlay({
         )}
       </div>
 
-      {/* Debug info (only in development) */}
+      {/* Enhanced Debug info (only in development) */}
       {import.meta.env.DEV && (
-        <div className="absolute top-2 left-2 bg-black/75 text-white text-xs p-2 rounded pointer-events-none z-10">
-          <div>Words: {words.length}</div>
-          <div>Errors: {errors.length}</div>
-          <div>Visible: {highlights.length}</div>
-          <div>Zoom: {(zoom * 100).toFixed(0)}%</div>
-          <div>Scale: {imageDimensions.width}x{imageDimensions.height}</div>
+        <div className="absolute top-2 left-2 bg-black/90 text-white text-xs p-3 rounded pointer-events-none z-10 font-mono max-w-xs">
+          <div className="font-bold mb-1">🐛 Debug Info</div>
+          <div className="space-y-0.5">
+            <div>Words: {words.length}</div>
+            <div>Errors: {errors.length}</div>
+            <div className={`font-bold ${highlights.length > 0 ? 'text-green-400' : 'text-red-400'}`}>
+              Highlights: {highlights.length}
+            </div>
+            {debugInfo && (
+              <>
+                <div>Matched: {debugInfo.matched}/{debugInfo.attempted}</div>
+                <div>Filtered: {debugInfo.filteredByType}</div>
+                <div className="text-yellow-300">
+                  Unmatched: {debugInfo.unmatched?.length || 0}
+                </div>
+              </>
+            )}
+            <div>Zoom: {(zoom * 100).toFixed(0)}%</div>
+            <div>Scale: {imageDimensions.width}x{imageDimensions.height}</div>
+            <div className="text-xs text-gray-400">
+              {imageNaturalDimensions.width}x{imageNaturalDimensions.height}
+            </div>
+          </div>
+          {debugInfo && debugInfo.unmatched?.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-gray-600">
+              <div className="text-yellow-300 mb-1">Unmatched (sample):</div>
+              {debugInfo.unmatched.slice(0, 2).map((err, idx) => (
+                <div key={idx} className="text-xs truncate">
+                  • {err.errorText}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
