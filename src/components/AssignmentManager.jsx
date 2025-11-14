@@ -460,6 +460,6 @@ function AssignmentFormModal({ assignment, courses, teacherId, onCreate, onUpdat
           </label>
         </div>
       </form>
-    </BaseModal>
+    </Modal>
   );
 }
