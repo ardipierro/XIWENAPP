@@ -23,13 +23,13 @@ import {
 import { Timestamp } from 'firebase/firestore';
 import {
   BaseButton,
-  BaseCard,
   BaseModal,
   BaseInput,
   BaseBadge,
   BaseLoading,
   BaseEmptyState
 } from './common';
+import { UniversalCard } from './cards';
 import logger from '../utils/logger';
 
 export default function AssignmentManager({ teacherId }) {
@@ -89,7 +89,7 @@ export default function AssignmentManager({ teacherId }) {
       </div>
 
       {/* Search and Filters */}
-      <BaseCard>
+      <UniversalCard variant="default" size="md">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} strokeWidth={2} />
@@ -111,27 +111,27 @@ export default function AssignmentManager({ teacherId }) {
             <option value="archived">Archivadas</option>
           </select>
         </div>
-      </BaseCard>
+      </UniversalCard>
 
       {/* Stats Cards */}
       <div className="stats-grid">
-        <BaseCard className="text-center p-6">
+        <UniversalCard variant="default" size="md" className="text-center p-6">
           <FileText className="mx-auto mb-2" size={32} />
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Total</h3>
           <p className="text-3xl font-bold text-purple-600">{assignments.length}</p>
-        </BaseCard>
+        </UniversalCard>
 
-        <BaseCard className="text-center p-6">
+        <UniversalCard variant="default" size="md" className="text-center p-6">
           <CheckCircle className="mx-auto mb-2" size={32} />
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Activas</h3>
           <p className="text-3xl font-bold text-green-600">{assignments.filter(a => a.status === 'active').length}</p>
-        </BaseCard>
+        </UniversalCard>
 
-        <BaseCard className="text-center p-6">
+        <UniversalCard variant="default" size="md" className="text-center p-6">
           <BarChart3 className="mx-auto mb-2" size={32} />
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Archivadas</h3>
           <p className="text-3xl font-bold text-purple-600">{assignments.filter(a => a.status === 'archived').length}</p>
-        </BaseCard>
+        </UniversalCard>
       </div>
 
       {/* Assignments List */}
@@ -188,7 +188,7 @@ function AssignmentCard({ assignment, courses, onEdit, onDelete, onViewStats }) 
   const isOverdue = deadline && deadline < new Date();
 
   return (
-    <BaseCard>
+    <UniversalCard variant="default" size="md">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-start gap-3">
@@ -275,7 +275,7 @@ function AssignmentCard({ assignment, courses, onEdit, onDelete, onViewStats }) 
       </div>
 
       {showStats && <AssignmentStats assignmentId={assignment.id} />}
-    </BaseCard>
+    </UniversalCard>
   );
 }
 

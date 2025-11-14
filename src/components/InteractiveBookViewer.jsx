@@ -28,7 +28,6 @@ import './interactive-book/styles.css';
 import { useContentExport } from '../hooks/useContentExport';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  BaseCard,
   BaseButton,
   BaseBadge,
   BaseLoading,
@@ -36,6 +35,7 @@ import {
   BaseEmptyState,
   useModal
 } from './common';
+import { UniversalCard } from './cards';
 import {
   AudioPlayer,
   FillInBlankExercise,
@@ -235,11 +235,10 @@ function InteractiveBookViewer() {
     const { metadata } = bookData;
 
     return (
-      <BaseCard
+      <UniversalCard variant="default" size="md"
         icon={BookOpen}
         title={metadata.title}
         subtitle={metadata.description}
-        variant="elevated"
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -314,7 +313,7 @@ function InteractiveBookViewer() {
             Configuración
           </BaseButton>
         </div>
-      </BaseCard>
+      </UniversalCard>
     );
   };
 
@@ -377,7 +376,7 @@ function InteractiveBookViewer() {
         // Ejercicios no implementados aún - mostrar card informativa
         const ExerciseIcon = getExerciseIcon(exercise.type);
         return (
-          <BaseCard
+          <UniversalCard variant="default" size="md"
             key={exercise.exerciseId || index}
             icon={ExerciseIcon}
             title={exercise.title}
@@ -422,7 +421,7 @@ function InteractiveBookViewer() {
                 ⚠️ Este tipo de ejercicio estará disponible pronto
               </div>
             </div>
-          </BaseCard>
+          </UniversalCard>
         );
     }
   };

@@ -44,7 +44,6 @@ import {
 import logger from '../utils/logger';
 import {
   BaseButton,
-  BaseCard,
   BaseInput,
   BaseSelect,
   BaseBadge,
@@ -52,6 +51,7 @@ import {
   BaseAlert,
   BaseEmptyState
 } from './common';
+import { UniversalCard } from './cards';
 import CreateContentModal from './CreateContentModal';
 import ContentAnalytics from './ContentAnalytics';
 import { BaseModal } from './common';
@@ -947,7 +947,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
 
   // Grid View
   return (
-    <BaseCard
+    <UniversalCard variant="default" size="md"
       id={`content-${content.id}`}
       className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
       image={renderImageOrIcon()}
@@ -1026,7 +1026,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           <BaseButton variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
         </div>
       </div>
-    </BaseCard>
+    </UniversalCard>
   );
 }
 
