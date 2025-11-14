@@ -32,7 +32,6 @@ import StudentFeesPanel from './StudentFeesPanel';
 import ClassSessionManager from './ClassSessionManager';
 import ClassSessionRoom from './ClassSessionRoom';
 import { UniversalCard } from './cards';
-import { BaseButton } from './common';
 import NotificationCenter from './NotificationCenter';
 import ClassCountdownBanner from './ClassCountdownBanner';
 import { useStudentDashboard } from '../hooks/useStudentDashboard';
