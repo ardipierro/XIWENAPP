@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Check, X, PartyPopper, Frown } from 'lucide-react';
 import BaseButton from '../../common/BaseButton';
-import './MultipleChoiceExercise.css';
 
 function MultipleChoiceExercise({ questions, onComplete, studentName }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);

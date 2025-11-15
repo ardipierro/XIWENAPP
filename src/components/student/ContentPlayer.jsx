@@ -9,7 +9,6 @@ import { db } from '../../firebase/config';
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { markContentCompleted, getCourseProgress } from '../../firebase/studentProgress';
 import BaseButton from '../common/BaseButton';
-import './ContentPlayer.css';
 
 function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
   const [content, setContent] = useState(null);

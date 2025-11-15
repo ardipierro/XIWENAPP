@@ -12,7 +12,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
 import CreditBadge from './common/CreditBadge';
-import './UniversalTopBar.css';
 
 /**
  * TopBar universal con sistema de créditos y permisos

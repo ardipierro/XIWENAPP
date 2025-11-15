@@ -8,7 +8,6 @@ import { TrendingUp, Target, Zap, Award, Calendar, Clock, CheckCircle, AlertCirc
 import { BaseCard, BaseBadge, BaseButton } from './common';
 import { getUserReviewStats } from '../services/spacedRepetitionService';
 import logger from '../utils/logger';
-import './FlashCardStatsPanel.css';
 
 /**
  * Stats Panel para FlashCards

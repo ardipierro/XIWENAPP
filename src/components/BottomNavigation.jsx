@@ -216,7 +216,7 @@ function BottomNavigation({ userRole, currentScreen, onNavigate, onMenuAction })
                 min-w-[64px] h-full px-2
                 transition-colors duration-200
                 ${active
-                  ? 'text-zinc-900 dark:text-white'
+                  ? 'style={{ color: 'var(--color-text-primary)' }}'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
                 }
               `}
@@ -231,7 +231,7 @@ function BottomNavigation({ userRole, currentScreen, onNavigate, onMenuAction })
               />
               <span className={`
                 text-xs font-medium
-                ${active ? 'text-zinc-900 dark:text-white' : 'text-zinc-600 dark:text-zinc-400'}
+                ${active ? 'style={{ color: 'var(--color-text-primary)' }}' : 'style={{ color: 'var(--color-text-secondary)' }}'}
               `}>
                 {item.label}
               </span>

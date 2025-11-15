@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { BarChart3, User, Settings, LogOut } from 'lucide-react';
-import './UserMenu.css';
 
 function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
   const navigate = useNavigate();
