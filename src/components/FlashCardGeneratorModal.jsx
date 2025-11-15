@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { Sparkles, X, Loader, CheckCircle, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { BaseButton, BaseInput, BaseSelect, BaseModal, BaseAlert } from './common';
 import { createFlashCardCollection } from '../firebase/flashcards';
+import { uploadFlashCardImage } from '../services/flashcardImageService';
+import { generateFlashCardAudio, isElevenLabsConfigured } from '../services/elevenLabsService';
 import { callAI } from '../firebase/aiConfig';
 import imageGenerationService from '../services/imageGenerationService';
 import logger from '../utils/logger';
@@ -80,6 +82,8 @@ export function FlashCardGeneratorModal({ isOpen, onClose, onSuccess, user }) {
   const [generatedCards, setGeneratedCards] = useState([]);
 
   const handleGenerate = async () => {
+    let collectionId = null;
+
     try {
       setGenerating(true);
       setError(null);
@@ -94,7 +98,31 @@ export function FlashCardGeneratorModal({ isOpen, onClose, onSuccess, user }) {
       const cards = textResult.cards;
       setGeneratedCards(cards);
 
-      // 2. Generar imágenes para cada tarjeta
+      // 2. Crear colección primero para obtener ID
+      setProgress({ stage: 'saving', current: 0, total: 1, currentItem: 'Creando colección...' });
+
+      const themeName = THEMES.find(t => t.value === config.theme)?.label || config.theme;
+      const collectionName = config.collectionName || `${themeName} - ${config.level}`;
+      const description = config.description || `Colección de ${config.quantity} tarjetas de ${themeName.toLowerCase()}`;
+
+      const tempResult = await createFlashCardCollection({
+        name: collectionName,
+        description: description,
+        level: config.level,
+        category: 'vocabulary',
+        cards: cards.map(c => ({ ...c, imageUrl: null })), // Sin imágenes aún
+        createdBy: user.uid,
+        imageUrl: null
+      });
+
+      if (!tempResult.success) {
+        throw new Error(tempResult.error);
+      }
+
+      collectionId = tempResult.id;
+      logger.info('Temporary collection created:', collectionId);
+
+      // 3. Generar y subir imágenes para cada tarjeta
       setProgress({ stage: 'generating-images', current: 0, total: cards.length, currentItem: '' });
 
       const cardsWithImages = [];
@@ -105,39 +133,88 @@ export function FlashCardGeneratorModal({ isOpen, onClose, onSuccess, user }) {
         // Generar imagen con DALL-E
         const imageResult = await generateCardImage(card);
 
+        let finalImageUrl = null;
+
+        if (imageResult.success && imageResult.imageUrl) {
+          // Descargar y subir a Firebase Storage
+          try {
+            const imageBlob = await downloadImage(imageResult.imageUrl);
+            const imageFile = new File([imageBlob], `${card.id}.jpg`, { type: 'image/jpeg' });
+
+            const uploadResult = await uploadFlashCardImage(imageFile, collectionId, card.id);
+
+            if (uploadResult.success) {
+              finalImageUrl = uploadResult.url;
+              logger.info(`Image uploaded to Storage for card ${card.id}`);
+            } else {
+              logger.warn(`Failed to upload image for card ${card.id}:`, uploadResult.error);
+            }
+          } catch (uploadErr) {
+            logger.error(`Error uploading image for card ${card.id}:`, uploadErr);
+          }
+        }
+
         cardsWithImages.push({
           ...card,
-          imageUrl: imageResult.success ? imageResult.imageUrl : null
+          imageUrl: finalImageUrl
         });
       }
 
-      // 3. Guardar en Firebase
+      // 4. Generar audio premium si ElevenLabs está configurado
+      let cardsWithAudio = [...cardsWithImages];
+
+      if (isElevenLabsConfigured()) {
+        setProgress({ stage: 'generating-audio', current: 0, total: cardsWithImages.length, currentItem: 'Generando audio premium...' });
+
+        for (let i = 0; i < cardsWithImages.length; i++) {
+          const card = cardsWithImages[i];
+          setProgress(prev => ({ ...prev, current: i + 1, currentItem: card.spanish }));
+
+          try {
+            const audioResult = await generateFlashCardAudio(card.spanish, {
+              collectionId,
+              cardId: card.id,
+              voiceId: 'bella' // Voz femenina por defecto
+            });
+
+            if (audioResult.success) {
+              cardsWithAudio[i] = {
+                ...cardsWithAudio[i],
+                audioUrl: audioResult.audioUrl
+              };
+              logger.info(`Audio generated for card ${card.id}`);
+            }
+          } catch (audioErr) {
+            logger.warn(`Failed to generate audio for card ${card.id}:`, audioErr);
+            // Continuar sin audio para esta tarjeta
+          }
+
+          // Pequeña pausa para no saturar la API
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      } else {
+        logger.info('ElevenLabs not configured, skipping audio generation');
+      }
+
+      // 5. Actualizar colección con imágenes y audio
       setProgress({ stage: 'saving', current: 0, total: 1, currentItem: 'Guardando colección...' });
 
-      const themeName = THEMES.find(t => t.value === config.theme)?.label || config.theme;
-      const collectionName = config.collectionName || `${themeName} - ${config.level}`;
-      const description = config.description || `Colección de ${config.quantity} tarjetas de ${themeName.toLowerCase()}`;
-
-      const result = await createFlashCardCollection({
+      const updateResult = await createFlashCardCollection({
         name: collectionName,
         description: description,
         level: config.level,
         category: 'vocabulary',
-        cards: cardsWithImages,
+        cards: cardsWithAudio,
         createdBy: user.uid,
-        imageUrl: cardsWithImages[0]?.imageUrl || null
+        imageUrl: cardsWithAudio[0]?.imageUrl || null
       });
 
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      logger.info('FlashCard collection created successfully:', result.id);
+      logger.info('FlashCard collection created with images and audio successfully');
       setProgress({ stage: 'complete', current: 1, total: 1, currentItem: '¡Completado!' });
 
       // Callback de éxito
       setTimeout(() => {
-        onSuccess && onSuccess(result.id);
+        onSuccess && onSuccess(collectionId);
         handleClose();
       }, 1500);
 
@@ -245,6 +322,23 @@ No text in the image.`;
     }
   };
 
+  /**
+   * Descargar imagen desde URL y convertir a Blob
+   */
+  const downloadImage = async (url) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.statusText}`);
+      }
+      const blob = await response.blob();
+      return blob;
+    } catch (error) {
+      logger.error('Error downloading image:', error);
+      throw error;
+    }
+  };
+
   const handleClose = () => {
     if (!generating) {
       setConfig({
@@ -273,6 +367,8 @@ No text in the image.`;
         return 'Generando contenido con IA...';
       case 'generating-images':
         return `Generando imágenes (${progress.current}/${progress.total})...`;
+      case 'generating-audio':
+        return `Generando audio premium (${progress.current}/${progress.total})...`;
       case 'saving':
         return 'Guardando colección...';
       case 'complete':

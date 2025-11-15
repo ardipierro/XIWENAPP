@@ -318,6 +318,7 @@ export function FlashCardManager({ user }) {
         isOpen={showViewer}
         onClose={() => setShowViewer(false)}
         collectionId={selectedCollectionId}
+        user={user}
       />
     </div>
   );

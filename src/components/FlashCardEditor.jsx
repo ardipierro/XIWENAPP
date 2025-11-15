@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Trash2, Save, X, Image as ImageIcon, Upload } from 'lucide-react';
 import { BaseButton, BaseInput, BaseSelect, BaseModal, BaseAlert, BaseCard } from './common';
 import { createFlashCardCollection, updateFlashCardCollection, getFlashCardCollectionById } from '../firebase/flashcards';
+import { uploadFlashCardImage, deleteFlashCardImage, compressImage } from '../services/flashcardImageService';
 import logger from '../utils/logger';
 import './FlashCardEditor.css';
 
@@ -48,6 +49,7 @@ export function FlashCardEditor({ isOpen, onClose, onSave, collectionId, user })
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(new Set());
 
   useEffect(() => {
     if (isOpen) {
@@ -200,16 +202,69 @@ export function FlashCardEditor({ isOpen, onClose, onSave, collectionId, user })
     }
   };
 
-  const handleImageUpload = (index, event) => {
+  const handleImageUpload = async (index, event) => {
     const file = event.target.files[0];
-    if (file) {
-      // TODO: Subir a Firebase Storage
-      // Por ahora, crear URL local de preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleUpdateCard(index, 'imageUrl', reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const cardId = collection.cards[index].id;
+
+    try {
+      // Mark as uploading
+      setUploadingImages(prev => new Set(prev).add(index));
+      setError(null);
+
+      // Compress image before upload
+      logger.info('Compressing image...');
+      const compressedBlob = await compressImage(file, 1024, 0.8);
+      const compressedFile = new File([compressedBlob], file.name, { type: 'image/jpeg' });
+
+      // Upload to Firebase Storage
+      logger.info('Uploading image to Firebase Storage...');
+      const result = await uploadFlashCardImage(
+        compressedFile,
+        collectionId || 'temp',
+        cardId
+      );
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      // Update card with Firebase URL
+      handleUpdateCard(index, 'imageUrl', result.url);
+      logger.info('Image uploaded successfully:', result.url);
+
+    } catch (err) {
+      logger.error('Error uploading image:', err);
+      setError(`Error al subir imagen: ${err.message}`);
+    } finally {
+      // Remove from uploading set
+      setUploadingImages(prev => {
+        const next = new Set(prev);
+        next.delete(index);
+        return next;
+      });
+    }
+  };
+
+  const handleRemoveImage = async (index) => {
+    const card = collection.cards[index];
+    if (!card.imageUrl) return;
+
+    try {
+      // Delete from Firebase Storage if it's a Firebase URL
+      if (card.imageUrl.includes('firebase')) {
+        await deleteFlashCardImage(card.imageUrl);
+        logger.info('Image deleted from Firebase Storage');
+      }
+
+      // Clear imageUrl in card
+      handleUpdateCard(index, 'imageUrl', '');
+
+    } catch (err) {
+      logger.error('Error deleting image:', err);
+      // Still clear the URL even if deletion fails
+      handleUpdateCard(index, 'imageUrl', '');
     }
   };
 
@@ -343,12 +398,18 @@ export function FlashCardEditor({ isOpen, onClose, onSave, collectionId, user })
                         <div className="flashcard-editor__field">
                           <label>Imagen</label>
                           <div className="flashcard-editor__image-upload">
-                            {card.imageUrl ? (
+                            {uploadingImages.has(index) ? (
+                              <div className="flashcard-editor__image-button">
+                                <Upload size={18} className="animate-pulse" />
+                                Subiendo imagen...
+                              </div>
+                            ) : card.imageUrl ? (
                               <div className="flashcard-editor__image-preview">
                                 <img src={card.imageUrl} alt="Preview" />
                                 <button
                                   className="flashcard-editor__image-remove"
-                                  onClick={() => handleUpdateCard(index, 'imageUrl', '')}
+                                  onClick={() => handleRemoveImage(index)}
+                                  type="button"
                                 >
                                   <X size={16} />
                                 </button>

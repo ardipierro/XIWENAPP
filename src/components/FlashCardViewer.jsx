@@ -4,9 +4,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, RotateCw, Check, X, HelpCircle, Volume2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCw, Check, X, HelpCircle, Volume2, Star, Zap } from 'lucide-react';
 import { BaseButton, BaseModal, BaseBadge, BaseAlert } from './common';
 import { getFlashCardCollectionById } from '../firebase/flashcards';
+import { generateFallbackAudio } from '../services/elevenLabsService';
+import { saveCardProgress, getCollectionProgress } from '../services/spacedRepetitionService';
 import logger from '../utils/logger';
 import './FlashCardViewer.css';
 
@@ -16,14 +18,17 @@ import './FlashCardViewer.css';
  * @param {boolean} props.isOpen - Si el visor está abierto
  * @param {Function} props.onClose - Callback al cerrar
  * @param {string} props.collectionId - ID de la colección a mostrar
+ * @param {Object} props.user - Usuario actual
  */
-export function FlashCardViewer({ isOpen, onClose, collectionId }) {
+export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
   const [collection, setCollection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [learned, setLearned] = useState(new Set());
   const [showHint, setShowHint] = useState(false);
+  const [cardProgress, setCardProgress] = useState({});
+  const [reviewMode, setReviewMode] = useState(false); // Modo repaso espaciado
 
   useEffect(() => {
     if (isOpen && collectionId) {
@@ -41,6 +46,13 @@ export function FlashCardViewer({ isOpen, onClose, collectionId }) {
       setLearned(new Set());
       setShowHint(false);
       logger.info('FlashCard collection loaded:', data);
+
+      // Cargar progreso del usuario si está disponible
+      if (user) {
+        const progress = await getCollectionProgress(user.uid, collectionId);
+        setCardProgress(progress);
+        logger.info('User progress loaded:', progress);
+      }
     } catch (error) {
       logger.error('Error loading flashcard collection:', error);
     } finally {
@@ -80,20 +92,67 @@ export function FlashCardViewer({ isOpen, onClose, collectionId }) {
     logger.debug(`Card ${currentIndex} marked as ${learned.has(currentIndex) ? 'not learned' : 'learned'}`);
   };
 
+  /**
+   * Guardar calificación de la tarjeta (Spaced Repetition)
+   * @param {number} quality - 0=Again, 2=Hard, 3=Good, 5=Easy
+   */
+  const handleRateCard = async (quality) => {
+    if (!user) {
+      logger.warn('Cannot save progress without user');
+      return;
+    }
+
+    const card = collection.cards[currentIndex];
+
+    try {
+      // Guardar progreso
+      const result = await saveCardProgress(user.uid, collectionId, card.id, quality);
+
+      if (result.success) {
+        // Recargar progreso
+        const progress = await getCollectionProgress(user.uid, collectionId);
+        setCardProgress(progress);
+
+        // Auto-avanzar a siguiente tarjeta
+        if (currentIndex < collection.cards.length - 1) {
+          setTimeout(() => {
+            handleNext();
+          }, 300);
+        }
+
+        logger.info(`Card rated with quality ${quality}`);
+      }
+    } catch (error) {
+      logger.error('Error rating card:', error);
+    }
+  };
+
   const handleShowHint = () => {
     setShowHint(!showHint);
   };
 
-  const handlePlayAudio = () => {
+  const handlePlayAudio = async () => {
     const card = collection.cards[currentIndex];
-    if (card.audioUrl) {
-      const audio = new Audio(card.audioUrl);
-      audio.play();
-    } else {
-      // Usar TTS del navegador como fallback
-      const utterance = new SpeechSynthesisUtterance(card.spanish);
-      utterance.lang = 'es-ES';
-      window.speechSynthesis.speak(utterance);
+
+    try {
+      if (card.audioUrl) {
+        // Usar audio premium de ElevenLabs
+        logger.info('Playing premium audio from:', card.audioUrl);
+        const audio = new Audio(card.audioUrl);
+        await audio.play();
+      } else {
+        // Fallback a Web Speech API
+        logger.info('Using Web Speech API fallback');
+        await generateFallbackAudio(card.spanish);
+      }
+    } catch (error) {
+      logger.error('Error playing audio:', error);
+      // Último fallback
+      try {
+        await generateFallbackAudio(card.spanish);
+      } catch (fallbackError) {
+        logger.error('Fallback audio also failed:', fallbackError);
+      }
     }
   };
 
@@ -209,6 +268,47 @@ export function FlashCardViewer({ isOpen, onClose, collectionId }) {
 
         {/* Controls */}
         <div className="flashcard-viewer__controls">
+          {/* Spaced Repetition Rating (mostrar cuando está volteada) */}
+          {isFlipped && user && (
+            <div className="flashcard-viewer__rating-buttons">
+              <BaseButton
+                variant="outline"
+                size="sm"
+                onClick={() => handleRateCard(0)}
+                style={{ borderColor: '#ef4444', color: '#ef4444' }}
+              >
+                <X size={16} />
+                Otra vez
+              </BaseButton>
+              <BaseButton
+                variant="outline"
+                size="sm"
+                onClick={() => handleRateCard(2)}
+                style={{ borderColor: '#f59e0b', color: '#f59e0b' }}
+              >
+                Difícil
+              </BaseButton>
+              <BaseButton
+                variant="outline"
+                size="sm"
+                onClick={() => handleRateCard(3)}
+                style={{ borderColor: '#3b82f6', color: '#3b82f6' }}
+              >
+                <Check size={16} />
+                Bien
+              </BaseButton>
+              <BaseButton
+                variant="outline"
+                size="sm"
+                onClick={() => handleRateCard(5)}
+                style={{ borderColor: '#22c55e', color: '#22c55e' }}
+              >
+                <Zap size={16} />
+                Fácil
+              </BaseButton>
+            </div>
+          )}
+
           <div className="flashcard-viewer__nav-buttons">
             <BaseButton
               variant="ghost"
