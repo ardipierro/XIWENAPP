@@ -1153,6 +1153,29 @@
     color: var(--color-text-primary);
   }
 
+  /* Tabs Responsive para Móvil */
+  @media (max-width: 768px) {
+    .modal-tabs-container {
+      padding: 0 1rem; /* Menos padding lateral */
+    }
+
+    .modal-tabs {
+      gap: 0.5rem; /* Menos gap entre tabs */
+    }
+
+    .tab,
+    .tab-active {
+      min-width: auto; /* ← CRÍTICO: Eliminar 100px forzado */
+      padding: 0.75rem 1rem; /* px-4 py-3 → px-4 py-2.5 */
+      font-size: 0.875rem; /* text-sm */
+    }
+
+    /* Tab content más compacto */
+    .tab-content {
+      padding: 1rem; /* Menos padding en móvil */
+    }
+  }
+
   /* Inline icon helper */
   .inline-icon {
     @apply inline-block align-text-bottom;
@@ -3123,25 +3146,54 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 @media (max-width: 768px) {
   .messages-panel {
     flex-direction: column;
+    min-height: auto !important; /* ← CRÍTICO: Eliminar 600px en móvil */
+    max-height: calc(100vh - 180px); /* Altura máxima razonable */
+    height: auto; /* Auto-adjust */
   }
 
   .messages-sidebar {
     width: 100%;
+    max-height: 35vh; /* Máximo 35% del viewport */
+    min-height: 180px; /* Mínimo razonable para ver conversaciones */
     border-right: none;
     border-bottom: 1px solid var(--color-border);
+    overflow-y: auto; /* Scroll si hay muchas conversaciones */
   }
 
   .messages-main {
     flex: 1;
+    min-height: 400px; /* Espacio mínimo para el thread */
+    max-height: 60vh; /* Máximo 60% del viewport */
   }
 
   .message-bubble {
-    max-width: 80%;
+    max-width: 85%; /* Más ancho en móvil */
   }
 
   .new-message-modal {
     width: 100%;
     max-height: 90vh;
+  }
+
+  /* Ajustar header del sidebar en móvil */
+  .messages-sidebar-header {
+    padding: 16px; /* Menos padding */
+  }
+
+  .header-title h2 {
+    font-size: 18px; /* Texto más pequeño */
+  }
+
+  /* Búsqueda más compacta */
+  .messages-search {
+    padding: 10px 16px;
+  }
+
+  /* Lista de conversaciones scrolleable */
+  .conversations-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(35vh - 140px); /* Restar header y búsqueda */
   }
 }
 
@@ -3865,7 +3917,25 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     width: 16px;
     height: 16px;
   }
+
+  /* Ocultar labels de tabs en móvil muy pequeño si es necesario */
+  .content-manager-tabs__tab-label {
+    display: inline; /* Mantener visible en móvil normal */
+  }
 }
+
+/* Móviles muy pequeños - ContentManagerTabs */
+@media (max-width: 480px) {
+  .content-manager-tabs__tab {
+    padding: 0.5rem 0.75rem; /* Aún más compacto */
+    font-size: 0.8125rem; /* 13px */
+  }
+
+  .content-manager-tabs__tab-label {
+    font-size: 0.8125rem;
+  }
+}
+
 /* ============================================
    CALENDAR VIEW - ESTILOS CONSISTENTES
    ============================================ */
