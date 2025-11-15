@@ -4736,55 +4736,30 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
    ============================================ */
 
 /**
- * Clase base para TODOS los paneles del sistema
- * Aplica padding superior consistente y previene overlap con TopBar
+ * NOTA IMPORTANTE:
+ * La mayoría de los paneles NO necesitan clase especial porque
+ * .universal-dashboard__content ya tiene padding: 1.5rem
  *
- * USO:
- * <div className="universal-panel messages-panel">...</div>
- * <div className="universal-panel homework-review-panel">...</div>
- *
- * VER: .claude/DESIGN_SYSTEM.md sección "Paneles"
+ * Solo usar .universal-panel-standalone para paneles que se
+ * renderizan FUERA del UniversalDashboard (ej: modales, popups)
  */
-.universal-panel {
-  /* Padding superior para evitar que el contenido toque la barra superior */
-  padding-top: 1.25rem; /* 20px */
 
-  /* Permitir que los paneles tengan su propio margen superior si lo necesitan */
-  /* NO forzamos margin-top: 0 porque eso causaba el bug */
-
-  /* Comportamiento de scroll interno */
-  position: relative;
-
-  /* Transiciones suaves */
-  transition: padding 0.2s ease;
+/**
+ * Paneles standalone (fuera del UniversalDashboard)
+ * Solo usar si el panel NO está dentro de .universal-dashboard__content
+ */
+.universal-panel-standalone {
+  padding: 1.5rem;
+  background: var(--color-bg-primary);
 }
 
 /**
- * Paneles de altura completa (ocupan todo el viewport disponible)
- * Ej: MessagesPanel, HomeworkReviewPanel
+ * Fix para paneles full-height complejos (Messages, etc.)
+ * Estos paneles manejan su propio layout y NO deben tener padding extra
  */
-.universal-panel--full-height {
+.messages-panel,
+.homework-review-modal {
+  /* Asegurar que ocupen todo el espacio disponible */
   height: 100%;
-  min-height: 600px;
-  display: flex;
-  flex-direction: column;
-}
-
-/**
- * Paneles con scroll interno
- * Ej: Settings, Analytics
- */
-.universal-panel--scrollable {
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: calc(100vh - 120px);
-}
-
-/**
- * Responsive - Menos padding en móvil
- */
-@media (max-width: 768px) {
-  .universal-panel {
-    padding-top: 1rem; /* 16px en móvil */
-  }
+  max-height: calc(100vh - 64px - 1.5rem - 1.5rem); /* viewport - topbar - padding top - padding bottom */
 }

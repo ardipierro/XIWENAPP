@@ -146,7 +146,7 @@ function AdminPaymentsPanel() {
   }
 
   return (
-    <div className="universal-panel universal-panel--scrollable p-6 min-h-screen" style={{ background: 'var(--color-bg-tertiary)' }}>
+    <div className="space-y-6">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
