@@ -97,6 +97,13 @@ export default function HomeworkReviewPanel({ teacherId }) {
     setSelectedReview(null);
   };
 
+  const handleReanalysisSuccess = () => {
+    // Reload pending reviews to show processing status
+    loadPendingReviews();
+    setShowDetailModal(false);
+    setSelectedReview(null);
+  };
+
   const handleUploadSuccess = () => {
     // Reload pending reviews to show the new one
     loadPendingReviews();
@@ -168,6 +175,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
             setSelectedReview(null);
           }}
           onApproveSuccess={handleApproveSuccess}
+          onReanalysisSuccess={handleReanalysisSuccess}
           teacherId={teacherId}
           currentUser={user}
         />
@@ -260,7 +268,7 @@ function ReviewCard({ review, onSelect }) {
 /**
  * Review Detail Modal Component
  */
-function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: parentTeacherId, currentUser }) {
+function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSuccess, teacherId: parentTeacherId, currentUser }) {
   const [isApproving, setIsApproving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState(review.overallFeedback || '');
@@ -540,14 +548,15 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, teacherId: paren
           onReanalyze={async (profileId) => {
             const result = await requestReanalysis(review.id, profileId);
             if (result.success) {
-              alert('Re-análisis solicitado. La tarea se procesará en unos momentos...');
-              onClose();
-              // Reload reviews after a delay to show the processing status
+              // Show success message
+              setSuccess('Re-análisis solicitado. La tarea se procesará en unos momentos...');
+
+              // Close modal and reload reviews after a short delay
               setTimeout(() => {
-                window.location.reload();
-              }, 1000);
+                onReanalysisSuccess();
+              }, 1500);
             } else {
-              alert('Error al solicitar re-análisis: ' + result.error);
+              setError('Error al solicitar re-análisis: ' + result.error);
             }
           }}
         />

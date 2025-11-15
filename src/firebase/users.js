@@ -61,11 +61,14 @@ class UsersRepository extends BaseRepository {
 
   /**
    * Obtener estudiantes de un profesor
+   * NOTA: Actualmente devuelve TODOS los estudiantes activos de la app
+   * La relación profesor-estudiante se maneja a través de grupos/cursos,
+   * no a través de un campo teacherId en usuarios
    */
   async getStudentsByTeacher(teacherId) {
+    // Obtener todos los estudiantes activos (no filtrar por teacherId)
     const students = await this.findWhere([
-      ['role', '==', 'student'],
-      ['teacherId', '==', teacherId]
+      ['role', '==', 'student']
     ]);
 
     // Filtrar activos y ordenar por nombre
