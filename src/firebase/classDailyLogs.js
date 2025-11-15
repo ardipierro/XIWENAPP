@@ -50,10 +50,15 @@ class ClassDailyLogRepository extends BaseRepository {
         updatedAt: serverTimestamp()
       };
 
-      const logId = await this.create(newLog);
-      logger.info('📝 Diario de clase creado:', logId, 'ClassDailyLogRepository');
+      const result = await this.create(newLog);
 
-      return { success: true, logId };
+      if (!result.success) {
+        throw new Error(result.error || 'Error creando diario');
+      }
+
+      logger.info('📝 Diario de clase creado:', result.id, 'ClassDailyLogRepository');
+
+      return { success: true, logId: result.id };
     } catch (error) {
       logger.error('Error creando diario de clase:', error, 'ClassDailyLogRepository');
       return { success: false, error: error.message };
