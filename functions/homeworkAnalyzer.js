@@ -404,8 +404,8 @@ exports.analyzeHomeworkImage = onDocumentCreated({
     // Get homework_analyzer function config
     const functionConfig = aiConfig.homework_analyzer || {
       enabled: true,
-      analysis_provider: 'claude', // Who analyzes and corrects
-      ocr_provider: 'claude',      // Who extracts text (google for coordinates)
+      analysis_provider: 'claude',  // Who analyzes and corrects
+      ocr_provider: 'google',        // Who extracts text WITH COORDINATES (must be google!)
       model: 'claude-sonnet-4-5'
     };
 
@@ -722,8 +722,8 @@ exports.reanalyzeHomework = onDocumentUpdated({
     // Get homework_analyzer function config
     const functionConfig = aiConfig.homework_analyzer || {
       enabled: true,
-      analysis_provider: 'claude',
-      ocr_provider: 'claude',
+      analysis_provider: 'claude',  // Who analyzes and corrects
+      ocr_provider: 'google',        // Who extracts text WITH COORDINATES (must be google!)
       model: 'claude-sonnet-4-5'
     };
 
