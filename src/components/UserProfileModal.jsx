@@ -233,32 +233,28 @@ function UserProfileModal({ isOpen, onClose, user, userRole, onUpdate }) {
       title=""
       size="lg"
       showCloseButton={false}
-      className="!p-0"
+      noPadding={true}
+      className="!overflow-hidden"
     >
-      <div className="flex flex-col -m-6 overflow-hidden" style={{ borderRadius: 'inherit' }}>
+      <div className="flex flex-col">
         {/* Banner Section */}
-        <div className="relative h-40 md:h-48 lg:h-56 overflow-hidden flex-shrink-0" style={{ borderTopLeftRadius: 'inherit', borderTopRightRadius: 'inherit' }}>
+        <div className="relative h-40 md:h-48 lg:h-56 overflow-hidden flex-shrink-0 rounded-t-xl">
           {/* Banner Image o Gradient */}
           {userBanner ? (
             <img
               src={userBanner}
               alt="Banner de perfil"
               className="w-full h-full object-cover"
-              style={{ borderTopLeftRadius: 'inherit', borderTopRightRadius: 'inherit' }}
             />
           ) : (
             <div
               className="w-full h-full"
-              style={{
-                background: getDefaultBannerGradient(),
-                borderTopLeftRadius: 'inherit',
-                borderTopRightRadius: 'inherit'
-              }}
+              style={{ background: getDefaultBannerGradient() }}
             />
           )}
 
           {/* Overlay con botones */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" style={{ borderTopLeftRadius: 'inherit', borderTopRightRadius: 'inherit' }}>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent">
             <div className="flex justify-between items-start p-4">
               {/* Botón editar banner */}
               <label
@@ -311,7 +307,7 @@ function UserProfileModal({ isOpen, onClose, user, userRole, onUpdate }) {
         </div>
 
         {/* Avatar Section - Positioned over banner */}
-        <div className="relative -mt-16 md:-mt-20 px-6 flex-shrink-0">
+        <div className="relative -mt-16 md:-mt-20 px-6 flex-shrink-0 z-10">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4">
             {/* Avatar Container */}
             <div className="relative group">
