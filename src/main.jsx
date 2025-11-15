@@ -17,6 +17,9 @@ import { AuthProvider } from './contexts/AuthContext.jsx';
 // Error Boundary
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 
+// Badge System Initialization
+import { initBadgeSystem } from './config/badgeSystem.js';
+
 /**
  * Orden de Providers (de fuera hacia adentro):
  * 1. ErrorBoundary - Captura errores de toda la app
@@ -26,6 +29,10 @@ import ErrorBoundary from './components/common/ErrorBoundary.jsx';
  * 5. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
  * 6. App - Componente principal
  */
+
+// Inicializar sistema de badges (aplicar colores guardados)
+initBadgeSystem();
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
