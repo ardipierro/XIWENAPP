@@ -24,6 +24,7 @@ const AdminPaymentsPanel = lazy(() => import('./AdminPaymentsPanel'));
 const ContentManagerTabs = lazy(() => import('./ContentManagerTabs'));
 const AttendanceView = lazy(() => import('./AttendanceView'));
 const ClassSessionManager = lazy(() => import('./ClassSessionManager'));
+const ClassDailyLogManager = lazy(() => import('./ClassDailyLogManager'));
 const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
 const CreditManager = lazy(() => import('./CreditManager'));
 const SettingsPanel = lazy(() => import('./SettingsPanel'));
@@ -226,6 +227,11 @@ export function UniversalDashboard() {
             case '/dashboard-v2/classes':
               if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
               return <ClassSessionManager user={effectiveUser} />;
+
+            // DIARIOS DE CLASE - ClassDailyLogManager integrado
+            case '/dashboard-v2/daily-logs':
+              if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
+              return <ClassDailyLogManager user={effectiveUser} />;
 
             // ASISTENCIAS
             case '/dashboard-v2/attendance':

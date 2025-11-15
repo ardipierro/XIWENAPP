@@ -83,6 +83,14 @@ const MENU_ITEMS = [
     permission: 'manage-classes',
   },
   {
+    id: 'daily-logs',
+    label: 'Diarios de Clase',
+    icon: BookOpen,
+    path: '/dashboard-v2/daily-logs',
+    permission: 'manage-classes',
+    description: 'Feed continuo de contenidos mostrados en clase',
+  },
+  {
     id: 'homework-review',
     label: 'Tareas',
     icon: CheckCircle,
