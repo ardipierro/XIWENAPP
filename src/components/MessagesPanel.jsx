@@ -90,21 +90,23 @@ function MessagesPanel({ user }) {
         </div>
 
         <div className="messages-search">
-          <Search size={16} />
-          <input
-            type="text"
-            placeholder="Buscar conversaciones..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <BaseButton
-              variant="ghost"
-              icon={X}
-              onClick={() => setSearchTerm('')}
-              className="clear-search"
+          <div className="search-input-container">
+            <Search size={16} />
+            <input
+              type="text"
+              placeholder="Buscar conversaciones..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-          )}
+            {searchTerm && (
+              <BaseButton
+                variant="ghost"
+                icon={X}
+                onClick={() => setSearchTerm('')}
+                className="clear-search"
+              />
+            )}
+          </div>
         </div>
 
         <div className="conversations-list">
