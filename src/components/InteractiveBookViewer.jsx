@@ -731,6 +731,7 @@ function InteractiveBookViewer() {
               isOpen={settingsModal.isOpen}
               onClose={settingsModal.close}
               characters={characters}
+              user={user}
             />
 
             {/* Unidades */}
