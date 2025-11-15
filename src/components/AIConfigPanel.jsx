@@ -388,7 +388,7 @@ function AIConfigPanel() {
 
       {/* Category Filter */}
       <div className="mb-6 flex flex-wrap gap-2 items-center">
-        <Filter className="w-4 h-4 style={{ color: 'var(--color-text-secondary)' }}" />
+        <Filter className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }} />
         <BaseButton
           variant={selectedCategory === null ? 'primary' : 'secondary'}
           size="sm"
