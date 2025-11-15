@@ -63,6 +63,9 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
     setShowUserMenu(!showUserMenu);
   };
 
+  // Debug: log cuando el componente se renderiza
+  console.log('UniversalTopBar rendering, showUserMenu:', showUserMenu, 'user:', effectiveUser?.email);
+
   return (
     <header className="universal-topbar">
       {/* Left Section */}
@@ -116,8 +119,13 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         <div className="universal-topbar__user-menu" ref={userMenuRef}>
           <button
             className="universal-topbar__user-btn"
-            onClick={handleUserMenuToggle}
+            onClick={(e) => {
+              console.log('Button clicked!', e);
+              handleUserMenuToggle();
+            }}
+            onMouseEnter={() => console.log('Mouse entered button')}
             aria-label="Menú de usuario"
+            style={{ cursor: 'pointer', position: 'relative', zIndex: 10000 }}
           >
             <div className="universal-topbar__avatar">
               {effectiveUser?.photoURL ? (
