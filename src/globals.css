@@ -3784,7 +3784,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   display: flex;
   gap: 0.5rem;
   padding: 1rem;
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-bg-primary);
   overflow-x: auto;
 }
 
@@ -3811,7 +3811,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .content-manager-tabs__tab--active {
-  background-color: var(--color-bg-primary);
+  background-color: var(--color-bg-tertiary);
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
@@ -3828,7 +3828,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .content-manager-tabs__content {
   flex: 1;
   overflow-y: auto;
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-bg-primary);
 }
 
 /* Dark Mode - Las variables CSS ya se actualizan automáticamente con .dark */
