@@ -106,7 +106,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[1100]" onClick={onClose}>
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg w-[90%] max-w-[500px] max-h-[90vh] flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="style={{ background: 'var(--color-bg-secondary)' }} border border-zinc-200 dark:border-zinc-800 rounded-lg w-[90%] max-w-[500px] max-h-[90vh] flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-zinc-200 dark:border-zinc-800">
           <h2 className="flex items-center gap-3 text-[22px] font-bold text-zinc-900 dark:text-zinc-50 m-0">
@@ -148,10 +148,10 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                 <img
                   src={uploadedImageUrl}
                   alt="Avatar"
-                  className="w-full h-full rounded-full object-cover border-[3px] border-zinc-200 dark:border-zinc-700"
+                  className="w-full h-full rounded-full object-cover border-[3px] style={{ borderColor: 'var(--color-border)' }}"
                 />
               ) : (
-                <div className="w-full h-full rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-[64px] border-[3px] border-zinc-200 dark:border-zinc-700">
+                <div className="w-full h-full rounded-full style={{ background: 'var(--color-bg-tertiary)' }} flex items-center justify-center text-[64px] border-[3px] style={{ borderColor: 'var(--color-border)' }}">
                   {(() => {
                     const AvatarIcon = AVATARS[userAvatar]?.icon || AVATARS.default.icon;
                     return <AvatarIcon size={48} strokeWidth={2} />;
@@ -167,7 +167,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                 {/* Upload Option */}
                 <div className="text-center mb-5 pb-5 border-b border-zinc-200 dark:border-zinc-800">
                   <label
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 border border-zinc-300 dark:border-zinc-700 rounded-md text-sm font-semibold cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 style={{ background: 'var(--color-bg-secondary)' }} text-zinc-900 dark:text-zinc-50 border border-zinc-300 dark:border-zinc-700 rounded-md text-sm font-semibold cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                     htmlFor="avatar-upload"
                   >
                     <Upload size={20} strokeWidth={2} />
@@ -181,7 +181,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                     disabled={uploading}
                     style={{ display: 'none' }}
                   />
-                  <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">JPG, PNG o GIF (máx 5MB)</p>
+                  <p className="mt-2 text-xs style={{ color: 'var(--color-text-secondary)' }}">JPG, PNG o GIF (máx 5MB)</p>
                 </div>
 
                 {/* Icon Avatars */}
@@ -189,7 +189,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                   {Object.entries(AVATARS).map(([key, { icon: Icon, label }]) => (
                     <button
                       key={key}
-                      className={`aspect-square bg-white dark:bg-zinc-900 border-2 ${userAvatar === key && !uploadedImageUrl ? 'border-zinc-400 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800' : 'border-zinc-200 dark:border-zinc-800'} rounded-lg text-[32px] cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center`}
+                      className={`aspect-square style={{ background: 'var(--color-bg-secondary)' }} border-2 ${userAvatar === key && !uploadedImageUrl ? 'border-zinc-400 dark:border-zinc-600 style={{ background: 'var(--color-bg-tertiary)' }}' : 'border-zinc-200 dark:border-zinc-800'} rounded-lg text-[32px] cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center`}
                       onClick={() => handleSelectEmoji(key)}
                       title={label}
                     >
@@ -216,7 +216,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                 placeholder="Sin nombre"
                 disabled
               />
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 m-0">El nombre se actualiza desde la configuración de la cuenta</p>
+              <p className="text-xs style={{ color: 'var(--color-text-muted)' }} m-0">El nombre se actualiza desde la configuración de la cuenta</p>
             </div>
 
             <div className="flex flex-col gap-2">

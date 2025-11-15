@@ -3,7 +3,6 @@ import logger from '../utils/logger';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { subscribeToGameSession, startGame, pauseGame, resumeGame, finishGame, moveToNextQuestion } from '../firebase/gameSession';
 import BaseButton from './common/BaseButton';
-import './LiveGameProjection.css';
 
 /**
  * Vista de proyección para pizarra/pantalla grande

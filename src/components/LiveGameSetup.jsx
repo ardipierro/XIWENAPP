@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Play, Users, Timer, RotateCcw, Shuffle } from 'lucide-react';
 import { createGameSession } from '../firebase/gameSession';
 import { loadCategories } from '../firebase/firestore';
-import './LiveGameSetup.css';
 
 /**
  * Formulario para crear una nueva sesión de juego en vivo

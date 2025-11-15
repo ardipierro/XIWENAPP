@@ -21,7 +21,6 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
-import './UniversalSideMenu.css';
 
 /**
  * Definición de items del menú con permisos requeridos
