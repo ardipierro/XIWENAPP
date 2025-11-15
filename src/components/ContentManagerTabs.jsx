@@ -1,16 +1,17 @@
 /**
  * @fileoverview Content Manager Tabs - Gestión de contenidos con pestañas
- * Incluye: Contenidos, Exercise Builder, Configurar IA, Libro ADE 1, Visor de Contenidos
+ * Incluye: Contenidos, Exercise Builder, Configurar IA, FlashCards, Libro ADE 1, Visor de Contenidos
  * @module components/ContentManagerTabs
  */
 
 import { useState } from 'react';
-import { Layers, Sparkles, Lightbulb, BookOpen, Edit3 } from 'lucide-react';
+import { Layers, Sparkles, Lightbulb, BookOpen, Edit3, CreditCard } from 'lucide-react';
 import UnifiedContentManager from './UnifiedContentManager';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
 import AIConfigPanel from './AIConfigPanel';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import ContentReader from './ContentReader';
+import FlashCardManager from './FlashCardManager';
 import { usePermissions } from '../hooks/usePermissions';
 import './ContentManagerTabs.css';
 
@@ -35,6 +36,12 @@ const TABS = [
     label: 'Configurar IA',
     icon: Lightbulb,
     permission: 'configure-ai',
+  },
+  {
+    id: 'flashcards',
+    label: 'FlashCards',
+    icon: CreditCard,
+    permission: 'create-content', // Mismo permiso que contenidos
   },
   {
     id: 'libro-ade1',
@@ -79,6 +86,8 @@ export function ContentManagerTabs({ user, userRole }) {
         return <ExerciseBuilder />;
       case 'ai-config':
         return <AIConfigPanel />;
+      case 'flashcards':
+        return <FlashCardManager user={user} />;
       case 'libro-ade1':
         return <InteractiveBookViewer />;
       case 'visor-contenidos':

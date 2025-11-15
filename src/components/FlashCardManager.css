@@ -1,0 +1,290 @@
+/**
+ * FlashCard Manager - Estilos
+ */
+
+.flashcard-manager {
+  padding: 1.5rem;
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+}
+
+/* Header */
+.flashcard-manager__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1.5rem;
+}
+
+.flashcard-manager__header-text {
+  flex: 1;
+}
+
+.flashcard-manager__title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.flashcard-manager__title-icon {
+  color: var(--color-primary);
+}
+
+.flashcard-manager__subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.flashcard-manager__header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Filters */
+.flashcard-manager__filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.flashcard-manager__search {
+  flex: 1;
+}
+
+.flashcard-manager__view-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Collections */
+.flashcard-manager__collections {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.flashcard-manager__collections--grid {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.flashcard-manager__collections--list {
+  grid-template-columns: 1fr;
+}
+
+/* Collection Card */
+.flashcard-collection-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.flashcard-collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.flashcard-collection-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.flashcard-collection-card__badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.flashcard-collection-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.flashcard-collection-card__description {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.flashcard-collection-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Generator Placeholder */
+.flashcard-generator-placeholder {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+/* Dark Mode */
+.dark .flashcard-manager {
+  background-color: var(--dark-bg-secondary);
+}
+
+.dark .flashcard-manager__title {
+  color: var(--dark-text-primary);
+}
+
+.dark .flashcard-manager__title-icon {
+  color: var(--dark-primary);
+}
+
+.dark .flashcard-manager__subtitle {
+  color: var(--dark-text-secondary);
+}
+
+.dark .flashcard-collection-card__title {
+  color: var(--dark-text-primary);
+}
+
+.dark .flashcard-collection-card__description {
+  color: var(--dark-text-secondary);
+}
+
+.dark .flashcard-collection-card__actions {
+  border-top-color: var(--dark-border);
+}
+
+.dark .flashcard-collection-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Tabs */
+.flashcard-manager__tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.flashcard-manager__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flashcard-manager__tab:hover {
+  color: var(--color-text-primary);
+}
+
+.flashcard-manager__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.dark .flashcard-manager__tabs {
+  border-bottom-color: var(--dark-border);
+}
+
+.dark .flashcard-manager__tab {
+  color: var(--dark-text-secondary);
+}
+
+.dark .flashcard-manager__tab:hover {
+  color: var(--dark-text-primary);
+}
+
+.dark .flashcard-manager__tab--active {
+  color: var(--dark-primary);
+  border-bottom-color: var(--dark-primary);
+}
+
+/* Export Menu */
+.flashcard-export-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.flashcard-export-menu__description {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.flashcard-export-menu__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dark .flashcard-export-menu__description {
+  color: var(--dark-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .flashcard-manager {
+    padding: 1rem;
+  }
+
+  .flashcard-manager__header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .flashcard-manager__header-actions {
+    width: 100%;
+  }
+
+  .flashcard-manager__header-actions button {
+    flex: 1;
+  }
+
+  .flashcard-manager__filters {
+    flex-direction: column;
+  }
+
+  .flashcard-manager__view-toggle {
+    justify-content: flex-end;
+  }
+
+  .flashcard-manager__collections--grid {
+    grid-template-columns: 1fr;
+  }
+
+  .flashcard-manager__title {
+    font-size: 1.5rem;
+  }
+
+  .flashcard-manager__tabs {
+    overflow-x: auto;
+  }
+
+  .flashcard-manager__tab {
+    flex-shrink: 0;
+  }
+}
