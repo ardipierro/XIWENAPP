@@ -104,18 +104,27 @@ export function useSpeaker() {
       if (voices.length === 0) {
         logger.warn('⚠️ No hay voces disponibles en el navegador', 'useSpeaker');
       } else {
-        const spanishVoice = voices.find(v =>
-          v.lang.startsWith('es-') ||
-          v.lang === 'es' ||
-          v.name.includes('Spanish') ||
-          v.name.includes('Español')
-        );
+        // Log available voices for debugging (only first 3)
+        logger.info(`🔍 Voces disponibles (${voices.length}): ${voices.slice(0, 3).map(v => `${v.name} (${v.lang})`).join(', ')}...`, 'useSpeaker');
+
+        // Try to find Spanish voice (case insensitive search)
+        const spanishVoice = voices.find(v => {
+          const lang = (v.lang || '').toLowerCase();
+          const name = (v.name || '').toLowerCase();
+          return (
+            lang.startsWith('es') ||
+            lang === 'es' ||
+            name.includes('spanish') ||
+            name.includes('español') ||
+            name.includes('espanol')
+          );
+        });
 
         if (spanishVoice) {
           utterance.voice = spanishVoice;
           logger.info(`📢 Using voice: ${spanishVoice.name} (${spanishVoice.lang})`, 'useSpeaker');
         } else {
-          logger.warn('⚠️ No se encontró voz en español, usando voz predeterminada', 'useSpeaker');
+          logger.info('ℹ️ No se encontró voz en español, usando voz predeterminada del sistema', 'useSpeaker');
         }
       }
 
