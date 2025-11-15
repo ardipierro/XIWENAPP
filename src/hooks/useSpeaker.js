@@ -29,6 +29,38 @@ export function useSpeaker() {
   }, []);
 
   /**
+   * Get available voices, waiting for them to load if necessary
+   * @returns {Promise<SpeechSynthesisVoice[]>} Array of available voices
+   */
+  const getVoices = useCallback(() => {
+    return new Promise((resolve) => {
+      let voices = window.speechSynthesis.getVoices();
+
+      if (voices.length > 0) {
+        resolve(voices);
+        return;
+      }
+
+      // Voices not loaded yet, wait for voiceschanged event
+      const voicesChangedHandler = () => {
+        voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          window.speechSynthesis.removeEventListener('voiceschanged', voicesChangedHandler);
+          resolve(voices);
+        }
+      };
+
+      window.speechSynthesis.addEventListener('voiceschanged', voicesChangedHandler);
+
+      // Fallback timeout in case voices never load
+      setTimeout(() => {
+        window.speechSynthesis.removeEventListener('voiceschanged', voicesChangedHandler);
+        resolve(window.speechSynthesis.getVoices());
+      }, 1000);
+    });
+  }, []);
+
+  /**
    * Speak text with TTS using Web Speech API (browser native)
    * @param {string} text - Text to speak
    * @param {Object} options - Speaking options
@@ -66,18 +98,25 @@ export function useSpeaker() {
       utterance.pitch = 1.0;
       utterance.volume = 1.0;
 
-      // Try to select a Spanish voice
-      const voices = window.speechSynthesis.getVoices();
-      const spanishVoice = voices.find(v =>
-        v.lang.startsWith('es-') ||
-        v.lang === 'es' ||
-        v.name.includes('Spanish') ||
-        v.name.includes('Español')
-      );
+      // Wait for voices to load and try to select a Spanish voice
+      const voices = await getVoices();
 
-      if (spanishVoice) {
-        utterance.voice = spanishVoice;
-        logger.info(`📢 Using voice: ${spanishVoice.name} (${spanishVoice.lang})`, 'useSpeaker');
+      if (voices.length === 0) {
+        logger.warn('⚠️ No hay voces disponibles en el navegador', 'useSpeaker');
+      } else {
+        const spanishVoice = voices.find(v =>
+          v.lang.startsWith('es-') ||
+          v.lang === 'es' ||
+          v.name.includes('Spanish') ||
+          v.name.includes('Español')
+        );
+
+        if (spanishVoice) {
+          utterance.voice = spanishVoice;
+          logger.info(`📢 Using voice: ${spanishVoice.name} (${spanishVoice.lang})`, 'useSpeaker');
+        } else {
+          logger.warn('⚠️ No se encontró voz en español, usando voz predeterminada', 'useSpeaker');
+        }
       }
 
       // Set up promise to wait for speech to complete
@@ -126,7 +165,7 @@ export function useSpeaker() {
       setIsSpeaking(false);
       throw err;
     }
-  }, [stopAudio]);
+  }, [stopAudio, getVoices]);
 
   /**
    * Clear speaking error
