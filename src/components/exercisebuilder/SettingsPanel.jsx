@@ -135,7 +135,7 @@ export function SettingsPanel() {
           </UniversalCard>
 
           {/* Colores de feedback */}
-          <UniversalCard variant="default" size="md" title="Colores de Feedback" icon={Palette}>
+          <UniversalCard variant="default" size="md" title="Colores de Feedback" icon={Sparkles}>
             <div className="space-y-4">
               {[
                 { key: 'correct', label: 'Correcto', default: '#10b981' },
