@@ -259,9 +259,12 @@ export function UniversalCard({
 
     return (
       <div className={`flex flex-wrap gap-2 ${layout === 'horizontal' ? 'mt-0' : 'mt-3'}`}>
-        {badges.map((badgeProps, index) => (
-          <BaseBadge key={index} size={layout === 'horizontal' ? 'sm' : 'md'} {...badgeProps} />
-        ))}
+        {badges.map((badgeProps, index) => {
+          const { key, ...restProps } = badgeProps;
+          return (
+            <BaseBadge key={index} size={layout === 'horizontal' ? 'sm' : 'md'} {...restProps} />
+          );
+        })}
       </div>
     );
   };
