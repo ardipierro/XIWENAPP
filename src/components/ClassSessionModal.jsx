@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Video, Calendar, PenTool, Presentation, Clock, Users, FileText, Plus, Trash2, Zap, ExternalLink } from 'lucide-react';
 import logger from '../utils/logger';
-import { BaseModal, BaseButton, BaseInput, BaseSelect, BaseTextarea } from './common';
+import { BaseModal, BaseButton, BaseInput, BaseSelect, BaseTextarea, BaseTabs } from './common';
 import { Timestamp } from 'firebase/firestore';
 import {
   assignGroupToSession,
@@ -352,58 +352,19 @@ function ClassSessionModal({
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Tabs Bar */}
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={() => setActiveTab('general')}
-              className={`flex items-center gap-2 py-3 px-4 font-medium border-b-2 transition-colors ${
-                activeTab === 'general'
-                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <Video className="w-4 h-4" />
-              General
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('programacion')}
-              className={`flex items-center gap-2 py-3 px-4 font-medium border-b-2 transition-colors ${
-                activeTab === 'programacion'
-                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <Clock className="w-4 h-4" />
-              Programación
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('estudiantes')}
-              className={`flex items-center gap-2 py-3 px-4 font-medium border-b-2 transition-colors ${
-                activeTab === 'estudiantes'
-                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              Estudiantes
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('contenidos')}
-              className={`flex items-center gap-2 py-3 px-4 font-medium border-b-2 transition-colors ${
-                activeTab === 'contenidos'
-                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              Contenidos
-            </button>
-          </div>
-        </div>
+        {/* Tabs - Using BaseTabs component */}
+        <BaseTabs
+          tabs={[
+            { id: 'general', label: 'General', icon: Video },
+            { id: 'programacion', label: 'Programación', icon: Clock },
+            { id: 'estudiantes', label: 'Estudiantes', icon: Users },
+            { id: 'contenidos', label: 'Contenidos', icon: FileText },
+          ]}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="underline"
+          size="md"
+        />
 
         {/* Tab Content */}
         <div className="min-h-[400px]">

@@ -11,7 +11,8 @@ import {
   BaseInput,
   BaseTextarea,
   BaseSelect,
-  BaseAlert
+  BaseAlert,
+  BaseTabs
 } from './common';
 import { CONTENT_TYPES, EXERCISE_TYPES, DIFFICULTY_LEVELS, CONTENT_STATUS } from '../firebase/content';
 import { getAllContent } from '../firebase/content';
@@ -408,47 +409,17 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
           </BaseAlert>
         )}
 
-        {/* Tabs: Manual vs IA - Nivel Superior */}
-        <div className="flex gap-2 border-b border-zinc-200 dark:border-zinc-700">
-          <button
-            type="button"
-            onClick={() => setActiveTab('manual')}
-            className={`
-              px-4 py-2 font-medium text-sm transition-colors relative
-              ${activeTab === 'manual'
-                ? 'text-zinc-900 dark:text-white'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }
-            `}
-          >
-            <div className="flex items-center gap-2">
-              <Edit3 className="w-4 h-4" strokeWidth={2} />
-              <span>Manual</span>
-            </div>
-            {activeTab === 'manual' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white dark:bg-gray-800" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('ai')}
-            className={`
-              px-4 py-2 font-medium text-sm transition-colors relative
-              ${activeTab === 'ai'
-                ? 'text-zinc-900 dark:text-white'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }
-            `}
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4" strokeWidth={2} />
-              <span>Generar con IA</span>
-            </div>
-            {activeTab === 'ai' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900 dark:bg-white dark:bg-gray-800" />
-            )}
-          </button>
-        </div>
+        {/* Tabs: Manual vs IA - Using BaseTabs component */}
+        <BaseTabs
+          tabs={[
+            { id: 'manual', label: 'Manual', icon: Edit3 },
+            { id: 'ai', label: 'Generar con IA', icon: Sparkles },
+          ]}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="underline"
+          size="md"
+        />
 
         {/* Contenido Tab Manual */}
         {activeTab === 'manual' && (

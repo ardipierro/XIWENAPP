@@ -7,7 +7,7 @@ import { useState } from 'react';
 import logger from '../utils/logger';
 import { useGamification, useLeaderboard, useBadges } from '../hooks/useGamification';
 import { Trophy, Award, Zap, TrendingUp, Star, Medal, Crown, Target } from 'lucide-react';
-import { BaseLoading } from './common';
+import { BaseLoading, BaseTabs } from './common';
 
 export default function GamificationPanel({ userId }) {
   const { profile, levelProgress, loading } = useGamification(userId);
@@ -103,28 +103,17 @@ export default function GamificationPanel({ userId }) {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <div className="flex gap-4">
-          {[
-            { id: 'overview', label: 'Resumen', icon: Star },
-            { id: 'badges', label: 'Insignias', icon: Award },
-            { id: 'leaderboard', label: 'Clasificación', icon: Trophy }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium ${
-                activeTab === tab.id
-                  ? 'border-primary text-gray-900 dark:text-gray-100'
-                  : 'border-transparent text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              <tab.icon size={18} strokeWidth={2} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <BaseTabs
+        tabs={[
+          { id: 'overview', label: 'Resumen', icon: Star },
+          { id: 'badges', label: 'Insignias', icon: Award },
+          { id: 'leaderboard', label: 'Clasificación', icon: Trophy }
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        variant="underline"
+        size="md"
+      />
 
       {/* Tab Content */}
       {activeTab === 'overview' && (

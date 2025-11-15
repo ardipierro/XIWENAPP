@@ -40,7 +40,8 @@ import {
   BaseLoading,
   BaseEmptyState,
   BaseAlert,
-  BaseModal
+  BaseModal,
+  BaseTabs
 } from './common';
 import { UniversalCard } from './cards';
 
@@ -222,49 +223,20 @@ function AdminPaymentsPanel() {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-700">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'overview'
-              ? 'text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-          }`}
-        >
-          Resumen
-        </button>
-        <button
-          onClick={() => setActiveTab('fees')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'fees'
-              ? 'text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-          }`}
-        >
-          Cuotas Mensuales
-        </button>
-        <button
-          onClick={() => setActiveTab('payments')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'payments'
-              ? 'text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-          }`}
-        >
-          Pagos
-        </button>
-        <button
-          onClick={() => setActiveTab('enrollments')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'enrollments'
-              ? 'text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-          }`}
-        >
-          Inscripciones
-        </button>
-      </div>
+      {/* Tabs - Using BaseTabs component */}
+      <BaseTabs
+        tabs={[
+          { id: 'overview', label: 'Resumen', icon: TrendingUp },
+          { id: 'fees', label: 'Cuotas Mensuales', icon: Calendar },
+          { id: 'payments', label: 'Pagos', icon: CreditCard },
+          { id: 'enrollments', label: 'Inscripciones', icon: Users },
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        variant="underline"
+        size="md"
+        className="mb-6"
+      />
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
