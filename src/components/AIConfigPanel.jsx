@@ -13,7 +13,8 @@ import {
   BaseButton,
   BaseAlert,
   BaseBadge,
-  BaseEmptyState
+  BaseEmptyState,
+  BaseModal
 } from './common';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
