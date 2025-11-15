@@ -192,25 +192,11 @@ export function useExerciseBuilderConfig() {
     };
     root.style.setProperty('--animation-speed', animationSpeedMap[config.animationSpeed] || '300ms');
 
-    // Aplicar tema (dark mode de Tailwind)
-    if (config.theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    // REMOVED: Theme application - now respects global app theme from ThemeContext
+    // The Exercise Builder no longer forces its own theme on the entire app
+    // Instead, it uses the app's global theme managed by ThemeContext
 
-    // Aplicar colores de tema predefinido
-    const themeColors = PRESET_THEMES[config.theme]?.colors;
-    if (themeColors) {
-      root.style.setProperty('--theme-bg', themeColors.bg);
-      root.style.setProperty('--theme-bg-secondary', themeColors.bgSecondary);
-      root.style.setProperty('--theme-text', themeColors.text);
-      root.style.setProperty('--theme-text-secondary', themeColors.textSecondary);
-      root.style.setProperty('--theme-border', themeColors.border);
-      root.style.setProperty('--theme-accent', themeColors.accent);
-    }
-
-    logger.debug('CSS variables applied', { theme: config.theme, fontSize: config.fontSize });
+    logger.debug('CSS variables applied', { fontSize: config.fontSize });
   }, [config]);
 
   return {

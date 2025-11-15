@@ -4,11 +4,11 @@
  */
 
 import { useState } from 'react';
-import { Settings, Sun, Moon, Type, Palette, Sparkles, Volume2, RotateCcw, Zap, Music } from 'lucide-react';
+import { Settings, Type, Sparkles, Volume2, RotateCcw, Zap, Music } from 'lucide-react';
 import { BaseButton, BaseModal, BaseBadge, BaseAlert } from '../common';
 import { UniversalCard } from '../cards';
 import { useExerciseBuilderConfig } from '../../hooks/useExerciseBuilderConfig';
-import { PRESET_THEMES, SOUND_PACKS } from '../../firebase/exerciseBuilderConfig';
+import { SOUND_PACKS } from '../../firebase/exerciseBuilderConfig';
 import logger from '../../utils/logger';
 
 /**
@@ -63,48 +63,7 @@ export function SettingsPanel() {
         size="lg"
       >
         <div className="space-y-6">
-          {/* Tema */}
-          <UniversalCard variant="default" size="md" title="Tema">
-            <div className="grid grid-cols-3 gap-2">
-              {Object.entries(PRESET_THEMES).map(([key, theme]) => (
-                <button
-                  key={key}
-                  onClick={() => updateField('theme', key)}
-                  className={`
-                    p-3 rounded-lg border-2 transition-all
-                    ${config.theme === key
-                      ? 'border-zinc-500 shadow-md'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                    }
-                  `}
-                  style={{ backgroundColor: theme.colors.bg }}
-                >
-                  <div className="flex flex-col items-start gap-1">
-                    <span
-                      className="text-xs font-medium"
-                      style={{ color: theme.colors.text }}
-                    >
-                      {theme.name}
-                    </span>
-                    <div className="flex gap-1">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: theme.colors.accent }}
-                      />
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: theme.colors.bgSecondary }}
-                      />
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: theme.colors.border }}
-                      />
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </UniversalCard>
+          {/* REMOVED: Theme selector - Exercise Builder now respects global app theme */}
 
           {/* Tipografía */}
           <UniversalCard variant="default" size="md" title="Tipografía" icon={Type}>
