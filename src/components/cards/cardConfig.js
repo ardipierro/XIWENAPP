@@ -21,7 +21,7 @@ export const cardVariants = {
     // Header
     headerHeight: '128px',         // 32 en Tailwind (h-32)
     headerBg: 'gradient',          // 'gradient' | 'solid' | 'image' | 'transparent'
-    headerGradient: 'from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900',
+    headerGradient: 'from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]',
 
     // Content
     contentPadding: '20px',        // p-5 en Tailwind
@@ -45,6 +45,11 @@ export const cardVariants = {
     iconSize: 48,
     showBadges: true,
     showStats: true,
+
+    // Footer
+    footerSticky: true,           // Footer siempre al fondo de la card
+    footerSpacing: 'gap-3',       // Espacio entre badges/stats/actions
+    footerAlignment: 'start',     // 'start' | 'center' | 'end'
   },
 
   /**
@@ -56,7 +61,7 @@ export const cardVariants = {
     // Header
     headerHeight: '100px',
     headerBg: 'gradient',
-    headerGradient: 'from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900',
+    headerGradient: 'from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]',
 
     // Avatar
     showAvatar: true,
@@ -88,6 +93,11 @@ export const cardVariants = {
     // Transitions
     transitionDuration: '300ms',
     transitionTiming: 'cubic-bezier(0.4, 0, 0.2, 1)',
+
+    // Footer
+    footerSticky: true,
+    footerSpacing: 'gap-3',
+    footerAlignment: 'start',
   },
 
   /**
@@ -129,6 +139,11 @@ export const cardVariants = {
     // Extras
     showParticipants: true,
     showDuration: true,
+
+    // Footer
+    footerSticky: true,
+    footerSpacing: 'gap-3',
+    footerAlignment: 'start',
   },
 
   /**
@@ -169,6 +184,11 @@ export const cardVariants = {
     showProgress: true,
     showBadges: true,
     showAuthor: true,
+
+    // Footer
+    footerSticky: true,
+    footerSpacing: 'gap-3',
+    footerAlignment: 'start',
   },
 
   /**
@@ -205,6 +225,11 @@ export const cardVariants = {
     // Extras
     showTrend: true,              // Mostrar trend arrow
     showComparisonText: true,     // "vs. mes anterior"
+
+    // Footer
+    footerSticky: false,          // Stats cards no necesitan footer sticky
+    footerSpacing: 'gap-2',
+    footerAlignment: 'start',
   },
 
   /**
@@ -215,7 +240,7 @@ export const cardVariants = {
     // Header
     headerHeight: '60px',
     headerBg: 'gradient',
-    headerGradient: 'from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800',
+    headerGradient: 'from-[var(--color-bg-tertiary)] to-[var(--color-bg-hover)]',
 
     // Content
     contentPadding: '12px',
@@ -241,6 +266,11 @@ export const cardVariants = {
     // Extras
     showBadges: true,
     maxBadges: 2,
+
+    // Footer
+    footerSticky: true,
+    footerSpacing: 'gap-2',
+    footerAlignment: 'start',
   },
 };
 

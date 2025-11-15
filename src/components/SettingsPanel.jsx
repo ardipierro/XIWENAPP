@@ -4,12 +4,13 @@
  */
 
 import { useState } from 'react';
-import { Settings, Key, Bell, User, Globe, Palette, Type, Home, Database, Tag } from 'lucide-react';
+import { Settings, Key, Bell, User, Globe, Palette, Type, Home, Database, Tag, LayoutGrid } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import CredentialsTab from './settings/CredentialsTab';
 import LandingPageTab from './settings/LandingPageTab';
 import AudioCacheTab from './settings/AudioCacheTab';
 import BadgeCustomizerTab from './settings/BadgeCustomizerTab';
+import CardSystemTab from './settings/CardSystemTab';
 import ThemeCustomizer from './ThemeCustomizer';
 import { UniversalCard } from './cards';
 import { useFont } from '../contexts/FontContext';
@@ -26,6 +27,7 @@ function SettingsPanel() {
     { id: 'fonts', label: 'Fuentes', icon: Type },
     { id: 'credentials', label: 'Credenciales IA', icon: Key },
     { id: 'badges', label: 'Badges', icon: Tag },
+    { id: 'cardsystem', label: 'Card System', icon: LayoutGrid },
     { id: 'cache', label: 'Caché de Audio', icon: Database },
     { id: 'landing', label: 'Landing Page', icon: Home },
     { id: 'notifications', label: 'Notificaciones', icon: Bell },
@@ -258,6 +260,12 @@ function SettingsPanel() {
         {activeTab === 'badges' && (
           <div className="w-full">
             <BadgeCustomizerTab user={user} />
+          </div>
+        )}
+
+        {activeTab === 'cardsystem' && (
+          <div className="w-full">
+            <CardSystemTab />
           </div>
         )}
 
