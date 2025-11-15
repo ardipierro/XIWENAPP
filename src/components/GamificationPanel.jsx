@@ -24,7 +24,7 @@ export default function GamificationPanel({ userId }) {
   }
 
   return (
-    <div className="universal-panel universal-panel--scrollable p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header with Level and XP */}
       <div className="bg-primary rounded-lg p-6 text-white">
         <div className="flex items-center justify-between mb-4">

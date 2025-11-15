@@ -333,7 +333,7 @@ function AIConfigPanel() {
   // RENDER PRINCIPAL
   // ============================================================================
   return (
-    <div className="universal-panel universal-panel--scrollable ai-config-panel">
+    <div className="ai-config-panel">
       {/* Stats */}
       <div className="mb-6">
         <div className="flex items-center justify-between gap-4">

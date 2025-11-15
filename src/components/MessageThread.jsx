@@ -65,6 +65,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesListRef = useRef(null);  // Ref al contenedor de mensajes
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -188,18 +189,37 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
   /**
    * Scroll to bottom of messages
+   * IMPORTANTE: Usar scrollTop directamente en el contenedor para evitar
+   * que el scroll afecte a los contenedores padres (panels, dashboard, etc.)
    */
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesListRef.current) {
+      messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
+    }
   };
 
   /**
    * Scroll to search result
+   * IMPORTANTE: Calcular la posición relativa al contenedor .messages-list
+   * para evitar scroll en contenedores padres
    */
   const scrollToSearchResult = (messageId) => {
     const element = searchResultRefs.current[messageId];
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const container = messagesListRef.current;
+
+    if (element && container) {
+      // Calcular posición relativa del elemento dentro del contenedor
+      const elementTop = element.offsetTop;
+      const containerHeight = container.clientHeight;
+      const elementHeight = element.clientHeight;
+
+      // Centrar el elemento en el contenedor
+      const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
+
+      container.scrollTo({
+        top: scrollPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -574,7 +594,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
       )}
 
       {/* Messages List */}
-      <div className="messages-list">
+      <div className="messages-list" ref={messagesListRef}>
         {messages.length === 0 ? (
           <div className="messages-empty">
             <p>No hay mensajes aún. ¡Inicia la conversación!</p>
