@@ -42,10 +42,13 @@ const LiveGamesView = lazy(() => import('./games/LiveGamesView'));
 // Guardian views
 const GuardianView = lazy(() => import('./guardian/GuardianView'));
 
+// ADE1 Content Viewer
+const ADE1ContentViewer = lazy(() => import('./ADE1ContentViewer'));
+
 /**
  * Vista de inicio (placeholder)
  */
-function HomeView({ user }) {
+function HomeView({ user, onNavigate }) {
   const { getRoleLabel } = usePermissions();
 
   return (
@@ -70,6 +73,26 @@ function HomeView({ user }) {
         <div className="feature-card">
           <h3>🚀 Altamente Escalable</h3>
           <p>Fácil agregar nuevos roles y features</p>
+        </div>
+      </div>
+
+      {/* Acceso rápido a contenido ADE1 */}
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4">📚 Contenido Interactivo</h2>
+        <div className="universal-dashboard__features">
+          <div
+            className="feature-card cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => onNavigate && onNavigate('/dashboard-v2/ade1-content')}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => e.key === 'Enter' && onNavigate && onNavigate('/dashboard-v2/ade1-content')}
+          >
+            <h3>📖 ADE1 2026 - Fonética</h3>
+            <p>Libro interactivo con 120+ slides y ejercicios de fonética española</p>
+            <button className="mt-3 px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600">
+              Ver contenido →
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -187,7 +210,7 @@ export function UniversalDashboard() {
         {(() => {
           switch (currentPath) {
             case '/dashboard-v2':
-              return <HomeView user={effectiveUser} />;
+              return <HomeView user={effectiveUser} onNavigate={handleNavigate} />;
 
             // Legacy Routes - Default views for each role
             case '/admin':
@@ -234,6 +257,10 @@ export function UniversalDashboard() {
             case '/dashboard-v2/unified-content':
               if (!can('create-content')) return <PlaceholderView title="Sin acceso" />;
               return <ContentManagerTabs user={effectiveUser} userRole={effectiveUser.role} />;
+
+            // ADE1 2026 CONTENT VIEWER - Libro interactivo
+            case '/dashboard-v2/ade1-content':
+              return <ADE1ContentViewer />;
 
             // ESTUDIANTES (redirige a /users)
             case '/dashboard-v2/students':
