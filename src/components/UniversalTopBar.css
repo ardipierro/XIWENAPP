@@ -11,7 +11,12 @@
   justify-content: space-between;
   padding: 0 1.5rem;
   z-index: 100;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+}
+
+/* Mover TopBar hacia abajo cuando ViewAs está activo */
+.universal-dashboard--viewing-as .universal-topbar {
+  top: 44px; /* Altura del ViewAs Banner en desktop */
 }
 
 .universal-topbar__left {
@@ -258,6 +263,11 @@
   .universal-topbar {
     height: 56px;
     padding: 0 1rem;
+  }
+
+  /* Ajuste para ViewAs en mobile */
+  .universal-dashboard--viewing-as .universal-topbar {
+    top: 38px; /* Altura del ViewAs Banner en mobile */
   }
 
   .universal-topbar__title h1 {

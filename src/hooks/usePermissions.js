@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useViewAs } from '../contexts/ViewAsContext';
 import permissionService from '../services/permissionService';
 
 /**
@@ -13,15 +14,20 @@ import permissionService from '../services/permissionService';
  * @returns {Object} Funciones de permisos
  */
 export function usePermissions() {
-  const { userRole } = useAuth();
+  const { user, userRole } = useAuth();
+  const { getEffectiveUser } = useViewAs();
   const [initialized, setInitialized] = useState(false);
 
+  // Usuario efectivo (puede ser viewAs o user real)
+  const effectiveUser = getEffectiveUser(user);
+  const effectiveRole = effectiveUser?.role || userRole;
+
   useEffect(() => {
-    if (userRole) {
-      permissionService.setRole(userRole);
+    if (effectiveRole) {
+      permissionService.setRole(effectiveRole);
       setInitialized(true);
     }
-  }, [userRole]);
+  }, [effectiveRole]);
 
   return {
     /**

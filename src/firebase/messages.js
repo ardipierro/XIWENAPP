@@ -283,41 +283,60 @@ export function subscribeToConversations(userId, callback) {
   );
 
   return onSnapshot(q, async (snapshot) => {
-    const conversations = [];
+    try {
+      const conversations = [];
 
-    for (const docSnap of snapshot.docs) {
-      const data = docSnap.data();
+      for (const docSnap of snapshot.docs) {
+        try {
+          const data = docSnap.data();
 
-      // Get other participant info
-      const otherUserId = data.participants.find(id => id !== userId);
-      const userDoc = await getDoc(doc(db, 'users', otherUserId));
-      const userData = userDoc.exists() ? userDoc.data() : {};
+          // Get other participant info
+          const otherUserId = data.participants.find(id => id !== userId);
 
-      conversations.push({
-        id: docSnap.id,
-        ...data,
-        otherUser: {
-          id: otherUserId,
-          name: userData.name || 'Usuario',
-          email: userData.email || '',
-          role: userData.role || 'student'
-        },
-        unreadCount: Array.isArray(data.unreadCount?.[userId])
-          ? data.unreadCount[userId].length
-          : 0
+          if (!otherUserId) {
+            logger.warn('No other participant found in conversation', 'Messages');
+            continue;
+          }
+
+          const userDoc = await getDoc(doc(db, 'users', otherUserId));
+          const userData = userDoc.exists() ? userDoc.data() : {};
+
+          conversations.push({
+            id: docSnap.id,
+            ...data,
+            otherUser: {
+              id: otherUserId,
+              name: userData.name || 'Usuario',
+              email: userData.email || '',
+              role: userData.role || 'student'
+            },
+            unreadCount: Array.isArray(data.unreadCount?.[userId])
+              ? data.unreadCount[userId].length
+              : 0
+          });
+        } catch (convError) {
+          logger.error('Error processing conversation', convError, 'Messages');
+          // Continue with other conversations even if one fails
+        }
+      }
+
+      // Ordenar en memoria por lastMessageAt descendente
+      conversations.sort((a, b) => {
+        const aTime = a.lastMessageAt?.toMillis?.() || 0;
+        const bTime = b.lastMessageAt?.toMillis?.() || 0;
+        return bTime - aTime;
       });
+
+      callback(conversations);
+    } catch (error) {
+      logger.error('Error processing conversations snapshot', error, 'Messages');
+      // Call callback with empty array to stop loading state
+      callback([]);
     }
-
-    // Ordenar en memoria por lastMessageAt descendente
-    conversations.sort((a, b) => {
-      const aTime = a.lastMessageAt?.toMillis?.() || 0;
-      const bTime = b.lastMessageAt?.toMillis?.() || 0;
-      return bTime - aTime;
-    });
-
-    callback(conversations);
   }, (error) => {
     logger.error('Error in conversations subscription', error, 'Messages');
+    // Call callback with empty array to stop loading state
+    callback([]);
   });
 }
 
