@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon } from 'lucide-react';
+import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import { getCorrectionProfilesByTeacher } from '../firebase/correctionProfiles';
 import logger from '../utils/logger';
@@ -22,6 +22,7 @@ import AIFunctionConfigModal from './AIFunctionConfigModal';
 import VoiceLabModal from './VoiceLabModal';
 import ProfileEditor from './homework/ProfileEditor';
 import ImageTaskModal from './ImageTaskModal';
+import TranslatorConfigCard from './settings/TranslatorConfigCard';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
 import { IMAGE_GENERATION_TASKS } from '../utils/imageGenerationTasks';
 import { useAuth } from '../contexts/AuthContext';
@@ -47,6 +48,9 @@ function AIConfigPanel() {
   const [selectedImageTask, setSelectedImageTask] = useState(null);
   const [showImageTaskModal, setShowImageTaskModal] = useState(false);
 
+  // Estado para configuración del traductor
+  const [translatorConfig, setTranslatorConfig] = useState(null);
+
   // Get current user and role
   const { user, userRole } = useAuth();
   const isAdmin = userRole === 'admin';
@@ -57,7 +61,42 @@ function AIConfigPanel() {
   useEffect(() => {
     loadConfig();
     loadCorrectionProfiles();
+    loadTranslatorConfig();
   }, []);
+
+  /**
+   * Cargar configuración del traductor desde localStorage
+   */
+  const loadTranslatorConfig = () => {
+    try {
+      const saved = localStorage.getItem('xiwen_translator_config');
+      if (saved) {
+        setTranslatorConfig(JSON.parse(saved));
+      } else {
+        // Config por defecto
+        setTranslatorConfig({
+          mode: 'ai',
+          ai: { provider: 'openai', model: 'gpt-4.1' },
+          dictionary: {
+            sources: { mdbg: true, wordreference: false, pleco: false },
+            priority: 'mdbg',
+            fallbackToAI: true
+          },
+          sections: {
+            chinese: true, pinyin: true, meanings: true,
+            meaningsLimit: 3, example: false
+          },
+          display: {
+            mode: 'compact', popupWidth: 320,
+            chineseFontSize: 24, showIcons: true,
+            animations: true, position: 'auto'
+          }
+        });
+      }
+    } catch (err) {
+      logger.error('Error loading translator config:', err);
+    }
+  };
 
   // ============================================================================
   // FUNCIONES - Lógica de negocio
@@ -383,6 +422,39 @@ function AIConfigPanel() {
         onViewModeChange={setViewMode}
         className="mb-6"
       />
+
+      {/* SECCIÓN ESPECIAL: Configuración de Contenidos */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <Layers className="w-5 h-5" />
+          Configuración de Contenidos
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Configura cómo se muestran las traducciones, diccionarios y contenidos interactivos
+        </p>
+
+        {translatorConfig && (
+          <TranslatorConfigCard
+            config={translatorConfig}
+            onChange={(newConfig) => {
+              setTranslatorConfig(newConfig);
+              // Guardar automáticamente
+              localStorage.setItem('xiwen_translator_config', JSON.stringify(newConfig));
+              window.dispatchEvent(new CustomEvent('xiwen_translator_config_changed', { detail: newConfig }));
+              setSuccess('Configuración del traductor guardada');
+              setTimeout(() => setSuccess(null), 2000);
+            }}
+          />
+        )}
+      </div>
+
+      {/* Divider */}
+      <div className="my-8 border-t border-gray-300 dark:border-gray-700"></div>
+
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+        <Lightbulb className="w-5 h-5" />
+        Funciones de Inteligencia Artificial
+      </h2>
 
       {/* Category Filter */}
       <div className="mb-6 flex flex-wrap gap-2 items-center">
