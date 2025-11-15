@@ -437,6 +437,7 @@
 /* Message Input */
 .message-input-container {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   padding: 20px;
   border-top: 1px solid var(--color-border);
@@ -451,9 +452,11 @@
   font-size: 14px;
   color: var(--color-text-primary);
   background: var(--color-bg-primary);
-  resize: none;
-  max-height: 120px;
+  resize: vertical;
+  min-height: 80px;
+  max-height: 200px;
   font-family: inherit;
+  line-height: 1.5;
 }
 
 .message-input:focus {
