@@ -2095,7 +2095,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .universal-dashboard__content {
   margin-top: 64px;
   margin-left: 0;
-  padding: 2rem;
+  padding: 1rem;
   height: calc(100vh - 64px);
   overflow-y: auto;
   overflow-x: hidden;
@@ -2248,11 +2248,12 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 @media (min-width: 1024px) {
-  .universal-sidemenu {
+  /* En desktop, el menú se muestra por defecto pero puede cerrarse */
+  .universal-sidemenu--open {
     transform: translateX(0);
   }
 
-  .universal-dashboard__content {
+  .universal-dashboard__content--menu-open {
     margin-left: 260px;
   }
 
@@ -2267,7 +2268,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 /* ===== Messages Panel ===== */
 .messages-panel {
   display: flex;
-  height: 100%;
+  height: calc(100vh - 64px - 2rem);
+  max-height: calc(100vh - 64px - 2rem);
   background: var(--color-bg-primary);
   border-radius: 16px;
   overflow: hidden;

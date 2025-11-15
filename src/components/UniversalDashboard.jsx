@@ -96,7 +96,8 @@ export function UniversalDashboard() {
   const { user, loading: authLoading } = useAuth();
   const { getEffectiveUser, isViewingAs } = useViewAs();
   const { initialized, can } = usePermissions();
-  const [menuOpen, setMenuOpen] = useState(false);
+  // En desktop (>= 1024px) el menú está abierto por defecto, en mobile cerrado
+  const [menuOpen, setMenuOpen] = useState(window.innerWidth >= 1024);
   const [currentPath, setCurrentPath] = useState(location.pathname);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
@@ -106,6 +107,23 @@ export function UniversalDashboard() {
   useEffect(() => {
     setCurrentPath(location.pathname);
   }, [location.pathname]);
+
+  // Manejar cambios de tamaño de ventana para el menú lateral
+  useEffect(() => {
+    const handleResize = () => {
+      // En desktop, abrir menú por defecto si está cerrado
+      if (window.innerWidth >= 1024 && !menuOpen) {
+        setMenuOpen(true);
+      }
+      // En mobile, cerrar menú si está abierto
+      if (window.innerWidth < 1024 && menuOpen) {
+        setMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [menuOpen]);
 
   // Student course navigation states
   const [selectedCourseId, setSelectedCourseId] = useState(null);
