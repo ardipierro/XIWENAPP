@@ -1,0 +1,458 @@
+{
+  "metadata": {
+    "title": "Ejercicios ADE1 2026 - Sample",
+    "description": "Ejemplo de estructura JSON para ejercicios del libro ADE1",
+    "version": "1.0.0",
+    "totalExercises": 50,
+    "createdAt": "2025-01-15"
+  },
+  "exercises": [
+    {
+      "id": "ex-001",
+      "slideNumber": 2,
+      "theme": "fonetica",
+      "type": "fill-in-blank",
+      "difficulty": "easy",
+      "question": "Completa: B + a = ?",
+      "answer": "ba",
+      "hints": ["Primera consonante del alfabeto", "Sonido /b/"],
+      "points": 10,
+      "timeLimit": 30
+    },
+    {
+      "id": "ex-002",
+      "slideNumber": 7,
+      "theme": "vocabulario",
+      "type": "multiple-choice",
+      "difficulty": "easy",
+      "question": "¿Cómo se dice '厕所' en español?",
+      "options": ["baño", "casa", "gato", "familia"],
+      "correctAnswer": "baño",
+      "translation": "厕所 = baño (bathroom)",
+      "pronunciation": "ba-ño",
+      "points": 10,
+      "timeLimit": 30
+    },
+    {
+      "id": "ex-003",
+      "slideNumber": 11,
+      "theme": "dias-meses",
+      "type": "fill-in-blank",
+      "difficulty": "easy",
+      "question": "¿Qué día viene después de lunes?",
+      "answer": "martes",
+      "hints": ["Es el segundo día de la semana"],
+      "points": 10,
+      "timeLimit": 30
+    },
+    {
+      "id": "ex-004",
+      "slideNumber": 14,
+      "theme": "colores",
+      "type": "matching",
+      "difficulty": "medium",
+      "question": "Conecta el color con su nombre",
+      "pairs": [
+        { "left": "🔴", "right": "Rojo" },
+        { "left": "🔵", "right": "Azul" },
+        { "left": "🟡", "right": "Amarillo" },
+        { "left": "🟢", "right": "Verde" }
+      ],
+      "points": 20,
+      "timeLimit": 60
+    },
+    {
+      "id": "ex-005",
+      "slideNumber": 35,
+      "theme": "numeros",
+      "type": "fill-in-blank",
+      "difficulty": "medium",
+      "question": "Escribe en letras: 24",
+      "answer": "veinticuatro",
+      "hints": ["20 + 4", "Usa 'veinti...'"],
+      "points": 15,
+      "timeLimit": 45
+    },
+    {
+      "id": "ex-006",
+      "slideNumber": 48,
+      "theme": "info-personal",
+      "type": "interactive-form",
+      "difficulty": "easy",
+      "question": "Completa el formulario con tu información personal",
+      "fields": [
+        { "name": "nombre", "label": "Nombre/s", "type": "text", "required": true },
+        { "name": "apellido", "label": "Apellido", "type": "text", "required": true },
+        { "name": "edad", "label": "Edad", "type": "number", "required": true },
+        { "name": "email", "label": "E-mail", "type": "email", "required": false }
+      ],
+      "points": 20,
+      "timeLimit": 120
+    },
+    {
+      "id": "ex-007",
+      "slideNumber": 76,
+      "theme": "profesiones",
+      "type": "audio-pronunciation",
+      "difficulty": "medium",
+      "question": "Escucha y repite: 'electricista'",
+      "word": "electricista",
+      "audioUrl": "/audio/profesiones/electricista.mp3",
+      "syllables": ["e", "lec", "tri", "cis", "ta"],
+      "translation": "电工",
+      "points": 15,
+      "timeLimit": 60
+    },
+    {
+      "id": "ex-008",
+      "slideNumber": 78,
+      "theme": "textos",
+      "type": "reading-comprehension",
+      "difficulty": "hard",
+      "passage": "Yo me llamo Martín. Tengo 23 años. Soy estudiante de español en Buenos Aires...",
+      "questions": [
+        {
+          "id": "rc-001",
+          "question": "¿Cuántos años tiene Martín?",
+          "type": "fill-in-blank",
+          "answer": "23"
+        },
+        {
+          "id": "rc-002",
+          "question": "¿Qué estudia Martín?",
+          "type": "multiple-choice",
+          "options": ["Inglés", "Español", "Chino", "Francés"],
+          "correctAnswer": "Español"
+        }
+      ],
+      "points": 30,
+      "timeLimit": 180
+    },
+    {
+      "id": "ex-009",
+      "slideNumber": 102,
+      "theme": "adjetivos",
+      "type": "matching",
+      "difficulty": "easy",
+      "question": "Conecta cada adjetivo con su antónimo",
+      "pairs": [
+        { "left": "alto", "right": "bajo" },
+        { "left": "lindo", "right": "feo" },
+        { "left": "gordo", "right": "flaco" },
+        { "left": "simpático", "right": "antipático" }
+      ],
+      "points": 20,
+      "timeLimit": 60
+    },
+    {
+      "id": "ex-010",
+      "slideNumber": 119,
+      "theme": "demostrativos",
+      "type": "drag-drop",
+      "difficulty": "medium",
+      "question": "Arrastra el demostrativo correcto para cada zona de distancia",
+      "zones": [
+        { "id": "cerca", "label": "Cerca (aquí)", "accepts": ["este", "esta", "estos", "estas"] },
+        { "id": "medio", "label": "Medio (ahí)", "accepts": ["ese", "esa", "esos", "esas"] },
+        { "id": "lejos", "label": "Lejos (allá)", "accepts": ["aquel", "aquella", "aquellos", "aquellas"] }
+      ],
+      "items": ["este", "ese", "aquel", "esta", "esa", "aquella"],
+      "points": 25,
+      "timeLimit": 90
+    },
+    {
+      "id": "ex-011",
+      "slideNumber": 124,
+      "theme": "estar",
+      "type": "conjugation",
+      "difficulty": "medium",
+      "question": "Conjuga el verbo ESTAR",
+      "verb": "estar",
+      "conjugations": [
+        { "pronoun": "yo", "answer": "estoy" },
+        { "pronoun": "vos", "answer": "estás" },
+        { "pronoun": "él/ella/usted", "answer": "está" },
+        { "pronoun": "nosotros", "answer": "estamos" },
+        { "pronoun": "ellos/ustedes", "answer": "están" }
+      ],
+      "points": 25,
+      "timeLimit": 90
+    },
+    {
+      "id": "ex-012",
+      "slideNumber": 129,
+      "theme": "adverbios-lugar",
+      "type": "interactive-diagram",
+      "difficulty": "hard",
+      "question": "Observa el dibujo y responde: ¿Dónde están las flores?",
+      "imageUrl": "/images/room-diagram.png",
+      "answer": "Las flores están sobre la mesa",
+      "acceptableAnswers": [
+        "sobre la mesa",
+        "encima de la mesa",
+        "arriba de la mesa"
+      ],
+      "points": 20,
+      "timeLimit": 60
+    },
+    {
+      "id": "ex-013",
+      "slideNumber": 143,
+      "theme": "envases",
+      "type": "fill-in-blank-with-image",
+      "difficulty": "medium",
+      "question": "Completa: Un _______ de mermelada",
+      "imageUrl": "/images/envases/mermelada.jpg",
+      "answer": "frasco",
+      "acceptableAnswers": ["frasco", "tarro", "pote"],
+      "hints": ["Envase de vidrio"],
+      "points": 15,
+      "timeLimit": 45
+    },
+    {
+      "id": "ex-014",
+      "slideNumber": 146,
+      "theme": "interrogativas",
+      "type": "fill-in-blank",
+      "difficulty": "easy",
+      "question": "Completa: _____ es ese señor? - Es mi profesor.",
+      "answer": "¿Quién?",
+      "acceptableAnswers": ["Quién", "quién", "¿Quién?"],
+      "translation": "谁 (quién)",
+      "points": 10,
+      "timeLimit": 30
+    },
+    {
+      "id": "ex-015",
+      "slideNumber": 150,
+      "theme": "interrogativas",
+      "type": "matching",
+      "difficulty": "medium",
+      "question": "Unir preguntas con respuestas",
+      "pairs": [
+        { "left": "¿Esta es tu lapicera?", "right": "No, es mía, es de Juan." },
+        { "left": "¿Ella es tu hermana?", "right": "No, es mi vecina." },
+        { "left": "¿Dónde vivís vos?", "right": "Vivo en la calle Moreno al 2500." }
+      ],
+      "points": 20,
+      "timeLimit": 90
+    },
+    {
+      "id": "ex-016",
+      "slideNumber": 156,
+      "theme": "descripcion-casa",
+      "type": "free-text",
+      "difficulty": "hard",
+      "question": "Describe tu casa (mínimo 12 oraciones)",
+      "minWords": 100,
+      "maxWords": 500,
+      "rubric": {
+        "grammar": 30,
+        "vocabulary": 30,
+        "structure": 20,
+        "creativity": 20
+      },
+      "points": 50,
+      "timeLimit": 600
+    },
+    {
+      "id": "ex-017",
+      "slideNumber": 165,
+      "theme": "hora",
+      "type": "time-telling",
+      "difficulty": "medium",
+      "question": "¿Qué hora es? 10:20",
+      "answer": "Son las diez y veinte",
+      "acceptableAnswers": [
+        "Son las diez y veinte",
+        "10 y 20",
+        "diez y veinte"
+      ],
+      "clockImage": "/images/clocks/10-20.png",
+      "points": 15,
+      "timeLimit": 45
+    },
+    {
+      "id": "ex-018",
+      "slideNumber": 177,
+      "theme": "ser-estar",
+      "type": "true-false",
+      "difficulty": "medium",
+      "statements": [
+        {
+          "id": "tf-001",
+          "statement": "Usamos SER para cualidades permanentes",
+          "answer": true,
+          "explanation": "Ejemplo: Juan es alto (cualidad)"
+        },
+        {
+          "id": "tf-002",
+          "statement": "Usamos ESTAR para ubicación geográfica",
+          "answer": true,
+          "explanation": "Ejemplo: Yo estoy en Argentina (lugar)"
+        },
+        {
+          "id": "tf-003",
+          "statement": "Usamos SER para estados temporales",
+          "answer": false,
+          "explanation": "ESTAR se usa para estados temporales: Juan está enfermo"
+        }
+      ],
+      "points": 30,
+      "timeLimit": 120
+    },
+    {
+      "id": "ex-019",
+      "slideNumber": 179,
+      "theme": "ser-estar",
+      "type": "fill-in-blank-selective",
+      "difficulty": "medium",
+      "question": "Complete con SER o ESTAR",
+      "sentences": [
+        {
+          "id": "sb-001",
+          "sentence": "Luis _______ simpático.",
+          "answer": "es",
+          "options": ["es", "está"]
+        },
+        {
+          "id": "sb-002",
+          "sentence": "¿_______ usted cansado?",
+          "answer": "Está",
+          "options": ["Es", "Está"]
+        },
+        {
+          "id": "sb-003",
+          "sentence": "Las ventanas _______ abiertas.",
+          "answer": "están",
+          "options": ["son", "están"]
+        }
+      ],
+      "points": 30,
+      "timeLimit": 120
+    },
+    {
+      "id": "ex-020",
+      "slideNumber": 184,
+      "theme": "ser-estar",
+      "type": "interactive-floor-plan",
+      "difficulty": "hard",
+      "question": "Describe el plano de la casa usando SER y ESTAR",
+      "imageUrl": "/images/floor-plan.png",
+      "guidedQuestions": [
+        "¿Dónde está la cocina?",
+        "¿Cómo es el dormitorio?",
+        "¿Qué hay en el baño?"
+      ],
+      "points": 40,
+      "timeLimit": 300
+    }
+  ],
+  "exerciseTypes": {
+    "fill-in-blank": {
+      "name": "Completar",
+      "description": "El alumno completa espacios en blanco con la respuesta correcta",
+      "icon": "✏️"
+    },
+    "multiple-choice": {
+      "name": "Selección Múltiple",
+      "description": "El alumno elige la respuesta correcta entre varias opciones",
+      "icon": "☑️"
+    },
+    "matching": {
+      "name": "Emparejar",
+      "description": "El alumno conecta elementos relacionados",
+      "icon": "🔗"
+    },
+    "audio-pronunciation": {
+      "name": "Pronunciación con Audio",
+      "description": "El alumno escucha y repite palabras o frases",
+      "icon": "🎤"
+    },
+    "reading-comprehension": {
+      "name": "Comprensión Lectora",
+      "description": "El alumno lee un texto y responde preguntas",
+      "icon": "📖"
+    },
+    "drag-drop": {
+      "name": "Arrastrar y Soltar",
+      "description": "El alumno arrastra elementos a las zonas correctas",
+      "icon": "🖱️"
+    },
+    "conjugation": {
+      "name": "Conjugación Verbal",
+      "description": "El alumno conjuga verbos según el pronombre",
+      "icon": "⚡"
+    },
+    "interactive-diagram": {
+      "name": "Diagrama Interactivo",
+      "description": "El alumno interactúa con una imagen para responder",
+      "icon": "🖼️"
+    },
+    "interactive-form": {
+      "name": "Formulario Interactivo",
+      "description": "El alumno completa un formulario con múltiples campos",
+      "icon": "📋"
+    },
+    "free-text": {
+      "name": "Texto Libre",
+      "description": "El alumno escribe una composición o respuesta extensa",
+      "icon": "📝"
+    },
+    "true-false": {
+      "name": "Verdadero o Falso",
+      "description": "El alumno determina si afirmaciones son verdaderas o falsas",
+      "icon": "✓✗"
+    },
+    "time-telling": {
+      "name": "Decir la Hora",
+      "description": "El alumno escribe o dice la hora mostrada",
+      "icon": "🕐"
+    },
+    "fill-in-blank-with-image": {
+      "name": "Completar con Imagen",
+      "description": "El alumno completa mirando una imagen de referencia",
+      "icon": "🖼️✏️"
+    },
+    "fill-in-blank-selective": {
+      "name": "Completar Selectivo",
+      "description": "El alumno elige entre opciones limitadas para completar",
+      "icon": "🔽"
+    },
+    "interactive-floor-plan": {
+      "name": "Plano Interactivo",
+      "description": "El alumno describe un plano de casa/edificio",
+      "icon": "🏠"
+    }
+  },
+  "themes": {
+    "fonetica": { "name": "Fonética", "color": "#3B82F6", "icon": "🎵" },
+    "vocabulario": { "name": "Vocabulario Básico", "color": "#10B981", "icon": "📝" },
+    "dias-meses": { "name": "Días y Meses", "color": "#8B5CF6", "icon": "📅" },
+    "colores": { "name": "Colores", "color": "#EC4899", "icon": "🎨" },
+    "abecedario": { "name": "Abecedario", "color": "#6366F1", "icon": "🔤" },
+    "acentuacion": { "name": "Acentuación", "color": "#F59E0B", "icon": "✍️" },
+    "frases-clase": { "name": "Frases de Clase", "color": "#14B8A6", "icon": "💬" },
+    "clima": { "name": "Clima", "color": "#06B6D4", "icon": "☁️" },
+    "numeros": { "name": "Números", "color": "#F97316", "icon": "🔢" },
+    "info-personal": { "name": "Info Personal", "color": "#EF4444", "icon": "👤" },
+    "profesiones": { "name": "Profesiones", "color": "#84CC16", "icon": "💼" },
+    "textos": { "name": "Comprensión Lectora", "color": "#10B981", "icon": "📖" },
+    "gramatica": { "name": "Gramática", "color": "#8B5CF6", "icon": "📚" },
+    "adjetivos": { "name": "Adjetivos Descriptivos", "color": "#D946EF", "icon": "✨" },
+    "posesivos": { "name": "Posesivos", "color": "#F43F5E", "icon": "🤝" },
+    "demostrativos": { "name": "Demostrativos", "color": "#F59E0B", "icon": "👈" },
+    "estar": { "name": "Verbo ESTAR", "color": "#3B82F6", "icon": "📍" },
+    "adverbios-lugar": { "name": "Adverbios de Lugar", "color": "#10B981", "icon": "🗺️" },
+    "envases": { "name": "Envases y Cantidades", "color": "#8B5CF6", "icon": "📦" },
+    "interrogativas": { "name": "Palabras Interrogativas", "color": "#EC4899", "icon": "❓" },
+    "descripcion-casa": { "name": "Descripción de Casa", "color": "#6366F1", "icon": "🏠" },
+    "hora": { "name": "¿Qué Hora Es?", "color": "#06B6D4", "icon": "🕐" },
+    "ser-estar": { "name": "SER vs ESTAR", "color": "#F97316", "icon": "⚖️" }
+  },
+  "difficultyLevels": {
+    "easy": { "name": "Fácil", "color": "#10B981", "pointsMultiplier": 1.0 },
+    "medium": { "name": "Medio", "color": "#F59E0B", "pointsMultiplier": 1.5 },
+    "hard": { "name": "Difícil", "color": "#EF4444", "pointsMultiplier": 2.0 }
+  }
+}
