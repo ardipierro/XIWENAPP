@@ -12,7 +12,8 @@
  * @module components/settings/BadgeCustomizerTab
  */
 
-import { useState, useMemo } from 'prop-types';
+import { useState, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import {
   Tag,
   Palette,
