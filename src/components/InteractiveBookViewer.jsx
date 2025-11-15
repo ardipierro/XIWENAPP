@@ -566,16 +566,16 @@ function InteractiveBookViewer() {
             {/* Notas Culturales */}
             {unit.content?.culturalNotes && (
               <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                <h4 className="text-md font-semibold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
+                <h4 className="text-md font-semibold style={{ color: 'var(--color-text-primary)' }} mb-3 flex items-center gap-2">
                   {unit.content.culturalNotes.icon} {unit.content.culturalNotes.title}
                 </h4>
                 <div className="space-y-3">
                   {unit.content.culturalNotes.content.map((note, idx) => (
                     <div key={idx} className="text-sm">
-                      <div className="font-semibold text-purple-900 dark:text-purple-200">
+                      <div className="font-semibold style={{ color: 'var(--color-text-primary)' }}">
                         {note.topic}
                       </div>
-                      <div className="text-purple-800 dark:text-purple-300 mt-1">
+                      <div className="style={{ color: 'var(--color-text-secondary)' }} mt-1">
                         {note.text}
                       </div>
                     </div>
