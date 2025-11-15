@@ -72,7 +72,7 @@ function normalizeText(text) {
  */
 function extractErrorInfo(error) {
   // Try different field names for error text
-  const errorText = error.errorText || error.text || error.error || error.word || '';
+  const errorText = error.errorText || error.text || error.error || error.word || error.original || '';
 
   // Try different field names for error type
   const errorType = error.errorType || error.type || error.category || 'default';
