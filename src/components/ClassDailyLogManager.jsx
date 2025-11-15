@@ -26,7 +26,6 @@ import {
   LOG_STATUS
 } from '../firebase/classDailyLogs';
 import { getCourses } from '../firebase/content';
-import { getAllGroups } from '../firebase/groups';
 import {
   BaseButton,
   BaseBadge,
@@ -43,7 +42,6 @@ import ClassDailyLog from './ClassDailyLog';
 function ClassDailyLogManager({ user }) {
   const [logs, setLogs] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
@@ -60,15 +58,13 @@ function ClassDailyLogManager({ user }) {
       setLoading(true);
       setError(null);
 
-      const [logsData, coursesData, groupsData] = await Promise.all([
+      const [logsData, coursesData] = await Promise.all([
         getTeacherLogs(user.uid),
-        getCourses(user.uid),
-        getAllGroups()
+        getCourses(user.uid)
       ]);
 
       setLogs(logsData || []);
       setCourses(coursesData || []);
-      setGroups(groupsData || []);
 
       logger.info(`Cargados ${logsData?.length || 0} diarios de clase`, 'ClassDailyLogManager');
     } catch (err) {
@@ -216,7 +212,6 @@ function ClassDailyLogManager({ user }) {
         onClose={createModal.close}
         onCreate={handleCreateLog}
         courses={courses}
-        groups={groups}
       />
     </div>
   );
@@ -263,12 +258,6 @@ function LogCard({ log, onOpen, onDelete }) {
               <span>{log.courseName}</span>
             </div>
           )}
-          {log.groupName && (
-            <div className="flex items-center gap-2">
-              <Users size={16} />
-              <span>{log.groupName}</span>
-            </div>
-          )}
           <div className="flex items-center gap-2">
             <Calendar size={16} />
             <span>{log.createdAt?.toDate?.().toLocaleDateString() || 'Sin fecha'}</span>
@@ -304,12 +293,11 @@ function LogCard({ log, onOpen, onDelete }) {
 // CREATE MODAL
 // ============================================
 
-function CreateLogModal({ isOpen, onClose, onCreate, courses, groups }) {
+function CreateLogModal({ isOpen, onClose, onCreate, courses }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     courseId: '',
-    groupId: '',
     assignedStudents: []
   });
 
@@ -320,46 +308,25 @@ function CreateLogModal({ isOpen, onClose, onCreate, courses, groups }) {
         name: `Clase ${new Date().toLocaleDateString()}`,
         description: '',
         courseId: '',
-        groupId: '',
         assignedStudents: []
       });
     }
   }, [isOpen]);
 
-  // Cuando se selecciona un grupo, asignar sus estudiantes
-  useEffect(() => {
-    if (formData.groupId) {
-      const selectedGroup = groups.find(g => g.id === formData.groupId);
-      if (selectedGroup?.students) {
-        setFormData(prev => ({
-          ...prev,
-          assignedStudents: selectedGroup.students.map(s => s.id || s)
-        }));
-      }
-    }
-  }, [formData.groupId, groups]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const selectedCourse = courses.find(c => c.id === formData.courseId);
-    const selectedGroup = groups.find(g => g.id === formData.groupId);
 
     onCreate({
       ...formData,
-      courseName: selectedCourse?.title || '',
-      groupName: selectedGroup?.name || ''
+      courseName: selectedCourse?.title || ''
     });
   };
 
   const courseOptions = [
     { value: '', label: 'Sin curso' },
     ...courses.map(c => ({ value: c.id, label: c.title }))
-  ];
-
-  const groupOptions = [
-    { value: '', label: 'Sin grupo' },
-    ...groups.map(g => ({ value: g.id, label: g.name }))
   ];
 
   return (
@@ -406,19 +373,6 @@ function CreateLogModal({ isOpen, onClose, onCreate, courses, groups }) {
                 onChange={(e) => setFormData(prev => ({ ...prev, courseId: e.target.value }))}
                 options={courseOptions}
               />
-
-              <BaseSelect
-                label="Grupo (opcional)"
-                value={formData.groupId}
-                onChange={(e) => setFormData(prev => ({ ...prev, groupId: e.target.value }))}
-                options={groupOptions}
-              />
-
-              {formData.groupId && formData.assignedStudents.length > 0 && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  ✓ {formData.assignedStudents.length} estudiantes asignados automáticamente
-                </div>
-              )}
 
               <div className="flex justify-end gap-3 pt-4">
                 <BaseButton variant="secondary" onClick={onClose} type="button">
