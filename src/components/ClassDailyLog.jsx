@@ -32,6 +32,7 @@ import {
   endLog
 } from '../firebase/classDailyLogs';
 import { getContentById } from '../firebase/content';
+import { saveStudentExerciseResult } from '../firebase/exerciseProgress';
 import {
   BaseButton,
   BaseBadge,
@@ -41,6 +42,11 @@ import {
   useModal
 } from './common';
 import ContentSelectorModal from './ContentSelectorModal';
+import {
+  UnifiedExerciseRenderer,
+  EditableTextBlock,
+  InSituContentEditor
+} from './diary';
 
 // ============================================
 // CONTENT TYPE ICONS
@@ -52,7 +58,8 @@ const CONTENT_ICONS = {
   video: VideoIcon,
   exercise: PenTool,
   link: LinkIcon,
-  course: BookOpen
+  course: BookOpen,
+  'text-block': FileText
 };
 
 // ============================================
@@ -232,6 +239,87 @@ function ClassDailyLog({ logId, user, onBack }) {
     }
   };
 
+  // Actualizar bloque de texto
+  const handleUpdateTextBlock = async (data) => {
+    try {
+      const updatedEntries = log.entries.map(entry =>
+        entry.id === data.blockId
+          ? {
+              ...entry,
+              contentData: {
+                ...entry.contentData,
+                html: data.content
+              },
+              updatedAt: data.updatedAt
+            }
+          : entry
+      );
+
+      await updateLog(logId, {
+        entries: updatedEntries,
+        updatedAt: Date.now()
+      });
+
+      logger.info('✏️ Bloque de texto actualizado');
+      setHasUnsavedChanges(true);
+    } catch (err) {
+      logger.error('Error actualizando bloque de texto:', err);
+      throw new Error('Error al guardar el bloque de texto');
+    }
+  };
+
+  // Actualizar contenido existente (ejercicios, lecciones, etc.)
+  const handleUpdateContent = async (data) => {
+    try {
+      const updatedEntries = log.entries.map(entry =>
+        entry.contentId === data.contentId
+          ? {
+              ...entry,
+              contentData: data.updatedData,
+              updatedAt: data.updatedAt
+            }
+          : entry
+      );
+
+      await updateLog(logId, {
+        entries: updatedEntries,
+        updatedAt: Date.now()
+      });
+
+      logger.info('✏️ Contenido actualizado');
+      setHasUnsavedChanges(true);
+    } catch (err) {
+      logger.error('Error actualizando contenido:', err);
+      throw new Error('Error al guardar los cambios');
+    }
+  };
+
+  // Guardar progreso de ejercicio del estudiante
+  const handleExerciseComplete = async (result) => {
+    try {
+      logger.info('✅ Ejercicio completado:', result);
+
+      // Guardar resultado en Firebase
+      const saveResult = await saveStudentExerciseResult({
+        studentId: user.uid,
+        exerciseId: result.exerciseId,
+        logId: result.logId || logId,
+        answer: result.answer,
+        correct: result.correct,
+        timestamp: result.timestamp,
+        exerciseType: result.exerciseType,
+        points: result.correct ? 100 : 0,
+        attempts: 1
+      });
+
+      if (!saveResult.success) {
+        logger.error('Error guardando resultado:', saveResult.error);
+      }
+    } catch (err) {
+      logger.error('Error guardando progreso de ejercicio:', err);
+    }
+  };
+
   const renderContentEntry = (entry, index) => {
     const content = entry.contentData;
     if (!content) {
@@ -299,9 +387,33 @@ function ClassDailyLog({ logId, user, onBack }) {
 
   const renderContentBody = (content) => {
     switch (content.type) {
+      case 'text-block':
+        // Nuevo: Bloque de texto editable
+        return (
+          <EditableTextBlock
+            blockId={content.id}
+            initialContent={content.html || '<p>Escribe aquí...</p>'}
+            isTeacher={isTeacher}
+            onSave={handleUpdateTextBlock}
+          />
+        );
+
       case 'lesson':
       case 'reading':
-        return (
+        // Envuelto con InSituContentEditor para permitir edición
+        return isTeacher ? (
+          <InSituContentEditor
+            content={content}
+            isTeacher={isTeacher}
+            onUpdate={handleUpdateContent}
+            renderComponent={(cnt) => (
+              <div
+                className="prose prose-lg dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: cnt.body || '<p>Sin contenido</p>' }}
+              />
+            )}
+          />
+        ) : (
           <div
             className="prose prose-lg dark:prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: content.body || '<p>Sin contenido</p>' }}
@@ -341,24 +453,28 @@ function ClassDailyLog({ logId, user, onBack }) {
         );
 
       case 'exercise':
-        return (
-          <div className="p-8 bg-amber-50 dark:bg-amber-900/20 rounded-lg border-2 border-amber-200 dark:border-amber-800">
-            <div className="flex items-center gap-3 mb-4">
-              <PenTool size={24} className="text-amber-600 dark:text-amber-400" />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Ejercicio Interactivo
-              </h3>
-            </div>
-            {content.metadata?.exerciseType && (
-              <BaseBadge variant="warning" className="mb-4">
-                {content.metadata.exerciseType}
-              </BaseBadge>
+        // Nuevo: Ejercicios totalmente interactivos
+        return isTeacher ? (
+          <InSituContentEditor
+            content={content}
+            isTeacher={isTeacher}
+            onUpdate={handleUpdateContent}
+            renderComponent={(cnt) => (
+              <UnifiedExerciseRenderer
+                content={cnt}
+                onComplete={handleExerciseComplete}
+                readOnly={log?.status === 'ended'}
+                logId={logId}
+              />
             )}
-            <p className="text-gray-700 dark:text-gray-300">
-              {content.description || 'Ejercicio disponible'}
-            </p>
-            {/* TODO: Renderizar componente de ejercicio según tipo */}
-          </div>
+          />
+        ) : (
+          <UnifiedExerciseRenderer
+            content={content}
+            onComplete={handleExerciseComplete}
+            readOnly={log?.status === 'ended'}
+            logId={logId}
+          />
         );
 
       default:
