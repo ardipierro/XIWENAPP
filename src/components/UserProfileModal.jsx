@@ -235,25 +235,30 @@ function UserProfileModal({ isOpen, onClose, user, userRole, onUpdate }) {
       showCloseButton={false}
       className="!p-0"
     >
-      <div className="flex flex-col -m-6">
+      <div className="flex flex-col -m-6 overflow-hidden" style={{ borderRadius: 'inherit' }}>
         {/* Banner Section */}
-        <div className="relative h-40 md:h-48 lg:h-56 overflow-hidden flex-shrink-0">
+        <div className="relative h-40 md:h-48 lg:h-56 overflow-hidden flex-shrink-0" style={{ borderTopLeftRadius: 'inherit', borderTopRightRadius: 'inherit' }}>
           {/* Banner Image o Gradient */}
           {userBanner ? (
             <img
               src={userBanner}
               alt="Banner de perfil"
               className="w-full h-full object-cover"
+              style={{ borderTopLeftRadius: 'inherit', borderTopRightRadius: 'inherit' }}
             />
           ) : (
             <div
               className="w-full h-full"
-              style={{ background: getDefaultBannerGradient() }}
+              style={{
+                background: getDefaultBannerGradient(),
+                borderTopLeftRadius: 'inherit',
+                borderTopRightRadius: 'inherit'
+              }}
             />
           )}
 
           {/* Overlay con botones */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" style={{ borderTopLeftRadius: 'inherit', borderTopRightRadius: 'inherit' }}>
             <div className="flex justify-between items-start p-4">
               {/* Botón editar banner */}
               <label
