@@ -138,6 +138,7 @@ import { UniversalCard } from './components/cards';
   icon={Icon}          // Para variant='default'
   avatar="JP"          // Para variant='user'
   avatarColor="#3b82f6"
+  showHeader={undefined} // undefined=auto-detectar, true=forzar mostrar, false=forzar ocultar
 
   // Content
   title="Título"       // Required
@@ -163,6 +164,25 @@ import { UniversalCard } from './components/cards';
   selected={false}
   disabled={false}
 />
+```
+
+**🆕 Auto-detección de Headers (NUEVO):**
+
+El header ahora se **auto-detecta inteligentemente**:
+- ✅ **SIN header**: Si no pasas `icon`, `image`, `avatar`, o `badge`, el header se oculta automáticamente
+- ✅ **CON header**: Si pasas cualquiera de esos props, el header se muestra
+- ✅ **Control manual**: Usa `showHeader={true/false}` para forzar el comportamiento
+
+```javascript
+// Ejemplo: Card sin header (auto-detectado)
+<UniversalCard variant="default" size="sm">
+  <div>Solo contenido, sin espacio desperdiciado arriba</div>
+</UniversalCard>
+
+// Ejemplo: Card con header
+<UniversalCard variant="default" icon={Users}>
+  <div>Header visible con icono</div>
+</UniversalCard>
 ```
 
 ---

@@ -51,6 +51,21 @@ import {
  *     { icon: '⏱️', text: 'Hace 15 min' }
  *   ]}
  * />
+ *
+ * @example
+ * // Card con contenido custom (SIN header - auto-detectado)
+ * <UniversalCard variant="default" size="sm">
+ *   <div className="flex items-center justify-between">
+ *     <span>Contenido custom</span>
+ *     <span>123</span>
+ *   </div>
+ * </UniversalCard>
+ *
+ * @example
+ * // Forzar mostrar header vacío (poco común)
+ * <UniversalCard variant="default" showHeader={true}>
+ *   <div>Mi contenido</div>
+ * </UniversalCard>
  */
 export function UniversalCard({
   // Layout & Variant
@@ -65,6 +80,7 @@ export function UniversalCard({
   avatarColor,             // Custom avatar background color
   headerColor,             // Custom header background color
   badge,                   // Badge en top-right del header
+  showHeader,              // Control manual del header: true=forzar mostrar, false=forzar ocultar, undefined=auto-detectar
 
   // Content
   title,                   // Required
@@ -154,6 +170,21 @@ export function UniversalCard({
   const renderHeader = () => {
     // Skip header si es transparent (variant='class')
     if (variantConfig.headerBg === 'transparent') {
+      return null;
+    }
+
+    // Auto-detectar si el header tiene contenido visual
+    const hasHeaderContent = image || Icon || avatar || badge;
+
+    // Determinar si mostrar el header:
+    // - Si showHeader es explícito (true/false), usarlo
+    // - Si es undefined, auto-detectar basado en contenido
+    const shouldShowHeader = showHeader !== undefined
+      ? showHeader
+      : hasHeaderContent;
+
+    // Si no debe mostrarse, retornar null
+    if (!shouldShowHeader) {
       return null;
     }
 
