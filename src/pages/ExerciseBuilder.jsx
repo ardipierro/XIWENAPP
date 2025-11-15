@@ -497,20 +497,6 @@ export function ExerciseBuilder() {
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-zinc-500 to-zinc-700 rounded-xl flex items-center justify-center">
-                <Palette size={24} className="text-white" strokeWidth={2} />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Design Lab ELE
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Diseña y prueba interfaces de ejercicios interactivos
-                </p>
-              </div>
-            </div>
-
             <div className="flex items-center gap-3">
               <BaseBadge variant="info" size="sm">
                 Nivel: {config.cefrLevel}

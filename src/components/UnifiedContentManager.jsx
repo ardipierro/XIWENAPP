@@ -312,14 +312,6 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-              📚 Gestión de Contenidos
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Sistema unificado para todos tus recursos educativos
-            </p>
-          </div>
           <div className="flex items-center gap-3">
             <BaseButton
               variant="secondary"

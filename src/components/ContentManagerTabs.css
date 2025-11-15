@@ -15,7 +15,6 @@
   gap: 0.5rem;
   padding: 1rem;
   background-color: var(--color-bg-secondary);
-  border-bottom: 2px solid var(--color-border);
   overflow-x: auto;
 }
 
@@ -58,7 +57,7 @@
 /* Tab Content */
 .content-manager-tabs__content {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
   background-color: var(--color-bg-primary);
 }
 

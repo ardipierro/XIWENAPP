@@ -332,44 +332,8 @@ function AIConfigPanel() {
   // ============================================================================
   return (
     <div className="ai-config-panel">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
-        <PageHeader
-          icon={Lightbulb}
-          title="Tareas IA"
-          actionLabel="+ Crear Nueva Configuración"
-          onAction={() => {
-            const newFunction = {
-              id: `custom_${Date.now()}`,
-              name: 'Nueva Función de IA',
-              description: 'Configura esta función personalizada',
-              icon: Settings,
-              category: 'content',
-              defaultConfig: {
-                enabled: false,
-                provider: '',
-                model: '',
-                apiKey: '',
-                systemPrompt: '',
-                parameters: {
-                  temperature: 0.7,
-                  maxTokens: 2000,
-                  topP: 1
-                }
-              }
-            };
-            setSelectedFunction(newFunction);
-            setModalOpen(true);
-          }}
-        />
-      </div>
-
-      {/* Description and Stats */}
+      {/* Stats */}
       <div className="mb-6">
-        <p className="text-zinc-600 dark:text-zinc-400 mb-4">
-          Configura diferentes funciones de IA, perfiles de corrección y tareas de demostración
-        </p>
-
         <div className="flex items-center justify-between gap-4">
           <div className="flex gap-4">
             <BaseBadge variant="success" size="lg">
