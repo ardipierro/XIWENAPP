@@ -27,10 +27,8 @@ function ViewAsBanner() {
     // Desactivar modo "Ver como"
     stopViewingAs();
 
-    // Navegar a la pantalla de usuarios si hay un perfil para reabrir
-    // De lo contrario, ir al dashboard principal
-    const targetRoute = returnToUserId ? '/teacher/users' : '/teacher';
-    navigate(targetRoute);
+    // Navegar al UniversalDashboard con la vista de usuarios
+    navigate('/dashboard-v2/users');
 
     // Limpiar el contexto después de navegar
     setTimeout(() => clearViewAsState(), 100);

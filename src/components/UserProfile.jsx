@@ -400,8 +400,8 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
     // Activar modo "Ver como"
     startViewingAs(currentUser, selectedUser);
 
-    // Navegar según el rol del usuario
-    navigate('/dashboard');
+    // Navegar al UniversalDashboard (v2)
+    navigate('/dashboard-v2');
   };
 
   const isCourseEnrolled = (courseId) => {
