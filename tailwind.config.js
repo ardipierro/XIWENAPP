@@ -78,6 +78,22 @@ export default {
         warning: '#f59e0b',        // amber-500
         error: '#ef4444',          // red-500
         info: '#a1a1aa',           // zinc-400 (gris neutral, NO azul)
+
+        // Gradientes personalizados (para fondos degradados)
+        'gradient-start': '#667eea',
+        'gradient-end': '#764ba2',
+
+        // Indigo extendido (colores faltantes)
+        indigo: {
+          50: '#eef2ff',
+          100: '#e0e7ff',
+          // 200-700 ya existen en Tailwind por defecto
+          800: '#3730a3',
+        },
+
+        // Errores personalizados
+        'error-light': '#ff4757',
+        'error-lighter': '#ff3838',
       },
       
       // Espaciado personalizado (Mobile First)
