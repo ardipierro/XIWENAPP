@@ -5,7 +5,7 @@
  */
 
 import { Menu, Bell, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -28,33 +28,9 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const { getRoleLabel } = usePermissions();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const userMenuRef = useRef(null);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
-
-  // Cerrar menú cuando se hace clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        console.log('Click outside detected, closing menu');
-        setShowUserMenu(false);
-      }
-    };
-
-    if (showUserMenu) {
-      // Pequeño delay para evitar que el click que abrió el menú lo cierre inmediatamente
-      const timer = setTimeout(() => {
-        console.log('Adding mousedown listener');
-        document.addEventListener('mousedown', handleClickOutside);
-      }, 100);
-
-      return () => {
-        clearTimeout(timer);
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [showUserMenu]);
 
   const handleLogout = async () => {
     try {
@@ -65,12 +41,8 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   };
 
   const handleUserMenuToggle = () => {
-    console.log('Toggle user menu, current state:', showUserMenu);
     setShowUserMenu(!showUserMenu);
   };
-
-  // Debug: log cuando el componente se renderiza
-  console.log('UniversalTopBar rendering, showUserMenu:', showUserMenu, 'user:', effectiveUser?.email);
 
   return (
     <header className="universal-topbar">
@@ -122,16 +94,11 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         </button>
 
         {/* User Menu */}
-        <div className="universal-topbar__user-menu" ref={userMenuRef}>
+        <div className="universal-topbar__user-menu">
           <button
             className="universal-topbar__user-btn"
-            onClick={(e) => {
-              console.log('Button clicked!', e);
-              handleUserMenuToggle();
-            }}
-            onMouseEnter={() => console.log('Mouse entered button')}
+            onClick={handleUserMenuToggle}
             aria-label="Menú de usuario"
-            style={{ cursor: 'pointer', position: 'relative', zIndex: 10000 }}
           >
             <div className="universal-topbar__avatar">
               {effectiveUser?.photoURL ? (
@@ -157,14 +124,20 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
                 <User size={16} />
                 <span>Mi Perfil</span>
               </button>
-              <button className="universal-topbar__dropdown-item">
+              <button
+                className="universal-topbar__dropdown-item"
+                onClick={() => setShowUserMenu(false)}
+              >
                 <Settings size={16} />
                 <span>Configuración</span>
               </button>
               <div className="universal-topbar__dropdown-divider" />
               <button
                 className="universal-topbar__dropdown-item universal-topbar__dropdown-item--danger"
-                onClick={handleLogout}
+                onClick={() => {
+                  setShowUserMenu(false);
+                  handleLogout();
+                }}
               >
                 <LogOut size={16} />
                 <span>Cerrar Sesión</span>
