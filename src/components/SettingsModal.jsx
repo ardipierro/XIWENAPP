@@ -25,7 +25,7 @@ import {
   Type
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
-import { BaseButton, BaseBadge } from './common';
+import { BaseButton, BaseBadge, BaseTabs } from './common';
 import ViewCustomizer from './interactive-book/ViewCustomizer';
 import AIImageGenerator from './interactive-book/AIImageGenerator';
 import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
@@ -192,27 +192,15 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       icon={Settings}
     >
       <div className="flex flex-col h-[600px]">
-        {/* Tabs horizontales arriba */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-6 flex-shrink-0">
-          <div className="flex gap-1 flex-wrap">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-all
-                  border-b-2 -mb-px
-                  ${activeTab === tab.id
-                    ? 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-50/50 dark:bg-purple-900/20'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
-                  }
-                `}
-              >
-                <tab.icon size={18} className="flex-shrink-0" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
+        {/* Tabs - Using BaseTabs component */}
+        <div className="mb-6 flex-shrink-0">
+          <BaseTabs
+            tabs={tabs}
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            variant="underline"
+            size="md"
+          />
         </div>
 
         {/* Content */}

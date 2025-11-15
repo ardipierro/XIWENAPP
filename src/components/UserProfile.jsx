@@ -52,7 +52,7 @@ import CreditManager from './CreditManager';
 import StudentClassView from './StudentClassView';
 import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
-import { BaseAlert } from './common';
+import { BaseAlert, BaseTabs } from './common';
 import BaseButton from './common/BaseButton';
 import './UserProfile.css';
 
@@ -514,113 +514,31 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         </BaseAlert>
       )}
 
-      {/* Tabs - Mobile First: Scroll horizontal */}
-      <div className="border-b border-zinc-200 dark:border-zinc-700">
-        <div className="flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide px-4 md:px-0">
-          <button
-            onClick={() => setActiveTab('info')}
-            className={`
-              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
-              border-b-2 font-medium text-sm transition-colors
-              ${activeTab === 'info'
-                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
-                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
-              }
-            `}
-          >
-            <BarChart3 size={18} strokeWidth={2} />
-            <span>Información</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('courses')}
-            className={`
-              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
-              border-b-2 font-medium text-sm transition-colors
-              ${activeTab === 'courses'
-                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
-                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
-              }
-            `}
-          >
-            <BookOpen size={18} strokeWidth={2} />
-            <span>Cursos</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('credits')}
-            className={`
-              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
-              border-b-2 font-medium text-sm transition-colors
-              ${activeTab === 'credits'
-                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
-                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
-              }
-            `}
-          >
-            <CreditCard size={18} strokeWidth={2} />
-            <span>Créditos</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('contents')}
-            className={`
-              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
-              border-b-2 font-medium text-sm transition-colors
-              ${activeTab === 'contents'
-                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
-                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
-              }
-            `}
-          >
-            <FileText size={18} strokeWidth={2} />
-            <span>Contenidos</span>
-          </button>
-          {(['teacher', 'trial_teacher', 'admin'].includes(selectedUser?.role)) && (
-            <button
-              onClick={() => setActiveTab('students')}
-              className={`
-                flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
-                border-b-2 font-medium text-sm transition-colors
-                ${activeTab === 'students'
-                  ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
-                  : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
-                }
-              `}
-            >
-              <GraduationCap size={18} strokeWidth={2} />
-              <span>Alumnos</span>
-            </button>
-          )}
-          <button
-            onClick={() => setActiveTab('classes')}
-            className={`
-              flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
-              border-b-2 font-medium text-sm transition-colors
-              ${activeTab === 'classes'
-                ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
-                : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
-              }
-            `}
-          >
-            <Calendar size={18} strokeWidth={2} />
-            <span>Clases</span>
-          </button>
-          {(['student', 'listener', 'trial'].includes(selectedUser?.role)) && (
-            <button
-              onClick={() => setActiveTab('guardians')}
-              className={`
-                flex items-center gap-2 whitespace-nowrap px-4 py-3 min-h-tap-md
-                border-b-2 font-medium text-sm transition-colors
-                ${activeTab === 'guardians'
-                  ? 'border-zinc-900 dark:border-white text-zinc-900 dark:text-white'
-                  : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700'
-                }
-              `}
-            >
-              <UsersRound size={18} strokeWidth={2} />
-              <span>Tutores</span>
-            </button>
-          )}
-        </div>
-      </div>
+      {/* Tabs - Using BaseTabs component */}
+      <BaseTabs
+        tabs={[
+          { id: 'info', label: 'Información', icon: BarChart3 },
+          { id: 'courses', label: 'Cursos', icon: BookOpen },
+          { id: 'credits', label: 'Créditos', icon: CreditCard },
+          { id: 'contents', label: 'Contenidos', icon: FileText },
+          // Conditional tab for teachers
+          ...(['teacher', 'trial_teacher', 'admin'].includes(selectedUser?.role)
+            ? [{ id: 'students', label: 'Alumnos', icon: GraduationCap }]
+            : []
+          ),
+          { id: 'classes', label: 'Clases', icon: Calendar },
+          // Conditional tab for students
+          ...(['student', 'listener', 'trial'].includes(selectedUser?.role)
+            ? [{ id: 'guardians', label: 'Tutores', icon: UsersRound }]
+            : []
+          ),
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        variant="underline"
+        size="md"
+        className="px-4 md:px-0"
+      />
 
       {/* Tab Content */}
       <div className="modal-body flex-1 overflow-y-auto">
