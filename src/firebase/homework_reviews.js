@@ -223,7 +223,7 @@ export async function getReviewsByStudent(studentId, includeUnreviewed = false) 
  */
 export async function getPendingReviews(teacherId = null) {
   try {
-    console.log(`[getPendingReviews] Fetching reviews (teacherId: ${teacherId || 'ALL'})`);
+    logger.debug(`[getPendingReviews] Fetching reviews (teacherId: ${teacherId || 'ALL'})`);
     const reviewsRef = collection(db, 'homework_reviews');
     let q;
 
@@ -236,13 +236,13 @@ export async function getPendingReviews(teacherId = null) {
       orderBy('createdAt', 'desc')
     );
 
-    console.log('[getPendingReviews] Executing query...');
+    logger.debug('[getPendingReviews] Executing query...');
     const snapshot = await getDocs(q);
-    console.log(`[getPendingReviews] Query returned ${snapshot.docs.length} documents`);
+    logger.debug(`[getPendingReviews] Query returned ${snapshot.docs.length} documents`);
 
     const reviews = snapshot.docs.map(doc => {
       const data = doc.data();
-      console.log(`[getPendingReviews] Review ${doc.id}:`, {
+      logger.debug(`[getPendingReviews] Review ${doc.id}:`, {
         status: data.status,
         teacherReviewed: data.teacherReviewed,
         studentId: data.studentId,
@@ -254,10 +254,10 @@ export async function getPendingReviews(teacherId = null) {
       };
     });
 
-    console.log(`[getPendingReviews] ✅ Returning ${reviews.length} reviews`);
+    logger.debug(`[getPendingReviews] ✅ Returning ${reviews.length} reviews`);
     return reviews;
   } catch (error) {
-    console.error('[getPendingReviews] ❌ Error:', error);
+    logger.error('[getPendingReviews] ❌ Error:', error);
     logger.error('Error getting pending reviews', 'HomeworkReviews', error);
     return [];
   }

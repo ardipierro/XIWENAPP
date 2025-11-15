@@ -81,7 +81,7 @@ function InteractiveBookViewer() {
           setShowMetadataBadges(settings.showMetadataBadges);
         }
       } catch (err) {
-        console.error('Error loading display settings:', err);
+        logger.error('Error loading display settings:', err);
       }
     }
 
@@ -95,7 +95,7 @@ function InteractiveBookViewer() {
             setShowMetadataBadges(settings.showMetadataBadges);
           }
         } catch (err) {
-          console.error('Error loading display settings:', err);
+          logger.error('Error loading display settings:', err);
         }
       }
     };

@@ -512,7 +512,7 @@ export const getCharacterVoiceConfig = (characterId) => {
     const configs = JSON.parse(saved);
     return configs[characterId]?.voiceConfig || DEFAULT_CHARACTER_CONFIG;
   } catch (err) {
-    console.error('Error getting character voice config:', err);
+    logger.error('Error getting character voice config:', err);
     return DEFAULT_CHARACTER_CONFIG;
   }
 };

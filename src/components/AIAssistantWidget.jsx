@@ -263,7 +263,7 @@ function AIAssistantWidget() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-gutter-stable">
             {messages.length === 0 ? (
               <div className="text-center text-zinc-500 dark:text-zinc-400 mt-8">
                 <Sparkles size={48} className="mx-auto mb-4 opacity-50 text-primary-600 dark:text-primary-400" />

@@ -651,7 +651,7 @@ function LandingPageTab() {
                   No hay ejercicios disponibles
                 </p>
               ) : (
-                <div className="max-h-64 overflow-y-auto space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div className="max-h-64 overflow-y-auto space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 scrollbar-gutter-stable">
                   {exercises.map(exercise => (
                     <label
                       key={exercise.id}

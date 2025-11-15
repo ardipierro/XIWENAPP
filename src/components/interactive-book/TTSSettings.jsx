@@ -11,6 +11,8 @@ import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
 import { getAICredential } from '../../utils/credentialsHelper';
 import PropTypes from 'prop-types';
+import logger from '../../utils/logger';
+
 
 /**
  * Panel de configuración de TTS
@@ -62,7 +64,7 @@ function TTSSettings({ alwaysOpen = false }) {
         setHasElevenLabsKey(false);
       }
     } catch (err) {
-      console.error('Error loading ElevenLabs key:', err);
+      logger.error('Error loading ElevenLabs key:', err);
       setHasElevenLabsKey(false);
     }
   };
@@ -80,7 +82,7 @@ function TTSSettings({ alwaysOpen = false }) {
     try {
       await ttsService.speak(testText, { voice });
     } catch (err) {
-      console.error('Error testing voice:', err);
+      logger.error('Error testing voice:', err);
     }
   };
 
@@ -112,7 +114,7 @@ function TTSSettings({ alwaysOpen = false }) {
         };
       }
     } catch (err) {
-      console.error('Error testing ElevenLabs voice:', err);
+      logger.error('Error testing ElevenLabs voice:', err);
       alert('Error al probar la voz: ' + err.message);
     }
   };
@@ -215,7 +217,7 @@ function TTSSettings({ alwaysOpen = false }) {
                     No hay voces en español disponibles. Las voces dependen de tu sistema operativo.
                   </p>
                 ) : (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                  <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-gutter-stable">
                     {voices.map((voice, idx) => (
                       <div
                         key={idx}

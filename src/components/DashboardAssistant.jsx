@@ -292,7 +292,7 @@ Puedo responder preguntas específicas usando los datos reales de tu cuenta. ¿E
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-zinc-50/50 to-transparent dark:from-zinc-950/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-zinc-50/50 to-transparent dark:from-zinc-950/50 scrollbar-gutter-stable">
             {messages.length === 0 ? (
               <div className="text-center text-zinc-500 dark:text-zinc-400 mt-8">
                 <Sparkles size={48} className="mx-auto mb-4 opacity-50 text-primary-600 dark:text-primary-400 animate-pulse" />

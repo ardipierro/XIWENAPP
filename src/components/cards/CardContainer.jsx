@@ -9,6 +9,8 @@ import { BaseLoading, BaseEmptyState } from '../common';
 import CardGrid from './CardGrid';
 import CardList from './CardList';
 import CardTable from './CardTable';
+import logger from '../../utils/logger';
+
 
 /**
  * CardContainer - Contenedor inteligente con múltiples modos de vista
@@ -143,7 +145,7 @@ export function CardContainer({
    */
   if (viewMode === 'grid') {
     if (!renderCard) {
-      console.error('CardContainer: renderCard function is required for grid view');
+      logger.error('CardContainer: renderCard function is required for grid view');
       return null;
     }
 
@@ -166,7 +168,7 @@ export function CardContainer({
    */
   if (viewMode === 'list') {
     if (!renderCard) {
-      console.error('CardContainer: renderCard function is required for list view');
+      logger.error('CardContainer: renderCard function is required for list view');
       return null;
     }
 
@@ -184,7 +186,7 @@ export function CardContainer({
    */
   if (viewMode === 'table') {
     if (!renderTableRow) {
-      console.error('CardContainer: renderTableRow function is required for table view');
+      logger.error('CardContainer: renderTableRow function is required for table view');
       return null;
     }
 
@@ -204,7 +206,7 @@ export function CardContainer({
   }
 
   // Fallback
-  console.error(`CardContainer: Invalid viewMode "${viewMode}"`);
+  logger.error(`CardContainer: Invalid viewMode "${viewMode}"`);
   return null;
 }
 

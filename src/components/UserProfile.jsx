@@ -541,7 +541,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
       />
 
       {/* Tab Content */}
-      <div className="modal-body flex-1 overflow-y-auto">
+      <div className="modal-body flex-1 overflow-y-auto scrollbar-gutter-stable">
         {/* Tab: Información Básica */}
         {activeTab === 'info' && (
           <div>

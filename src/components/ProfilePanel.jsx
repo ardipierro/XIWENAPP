@@ -123,7 +123,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 scrollbar-gutter-stable">
           {/* Mensajes */}
           {error && (
             <div className="p-3 px-4 rounded-md mb-5 text-sm font-semibold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">

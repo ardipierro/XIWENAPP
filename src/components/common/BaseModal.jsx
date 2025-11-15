@@ -137,7 +137,7 @@ function BaseModal({
 
         {/* Body - scrollable */}
         <div
-          className="flex-1 px-6 py-6 overflow-y-auto"
+          className="flex-1 px-6 py-6 overflow-y-auto scrollbar-gutter-stable"
           style={{ color: 'var(--color-text-primary)' }}
         >
           {children}

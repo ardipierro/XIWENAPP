@@ -254,7 +254,7 @@ function ContentOrderEditor({ course, contents, isOpen, onClose, onSave }) {
               items={items.map(item => item.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+              <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar scrollbar-gutter-stable">
                 {items.map((item, index) => (
                   <SortableItem
                     key={item.id}

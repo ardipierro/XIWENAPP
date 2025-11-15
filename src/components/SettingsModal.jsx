@@ -31,6 +31,8 @@ import ViewCustomizer from './interactive-book/ViewCustomizer';
 import AIImageGenerator from './interactive-book/AIImageGenerator';
 import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
 import AudioCacheTab from './settings/AudioCacheTab';
+import logger from '../utils/logger';
+
 
 /**
  * Modal de configuración completo con tabs
@@ -54,7 +56,7 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       try {
         setDisplaySettings(JSON.parse(saved));
       } catch (err) {
-        console.error('Error loading display settings:', err);
+        logger.error('Error loading display settings:', err);
       }
     }
   }, []);
@@ -126,9 +128,9 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       window.dispatchEvent(new Event('xiwen_settings_changed'));
 
       // Feedback de éxito
-      console.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
+      logger.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
     } catch (err) {
-      console.error('Error aplicando preset:', err);
+      logger.error('Error aplicando preset:', err);
       alert('❌ Error al aplicar el preset. Por favor intenta nuevamente.');
     }
   };
@@ -212,7 +214,7 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto pb-4">
+        <div className="flex-1 overflow-y-auto pb-4 scrollbar-gutter-stable">
           {/* ========================================= */}
           {/* TAB 1: APARIENCIA (Visual + Tipografía) */}
           {/* ========================================= */}

@@ -584,7 +584,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                 )}
                 {viewingContent.body && (
                   <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
-                    <pre className="text-sm whitespace-pre-wrap overflow-auto max-h-96">
+                    <pre className="text-sm whitespace-pre-wrap overflow-auto max-h-96 scrollbar-gutter-stable">
                       {typeof viewingContent.body === 'string'
                         ? viewingContent.body
                         : JSON.stringify(viewingContent.body, null, 2)}

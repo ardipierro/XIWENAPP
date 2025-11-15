@@ -15,6 +15,8 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './config';
+import logger from '../utils/logger';
+
 
 const NOTIFICATIONS_COLLECTION = 'notifications';
 
@@ -54,10 +56,10 @@ export async function createNotification(notificationData) {
       createdAt: Timestamp.now()
     });
 
-    console.log('✅ Notificación creada:', notificationRef.id);
+    logger.debug('✅ Notificación creada:', notificationRef.id);
     return notificationRef.id;
   } catch (error) {
-    console.error('❌ Error creando notificación:', error);
+    logger.error('❌ Error creando notificación:', error);
     throw error;
   }
 }
@@ -86,9 +88,9 @@ export async function createBatchNotifications(notificationsData) {
     });
 
     await batch.commit();
-    console.log(`✅ ${notificationsData.length} notificaciones creadas en batch`);
+    logger.debug(`✅ ${notificationsData.length} notificaciones creadas en batch`);
   } catch (error) {
-    console.error('❌ Error creando notificaciones en batch:', error);
+    logger.error('❌ Error creando notificaciones en batch:', error);
     throw error;
   }
 }
@@ -227,7 +229,7 @@ export async function getUserNotifications(userId, options = {}) {
       ...doc.data()
     }));
   } catch (error) {
-    console.error('❌ Error obteniendo notificaciones:', error);
+    logger.error('❌ Error obteniendo notificaciones:', error);
     throw error;
   }
 }
@@ -248,7 +250,7 @@ export async function getUnreadCount(userId) {
     const snapshot = await getDocs(q);
     return snapshot.size;
   } catch (error) {
-    console.error('❌ Error obteniendo conteo de no leídas:', error);
+    logger.error('❌ Error obteniendo conteo de no leídas:', error);
     throw error;
   }
 }
@@ -265,7 +267,7 @@ export async function markAsRead(notificationId) {
       readAt: Timestamp.now()
     });
   } catch (error) {
-    console.error('❌ Error marcando notificación como leída:', error);
+    logger.error('❌ Error marcando notificación como leída:', error);
     throw error;
   }
 }
@@ -299,9 +301,9 @@ export async function markAllAsRead(userId) {
     });
 
     await batch.commit();
-    console.log(`✅ ${snapshot.size} notificaciones marcadas como leídas`);
+    logger.debug(`✅ ${snapshot.size} notificaciones marcadas como leídas`);
   } catch (error) {
-    console.error('❌ Error marcando todas como leídas:', error);
+    logger.error('❌ Error marcando todas como leídas:', error);
     throw error;
   }
 }
@@ -313,9 +315,9 @@ export async function markAllAsRead(userId) {
 export async function deleteNotification(notificationId) {
   try {
     await deleteDoc(doc(db, NOTIFICATIONS_COLLECTION, notificationId));
-    console.log('✅ Notificación eliminada:', notificationId);
+    logger.debug('✅ Notificación eliminada:', notificationId);
   } catch (error) {
-    console.error('❌ Error eliminando notificación:', error);
+    logger.error('❌ Error eliminando notificación:', error);
     throw error;
   }
 }
@@ -345,9 +347,9 @@ export async function deleteReadNotifications(userId) {
     });
 
     await batch.commit();
-    console.log(`✅ ${snapshot.size} notificaciones leídas eliminadas`);
+    logger.debug(`✅ ${snapshot.size} notificaciones leídas eliminadas`);
   } catch (error) {
-    console.error('❌ Error eliminando notificaciones leídas:', error);
+    logger.error('❌ Error eliminando notificaciones leídas:', error);
     throw error;
   }
 }
@@ -383,7 +385,7 @@ export function subscribeUserNotifications(userId, callback, options = {}) {
     }));
     callback(notifications);
   }, (error) => {
-    console.error('❌ Error en listener de notificaciones:', error);
+    logger.error('❌ Error en listener de notificaciones:', error);
   });
 }
 
@@ -403,6 +405,6 @@ export function subscribeUnreadCount(userId, callback) {
   return onSnapshot(q, (snapshot) => {
     callback(snapshot.size);
   }, (error) => {
-    console.error('❌ Error en listener de conteo no leídas:', error);
+    logger.error('❌ Error en listener de conteo no leídas:', error);
   });
 }

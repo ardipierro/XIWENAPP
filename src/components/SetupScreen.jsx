@@ -164,7 +164,7 @@ function SetupScreen({
   }
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto p-4 md:p-8">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto p-4 md:p-8 scrollbar-gutter-stable">
       <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-8">
         <div className="flex items-center justify-between mb-8">
           {onBack && (

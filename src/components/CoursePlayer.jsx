@@ -472,7 +472,7 @@ function CoursePlayer({ courseId, userId, onBack }) {
           </div>
 
           {/* Lista de contenidos */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 scrollbar-gutter-stable">
             {contents.map((content, index) => {
               const isActive = index === currentIndex;
               const isCompleted = completedIds.has(content.id);

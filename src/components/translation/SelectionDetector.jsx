@@ -8,6 +8,8 @@ import { Languages } from 'lucide-react';
 import PropTypes from 'prop-types';
 import TranslationPopup from './TranslationPopup';
 import useTranslator from '../../hooks/useTranslator';
+import logger from '../../utils/logger';
+
 
 const SelectionDetector = ({ children, enabled = true, containerRef = null }) => {
   const [selectedText, setSelectedText] = useState('');
@@ -73,7 +75,7 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
       setShowButton(false);
       setShowPopup(true);
     } catch (err) {
-      console.error('Translation error:', err);
+      logger.error('Translation error:', err);
       setShowPopup(true); // Show popup with error
     }
   }, [selectedText, translate]);

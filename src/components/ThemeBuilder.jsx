@@ -528,7 +528,7 @@ function ThemeBuilder() {
 
       <div className="flex">
         {/* Panel de Control Lateral */}
-        <aside className={`w-80 ${mode === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r h-[calc(100vh-73px)] overflow-y-auto sticky top-[73px]`}>
+        <aside className={`w-80 ${mode === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r h-[calc(100vh-73px)] overflow-y-auto sticky top-[73px] scrollbar-gutter-stable`}>
           <div className="p-6 space-y-6">
             {/* Presets */}
             <section>

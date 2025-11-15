@@ -199,7 +199,7 @@ export function DialogueRolePlayExercise({
 
         {/* Chat de diálogo */}
         <div
-          className="space-y-3 p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto"
+          className="space-y-3 p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto scrollbar-gutter-stable"
           style={{
             borderColor: config.customColors?.borderColor,
             backgroundColor: config.customColors?.cardBackground

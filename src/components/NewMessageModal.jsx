@@ -197,7 +197,7 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
             />
 
             {/* Search Results */}
-            <div className="max-h-96 overflow-y-auto space-y-2">
+            <div className="max-h-96 overflow-y-auto space-y-2 scrollbar-gutter-stable">
               {searching ? (
                 <div className="flex items-center justify-center gap-2 py-8 text-gray-600 dark:text-gray-400">
                   <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300 rounded-full animate-spin"></div>

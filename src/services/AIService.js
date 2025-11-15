@@ -4,6 +4,8 @@
  */
 
 import { getAIConfig, callAI } from '../firebase/aiConfig';
+import logger from '../utils/logger';
+
 
 // AI Provider metadata
 const AI_PROVIDERS = [
@@ -106,7 +108,7 @@ class AIService {
         provider: this.currentProvider
       };
     } catch (error) {
-      console.error('AIService error:', error);
+      logger.error('AIService error:', error);
       return {
         success: false,
         error: error.message || 'Error al generar ejercicios'

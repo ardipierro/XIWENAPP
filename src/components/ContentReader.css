@@ -91,6 +91,7 @@
   max-width: 64px;
   max-height: 95vh;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   overflow-x: hidden;
   padding: 12px 8px;
   gap: 6px;

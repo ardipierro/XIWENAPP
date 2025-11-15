@@ -107,6 +107,7 @@
 .conversations-list {
   flex: 1;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .conversation-item {
@@ -343,6 +344,7 @@
 .messages-list {
   flex: 1;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -606,6 +608,7 @@
 .search-results {
   max-height: 300px;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   margin-bottom: 20px;
 }
 

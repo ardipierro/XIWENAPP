@@ -197,6 +197,7 @@
 .notification-list {
   flex: 1;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   max-height: 500px;
 }
 

@@ -13,6 +13,8 @@ import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
 import CreditBadge from './common/CreditBadge';
 import './UniversalTopBar.css';
+import logger from '../utils/logger';
+
 
 /**
  * TopBar universal con sistema de créditos y permisos
@@ -35,7 +37,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
     try {
       await logout();
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      logger.error('Error al cerrar sesión:', error);
     }
   };
 

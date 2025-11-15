@@ -521,7 +521,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
 
       <div className="flex">
         {/* Panel de Control Lateral */}
-        <aside className={`w-80 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r h-[calc(100vh-73px)] overflow-y-auto sticky top-[73px]`}>
+        <aside className={`w-80 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r h-[calc(100vh-73px)] overflow-y-auto sticky top-[73px] scrollbar-gutter-stable`}>
           <div className="p-6 space-y-6">
             {/* Selector de Tema */}
             <section>
@@ -635,7 +635,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
         </aside>
 
         {/* Showcase de Componentes */}
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-8 overflow-y-auto scrollbar-gutter-stable">
           <ComponentShowcase isDark={isDarkTheme} />
         </main>
       </div>

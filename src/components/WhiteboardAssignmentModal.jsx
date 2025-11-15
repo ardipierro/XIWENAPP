@@ -219,7 +219,7 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
 
             {/* Students Tab */}
             {activeTab === 'students' && (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <div className="space-y-2 max-h-96 overflow-y-auto scrollbar-gutter-stable">
                 {students.length === 0 ? (
                   <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                     No hay estudiantes disponibles

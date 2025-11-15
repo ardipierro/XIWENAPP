@@ -319,7 +319,7 @@ export function ExerciseLibrary({onTemplateSelected = () => {}, onTemplateCloned
           onClick={() => setPreviewTemplate(null)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6"
+            className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 scrollbar-gutter-stable"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-4">

@@ -122,7 +122,7 @@ function HistoryModal({ isOpen, onClose, gameHistory, setGameHistory, parseQuest
 
         {/* Games View */}
         {historyView === 'games' && (
-          <div className="space-y-4 max-h-[600px] overflow-y-auto">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto scrollbar-gutter-stable">
             {gameHistory.length === 0 ? (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 No hay partidas en el historial

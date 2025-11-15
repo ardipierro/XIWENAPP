@@ -8,6 +8,8 @@
 // DEFINICIÓN DE PERMISOS
 // ============================================
 
+import logger from '../utils/logger';
+
 export const PERMISSIONS = {
   // ==================== CREDIT MANAGEMENT ====================
   'view-own-credits': ['admin', 'teacher', 'trial_teacher', 'guest_teacher', 'student', 'trial', 'listener', 'guardian'],
@@ -142,7 +144,7 @@ export function hasPermission(role, permission) {
 
   const allowedRoles = PERMISSIONS[permission];
   if (!allowedRoles) {
-    console.warn(`Permission "${permission}" no está definido`);
+    logger.warn(`Permission "${permission}" no está definido`);
     return false;
   }
 

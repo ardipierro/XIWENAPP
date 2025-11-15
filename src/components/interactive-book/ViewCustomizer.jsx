@@ -25,6 +25,8 @@ import {
 import { BaseButton, BaseBadge } from '../common';
 import { UniversalCard } from '../cards';
 import PropTypes from 'prop-types';
+import logger from '../../utils/logger';
+
 
 const DEFAULT_SETTINGS = {
   // Tipografía
@@ -366,7 +368,7 @@ function ViewCustomizer({ onSettingsChange, alwaysOpen = false, autoSave = true 
         setSettings(merged);
         applySettingsToDOM(merged);
       } catch (err) {
-        console.error('Error loading settings:', err);
+        logger.error('Error loading settings:', err);
         applySettingsToDOM(DEFAULT_SETTINGS);
       }
     } else {

@@ -656,7 +656,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
                 </div>
 
                 {/* Lista de contenidos disponibles */}
-                <div className="space-y-2 max-h-64 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-3">
+                <div className="space-y-2 max-h-64 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-3 scrollbar-gutter-stable">
                   {allContents && allContents.length > 0 ? (
                     allContents
                       .filter(c => c.type !== CONTENT_TYPES.COURSE) // No permitir cursos dentro de cursos

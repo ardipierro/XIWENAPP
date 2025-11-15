@@ -9,6 +9,7 @@
   padding: 1.5rem;
   max-height: 80vh;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 /* Info Section */

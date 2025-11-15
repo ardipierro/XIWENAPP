@@ -6,6 +6,8 @@
 import React, { useEffect, useRef } from 'react';
 import { X, Copy, Check, Loader2, Languages } from 'lucide-react';
 import PropTypes from 'prop-types';
+import logger from '../../utils/logger';
+
 
 const TranslationPopup = ({
   translation,
@@ -52,7 +54,7 @@ const TranslationPopup = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Error copying to clipboard:', error);
+      logger.error('Error copying to clipboard:', error);
     }
   };
 
@@ -124,7 +126,7 @@ const TranslationPopup = ({
       </div>
 
       {/* Content */}
-      <div className="px-4 py-3 max-h-96 overflow-y-auto">
+      <div className="px-4 py-3 max-h-96 overflow-y-auto scrollbar-gutter-stable">
         {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-8 gap-3">

@@ -2841,7 +2841,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto scrollbar-gutter-stable">
         <div
           ref={containerRef}
           className="relative w-full p-8"

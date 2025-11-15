@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
+import logger from '../utils/logger';
+
   subscribeUserNotifications,
   subscribeUnreadCount,
   markAsRead,
@@ -56,7 +58,7 @@ export function useClassNotifications(userId, options = {}) {
     try {
       await markAsRead(notificationId);
     } catch (error) {
-      console.error('Error marcando notificación como leída:', error);
+      logger.error('Error marcando notificación como leída:', error);
     }
   };
 
@@ -64,7 +66,7 @@ export function useClassNotifications(userId, options = {}) {
     try {
       await markAllAsRead(userId);
     } catch (error) {
-      console.error('Error marcando todas como leídas:', error);
+      logger.error('Error marcando todas como leídas:', error);
     }
   };
 

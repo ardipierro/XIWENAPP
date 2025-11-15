@@ -304,6 +304,7 @@
 .schedule-modal .modal-body {
   flex: 1;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   overflow-x: hidden;
   min-height: 0; /* Crítico para que flexbox + overflow funcione */
   padding: 24px;

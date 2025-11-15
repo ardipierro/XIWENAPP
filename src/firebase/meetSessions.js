@@ -13,6 +13,8 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from './config';
+import logger from '../utils/logger';
+
 
 const MEET_SESSIONS_COLLECTION = 'meet_sessions';
 
@@ -53,10 +55,10 @@ export async function createMeetSession(sessionData) {
       updatedAt: Timestamp.now()
     });
 
-    console.log('✅ Meet session creada:', meetSessionRef.id);
+    logger.debug('✅ Meet session creada:', meetSessionRef.id);
     return meetSessionRef.id;
   } catch (error) {
-    console.error('❌ Error creando meet session:', error);
+    logger.error('❌ Error creando meet session:', error);
     throw error;
   }
 }
@@ -79,7 +81,7 @@ export async function getMeetSession(meetSessionId) {
 
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo meet session:', error);
+    logger.error('❌ Error obteniendo meet session:', error);
     throw error;
   }
 }
@@ -109,7 +111,7 @@ export async function getMeetSessionByClassId(classSessionId) {
 
     return null;
   } catch (error) {
-    console.error('❌ Error obteniendo meet session por classId:', error);
+    logger.error('❌ Error obteniendo meet session por classId:', error);
     throw error;
   }
 }
@@ -133,7 +135,7 @@ export async function getActiveMeetSessions() {
       ...doc.data()
     }));
   } catch (error) {
-    console.error('❌ Error obteniendo meet sessions activas:', error);
+    logger.error('❌ Error obteniendo meet sessions activas:', error);
     throw error;
   }
 }
@@ -164,7 +166,7 @@ export async function getMeetSessionsByTeacher(teacherId, activeOnly = true) {
       ...doc.data()
     }));
   } catch (error) {
-    console.error('❌ Error obteniendo meet sessions del profesor:', error);
+    logger.error('❌ Error obteniendo meet sessions del profesor:', error);
     throw error;
   }
 }
@@ -182,7 +184,7 @@ export async function updateParticipantCount(meetSessionId, count) {
       updatedAt: Timestamp.now()
     });
   } catch (error) {
-    console.error('❌ Error actualizando contador de participantes:', error);
+    logger.error('❌ Error actualizando contador de participantes:', error);
     throw error;
   }
 }
@@ -200,9 +202,9 @@ export async function endMeetSession(meetSessionId) {
       updatedAt: Timestamp.now()
     });
 
-    console.log('✅ Meet session finalizada:', meetSessionId);
+    logger.debug('✅ Meet session finalizada:', meetSessionId);
   } catch (error) {
-    console.error('❌ Error finalizando meet session:', error);
+    logger.error('❌ Error finalizando meet session:', error);
     throw error;
   }
 }
@@ -219,7 +221,7 @@ export async function endMeetSessionByClassId(classSessionId) {
       await endMeetSession(meetSession.id);
     }
   } catch (error) {
-    console.error('❌ Error finalizando meet session por classId:', error);
+    logger.error('❌ Error finalizando meet session por classId:', error);
     throw error;
   }
 }
@@ -234,12 +236,12 @@ export async function deleteMeetSession(meetSessionId) {
 
     if (meetSession && meetSession.status === 'ended') {
       await deleteDoc(doc(db, MEET_SESSIONS_COLLECTION, meetSessionId));
-      console.log('✅ Meet session eliminada:', meetSessionId);
+      logger.debug('✅ Meet session eliminada:', meetSessionId);
     } else {
       throw new Error('Solo se pueden eliminar meet sessions finalizadas');
     }
   } catch (error) {
-    console.error('❌ Error eliminando meet session:', error);
+    logger.error('❌ Error eliminando meet session:', error);
     throw error;
   }
 }
@@ -263,7 +265,7 @@ export function subscribeMeetSession(meetSessionId, callback) {
       callback(null);
     }
   }, (error) => {
-    console.error('❌ Error en listener de meet session:', error);
+    logger.error('❌ Error en listener de meet session:', error);
   });
 }
 
@@ -286,7 +288,7 @@ export function subscribeActiveMeetSessions(callback) {
     }));
     callback(sessions);
   }, (error) => {
-    console.error('❌ Error en listener de meet sessions activas:', error);
+    logger.error('❌ Error en listener de meet sessions activas:', error);
   });
 }
 
@@ -311,6 +313,6 @@ export function subscribeTeacherMeetSessions(teacherId, callback) {
     }));
     callback(sessions);
   }, (error) => {
-    console.error('❌ Error en listener de meet sessions del profesor:', error);
+    logger.error('❌ Error en listener de meet sessions del profesor:', error);
   });
 }

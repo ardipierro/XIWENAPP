@@ -3,6 +3,8 @@
  * Manages localStorage caching for translations to avoid redundant API calls
  */
 
+import logger from './logger.js';
+
 const CACHE_KEY = 'xiwen_translation_cache';
 const CACHE_VERSION = '1.0';
 const MAX_CACHE_SIZE = 500; // Maximum number of cached translations
@@ -23,13 +25,13 @@ export function getCache() {
 
     // Check version
     if (cache.version !== CACHE_VERSION) {
-      console.log('[TranslationCache] Cache version mismatch, reinitializing');
+      logger.debug('[TranslationCache] Cache version mismatch, reinitializing');
       return initializeCache();
     }
 
     return cache;
   } catch (error) {
-    console.error('[TranslationCache] Error reading cache:', error);
+    logger.error('[TranslationCache] Error reading cache:', error);
     return initializeCache();
   }
 }
@@ -60,10 +62,10 @@ function saveCache(cache) {
     cache.metadata.lastAccessed = new Date().toISOString();
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch (error) {
-    console.error('[TranslationCache] Error saving cache:', error);
+    logger.error('[TranslationCache] Error saving cache:', error);
     // If quota exceeded, clear old entries
     if (error.name === 'QuotaExceededError') {
-      console.log('[TranslationCache] Quota exceeded, clearing old entries');
+      logger.debug('[TranslationCache] Quota exceeded, clearing old entries');
       clearOldEntries(cache);
     }
   }
@@ -103,15 +105,15 @@ export function getCachedTranslation(text, sourceLang = 'es', targetLang = 'zh')
     const daysDiff = (now - cached) / (1000 * 60 * 60 * 24);
 
     if (daysDiff > CACHE_EXPIRY_DAYS) {
-      console.log(`[TranslationCache] Entry expired for "${text}"`);
+      logger.debug(`[TranslationCache] Entry expired for "${text}"`);
       deleteCachedTranslation(text, sourceLang, targetLang);
       return null;
     }
 
-    console.log(`[TranslationCache] Cache hit for "${text}"`);
+    logger.debug(`[TranslationCache] Cache hit for "${text}"`);
     return entry.data;
   } catch (error) {
-    console.error('[TranslationCache] Error getting cached translation:', error);
+    logger.error('[TranslationCache] Error getting cached translation:', error);
     return null;
   }
 }
@@ -131,7 +133,7 @@ export function setCachedTranslation(text, translationData, sourceLang = 'es', t
     // Check cache size and remove oldest entries if needed
     const currentSize = Object.keys(cache.translations).length;
     if (currentSize >= MAX_CACHE_SIZE) {
-      console.log('[TranslationCache] Cache size limit reached, removing oldest entries');
+      logger.debug('[TranslationCache] Cache size limit reached, removing oldest entries');
       removeOldestEntries(cache, Math.floor(MAX_CACHE_SIZE * 0.2)); // Remove 20%
     }
 
@@ -142,9 +144,9 @@ export function setCachedTranslation(text, translationData, sourceLang = 'es', t
     };
 
     saveCache(cache);
-    console.log(`[TranslationCache] Cached translation for "${text}"`);
+    logger.debug(`[TranslationCache] Cached translation for "${text}"`);
   } catch (error) {
-    console.error('[TranslationCache] Error saving translation:', error);
+    logger.error('[TranslationCache] Error saving translation:', error);
   }
 }
 
@@ -160,9 +162,9 @@ export function deleteCachedTranslation(text, sourceLang = 'es', targetLang = 'z
     const key = generateKey(text, sourceLang, targetLang);
     delete cache.translations[key];
     saveCache(cache);
-    console.log(`[TranslationCache] Deleted translation for "${text}"`);
+    logger.debug(`[TranslationCache] Deleted translation for "${text}"`);
   } catch (error) {
-    console.error('[TranslationCache] Error deleting translation:', error);
+    logger.error('[TranslationCache] Error deleting translation:', error);
   }
 }
 
@@ -172,9 +174,9 @@ export function deleteCachedTranslation(text, sourceLang = 'es', targetLang = 'z
 export function clearCache() {
   try {
     localStorage.removeItem(CACHE_KEY);
-    console.log('[TranslationCache] Cache cleared');
+    logger.debug('[TranslationCache] Cache cleared');
   } catch (error) {
-    console.error('[TranslationCache] Error clearing cache:', error);
+    logger.error('[TranslationCache] Error clearing cache:', error);
   }
 }
 
@@ -219,7 +221,7 @@ function clearOldEntries(cache) {
   });
 
   saveCache(cache);
-  console.log(`[TranslationCache] Cleared ${removedCount} expired entries`);
+  logger.debug(`[TranslationCache] Cleared ${removedCount} expired entries`);
 }
 
 /**
@@ -243,7 +245,7 @@ export function getCacheStats() {
       metadata: cache.metadata
     };
   } catch (error) {
-    console.error('[TranslationCache] Error getting stats:', error);
+    logger.error('[TranslationCache] Error getting stats:', error);
     return null;
   }
 }
@@ -268,8 +270,8 @@ export function importCache(cacheData) {
     }
 
     saveCache(cacheData);
-    console.log('[TranslationCache] Cache imported successfully');
+    logger.debug('[TranslationCache] Cache imported successfully');
   } catch (error) {
-    console.error('[TranslationCache] Error importing cache:', error);
+    logger.error('[TranslationCache] Error importing cache:', error);
   }
 }

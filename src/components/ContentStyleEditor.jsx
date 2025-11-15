@@ -376,7 +376,7 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
                 Vista Previa
               </h4>
               <div
-                className="p-6 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 overflow-auto max-h-96"
+                className="p-6 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 overflow-auto max-h-96 scrollbar-gutter-stable"
                 style={getPreviewStyles()}
               >
                 <h2

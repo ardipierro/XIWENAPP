@@ -7,6 +7,8 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import logger from '../utils/logger';
+
 
 /**
  * Hook para detectar clases próximas en tiempo real
@@ -81,9 +83,9 @@ export function useRealtimeClassStatus(userId, userRole = 'student', options = {
       setUpcomingSessions(sorted);
       setLoading(false);
 
-      console.log(`⏰ [useRealtimeClassStatus] Found ${sorted.length} upcoming sessions for ${userRole}`);
+      logger.debug(`⏰ [useRealtimeClassStatus] Found ${sorted.length} upcoming sessions for ${userRole}`);
     }, (error) => {
-      console.error('❌ [useRealtimeClassStatus] Error:', error);
+      logger.error('❌ [useRealtimeClassStatus] Error:', error);
       setLoading(false);
     });
 

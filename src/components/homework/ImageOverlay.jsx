@@ -16,6 +16,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import logger from '../../utils/logger';
+
 
 /**
  * Error type to color mapping
@@ -149,7 +151,7 @@ export default function ImageOverlay({
    */
   const getErrorHighlights = () => {
     if (!words || words.length === 0 || !errors || errors.length === 0) {
-      console.log('[ImageOverlay] No highlights:', {
+      logger.debug('[ImageOverlay] No highlights:', {
         hasWords: !!words?.length,
         hasErrors: !!errors?.length,
         wordsCount: words?.length || 0,
@@ -160,7 +162,7 @@ export default function ImageOverlay({
 
     // Wait for image dimensions to be available
     if (imageDimensions.width === 0 || imageNaturalDimensions.width === 0) {
-      console.log('[ImageOverlay] Waiting for image dimensions...');
+      logger.debug('[ImageOverlay] Waiting for image dimensions...');
       return { highlights: [], stats: null };
     }
 
@@ -176,7 +178,7 @@ export default function ImageOverlay({
     const scaleX = imageDimensions.width / imageNaturalDimensions.width;
     const scaleY = imageDimensions.height / imageNaturalDimensions.height;
 
-    console.log('[ImageOverlay] Starting matching:', {
+    logger.debug('[ImageOverlay] Starting matching:', {
       errors: errors.length,
       words: words.length,
       scaleX,
@@ -186,12 +188,12 @@ export default function ImageOverlay({
     });
 
     // Sample first 3 words and errors for debugging
-    console.log('[ImageOverlay] Sample words:', words.slice(0, 3).map(w => ({
+    logger.debug('[ImageOverlay] Sample words:', words.slice(0, 3).map(w => ({
       text: w.text,
       hasBounds: !!w.bounds,
       bounds: w.bounds
     })));
-    console.log('[ImageOverlay] Sample errors:', errors.slice(0, 3).map(e => {
+    logger.debug('[ImageOverlay] Sample errors:', errors.slice(0, 3).map(e => {
       const extracted = extractErrorInfo(e);
       return {
         original: e,
@@ -205,7 +207,7 @@ export default function ImageOverlay({
       const { errorText, errorType, suggestion } = extractErrorInfo(error);
 
       if (!errorText) {
-        console.log(`[ImageOverlay] Error ${errorIndex}: No text found`);
+        logger.debug(`[ImageOverlay] Error ${errorIndex}: No text found`);
         return;
       }
 
@@ -218,7 +220,7 @@ export default function ImageOverlay({
       // Normalize error text for matching
       const normalizedError = normalizeText(errorText);
       if (!normalizedError) {
-        console.log(`[ImageOverlay] Error ${errorIndex}: Empty after normalization`);
+        logger.debug(`[ImageOverlay] Error ${errorIndex}: Empty after normalization`);
         return;
       }
 
@@ -251,7 +253,7 @@ export default function ImageOverlay({
           });
           matched = true;
           matchingStats.matched++;
-          console.log(`[ImageOverlay] ✓ Matched single word:`, {
+          logger.debug(`[ImageOverlay] ✓ Matched single word:`, {
             error: errorText,
             word: word.text,
             type: errorType
@@ -300,7 +302,7 @@ export default function ImageOverlay({
             });
             matched = true;
             matchingStats.matched++;
-            console.log(`[ImageOverlay] ✓ Matched phrase:`, {
+            logger.debug(`[ImageOverlay] ✓ Matched phrase:`, {
               error: errorText,
               words: errorWords.length,
               type: errorType
@@ -315,10 +317,10 @@ export default function ImageOverlay({
       }
     });
 
-    console.log('[ImageOverlay] Matching complete:', matchingStats);
+    logger.debug('[ImageOverlay] Matching complete:', matchingStats);
 
     if (matchingStats.unmatched.length > 0) {
-      console.log('[ImageOverlay] Unmatched errors (first 5):',
+      logger.debug('[ImageOverlay] Unmatched errors (first 5):',
         matchingStats.unmatched.slice(0, 5)
       );
     }

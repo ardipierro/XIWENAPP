@@ -183,7 +183,7 @@ function ExpandableModal({
 
         {/* Body - scrollable */}
         <div
-          className="flex-1 px-4 md:px-6 py-4 md:py-6 overflow-y-auto custom-scrollbar"
+          className="flex-1 px-4 md:px-6 py-4 md:py-6 overflow-y-auto custom-scrollbar scrollbar-gutter-stable"
           style={{ color: 'var(--color-text-primary)' }}
         >
           {children}

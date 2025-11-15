@@ -8,6 +8,8 @@
  * @param {Object[]} results - Array de resultados
  * @param {string} filename - Nombre del archivo
  */
+import logger from './logger.js';
+
 export function exportToJSON(results, filename = 'resultados') {
   const dataStr = JSON.stringify(results, null, 2);
   const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -21,7 +23,7 @@ export function exportToJSON(results, filename = 'resultados') {
  */
 export function exportToCSV(results, filename = 'resultados') {
   if (!results || results.length === 0) {
-    console.warn('No hay resultados para exportar');
+    logger.warn('No hay resultados para exportar');
     return;
   }
 

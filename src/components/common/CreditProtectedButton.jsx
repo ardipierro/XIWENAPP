@@ -10,6 +10,8 @@ import { useCredits } from '../../hooks/useCredits';
 import { getCost } from '../../config/creditCosts';
 import BaseButton from './BaseButton';
 import './CreditProtectedButton.css';
+import logger from '../../utils/logger';
+
 
 /**
  * Botón protegido por créditos
@@ -50,11 +52,11 @@ export function CreditProtectedButton({
         await onClick(result);
       } else {
         // Mostrar error
-        console.error('Error usando feature:', result.error);
+        logger.error('Error usando feature:', result.error);
         // Podrías agregar un toast aquí
       }
     } catch (error) {
-      console.error('Error en CreditProtectedButton:', error);
+      logger.error('Error en CreditProtectedButton:', error);
     } finally {
       setProcessing(false);
     }
