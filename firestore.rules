@@ -523,6 +523,34 @@ service cloud.firestore {
         (request.resource.data.userId == request.auth.uid || isAdmin());
     }
 
+    // ============================================
+    // CLASS DAILY LOGS
+    // ============================================
+
+    // Class daily logs - Daily feed/timeline of class content
+    match /class_daily_logs/{logId} {
+      // Teachers can create logs with their own teacherId, admins can create for anyone
+      allow create: if isAuthenticated() &&
+        (isAdmin() ||
+         (isTeacher() && request.resource.data.teacherId == request.auth.uid));
+
+      // Teachers can read their own logs, students can read logs they're assigned to, admins can read all
+      allow read: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid ||
+         resource.data.assignedStudents.hasAny([request.auth.uid]));
+
+      // Teachers can update their own logs, admins can update all
+      allow update: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
+
+      // Teachers can delete their own logs, admins can delete all
+      allow delete: if isAuthenticated() &&
+        (isAdmin() ||
+         resource.data.teacherId == request.auth.uid);
+    }
+
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;
