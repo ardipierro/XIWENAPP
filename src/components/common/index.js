@@ -28,6 +28,7 @@ export { default as BaseAlert } from './BaseAlert';
 
 // Navigation & Menus
 export { default as BaseDropdown } from './BaseDropdown';
+export { default as BaseTabs } from './BaseTabs';
 
 // Empty States
 export { default as BaseEmptyState } from './BaseEmptyState';

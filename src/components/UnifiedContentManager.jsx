@@ -848,11 +848,19 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   }
 
   // Grid View
+  // Determinar si usar variant="content" (con imagen) o "default" (con ícono)
+  const gridVariant = hasImage ? 'content' : 'default';
+  const gridImage = hasImage ? content.videoData.thumbnailUrl : undefined;
+  const gridIcon = !hasImage ? IconComponent : undefined;
+
   return (
-    <UniversalCard variant="default" size="md"
+    <UniversalCard
+      variant={gridVariant}
+      size="md"
       id={`content-${content.id}`}
       className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
-      image={renderImageOrIcon()}
+      image={gridImage}
+      icon={gridIcon}
     >
       <div className="flex flex-col h-full">
         {/* Badges Section */}

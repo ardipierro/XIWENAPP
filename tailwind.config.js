@@ -137,7 +137,24 @@ export default {
         'base': '200ms',
         'slow': '300ms',
       },
-      
+
+      // Z-Index Scale - Escala centralizada para evitar conflictos
+      zIndex: {
+        '0': '0',
+        '10': '10',           // Dropdowns, tooltips básicos
+        '20': '20',           // Sticky headers
+        '30': '30',           // Fixed elements
+        '40': '40',           // Floating action buttons, widgets
+        '50': '50',           // Modal overlays
+        '51': '51',           // Modal content
+        '60': '60',           // Notifications, toasts
+        '70': '70',           // Tooltips avanzados
+        '80': '80',           // Context menus
+        '90': '90',           // Critical overlays
+        '999': '999',         // Maximum (uso excepcional)
+        'auto': 'auto',
+      },
+
       // Animaciones personalizadas
       keyframes: {
         fadeIn: {

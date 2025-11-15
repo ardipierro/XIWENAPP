@@ -58,29 +58,18 @@ function BaseModal({
     // Overlay con backdrop blur
     <div
       className={`
-        fixed flex items-center justify-center p-4
+        fixed inset-0 z-50
+        flex items-center justify-center p-4
         bg-black/50 dark:bg-black/70 backdrop-blur-sm
         animate-in fade-in duration-200
         ${isDanger ? 'bg-red-500/10' : ''}
       `}
-      style={{
-        zIndex: 99999,
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100vw',
-        height: '100vh',
-        margin: 0,
-        padding: '1rem'
-      }}
       onClick={handleOverlayClick}
     >
       {/* Modal box */}
       <div
         className={`
-          relative w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
+          relative z-51 w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
           bg-white dark:bg-primary-900
           rounded-xl
           flex flex-col
@@ -89,7 +78,6 @@ function BaseModal({
           ${className}
         `}
         style={{
-          zIndex: 100000,
           border: '1px solid var(--color-border)'
         }}
         onClick={(e) => e.stopPropagation()}

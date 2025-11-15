@@ -78,18 +78,18 @@ function ExpandableModal({
     // Overlay con backdrop blur
     <div
       className={`
-        fixed inset-0 flex items-center justify-center
+        fixed inset-0 z-50
+        flex items-center justify-center
         ${isFullscreen ? 'p-0' : 'p-4'}
         bg-black/50 dark:bg-black/70 backdrop-blur-sm
         animate-in fade-in duration-200
       `}
-      style={{ zIndex: 'var(--z-modal-backdrop)' }}
       onClick={handleOverlayClick}
     >
       {/* Modal box */}
       <div
         className={`
-          relative w-full ${modalSizeClass}
+          relative z-51 w-full ${modalSizeClass}
           bg-white dark:bg-primary-900
           ${isFullscreen ? '' : 'rounded-xl'}
           flex flex-col
@@ -98,7 +98,6 @@ function ExpandableModal({
           ${className}
         `}
         style={{
-          zIndex: 'var(--z-modal)',
           border: '1px solid var(--color-border)'
         }}
         onClick={(e) => e.stopPropagation()}
