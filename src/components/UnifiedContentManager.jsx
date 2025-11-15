@@ -50,12 +50,12 @@ import {
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
-  BaseModal
+  BaseModal,
+  ExpandableModal
 } from './common';
 import { UniversalCard } from './cards';
 import CreateContentModal from './CreateContentModal';
 import ContentAnalytics from './ContentAnalytics';
-import ContentViewer from './ContentViewer';
 
 // ============================================
 // CONSTANTS
@@ -494,15 +494,158 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         )}
       </BaseModal>
 
-      {/* View Content Modal - Uses ContentViewer for intelligent rendering */}
-      <ContentViewer
-        content={viewingContent}
+      {/* View Content Modal - Simple working viewer with fullscreen */}
+      <ExpandableModal
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
           setViewingContent(null);
         }}
-      />
+        title={viewingContent?.title || 'Contenido'}
+        icon={viewingContent ? CONTENT_TYPE_CONFIG[viewingContent.type]?.icon : BookOpen}
+      >
+        {viewingContent && (
+          <div className="space-y-4">
+            {/* Video */}
+            {viewingContent.type === CONTENT_TYPES.VIDEO && viewingContent.url && (
+              <div className="space-y-4">
+                <div className="aspect-video w-full rounded-lg overflow-hidden bg-zinc-900">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={viewingContent.url}
+                    title={viewingContent.title}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
+                {viewingContent.videoData && (
+                  <div className="text-sm space-y-2 text-gray-600 dark:text-gray-400">
+                    {viewingContent.videoData.duration && (
+                      <p><strong>Duración:</strong> {Math.floor(viewingContent.videoData.duration / 60)}:{(viewingContent.videoData.duration % 60).toString().padStart(2, '0')}</p>
+                    )}
+                    {viewingContent.videoData.provider && (
+                      <p><strong>Proveedor:</strong> {viewingContent.videoData.provider}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Link */}
+            {viewingContent.type === CONTENT_TYPES.LINK && viewingContent.url && (
+              <div className="space-y-4">
+                <a
+                  href={viewingContent.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                >
+                  {viewingContent.url}
+                </a>
+                {viewingContent.description && (
+                  <p className="text-gray-600 dark:text-gray-400">{viewingContent.description}</p>
+                )}
+              </div>
+            )}
+
+            {/* Lesson/Reading */}
+            {(viewingContent.type === CONTENT_TYPES.LESSON || viewingContent.type === CONTENT_TYPES.READING) && viewingContent.body && (
+              <div
+                className="prose dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: viewingContent.body }}
+              />
+            )}
+
+            {/* Exercise */}
+            {viewingContent.type === CONTENT_TYPES.EXERCISE && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {viewingContent.metadata?.exerciseType && (
+                    <BaseBadge variant="warning">
+                      {viewingContent.metadata.exerciseType}
+                    </BaseBadge>
+                  )}
+                  {viewingContent.metadata?.difficulty && (
+                    <BaseBadge variant="info">
+                      {viewingContent.metadata.difficulty}
+                    </BaseBadge>
+                  )}
+                  {viewingContent.metadata?.points && (
+                    <BaseBadge variant="success">
+                      {viewingContent.metadata.points} pts
+                    </BaseBadge>
+                  )}
+                </div>
+                {viewingContent.description && (
+                  <p className="text-gray-600 dark:text-gray-400">{viewingContent.description}</p>
+                )}
+                {viewingContent.body && (
+                  <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <pre className="text-sm whitespace-pre-wrap overflow-auto max-h-96">
+                      {typeof viewingContent.body === 'string'
+                        ? viewingContent.body
+                        : JSON.stringify(viewingContent.body, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Unit/Interactive Book */}
+            {viewingContent.type === CONTENT_TYPES.UNIT && (
+              <div className="space-y-4">
+                {viewingContent.description && (
+                  <p className="text-gray-600 dark:text-gray-400">{viewingContent.description}</p>
+                )}
+                {viewingContent.body && (
+                  <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <pre className="text-sm whitespace-pre-wrap overflow-auto max-h-96">
+                      {typeof viewingContent.body === 'string'
+                        ? viewingContent.body
+                        : JSON.stringify(viewingContent.body, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Course */}
+            {viewingContent.type === CONTENT_TYPES.COURSE && (
+              <div className="space-y-4">
+                {viewingContent.description && (
+                  <p className="text-gray-600 dark:text-gray-400">{viewingContent.description}</p>
+                )}
+                {viewingContent.metadata?.tags?.length > 0 && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {viewingContent.metadata.tags.map((tag, idx) => (
+                      <BaseBadge key={idx} variant="info">{tag}</BaseBadge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Live Game */}
+            {viewingContent.type === CONTENT_TYPES.LIVE_GAME && (
+              <div className="space-y-4">
+                {viewingContent.description && (
+                  <p className="text-gray-600 dark:text-gray-400">{viewingContent.description}</p>
+                )}
+                {viewingContent.metadata?.gameConfig && (
+                  <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <pre className="text-sm whitespace-pre-wrap overflow-auto max-h-96">
+                      {JSON.stringify(viewingContent.metadata.gameConfig, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </ExpandableModal>
     </div>
   );
 }
