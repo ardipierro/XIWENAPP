@@ -2061,6 +2061,139 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   background: var(--color-text-muted);
 }
 
+/* ===== SIDEMENU (Legacy Dashboard) ===== */
+.sidemenu {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  bottom: 0;
+  width: 260px;
+  background: var(--color-bg-primary);
+  border-right: 1px solid var(--color-border);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease, top 0.3s ease;
+  z-index: 90;
+  overflow-y: auto;
+}
+
+.sidemenu.open {
+  transform: translateX(0);
+}
+
+.sidemenu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 85;
+  display: block;
+}
+
+.sidemenu-content {
+  padding: 0;
+}
+
+.sidemenu-nav {
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidemenu-section {
+  margin-bottom: 0;
+}
+
+.sidemenu-section-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidemenu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.sidemenu-item:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.sidemenu-item.active {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #2563eb 100%);
+  color: #ffffff;
+}
+
+.sidemenu-item.active:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.sidemenu-item-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidemenu-item-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidemenu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidemenu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidemenu::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.sidemenu::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Responsive para .sidemenu */
+@media (min-width: 1024px) {
+  .sidemenu {
+    transform: translateX(0);
+  }
+
+  .sidemenu-overlay {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidemenu {
+    top: 56px;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
 /* ===== UNIVERSAL DASHBOARD ===== */
 .universal-dashboard {
   min-height: 100vh;
@@ -3698,30 +3831,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   background-color: var(--color-bg-secondary);
 }
 
-/* Dark Mode */
-.dark .content-manager-tabs__nav {
-  background-color: var(--dark-bg-secondary);
-  border-bottom-color: var(--dark-border);
-}
-
-.dark .content-manager-tabs__tab {
-  color: var(--dark-text-secondary);
-}
-
-.dark .content-manager-tabs__tab:hover {
-  background-color: var(--dark-bg-hover);
-  color: var(--dark-text-primary);
-}
-
-.dark .content-manager-tabs__tab--active {
-  background-color: var(--dark-bg-primary);
-  color: var(--dark-primary);
-  border-bottom-color: var(--dark-primary);
-}
-
-.dark .content-manager-tabs__content {
-  background-color: var(--dark-bg-secondary);
-}
+/* Dark Mode - Las variables CSS ya se actualizan automáticamente con .dark */
+/* No se necesitan overrides adicionales porque var(--color-*) cambia automáticamente */
 
 /* Responsive */
 @media (max-width: 768px) {

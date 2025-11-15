@@ -48,7 +48,7 @@ function SettingsPanel() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium whitespace-nowrap transition-all border-b-2 rounded-t-lg ${
                   isActive
-                    ? 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-50/50 dark:bg-purple-900/20'
+                    ? 'border-indigo-500 text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-zinc-800'
                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
@@ -120,8 +120,8 @@ function SettingsPanel() {
                         onClick={() => setSelectedFont(font.family)}
                         className={`p-3 border-2 rounded-lg transition-all text-left ${
                           selectedFont === font.family
-                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-md'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                            ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900 shadow-md'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
@@ -156,8 +156,8 @@ function SettingsPanel() {
                       onClick={() => setFontWeight('normal')}
                       className={`flex-1 p-3 border-2 rounded-lg transition-all font-medium ${
                         fontWeight === 'normal'
-                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                          ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900'
+                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
                       }`}
                     >
                       Normal
@@ -166,8 +166,8 @@ function SettingsPanel() {
                       onClick={() => setFontWeight('bold')}
                       className={`flex-1 p-3 border-2 rounded-lg transition-all font-bold ${
                         fontWeight === 'bold'
-                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                          ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900'
+                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
                       }`}
                     >
                       Negrita
@@ -178,7 +178,7 @@ function SettingsPanel() {
                 {/* Slider de tamaño */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Tamaño: <span className="text-purple-600 dark:text-purple-400 font-bold">{fontSize.toFixed(2)}rem</span>
+                    Tamaño: <span className="text-indigo-600 dark:text-indigo-400 font-bold">{fontSize.toFixed(2)}rem</span>
                   </label>
                   <div className="space-y-2">
                     <input
@@ -199,7 +199,7 @@ function SettingsPanel() {
               </div>
 
               {/* Vista previa grande */}
-              <div className="mt-8 p-8 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-700">
+              <div className="mt-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800 rounded-xl border-2 border-gray-200 dark:border-gray-700">
                 <div className="text-center">
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                     Vista Previa (así se verá en la barra superior):
