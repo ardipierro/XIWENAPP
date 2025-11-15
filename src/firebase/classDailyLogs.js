@@ -81,7 +81,7 @@ class ClassDailyLogRepository extends BaseRepository {
         contentType: entry.contentType,
         contentTitle: entry.contentTitle,
         contentData: entry.contentData || null, // Datos completos del contenido
-        addedAt: serverTimestamp(),
+        addedAt: Date.now(), // Usar Date.now() en lugar de serverTimestamp() (no permitido en arrays)
         order: log.entries.length,
         annotations: []
       };
