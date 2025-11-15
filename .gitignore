@@ -10,4 +10,4 @@ build/
 
 # Lighthouse reports
 lighthouse-*-report.html
-.lighthouseci/
+.lighthouseci/*.backup
