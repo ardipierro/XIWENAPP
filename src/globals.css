@@ -2064,7 +2064,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 /* ===== UNIVERSAL DASHBOARD ===== */
 .universal-dashboard {
   min-height: 100vh;
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-primary);
 }
 
 .universal-dashboard__loading,
@@ -3695,7 +3695,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .content-manager-tabs__content {
   flex: 1;
   overflow-y: auto;
-  background-color: var(--color-bg-primary);
+  background-color: var(--color-bg-secondary);
 }
 
 /* Dark Mode */
@@ -3720,7 +3720,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .dark .content-manager-tabs__content {
-  background-color: var(--dark-bg-primary);
+  background-color: var(--dark-bg-secondary);
 }
 
 /* Responsive */
