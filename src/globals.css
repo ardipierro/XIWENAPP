@@ -2607,10 +2607,14 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .messages-list {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* IMPORTANTE: Contener el scroll dentro de este elemento */
+  position: relative;
+  min-height: 0; /* Permite que flex: 1 funcione correctamente con overflow */
 }
 
 .messages-empty {
