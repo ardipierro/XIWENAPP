@@ -112,7 +112,7 @@ export function UniversalCard({
 
   // Generate classes and styles
   const classes = generateCardClasses(variant, size, layout);
-  const styles = generateCardStyles(variant, size);
+  const styles = generateCardStyles(variant, size, layout);
 
   /**
    * Handle mouse enter
@@ -199,9 +199,13 @@ export function UniversalCard({
           <div
             className="relative z-10 rounded-full flex items-center justify-center text-white font-extrabold shadow-lg"
             style={{
-              width: variantConfig.avatarSize,
-              height: variantConfig.avatarSize,
-              fontSize: variantConfig.avatarFontSize,
+              width: layout === 'horizontal' && layoutConfig.avatarSize
+                ? layoutConfig.avatarSize
+                : variantConfig.avatarSize,
+              height: layout === 'horizontal' && layoutConfig.avatarSize
+                ? layoutConfig.avatarSize
+                : variantConfig.avatarSize,
+              fontSize: layout === 'horizontal' ? '18px' : variantConfig.avatarFontSize,
               backgroundColor: avatarColor || '#3b82f6',
             }}
           >
@@ -254,9 +258,9 @@ export function UniversalCard({
     if (!badges || badges.length === 0 || !variantConfig.showBadges) return null;
 
     return (
-      <div className="flex flex-wrap gap-2 mt-3">
+      <div className={`flex flex-wrap gap-2 ${layout === 'horizontal' ? 'mt-0' : 'mt-3'}`}>
         {badges.map((badgeProps, index) => (
-          <BaseBadge key={index} {...badgeProps} />
+          <BaseBadge key={index} size={layout === 'horizontal' ? 'sm' : 'md'} {...badgeProps} />
         ))}
       </div>
     );
@@ -268,14 +272,15 @@ export function UniversalCard({
   const renderStats = () => {
     if (!stats || stats.length === 0 || !variantConfig.showStats) return null;
 
-    const isHorizontal = variantConfig.statsLayout === 'horizontal';
+    const isHorizontal = variantConfig.statsLayout === 'horizontal' || layout === 'horizontal';
+    const isCompact = layout === 'horizontal';
 
     return (
       <div
         className={`flex ${
           isHorizontal ? 'flex-row' : 'flex-col'
-        } gap-4 mt-4 pt-4 border-t`}
-        style={{ borderColor: 'var(--color-border)' }}
+        } gap-4 ${isCompact ? 'mt-0' : 'mt-4 pt-4 border-t'}`}
+        style={!isCompact ? { borderColor: 'var(--color-border)' } : {}}
       >
         {stats.map((stat, index) => {
           const StatIcon = stat.icon;
@@ -286,14 +291,14 @@ export function UniversalCard({
             >
               {StatIcon && (
                 <StatIcon
-                  size={18}
+                  size={isCompact ? 16 : 18}
                   className="flex-shrink-0"
                   style={{ color: 'var(--color-text-secondary)' }}
                 />
               )}
               <div className="flex flex-col gap-0.5">
                 <span
-                  className="text-xl font-extrabold leading-none"
+                  className={`${isCompact ? 'text-lg' : 'text-xl'} font-extrabold leading-none`}
                   style={{ color: 'var(--color-text-primary)' }}
                 >
                   {stat.value}
@@ -421,50 +426,102 @@ export function UniversalCard({
 
       {/* Content */}
       <div className={classes.content} style={styles.content}>
-        {/* Text Content */}
-        <div className="card-text">
-          {title && (
-            <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
-              {title}
-            </h3>
-          )}
+        {layout === 'horizontal' ? (
+          <>
+            {/* Horizontal Layout */}
+            <div className="flex-1 flex flex-col justify-center min-w-0">
+              {title && (
+                <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
+                  {title}
+                </h3>
+              )}
+              {subtitle && (
+                <p
+                  className={`${classes.subtitle} truncate`}
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  {subtitle}
+                </p>
+              )}
+            </div>
 
-          {subtitle && (
-            <p
-              className={classes.subtitle}
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              {subtitle}
-            </p>
-          )}
+            {/* Badges */}
+            {badges && badges.length > 0 && (
+              <div className="flex-shrink-0">
+                {renderBadges()}
+              </div>
+            )}
 
-          {description && (
-            <p
-              className={`${classes.description} mt-2`}
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              {description}
-            </p>
-          )}
-        </div>
+            {/* Stats */}
+            {stats && stats.length > 0 && (
+              <div className="flex-shrink-0">
+                {renderStats()}
+              </div>
+            )}
 
-        {/* Meta Info (variant='class') */}
-        {renderMeta()}
+            {/* Actions */}
+            {actions && (
+              <div className="flex-shrink-0 flex gap-2">
+                {Array.isArray(actions) ? (
+                  actions.map((action, index) => (
+                    <div key={index} onClick={(e) => e.stopPropagation()}>
+                      {action}
+                    </div>
+                  ))
+                ) : (
+                  <div onClick={(e) => e.stopPropagation()}>{actions}</div>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Vertical Layout */}
+            <div className="card-text">
+              {title && (
+                <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
+                  {title}
+                </h3>
+              )}
 
-        {/* Badges */}
-        {renderBadges()}
+              {subtitle && (
+                <p
+                  className={classes.subtitle}
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  {subtitle}
+                </p>
+              )}
 
-        {/* Stats */}
-        {renderStats()}
+              {description && (
+                <p
+                  className={`${classes.description} mt-2`}
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  {description}
+                </p>
+              )}
+            </div>
 
-        {/* Big Number (variant='stats') */}
-        {renderBigNumber()}
+            {/* Meta Info (variant='class') */}
+            {renderMeta()}
 
-        {/* Custom Children */}
-        {children}
+            {/* Badges */}
+            {renderBadges()}
 
-        {/* Actions */}
-        {renderActions()}
+            {/* Stats */}
+            {renderStats()}
+
+            {/* Big Number (variant='stats') */}
+            {renderBigNumber()}
+
+            {/* Custom Children */}
+            {children}
+
+            {/* Actions */}
+            {renderActions()}
+          </>
+        )}
       </div>
 
       {/* Loading Overlay */}

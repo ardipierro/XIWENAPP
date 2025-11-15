@@ -185,11 +185,13 @@
 }
 
 @media (min-width: 1024px) {
-  .universal-dashboard__content {
+  /* Contenido se desplaza solo cuando el menú está abierto */
+  .universal-dashboard__content--menu-open {
     margin-left: 260px;
   }
 
+  /* Sin overlay en desktop - permite interacción normal con el contenido */
   .universal-dashboard__overlay {
-    display: none !important;
+    display: none;
   }
 }

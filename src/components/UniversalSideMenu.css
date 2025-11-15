@@ -116,12 +116,15 @@
   }
 }
 
+/* Desktop: El menú también se puede ocultar/mostrar */
 @media (min-width: 1024px) {
   .universal-sidemenu {
-    transform: translateX(0);
+    /* Oculto por defecto, como en mobile */
+    transform: translateX(-100%);
   }
 
   .universal-sidemenu--open {
+    /* Visible cuando está abierto */
     transform: translateX(0);
   }
 }

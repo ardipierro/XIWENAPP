@@ -58,7 +58,7 @@ function BaseModal({
     // Overlay con backdrop blur
     <div
       className={`
-        fixed inset-0 z-50
+        fixed inset-0 z-[9999]
         flex items-center justify-center p-4
         bg-black/50 dark:bg-black/70 backdrop-blur-sm
         animate-in fade-in duration-200
@@ -69,7 +69,7 @@ function BaseModal({
       {/* Modal box */}
       <div
         className={`
-          relative z-51 w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
+          relative z-[10000] w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
           bg-white dark:bg-primary-900
           rounded-xl
           flex flex-col

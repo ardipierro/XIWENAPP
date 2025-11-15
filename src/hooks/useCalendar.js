@@ -52,6 +52,7 @@ export function useCalendar(userId, userRole, startDate = null, endDate = null) 
         const data = await getUnifiedCalendar(userId, userRole, start, end);
 
         if (isMounted) {
+          logger.info(`📅 useCalendar received ${data.length} events from getUnifiedCalendar`, 'useCalendar');
           setEvents(data);
         }
       } catch (err) {

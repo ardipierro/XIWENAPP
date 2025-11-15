@@ -15,7 +15,7 @@ import {
   Timestamp,
   deleteDoc,
   updateDoc
-} from 'firebase/db';
+} from 'firebase/firestore';
 import { createFlashCardCollection } from '../firebase/flashcards';
 import logger from '../utils/logger';
 

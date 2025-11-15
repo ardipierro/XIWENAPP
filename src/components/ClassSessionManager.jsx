@@ -385,8 +385,14 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
 
   // Calcular sesiones restantes para sesiones recurrentes
   const calculateRemainingSessions = (session) => {
-    if (session.type !== 'recurring' || !session.schedules || !session.recurringStartDate || !session.recurringWeeks) {
-      logger.warn('Session missing required fields for remaining calculation:', {
+    // Si no es recurring, no hay nada que calcular
+    if (session.type !== 'recurring') {
+      return null;
+    }
+
+    // Si es recurring pero le faltan campos, solo hacer debug (no warn)
+    if (!session.schedules || !session.recurringStartDate || !session.recurringWeeks) {
+      logger.debug('Session missing required fields for remaining calculation:', {
         id: session.id,
         name: session.name,
         type: session.type,
@@ -659,13 +665,15 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
               key={session.id}
               title={session.name}
               subtitle={session.courseName}
-              badges={[
-                renderStatusBadge(session.status),
-                renderModeBadge(session.mode),
-                renderWhiteboardBadge(session.whiteboardType)
-              ].filter(Boolean)}
               hover
             >
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                {renderStatusBadge(session.status)}
+                {renderModeBadge(session.mode)}
+                {renderWhiteboardBadge(session.whiteboardType)}
+              </div>
+
               <div className="space-y-3">
                 {/* Descripción */}
                 {session.description && (

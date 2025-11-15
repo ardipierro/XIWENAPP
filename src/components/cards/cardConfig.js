@@ -291,7 +291,10 @@ export const cardLayouts = {
   horizontal: {
     flexDirection: 'flex-row',
     headerPosition: 'left',
-    headerWidth: '100px',        // Solo para horizontal
+    headerWidth: '80px',         // Más compacto para horizontal
+    avatarSize: '48px',          // Avatar más pequeño en horizontal
+    contentPadding: '16px',      // Padding reducido
+    statsLayout: 'inline',       // Stats en línea horizontal
   },
 };
 
@@ -317,9 +320,9 @@ export const gridColumns = {
   wide: {
     base: 'grid-cols-1',
     sm: 'sm:grid-cols-1',
-    md: 'md:grid-cols-2',
-    lg: 'lg:grid-cols-2',
-    xl: 'xl:grid-cols-3',
+    md: 'md:grid-cols-1',
+    lg: 'lg:grid-cols-1',
+    xl: 'xl:grid-cols-1',
   },
 };
 
@@ -375,24 +378,23 @@ export function generateCardClasses(variant, size, layout) {
       items-center
       justify-center
       flex-shrink-0
-      ${layout === 'horizontal' ? 'w-[100px]' : 'w-full'}
+      ${layout === 'horizontal' ? '' : 'w-full'}
     `.trim().replace(/\s+/g, ' '),
 
     content: `
       flex
-      flex-col
+      ${layout === 'horizontal' ? 'flex-row items-center gap-4' : 'flex-col'}
       flex-1
-      ${layout === 'horizontal' ? 'flex-row' : ''}
     `.trim().replace(/\s+/g, ' '),
 
     title: `
-      ${sizeConfig.titleSize}
+      ${layout === 'horizontal' ? 'text-base' : sizeConfig.titleSize}
       font-bold
-      mb-2
+      ${layout === 'horizontal' ? 'mb-0' : 'mb-2'}
     `.trim().replace(/\s+/g, ' '),
 
     subtitle: `
-      ${sizeConfig.subtitleSize}
+      ${layout === 'horizontal' ? 'text-sm' : sizeConfig.subtitleSize}
       font-medium
     `.trim().replace(/\s+/g, ' '),
 
@@ -405,26 +407,30 @@ export function generateCardClasses(variant, size, layout) {
 /**
  * Helper: Generate card styles (inline styles)
  */
-export function generateCardStyles(variant, size) {
+export function generateCardStyles(variant, size, layout = 'vertical') {
   const variantConfig = getVariantConfig(variant);
   const sizeConfig = getSizeConfig(size);
+  const layoutConfig = getLayoutConfig(layout);
 
   return {
     container: {
       backgroundColor: 'var(--color-bg-secondary)',
       border: `1px solid ${variantConfig.normalBorderColor}`,
       boxShadow: variantConfig.normalShadow,
-      minHeight: sizeConfig.minHeight,
+      minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight,
       transitionDuration: variantConfig.transitionDuration,
       transitionTimingFunction: variantConfig.transitionTiming,
     },
 
     header: {
-      height: variantConfig.headerHeight,
+      height: layout === 'horizontal' ? '100%' : variantConfig.headerHeight,
+      width: layout === 'horizontal' ? layoutConfig.headerWidth : 'auto',
     },
 
     content: {
-      padding: sizeConfig.padding,
+      padding: layout === 'horizontal' && layoutConfig.contentPadding
+        ? layoutConfig.contentPadding
+        : sizeConfig.padding,
     },
   };
 }

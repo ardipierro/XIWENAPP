@@ -133,12 +133,12 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         logger.debug(`🔍 Processing session "${data.name}" - type: ${data.type}, active: ${data.active}`, 'Calendar');
 
-        // Handle single sessions
-        if (data.type === 'single' && data.scheduledStart) {
+        // Handle single and instant sessions
+        if ((data.type === 'single' || data.type === 'instant') && data.scheduledStart) {
           const sessionDate = data.scheduledStart;
-          logger.debug(`🔍 Single session "${data.name}" - scheduledStart: ${sessionDate.toDate().toISOString()}, range: ${startTimestamp.toDate().toISOString()} to ${endTimestamp.toDate().toISOString()}`, 'Calendar');
+          logger.debug(`🔍 ${data.type} session "${data.name}" - scheduledStart: ${sessionDate.toDate().toISOString()}, range: ${startTimestamp.toDate().toISOString()} to ${endTimestamp.toDate().toISOString()}`, 'Calendar');
           if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
-            logger.info(`✅ Adding single session to calendar: "${data.name}"`, 'Calendar');
+            logger.info(`✅ Adding ${data.type} session to calendar: "${data.name}"`, 'Calendar');
             events.push({
               id: doc.id,
               title: data.name,
@@ -219,12 +219,12 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         logger.debug(`🔍 Processing session "${data.name}" - type: ${data.type}, active: ${data.active}`, 'Calendar');
 
-        // Handle single sessions
-        if (data.type === 'single' && data.scheduledStart) {
+        // Handle single and instant sessions
+        if ((data.type === 'single' || data.type === 'instant') && data.scheduledStart) {
           const sessionDate = data.scheduledStart;
-          logger.debug(`🔍 Single session "${data.name}" - scheduledStart: ${sessionDate.toDate().toISOString()}, range: ${startTimestamp.toDate().toISOString()} to ${endTimestamp.toDate().toISOString()}`, 'Calendar');
+          logger.debug(`🔍 ${data.type} session "${data.name}" - scheduledStart: ${sessionDate.toDate().toISOString()}, range: ${startTimestamp.toDate().toISOString()} to ${endTimestamp.toDate().toISOString()}`, 'Calendar');
           if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
-            logger.info(`✅ Adding single session to calendar: "${data.name}"`, 'Calendar');
+            logger.info(`✅ Adding ${data.type} session to calendar: "${data.name}"`, 'Calendar');
             events.push({
               id: doc.id,
               title: data.name,

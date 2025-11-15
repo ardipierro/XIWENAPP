@@ -28,7 +28,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useUserManagement } from '../hooks/useUserManagement';
 import { createUser, deleteUser } from '../firebase/users';
 import SearchBar from './common/SearchBar';
-import { BaseButton, BaseLoading, BaseEmptyState } from './common';
+import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge } from './common';
 import { UniversalCard, CardGrid } from './cards';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
@@ -363,12 +363,108 @@ export default function UniversalUserManager({ user, userRole }) {
                 : 'Agrega tu primer alumno con el botón de arriba'
             }
           />
-        ) : viewMode === 'grid' || viewMode === 'list' ? (
-          /* Vista Grid/List con UniversalCard */
-          <CardGrid
-            columnsType={viewMode === 'list' ? 'wide' : 'default'}
-            gap={viewMode === 'list' ? 'gap-3' : 'gap-4 md:gap-6'}
-          >
+        ) : viewMode === 'list' ? (
+          /* Vista List - Estilo filas como Contenidos */
+          <div className="flex flex-col gap-3">
+            {userManagement.filteredUsers.map((userItem) => {
+              const initial = userItem.name?.charAt(0).toUpperCase() || '?';
+              const avatarColor = getAvatarColor(userItem.role);
+              const roleBadge = getRoleBadge(userItem.role);
+
+              return (
+                <div
+                  key={userItem.id}
+                  className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-500 dark:hover:border-blue-500 cursor-pointer"
+                  onClick={() => handleViewUserProfile(userItem)}
+                >
+                  <div className="flex items-stretch min-h-[96px]">
+                    {/* Avatar - Cuadrado que ocupa toda la altura */}
+                    <div className="w-[96px] flex-shrink-0 overflow-hidden">
+                      <div
+                        className="w-full h-full flex items-center justify-center text-white font-extrabold text-2xl"
+                        style={{ backgroundColor: avatarColor }}
+                      >
+                        {initial}
+                      </div>
+                    </div>
+
+                    {/* Contenido */}
+                    <div className="flex-1 flex items-center gap-4 px-5 py-4 min-w-0">
+                      {/* Nombre y Email */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                          {userItem.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          <Mail size={14} className="inline mr-1" />
+                          {userItem.email}
+                        </p>
+                      </div>
+
+                      {/* Badge Rol */}
+                      <div className="flex-shrink-0">
+                        <BaseBadge variant={roleBadge.variant} size="sm">
+                          {roleBadge.label}
+                        </BaseBadge>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex gap-6 flex-shrink-0">
+                        <div className="flex items-center gap-2">
+                          <BookOpen size={16} className="text-gray-500" />
+                          <div className="flex flex-col">
+                            <span className="text-lg font-extrabold text-gray-900 dark:text-white">
+                              {enrollmentCounts[userItem.id] || 0}
+                            </span>
+                            <span className="text-xs text-gray-500">Cursos</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DollarSign size={16} className="text-gray-500" />
+                          <div className="flex flex-col">
+                            <span className="text-lg font-extrabold text-gray-900 dark:text-white">
+                              {userItem.credits || 0}
+                            </span>
+                            <span className="text-xs text-gray-500">Créditos</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2 flex-shrink-0">
+                        <BaseButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewUserProfile(userItem);
+                          }}
+                          variant="ghost"
+                          size="sm"
+                          icon={Eye}
+                        >
+                          Ver
+                        </BaseButton>
+                        {can('delete-users') && (
+                          <BaseButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setUserToDelete(userItem);
+                              setShowDeleteConfirm(true);
+                            }}
+                            variant="danger"
+                            size="sm"
+                            icon={Trash2}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : viewMode === 'grid' ? (
+          /* Vista Grid con UniversalCard */
+          <CardGrid columnsType="default" gap="gap-4 md:gap-6">
             {userManagement.filteredUsers.map((userItem) => {
               const initial = userItem.name?.charAt(0).toUpperCase() || '?';
               const avatarColor = getAvatarColor(userItem.role);
@@ -379,7 +475,7 @@ export default function UniversalUserManager({ user, userRole }) {
                   key={userItem.id}
                   variant="user"
                   size="md"
-                  layout={viewMode === 'list' ? 'horizontal' : 'vertical'}
+                  layout="vertical"
                   avatar={initial}
                   avatarColor={avatarColor}
                   title={userItem.name}

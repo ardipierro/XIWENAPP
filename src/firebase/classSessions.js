@@ -43,9 +43,11 @@ export async function createClassSession(sessionData) {
       whiteboardType = 'none', // 'none' | 'canvas' | 'excalidraw'
 
       // Programación
-      type = 'single', // 'single' | 'recurring'
+      type = 'single', // 'single' | 'recurring' | 'instant'
       scheduledStart = null, // Timestamp para single
       schedules = [], // [{ day, startTime, endTime }] para recurring
+      recurringStartDate = null, // Timestamp - cuándo empiezan las sesiones recurrentes
+      recurringWeeks = 4, // Número de semanas que duran las sesiones recurrentes
       duration = 60, // minutos
 
       // LiveKit (si mode='live')
@@ -74,8 +76,16 @@ export async function createClassSession(sessionData) {
       return { success: false, error: 'Fecha de inicio es requerida para sesiones únicas' };
     }
 
-    if (type === 'recurring' && schedules.length === 0) {
-      return { success: false, error: 'Debe definir al menos un horario para sesiones recurrentes' };
+    if (type === 'recurring') {
+      if (schedules.length === 0) {
+        return { success: false, error: 'Debe definir al menos un horario para sesiones recurrentes' };
+      }
+      if (!recurringStartDate) {
+        return { success: false, error: 'Fecha de inicio es requerida para sesiones recurrentes' };
+      }
+      if (!recurringWeeks || recurringWeeks < 1) {
+        return { success: false, error: 'Duración en semanas es requerida para sesiones recurrentes' };
+      }
     }
 
     // Generar roomName único si es live
@@ -101,6 +111,10 @@ export async function createClassSession(sessionData) {
         ? (scheduledStart instanceof Timestamp ? scheduledStart : Timestamp.fromDate(scheduledStart))
         : null,
       schedules: type === 'recurring' ? schedules : [],
+      recurringStartDate: type === 'recurring' && recurringStartDate
+        ? (recurringStartDate instanceof Timestamp ? recurringStartDate : Timestamp.fromDate(recurringStartDate))
+        : null,
+      recurringWeeks: type === 'recurring' ? recurringWeeks : null,
       duration,
 
       // LiveKit
