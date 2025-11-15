@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Settings, Volume2, Zap, Languages, Key, Sparkles, CheckCircle } from 'lucide-react';
-import { BaseButton, BaseBadge, BaseInput } from '../common';
+import { BaseButton, BaseBadge, BaseInput, BaseTabs } from '../common';
 import { UniversalCard } from '../cards';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
@@ -163,35 +163,17 @@ function TTSSettings({ alwaysOpen = false }) {
               subtitle="Selecciona la voz para los audios generados por IA"
             >
           {/* Tabs: Navegador vs ElevenLabs */}
-          <div className="flex gap-2 mb-4 border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => setActiveTab('browser')}
-              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                activeTab === 'browser'
-                  ? 'border-zinc-600 text-zinc-900 dark:text-white'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Languages size={16} />
-                Voces del Navegador
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('elevenlabs')}
-              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                activeTab === 'elevenlabs'
-                  ? 'border-zinc-600 text-zinc-900 dark:text-white'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Sparkles size={16} />
-                ElevenLabs Premium
-                {hasElevenLabsKey && <BaseBadge variant="success" size="sm">Configurado</BaseBadge>}
-              </div>
-            </button>
-          </div>
+          <BaseTabs
+            tabs={[
+              { id: 'browser', label: 'Voces del Navegador', icon: Languages },
+              { id: 'elevenlabs', label: 'ElevenLabs Premium', icon: Sparkles, badge: hasElevenLabsKey ? '✓' : undefined }
+            ]}
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            variant="underline"
+            size="sm"
+            className="mb-4"
+          />
 
           {/* Tab: Voces del Navegador */}
           {activeTab === 'browser' && (
@@ -487,35 +469,17 @@ function TTSSettings({ alwaysOpen = false }) {
             /* ✅ Contenido SIN BaseCard cuando alwaysOpen=true */
             <div className="space-y-4">
               {/* Tabs: Navegador vs ElevenLabs */}
-              <div className="flex gap-2 mb-4 border-b border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => setActiveTab('browser')}
-                  className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                    activeTab === 'browser'
-                      ? 'border-zinc-600 text-zinc-900 dark:text-white'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Languages size={16} />
-                    Voces del Navegador
-                  </div>
-                </button>
-                <button
-                  onClick={() => setActiveTab('elevenlabs')}
-                  className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                    activeTab === 'elevenlabs'
-                      ? 'border-zinc-600 text-zinc-900 dark:text-white'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={16} />
-                    ElevenLabs Premium
-                    {hasElevenLabsKey && <BaseBadge variant="success" size="sm">Configurado</BaseBadge>}
-                  </div>
-                </button>
-              </div>
+              <BaseTabs
+                tabs={[
+                  { id: 'browser', label: 'Voces del Navegador', icon: Languages },
+                  { id: 'elevenlabs', label: 'ElevenLabs Premium', icon: Sparkles, badge: hasElevenLabsKey ? '✓' : undefined }
+                ]}
+                activeTab={activeTab}
+                onChange={setActiveTab}
+                variant="underline"
+                size="sm"
+                className="mb-4"
+              />
 
               {/* Tab: Voces del Navegador - MISMO CONTENIDO */}
               {activeTab === 'browser' && (
