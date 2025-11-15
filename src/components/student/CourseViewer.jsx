@@ -10,6 +10,7 @@ import { getCourseProgress, getNextContent } from '../../firebase/studentProgres
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { getCourseContents, getCourseExercises } from '../../firebase/relationships';
 import BaseButton from '../common/BaseButton';
+import { BaseTabs } from '../common';
 import './CourseViewer.css';
 
 function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPlayExercise }) {
@@ -165,26 +166,17 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
       </div>
 
       {/* Tabs */}
-      <div className="course-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
-          onClick={() => setActiveTab('content')}
-        >
-          <BookMarked size={18} strokeWidth={2} className="inline-icon" /> Contenido ({courseContent.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'exercises' ? 'active' : ''}`}
-          onClick={() => setActiveTab('exercises')}
-        >
-          <Gamepad2 size={18} strokeWidth={2} className="inline-icon" /> Ejercicios ({courseExercises.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'progress' ? 'active' : ''}`}
-          onClick={() => setActiveTab('progress')}
-        >
-          <BarChart3 size={18} strokeWidth={2} className="inline-icon" /> Mi Progreso
-        </button>
-      </div>
+      <BaseTabs
+        tabs={[
+          { id: 'content', label: 'Contenido', icon: BookMarked, badge: courseContent.length },
+          { id: 'exercises', label: 'Ejercicios', icon: Gamepad2, badge: courseExercises.length },
+          { id: 'progress', label: 'Mi Progreso', icon: BarChart3 }
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        variant="underline"
+        size="md"
+      />
 
       {/* Tab Content */}
       <div className="tab-content">

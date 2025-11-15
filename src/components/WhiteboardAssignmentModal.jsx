@@ -6,7 +6,7 @@ import { getUsersByRole } from '../firebase/users';
 import { getGroupsByTeacher } from '../firebase/groups';
 import { assignStudentsToWhiteboard, assignGroupsToWhiteboard, startLiveSession, updateWhiteboardSession } from '../firebase/whiteboard';
 import { auth } from '../firebase/config';
-import { BaseModal, BaseButton, BaseInput } from './common';
+import { BaseModal, BaseButton, BaseInput, BaseTabs } from './common';
 
 /**
  * Modal for editing whiteboard details, assigning students/groups, and starting live sessions
@@ -173,43 +173,17 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
     >
       <div className="space-y-6">
         {/* Main Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('details')}
-              className={`px-4 py-2 font-semibold flex items-center gap-2 transition-colors ${
-                activeTab === 'details'
-                  ? 'border-b-2 border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <Edit size={16} strokeWidth={2} />
-              Detalles
-            </button>
-            <button
-              onClick={() => setActiveTab('students')}
-              className={`px-4 py-2 font-semibold flex items-center gap-2 transition-colors ${
-                activeTab === 'students'
-                  ? 'border-b-2 border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <UserPlus size={16} strokeWidth={2} />
-              Estudiantes ({selectedStudents.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('groups')}
-              className={`px-4 py-2 font-semibold flex items-center gap-2 transition-colors ${
-                activeTab === 'groups'
-                  ? 'border-b-2 border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <Users size={16} strokeWidth={2} />
-              Grupos ({selectedGroups.length})
-            </button>
-          </div>
-        </div>
+        <BaseTabs
+          tabs={[
+            { id: 'details', label: 'Detalles', icon: Edit },
+            { id: 'students', label: 'Estudiantes', icon: UserPlus, badge: selectedStudents.length },
+            { id: 'groups', label: 'Grupos', icon: Users, badge: selectedGroups.length }
+          ]}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="underline"
+          size="md"
+        />
 
         {loading && activeTab !== 'details' ? (
           <div className="flex items-center justify-center py-12">
