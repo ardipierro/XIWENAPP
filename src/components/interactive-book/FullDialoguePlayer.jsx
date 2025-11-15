@@ -9,6 +9,7 @@ import { Play, Pause, Volume2, SkipForward, List, User, AlertCircle } from 'luci
 import PropTypes from 'prop-types';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
+import audioCacheService from '../../services/audioCache';
 import { getCharacterVoiceConfig } from './CharacterVoiceManager';
 import { BaseButton } from '../common';
 import logger from '../../utils/logger';
@@ -90,21 +91,36 @@ function FullDialoguePlayer({ dialogue, onComplete }) {
     logger.info(`🎤 Reproduciendo línea de ${line.character}: ${line.text.substring(0, 30)}...`);
 
     try {
-      // Si está configurado para usar ElevenLabs
+      // 🆕 Si está configurado para usar ElevenLabs - USAR CACHÉ
       if (voiceConfig?.provider === 'elevenlabs' && voiceConfig?.voiceId) {
-        const result = await premiumTTSService.generateWithElevenLabs(
+        // Usar el servicio de caché
+        const result = await audioCacheService.getOrGenerateAudio(
           line.text,
-          voiceConfig.voiceId
+          voiceConfig,
+          'dialogue', // Contexto para el caché
+          // Función de generación (solo se llama si no está en caché)
+          async () => {
+            return await premiumTTSService.generateWithElevenLabs(
+              line.text,
+              voiceConfig.voiceId
+            );
+          }
         );
 
         if (result.audioUrl) {
           try {
             await playAudioFile(result.audioUrl, speedToUse);
-            premiumTTSService.cleanup(result.audioUrl);
+            // Solo limpiar si es blob: URL temporal (no URLs de Firebase)
+            if (result.audioUrl.startsWith('blob:')) {
+              premiumTTSService.cleanup(result.audioUrl);
+            }
             return;
           } catch (audioError) {
             logger.warn('ElevenLabs playback failed, falling back to Web Speech:', audioError);
-            premiumTTSService.cleanup(result.audioUrl);
+            // Solo limpiar si es blob: URL temporal
+            if (result.audioUrl.startsWith('blob:')) {
+              premiumTTSService.cleanup(result.audioUrl);
+            }
           }
         }
       }
