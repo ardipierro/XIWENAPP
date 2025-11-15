@@ -4,10 +4,11 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, RotateCcw, Mic, User, Globe, Sparkles } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, RotateCcw, Mic, User, Globe, Sparkles, Database } from 'lucide-react';
 import PropTypes from 'prop-types';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
+import audioCacheService from '../../services/audioCache';
 import logger from '../../utils/logger';
 
 /**
@@ -37,6 +38,8 @@ function AudioPlayer({
   // ✅ SINCRONIZAR playbackSpeed con voiceConfig.rate al montar
   const initialSpeed = voiceConfig?.rate || 1.0;
   const [playbackSpeed, setPlaybackSpeed] = useState(initialSpeed);
+  const [isCached, setIsCached] = useState(false); // ✅ Nuevo: indica si el audio viene del caché
+  const [isGenerating, setIsGenerating] = useState(false); // ✅ Nuevo: indica si está generando audio
   const audioRef = useRef(null);
   const ttsIntervalRef = useRef(null);
   const ttsAudioRef = useRef(null); // Audio generado por TTS/ElevenLabs
@@ -228,16 +231,34 @@ function AudioPlayer({
     logger.info(`🎤 TTS para ${characterName || 'personaje'}: provider=${effectiveVoiceConfig.provider}, rate=${speedToUse}x`);
 
     try {
-      // Si está configurado para usar ElevenLabs y tiene voiceId
+      // 🆕 Si está configurado para usar ElevenLabs y tiene voiceId - USAR CACHÉ
       if (effectiveVoiceConfig.provider === 'elevenlabs' && effectiveVoiceConfig.voiceId) {
-        const result = await premiumTTSService.generateWithElevenLabs(
+        setIsGenerating(true);
+        setIsCached(false);
+
+        // Determinar contexto para el caché (courseId si está disponible, sino 'interactive-book')
+        const cacheContext = 'interactive-book'; // TODO: pasar courseId como prop si está disponible
+
+        // 🆕 Usar el servicio de caché
+        const result = await audioCacheService.getOrGenerateAudio(
           text,
-          effectiveVoiceConfig.voiceId
+          effectiveVoiceConfig,
+          cacheContext,
+          // Función de generación (solo se llama si no está en caché)
+          async () => {
+            return await premiumTTSService.generateWithElevenLabs(
+              text,
+              effectiveVoiceConfig.voiceId
+            );
+          }
         );
+
+        setIsGenerating(false);
+        setIsCached(result.cached || false);
 
         if (result.audioUrl) {
           try {
-            // Si se generó un archivo de audio, reproducirlo con velocidad ajustable
+            // Si se obtuvo el audio (cacheado o generado), reproducirlo
             await new Promise((resolve, reject) => {
               const audio = new Audio(result.audioUrl);
               ttsAudioRef.current = audio;
@@ -261,7 +282,10 @@ function AudioPlayer({
                 setIsPlaying(false);
                 setProgress(0);
                 setCurrentTime(0);
-                premiumTTSService.cleanup(result.audioUrl);
+                // Solo limpiar si es blob: URL temporal (no URLs de Firebase)
+                if (result.audioUrl.startsWith('blob:')) {
+                  premiumTTSService.cleanup(result.audioUrl);
+                }
                 ttsAudioRef.current = null;
                 if (onComplete) {
                   onComplete();
@@ -279,8 +303,12 @@ function AudioPlayer({
             return; // Exit successfully if audio plays
           } catch (audioError) {
             logger.warn('ElevenLabs audio playback failed, falling back to Web Speech:', audioError);
-            premiumTTSService.cleanup(result.audioUrl);
+            // Solo limpiar si es blob: URL temporal
+            if (result.audioUrl.startsWith('blob:')) {
+              premiumTTSService.cleanup(result.audioUrl);
+            }
             ttsAudioRef.current = null;
+            setIsGenerating(false);
           }
         }
       }
@@ -481,6 +509,20 @@ function AudioPlayer({
                     Navegador
                   </>
                 )}
+              </span>
+            )}
+            {/* 🆕 Badge de caché */}
+            {useTTS && isElevenLabs && isCached && (
+              <span className="px-2 py-1 rounded text-xs font-medium flex items-center gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                <Database size={12} />
+                Caché
+              </span>
+            )}
+            {/* 🆕 Badge de generando */}
+            {useTTS && isElevenLabs && isGenerating && (
+              <span className="px-2 py-1 rounded text-xs font-medium flex items-center gap-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 animate-pulse">
+                <Sparkles size={12} className="animate-spin" />
+                Generando...
               </span>
             )}
           </div>

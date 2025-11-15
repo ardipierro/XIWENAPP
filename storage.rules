@@ -64,6 +64,22 @@ service firebase.storage {
                    && isValidSize();
     }
 
+    // 🆕 Carpeta de caché de audios generados por TTS
+    // Cachea audios de ElevenLabs y otros proveedores TTS para evitar regeneración
+    match /audio-cache/{context}/{fileName} {
+      // Cualquier usuario autenticado puede leer audios cacheados
+      allow read: if isAuthenticated();
+
+      // Cualquier usuario autenticado puede escribir audios
+      // Verificar que sea un archivo de audio y tamaño razonable (max 1MB)
+      allow write: if isAuthenticated()
+                   && request.resource.contentType == 'audio/mpeg'
+                   && request.resource.size < 1 * 1024 * 1024;
+
+      // Permitir eliminación solo a usuarios autenticados
+      allow delete: if isAuthenticated();
+    }
+
     // Bloquear todo lo demás por defecto
     match /{allPaths=**} {
       allow read: if false;

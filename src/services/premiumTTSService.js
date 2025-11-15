@@ -181,6 +181,7 @@ class PremiumTTSService {
       return {
         type: 'elevenlabs',
         audioUrl,
+        audioBlob, // ✅ Retornar también el blob para el servicio de caché
         quality: 'premium'
       };
     } catch (err) {
