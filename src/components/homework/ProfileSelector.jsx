@@ -4,13 +4,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, User, Check } from 'lucide-react';
+import { RefreshCw, User, Check, Plus } from 'lucide-react';
 import { BaseButton, BaseBadge } from '../common';
 import { UniversalCard } from '../cards';
 import {
   getCorrectionProfilesByTeacher,
   getStudentProfile,
-  getDefaultProfile
+  getDefaultProfile,
+  initializeDefaultProfiles
 } from '../../firebase/correctionProfiles';
 import logger from '../../utils/logger';
 
@@ -31,6 +32,7 @@ export default function ProfileSelector({
   const [selectedProfileId, setSelectedProfileId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reanalyzing, setReanalyzing] = useState(false);
+  const [initializing, setInitializing] = useState(false);
 
   useEffect(() => {
     loadProfilesAndCurrent();
@@ -56,6 +58,27 @@ export default function ProfileSelector({
       logger.error('Error loading profiles', 'ProfileSelector', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInitializeProfiles = async () => {
+    try {
+      setInitializing(true);
+      const result = await initializeDefaultProfiles(teacherId);
+
+      if (result.success) {
+        // Reload profiles
+        await loadProfilesAndCurrent();
+        logger.info('Default profiles initialized successfully', 'ProfileSelector');
+      } else {
+        logger.error('Failed to initialize profiles', 'ProfileSelector', result.error);
+        alert('Error al crear perfiles por defecto');
+      }
+    } catch (error) {
+      logger.error('Error initializing profiles', 'ProfileSelector', error);
+      alert('Error al crear perfiles por defecto');
+    } finally {
+      setInitializing(false);
     }
   };
 
@@ -89,9 +112,38 @@ export default function ProfileSelector({
 
   if (profiles.length === 0) {
     return (
-      <UniversalCard variant="default" size="md" className="mb-4">
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          No hay perfiles de corrección configurados
+      <UniversalCard variant="warning" size="md" className="mb-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <User size={18} />
+            <span className="font-semibold">No hay perfiles de corrección configurados</span>
+          </div>
+          <p className="text-xs text-gray-600 dark:text-gray-400">
+            Los perfiles definen cómo se corrigen las tareas (nivel de exigencia, qué errores revisar, etc.)
+          </p>
+          <BaseButton
+            variant="primary"
+            size="sm"
+            icon={Plus}
+            onClick={handleInitializeProfiles}
+            disabled={initializing}
+            className="w-full"
+          >
+            {initializing ? (
+              <>
+                <RefreshCw size={14} className="animate-spin" />
+                Creando perfiles...
+              </>
+            ) : (
+              <>
+                <Plus size={14} />
+                Crear perfiles por defecto (3)
+              </>
+            )}
+          </BaseButton>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Se crearán perfiles para: Principiantes (A1-A2), Intermedio (B1-B2) y Avanzado (C1-C2)
+          </p>
         </div>
       </UniversalCard>
     );

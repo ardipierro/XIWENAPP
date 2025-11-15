@@ -172,15 +172,25 @@ export default function ImageOverlay({
       errors: errors.length,
       words: words.length,
       scaleX,
-      scaleY
+      scaleY,
+      imageDimensions,
+      imageNaturalDimensions
     });
 
     // Sample first 3 words and errors for debugging
     console.log('[ImageOverlay] Sample words:', words.slice(0, 3).map(w => ({
       text: w.text,
-      hasBounds: !!w.bounds
+      hasBounds: !!w.bounds,
+      bounds: w.bounds
     })));
-    console.log('[ImageOverlay] Sample errors:', errors.slice(0, 3).map(e => extractErrorInfo(e)));
+    console.log('[ImageOverlay] Sample errors:', errors.slice(0, 3).map(e => {
+      const extracted = extractErrorInfo(e);
+      return {
+        original: e,
+        extracted,
+        hasText: !!extracted.errorText
+      };
+    }));
 
     errors.forEach((error, errorIndex) => {
       matchingStats.attempted++;
