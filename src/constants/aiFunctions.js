@@ -266,7 +266,7 @@ export const AI_FUNCTIONS = [
     icon: Languages,
     category: 'tools',
     defaultConfig: {
-      enabled: false,
+      enabled: true,
       provider: 'openai',
       model: 'gpt-4.1',
       systemPrompt: 'Eres un traductor educativo. Traduces textos y además proporcionas contexto cultural, explicaciones de modismos, y notas pedagógicas útiles para estudiantes de español.',

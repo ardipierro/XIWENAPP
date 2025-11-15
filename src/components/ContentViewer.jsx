@@ -8,9 +8,10 @@
  * 100% Tailwind CSS | Dark Mode | Mobile First
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { BookMarked, FileText, Video, Link as LinkIcon, PenTool, BookOpen, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { ExpandableModal } from './common';
+import SelectionDetector from './translation/SelectionDetector';
 import logger from '../utils/logger';
 
 /**
@@ -24,6 +25,7 @@ import logger from '../utils/logger';
  */
 function ContentViewer({ content, isOpen, onClose, courses = [] }) {
   const [renderError, setRenderError] = useState(null);
+  const contentContainerRef = useRef(null);
 
   if (!content) return null;
 
@@ -613,13 +615,17 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
       )}
 
       {/* Contenido renderizado con estilos personalizados */}
-      {customStyles ? (
-        <div style={customStyles} className="p-4 rounded-lg transition-all">
-          {renderedContent}
+      <SelectionDetector enabled={isOpen} containerRef={contentContainerRef}>
+        <div ref={contentContainerRef}>
+          {customStyles ? (
+            <div style={customStyles} className="p-4 rounded-lg transition-all">
+              {renderedContent}
+            </div>
+          ) : (
+            renderedContent
+          )}
         </div>
-      ) : (
-        renderedContent
-      )}
+      </SelectionDetector>
     </ExpandableModal>
   );
 }
