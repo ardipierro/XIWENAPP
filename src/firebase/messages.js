@@ -76,9 +76,10 @@ export async function getOrCreateConversation(userId1, userId2) {
  * @param {string} messageData.receiverId - Receiver user ID
  * @param {string} messageData.content - Message content
  * @param {Object} [messageData.attachment] - Optional attachment data
+ * @param {Object} [messageData.replyTo] - Optional reply to message data
  * @returns {Promise<string>} Message ID
  */
-export async function sendMessage({ conversationId, senderId, senderName, receiverId, content, attachment }) {
+export async function sendMessage({ conversationId, senderId, senderName, receiverId, content, attachment, replyTo }) {
   try {
     const batch = writeBatch(db);
 
@@ -92,12 +93,20 @@ export async function sendMessage({ conversationId, senderId, senderName, receiv
       senderName,
       content: content || '',
       createdAt: serverTimestamp(),
-      read: false
+      read: false,
+      status: 'sent', // sent, delivered, read
+      deleted: false,
+      edited: false
     };
 
     // Add attachment if present
     if (attachment) {
       messageData.attachment = attachment;
+    }
+
+    // Add reply reference if present
+    if (replyTo) {
+      messageData.replyTo = replyTo;
     }
 
     batch.set(messageRef, messageData);
@@ -223,7 +232,10 @@ export async function markMessagesAsRead(conversationId, userId) {
     const batch = writeBatch(db);
 
     snapshot.docs.forEach(doc => {
-      batch.update(doc.ref, { read: true });
+      batch.update(doc.ref, {
+        read: true,
+        status: 'read'
+      });
     });
 
     // Reset unread count
@@ -533,6 +545,113 @@ export async function removeReaction(messageId, userId, emoji) {
   }
 }
 
+/**
+ * Delete a message
+ * @param {string} messageId - Message ID
+ * @param {string} userId - User ID
+ * @param {boolean} deleteForEveryone - Delete for everyone or just for me
+ * @returns {Promise<void>}
+ */
+export async function deleteMessage(messageId, userId, deleteForEveryone = false) {
+  try {
+    const messageRef = doc(db, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const data = messageDoc.data();
+
+    // Check if user is the sender
+    if (data.senderId !== userId) {
+      throw new Error('Not authorized to delete this message');
+    }
+
+    if (deleteForEveryone) {
+      // Check if message is not older than 1 hour
+      const createdAt = data.createdAt?.toDate?.() || new Date(data.createdAt);
+      const oneHourAgo = new Date(Date.now() - 3600000);
+
+      if (createdAt < oneHourAgo) {
+        throw new Error('Solo puedes eliminar mensajes de la última hora');
+      }
+
+      // Mark as deleted for everyone
+      await updateDoc(messageRef, {
+        deleted: true,
+        deletedAt: serverTimestamp(),
+        deletedBy: userId,
+        content: 'Este mensaje fue eliminado',
+        attachment: null
+      });
+
+      logger.info(`Message ${messageId} deleted for everyone`, 'Messages');
+    } else {
+      // Hide message only for this user
+      await updateDoc(messageRef, {
+        [`hiddenFor.${userId}`]: true
+      });
+
+      logger.info(`Message ${messageId} hidden for user ${userId}`, 'Messages');
+    }
+  } catch (error) {
+    logger.error('Error deleting message', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
+ * Edit a message
+ * @param {string} messageId - Message ID
+ * @param {string} userId - User ID
+ * @param {string} newContent - New message content
+ * @returns {Promise<void>}
+ */
+export async function editMessage(messageId, userId, newContent) {
+  try {
+    const messageRef = doc(db, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const data = messageDoc.data();
+
+    // Check if user is the sender
+    if (data.senderId !== userId) {
+      throw new Error('Not authorized to edit this message');
+    }
+
+    // Check if message is not older than 15 minutes
+    const createdAt = data.createdAt?.toDate?.() || new Date(data.createdAt);
+    const fifteenMinAgo = new Date(Date.now() - 900000);
+
+    if (createdAt < fifteenMinAgo) {
+      throw new Error('Solo puedes editar mensajes de los últimos 15 minutos');
+    }
+
+    // Don't allow editing deleted messages
+    if (data.deleted) {
+      throw new Error('No puedes editar un mensaje eliminado');
+    }
+
+    // Update message with new content
+    await updateDoc(messageRef, {
+      content: newContent.trim(),
+      edited: true,
+      editedAt: serverTimestamp(),
+      originalContent: data.originalContent || data.content // Preserve first version
+    });
+
+    logger.info(`Message ${messageId} edited`, 'Messages');
+  } catch (error) {
+    logger.error('Error editing message', error, 'Messages');
+    throw error;
+  }
+}
+
 export default {
   getOrCreateConversation,
   sendMessage,
@@ -547,5 +666,7 @@ export default {
   setTyping,
   clearTyping,
   addReaction,
-  removeReaction
+  removeReaction,
+  deleteMessage,
+  editMessage
 };

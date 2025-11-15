@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -14,7 +14,9 @@ import {
   setTyping,
   clearTyping,
   addReaction,
-  removeReaction
+  removeReaction,
+  deleteMessage,
+  editMessage
 } from '../firebase/messages';
 import {
   uploadMessageAttachment,
@@ -64,6 +66,9 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editingContent, setEditingContent] = useState('');
+  const [replyingTo, setReplyingTo] = useState(null);
   const messagesEndRef = useRef(null);
   const messagesListRef = useRef(null);  // Ref al contenedor de mensajes
   const inputRef = useRef(null);
@@ -118,8 +123,18 @@ function MessageThread({ conversation, currentUser, onClose }) {
     return () => unsubscribe();
   }, [conversation?.id, conversation?.otherUser?.id]);
 
+  // Sync editing content with input when editing
+  useEffect(() => {
+    if (editingMessage) {
+      setNewMessage(editingContent);
+    }
+  }, [editingMessage, editingContent]);
+
   // Handle typing indicator when user types
   useEffect(() => {
+    // Don't show typing when editing
+    if (editingMessage) return;
+
     if (!newMessage.trim() || !conversation?.id) {
       // Clear typing when message is empty
       if (typingTimeoutRef.current) {
@@ -299,6 +314,99 @@ function MessageThread({ conversation, currentUser, onClose }) {
   };
 
   /**
+   * Handle delete message
+   */
+  const handleDeleteMessage = async (messageId, deleteForEveryone = false) => {
+    const confirmMsg = deleteForEveryone
+      ? '¿Eliminar este mensaje para todos? Solo puedes hacerlo en la primera hora.'
+      : '¿Eliminar este mensaje para ti?';
+
+    if (!window.confirm(confirmMsg)) return;
+
+    await safeAsync(
+      () => deleteMessage(messageId, currentUser.uid, deleteForEveryone),
+      {
+        context: 'MessageThread',
+        onError: (error) => {
+          alert(error.message || 'Error al eliminar el mensaje');
+        }
+      }
+    );
+  };
+
+  /**
+   * Handle edit message
+   */
+  const handleEditMessage = (message) => {
+    setEditingMessage(message);
+    setEditingContent(message.content);
+    inputRef.current?.focus();
+  };
+
+  /**
+   * Handle save edited message
+   */
+  const handleSaveEdit = async () => {
+    if (!editingMessage || !editingContent.trim() || sending) return;
+
+    setSending(true);
+
+    const result = await safeAsync(
+      () => editMessage(editingMessage.id, currentUser.uid, editingContent),
+      {
+        context: 'MessageThread',
+        onError: (error) => {
+          alert(error.message || 'Error al editar el mensaje');
+        }
+      }
+    );
+
+    setSending(false);
+
+    if (result !== null) {
+      setEditingMessage(null);
+      setEditingContent('');
+      setNewMessage('');
+    }
+  };
+
+  /**
+   * Handle cancel edit
+   */
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setEditingContent('');
+    setNewMessage('');
+  };
+
+  /**
+   * Handle reply to message
+   */
+  const handleReplyToMessage = (message) => {
+    setReplyingTo({
+      messageId: message.id,
+      content: message.content || '',
+      senderName: message.senderName,
+      attachment: message.attachment || null
+    });
+    inputRef.current?.focus();
+  };
+
+  /**
+   * Handle cancel reply
+   */
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+  };
+
+  /**
+   * Scroll to message
+   */
+  const scrollToMessage = (messageId) => {
+    scrollToSearchResult(messageId);
+  };
+
+  /**
    * Handle voice message send
    */
   const handleVoiceSend = async (audioBlob, duration) => {
@@ -403,6 +511,12 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
+    // If editing, save edit instead
+    if (editingMessage) {
+      await handleSaveEdit();
+      return;
+    }
+
     // Require either text or file
     if ((!newMessage.trim() && !selectedFile) || sending || uploading) return;
 
@@ -450,7 +564,8 @@ function MessageThread({ conversation, currentUser, onClose }) {
         senderName: currentUser.displayName || currentUser.email,
         receiverId: conversation.otherUser.id,
         content: messageContent,
-        attachment: attachmentData
+        attachment: attachmentData,
+        replyTo: replyingTo
       }),
       {
         context: 'MessageThread',
@@ -465,6 +580,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
     if (result) {
       logger.info('Message sent successfully', 'MessageThread');
+      handleCancelReply(); // Clear reply state
       inputRef.current?.focus();
       // Ensure scroll to bottom after sending
       setTimeout(() => scrollToBottom(), 200);
@@ -492,6 +608,19 @@ function MessageThread({ conversation, currentUser, onClose }) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage(e);
+    }
+  };
+
+  /**
+   * Handle key down (for Esc to cancel edit)
+   */
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      if (editingMessage) {
+        handleCancelEdit();
+      } else if (replyingTo) {
+        handleCancelReply();
+      }
     }
   };
 
@@ -622,6 +751,10 @@ function MessageThread({ conversation, currentUser, onClose }) {
                 searchTerm={searchTerm}
                 onAddReaction={handleAddReaction}
                 onRemoveReaction={handleRemoveReaction}
+                onDelete={handleDeleteMessage}
+                onEdit={handleEditMessage}
+                onReply={handleReplyToMessage}
+                onScrollToMessage={scrollToMessage}
                 ref={(el) => {
                   if (el) searchResultRefs.current[message.id] = el;
                 }}
@@ -654,6 +787,45 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
       {/* Message Input */}
       <form className="message-input-container" onSubmit={handleSendMessage}>
+        {/* Reply Bar */}
+        {replyingTo && (
+          <div className="reply-bar">
+            <div className="reply-bar-content">
+              <Reply size={16} />
+              <div className="reply-info">
+                <strong>Respondiendo a {replyingTo.senderName}</strong>
+                <p>{replyingTo.content || (replyingTo.attachment ? '📎 ' + replyingTo.attachment.filename : '')}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="reply-bar-close"
+              onClick={handleCancelReply}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* Edit Bar */}
+        {editingMessage && (
+          <div className="edit-bar">
+            <div className="edit-bar-content">
+              <Edit2 size={16} />
+              <div className="edit-info">
+                <strong>Editando mensaje</strong>
+                <p>Presiona Esc para cancelar</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="edit-bar-close"
+              onClick={handleCancelEdit}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
         {/* File Preview */}
         {selectedFile && (
           <div className="file-preview-container">
@@ -741,10 +913,17 @@ function MessageThread({ conversation, currentUser, onClose }) {
           <textarea
             ref={inputRef}
             className="message-input"
-            placeholder="Escribe un mensaje..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
+            value={editingMessage ? editingContent : newMessage}
+            onChange={(e) => {
+              if (editingMessage) {
+                setEditingContent(e.target.value);
+              } else {
+                setNewMessage(e.target.value);
+              }
+            }}
             onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             rows={3}
             disabled={sending || uploading}
           />
@@ -779,9 +958,14 @@ const MessageBubble = forwardRef(({
   isCurrentSearchResult,
   searchTerm,
   onAddReaction,
-  onRemoveReaction
+  onRemoveReaction,
+  onDelete,
+  onEdit,
+  onReply,
+  onScrollToMessage
 }, ref) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
   const formatTime = (date) => {
     if (!date) return '';
     try {
@@ -843,11 +1027,32 @@ const MessageBubble = forwardRef(({
     setShowReactionPicker(false);
   };
 
+  /**
+   * Check if message can be edited (within 15 minutes)
+   */
+  const canEdit = () => {
+    if (!isOwn || message.deleted) return false;
+    const createdAt = message.createdAt instanceof Date ? message.createdAt : new Date(message.createdAt);
+    const fifteenMinAgo = new Date(Date.now() - 900000);
+    return createdAt >= fifteenMinAgo;
+  };
+
+  /**
+   * Check if message can be deleted for everyone (within 1 hour)
+   */
+  const canDeleteForEveryone = () => {
+    if (!isOwn || message.deleted) return false;
+    const createdAt = message.createdAt instanceof Date ? message.createdAt : new Date(message.createdAt);
+    const oneHourAgo = new Date(Date.now() - 3600000);
+    return createdAt >= oneHourAgo;
+  };
+
   const containerClasses = [
     'message-bubble-container',
     isOwn ? 'own' : 'other',
     isSearchResult ? 'search-result' : '',
-    isCurrentSearchResult ? 'current-search-result' : ''
+    isCurrentSearchResult ? 'current-search-result' : '',
+    message.deleted ? 'deleted' : ''
   ].filter(Boolean).join(' ');
 
   return (
@@ -859,8 +1064,64 @@ const MessageBubble = forwardRef(({
       )}
 
       <div className="message-bubble">
+        {/* Context Menu Button */}
+        {!message.deleted && (
+          <div className="message-actions-container">
+            <button
+              className="message-menu-btn"
+              onClick={() => setShowContextMenu(!showContextMenu)}
+              title="Más opciones"
+            >
+              <MoreVertical size={14} />
+            </button>
+
+            {showContextMenu && (
+              <div className="message-context-menu">
+                <button onClick={() => { onReply(message); setShowContextMenu(false); }}>
+                  <Reply size={14} />
+                  Responder
+                </button>
+                {isOwn && canEdit() && !message.attachment && (
+                  <button onClick={() => { onEdit(message); setShowContextMenu(false); }}>
+                    <Edit2 size={14} />
+                    Editar
+                  </button>
+                )}
+                {isOwn && (
+                  <>
+                    <button onClick={() => { onDelete(message.id, false); setShowContextMenu(false); }}>
+                      <Trash2 size={14} />
+                      Eliminar para mí
+                    </button>
+                    {canDeleteForEveryone() && (
+                      <button onClick={() => { onDelete(message.id, true); setShowContextMenu(false); }}>
+                        <Trash2 size={14} />
+                        Eliminar para todos
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {!isOwn && showAvatar && (
           <div className="message-sender">{message.senderName}</div>
+        )}
+
+        {/* Reply Preview */}
+        {message.replyTo && (
+          <div
+            className="message-reply-preview"
+            onClick={() => onScrollToMessage(message.replyTo.messageId)}
+          >
+            <div className="reply-line"></div>
+            <div className="reply-content">
+              <strong>{message.replyTo.senderName}</strong>
+              <p>{message.replyTo.content || (message.replyTo.attachment ? '📎 ' + message.replyTo.attachment.filename : '')}</p>
+            </div>
+          </div>
         )}
 
         {/* Attachment Display */}
@@ -911,7 +1172,19 @@ const MessageBubble = forwardRef(({
           </div>
         )}
 
-        <div className="message-time">{formatTime(message.createdAt)}</div>
+        <div className="message-footer">
+          <div className="message-time">
+            {formatTime(message.createdAt)}
+            {message.edited && <span className="edited-indicator"> (editado)</span>}
+          </div>
+          {isOwn && !message.deleted && (
+            <div className="message-status">
+              {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
+              {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
+              {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+            </div>
+          )}
+        </div>
 
         {/* Reactions Display */}
         {message.reactions && Object.keys(message.reactions).length > 0 && (
