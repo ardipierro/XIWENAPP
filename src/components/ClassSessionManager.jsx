@@ -27,7 +27,6 @@ import {
   createInstantMeetSession
 } from '../firebase/classSessions';
 import { loadCourses, getAllUsers } from '../firebase/firestore';
-import { getAllGroups } from '../firebase/groups';
 import { getAllContent } from '../firebase/content';
 import ClassSessionModal from './ClassSessionModal';
 import {
@@ -47,7 +46,6 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
   const [sessions, setSessions] = useState([]);
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
-  const [groups, setGroups] = useState([]);
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -77,24 +75,21 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
   const loadData = async () => {
     try {
       setLoading(true);
-      const [sessionsData, coursesData, usersData, groupsData, contentsData] = await Promise.all([
+      const [sessionsData, coursesData, usersData, contentsData] = await Promise.all([
         getTeacherSessions(user.uid),
         loadCourses(),
         getAllUsers(),
-        getAllGroups(),
         getAllContent()
       ]);
 
       setSessions(sessionsData);
       setCourses(coursesData);
       setStudents(usersData.filter(u => ['student', 'trial'].includes(u.role)));
-      setGroups(groupsData);
       setContents(contentsData);
       logger.info('Datos cargados:', {
         sesiones: sessionsData.length,
         cursos: coursesData.length,
         estudiantes: usersData.filter(u => ['student', 'trial'].includes(u.role)).length,
-        grupos: groupsData.length,
         contenidos: contentsData.length
       });
 
@@ -769,7 +764,6 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
         session={editingSession}
         courses={courses}
         students={students}
-        groups={groups}
         contents={contents}
         loading={actionLoading === 'create' || actionLoading === 'edit'}
       />

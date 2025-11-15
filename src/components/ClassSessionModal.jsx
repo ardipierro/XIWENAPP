@@ -4,8 +4,6 @@ import logger from '../utils/logger';
 import { BaseModal, BaseButton, BaseInput, BaseSelect, BaseTextarea, BaseTabs } from './common';
 import { Timestamp } from 'firebase/firestore';
 import {
-  assignGroupToSession,
-  unassignGroupFromSession,
   assignStudentToSession,
   unassignStudentFromSession,
   assignContentToSession,
@@ -23,7 +21,6 @@ function ClassSessionModal({
   session = null,
   courses = [],
   students = [],
-  groups = [],
   contents = [],
   loading = false
 }) {
@@ -272,32 +269,6 @@ function ClassSessionModal({
       session.assignedStudents = (session.assignedStudents || []).filter(id => id !== studentId);
     } else {
       showAssignmentMessage('error', result.error || 'Error al remover estudiante');
-    }
-    setAssignmentLoading(false);
-  };
-
-  const handleAssignGroup = async (groupId) => {
-    if (!session?.id) return;
-    setAssignmentLoading(true);
-    const result = await assignGroupToSession(session.id, groupId);
-    if (result.success) {
-      showAssignmentMessage('success', '✅ Grupo asignado');
-      session.assignedGroups = [...(session.assignedGroups || []), groupId];
-    } else {
-      showAssignmentMessage('error', result.error || 'Error al asignar grupo');
-    }
-    setAssignmentLoading(false);
-  };
-
-  const handleUnassignGroup = async (groupId) => {
-    if (!session?.id) return;
-    setAssignmentLoading(true);
-    const result = await unassignGroupFromSession(session.id, groupId);
-    if (result.success) {
-      showAssignmentMessage('success', '✅ Grupo removido');
-      session.assignedGroups = (session.assignedGroups || []).filter(id => id !== groupId);
-    } else {
-      showAssignmentMessage('error', result.error || 'Error al remover grupo');
     }
     setAssignmentLoading(false);
   };
@@ -812,72 +783,20 @@ function ClassSessionModal({
                   <div className="text-center">
                     <Users className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
                     <p className="text-gray-600 dark:text-gray-400">
-                      Primero crea la sesión para poder asignar estudiantes y grupos
+                      Primero crea la sesión para poder asignar estudiantes
                     </p>
                   </div>
                 </div>
               ) : (
                 <>
-                  {/* Grupos Asignados */}
+                  {/* Estudiantes Asignados */}
                   <div className="space-y-3">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                       <Users size={20} strokeWidth={2} />
-                      Grupos Asignados
-                    </h3>
-                    {(session.assignedGroups || []).length === 0 ? (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">No hay grupos asignados</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {groups.filter(g => (session.assignedGroups || []).includes(g.id)).map(group => (
-                          <div key={group.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">{group.name}</div>
-                              {group.description && (
-                                <div className="text-sm text-gray-600 dark:text-gray-400">{group.description}</div>
-                              )}
-                            </div>
-                            <BaseButton
-                              variant="danger"
-                              size="sm"
-                              icon={Trash2}
-                              onClick={() => handleUnassignGroup(group.id)}
-                              disabled={assignmentLoading}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Asignar Nuevo Grupo */}
-                  {groups.filter(g => !(session.assignedGroups || []).includes(g.id)).length > 0 && (
-                    <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Plus size={18} strokeWidth={2} />
-                        Asignar Grupo
-                      </h4>
-                      <BaseSelect
-                        value=""
-                        onChange={(e) => e.target.value && handleAssignGroup(e.target.value)}
-                        options={[
-                          { value: '', label: 'Selecciona un grupo...' },
-                          ...groups
-                            .filter(g => !(session.assignedGroups || []).includes(g.id))
-                            .map(g => ({ value: g.id, label: g.name }))
-                        ]}
-                        disabled={assignmentLoading}
-                      />
-                    </div>
-                  )}
-
-                  {/* Estudiantes Asignados */}
-                  <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Users size={20} strokeWidth={2} />
-                      Estudiantes Asignados Individualmente
+                      Estudiantes Asignados
                     </h3>
                     {(session.assignedStudents || []).length === 0 ? (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">No hay estudiantes asignados individualmente</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">No hay estudiantes asignados</p>
                     ) : (
                       <div className="space-y-2">
                         {students.filter(s => (session.assignedStudents || []).includes(s.id)).map(student => (

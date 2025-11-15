@@ -19,7 +19,6 @@ import EventDetailModal from './EventDetailModal';
 import ClassSessionModal from './ClassSessionModal';
 import { startClassSession, endClassSession, updateClassSession } from '../firebase/classSessions';
 import { loadCourses, getAllUsers } from '../firebase/firestore';
-import { getAllGroups } from '../firebase/groups';
 import { getAllContent } from '../firebase/content';
 
 export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJoinSession, onEditSession }) {
@@ -38,7 +37,6 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
   // Datos necesarios para el modal de edición
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
-  const [groups, setGroups] = useState([]);
   const [contents, setContents] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
 
@@ -56,16 +54,14 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
   const loadModalData = async () => {
     try {
       setDataLoading(true);
-      const [coursesData, usersData, groupsData, contentsData] = await Promise.all([
+      const [coursesData, usersData, contentsData] = await Promise.all([
         loadCourses(),
         getAllUsers(),
-        getAllGroups(),
         getAllContent()
       ]);
 
       setCourses(coursesData);
       setStudents(usersData.filter(u => ['student', 'trial'].includes(u.role)));
-      setGroups(groupsData);
       setContents(contentsData);
     } catch (error) {
       logger.error('Error loading modal data:', error);
@@ -311,7 +307,6 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
         session={editingSession}
         courses={courses}
         students={students}
-        groups={groups}
         contents={contents}
         loading={actionLoading}
       />
