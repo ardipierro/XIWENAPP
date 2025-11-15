@@ -150,7 +150,9 @@
       "Bash(git merge-base:*)",
       "Bash(git pull:*)",
       "Bash(del NUL)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(timeout 3 bash:*)",
+      "Bash(grammar)"
     ],
     "deny": [],
     "ask": []

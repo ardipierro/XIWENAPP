@@ -191,11 +191,10 @@ export async function getCorrectionProfilesByTeacher(teacherId, isAdmin = false)
 
     // Admins can see all profiles, teachers only their own
     const q = isAdmin
-      ? query(profilesRef, orderBy('createdAt', 'desc'))
+      ? query(profilesRef)
       : query(
           profilesRef,
-          where('teacherId', '==', teacherId),
-          orderBy('createdAt', 'desc')
+          where('teacherId', '==', teacherId)
         );
 
     const snapshot = await getDocs(q);
@@ -204,6 +203,13 @@ export async function getCorrectionProfilesByTeacher(teacherId, isAdmin = false)
       id: doc.id,
       ...doc.data()
     }));
+
+    // Sort in memory to avoid needing Firestore index
+    profiles.sort((a, b) => {
+      const timeA = a.createdAt?.toMillis?.() || 0;
+      const timeB = b.createdAt?.toMillis?.() || 0;
+      return timeB - timeA; // Desc order (newest first)
+    });
 
     return profiles;
   } catch (error) {

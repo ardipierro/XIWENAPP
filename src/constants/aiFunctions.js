@@ -341,6 +341,9 @@ export const AI_FUNCTIONS = [
       enabled: false,
       provider: 'claude',
       model: 'claude-sonnet-4-5',
+      // ✨ OCR & Analysis providers (separate for better accuracy)
+      analysis_provider: 'claude',  // Who analyzes and corrects the text
+      ocr_provider: 'google',        // Who extracts word coordinates (MUST be 'google' for highlights)
       // Configuración de corrección
       strictnessLevel: 'intermediate', // 'beginner' | 'intermediate' | 'advanced'
       correctionTypes: {
