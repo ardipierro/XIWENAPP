@@ -24,6 +24,7 @@ import {
   BaseInput,
   BaseSelect,
   BaseBadge,
+  CategoryBadge,
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
@@ -199,13 +200,17 @@ function ContentSelectorModal({ isOpen, onClose, onSelect, teacherId }) {
                         </p>
                       )}
                       <div className="flex items-center gap-2 flex-wrap">
-                        <BaseBadge variant="primary" size="sm">
-                          {config.label}
-                        </BaseBadge>
+                        <CategoryBadge
+                          type="content"
+                          value={content.type}
+                          size="sm"
+                        />
                         {content.metadata?.difficulty && (
-                          <BaseBadge variant="info" size="sm">
-                            {content.metadata.difficulty}
-                          </BaseBadge>
+                          <CategoryBadge
+                            type="difficulty"
+                            value={content.metadata.difficulty}
+                            size="sm"
+                          />
                         )}
                         {content.metadata?.duration && (
                           <span className="text-xs text-gray-500 dark:text-gray-400">

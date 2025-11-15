@@ -35,6 +35,7 @@ import { getContentById } from '../firebase/content';
 import {
   BaseButton,
   BaseBadge,
+  CategoryBadge,
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
@@ -260,9 +261,11 @@ function ClassDailyLog({ logId, user, onBack }) {
                   {content.title}
                 </h2>
                 <div className="flex items-center gap-2 mt-2">
-                  <BaseBadge variant="primary" size="sm">
-                    {content.type}
-                  </BaseBadge>
+                  <CategoryBadge
+                    type="content"
+                    value={content.type}
+                    size="sm"
+                  />
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     Agregado: {entry.addedAt?.toDate?.().toLocaleTimeString() || 'Ahora'}
                   </span>
@@ -350,9 +353,11 @@ function ClassDailyLog({ logId, user, onBack }) {
               </h3>
             </div>
             {content.metadata?.exerciseType && (
-              <BaseBadge variant="warning" className="mb-4">
-                {content.metadata.exerciseType}
-              </BaseBadge>
+              <CategoryBadge
+                type="exercise"
+                value={content.metadata.exerciseType}
+                className="mb-4"
+              />
             )}
             <p className="text-gray-700 dark:text-gray-300">
               {content.description || 'Ejercicio disponible'}
@@ -422,9 +427,10 @@ function ClassDailyLog({ logId, user, onBack }) {
             {/* Center */}
             <div className="flex items-center gap-2">
               {log.status === 'active' && (
-                <BaseBadge variant="success" icon={Activity}>
-                  En Vivo
-                </BaseBadge>
+                <CategoryBadge
+                  type="status"
+                  value="published"
+                />
               )}
               {lastSaved && (
                 <span className="text-xs text-gray-500 dark:text-gray-400">
