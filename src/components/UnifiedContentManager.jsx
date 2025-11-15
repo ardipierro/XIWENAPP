@@ -49,7 +49,8 @@ import {
   BaseBadge,
   BaseLoading,
   BaseAlert,
-  BaseEmptyState
+  BaseEmptyState,
+  BaseModal
 } from './common';
 import { UniversalCard } from './cards';
 import CreateContentModal from './CreateContentModal';
