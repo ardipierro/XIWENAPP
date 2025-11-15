@@ -42,7 +42,8 @@ export async function createHomeworkReview(reviewData) {
     const reviewsRef = collection(db, 'homework_reviews');
     const docRef = await addDoc(reviewsRef, {
       ...reviewData,
-      status: REVIEW_STATUS.PROCESSING,
+      // Only set status to PROCESSING if not already provided (for manual uploads it may be PENDING_REVIEW)
+      status: reviewData.status || REVIEW_STATUS.PROCESSING,
       teacherReviewed: false,
       createdAt: serverTimestamp()
     });

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { BaseButton, BaseAlert, BaseLoading, BaseSelect } from '../common';
 import { getStudentsByTeacher, getAllUsers } from '../../firebase/users';
-import { createHomeworkReview } from '../../firebase/homework_reviews';
+import { createHomeworkReview, REVIEW_STATUS } from '../../firebase/homework_reviews';
 import { uploadImage } from '../../firebase/storage';
 import logger from '../../utils/logger';
 
@@ -135,10 +135,17 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
         imageUrl: uploadResult.url,
         filename: selectedFile.name,
         imageSize: selectedFile.size,
+        status: REVIEW_STATUS.PENDING_REVIEW, // Manual uploads go straight to pending review (no AI processing needed)
         isManualUpload: true, // Flag to distinguish manual uploads
         uploadedBy: teacherId,
         isFreeCorrection: false, // Assuming manual uploads are not free corrections
-        needsStudentAssignment: !selectedStudentId // Flag to indicate if student needs to be assigned later
+        needsStudentAssignment: !selectedStudentId, // Flag to indicate if student needs to be assigned later
+        // Initialize empty corrections for manual uploads
+        aiSuggestions: [],
+        detailedCorrections: [],
+        errorSummary: { total: 0 },
+        overallFeedback: 'Tarea subida manualmente - pendiente de revisión',
+        suggestedGrade: 0
       };
 
       const result = await createHomeworkReview(reviewData);
