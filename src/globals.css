@@ -4735,3 +4735,22 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
    Asegurar padding consistente en todos los paneles
    ============================================ */
 
+
+/* ============================================
+   FIX CRÍTICO: Prevenir que contenido se esconda bajo la barra superior
+   ============================================ */
+
+/* Asegurar que NADA tenga margin-top negativo que lo empuje hacia arriba */
+.universal-dashboard__content > *,
+.universal-dashboard__content > * > *,
+.universal-dashboard__content > * > * > * {
+  margin-top: 0;
+}
+
+/* Regla específica para el panel de mensajes */
+.universal-dashboard__content .messages-panel,
+.universal-dashboard__content .messages-main,
+.universal-dashboard__content .message-thread {
+  margin-top: 0 !important;
+  position: relative;
+}
