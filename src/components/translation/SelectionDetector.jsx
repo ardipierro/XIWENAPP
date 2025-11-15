@@ -1,22 +1,26 @@
 /**
  * SelectionDetector Component
- * Detects text selection and shows translation button
+ * Detects text selection and shows translation + speaker buttons
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Languages } from 'lucide-react';
 import PropTypes from 'prop-types';
 import TranslationPopup from './TranslationPopup';
+import SpeakerButton from '../selection/SpeakerButton';
 import useTranslator from '../../hooks/useTranslator';
+import useSpeaker from '../../hooks/useSpeaker';
+import logger from '../../utils/logger';
 
 const SelectionDetector = ({ children, enabled = true, containerRef = null }) => {
   const [selectedText, setSelectedText] = useState('');
   const [selectionPosition, setSelectionPosition] = useState(null);
-  const [showButton, setShowButton] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
-  const buttonRef = useRef(null);
+  const buttonsRef = useRef(null);
   const { translate, isTranslating, error, lastTranslation, clearError } = useTranslator();
+  const { speak, isGenerating, error: speakError, clearError: clearSpeakError } = useSpeaker();
 
   /**
    * Handle text selection
@@ -54,10 +58,10 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
         width: rect.width,
         bottom: rect.bottom + window.scrollY
       });
-      setShowButton(true);
+      setShowButtons(true);
       setShowPopup(false); // Hide popup if showing
     } else {
-      setShowButton(false);
+      setShowButtons(false);
       setShowPopup(false);
     }
   }, [enabled, containerRef]);
@@ -70,36 +74,59 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
 
     try {
       await translate(selectedText);
-      setShowButton(false);
+      setShowButtons(false);
       setShowPopup(true);
     } catch (err) {
-      console.error('Translation error:', err);
+      logger.error('Translation error:', err, 'SelectionDetector');
       setShowPopup(true); // Show popup with error
     }
   }, [selectedText, translate]);
+
+  /**
+   * Handle speak button click
+   */
+  const handleSpeak = useCallback(async () => {
+    if (!selectedText) return;
+
+    try {
+      logger.info(`🔊 Speaking selected text: "${selectedText.substring(0, 30)}..."`, 'SelectionDetector');
+      await speak(selectedText, {
+        voice: 'es-AR-female-1',
+        rate: 1.0,
+        preferPremium: false // Use free Edge TTS
+      });
+
+      // Keep buttons visible while speaking
+      // They will hide on new selection or click outside
+    } catch (err) {
+      logger.error('Speaking error:', err, 'SelectionDetector');
+      // Error is handled by useSpeaker hook
+    }
+  }, [selectedText, speak]);
 
   /**
    * Close popup and reset state
    */
   const handleClosePopup = useCallback(() => {
     setShowPopup(false);
-    setShowButton(false);
+    setShowButtons(false);
     setSelectedText('');
     setSelectionPosition(null);
     clearError();
+    clearSpeakError();
 
     // Clear text selection
     if (window.getSelection) {
       window.getSelection().removeAllRanges();
     }
-  }, [clearError]);
+  }, [clearError, clearSpeakError]);
 
   /**
-   * Handle click outside button
+   * Handle click outside buttons
    */
   const handleClickOutside = useCallback((e) => {
-    if (buttonRef.current && !buttonRef.current.contains(e.target)) {
-      setShowButton(false);
+    if (buttonsRef.current && !buttonsRef.current.contains(e.target)) {
+      setShowButtons(false);
     }
   }, []);
 
@@ -119,37 +146,39 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
   }, [enabled, handleSelection, handleClickOutside]);
 
   /**
-   * Calculate button position
+   * Calculate buttons container position
+   * Displays 2 buttons side by side on desktop, stacked on mobile
    */
-  const getButtonStyle = () => {
+  const getButtonsStyle = () => {
     if (!selectionPosition) return {};
 
-    const buttonWidth = 120;
-    const buttonHeight = 40;
+    const buttonsWidth = 280; // Width for 2 buttons side by side
+    const buttonsHeight = 40;
     const offset = 8;
 
-    // Position button below selection by default
+    // Position buttons below selection by default
     let top = selectionPosition.bottom + offset;
-    let left = selectionPosition.left + selectionPosition.width / 2 - buttonWidth / 2;
+    let left = selectionPosition.left + selectionPosition.width / 2 - buttonsWidth / 2;
 
-    // If button would be below viewport, position it above selection
-    if (top + buttonHeight > window.innerHeight + window.scrollY - 20) {
-      top = selectionPosition.top - buttonHeight - offset;
+    // If buttons would be below viewport, position them above selection
+    if (top + buttonsHeight > window.innerHeight + window.scrollY - 20) {
+      top = selectionPosition.top - buttonsHeight - offset;
     }
 
-    // Keep button within horizontal bounds
-    if (left < 10) {
-      left = 10;
+    // Keep buttons within horizontal bounds (mobile-first)
+    const horizontalPadding = 10;
+    if (left < horizontalPadding) {
+      left = horizontalPadding;
     }
-    if (left + buttonWidth > window.innerWidth - 10) {
-      left = window.innerWidth - buttonWidth - 10;
+    if (left + buttonsWidth > window.innerWidth - horizontalPadding) {
+      left = window.innerWidth - buttonsWidth - horizontalPadding;
     }
 
     return {
       position: 'fixed',
       top: `${top - window.scrollY}px`,
       left: `${left - window.scrollX}px`,
-      zIndex: 9999
+      zIndex: 'var(--z-popover)' // Using CSS variable (1060)
     };
   };
 
@@ -157,30 +186,66 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
     <>
       {children}
 
-      {/* Translation Button */}
-      {showButton && !showPopup && (
+      {/* Action Buttons - Translate + Speak */}
+      {showButtons && !showPopup && (
         <div
-          ref={buttonRef}
-          style={getButtonStyle()}
+          ref={buttonsRef}
+          style={getButtonsStyle()}
           className="animate-in fade-in slide-in-from-top-1 duration-150"
         >
-          <button
-            onClick={handleTranslate}
-            disabled={isTranslating}
-            className="
-              flex items-center gap-2 px-4 py-2
-              bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400
-              text-white text-sm font-medium
-              rounded-lg shadow-lg
-              transition-all duration-200
-              hover:scale-105 active:scale-95
-              disabled:cursor-not-allowed
-            "
-          >
-            <Languages size={16} strokeWidth={2} />
-            <span>Traducir</span>
-            <span className="text-xs opacity-90">翻译</span>
-          </button>
+          <div className="flex gap-2 flex-wrap">
+            {/* Translate Button */}
+            <button
+              onClick={handleTranslate}
+              disabled={isTranslating}
+              className="
+                flex items-center gap-2 px-4 py-2
+                bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+                disabled:bg-blue-400 dark:disabled:bg-blue-300
+                text-white text-sm font-medium
+                rounded-lg shadow-lg
+                transition-all duration-200
+                hover:scale-105 active:scale-95
+                disabled:cursor-not-allowed
+                min-h-tap-sm
+              "
+              aria-label="Traducir texto seleccionado"
+            >
+              <Languages size={16} strokeWidth={2} />
+              <span className="whitespace-nowrap">Traducir</span>
+              <span className="text-xs opacity-90">翻译</span>
+            </button>
+
+            {/* Speak Button */}
+            <button
+              onClick={handleSpeak}
+              disabled={isGenerating}
+              className="
+                flex items-center gap-2 px-4 py-2
+                bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600
+                disabled:bg-indigo-400 dark:disabled:bg-indigo-300
+                text-white text-sm font-medium
+                rounded-lg shadow-lg
+                transition-all duration-200
+                hover:scale-105 active:scale-95
+                disabled:cursor-not-allowed
+                min-h-tap-sm
+              "
+              aria-label="Pronunciar texto seleccionado"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="whitespace-nowrap">Generando...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-base">🔊</span>
+                  <span className="whitespace-nowrap">Pronunciar</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
