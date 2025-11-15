@@ -56,18 +56,11 @@ const MENU_ITEMS = [
   // HERRAMIENTAS DE CREACIÓN (Teachers + Admin)
   {
     id: 'unified-content',
-    label: 'Gestionar Contenidos',
+    label: 'Contenidos',
     icon: Layers,
     path: '/dashboard-v2/unified-content',
     permission: 'create-content',
     description: 'Crear y editar cursos, lecciones, ejercicios, videos y links',
-  },
-  {
-    id: 'exercise-builder',
-    label: 'Exercise Builder',
-    icon: Sparkles,
-    path: '/dashboard-v2/exercise-builder',
-    permission: 'use-exercise-builder',
   },
 
   // DIVIDER
@@ -91,7 +84,7 @@ const MENU_ITEMS = [
   },
   {
     id: 'homework-review',
-    label: 'Revisar Tareas IA',
+    label: 'Tareas',
     icon: CheckCircle,
     path: '/dashboard-v2/homework-review',
     permission: 'grade-assignments',
@@ -139,17 +132,10 @@ const MENU_ITEMS = [
   // ADMIN ONLY
   {
     id: 'users',
-    label: 'Gestión de Usuarios',
+    label: 'Usuarios',
     icon: UserCog,
     path: '/dashboard-v2/users',
     permission: 'view-all-users',
-  },
-  {
-    id: 'ai-config',
-    label: 'Configurar IA',
-    icon: Sparkles,
-    path: '/dashboard-v2/ai-config',
-    permission: 'configure-ai',
   },
   {
     id: 'system-settings',

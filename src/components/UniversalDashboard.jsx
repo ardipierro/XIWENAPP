@@ -18,13 +18,11 @@ const UnifiedCalendar = lazy(() => import('./UnifiedCalendar'));
 const MessagesPanel = lazy(() => import('./MessagesPanel'));
 const HomeworkReviewPanel = lazy(() => import('./HomeworkReviewPanel'));
 const AdminPaymentsPanel = lazy(() => import('./AdminPaymentsPanel'));
-const UnifiedContentManager = lazy(() => import('./UnifiedContentManager'));
-const ExerciseBuilder = lazy(() => import('../pages/ExerciseBuilder'));
+const ContentManagerTabs = lazy(() => import('./ContentManagerTabs'));
 const AttendanceView = lazy(() => import('./AttendanceView'));
 const ClassSessionManager = lazy(() => import('./ClassSessionManager'));
 const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
 const CreditManager = lazy(() => import('./CreditManager'));
-const AIConfigPanel = lazy(() => import('./AIConfigPanel'));
 const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const UniversalUserManager = lazy(() => import('./UniversalUserManager'));
 
@@ -173,15 +171,10 @@ export function UniversalDashboard() {
               if (!can('send-messages')) return <PlaceholderView title="Sin acceso" />;
               return <MessagesPanel userId={user.uid} userRole={user.role} />;
 
-            // GESTIONAR CONTENIDOS - Teachers + Admin
+            // CONTENIDOS - Teachers + Admin (incluye Exercise Builder y Configurar IA en tabs)
             case '/dashboard-v2/unified-content':
               if (!can('create-content')) return <PlaceholderView title="Sin acceso" />;
-              return <UnifiedContentManager user={user} userRole={user.role} />;
-
-            // EXERCISE BUILDER
-            case '/dashboard-v2/exercise-builder':
-              if (!can('use-exercise-builder')) return <PlaceholderView title="Sin acceso" />;
-              return <ExerciseBuilder />;
+              return <ContentManagerTabs user={user} userRole={user.role} />;
 
             // ESTUDIANTES (redirige a /users)
             case '/dashboard-v2/students':
@@ -305,11 +298,6 @@ export function UniversalDashboard() {
             case '/dashboard-v2/payments':
               if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
               return <AdminPaymentsPanel />;
-
-            // CONFIGURAR IA (Admin) - AIConfigPanel integrado
-            case '/dashboard-v2/ai-config':
-              if (!can('configure-ai')) return <PlaceholderView title="Sin acceso" />;
-              return <AIConfigPanel user={user} />;
 
             // CONFIGURACIÓN (Admin) - SettingsPanel integrado
             case '/dashboard-v2/system-settings':

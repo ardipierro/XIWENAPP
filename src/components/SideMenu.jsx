@@ -82,8 +82,7 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
               { icon: DollarSign, label: 'Pagos', path: '/admin', action: 'payments' },
               { icon: TrendingUp, label: 'Analytics', path: '/admin', action: 'analytics' },
               { icon: ClipboardList, label: 'Asistencias', path: '/admin', action: 'attendance' },
-              { icon: CheckCircle, label: 'Revisar Tareas', path: '/admin', action: 'homeworkReview' },
-              { icon: Lightbulb, label: 'Tareas IA', path: '/admin', action: 'aiConfig' },
+              { icon: CheckCircle, label: 'Tareas', path: '/admin', action: 'homeworkReview' },
               { icon: Settings, label: 'Configuración', path: '/admin', action: 'settings' },
             ]
           },
@@ -91,7 +90,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
             id: 'ensenanza',
             label: 'Herramientas de Enseñanza',
             items: [
-              { icon: Layers, label: 'Exercise Builder', path: '/admin', action: 'exerciseBuilder' },
               { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
               { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
               // Theme Builder y Design Lab desactivados temporalmente
@@ -108,13 +106,12 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
           { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
           { icon: BookOpen, label: 'Contenidos', path: '/teacher', action: 'unifiedContent' },
           { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classSessions' },
-          { icon: CheckSquare, label: 'Tareas', path: '/teacher', action: 'assignments' },
+          { icon: CheckSquare, label: 'Asignaciones', path: '/teacher', action: 'assignments' },
           { icon: FileCheck, label: 'Calificar', path: '/teacher', action: 'grading' },
-          { icon: CheckCircle, label: 'Revisar Tareas', path: '/teacher', action: 'homeworkReview' },
+          { icon: CheckCircle, label: 'Tareas', path: '/teacher', action: 'homeworkReview' },
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
-          { icon: Layers, label: 'Exercise Builder', path: '/teacher', action: 'exerciseBuilder' },
           { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
           { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
           // Theme Builder y Design Lab desactivados temporalmente
