@@ -11,7 +11,6 @@ import { createUserProfile, getUserRole } from '../firebase/firestore';
 import { isAdminEmail, getDefaultRole, ROLE_INFO } from '../firebase/roleConfig';
 import logger from '../utils/logger';
 import BaseButton from './common/BaseButton';
-import './UnifiedLogin.css';
 
 function UnifiedLogin() {
   const [isRegistering, setIsRegistering] = useState(false);

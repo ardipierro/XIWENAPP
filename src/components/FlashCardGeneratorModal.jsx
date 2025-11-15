@@ -12,7 +12,6 @@ import { generateFlashCardAudio, isElevenLabsConfigured } from '../services/elev
 import { callAI } from '../firebase/aiConfig';
 import imageGenerationService from '../services/imageGenerationService';
 import logger from '../utils/logger';
-import './FlashCardGeneratorModal.css';
 
 const THEMES = [
   { value: 'expresiones-cotidianas', label: 'Expresiones Cotidianas' },

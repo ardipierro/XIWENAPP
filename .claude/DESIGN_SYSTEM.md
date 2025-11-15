@@ -263,6 +263,73 @@ const sizes = {
 
 ---
 
+### 5. PANELES - Sistema Simplificado ⭐ ACTUALIZADO
+
+**IMPORTANTE:** La mayoría de los paneles NO necesitan clases especiales porque `.universal-dashboard__content` ya proporciona padding consistente.
+
+#### ¿Cuándo usar clases de panel?
+
+**Para paneles dentro de UniversalDashboard (98% de los casos):**
+```jsx
+// ✅ CORRECTO - Sin clase especial, solo spacing
+function SettingsPanel() {
+  return (
+    <div className="space-y-6">
+      <h1>Configuración</h1>
+      {/* Contenido del panel */}
+    </div>
+  );
+}
+```
+
+**Para paneles standalone (modales, popups fuera del dashboard):**
+```jsx
+// ✅ Solo si NO está dentro de .universal-dashboard__content
+function StandalonePanel() {
+  return (
+    <div className="universal-panel-standalone">
+      {/* Contenido */}
+    </div>
+  );
+}
+```
+
+#### Paneles Full-Height Complejos (Messages, etc.)
+
+Estos paneles ya tienen su propio sistema de layout y NO necesitan clases adicionales:
+
+```jsx
+function MessagesPanel({ user }) {
+  return (
+    <div className="messages-panel">
+      {/* Ya tiene estilos propios en globals.css */}
+      <div className="messages-sidebar">...</div>
+      <div className="messages-main">...</div>
+    </div>
+  );
+}
+```
+
+#### Reglas IMPORTANTES
+
+✅ **SIEMPRE:**
+- Usar `space-y-6` o `space-y-4` para spacing vertical entre secciones del panel
+- Dejar que el panel herede el fondo de `.universal-dashboard__content`
+- Usar clases específicas (`messages-panel`, `settings-panel`) solo si el panel tiene estilos CSS únicos
+
+❌ **NUNCA:**
+- Agregar padding o background redundante que ya está en `.universal-dashboard__content`
+- Usar `margin-top: 0 !important` en paneles
+- Crear wrappers innecesarios con padding extra
+
+#### Colores de Fondo Consistentes
+
+Todos los paneles heredan el fondo del dashboard:
+- `.universal-dashboard__content` → `background: var(--color-bg-primary)`
+- Si un panel necesita fondo diferente para una sección específica, usar `var(--color-bg-secondary)` para cards/modales
+
+---
+
 ## 📐 Espaciado y Layout
 
 ### 1. Padding - Sistema Consistente

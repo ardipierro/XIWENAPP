@@ -9,7 +9,6 @@ import { LogIn, UserPlus, AlertCircle, CheckCircle, Loader, Lock } from 'lucide-
 import useAuth from '../hooks/useAuth.js';
 import { PASSWORD_RESET_NOTIFICATION_DURATION } from '../constants/auth.js';
 import BaseButton from './common/BaseButton';
-import './Login.css';
 
 /**
  * Componente de Login y Registro

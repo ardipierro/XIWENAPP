@@ -54,13 +54,13 @@ function MetricCard({ icon: Icon, label, value, subValue, color = 'blue' }) {
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-4">
+    <div className="style={{ background: 'var(--color-bg-secondary)' }} rounded-lg border style={{ borderColor: 'var(--color-border)' }} p-4">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">{label}</p>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
+          <p className="text-sm style={{ color: 'var(--color-text-secondary)' }} mb-1">{label}</p>
+          <p className="text-2xl font-bold style={{ color: 'var(--color-text-primary)' }}">{value}</p>
           {subValue && (
-            <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">{subValue}</p>
+            <p className="text-xs style={{ color: 'var(--color-text-muted)' }} mt-1">{subValue}</p>
           )}
         </div>
         <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
@@ -98,34 +98,34 @@ function TopContentsList({ contents, allContents }) {
       {contents.map((content, index) => (
         <div
           key={content.contentId}
-          className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 flex items-center gap-4"
+          className="style={{ background: 'var(--color-bg-secondary)' }} rounded-lg border style={{ borderColor: 'var(--color-border)' }} p-4 flex items-center gap-4"
         >
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center font-bold text-zinc-600 dark:text-zinc-400">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center font-bold style={{ color: 'var(--color-text-secondary)' }}">
             {index + 1}
           </div>
 
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-zinc-900 dark:text-white truncate">
+            <h4 className="font-medium style={{ color: 'var(--color-text-primary)' }} truncate">
               {getContentTitle(content.contentId)}
             </h4>
             <div className="flex items-center gap-3 mt-1">
               <span className={`text-xs px-2 py-0.5 rounded ${typeColors[getContentType(content.contentId)] || 'bg-zinc-100 dark:bg-zinc-700'}`}>
                 {getContentType(content.contentId)}
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-500">
+              <span className="text-xs style={{ color: 'var(--color-text-muted)' }}">
                 {content.views} vistas
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-500">
+              <span className="text-xs style={{ color: 'var(--color-text-muted)' }}">
                 {content.completionRate}% completado
               </span>
             </div>
           </div>
 
           <div className="flex-shrink-0 text-right">
-            <div className="text-sm font-medium text-zinc-900 dark:text-white">
+            <div className="text-sm font-medium style={{ color: 'var(--color-text-primary)' }}">
               {formatTimeSpent(content.avgTimeSpent)}
             </div>
-            <div className="text-xs text-zinc-500 dark:text-zinc-500">
+            <div className="text-xs style={{ color: 'var(--color-text-muted)' }}">
               promedio
             </div>
           </div>
@@ -257,7 +257,7 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+          <h2 className="text-xl font-bold style={{ color: 'var(--color-text-primary)' }}">
             Analytics del Contenido
           </h2>
           <div className="flex items-center gap-2">
@@ -308,8 +308,8 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
         </div>
 
         {/* Chart */}
-        <div className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-6">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
+        <div className="style={{ background: 'var(--color-bg-secondary)' }} rounded-lg border style={{ borderColor: 'var(--color-border)' }} p-6">
+          <h3 className="text-lg font-semibold style={{ color: 'var(--color-text-primary)' }} mb-4">
             Resumen de Engagement
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -335,7 +335,7 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+        <h2 className="text-xl font-bold style={{ color: 'var(--color-text-primary)' }}">
           Analytics General
         </h2>
         <div className="flex items-center gap-2">
@@ -397,8 +397,8 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Content Type Distribution */}
         {metrics?.contentsByType && (
-          <div className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-6">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
+          <div className="style={{ background: 'var(--color-bg-secondary)' }} rounded-lg border style={{ borderColor: 'var(--color-border)' }} p-6">
+            <h3 className="text-lg font-semibold style={{ color: 'var(--color-text-primary)' }} mb-4">
               Distribución por Tipo
             </h3>
             <ResponsiveContainer width="100%" height={250}>
@@ -428,15 +428,15 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
 
         {/* Time Stats */}
         {metrics && (
-          <div className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-6">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
+          <div className="style={{ background: 'var(--color-bg-secondary)' }} rounded-lg border style={{ borderColor: 'var(--color-border)' }} p-6">
+            <h3 className="text-lg font-semibold style={{ color: 'var(--color-text-primary)' }} mb-4">
               Estadísticas de Tiempo
             </h3>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Tiempo Total</span>
-                  <span className="text-lg font-bold text-zinc-900 dark:text-white">
+                  <span className="text-sm style={{ color: 'var(--color-text-secondary)' }}">Tiempo Total</span>
+                  <span className="text-lg font-bold style={{ color: 'var(--color-text-primary)' }}">
                     {formatTimeSpent(metrics.totalTimeSpent)}
                   </span>
                 </div>
@@ -447,8 +447,8 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Promedio por Vista</span>
-                  <span className="text-lg font-bold text-zinc-900 dark:text-white">
+                  <span className="text-sm style={{ color: 'var(--color-text-secondary)' }}">Promedio por Vista</span>
+                  <span className="text-lg font-bold style={{ color: 'var(--color-text-primary)' }}">
                     {formatTimeSpent(metrics.avgTimePerView)}
                   </span>
                 </div>
@@ -463,8 +463,8 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
 
       {/* Top Contents */}
       {topContents.length > 0 && (
-        <div className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-6">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
+        <div className="style={{ background: 'var(--color-bg-secondary)' }} rounded-lg border style={{ borderColor: 'var(--color-border)' }} p-6">
+          <h3 className="text-lg font-semibold style={{ color: 'var(--color-text-primary)' }} mb-4">
             Top 10 Contenidos Más Populares
           </h3>
           <TopContentsList contents={topContents} allContents={allContents} />

@@ -491,6 +491,38 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ============================================
+    // FLASHCARD COLLECTIONS
+    // ============================================
+
+    // Flashcard collections - authenticated users can read, teachers/admins can write
+    match /flashcard_collections/{collectionId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+
+      // Flashcards subcollection
+      match /flashcards/{cardId} {
+        allow read: if isAuthenticated();
+        allow write: if isTeacher() || isAdmin();
+      }
+    }
+
+    // Flashcard study sessions - users can read/write their own sessions
+    match /flashcard_sessions/{sessionId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Flashcard progress - users can read/write their own progress
+    match /flashcard_progress/{progressId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+    }
+
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;

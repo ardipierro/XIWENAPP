@@ -6,7 +6,6 @@ import {
   UserCog, Bot, X
 } from 'lucide-react';
 import BaseButton from './common/BaseButton';
-import './AvatarSelector.css';
 
 // Avatares disponibles con iconos de lucide-react
 export const AVATARS = {

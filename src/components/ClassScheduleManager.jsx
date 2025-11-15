@@ -18,7 +18,6 @@ import {
   checkAndAutoRenewSessions
 } from '../firebase/scheduledClasses';
 import { generateSessionsForScheduledClass, getScheduledClassStats } from '../firebase/classSessions';
-import './ClassScheduleManager.css';
 
 /**
  * Gestor de horarios de clases para grupos

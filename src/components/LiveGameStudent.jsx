@@ -3,7 +3,6 @@ import logger from '../utils/logger';
 import { useState, useEffect } from 'react';
 import { subscribeToGameSession, markStudentConnected, submitStudentAnswer } from '../firebase/gameSession';
 import BaseButton from './common/BaseButton';
-import './LiveGameStudent.css';
 
 /**
  * Vista móvil para estudiantes

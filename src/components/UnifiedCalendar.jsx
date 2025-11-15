@@ -16,7 +16,10 @@ import { useCalendar, useCalendarNavigation } from '../hooks/useCalendar';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Plus, Video, List, Grid } from 'lucide-react';
 import { BaseLoading, BaseButton, BaseSelect } from './common';
 import EventDetailModal from './EventDetailModal';
-import { startClassSession, endClassSession } from '../firebase/classSessions';
+import ClassSessionModal from './ClassSessionModal';
+import { startClassSession, endClassSession, updateClassSession } from '../firebase/classSessions';
+import { loadCourses, getAllUsers } from '../firebase/firestore';
+import { getAllContent } from '../firebase/content';
 
 export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJoinSession, onEditSession }) {
   const { currentDate, view, setView, goToToday, goToNext, goToPrevious, getDateRange, getDisplayText } = useCalendarNavigation();
@@ -27,11 +30,45 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mobileView, setMobileView] = useState('list'); // 'list' | 'calendar'
 
+  // Estado para edición de sesiones
+  const [editingSession, setEditingSession] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Datos necesarios para el modal de edición
+  const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [contents, setContents] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Cargar datos para el modal de edición
+  useEffect(() => {
+    loadModalData();
+  }, []);
+
+  const loadModalData = async () => {
+    try {
+      setDataLoading(true);
+      const [coursesData, usersData, contentsData] = await Promise.all([
+        loadCourses(),
+        getAllUsers(),
+        getAllContent()
+      ]);
+
+      setCourses(coursesData);
+      setStudents(usersData.filter(u => ['student', 'trial'].includes(u.role)));
+      setContents(contentsData);
+    } catch (error) {
+      logger.error('Error loading modal data:', error);
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   const handleStartSession = async (event) => {
     try {
@@ -89,15 +126,47 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
     }
   };
 
+  // Manejar actualización de sesión desde el modal
+  const handleUpdateSession = async (sessionData) => {
+    try {
+      setActionLoading(true);
+      const sessionId = editingSession.sessionId || editingSession.id;
+
+      const result = await updateClassSession(sessionId, sessionData);
+
+      if (result.success) {
+        logger.info('Session updated successfully from calendar');
+        setShowEditModal(false);
+        setEditingSession(null);
+        await refresh(); // Refrescar eventos del calendario
+      } else {
+        logger.error('Failed to update session:', result.error);
+        alert('Error al actualizar sesión: ' + result.error);
+      }
+    } catch (error) {
+      logger.error('Error updating session:', error);
+      alert('Error al actualizar sesión');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Cerrar modal de edición
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingSession(null);
+  };
+
   // Manejar click en evento
   const handleEventClick = (event) => {
-    // Si es una sesión de clase y hay callback de edición, abrir modal de edición
-    if (event.type === 'session' && onEditSession) {
-      // Obtener el ID de la sesión real (no el ID de instancia recurrente)
-      const sessionId = event.sessionId || event.id;
-      onEditSession(sessionId);
+    // Si es una sesión de clase, abrir modal de edición completo
+    if (event.type === 'session') {
+      // El evento del calendario contiene toda la información de la sesión
+      setEditingSession(event);
+      setShowEditModal(true);
+      logger.info('Opening edit modal for session:', event.sessionId || event.id);
     } else {
-      // Para otros tipos de eventos, mostrar modal de detalles
+      // Para otros tipos de eventos (assignments, events), mostrar modal de detalles
       setSelectedEvent(event);
     }
   };
@@ -219,7 +288,7 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
         </>
       )}
 
-      {/* Event Detail Modal */}
+      {/* Event Detail Modal - Para eventos que NO son sesiones de clase */}
       <EventDetailModal
         event={selectedEvent}
         isOpen={!!selectedEvent}
@@ -228,6 +297,18 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
         onStartSession={handleStartSession}
         onEndSession={handleEndSession}
         userRole={userRole}
+      />
+
+      {/* Class Session Edit Modal - Para sesiones de clase */}
+      <ClassSessionModal
+        isOpen={showEditModal}
+        onClose={handleCloseEditModal}
+        onSubmit={handleUpdateSession}
+        session={editingSession}
+        courses={courses}
+        students={students}
+        contents={contents}
+        loading={actionLoading}
       />
     </div>
   );

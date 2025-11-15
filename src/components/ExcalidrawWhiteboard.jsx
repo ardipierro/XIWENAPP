@@ -8,7 +8,6 @@ const Excalidraw = lazy(() =>
 import '@excalidraw/excalidraw/index.css';
 import { X, Save } from 'lucide-react';
 import { saveExcalidrawContent } from '../firebase/excalidraw';
-import './ExcalidrawWhiteboard.css';
 
 /**
  * Componente de Pizarra usando Excalidraw

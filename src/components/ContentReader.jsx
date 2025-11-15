@@ -54,7 +54,6 @@ import {
   deleteAnnotations
 } from '../firebase/annotations';
 import logger from '../utils/logger';
-import './ContentReader.css';
 
 /**
  * Colores disponibles para anotaciones
@@ -2173,7 +2172,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
           <div className="px-3 py-2 bg-gradient-to-r from-purple-50 to-primary-50 dark:from-purple-900/30 dark:to-primary-800/30 border-t border-primary-200 dark:border-primary-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <Layers className="w-4 h-4 style={{ color: 'var(--color-accent)' }}" />
                 <span className="text-xs font-semibold text-primary-900 dark:text-primary-100">Capas Visibles</span>
               </div>
               <button
@@ -2446,20 +2445,20 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
             <div className="flex items-center justify-center gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
-                <span className="font-semibold text-purple-700 dark:text-purple-300">
+                <span className="font-semibold style={{ color: 'var(--color-accent)' }}">
                   ✏️ Apple Pencil / Stylus Detectado
                 </span>
               </div>
               <div className="h-4 w-px bg-purple-300 dark:bg-purple-600"></div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-purple-600 dark:text-purple-400">Presión:</span>
+                <span className="text-xs style={{ color: 'var(--color-accent)' }}">Presión:</span>
                 <div className="w-24 h-2 bg-purple-200 dark:bg-purple-800 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-purple-400 to-pink-500 transition-all duration-75"
                     style={{ width: `${lastStylusPressure * 100}%` }}
                   ></div>
                 </div>
-                <span className="text-xs font-mono text-purple-700 dark:text-purple-300">
+                <span className="text-xs font-mono style={{ color: 'var(--color-accent)' }}">
                   {(lastStylusPressure * 100).toFixed(0)}%
                 </span>
               </div>
@@ -3204,7 +3203,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                       containerRef.current.scrollTop = containerRef.current.scrollHeight / 2;
                     }
                   }}
-                  className="w-full px-2 py-1 text-[9px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                  className="w-full px-2 py-1 text-[9px] bg-purple-100 dark:bg-purple-900/30 style={{ color: 'var(--color-accent)' }} rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
                 >
                   ➡️ Ir al medio
                 </button>
@@ -3356,7 +3355,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                     <span className="text-2xl">🎨</span>
                     <div>
                       <strong className="text-primary-900 dark:text-primary-100">Dibujar:</strong>
-                      <p className="text-xs mt-1">5 grosores: fino, medio, grueso, marcador y <strong>resaltador</strong> (ancho, semitransparente). <strong className="text-purple-600 dark:text-purple-400">✏️ Soporte MEJORADO para Apple Pencil/Stylus:</strong> detección automática, sensibilidad a presión avanzada (rango 0.3x-2.5x), palm rejection inteligente para iPad, e indicador visual con barra de presión en tiempo real. <strong>Borrador selectivo</strong> con tamaño ajustable (presiona E o click en el ícono). Selector avanzado con colores personalizados y opacidad.</p>
+                      <p className="text-xs mt-1">5 grosores: fino, medio, grueso, marcador y <strong>resaltador</strong> (ancho, semitransparente). <strong className="style={{ color: 'var(--color-accent)' }}">✏️ Soporte MEJORADO para Apple Pencil/Stylus:</strong> detección automática, sensibilidad a presión avanzada (rango 0.3x-2.5x), palm rejection inteligente para iPad, e indicador visual con barra de presión en tiempo real. <strong>Borrador selectivo</strong> con tamaño ajustable (presiona E o click en el ícono). Selector avanzado con colores personalizados y opacidad.</p>
                     </div>
                   </div>
 
@@ -3451,7 +3450,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                   <div className="flex items-start gap-3 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg border border-purple-200 dark:border-purple-700">
                     <span className="text-2xl">📚</span>
                     <div>
-                      <strong className="text-purple-700 dark:text-purple-300">Capas:</strong>
+                      <strong className="style={{ color: 'var(--color-accent)' }}">Capas:</strong>
                       <p className="text-xs mt-1">Oculta/muestra tipos de anotaciones (CTRL+L). Ideal para enfocarte en un tipo específico.</p>
                     </div>
                   </div>
@@ -3534,7 +3533,7 @@ function ContentReader({ contentId, initialContent, userId, readOnly = false, on
                       <strong>Doble Click:</strong> Haz doble click en notas o textos flotantes para editarlos nuevamente.
                     </p>
                     <p className="mb-2">
-                      <strong className="text-purple-600 dark:text-purple-400">✏️ Apple Pencil / iPad:</strong> Soporte completo mejorado - detección automática, sensibilidad a presión avanzada (0.3x-2.5x), palm rejection inteligente, e indicador visual con barra de presión en tiempo real mientras dibujas.
+                      <strong className="style={{ color: 'var(--color-accent)' }}">✏️ Apple Pencil / iPad:</strong> Soporte completo mejorado - detección automática, sensibilidad a presión avanzada (0.3x-2.5x), palm rejection inteligente, e indicador visual con barra de presión en tiempo real mientras dibujas.
                     </p>
                     <p className="mb-2">
                       <strong>Borrador:</strong> Presiona E para activar/desactivar. Ajusta el tamaño con el slider.

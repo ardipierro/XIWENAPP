@@ -133,8 +133,8 @@ export function useTranslator() {
       // Get AI configuration
       const aiConfig = await getAIConfig();
 
-      // Get translator function config
-      const translatorConfig = aiConfig.functions?.find(f => f.id === 'translator');
+      // Get translator function config (functions is an object, not an array)
+      const translatorConfig = aiConfig.functions?.translator;
 
       if (!translatorConfig || !translatorConfig.enabled) {
         throw new Error('El traductor no está habilitado. Por favor, configúralo en la sección de AI.');

@@ -21,7 +21,6 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
-import './UniversalSideMenu.css';
 
 /**
  * Definición de items del menú con permisos requeridos
@@ -81,6 +80,14 @@ const MENU_ITEMS = [
     icon: Video,
     path: '/dashboard-v2/classes',
     permission: 'manage-classes',
+  },
+  {
+    id: 'daily-logs',
+    label: 'Diarios de Clase',
+    icon: BookOpen,
+    path: '/dashboard-v2/daily-logs',
+    permission: 'manage-classes',
+    description: 'Feed continuo de contenidos mostrados en clase',
   },
   {
     id: 'homework-review',

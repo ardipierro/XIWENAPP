@@ -9,9 +9,7 @@ import { Coins, Lock, Loader } from 'lucide-react';
 import { useCredits } from '../../hooks/useCredits';
 import { getCost } from '../../config/creditCosts';
 import BaseButton from './BaseButton';
-import './CreditProtectedButton.css';
 import logger from '../../utils/logger';
-
 
 /**
  * Botón protegido por créditos

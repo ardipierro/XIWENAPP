@@ -9,7 +9,6 @@ import { getTeacherSessions, getClassSession } from '../firebase/classSessions';
 import { getSessionAttendance, markBulkAttendance, updateAttendanceStatus } from '../firebase/attendance';
 import { getGroupMembers } from '../firebase/groups';
 import BaseButton from './common/BaseButton';
-import './AttendanceView.css';
 
 /**
  * Vista de asistencia para profesores

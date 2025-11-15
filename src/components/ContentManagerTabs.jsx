@@ -13,7 +13,6 @@ import InteractiveBookViewer from './InteractiveBookViewer';
 import ContentReader from './ContentReader';
 import FlashCardManager from './FlashCardManager';
 import { usePermissions } from '../hooks/usePermissions';
-import './ContentManagerTabs.css';
 
 /**
  * Definición de las pestañas

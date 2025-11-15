@@ -33,7 +33,6 @@ import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
 import AudioCacheTab from './settings/AudioCacheTab';
 import logger from '../utils/logger';
 
-
 /**
  * Modal de configuración completo con tabs
  */
@@ -135,7 +134,7 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
     }
   };
 
-  // ✅ 4 tabs principales
+  // ✅ 6 tabs principales (Apariencia, Pantalla, Fuentes, Audio, Caché, Avanzado)
   const tabs = [
     {
       id: 'appearance',
@@ -174,6 +173,14 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       description: 'Progreso, imágenes IA y más'
     }
   ];
+
+  // Debug: Log tabs en desarrollo
+  useEffect(() => {
+    if (isOpen) {
+      logger.info(`📋 SettingsModal opened with ${tabs.length} tabs:`, 'SettingsModal');
+      tabs.forEach(tab => logger.info(`  - ${tab.id}: ${tab.label}`, 'SettingsModal'));
+    }
+  }, [isOpen]);
 
   // Manejar guardado de configuración
   const handleSaveSettings = () => {

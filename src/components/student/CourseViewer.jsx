@@ -11,7 +11,6 @@ import { ensureStudentProfile } from '../../firebase/firestore';
 import { getCourseContents, getCourseExercises } from '../../firebase/relationships';
 import BaseButton from '../common/BaseButton';
 import { BaseTabs } from '../common';
-import './CourseViewer.css';
 
 function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPlayExercise }) {
   const [activeTab, setActiveTab] = useState('content'); // 'content', 'exercises', 'progress'

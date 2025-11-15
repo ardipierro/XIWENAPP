@@ -78,19 +78,19 @@ function ExpandableModal({
     // Overlay con backdrop blur
     <div
       className={`
-        fixed inset-0 z-50
+        fixed inset-0
         flex items-center justify-center
         ${isFullscreen ? 'p-0' : 'p-4'}
         bg-black/50 dark:bg-black/70 backdrop-blur-sm
         animate-in fade-in duration-200
       `}
+      style={{ zIndex: 'var(--z-modal-backdrop)' }}
       onClick={handleOverlayClick}
     >
       {/* Modal box */}
       <div
         className={`
-          relative z-51 w-full ${modalSizeClass}
-          bg-white dark:bg-primary-900
+          relative w-full ${modalSizeClass}
           ${isFullscreen ? '' : 'rounded-xl'}
           flex flex-col
           transition-all duration-300 ease-in-out
@@ -98,6 +98,8 @@ function ExpandableModal({
           ${className}
         `}
         style={{
+          zIndex: 'var(--z-modal)',
+          background: 'var(--color-bg-secondary)',
           border: '1px solid var(--color-border)'
         }}
         onClick={(e) => e.stopPropagation()}
@@ -105,7 +107,13 @@ function ExpandableModal({
         {/* Loading spinner overlay */}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="w-10 h-10 border-4 border-gray-200 dark:border-gray-700 border-t-zinc-800 rounded-full animate-spin" />
+            <div
+              className="w-10 h-10 border-4 rounded-full animate-spin"
+              style={{
+                borderColor: 'var(--color-border)',
+                borderTopColor: 'var(--color-text-primary)'
+              }}
+            />
           </div>
         )}
 
@@ -118,16 +126,22 @@ function ExpandableModal({
             <div className="flex items-center gap-3 flex-1 min-w-0">
               {/* Icon */}
               {Icon && (
-                <div className="
-                  flex items-center justify-center w-10 h-10 rounded-lg shrink-0
-                  bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300
-                ">
+                <div
+                  className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
+                  style={{
+                    background: 'var(--color-bg-tertiary)',
+                    color: 'var(--color-text-primary)'
+                  }}
+                >
                   <Icon size={24} strokeWidth={2} />
                 </div>
               )}
               {/* Title */}
               {title && (
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white truncate">
+                <h3
+                  className="text-lg md:text-xl font-semibold truncate"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   {title}
                 </h3>
               )}
@@ -139,14 +153,22 @@ function ExpandableModal({
               <button
                 className="
                   flex items-center justify-center w-9 h-9 rounded-lg
-                  bg-zinc-100 dark:bg-zinc-800
-                  text-zinc-700 dark:text-zinc-300
-                  hover:bg-zinc-200 dark:hover:bg-zinc-700
-                  hover:text-zinc-900 dark:hover:text-white
                   active:scale-95 transition-all
                   disabled:opacity-50 disabled:cursor-not-allowed
-                  border border-zinc-300 dark:border-zinc-600
                 "
+                style={{
+                  background: 'var(--color-bg-tertiary)',
+                  color: 'var(--color-text-secondary)',
+                  border: '1px solid var(--color-border)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--color-bg-hover)';
+                  e.currentTarget.style.color = 'var(--color-text-primary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+                  e.currentTarget.style.color = 'var(--color-text-secondary)';
+                }}
                 onClick={toggleFullscreen}
                 aria-label={isFullscreen ? 'Contraer' : 'Expandir a pantalla completa'}
                 title={isFullscreen ? 'Contraer ventana' : 'Expandir a pantalla completa'}

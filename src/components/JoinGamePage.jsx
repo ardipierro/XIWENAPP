@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getGameSessionByCode } from '../firebase/gameSession';
 import LiveGameStudent from './LiveGameStudent';
-import './JoinGamePage.css';
 
 /**
  * Página pública para que estudiantes se unan a juegos

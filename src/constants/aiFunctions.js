@@ -498,6 +498,106 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       selectedVoiceName: null,
       presets: []
     }
+  },
+  {
+    id: 'selection_speaker',
+    name: 'Pronunciación de Selección',
+    description: 'Convierte texto seleccionado en audio con voces configurables (Edge TTS gratis o ElevenLabs premium)',
+    icon: Volume2,
+    category: 'tools',
+    defaultConfig: {
+      enabled: true,
+      provider: 'edgetts', // 'edgetts' (gratis) o 'elevenlabs' (premium)
+      model: 'eleven_multilingual_v2', // Solo para ElevenLabs
+      systemPrompt: '',
+      parameters: {
+        rate: 1.0, // Velocidad de habla (0.5 - 2.0)
+        stability: 0.5, // Solo ElevenLabs (0-1)
+        similarity_boost: 0.75, // Solo ElevenLabs (0-1)
+        style: 0.5, // Solo ElevenLabs (0-1)
+        use_speaker_boost: true // Solo ElevenLabs
+      },
+      // Voces disponibles por proveedor
+      voices: {
+        edgetts: [
+          {
+            id: 'es-AR-female-1',
+            name: 'Elena (Argentina - Femenina)',
+            voiceId: 'es-AR-ElenaNeural',
+            gender: 'female',
+            accent: 'Argentina',
+            description: 'Voz femenina natural con acento argentino',
+            isDefault: true
+          },
+          {
+            id: 'es-AR-male-1',
+            name: 'Tomás (Argentina - Masculina)',
+            voiceId: 'es-AR-TomasNeural',
+            gender: 'male',
+            accent: 'Argentina',
+            description: 'Voz masculina natural con acento argentino'
+          },
+          {
+            id: 'es-MX-female-1',
+            name: 'Dalia (México - Femenina)',
+            voiceId: 'es-MX-DaliaNeural',
+            gender: 'female',
+            accent: 'México',
+            description: 'Voz femenina natural con acento mexicano'
+          },
+          {
+            id: 'es-MX-male-1',
+            name: 'Jorge (México - Masculina)',
+            voiceId: 'es-MX-JorgeNeural',
+            gender: 'male',
+            accent: 'México',
+            description: 'Voz masculina natural con acento mexicano'
+          },
+          {
+            id: 'es-ES-female-1',
+            name: 'Elvira (España - Femenina)',
+            voiceId: 'es-ES-ElviraNeural',
+            gender: 'female',
+            accent: 'España',
+            description: 'Voz femenina natural con acento español'
+          }
+        ],
+        elevenlabs: [
+          {
+            id: 'bella-premium',
+            name: 'Bella (Premium - Femenina)',
+            voiceId: 'EXAVITQu4vr4xnSDxMaL',
+            gender: 'female',
+            description: 'Voz femenina premium de alta calidad',
+            isDefault: true
+          },
+          {
+            id: 'adam-premium',
+            name: 'Adam (Premium - Masculina)',
+            voiceId: 'pNInz6obpgDQGcFmaJgB',
+            gender: 'male',
+            description: 'Voz masculina premium de alta calidad'
+          },
+          {
+            id: 'domi-premium',
+            name: 'Domi (Premium - Femenina)',
+            voiceId: 'AZnzlk1XvdvUeBnXmlld',
+            gender: 'female',
+            description: 'Voz femenina premium versátil'
+          },
+          {
+            id: 'antoni-premium',
+            name: 'Antoni (Premium - Masculina)',
+            voiceId: 'ErXwobaYiN019PkySvjV',
+            gender: 'male',
+            description: 'Voz masculina premium versátil'
+          }
+        ]
+      },
+      selectedVoiceId: 'es-AR-female-1', // Voz por defecto
+      allowStudentSelection: false, // Permitir que alumnos elijan voz
+      autoCache: true // Cachear automáticamente
+    }
   }
 ];
 

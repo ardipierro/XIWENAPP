@@ -146,13 +146,13 @@ function AdminPaymentsPanel() {
   }
 
   return (
-    <div className="p-6 bg-zinc-50 dark:bg-zinc-900 min-h-screen">
+    <div className="space-y-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
           Gestión de Pagos
         </h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+        <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
           Panel de control de ingresos y cobros
         </p>
       </div>
@@ -262,10 +262,10 @@ function AdminPaymentsPanel() {
                     className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg"
                   >
                     <div>
-                      <p className="font-medium text-zinc-900 dark:text-white">
+                      <p className="font-medium style={{ color: 'var(--color-text-primary)' }}">
                         {payment.payerName || 'Estudiante'}
                       </p>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">
                         {payment.type === 'matricula'
                           ? 'Matrícula'
                           : payment.type === 'monthly_fee'
@@ -277,7 +277,7 @@ function AdminPaymentsPanel() {
                     </div>
 
                     <div className="text-right">
-                      <p className="font-bold text-zinc-900 dark:text-white">
+                      <p className="font-bold style={{ color: 'var(--color-text-primary)' }}">
                         {formatCurrency(payment.amount)}
                       </p>
                       <BaseBadge variant={getStatusVariant(payment.status)}>
@@ -355,7 +355,7 @@ function AdminPaymentsPanel() {
                 >
                   <div className="flex items-center gap-4 mt-2">
                     <div className="text-right">
-                      <p className="font-bold text-zinc-900 dark:text-white">
+                      <p className="font-bold style={{ color: 'var(--color-text-primary)' }}">
                         {formatCurrency(fee.finalAmount + (fee.lateFee || 0))}
                       </p>
                       {fee.lateFee > 0 && (
@@ -400,10 +400,10 @@ function AdminPaymentsPanel() {
                       ID: {payment.mercadopagoPaymentId}
                     </p>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+                      <p className="text-2xl font-bold style={{ color: 'var(--color-text-primary)' }}">
                         {formatCurrency(payment.amount)}
                       </p>
-                      <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                      <p className="text-xs style={{ color: 'var(--color-text-secondary)' }}">
                         {payment.paymentMethod}
                       </p>
                     </div>
@@ -447,11 +447,11 @@ function AdminPaymentsPanel() {
 
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                        <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">
                           Matrícula
                         </p>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-zinc-900 dark:text-white">
+                          <p className="font-medium style={{ color: 'var(--color-text-primary)' }}">
                             {formatCurrency(enrollment.matriculaAmount)}
                           </p>
                           {enrollment.matriculaPaid ? (
@@ -463,10 +463,10 @@ function AdminPaymentsPanel() {
                       </div>
 
                       <div className="text-right">
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                        <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">
                           Cuota
                         </p>
-                        <p className="font-medium text-zinc-900 dark:text-white">
+                        <p className="font-medium style={{ color: 'var(--color-text-primary)' }}">
                           {formatCurrency(enrollment.cuotaAmount)}
                         </p>
                       </div>
@@ -492,29 +492,29 @@ function AdminPaymentsPanel() {
         >
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">Estudiante</p>
-              <p className="text-lg font-semibold text-zinc-900 dark:text-white">
+              <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">Estudiante</p>
+              <p className="text-lg font-semibold style={{ color: 'var(--color-text-primary)' }}">
                 {selectedFee.studentName}
               </p>
             </div>
 
             <div>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">Mes</p>
-              <p className="font-medium text-zinc-900 dark:text-white">
+              <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">Mes</p>
+              <p className="font-medium style={{ color: 'var(--color-text-primary)' }}">
                 {selectedFee.monthName}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Monto base</p>
-                <p className="font-medium text-zinc-900 dark:text-white">
+                <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">Monto base</p>
+                <p className="font-medium style={{ color: 'var(--color-text-primary)' }}">
                   {formatCurrency(selectedFee.amount)}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Descuento</p>
+                <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">Descuento</p>
                 <p className="font-medium text-green-600 dark:text-green-400">
                   -{formatCurrency(selectedFee.discount || 0)}
                 </p>
@@ -523,15 +523,15 @@ function AdminPaymentsPanel() {
               {selectedFee.lateFee > 0 && (
                 <>
                   <div>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">Recargo</p>
+                    <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">Recargo</p>
                     <p className="font-medium text-red-600 dark:text-red-400">
                       +{formatCurrency(selectedFee.lateFee)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">Días de mora</p>
-                    <p className="font-medium text-zinc-900 dark:text-white">
+                    <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">Días de mora</p>
+                    <p className="font-medium style={{ color: 'var(--color-text-primary)' }}">
                       {selectedFee.daysPastDue} días
                     </p>
                   </div>
@@ -539,12 +539,12 @@ function AdminPaymentsPanel() {
               )}
             </div>
 
-            <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
+            <div className="pt-4 border-t style={{ borderColor: 'var(--color-border)' }}">
               <div className="flex justify-between items-center">
-                <p className="text-lg font-semibold text-zinc-900 dark:text-white">
+                <p className="text-lg font-semibold style={{ color: 'var(--color-text-primary)' }}">
                   Total
                 </p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+                <p className="text-2xl font-bold style={{ color: 'var(--color-text-primary)' }}">
                   {formatCurrency(selectedFee.finalAmount + (selectedFee.lateFee || 0))}
                 </p>
               </div>

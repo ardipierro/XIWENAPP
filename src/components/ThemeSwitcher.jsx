@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Palette, Check } from 'lucide-react';
 import { useTheme, THEMES, THEME_INFO } from '../contexts/ThemeContext';
-import './ThemeSwitcher.css';
 
 function ThemeSwitcher() {
   const { currentTheme, setTheme } = useTheme();

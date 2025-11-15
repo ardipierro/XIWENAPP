@@ -13,7 +13,6 @@ import MessageThread from './MessageThread';
 import NewMessageModal from './NewMessageModal';
 import BaseButton from './common/BaseButton';
 import logger from '../utils/logger';
-import './Messages.css';
 
 /**
  * Messages Panel Component
