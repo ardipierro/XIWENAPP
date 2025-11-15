@@ -69,7 +69,7 @@ function MessagesPanel({ user }) {
   const totalUnread = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
 
   return (
-    <div className="messages-panel">
+    <div className="universal-panel universal-panel--full-height messages-panel">
       {/* Sidebar - Conversations List */}
       <div className="messages-sidebar">
         <div className="messages-sidebar-header">

@@ -146,13 +146,13 @@ function AdminPaymentsPanel() {
   }
 
   return (
-    <div className="p-6 style={{ background: 'var(--color-bg-tertiary)' }} min-h-screen">
+    <div className="universal-panel universal-panel--scrollable p-6 min-h-screen" style={{ background: 'var(--color-bg-tertiary)' }}>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold style={{ color: 'var(--color-text-primary)' }}">
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
           Gestión de Pagos
         </h1>
-        <p className="text-sm style={{ color: 'var(--color-text-secondary)' }} mt-1">
+        <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
           Panel de control de ingresos y cobros
         </p>
       </div>

@@ -4732,25 +4732,59 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 /* ============================================
    UNIVERSAL PANEL BASE STYLES
-   Asegurar padding consistente en todos los paneles
+   Configuración centralizada para TODOS los paneles
    ============================================ */
 
+/**
+ * Clase base para TODOS los paneles del sistema
+ * Aplica padding superior consistente y previene overlap con TopBar
+ *
+ * USO:
+ * <div className="universal-panel messages-panel">...</div>
+ * <div className="universal-panel homework-review-panel">...</div>
+ *
+ * VER: .claude/DESIGN_SYSTEM.md sección "Paneles"
+ */
+.universal-panel {
+  /* Padding superior para evitar que el contenido toque la barra superior */
+  padding-top: 1.25rem; /* 20px */
 
-/* ============================================
-   FIX CRÍTICO: Prevenir que contenido se esconda bajo la barra superior
-   ============================================ */
+  /* Permitir que los paneles tengan su propio margen superior si lo necesitan */
+  /* NO forzamos margin-top: 0 porque eso causaba el bug */
 
-/* Asegurar que NADA tenga margin-top negativo que lo empuje hacia arriba */
-.universal-dashboard__content > *,
-.universal-dashboard__content > * > *,
-.universal-dashboard__content > * > * > * {
-  margin-top: 0;
+  /* Comportamiento de scroll interno */
+  position: relative;
+
+  /* Transiciones suaves */
+  transition: padding 0.2s ease;
 }
 
-/* Regla específica para el panel de mensajes */
-.universal-dashboard__content .messages-panel,
-.universal-dashboard__content .messages-main,
-.universal-dashboard__content .message-thread {
-  margin-top: 0 !important;
-  position: relative;
+/**
+ * Paneles de altura completa (ocupan todo el viewport disponible)
+ * Ej: MessagesPanel, HomeworkReviewPanel
+ */
+.universal-panel--full-height {
+  height: 100%;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+/**
+ * Paneles con scroll interno
+ * Ej: Settings, Analytics
+ */
+.universal-panel--scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 120px);
+}
+
+/**
+ * Responsive - Menos padding en móvil
+ */
+@media (max-width: 768px) {
+  .universal-panel {
+    padding-top: 1rem; /* 16px en móvil */
+  }
 }

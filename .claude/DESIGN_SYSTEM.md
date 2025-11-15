@@ -263,6 +263,110 @@ const sizes = {
 
 ---
 
+### 5. PANELES - Sistema Unificado ⭐ NUEVO
+
+**CLASE BASE OBLIGATORIA:** Todos los paneles DEBEN usar la clase `.universal-panel`
+
+Esta clase base resuelve el problema de overlapping con la barra superior y asegura padding consistente.
+
+#### Uso Básico
+
+```jsx
+// Panel simple
+<div className="universal-panel messages-panel">
+  {/* Contenido del panel */}
+</div>
+
+// Panel de altura completa (MessagesPanel, HomeworkReviewPanel)
+<div className="universal-panel universal-panel--full-height messages-panel">
+  {/* Contenido que ocupa todo el viewport */}
+</div>
+
+// Panel con scroll interno (SettingsPanel, AnalyticsPanel)
+<div className="universal-panel universal-panel--scrollable settings-panel">
+  {/* Contenido scrolleable */}
+</div>
+```
+
+#### Características de `.universal-panel`
+
+**Padding Superior:**
+- Desktop: `1.25rem` (20px)
+- Móvil: `1rem` (16px)
+- **PROPÓSITO:** Prevenir que títulos y contenido se escondan bajo TopBar
+
+**NO fuerza `margin-top: 0`:**
+- Los paneles pueden tener su propio margen superior si lo necesitan
+- Esto previene el bug donde los paneles "saltaban" hacia arriba al hacer click
+
+#### Variantes
+
+| Clase | Uso | Características |
+|-------|-----|----------------|
+| `.universal-panel` | Base (obligatoria) | padding-top consistente, position relative |
+| `.universal-panel--full-height` | Paneles de viewport completo | height: 100%, min-height: 600px, flex column |
+| `.universal-panel--scrollable` | Paneles con scroll interno | overflow-y auto, max-height calc |
+
+#### Ejemplos Completos
+
+**Mensaje Panel:**
+```jsx
+function MessagesPanel({ user }) {
+  return (
+    <div className="universal-panel universal-panel--full-height messages-panel">
+      <div className="messages-sidebar">
+        {/* Sidebar */}
+      </div>
+      <div className="messages-main">
+        {/* Main content */}
+      </div>
+    </div>
+  );
+}
+```
+
+**Settings Panel:**
+```jsx
+function SettingsPanel() {
+  return (
+    <div className="universal-panel universal-panel--scrollable settings-panel">
+      <h1>Configuración</h1>
+      {/* Mucho contenido que necesita scroll */}
+    </div>
+  );
+}
+```
+
+**Analytics Dashboard:**
+```jsx
+function AnalyticsDashboard({ user }) {
+  return (
+    <div className="universal-panel analytics-panel">
+      <header className="analytics-header">
+        <h1>Analytics</h1>
+      </header>
+      <div className="analytics-grid">
+        {/* Cards de métricas */}
+      </div>
+    </div>
+  );
+}
+```
+
+#### Reglas IMPORTANTES
+
+✅ **SIEMPRE:**
+- Usar `.universal-panel` en todos los paneles nuevos
+- Agregar `.universal-panel` a paneles existentes que tengan problemas de overlapping
+- Combinar con clase específica del panel (ej: `.messages-panel`, `.settings-panel`)
+
+❌ **NUNCA:**
+- Usar `margin-top: 0 !important` en paneles (ya no es necesario)
+- Crear paneles sin `.universal-panel` base
+- Modificar el padding-top de `.universal-panel` directamente (usar variantes)
+
+---
+
 ## 📐 Espaciado y Layout
 
 ### 1. Padding - Sistema Consistente
