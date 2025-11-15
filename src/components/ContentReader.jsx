@@ -54,7 +54,6 @@ import {
   deleteAnnotations
 } from '../firebase/annotations';
 import logger from '../utils/logger';
-import './ContentReader.css';
 
 /**
  * Colores disponibles para anotaciones

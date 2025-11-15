@@ -24,7 +24,6 @@ import {
   Save
 } from 'lucide-react';
 import logger from '../utils/logger';
-import './interactive-book/styles.css';
 import { useContentExport } from '../hooks/useContentExport';
 import { useAuth } from '../contexts/AuthContext';
 import {

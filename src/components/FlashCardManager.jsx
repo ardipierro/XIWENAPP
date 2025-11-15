@@ -21,7 +21,6 @@ import {
 import { exportCollection } from '../services/flashcardExportService';
 import { shareCollection } from '../services/flashcardSharingService';
 import logger from '../utils/logger';
-import './FlashCardManager.css';
 
 /**
  * FlashCard Manager - Gestión de colecciones de flashcards

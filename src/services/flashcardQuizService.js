@@ -4,7 +4,7 @@
  */
 
 import { db } from '../firebase/config';
-import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/db';
+import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import logger from '../utils/logger';
 
 /**
