@@ -153,6 +153,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
       {/* User Profile Modal */}
       {showProfileModal && (
         <UserProfileModal
+          isOpen={showProfileModal}
           user={effectiveUser}
           onClose={() => {
             console.log('Cerrando modal de perfil');
