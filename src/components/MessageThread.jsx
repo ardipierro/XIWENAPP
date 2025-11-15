@@ -69,12 +69,15 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [editingMessage, setEditingMessage] = useState(null);
   const [editingContent, setEditingContent] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
   const messagesEndRef = useRef(null);
   const messagesListRef = useRef(null);  // Ref al contenedor de mensajes
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const searchResultRefs = useRef({});
+  const dragCounterRef = useRef(0);
 
   // Subscribe to messages in real-time
   useEffect(() => {
@@ -602,6 +605,54 @@ function MessageThread({ conversation, currentUser, onClose }) {
   };
 
   /**
+   * Handle drag enter
+   */
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  /**
+   * Handle drag leave
+   */
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  /**
+   * Handle drag over
+   */
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  /**
+   * Handle drop
+   */
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounterRef.current = 0;
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      handleFileSelect({ target: { files: [file] } });
+    }
+  };
+
+  /**
    * Handle key press
    */
   const handleKeyPress = (e) => {
@@ -627,7 +678,24 @@ function MessageThread({ conversation, currentUser, onClose }) {
   if (!conversation) return null;
 
   return (
-    <div className="message-thread">
+    <div
+      className="message-thread"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Drag & Drop Overlay */}
+      {isDragging && (
+        <div className="drag-drop-overlay">
+          <div className="drag-drop-content">
+            <Paperclip size={48} />
+            <h3>Suelta el archivo aquí</h3>
+            <p>Se adjuntará a tu mensaje</p>
+          </div>
+        </div>
+      )}
+
       {/* Thread Header */}
       <div className="thread-header">
         <div className="thread-user-info">
@@ -755,6 +823,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
                 onEdit={handleEditMessage}
                 onReply={handleReplyToMessage}
                 onScrollToMessage={scrollToMessage}
+                onImageClick={setLightboxImage}
                 ref={(el) => {
                   if (el) searchResultRefs.current[message.id] = el;
                 }}
@@ -942,6 +1011,31 @@ function MessageThread({ conversation, currentUser, onClose }) {
           </button>
         </div>
       </form>
+
+      {/* Image Lightbox */}
+      {lightboxImage && (
+        <div className="image-lightbox" onClick={() => setLightboxImage(null)}>
+          <div className="lightbox-overlay"></div>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <button className="lightbox-close" onClick={() => setLightboxImage(null)}>
+              <X size={24} />
+            </button>
+            <img src={lightboxImage.url} alt={lightboxImage.filename} />
+            <div className="lightbox-info">
+              <span>{lightboxImage.filename}</span>
+              <a
+                href={lightboxImage.url}
+                download={lightboxImage.filename}
+                className="lightbox-download"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Download size={16} />
+                Descargar
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -962,7 +1056,8 @@ const MessageBubble = forwardRef(({
   onDelete,
   onEdit,
   onReply,
-  onScrollToMessage
+  onScrollToMessage,
+  onImageClick
 }, ref) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -1132,7 +1227,7 @@ const MessageBubble = forwardRef(({
                 <img
                   src={message.attachment.url}
                   alt={message.attachment.filename}
-                  onClick={() => window.open(message.attachment.url, '_blank')}
+                  onClick={() => onImageClick?.({ url: message.attachment.url, filename: message.attachment.filename })}
                 />
               </div>
             ) : isAudio(message.attachment.type) ? (

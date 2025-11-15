@@ -77,9 +77,11 @@ export async function getOrCreateConversation(userId1, userId2) {
  * @param {string} messageData.content - Message content
  * @param {Object} [messageData.attachment] - Optional attachment data
  * @param {Object} [messageData.replyTo] - Optional reply to message data
+ * @param {boolean} [messageData.forwarded] - Optional forwarded flag
+ * @param {Object} [messageData.forwardedFrom] - Optional forwarded from data
  * @returns {Promise<string>} Message ID
  */
-export async function sendMessage({ conversationId, senderId, senderName, receiverId, content, attachment, replyTo }) {
+export async function sendMessage({ conversationId, senderId, senderName, receiverId, content, attachment, replyTo, forwarded, forwardedFrom }) {
   try {
     const batch = writeBatch(db);
 
@@ -108,6 +110,17 @@ export async function sendMessage({ conversationId, senderId, senderName, receiv
     if (replyTo) {
       messageData.replyTo = replyTo;
     }
+
+    // Add forwarded data if present
+    if (forwarded) {
+      messageData.forwarded = true;
+      if (forwardedFrom) {
+        messageData.forwardedFrom = forwardedFrom;
+      }
+    }
+
+    // Initialize starredBy array
+    messageData.starredBy = [];
 
     batch.set(messageRef, messageData);
 
@@ -602,6 +615,89 @@ export async function deleteMessage(messageId, userId, deleteForEveryone = false
 }
 
 /**
+ * Star/unstar a message
+ * @param {string} messageId - Message ID
+ * @param {string} userId - User ID
+ * @param {boolean} star - True to star, false to unstar
+ * @returns {Promise<void>}
+ */
+export async function toggleMessageStar(messageId, userId, star = true) {
+  try {
+    const messageRef = doc(db, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const starredBy = messageDoc.data().starredBy || [];
+
+    if (star) {
+      // Add user to starredBy array if not already there
+      if (!starredBy.includes(userId)) {
+        await updateDoc(messageRef, {
+          starredBy: arrayUnion(userId)
+        });
+      }
+    } else {
+      // Remove user from starredBy array
+      await updateDoc(messageRef, {
+        starredBy: starredBy.filter(id => id !== userId)
+      });
+    }
+
+    logger.info(`Message ${messageId} ${star ? 'starred' : 'unstarred'}`, 'Messages');
+  } catch (error) {
+    logger.error('Error toggling message star', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
+ * Forward a message to another conversation
+ * @param {string} messageId - Original message ID
+ * @param {string} toConversationId - Destination conversation ID
+ * @param {string} fromUserId - User forwarding the message
+ * @param {string} fromUserName - User's name
+ * @param {string} receiverId - Receiver ID in new conversation
+ * @returns {Promise<string>} New message ID
+ */
+export async function forwardMessage(messageId, toConversationId, fromUserId, fromUserName, receiverId) {
+  try {
+    const messageDoc = await getDoc(doc(db, 'messages', messageId));
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const original = messageDoc.data();
+
+    // Send the forwarded message
+    const newMessageId = await sendMessage({
+      conversationId: toConversationId,
+      senderId: fromUserId,
+      senderName: fromUserName,
+      receiverId,
+      content: original.content || '',
+      attachment: original.attachment || null,
+      // Mark as forwarded
+      forwarded: true,
+      forwardedFrom: {
+        messageId,
+        senderName: original.senderName,
+        originalDate: original.createdAt
+      }
+    });
+
+    logger.info(`Message ${messageId} forwarded to conversation ${toConversationId}`, 'Messages');
+    return newMessageId;
+  } catch (error) {
+    logger.error('Error forwarding message', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
  * Edit a message
  * @param {string} messageId - Message ID
  * @param {string} userId - User ID
@@ -668,5 +764,7 @@ export default {
   addReaction,
   removeReaction,
   deleteMessage,
-  editMessage
+  editMessage,
+  toggleMessageStar,
+  forwardMessage
 };
