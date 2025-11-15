@@ -4,16 +4,22 @@
  */
 
 import { useState, useEffect } from 'react';
-import { CreditCard, Plus, Sparkles, Search, Grid3x3, List, Eye, Edit, Trash2, Play } from 'lucide-react';
-import { BaseButton, BaseInput, BaseCard, BaseBadge, BaseLoading, BaseAlert, BaseEmptyState } from './common';
+import { CreditCard, Plus, Sparkles, Search, Grid3x3, List, Eye, Edit, Trash2, Play, Download, Share2, Award, Trophy, BarChart3 } from 'lucide-react';
+import { BaseButton, BaseInput, BaseCard, BaseBadge, BaseLoading, BaseAlert, BaseEmptyState, BaseModal } from './common';
 import FlashCardGeneratorModal from './FlashCardGeneratorModal';
 import FlashCardViewer from './FlashCardViewer';
 import FlashCardEditor from './FlashCardEditor';
+import FlashCardStatsPanel from './FlashCardStatsPanel';
+import ShareCollectionModal from './ShareCollectionModal';
+import QuizModal from './QuizModal';
 import {
   getAllFlashCardCollections,
   getFlashCardCollectionsByTeacher,
-  deleteFlashCardCollection
+  deleteFlashCardCollection,
+  getFlashCardCollectionById
 } from '../firebase/flashcards';
+import { exportCollection } from '../services/flashcardExportService';
+import { shareCollection } from '../services/flashcardSharingService';
 import logger from '../utils/logger';
 import './FlashCardManager.css';
 
@@ -27,11 +33,15 @@ export function FlashCardManager({ user }) {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [activeTab, setActiveTab] = useState('collections'); // 'collections' | 'stats'
 
   // Modals
   const [showGenerator, setShowGenerator] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showViewer, setShowViewer] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(null); // collectionId
+  const [showShareModal, setShowShareModal] = useState(null); // collectionId
+  const [showQuizModal, setShowQuizModal] = useState(null); // collectionId
 
   // Selected items
   const [selectedCollectionId, setSelectedCollectionId] = useState(null);
@@ -126,6 +136,47 @@ export function FlashCardManager({ user }) {
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
+  const handleExport = async (collectionId, format) => {
+    try {
+      const collection = await getFlashCardCollectionById(collectionId);
+      if (!collection) {
+        throw new Error('Colección no encontrada');
+      }
+
+      const result = exportCollection(collection, format);
+      if (result.success) {
+        setSuccessMessage(`Colección exportada a ${format.toUpperCase()}`);
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }
+    } catch (error) {
+      logger.error('Error exporting collection:', error);
+      setErrorMessage('Error al exportar colección');
+      setTimeout(() => setErrorMessage(null), 3000);
+    }
+    setShowExportMenu(null);
+  };
+
+  const handleShare = async (collectionId, teacherEmail) => {
+    try {
+      const result = await shareCollection(collectionId, teacherEmail, user);
+      if (result.success) {
+        setSuccessMessage(`Colección compartida con ${teacherEmail}`);
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      logger.error('Error sharing collection:', error);
+      setErrorMessage(error.message || 'Error al compartir colección');
+      setTimeout(() => setErrorMessage(null), 3000);
+    }
+    setShowShareModal(null);
+  };
+
+  const handleStartQuiz = (collectionId) => {
+    setShowQuizModal(collectionId);
+  };
+
   // Filtrar colecciones por búsqueda
   const filteredCollections = collections.filter(col => {
     if (!searchTerm) return true;
@@ -171,6 +222,24 @@ export function FlashCardManager({ user }) {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flashcard-manager__tabs">
+        <button
+          className={`flashcard-manager__tab ${activeTab === 'collections' ? 'flashcard-manager__tab--active' : ''}`}
+          onClick={() => setActiveTab('collections')}
+        >
+          <CreditCard size={18} />
+          Colecciones
+        </button>
+        <button
+          className={`flashcard-manager__tab ${activeTab === 'stats' ? 'flashcard-manager__tab--active' : ''}`}
+          onClick={() => setActiveTab('stats')}
+        >
+          <BarChart3 size={18} />
+          Estadísticas
+        </button>
+      </div>
+
       {/* Success/Error Messages */}
       {successMessage && (
         <BaseAlert variant="success" className="mb-4">
@@ -184,8 +253,16 @@ export function FlashCardManager({ user }) {
         </BaseAlert>
       )}
 
-      {/* Filters */}
-      <div className="flashcard-manager__filters">
+      {/* Stats Panel */}
+      {activeTab === 'stats' && (
+        <FlashCardStatsPanel user={user} collectionId={null} />
+      )}
+
+      {/* Collections Tab */}
+      {activeTab === 'collections' && (
+        <>
+          {/* Filters */}
+          <div className="flashcard-manager__filters">
         <div className="flashcard-manager__search">
           <BaseInput
             icon={Search}
@@ -273,27 +350,116 @@ export function FlashCardManager({ user }) {
                   </BaseButton>
                   <BaseButton
                     variant="ghost"
-                    icon={Eye}
+                    icon={Trophy}
                     size="sm"
-                    onClick={() => handleViewCollection(collection.id)}
+                    onClick={() => handleStartQuiz(collection.id)}
+                    title="Hacer Quiz"
+                  />
+                  <BaseButton
+                    variant="ghost"
+                    icon={Download}
+                    size="sm"
+                    onClick={() => setShowExportMenu(collection.id)}
+                    title="Exportar"
+                  />
+                  <BaseButton
+                    variant="ghost"
+                    icon={Share2}
+                    size="sm"
+                    onClick={() => setShowShareModal(collection.id)}
+                    title="Compartir"
                   />
                   <BaseButton
                     variant="ghost"
                     icon={Edit}
                     size="sm"
                     onClick={() => handleEditCollection(collection.id)}
+                    title="Editar"
                   />
                   <BaseButton
                     variant="ghost"
                     icon={Trash2}
                     size="sm"
                     onClick={() => handleDeleteCollection(collection.id)}
+                    title="Eliminar"
                   />
                 </div>
               </div>
             </BaseCard>
           ))}
         </div>
+      )}
+        </>
+      )}
+
+      {/* Export Menu Modal */}
+      {showExportMenu && (
+        <BaseModal
+          isOpen={true}
+          onClose={() => setShowExportMenu(null)}
+          title="Exportar Colección"
+          size="small"
+        >
+          <div className="flashcard-export-menu">
+            <p className="flashcard-export-menu__description">
+              Selecciona el formato de exportación:
+            </p>
+            <div className="flashcard-export-menu__buttons">
+              <BaseButton
+                variant="outline"
+                icon={Download}
+                onClick={() => handleExport(showExportMenu, 'anki')}
+                fullWidth
+              >
+                Anki (.txt)
+              </BaseButton>
+              <BaseButton
+                variant="outline"
+                icon={Download}
+                onClick={() => handleExport(showExportMenu, 'quizlet')}
+                fullWidth
+              >
+                Quizlet (.txt)
+              </BaseButton>
+              <BaseButton
+                variant="outline"
+                icon={Download}
+                onClick={() => handleExport(showExportMenu, 'csv')}
+                fullWidth
+              >
+                CSV (.csv)
+              </BaseButton>
+              <BaseButton
+                variant="outline"
+                icon={Download}
+                onClick={() => handleExport(showExportMenu, 'json')}
+                fullWidth
+              >
+                JSON (.json)
+              </BaseButton>
+            </div>
+          </div>
+        </BaseModal>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <ShareCollectionModal
+          isOpen={true}
+          onClose={() => setShowShareModal(null)}
+          collectionId={showShareModal}
+          onShare={handleShare}
+        />
+      )}
+
+      {/* Quiz Modal */}
+      {showQuizModal && (
+        <QuizModal
+          isOpen={true}
+          onClose={() => setShowQuizModal(null)}
+          collectionId={showQuizModal}
+          user={user}
+        />
       )}
 
       {/* Generator Modal */}

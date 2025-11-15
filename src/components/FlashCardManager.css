@@ -171,6 +171,80 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* Tabs */
+.flashcard-manager__tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.flashcard-manager__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flashcard-manager__tab:hover {
+  color: var(--color-text-primary);
+}
+
+.flashcard-manager__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.dark .flashcard-manager__tabs {
+  border-bottom-color: var(--dark-border);
+}
+
+.dark .flashcard-manager__tab {
+  color: var(--dark-text-secondary);
+}
+
+.dark .flashcard-manager__tab:hover {
+  color: var(--dark-text-primary);
+}
+
+.dark .flashcard-manager__tab--active {
+  color: var(--dark-primary);
+  border-bottom-color: var(--dark-primary);
+}
+
+/* Export Menu */
+.flashcard-export-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.flashcard-export-menu__description {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.flashcard-export-menu__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dark .flashcard-export-menu__description {
+  color: var(--dark-text-secondary);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .flashcard-manager {
@@ -204,5 +278,13 @@
 
   .flashcard-manager__title {
     font-size: 1.5rem;
+  }
+
+  .flashcard-manager__tabs {
+    overflow-x: auto;
+  }
+
+  .flashcard-manager__tab {
+    flex-shrink: 0;
   }
 }
