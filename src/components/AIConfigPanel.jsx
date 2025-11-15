@@ -5,8 +5,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings, Play, CheckCircle } from 'lucide-react';
+import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
+import { getCorrectionProfilesByTeacher } from '../firebase/correctionProfiles';
 import logger from '../utils/logger';
 import {
   BaseButton,
@@ -19,9 +20,10 @@ import SearchBar from './common/SearchBar';
 import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
 import VoiceLabModal from './VoiceLabModal';
-import ImageGenerationDemo from './ImageGenerationDemo';
-import HomeworkCorrectionProfilesModal from './homework/HomeworkCorrectionProfilesModal';
+import ProfileEditor from './homework/ProfileEditor';
+import ImageTaskModal from './ImageTaskModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
+import { IMAGE_GENERATION_TASKS } from '../utils/imageGenerationTasks';
 import { useAuth } from '../contexts/AuthContext';
 
 function AIConfigPanel() {
@@ -37,17 +39,24 @@ function AIConfigPanel() {
   const [viewMode, setViewMode] = useState('grid');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [showImageDemo, setShowImageDemo] = useState(false);
-  const [showCorrectionProfiles, setShowCorrectionProfiles] = useState(false);
+
+  // Nuevos estados para perfiles y tareas
+  const [correctionProfiles, setCorrectionProfiles] = useState([]);
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [selectedImageTask, setSelectedImageTask] = useState(null);
+  const [showImageTaskModal, setShowImageTaskModal] = useState(false);
 
   // Get current user and role
   const { user, userRole } = useAuth();
+  const isAdmin = userRole === 'admin';
 
   // ============================================================================
   // EFECTOS - Cargar config al montar
   // ============================================================================
   useEffect(() => {
     loadConfig();
+    loadCorrectionProfiles();
   }, []);
 
   // ============================================================================
@@ -56,7 +65,6 @@ function AIConfigPanel() {
 
   /**
    * Cargar configuración desde Firebase
-   * CRÍTICO: Siempre inicializar con estructura válida
    */
   const loadConfig = async () => {
     try {
@@ -65,13 +73,13 @@ function AIConfigPanel() {
 
       const result = await getAIConfig();
 
-      // PASO 1: Crear config default con todas las funciones
+      // Crear config default con todas las funciones
       const defaultConfig = { functions: {} };
       AI_FUNCTIONS.forEach(func => {
         defaultConfig.functions[func.id] = func.defaultConfig;
       });
 
-      // PASO 2: Mergear con config de Firebase si existe
+      // Mergear con config de Firebase si existe
       if (result && result.functions) {
         const mergedConfig = {
           functions: {
@@ -82,7 +90,6 @@ function AIConfigPanel() {
         setConfig(mergedConfig);
         logger.info('AI config loaded and merged');
       } else {
-        // Si no hay config en Firebase, usar default
         setConfig(defaultConfig);
         logger.info('Using default AI config');
       }
@@ -90,7 +97,7 @@ function AIConfigPanel() {
       logger.error('Failed to load AI config:', err);
       setError('Error al cargar configuración');
 
-      // FALLBACK: Usar config default incluso en error
+      // Usar config default incluso en error
       const defaultConfig = { functions: {} };
       AI_FUNCTIONS.forEach(func => {
         defaultConfig.functions[func.id] = func.defaultConfig;
@@ -98,6 +105,21 @@ function AIConfigPanel() {
       setConfig(defaultConfig);
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Cargar perfiles de corrección
+   */
+  const loadCorrectionProfiles = async () => {
+    if (!user) return;
+
+    try {
+      const profiles = await getCorrectionProfilesByTeacher(user.uid, isAdmin);
+      setCorrectionProfiles(profiles);
+      logger.info('Correction profiles loaded:', profiles.length);
+    } catch (err) {
+      logger.error('Failed to load correction profiles:', err);
     }
   };
 
@@ -113,12 +135,26 @@ function AIConfigPanel() {
   };
 
   /**
+   * Abrir editor de perfil de corrección
+   */
+  const handleConfigureProfile = (profile) => {
+    setSelectedProfile(profile);
+    setShowProfileEditor(true);
+  };
+
+  /**
+   * Abrir modal de tarea de imagen
+   */
+  const handleConfigureImageTask = (task) => {
+    setSelectedImageTask(task);
+    setShowImageTaskModal(true);
+  };
+
+  /**
    * Guardar configuración de función
-   * CRÍTICO: Actualizar estado inmediatamente después de guardar en Firebase
    */
   const handleSaveFunction = async (functionId, functionConfig) => {
     try {
-      // PASO 1: Crear nuevo config con la función actualizada
       const updatedConfig = {
         ...config,
         functions: {
@@ -127,17 +163,12 @@ function AIConfigPanel() {
         }
       };
 
-      // PASO 2: Guardar en Firebase
       await saveAIConfig(updatedConfig);
-
-      // PASO 3: Actualizar estado local INMEDIATAMENTE
-      // Esto previene que las cards desaparezcan
       setConfig(updatedConfig);
 
       setSuccess('Configuración guardada exitosamente');
       logger.info('AI function config saved:', functionId);
 
-      // Limpiar mensaje de éxito después de 3 segundos
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       logger.error('Failed to save AI function config:', err);
@@ -148,19 +179,82 @@ function AIConfigPanel() {
 
   /**
    * Cerrar modal
-   * CRÍTICO: NO modificar config aquí, solo cerrar
    */
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedFunction(null);
-    setSearchTerm(''); // Limpiar búsqueda al cerrar modal
+    setSearchTerm('');
+  };
+
+  /**
+   * Cerrar editor de perfil
+   */
+  const handleCloseProfileEditor = () => {
+    setShowProfileEditor(false);
+    setSelectedProfile(null);
+    loadCorrectionProfiles(); // Recargar perfiles
+  };
+
+  /**
+   * Cerrar modal de tarea de imagen
+   */
+  const handleCloseImageTaskModal = () => {
+    setShowImageTaskModal(false);
+    setSelectedImageTask(null);
+  };
+
+  /**
+   * Convertir perfil de corrección a formato de función
+   */
+  const profileToFunction = (profile) => ({
+    id: `profile_${profile.id}`,
+    name: profile.name,
+    description: profile.description || 'Perfil de corrección de tareas',
+    icon: CheckCircle,
+    category: 'correction_profiles',
+    isProfile: true,
+    profileData: profile,
+    defaultConfig: {
+      enabled: profile.isDefault || false,
+      provider: 'custom',
+      model: profile.name
+    }
+  });
+
+  /**
+   * Convertir tarea de demostración a formato de función
+   */
+  const imageTaskToFunction = (task) => ({
+    id: `imagetask_${task.id}`,
+    name: task.name,
+    description: `${task.items.length} elementos - Nivel ${task.level}`,
+    icon: ImageIcon,
+    category: 'demo_tasks',
+    isImageTask: true,
+    taskData: task,
+    defaultConfig: {
+      enabled: false,
+      provider: 'demo',
+      model: task.id
+    }
+  });
+
+  /**
+   * Obtener todas las funciones (AI + Perfiles + Tareas)
+   */
+  const getAllFunctions = () => {
+    const aiFunctions = [...AI_FUNCTIONS];
+    const profileFunctions = correctionProfiles.map(profileToFunction);
+    const taskFunctions = IMAGE_GENERATION_TASKS.map(imageTaskToFunction);
+
+    return [...aiFunctions, ...profileFunctions, ...taskFunctions];
   };
 
   /**
    * Filtrar funciones por categoría y búsqueda
    */
   const getFilteredFunctions = () => {
-    let filtered = [...AI_FUNCTIONS];
+    let filtered = getAllFunctions();
 
     // Filtrar por categoría
     if (selectedCategory) {
@@ -184,7 +278,6 @@ function AIConfigPanel() {
    */
   const getEnabledCount = () => {
     if (!config || !config.functions) return 0;
-    // Solo contar funciones que están en AI_FUNCTIONS (no custom)
     return AI_FUNCTIONS.filter(func => {
       const funcConfig = config.functions[func.id];
       return funcConfig?.enabled;
@@ -193,7 +286,6 @@ function AIConfigPanel() {
 
   const getConfiguredCount = () => {
     if (!config || !config.functions) return 0;
-    // Solo contar funciones que están en AI_FUNCTIONS (no custom)
     return AI_FUNCTIONS.filter(func => {
       const funcConfig = config.functions[func.id];
       return funcConfig?.provider && funcConfig?.model;
@@ -201,14 +293,18 @@ function AIConfigPanel() {
   };
 
   // ============================================================================
-  // HOOKS MEMOIZADOS - ANTES de returns condicionales
+  // HOOKS MEMOIZADOS
   // ============================================================================
   const filteredFunctions = useMemo(() => {
     return getFilteredFunctions();
-  }, [selectedCategory, searchTerm]);
+  }, [selectedCategory, searchTerm, correctionProfiles, config]);
+
+  const allFunctions = useMemo(() => {
+    return getAllFunctions();
+  }, [correctionProfiles]);
 
   // ============================================================================
-  // RENDERS CONDICIONALES - Después de todos los hooks
+  // RENDERS CONDICIONALES
   // ============================================================================
   if (loading) {
     return (
@@ -227,22 +323,6 @@ function AIConfigPanel() {
         <BaseAlert variant="danger" title="Error">
           No se pudo cargar la configuración de IA. Por favor, recarga la página.
         </BaseAlert>
-      </div>
-    );
-  }
-
-  // Si está mostrando el demo de imágenes, renderizar solo ese componente
-  if (showImageDemo) {
-    return (
-      <div className="ai-config-panel">
-        <BaseButton
-          variant="outline"
-          onClick={() => setShowImageDemo(false)}
-          className="mb-6"
-        >
-          ← Volver a Tareas IA
-        </BaseButton>
-        <ImageGenerationDemo />
       </div>
     );
   }
@@ -282,45 +362,12 @@ function AIConfigPanel() {
             setModalOpen(true);
           }}
         />
-
-        {/* Botón de Tareas de Demostración */}
-        <BaseButton
-          variant="primary"
-          icon={Play}
-          onClick={() => setShowImageDemo(true)}
-          className="whitespace-nowrap"
-        >
-          Tareas de Demostración
-        </BaseButton>
-      </div>
-
-      {/* ✨ NEW: Homework Correction Profiles Section */}
-      <div className="mb-8 p-6 bg-zinc-50 dark:bg-zinc-900 rounded-lg border-2 border-primary-200 dark:border-primary-800">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="text-primary-600 dark:text-primary-400" size={24} strokeWidth={2} />
-            <div>
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                Perfiles de Corrección de Tareas
-              </h3>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Configura cómo se corrigen las tareas según el nivel de cada alumno
-              </p>
-            </div>
-          </div>
-          <BaseButton
-            variant="primary"
-            onClick={() => setShowCorrectionProfiles(true)}
-          >
-            Gestionar Perfiles
-          </BaseButton>
-        </div>
       </div>
 
       {/* Description and Stats */}
       <div className="mb-6">
         <p className="text-zinc-600 dark:text-zinc-400 mb-4">
-          Configura diferentes funciones de IA para tu plataforma educativa
+          Configura diferentes funciones de IA, perfiles de corrección y tareas de demostración
         </p>
 
         <div className="flex items-center justify-between gap-4">
@@ -329,7 +376,10 @@ function AIConfigPanel() {
               {getEnabledCount()} funciones activas
             </BaseBadge>
             <BaseBadge variant="default" size="lg">
-              {getConfiguredCount()} de {AI_FUNCTIONS.length} configuradas
+              {correctionProfiles.length} perfiles de corrección
+            </BaseBadge>
+            <BaseBadge variant="default" size="lg">
+              {IMAGE_GENERATION_TASKS.length} tareas de demostración
             </BaseBadge>
           </div>
         </div>
@@ -364,7 +414,7 @@ function AIConfigPanel() {
       <SearchBar
         value={searchTerm}
         onChange={setSearchTerm}
-        placeholder="Buscar funciones de IA..."
+        placeholder="Buscar configuraciones de IA..."
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         className="mb-6"
@@ -378,10 +428,10 @@ function AIConfigPanel() {
           size="sm"
           onClick={() => setSelectedCategory(null)}
         >
-          Todas ({AI_FUNCTIONS.length})
+          Todas ({allFunctions.length})
         </BaseButton>
         {AI_CATEGORIES.map(category => {
-          const count = AI_FUNCTIONS.filter(f => f.category === category.id).length;
+          const count = allFunctions.filter(f => f.category === category.id).length;
           const CategoryIcon = category.icon;
           return (
             <BaseButton
@@ -401,35 +451,93 @@ function AIConfigPanel() {
       {filteredFunctions.length === 0 ? (
         <BaseEmptyState
           icon={Settings}
-          title={searchTerm ? "No se encontraron funciones" : "No hay funciones en esta categoría"}
+          title={searchTerm ? "No se encontraron configuraciones" : "No hay configuraciones en esta categoría"}
           description={searchTerm ? "Intenta con otros términos de búsqueda" : "Selecciona otra categoría"}
           size="lg"
         />
       ) : viewMode === 'grid' ? (
         /* Vista Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-          {filteredFunctions.map(func => (
-            <AIFunctionCard
-              key={func.id}
-              aiFunction={func}
-              config={config.functions[func.id]}
-              onConfigure={() => handleConfigureFunction(func.id)}
-              viewMode="grid"
-            />
-          ))}
+          {filteredFunctions.map(func => {
+            // Si es un perfil de corrección
+            if (func.isProfile) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={() => handleConfigureProfile(func.profileData)}
+                  viewMode="grid"
+                />
+              );
+            }
+
+            // Si es una tarea de demostración
+            if (func.isImageTask) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={() => handleConfigureImageTask(func.taskData)}
+                  viewMode="grid"
+                />
+              );
+            }
+
+            // Función de IA normal
+            return (
+              <AIFunctionCard
+                key={func.id}
+                aiFunction={func}
+                config={config.functions[func.id]}
+                onConfigure={() => handleConfigureFunction(func.id)}
+                viewMode="grid"
+              />
+            );
+          })}
         </div>
       ) : (
         /* Vista List */
         <div className="flex flex-col gap-3 mb-6">
-          {filteredFunctions.map(func => (
-            <AIFunctionCard
-              key={func.id}
-              aiFunction={func}
-              config={config.functions[func.id]}
-              onConfigure={() => handleConfigureFunction(func.id)}
-              viewMode="list"
-            />
-          ))}
+          {filteredFunctions.map(func => {
+            // Si es un perfil de corrección
+            if (func.isProfile) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={() => handleConfigureProfile(func.profileData)}
+                  viewMode="list"
+                />
+              );
+            }
+
+            // Si es una tarea de demostración
+            if (func.isImageTask) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={() => handleConfigureImageTask(func.taskData)}
+                  viewMode="list"
+                />
+              );
+            }
+
+            // Función de IA normal
+            return (
+              <AIFunctionCard
+                key={func.id}
+                aiFunction={func}
+                config={config.functions[func.id]}
+                onConfigure={() => handleConfigureFunction(func.id)}
+                viewMode="list"
+              />
+            );
+          })}
         </div>
       )}
 
@@ -457,12 +565,21 @@ function AIConfigPanel() {
         document.body
       )}
 
-      {/* ✨ NEW: Correction Profiles Modal */}
-      {showCorrectionProfiles && user && (
-        <HomeworkCorrectionProfilesModal
-          onClose={() => setShowCorrectionProfiles(false)}
+      {/* Profile Editor Modal */}
+      {showProfileEditor && user && (
+        <ProfileEditor
+          profile={selectedProfile}
+          onClose={handleCloseProfileEditor}
           teacherId={user.uid}
           userRole={userRole}
+        />
+      )}
+
+      {/* Image Task Modal */}
+      {showImageTaskModal && selectedImageTask && (
+        <ImageTaskModal
+          task={selectedImageTask}
+          onClose={handleCloseImageTaskModal}
         />
       )}
     </div>

@@ -507,7 +507,9 @@ export const AI_CATEGORIES = [
   { id: 'grading', label: 'Evaluación', icon: BarChart3 },
   { id: 'tools', label: 'Herramientas', icon: Wrench },
   { id: 'planning', label: 'Planificación', icon: ClipboardList },
-  { id: 'images', label: 'Imágenes', icon: Image }
+  { id: 'images', label: 'Imágenes', icon: Image },
+  { id: 'correction_profiles', label: 'Perfiles de Corrección', icon: CheckCircle2 },
+  { id: 'demo_tasks', label: 'Tareas de Demostración', icon: Sparkles }
 ];
 
 /**
