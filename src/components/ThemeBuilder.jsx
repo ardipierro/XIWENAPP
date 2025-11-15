@@ -41,6 +41,7 @@ import {
   Edit2,
   Table
 } from 'lucide-react';
+import { BaseTabs } from './common';
 
 // Valores por defecto del sistema
 const DEFAULT_CONFIG = {
@@ -615,22 +616,19 @@ function ThemeBuilder() {
             </section>
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-300 dark:border-gray-700">
-              {[
-                { key: 'colors', label: 'Colors', icon: Palette },
-                { key: 'shadows', label: 'Shadows' },
-                { key: 'radius', label: 'Radius' },
-                { key: 'fonts', label: 'Fonts' }
-              ].map(tab => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${activeTab === tab.key ? `border-b-2 ${mode === 'dark' ? 'border-blue-400 text-blue-400' : 'border-blue-500 text-blue-600'}` : `${mode === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-700'}`}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+            <BaseTabs
+              tabs={[
+                { id: 'colors', label: 'Colors', icon: Palette },
+                { id: 'shadows', label: 'Shadows', icon: Sparkles },
+                { id: 'radius', label: 'Radius', icon: Settings },
+                { id: 'fonts', label: 'Fonts', icon: Code2 }
+              ]}
+              activeTab={activeTab}
+              onChange={setActiveTab}
+              variant="underline"
+              size="sm"
+              fullWidth
+            />
 
             {/* Colores */}
             {activeTab === 'colors' && (

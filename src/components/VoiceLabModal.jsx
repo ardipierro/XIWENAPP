@@ -30,7 +30,8 @@ import {
   BaseTextarea,
   BaseAlert,
   BaseBadge,
-  BaseEmptyState
+  BaseEmptyState,
+  BaseTabs
 } from './common';
 import premiumTTSService from '../services/premiumTTSService';
 import {
@@ -388,34 +389,16 @@ function VoiceLabModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
         </BaseAlert>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => setActiveTab('explore')}
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === 'explore'
-                ? 'border-purple-500 text-purple-600 dark:text-purple-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Search size={16} />
-              Explorar Voces ({voices.length})
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('presets')}
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === 'presets'
-                ? 'border-purple-500 text-purple-600 dark:text-purple-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Save size={16} />
-              Mis Presets ({presets.length})
-            </div>
-          </button>
-        </div>
+        <BaseTabs
+          tabs={[
+            { id: 'explore', label: 'Explorar Voces', icon: Search, badge: voices.length },
+            { id: 'presets', label: 'Mis Presets', icon: Save, badge: presets.length }
+          ]}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="underline"
+          size="sm"
+        />
 
         {/* TAB: Explorar Voces */}
         {activeTab === 'explore' && (
