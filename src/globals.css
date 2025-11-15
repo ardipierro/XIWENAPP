@@ -3372,7 +3372,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .emoji-categories {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--color-border);
 }
@@ -3401,7 +3401,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .emoji-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
+  gap: 3px;
   padding: 12px;
   overflow-y: auto;
   max-height: 280px;
@@ -4277,7 +4277,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .dark .search-input-container {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary);
 }
 
 /* Responsive Search */
