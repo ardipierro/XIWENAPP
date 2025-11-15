@@ -205,7 +205,7 @@ export function UniversalDashboard() {
 
             // CALENDARIO - Todos los roles
             case '/dashboard-v2/calendar':
-              return <UnifiedCalendar user={effectiveUser} userRole={initialized ? can('view-all-users') ? 'admin' : 'user' : 'user'} />;
+              return <UnifiedCalendar userId={effectiveUser.uid} userRole={effectiveUser.role} />;
 
             // MENSAJES - Todos con permiso
             case '/dashboard-v2/messages':
