@@ -14,6 +14,7 @@ import {
   where,
   orderBy,
   limit,
+  startAfter,
   onSnapshot,
   serverTimestamp,
   writeBatch,
@@ -76,9 +77,12 @@ export async function getOrCreateConversation(userId1, userId2) {
  * @param {string} messageData.receiverId - Receiver user ID
  * @param {string} messageData.content - Message content
  * @param {Object} [messageData.attachment] - Optional attachment data
+ * @param {Object} [messageData.replyTo] - Optional reply to message data
+ * @param {boolean} [messageData.forwarded] - Optional forwarded flag
+ * @param {Object} [messageData.forwardedFrom] - Optional forwarded from data
  * @returns {Promise<string>} Message ID
  */
-export async function sendMessage({ conversationId, senderId, senderName, receiverId, content, attachment }) {
+export async function sendMessage({ conversationId, senderId, senderName, receiverId, content, attachment, replyTo, forwarded, forwardedFrom }) {
   try {
     const batch = writeBatch(db);
 
@@ -92,13 +96,32 @@ export async function sendMessage({ conversationId, senderId, senderName, receiv
       senderName,
       content: content || '',
       createdAt: serverTimestamp(),
-      read: false
+      read: false,
+      status: 'sent', // sent, delivered, read
+      deleted: false,
+      edited: false
     };
 
     // Add attachment if present
     if (attachment) {
       messageData.attachment = attachment;
     }
+
+    // Add reply reference if present
+    if (replyTo) {
+      messageData.replyTo = replyTo;
+    }
+
+    // Add forwarded data if present
+    if (forwarded) {
+      messageData.forwarded = true;
+      if (forwardedFrom) {
+        messageData.forwardedFrom = forwardedFrom;
+      }
+    }
+
+    // Initialize starredBy array
+    messageData.starredBy = [];
 
     batch.set(messageRef, messageData);
 
@@ -223,7 +246,10 @@ export async function markMessagesAsRead(conversationId, userId) {
     const batch = writeBatch(db);
 
     snapshot.docs.forEach(doc => {
-      batch.update(doc.ref, { read: true });
+      batch.update(doc.ref, {
+        read: true,
+        status: 'read'
+      });
     });
 
     // Reset unread count
@@ -286,6 +312,63 @@ export function subscribeToMessages(conversationId, callback) {
     // Call callback with empty array to prevent loading state
     callback([]);
   });
+}
+
+/**
+ * Load older messages for infinite scroll
+ * @param {string} conversationId - Conversation ID
+ * @param {Object} oldestMessage - The oldest message currently loaded (with createdAt)
+ * @param {number} limitCount - Number of messages to load
+ * @returns {Promise<Object>} Object with messages array and hasMore flag
+ */
+export async function loadOlderMessages(conversationId, oldestMessage, limitCount = 50) {
+  try {
+    const messagesRef = collection(db, 'messages');
+
+    // Build query to get messages older than the oldest one we have
+    const q = query(
+      messagesRef,
+      where('conversationId', '==', conversationId),
+      orderBy('createdAt', 'desc'),
+      startAfter(oldestMessage.createdAt),
+      limit(limitCount)
+    );
+
+    const snapshot = await getDocs(q);
+
+    const messages = snapshot.docs.map(doc => {
+      const data = doc.data();
+      let createdAt;
+
+      // Handle timestamp with fallback
+      if (data.createdAt?.toDate) {
+        createdAt = data.createdAt.toDate();
+      } else if (data.createdAt) {
+        createdAt = new Date(data.createdAt);
+      } else {
+        createdAt = new Date();
+        logger.warn(`Message ${doc.id} has no createdAt timestamp`, 'Messages');
+      }
+
+      return {
+        id: doc.id,
+        ...data,
+        createdAt
+      };
+    }).reverse(); // Oldest first
+
+    const hasMore = snapshot.docs.length === limitCount;
+
+    logger.info(`Loaded ${messages.length} older messages for conversation ${conversationId}`, 'Messages');
+
+    return {
+      messages,
+      hasMore
+    };
+  } catch (error) {
+    logger.error('Error loading older messages', error, 'Messages');
+    throw error;
+  }
 }
 
 /**
@@ -533,6 +616,196 @@ export async function removeReaction(messageId, userId, emoji) {
   }
 }
 
+/**
+ * Delete a message
+ * @param {string} messageId - Message ID
+ * @param {string} userId - User ID
+ * @param {boolean} deleteForEveryone - Delete for everyone or just for me
+ * @returns {Promise<void>}
+ */
+export async function deleteMessage(messageId, userId, deleteForEveryone = false) {
+  try {
+    const messageRef = doc(db, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const data = messageDoc.data();
+
+    // Check if user is the sender
+    if (data.senderId !== userId) {
+      throw new Error('Not authorized to delete this message');
+    }
+
+    if (deleteForEveryone) {
+      // Check if message is not older than 1 hour
+      const createdAt = data.createdAt?.toDate?.() || new Date(data.createdAt);
+      const oneHourAgo = new Date(Date.now() - 3600000);
+
+      if (createdAt < oneHourAgo) {
+        throw new Error('Solo puedes eliminar mensajes de la última hora');
+      }
+
+      // Mark as deleted for everyone
+      await updateDoc(messageRef, {
+        deleted: true,
+        deletedAt: serverTimestamp(),
+        deletedBy: userId,
+        content: 'Este mensaje fue eliminado',
+        attachment: null
+      });
+
+      logger.info(`Message ${messageId} deleted for everyone`, 'Messages');
+    } else {
+      // Hide message only for this user
+      await updateDoc(messageRef, {
+        [`hiddenFor.${userId}`]: true
+      });
+
+      logger.info(`Message ${messageId} hidden for user ${userId}`, 'Messages');
+    }
+  } catch (error) {
+    logger.error('Error deleting message', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
+ * Star/unstar a message
+ * @param {string} messageId - Message ID
+ * @param {string} userId - User ID
+ * @param {boolean} star - True to star, false to unstar
+ * @returns {Promise<void>}
+ */
+export async function toggleMessageStar(messageId, userId, star = true) {
+  try {
+    const messageRef = doc(db, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const starredBy = messageDoc.data().starredBy || [];
+
+    if (star) {
+      // Add user to starredBy array if not already there
+      if (!starredBy.includes(userId)) {
+        await updateDoc(messageRef, {
+          starredBy: arrayUnion(userId)
+        });
+      }
+    } else {
+      // Remove user from starredBy array
+      await updateDoc(messageRef, {
+        starredBy: starredBy.filter(id => id !== userId)
+      });
+    }
+
+    logger.info(`Message ${messageId} ${star ? 'starred' : 'unstarred'}`, 'Messages');
+  } catch (error) {
+    logger.error('Error toggling message star', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
+ * Forward a message to another conversation
+ * @param {string} messageId - Original message ID
+ * @param {string} toConversationId - Destination conversation ID
+ * @param {string} fromUserId - User forwarding the message
+ * @param {string} fromUserName - User's name
+ * @param {string} receiverId - Receiver ID in new conversation
+ * @returns {Promise<string>} New message ID
+ */
+export async function forwardMessage(messageId, toConversationId, fromUserId, fromUserName, receiverId) {
+  try {
+    const messageDoc = await getDoc(doc(db, 'messages', messageId));
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const original = messageDoc.data();
+
+    // Send the forwarded message
+    const newMessageId = await sendMessage({
+      conversationId: toConversationId,
+      senderId: fromUserId,
+      senderName: fromUserName,
+      receiverId,
+      content: original.content || '',
+      attachment: original.attachment || null,
+      // Mark as forwarded
+      forwarded: true,
+      forwardedFrom: {
+        messageId,
+        senderName: original.senderName,
+        originalDate: original.createdAt
+      }
+    });
+
+    logger.info(`Message ${messageId} forwarded to conversation ${toConversationId}`, 'Messages');
+    return newMessageId;
+  } catch (error) {
+    logger.error('Error forwarding message', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
+ * Edit a message
+ * @param {string} messageId - Message ID
+ * @param {string} userId - User ID
+ * @param {string} newContent - New message content
+ * @returns {Promise<void>}
+ */
+export async function editMessage(messageId, userId, newContent) {
+  try {
+    const messageRef = doc(db, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const data = messageDoc.data();
+
+    // Check if user is the sender
+    if (data.senderId !== userId) {
+      throw new Error('Not authorized to edit this message');
+    }
+
+    // Check if message is not older than 15 minutes
+    const createdAt = data.createdAt?.toDate?.() || new Date(data.createdAt);
+    const fifteenMinAgo = new Date(Date.now() - 900000);
+
+    if (createdAt < fifteenMinAgo) {
+      throw new Error('Solo puedes editar mensajes de los últimos 15 minutos');
+    }
+
+    // Don't allow editing deleted messages
+    if (data.deleted) {
+      throw new Error('No puedes editar un mensaje eliminado');
+    }
+
+    // Update message with new content
+    await updateDoc(messageRef, {
+      content: newContent.trim(),
+      edited: true,
+      editedAt: serverTimestamp(),
+      originalContent: data.originalContent || data.content // Preserve first version
+    });
+
+    logger.info(`Message ${messageId} edited`, 'Messages');
+  } catch (error) {
+    logger.error('Error editing message', error, 'Messages');
+    throw error;
+  }
+}
+
 export default {
   getOrCreateConversation,
   sendMessage,
@@ -547,5 +820,9 @@ export default {
   setTyping,
   clearTyping,
   addReaction,
-  removeReaction
+  removeReaction,
+  deleteMessage,
+  editMessage,
+  toggleMessageStar,
+  forwardMessage
 };
