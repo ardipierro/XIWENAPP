@@ -9,6 +9,7 @@ import { getInstancesForStudent } from '../firebase/classInstances';
 import { getStudentAttendance, markAttendanceByLink } from '../firebase/attendance';
 import { getStudentGroups } from '../firebase/groups';
 import { getUserCredits } from '../firebase/credits';
+import { BaseEmptyState, BaseLoading } from './common';
 // StudentClassView.css removed - using Tailwind CSS
 
 // Helper: verificar si el link de una instancia está activo
@@ -231,9 +232,8 @@ function StudentClassView({ student }) {
 
   if (loading) {
     return (
-      <div className="student-class-view loading">
-        <div className="spinner"></div>
-        <p>Cargando clases...</p>
+      <div className="p-6">
+        <BaseLoading variant="spinner" size="lg" text="Cargando clases..." />
       </div>
     );
   }
@@ -274,15 +274,12 @@ function StudentClassView({ student }) {
 
       {/* Instances List */}
       {instances.length === 0 ? (
-        <div className="empty-classes">
-          <div className="empty-icon">
-            <BookOpen size={64} strokeWidth={2} className="text-gray-400" />
-          </div>
-          <h3 className="empty-title">No hay clases próximas</h3>
-          <p className="empty-text">
-            Tus próximas clases aparecerán aquí cuando sean programadas
-          </p>
-        </div>
+        <BaseEmptyState
+          icon={BookOpen}
+          title="No hay clases próximas"
+          description="Tus próximas clases aparecerán aquí cuando sean programadas"
+          size="lg"
+        />
       ) : (
         <div className="classes-list">
           {instances.map(instance => {
