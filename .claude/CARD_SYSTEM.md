@@ -1,7 +1,7 @@
 # 🃏 Sistema de Cards Unificado
 
-**Fecha:** 2025-11-14
-**Versión:** 1.0 - FASE 1 Completada
+**Fecha:** 2025-11-15
+**Versión:** 1.1 - Footer Sticky + Mejoras de Color
 **Estado:** ✅ Funcional
 
 ---
@@ -49,10 +49,12 @@ El **Sistema de Cards Unificado** reemplaza 6 componentes duplicados con una arq
 **Beneficios:**
 - ✅ Props consistentes
 - ✅ Configuración centralizada (`cardConfig.js`)
-- ✅ 100% Tailwind + CSS vars
+- ✅ 100% Tailwind + CSS vars (gradientes NO hardcoded)
 - ✅ Dark mode automático
 - ✅ Mobile-first
 - ✅ View modes (grid/list/table) unificados
+- ✅ **Footer sticky** - badges/actions siempre alineados
+- ✅ **Layout horizontal mejorado** - contenido distribuido
 
 ---
 
@@ -779,6 +781,100 @@ className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:t
 ```
 
 No necesitas hacer nada. Dark mode funciona out-of-the-box.
+
+---
+
+## 🆕 Novedades Versión 1.1 (2025-11-15)
+
+### 1. **Footer Sticky**
+
+Ahora los badges, stats y actions se mantienen alineados al fondo de la card independientemente del contenido:
+
+```javascript
+// Configuración en cardConfig.js
+default: {
+  // ...
+  footerSticky: true,           // Footer siempre al fondo
+  footerSpacing: 'gap-3',       // Espacio entre elementos del footer
+  footerAlignment: 'start',     // Alineación del footer
+}
+```
+
+**Resultado:**
+- ✅ En formato grid, todas las cards tienen badges/actions a la misma altura
+- ✅ Diseño más consistente y profesional
+- ✅ Mejor experiencia visual
+
+### 2. **Gradientes con CSS Variables**
+
+Los gradientes ya NO están hardcoded. Ahora usan CSS variables:
+
+```javascript
+// ❌ ANTES (hardcoded)
+headerGradient: 'from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900'
+
+// ✅ AHORA (CSS variables)
+headerGradient: 'from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]'
+```
+
+**Beneficios:**
+- ✅ Dark mode más consistente
+- ✅ Fácil de modificar desde un solo lugar
+- ✅ Se integra con el sistema de colores global
+
+### 3. **Auto-detección Mejorada de Header**
+
+El header ahora solo aparece si hay contenido visual REAL:
+
+```javascript
+// ❌ ANTES: Badge solo hacía que apareciera header vacío
+<UniversalCard badge="New" title="Card" />
+// Mostraba header vacío con fondo gris
+
+// ✅ AHORA: Solo imagen/icono/avatar muestran header
+<UniversalCard icon={Users} title="Card" />
+// Header con icono ✅
+
+<UniversalCard title="Card" />
+// Sin header vacío ✅
+```
+
+### 4. **Layout Horizontal Mejorado**
+
+En formato fila (horizontal), el contenido ahora se distribuye a lo largo de toda la fila:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ [Avatar] Texto principal (flex-1) │ Stats │ Badges │ Actions  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Antes:** Todo agrupado en las puntas
+**Ahora:** Distribuido uniformemente con `px-4` entre secciones
+
+### 5. **Sin Divs Vacíos de Imagen**
+
+Las cards sin imagen ya NO muestran el div con fondo gris:
+
+```javascript
+// ❌ ANTES: Mostraba div con bg-gray-200 dark:bg-gray-700
+<BaseCard title="Card" />
+
+// ✅ AHORA: Sin div vacío
+<BaseCard title="Card" />
+```
+
+### 6. **Pestaña de Visualización**
+
+Nueva pestaña en **Settings → Card System** para visualizar todas las variantes:
+
+- ✅ Vista en Grid y List
+- ✅ Ejemplos con y sin header
+- ✅ Demo de footer sticky
+- ✅ Comparación de layouts
+
+**Acceso:**
+`Configuración (menú lateral) → Card System`
 
 ---
 

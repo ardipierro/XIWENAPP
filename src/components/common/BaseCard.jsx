@@ -94,9 +94,9 @@ function BaseCard({
       onClick={onClick}
       style={cardStyle}
     >
-      {/* Imagen superior (full width) */}
+      {/* Imagen superior (full width) - Solo si existe */}
       {image && (
-        <div className="w-full h-48 overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
+        <div className="w-full h-48 overflow-hidden flex-shrink-0">
           {typeof image === 'string' ? (
             <img
               src={image}
