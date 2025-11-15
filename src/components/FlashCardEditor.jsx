@@ -9,7 +9,6 @@ import { BaseButton, BaseInput, BaseSelect, BaseModal, BaseAlert, BaseCard } fro
 import { createFlashCardCollection, updateFlashCardCollection, getFlashCardCollectionById } from '../firebase/flashcards';
 import { uploadFlashCardImage, deleteFlashCardImage, compressImage } from '../services/flashcardImageService';
 import logger from '../utils/logger';
-import './FlashCardEditor.css';
 
 const LEVELS = [
   { value: 'A1', label: 'A1 - Principiante' },

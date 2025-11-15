@@ -6,7 +6,6 @@
 
 import { Coins, Infinity as InfinityIcon, Loader } from 'lucide-react';
 import { useCredits } from '../../hooks/useCredits';
-import './CreditBadge.css';
 
 /**
  * Badge de créditos para TopBar

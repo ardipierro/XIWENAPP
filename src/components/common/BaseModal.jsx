@@ -58,19 +58,19 @@ function BaseModal({
     // Overlay con backdrop blur
     <div
       className={`
-        fixed inset-0 z-[9999]
+        fixed inset-0
         flex items-center justify-center p-4
         bg-black/50 dark:bg-black/70 backdrop-blur-sm
         animate-in fade-in duration-200
         ${isDanger ? 'bg-red-500/10' : ''}
       `}
+      style={{ zIndex: 'var(--z-modal-backdrop)' }}
       onClick={handleOverlayClick}
     >
       {/* Modal box */}
       <div
         className={`
-          relative z-[10000] w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
-          bg-white dark:bg-primary-900
+          relative w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
           rounded-xl
           flex flex-col
           animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
@@ -78,6 +78,8 @@ function BaseModal({
           ${className}
         `}
         style={{
+          zIndex: 'var(--z-modal)',
+          background: 'var(--color-bg-secondary)',
           border: '1px solid var(--color-border)'
         }}
         onClick={(e) => e.stopPropagation()}
@@ -85,7 +87,13 @@ function BaseModal({
         {/* Loading spinner overlay */}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="w-10 h-10 border-4 border-gray-200 dark:border-gray-700 border-t-zinc-800 rounded-full animate-spin" />
+            <div
+              className="w-10 h-10 border-4 rounded-full animate-spin"
+              style={{
+                borderColor: 'var(--color-border)',
+                borderTopColor: 'var(--color-text-primary)'
+              }}
+            />
           </div>
         )}
 
@@ -98,18 +106,26 @@ function BaseModal({
             <div className="flex items-center gap-3 flex-1">
               {/* Icon */}
               {Icon && (
-                <div className={`
-                  flex items-center justify-center w-10 h-10 rounded-lg shrink-0
-                  ${isDanger
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300'}
-                `}>
+                <div
+                  className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
+                  style={{
+                    background: isDanger
+                      ? 'var(--color-error-bg, #fee)'
+                      : 'var(--color-bg-tertiary)',
+                    color: isDanger
+                      ? 'var(--color-error)'
+                      : 'var(--color-text-primary)'
+                  }}
+                >
                   <Icon size={24} strokeWidth={2} />
                 </div>
               )}
               {/* Title */}
               {title && (
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h3
+                  className="text-xl font-semibold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   {title}
                 </h3>
               )}

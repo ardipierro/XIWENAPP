@@ -54,7 +54,6 @@ import {
 } from '../firebase/whiteboard';
 import { auth } from '../firebase/config';
 import SharedContentViewer from './SharedContentViewer';
-import './Whiteboard.css';
 import './SharedContentViewer.css';
 
 function Whiteboard({ onBack, initialSession = null, isCollaborative = false, collaborativeSessionId = null }) {

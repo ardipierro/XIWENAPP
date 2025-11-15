@@ -14,7 +14,6 @@ import {
   updateCreditNotes
 } from '../firebase/credits';
 import BaseButton from './common/BaseButton';
-import './CreditManager.css';
 
 function CreditManager({ userId, currentUser, onUpdate }) {
   const [loading, setLoading] = useState(true);

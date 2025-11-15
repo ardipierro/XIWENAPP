@@ -35,7 +35,6 @@ import {
   Sparkles,
   BookMarked
 } from 'lucide-react';
-import './SideMenu.css';
 
 /**
  * Menú lateral de navegación

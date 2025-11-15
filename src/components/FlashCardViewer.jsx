@@ -10,7 +10,6 @@ import { getFlashCardCollectionById } from '../firebase/flashcards';
 import { generateFallbackAudio } from '../services/elevenLabsService';
 import { saveCardProgress, getCollectionProgress } from '../services/spacedRepetitionService';
 import logger from '../utils/logger';
-import './FlashCardViewer.css';
 
 /**
  * FlashCard Viewer

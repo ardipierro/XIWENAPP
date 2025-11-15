@@ -239,7 +239,7 @@ export default function EventDetailModal({
               )}
 
               {event.isRecurring && (
-                <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3">
+                <div className="style={{ background: 'var(--color-bg-tertiary)' }} border border-zinc-200 dark:border-zinc-800 rounded-lg p-3">
                   <p className="text-sm text-zinc-800 dark:text-zinc-300 font-medium">
                     Esta es una sesión recurrente
                   </p>

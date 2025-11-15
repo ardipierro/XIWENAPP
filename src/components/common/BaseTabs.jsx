@@ -1,5 +1,5 @@
 /**
- * BaseTabs - Componente de pestañas reutilizable (100% Tailwind)
+ * BaseTabs - Componente de pestañas reutilizable (100% Tailwind + CSS Variables)
  *
  * Reemplaza las 16 implementaciones duplicadas de tabs en la app.
  * Incluye soporte para iconos, dark mode, y accesibilidad completa.
@@ -63,8 +63,13 @@ function BaseTabs({
 
   const config = sizeConfig[size] || sizeConfig.md;
 
-  // Variant styles
-  const getVariantClasses = (isActive, isDisabled) => {
+  // Render tab button
+  const renderTab = (tab) => {
+    const isActive = activeTab === tab.id;
+    const isDisabled = tab.disabled || false;
+    const Icon = tab.icon;
+
+    // Base classes for all variants
     const baseClasses = `
       flex items-center ${config.gap} ${config.padding} ${config.fontSize}
       font-medium transition-all duration-200 cursor-pointer
@@ -73,127 +78,161 @@ function BaseTabs({
       ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
     `;
 
-    const variants = {
-      // Underline - Borde inferior (más común en la app)
-      underline: isActive
-        ? `
-          ${baseClasses}
-          border-b-2 border-zinc-900 dark:border-white
-          text-zinc-900 dark:text-white
-        `
-        : `
-          ${baseClasses}
-          border-b-2 border-transparent
-          text-zinc-600 dark:text-zinc-400
-          hover:text-zinc-900 dark:hover:text-white
-          hover:border-zinc-300 dark:hover:border-zinc-700
-        `,
+    // Variant-specific inline styles
+    let buttonStyle = {};
+    let buttonClasses = baseClasses;
 
-      // Pills - Fondo redondeado
-      pills: isActive
-        ? `
-          ${baseClasses}
-          rounded-full
-          bg-zinc-900 dark:bg-white
-          text-white dark:text-zinc-900
-        `
-        : `
-          ${baseClasses}
-          rounded-full
-          bg-transparent
-          text-zinc-600 dark:text-zinc-400
-          hover:bg-zinc-100 dark:hover:bg-zinc-800
-          hover:text-zinc-900 dark:hover:text-white
-        `,
+    switch (variant) {
+      case 'underline':
+        buttonClasses += ' border-b-2';
+        if (isActive) {
+          buttonStyle = {
+            borderBottomColor: 'var(--color-text-primary)',
+            color: 'var(--color-text-primary)',
+          };
+        } else {
+          buttonStyle = {
+            borderBottomColor: 'transparent',
+            color: 'var(--color-text-secondary)',
+          };
+        }
+        break;
 
-      // Boxed - Con borde y fondo
-      boxed: isActive
-        ? `
-          ${baseClasses}
-          rounded-lg
-          bg-white dark:bg-zinc-800
-          text-zinc-900 dark:text-white
-          border border-zinc-300 dark:border-zinc-600
-          shadow-sm
-        `
-        : `
-          ${baseClasses}
-          rounded-lg
-          bg-transparent
-          text-zinc-600 dark:text-zinc-400
-          border border-transparent
-          hover:bg-zinc-50 dark:hover:bg-zinc-800/50
-          hover:text-zinc-900 dark:hover:text-white
-        `,
-    };
+      case 'pills':
+        buttonClasses += ' rounded-full';
+        if (isActive) {
+          buttonStyle = {
+            background: 'var(--color-text-primary)',
+            color: 'var(--color-bg-primary)',
+          };
+        } else {
+          buttonStyle = {
+            background: 'transparent',
+            color: 'var(--color-text-secondary)',
+          };
+        }
+        break;
 
-    return variants[variant] || variants.underline;
+      case 'boxed':
+        buttonClasses += ' rounded-lg';
+        if (isActive) {
+          buttonStyle = {
+            background: 'var(--color-bg-secondary)',
+            color: 'var(--color-text-primary)',
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+          };
+        } else {
+          buttonStyle = {
+            background: 'transparent',
+            color: 'var(--color-text-secondary)',
+            border: '1px solid transparent',
+          };
+        }
+        break;
+    }
+
+    return (
+      <button
+        key={tab.id}
+        role="tab"
+        type="button"
+        aria-selected={isActive}
+        aria-controls={`tabpanel-${tab.id}`}
+        aria-disabled={isDisabled}
+        tabIndex={isActive ? 0 : -1}
+        disabled={isDisabled}
+        onClick={() => {
+          if (!isDisabled && onChange) {
+            onChange(tab.id);
+          }
+        }}
+        className={buttonClasses}
+        style={buttonStyle}
+        onMouseEnter={(e) => {
+          if (!isActive && !isDisabled) {
+            if (variant === 'underline') {
+              e.currentTarget.style.color = 'var(--color-text-primary)';
+              e.currentTarget.style.borderBottomColor = 'var(--color-border-focus)';
+            } else if (variant === 'pills') {
+              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+              e.currentTarget.style.color = 'var(--color-text-primary)';
+            } else if (variant === 'boxed') {
+              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+              e.currentTarget.style.color = 'var(--color-text-primary)';
+            }
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive && !isDisabled) {
+            if (variant === 'underline') {
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+              e.currentTarget.style.borderBottomColor = 'transparent';
+            } else if (variant === 'pills') {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            } else if (variant === 'boxed') {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            }
+          }
+        }}
+      >
+        {/* Icon */}
+        {Icon && (
+          <Icon
+            size={config.iconSize}
+            strokeWidth={2}
+            className="flex-shrink-0"
+          />
+        )}
+
+        {/* Label */}
+        <span>{tab.label}</span>
+
+        {/* Badge (opcional) */}
+        {tab.badge !== undefined && tab.badge !== null && (
+          <span
+            className="ml-1.5 px-1.5 py-0.5 rounded-full text-xs font-semibold"
+            style={{
+              background: isActive ? 'rgba(255,255,255,0.2)' : 'var(--color-bg-tertiary)',
+              color: isActive ? 'currentColor' : 'var(--color-text-secondary)',
+            }}
+          >
+            {tab.badge}
+          </span>
+        )}
+      </button>
+    );
   };
 
-  // Container classes según variante
-  const containerClasses = {
-    underline: 'flex gap-0 border-b border-zinc-200 dark:border-zinc-700 overflow-x-auto',
-    pills: 'flex gap-2 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-x-auto',
-    boxed: 'flex gap-2 p-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg overflow-x-auto',
-  };
+  // Container styles según variante
+  let containerStyle = {};
+  let containerClasses = 'flex overflow-x-auto';
+
+  switch (variant) {
+    case 'underline':
+      containerClasses += ' gap-0';
+      containerStyle = { borderBottom: '1px solid var(--color-border)' };
+      break;
+    case 'pills':
+      containerClasses += ' gap-2 p-1 rounded-full';
+      containerStyle = { background: 'var(--color-bg-tertiary)' };
+      break;
+    case 'boxed':
+      containerClasses += ' gap-2 p-2 rounded-lg';
+      containerStyle = { background: 'var(--color-bg-tertiary)' };
+      break;
+  }
 
   return (
     <div
       role="tablist"
-      className={`${containerClasses[variant] || containerClasses.underline} ${className}`}
+      className={`${containerClasses} ${className}`}
+      style={containerStyle}
       aria-label="Pestañas de navegación"
     >
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.id;
-        const isDisabled = tab.disabled || false;
-        const Icon = tab.icon;
-
-        return (
-          <button
-            key={tab.id}
-            role="tab"
-            type="button"
-            aria-selected={isActive}
-            aria-controls={`tabpanel-${tab.id}`}
-            aria-disabled={isDisabled}
-            tabIndex={isActive ? 0 : -1}
-            disabled={isDisabled}
-            onClick={() => {
-              if (!isDisabled && onChange) {
-                onChange(tab.id);
-              }
-            }}
-            className={getVariantClasses(isActive, isDisabled)}
-          >
-            {/* Icon */}
-            {Icon && (
-              <Icon
-                size={config.iconSize}
-                strokeWidth={2}
-                className="flex-shrink-0"
-              />
-            )}
-
-            {/* Label */}
-            <span>{tab.label}</span>
-
-            {/* Badge (opcional) */}
-            {tab.badge !== undefined && tab.badge !== null && (
-              <span
-                className={`
-                  ml-1.5 px-1.5 py-0.5 rounded-full text-xs font-semibold
-                  ${isActive
-                    ? 'bg-white/20 text-current'
-                    : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
-                  }
-                `}
-              >
-                {tab.badge}
-              </span>
-            )}
-          </button>
-        );
-      })}
+      {tabs.map((tab) => renderTab(tab))}
     </div>
   );
 }

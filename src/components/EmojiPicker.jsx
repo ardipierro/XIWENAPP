@@ -5,7 +5,6 @@
 
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import './EmojiPicker.css';
 
 const EMOJI_CATEGORIES = {
   smileys: {

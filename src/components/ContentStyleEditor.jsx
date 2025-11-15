@@ -144,8 +144,8 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Palette size={24} className="text-indigo-600 dark:text-indigo-400" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <Palette size={24} style={{ color: 'var(--color-accent)' }} />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Editor de Estilos
           </h3>
         </div>
@@ -174,8 +174,8 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
           {/* TIPOGRAFÍA */}
           <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <div className="flex items-center gap-2 mb-4">
-              <Type size={18} className="text-indigo-600 dark:text-indigo-400" />
-              <h4 className="font-semibold text-gray-900 dark:text-white">Tipografía</h4>
+              <Type size={18} style={{ color: 'var(--color-accent)' }} />
+              <h4 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Tipografía</h4>
             </div>
 
             <div className="space-y-4">
@@ -251,8 +251,8 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
           {/* COLORES */}
           <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <div className="flex items-center gap-2 mb-4">
-              <Palette size={18} className="text-indigo-600 dark:text-indigo-400" />
-              <h4 className="font-semibold text-gray-900 dark:text-white">Colores</h4>
+              <Palette size={18} style={{ color: 'var(--color-accent)' }} />
+              <h4 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Colores</h4>
             </div>
 
             <div className="space-y-4">
@@ -327,8 +327,8 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
           {/* ESPACIADO */}
           <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <div className="flex items-center gap-2 mb-4">
-              <Space size={18} className="text-indigo-600 dark:text-indigo-400" />
-              <h4 className="font-semibold text-gray-900 dark:text-white">Espaciado</h4>
+              <Space size={18} style={{ color: 'var(--color-accent)' }} />
+              <h4 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Espaciado</h4>
             </div>
 
             <div className="space-y-4">

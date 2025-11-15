@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useClassNotifications from '../hooks/useClassNotifications';
 import { deleteNotification, deleteReadNotifications } from '../firebase/notifications';
-import '../styles/NotificationCenter.css';
 
 /**
  * Centro de notificaciones con toast automático para clases iniciadas

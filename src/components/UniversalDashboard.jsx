@@ -14,7 +14,6 @@ import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
 import ViewAsBanner from './ViewAsBanner';
 import { BaseLoading } from './common';
-import './UniversalDashboard.css';
 
 // Lazy load de componentes pesados
 const UnifiedCalendar = lazy(() => import('./UnifiedCalendar'));

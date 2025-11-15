@@ -3,7 +3,6 @@
  * @module components/ReactionPicker
  */
 
-import './ReactionPicker.css';
 
 const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🎉', '🔥', '👏'];
 

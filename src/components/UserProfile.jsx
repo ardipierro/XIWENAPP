@@ -54,7 +54,6 @@ import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { BaseAlert, BaseTabs } from './common';
 import BaseButton from './common/BaseButton';
-import './UserProfile.css';
 
 // Icon mapping for role icons from roleConfig
 const ICON_MAP = {

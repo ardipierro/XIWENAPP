@@ -95,19 +95,28 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
     >
       {/* Info de proveedor si está configurado */}
       {isConfigured && provider && (
-        <div className="flex items-center gap-2 p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg mb-3">
+        <div
+          className="flex items-center gap-2 p-2 rounded-lg mb-3"
+          style={{ background: 'var(--color-bg-tertiary)' }}
+        >
           {ProviderIcon && (
             <ProviderIcon
               size={18}
               strokeWidth={2}
-              className="text-zinc-600 dark:text-zinc-400"
+              style={{ color: 'var(--color-text-secondary)' }}
             />
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-zinc-900 dark:text-white truncate">
+            <p
+              className="text-xs font-medium truncate"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
               {provider.name}
             </p>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400 truncate">
+            <p
+              className="text-xs truncate"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
               {activeConfig.model}
             </p>
           </div>
@@ -116,7 +125,10 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
 
       {/* Preview de imagen generada (solo para funciones de imagen) */}
       {isImageFunction && generatedImageUrl && (
-        <div className="mb-3 rounded-lg overflow-hidden border-2 border-purple-300 dark:border-purple-700">
+        <div
+          className="mb-3 rounded-lg overflow-hidden border-2"
+          style={{ borderColor: 'var(--color-accent)' }}
+        >
           <img
             src={generatedImageUrl}
             alt="Generated preview"

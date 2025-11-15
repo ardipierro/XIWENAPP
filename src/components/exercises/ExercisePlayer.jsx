@@ -5,7 +5,6 @@ import { AlertTriangle, PartyPopper, Smile, Zap, Check, X, RotateCcw } from 'luc
 import { getExerciseById } from '../../firebase/exercises';
 import MultipleChoiceExercise from './types/MultipleChoiceExercise';
 import BaseButton from '../common/BaseButton';
-import './ExercisePlayer.css';
 
 function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
   const [exercise, setExercise] = useState(null);

@@ -98,17 +98,17 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
     return (
       <div className="space-y-6">
         {/* Header del ejercicio */}
-        <div className="p-5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+        <div className="p-5 rounded-xl  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <PenTool size={20} strokeWidth={2} />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1">
+              <h3 className="text-lg font-semibold  mb-1" style={{ color: 'var(--color-text-primary)' }}>
                 {exerciseData.title || content.title}
               </h3>
               {exerciseData.instructions && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm " style={{ color: 'var(--color-text-secondary)' }}>
                   {exerciseData.instructions}
                 </p>
               )}
@@ -118,7 +118,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
           {/* Metadata */}
           <div className="flex flex-wrap gap-2 mt-4">
             {exerciseData.type && (
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200">
+              <span className="px-3 py-1 rounded-full text-xs font-medium style={{ background: 'var(--color-bg-hover)' }} style={{ color: 'var(--color-text-primary)' }}">
                 {getExerciseTypeLabel(exerciseData.type)}
               </span>
             )}
@@ -143,15 +143,15 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
         {/* Preguntas del ejercicio */}
         {exerciseData.questions && exerciseData.questions.length > 0 && (
           <div className="space-y-4">
-            <h4 className="text-base font-semibold text-zinc-900 dark:text-white">
+            <h4 className="text-base font-semibold " style={{ color: 'var(--color-text-primary)' }}>
               Preguntas ({exerciseData.questions.length})
             </h4>
             {exerciseData.questions.map((question, index) => (
               <div
                 key={index}
-                className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                className="p-4 rounded-lg border style={{ borderColor: 'var(--color-border)' }} style={{ background: 'var(--color-bg-secondary)' }}"
               >
-                <p className="text-sm font-medium text-zinc-900 dark:text-white mb-3">
+                <p className="text-sm font-medium  mb-3" style={{ color: 'var(--color-text-primary)' }}>
                   {index + 1}. {question.question || question.text || 'Sin pregunta'}
                 </p>
 
@@ -166,7 +166,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
                           className={`p-2 rounded text-sm flex items-center gap-2 ${
                             isCorrect
                               ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                              : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
+                              : 'style={{ background: 'var(--color-bg-tertiary)' }} style={{ color: 'var(--color-text-secondary)' }}'
                           }`}
                         >
                           {isCorrect && <CheckCircle size={16} />}
@@ -201,8 +201,8 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
         )}
 
         {/* Nota informativa */}
-        <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-          <p className="text-xs text-zinc-600 dark:text-zinc-400">
+        <div className="p-4 rounded-lg  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
+          <p className="text-xs " style={{ color: 'var(--color-text-secondary)' }}>
             ℹ️ Esta es una vista previa del ejercicio. Para usar el ejercicio interactivo, ábrelo desde el player de contenidos.
           </p>
         </div>
@@ -229,17 +229,17 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
     return (
       <div className="space-y-6">
         {/* Header de la unidad */}
-        <div className="p-5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+        <div className="p-5 rounded-xl  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <BookOpen size={20} strokeWidth={2} />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1">
+              <h3 className="text-lg font-semibold  mb-1" style={{ color: 'var(--color-text-primary)' }}>
                 {unitData.title || content.title}
               </h3>
               {unitData.unitNumber && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm " style={{ color: 'var(--color-text-secondary)' }}>
                   Unidad {unitData.unitNumber}
                 </p>
               )}
@@ -254,7 +254,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
               </span>
             )}
             {unitData.estimatedDuration && (
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200">
+              <span className="px-3 py-1 rounded-full text-xs font-medium style={{ background: 'var(--color-bg-hover)' }} style={{ color: 'var(--color-text-primary)' }}">
                 {unitData.estimatedDuration} min
               </span>
             )}
@@ -264,22 +264,22 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
         {/* Diálogos */}
         {unitData.content?.dialogue?.lines && (
           <div className="space-y-3">
-            <h4 className="text-base font-semibold text-zinc-900 dark:text-white">Diálogo</h4>
+            <h4 className="text-base font-semibold " style={{ color: 'var(--color-text-primary)' }}>Diálogo</h4>
             {unitData.content.dialogue.lines.slice(0, 5).map((line, index) => (
               <div
                 key={index}
-                className="p-3 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700"
+                className="p-3 rounded-lg style={{ background: 'var(--color-bg-secondary)' }} border style={{ borderColor: 'var(--color-border)' }}"
               >
-                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                <p className="text-xs font-medium style={{ color: 'var(--color-text-muted)' }} mb-1">
                   {line.character || 'Personaje'}
                 </p>
-                <p className="text-sm text-zinc-900 dark:text-white">
+                <p className="text-sm " style={{ color: 'var(--color-text-primary)' }}>
                   {line.text}
                 </p>
               </div>
             ))}
             {unitData.content.dialogue.lines.length > 5 && (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+              <p className="text-xs style={{ color: 'var(--color-text-muted)' }} text-center">
                 ... y {unitData.content.dialogue.lines.length - 5} líneas más
               </p>
             )}
@@ -288,9 +288,9 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
 
         {/* Introducción */}
         {unitData.content?.introduction?.text && (
-          <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-            <h4 className="text-sm font-semibold text-zinc-900 dark:text-white mb-2">Introducción</h4>
-            <p className="text-sm text-zinc-700 dark:text-zinc-300">
+          <div className="p-4 rounded-lg  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
+            <h4 className="text-sm font-semibold  mb-2" style={{ color: 'var(--color-text-primary)' }}>Introducción</h4>
+            <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">
               {unitData.content.introduction.text}
             </p>
           </div>
@@ -298,13 +298,13 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
 
         {/* Ejercicios incluidos */}
         {unitData.content?.exercises && unitData.content.exercises.length > 0 && (
-          <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-            <h4 className="text-sm font-semibold text-zinc-900 dark:text-white mb-2">
+          <div className="p-4 rounded-lg  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
+            <h4 className="text-sm font-semibold  mb-2" style={{ color: 'var(--color-text-primary)' }}>
               Ejercicios incluidos ({unitData.content.exercises.length})
             </h4>
             <ul className="space-y-1">
               {unitData.content.exercises.map((ex, index) => (
-                <li key={index} className="text-sm text-zinc-700 dark:text-zinc-300">
+                <li key={index} className="text-sm style={{ color: 'var(--color-text-secondary)' }}">
                   • {ex.title || ex.type || `Ejercicio ${index + 1}`}
                 </li>
               ))}
@@ -313,8 +313,8 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
         )}
 
         {/* Nota informativa */}
-        <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-          <p className="text-xs text-zinc-600 dark:text-zinc-400">
+        <div className="p-4 rounded-lg  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
+          <p className="text-xs " style={{ color: 'var(--color-text-secondary)' }}>
             ℹ️ Esta es una vista previa de la unidad. Para la experiencia completa interactiva, ábrela desde el libro digital.
           </p>
         </div>
@@ -351,13 +351,13 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
   const renderLink = () => {
     return (
       <div className="space-y-4">
-        <div className="p-6 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+        <div className="p-6 rounded-xl  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
               <LinkIcon size={20} strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">Enlace externo:</p>
+              <p className="text-sm  mb-2" style={{ color: 'var(--color-text-secondary)' }}>Enlace externo:</p>
               <a
                 href={content.body}
                 target="_blank"
@@ -403,7 +403,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
 
         {/* Contenidos incluidos */}
         <div>
-          <h4 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+          <h4 className="text-lg font-semibold  mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <BookMarked size={20} strokeWidth={2} />
             Contenidos Incluidos ({childContentIds.length})
           </h4>
@@ -413,16 +413,16 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
               {childContentIds.map((childId, index) => (
                 <div
                   key={childId}
-                  className="flex items-center gap-3 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+                  className="flex items-center gap-3 p-4 rounded-lg border style={{ borderColor: 'var(--color-border)' }} bg-white dark:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
                 >
-                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 flex items-center justify-center font-semibold text-sm">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-700  flex items-center justify-center font-semibold text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     {index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-zinc-900 dark:text-white truncate">
+                    <p className="text-sm font-medium  truncate" style={{ color: 'var(--color-text-primary)' }}>
                       ID: {childId}
                     </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="text-xs style={{ color: 'var(--color-text-muted)' }}">
                       Contenido asignado
                     </p>
                   </div>
@@ -435,7 +435,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
           ) : (
             <div className="p-8 text-center rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-700">
               <AlertCircle size={32} className="mx-auto mb-3 text-zinc-400" strokeWidth={1.5} />
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm " style={{ color: 'var(--color-text-secondary)' }}>
                 No hay contenidos asignados a este {isCourse ? 'curso' : 'contenedor'}
               </p>
               <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
@@ -447,8 +447,8 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
 
         {/* Metadatos adicionales */}
         {content.metadata && Object.keys(content.metadata).length > 1 && (
-          <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-            <h5 className="text-sm font-semibold text-zinc-900 dark:text-white mb-2">
+          <div className="p-4 rounded-lg  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
+            <h5 className="text-sm font-semibold  mb-2" style={{ color: 'var(--color-text-primary)' }}>
               Información Adicional
             </h5>
             <dl className="grid grid-cols-2 gap-2 text-xs">
@@ -456,8 +456,8 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
                 if (key === 'childContentIds') return null;
                 return (
                   <div key={key}>
-                    <dt className="text-zinc-500 dark:text-zinc-400 font-medium">{key}:</dt>
-                    <dd className="text-zinc-700 dark:text-zinc-300">{String(value)}</dd>
+                    <dt className="style={{ color: 'var(--color-text-muted)' }} font-medium">{key}:</dt>
+                    <dd className="style={{ color: 'var(--color-text-secondary)' }}">{String(value)}</dd>
                   </div>
                 );
               })}
@@ -474,7 +474,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
   const renderText = () => {
     return (
       <div className="prose dark:prose-invert max-w-none">
-        <div className="whitespace-pre-wrap text-sm md:text-base text-zinc-700 dark:text-zinc-300">
+        <div className="whitespace-pre-wrap text-sm md:text-base style={{ color: 'var(--color-text-secondary)' }}">
           {content.body}
         </div>
       </div>
