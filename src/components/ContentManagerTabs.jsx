@@ -1,14 +1,16 @@
 /**
  * @fileoverview Content Manager Tabs - Gestión de contenidos con pestañas
- * Incluye: Contenidos, Exercise Builder, Configurar IA
+ * Incluye: Contenidos, Exercise Builder, Configurar IA, Libro ADE 1, Visor de Contenidos
  * @module components/ContentManagerTabs
  */
 
 import { useState } from 'react';
-import { Layers, Sparkles, Lightbulb } from 'lucide-react';
+import { Layers, Sparkles, Lightbulb, BookOpen, Edit3 } from 'lucide-react';
 import UnifiedContentManager from './UnifiedContentManager';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
 import AIConfigPanel from './AIConfigPanel';
+import InteractiveBookViewer from './InteractiveBookViewer';
+import ContentReader from './ContentReader';
 import { usePermissions } from '../hooks/usePermissions';
 import './ContentManagerTabs.css';
 
@@ -33,6 +35,18 @@ const TABS = [
     label: 'Configurar IA',
     icon: Lightbulb,
     permission: 'configure-ai',
+  },
+  {
+    id: 'libro-ade1',
+    label: 'Libro ADE 1',
+    icon: BookOpen,
+    permission: 'create-content', // Mismo permiso que contenidos
+  },
+  {
+    id: 'visor-contenidos',
+    label: 'Visor de Contenidos',
+    icon: Edit3,
+    permission: 'create-content', // Mismo permiso que contenidos
   },
 ];
 
@@ -65,6 +79,17 @@ export function ContentManagerTabs({ user, userRole }) {
         return <ExerciseBuilder />;
       case 'ai-config':
         return <AIConfigPanel />;
+      case 'libro-ade1':
+        return <InteractiveBookViewer />;
+      case 'visor-contenidos':
+        return (
+          <ContentReader
+            contentId="demo-content"
+            initialContent="<h1>Visor de Contenidos</h1><p>Este es el visor de contenidos con herramientas avanzadas de anotación.</p><p>Utiliza las herramientas de la barra lateral para:</p><ul><li>Resaltar texto</li><li>Dibujar y escribir</li><li>Agregar notas adhesivas</li><li>Insertar texto flotante</li></ul>"
+            userId={user?.uid}
+            readOnly={false}
+          />
+        );
       default:
         return null;
     }
