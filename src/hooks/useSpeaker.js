@@ -1,38 +1,35 @@
 /**
  * useSpeaker Hook
- * Custom hook for text-to-speech with caching
- * Uses Edge TTS (free) as primary provider with automatic caching in Firebase Storage
+ * Custom hook for text-to-speech using Web Speech API (browser native)
+ * Fast, free, and works offline - no API keys or external services needed
  */
 
 import { useState, useCallback } from 'react';
 import logger from '../utils/logger';
-import audioCacheService from '../services/audioCache';
-import premiumTTSService from '../services/premiumTTSService';
 
 /**
- * Hook for speaking text with TTS and caching
+ * Hook for speaking text with TTS using Web Speech API
  * @returns {Object} Speaker utilities
  */
 export function useSpeaker() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
-  const [currentAudio, setCurrentAudio] = useState(null);
   const [lastSpoken, setLastSpoken] = useState(null);
 
   /**
-   * Stop current audio playback
+   * Stop current speech synthesis
    */
   const stopAudio = useCallback(() => {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      logger.info('⏹️ Speech cancelled', 'useSpeaker');
     }
-  }, [currentAudio]);
+  }, []);
 
   /**
-   * Speak text with TTS and caching
+   * Speak text with TTS using Web Speech API (browser native)
    * @param {string} text - Text to speak
    * @param {Object} options - Speaking options
    * @param {string} options.voice - Voice ID (default: 'es-AR-female-1')
@@ -46,11 +43,7 @@ export function useSpeaker() {
     }
 
     const trimmedText = text.trim();
-    const {
-      voice = 'es-AR-female-1',
-      rate = 1.0,
-      preferPremium = false
-    } = options;
+    const { rate = 1.0 } = options;
 
     // Stop any current playback
     stopAudio();
@@ -59,81 +52,71 @@ export function useSpeaker() {
     setError(null);
 
     try {
-      logger.info(`🔊 Speaking: "${trimmedText.substring(0, 50)}..."`, 'useSpeaker');
+      logger.info(`🔊 Speaking with Web Speech API: "${trimmedText.substring(0, 50)}..."`, 'useSpeaker');
 
-      // Voice configuration for TTS
-      const voiceConfig = {
-        provider: preferPremium ? 'elevenlabs' : 'edgetts',
-        voiceId: voice,
-        rate: rate,
-        volume: 1.0
-      };
+      // Check if Web Speech API is available
+      if (!window.speechSynthesis) {
+        throw new Error('Web Speech API no está disponible en este navegador');
+      }
 
-      // Use cache service to get or generate audio
-      const result = await audioCacheService.getOrGenerateAudio(
-        trimmedText,
-        voiceConfig,
-        'selection', // Context for text selection audios
-        async () => {
-          // This function only runs on cache MISS
-          logger.info(`📢 Generating new audio with ${voiceConfig.provider}...`, 'useSpeaker');
+      // Create utterance
+      const utterance = new SpeechSynthesisUtterance(trimmedText);
+      utterance.lang = 'es-ES'; // Spanish
+      utterance.rate = rate;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
 
-          // Generate audio with premium TTS service
-          const audioResult = await premiumTTSService.generateSpeech({
+      // Try to select a Spanish voice
+      const voices = window.speechSynthesis.getVoices();
+      const spanishVoice = voices.find(v =>
+        v.lang.startsWith('es-') ||
+        v.lang === 'es' ||
+        v.name.includes('Spanish') ||
+        v.name.includes('Español')
+      );
+
+      if (spanishVoice) {
+        utterance.voice = spanishVoice;
+        logger.info(`📢 Using voice: ${spanishVoice.name} (${spanishVoice.lang})`, 'useSpeaker');
+      }
+
+      // Set up promise to wait for speech to complete
+      return new Promise((resolve, reject) => {
+        utterance.onstart = () => {
+          setIsSpeaking(true);
+          setIsGenerating(false);
+          logger.info('▶️ Speech started', 'useSpeaker');
+        };
+
+        utterance.onend = () => {
+          setIsSpeaking(false);
+          logger.info('⏹️ Speech ended', 'useSpeaker');
+
+          setLastSpoken({
             text: trimmedText,
-            voice: voice,
-            rate: rate,
-            preferPremium: preferPremium
+            timestamp: new Date().toISOString(),
+            cached: false,
+            method: 'webspeech'
           });
 
-          return audioResult;
-        }
-      );
+          resolve({
+            success: true,
+            cached: false,
+            method: 'webspeech'
+          });
+        };
 
-      logger.info(
-        `${result.cached ? '✅ Cache HIT' : '🆕 Generated'} - Ready to play`,
-        'useSpeaker'
-      );
+        utterance.onerror = (e) => {
+          logger.error('Speech error', e, 'useSpeaker');
+          setError('Error al reproducir el audio');
+          setIsSpeaking(false);
+          setIsGenerating(false);
+          reject(new Error(`Speech synthesis error: ${e.error}`));
+        };
 
-      // Create audio element and play
-      const audio = new Audio(result.audioUrl);
-
-      // Set up event listeners
-      audio.addEventListener('play', () => {
-        setIsSpeaking(true);
-        logger.info('▶️ Audio playing', 'useSpeaker');
+        // Speak
+        window.speechSynthesis.speak(utterance);
       });
-
-      audio.addEventListener('ended', () => {
-        setIsSpeaking(false);
-        logger.info('⏹️ Audio ended', 'useSpeaker');
-      });
-
-      audio.addEventListener('error', (e) => {
-        logger.error('Audio playback error', e, 'useSpeaker');
-        setError('Error al reproducir el audio');
-        setIsSpeaking(false);
-      });
-
-      // Play audio
-      await audio.play();
-
-      setCurrentAudio(audio);
-      setLastSpoken({
-        text: trimmedText,
-        timestamp: new Date().toISOString(),
-        cached: result.cached,
-        hash: result.hash
-      });
-
-      setIsGenerating(false);
-
-      return {
-        success: true,
-        cached: result.cached,
-        audioUrl: result.audioUrl,
-        hash: result.hash
-      };
 
     } catch (err) {
       logger.error('Speaking error', err, 'useSpeaker');
