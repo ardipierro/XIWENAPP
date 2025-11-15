@@ -20,6 +20,7 @@ import SearchBar from './common/SearchBar';
 import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
 import VoiceLabModal from './VoiceLabModal';
+import SelectionSpeakerConfig from './SelectionSpeakerConfig';
 import ProfileEditor from './homework/ProfileEditor';
 import ImageTaskModal from './ImageTaskModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
@@ -516,6 +517,23 @@ function AIConfigPanel() {
             initialConfig={config.functions[selectedFunction.id] || selectedFunction.defaultConfig}
             onSave={handleSaveFunction}
           />
+        ) : selectedFunction.id === 'selection_speaker' ? (
+          <BaseModal
+            key={selectedFunction.id}
+            isOpen={modalOpen}
+            onClose={handleCloseModal}
+            title="Configuración de Pronunciación"
+            size="lg"
+          >
+            <SelectionSpeakerConfig
+              config={config.functions[selectedFunction.id] || selectedFunction.defaultConfig}
+              onSave={async (speakerConfig) => {
+                await handleSaveFunction(selectedFunction.id, speakerConfig);
+                handleCloseModal();
+              }}
+              onClose={handleCloseModal}
+            />
+          </BaseModal>
         ) : (
           <AIFunctionConfigModal
             key={selectedFunction.id}

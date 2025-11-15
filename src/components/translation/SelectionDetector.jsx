@@ -84,17 +84,17 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
 
   /**
    * Handle speak button click
+   * Uses configuration from Firebase (ai_config/global/functions/selection_speaker)
    */
   const handleSpeak = useCallback(async () => {
     if (!selectedText) return;
 
     try {
       logger.info(`🔊 Speaking selected text: "${selectedText.substring(0, 30)}..."`, 'SelectionDetector');
-      await speak(selectedText, {
-        voice: 'es-AR-female-1',
-        rate: 1.0,
-        preferPremium: false // Use free Edge TTS
-      });
+
+      // Speak with default configuration from Firebase
+      // The useSpeaker hook loads config automatically
+      await speak(selectedText);
 
       // Keep buttons visible while speaking
       // They will hide on new selection or click outside
