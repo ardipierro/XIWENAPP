@@ -116,12 +116,9 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
             <div className="universal-topbar__dropdown">
               <button
                 className="universal-topbar__dropdown-item"
-                onClick={(e) => {
-                  console.log('MI PERFIL CLICKED', { showProfileModal, effectiveUser });
-                  e.stopPropagation();
+                onClick={() => {
                   setShowProfileModal(true);
                   setShowUserMenu(false);
-                  console.log('Estado después del click:', { showProfileModal: true });
                 }}
               >
                 <User size={16} />
@@ -155,15 +152,9 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         <UserProfileModal
           isOpen={showProfileModal}
           user={effectiveUser}
-          onClose={() => {
-            console.log('Cerrando modal de perfil');
-            setShowProfileModal(false);
-          }}
+          onClose={() => setShowProfileModal(false)}
         />
       )}
-
-      {/* DEBUG */}
-      {console.log('Render TopBar - showProfileModal:', showProfileModal, 'showUserMenu:', showUserMenu)}
     </header>
   );
 }
