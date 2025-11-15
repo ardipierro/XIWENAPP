@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -16,7 +16,11 @@ import {
   addReaction,
   removeReaction,
   deleteMessage,
-  editMessage
+  editMessage,
+  toggleMessageStar,
+  forwardMessage,
+  getUserConversations,
+  loadOlderMessages
 } from '../firebase/messages';
 import {
   uploadMessageAttachment,
@@ -24,9 +28,13 @@ import {
   uploadAudioMessage
 } from '../firebase/storage';
 import logger from '../utils/logger';
+import { showMessageNotification, requestNotificationPermission } from '../utils/notifications';
+import { exportToTXT, exportToJSON } from '../utils/exportConversation';
+import { compressImage, formatFileSize } from '../utils/imageCompression';
 import EmojiPicker from './EmojiPicker';
 import VoiceRecorder from './VoiceRecorder';
 import ReactionPicker from './ReactionPicker';
+import MediaGallery from './MediaGallery';
 
 /**
  * Simple async error handler
@@ -71,6 +79,13 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const [replyingTo, setReplyingTo] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [lightboxImage, setLightboxImage] = useState(null);
+  const [forwardingMessage, setForwardingMessage] = useState(null);
+  const [showForwardModal, setShowForwardModal] = useState(false);
+  const [availableConversations, setAvailableConversations] = useState([]);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showMediaGallery, setShowMediaGallery] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesListRef = useRef(null);  // Ref al contenedor de mensajes
   const inputRef = useRef(null);
@@ -78,6 +93,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
   const typingTimeoutRef = useRef(null);
   const searchResultRefs = useRef({});
   const dragCounterRef = useRef(0);
+  const previousScrollHeightRef = useRef(0);
 
   // Subscribe to messages in real-time
   useEffect(() => {
@@ -85,9 +101,32 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
     logger.info(`Subscribing to messages for conversation: ${conversation.id}`, 'MessageThread');
 
+    // Reset pagination state when changing conversations
+    setHasMoreMessages(true);
+    setLoadingOlderMessages(false);
+
     const unsubscribe = subscribeToMessages(conversation.id, (updatedMessages) => {
       logger.info(`Received ${updatedMessages.length} messages`, 'MessageThread');
+
+      // Show notification for new messages
+      if (updatedMessages.length > messages.length && messages.length > 0) {
+        const newMessage = updatedMessages[updatedMessages.length - 1];
+        if (newMessage.senderId !== currentUser.uid) {
+          showMessageNotification(
+            newMessage.senderName,
+            newMessage.content || '📎 Archivo adjunto',
+            conversation.id
+          );
+        }
+      }
+
       setMessages(updatedMessages);
+
+      // Check if we loaded the initial batch and it's less than 50 (no more messages)
+      if (updatedMessages.length < 50) {
+        setHasMoreMessages(false);
+      }
+
       // Use setTimeout to ensure DOM has updated before scrolling
       setTimeout(() => scrollToBottom(), 100);
     });
@@ -96,12 +135,23 @@ function MessageThread({ conversation, currentUser, onClose }) {
     markMessagesAsRead(conversation.id, currentUser.uid);
 
     return () => unsubscribe();
-  }, [conversation?.id, currentUser.uid]);
+  }, [conversation?.id, currentUser.uid, messages.length]);
 
   // Focus input on mount
   useEffect(() => {
     inputRef.current?.focus();
   }, [conversation?.id]);
+
+  // Load available conversations for forwarding
+  useEffect(() => {
+    const loadConversations = async () => {
+      const convs = await getUserConversations(currentUser.uid);
+      setAvailableConversations(convs.filter(c => c.id !== conversation?.id));
+    };
+    if (showForwardModal) {
+      loadConversations();
+    }
+  }, [showForwardModal, currentUser.uid, conversation?.id]);
 
   // Subscribe to conversation for typing indicators
   useEffect(() => {
@@ -410,6 +460,74 @@ function MessageThread({ conversation, currentUser, onClose }) {
   };
 
   /**
+   * Handle star/unstar message
+   */
+  const handleToggleStar = async (messageId, isStarred) => {
+    await safeAsync(
+      () => toggleMessageStar(messageId, currentUser.uid, !isStarred),
+      {
+        context: 'MessageThread',
+        onError: (error) => {
+          alert('Error al marcar mensaje como favorito');
+        }
+      }
+    );
+  };
+
+  /**
+   * Handle forward message
+   */
+  const handleForwardMessage = (message) => {
+    setForwardingMessage(message);
+    setShowForwardModal(true);
+  };
+
+  /**
+   * Handle send forward
+   */
+  const handleSendForward = async (toConversationId) => {
+    if (!forwardingMessage) return;
+
+    const targetConv = availableConversations.find(c => c.id === toConversationId);
+    if (!targetConv) return;
+
+    await safeAsync(
+      () => forwardMessage(
+        forwardingMessage.id,
+        toConversationId,
+        currentUser.uid,
+        currentUser.displayName || currentUser.email,
+        targetConv.otherUser.id
+      ),
+      {
+        context: 'MessageThread',
+        onError: (error) => {
+          alert('Error al reenviar mensaje');
+        }
+      }
+    );
+
+    setShowForwardModal(false);
+    setForwardingMessage(null);
+    alert('Mensaje reenviado exitosamente');
+  };
+
+  /**
+   * Handle export conversation
+   */
+  const handleExport = (format) => {
+    const participantNames = `${currentUser.displayName || currentUser.email} y ${conversation.otherUser.name}`;
+
+    if (format === 'txt') {
+      exportToTXT(messages, participantNames);
+    } else if (format === 'json') {
+      exportToJSON(messages, conversation);
+    }
+
+    setShowExportMenu(false);
+  };
+
+  /**
    * Handle voice message send
    */
   const handleVoiceSend = async (audioBlob, duration) => {
@@ -472,7 +590,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
   /**
    * Handle file selection
    */
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -483,15 +601,41 @@ function MessageThread({ conversation, currentUser, onClose }) {
       return;
     }
 
-    setSelectedFile(file);
+    // Compress if image
+    let processedFile = file;
+    if (file.type.startsWith('image/')) {
+      try {
+        const originalSize = formatFileSize(file.size);
+        logger.info(`Compressing image: ${originalSize}`, 'MessageThread');
+
+        processedFile = await compressImage(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          quality: 0.8
+        });
+
+        const compressedSize = formatFileSize(processedFile.size);
+        logger.info(`Image compressed: ${originalSize} → ${compressedSize}`, 'MessageThread');
+
+        // Show compression feedback if size was reduced significantly
+        if (processedFile.size < file.size * 0.9) {
+          logger.info(`Compression saved ${formatFileSize(file.size - processedFile.size)}`, 'MessageThread');
+        }
+      } catch (error) {
+        logger.error('Compression failed, using original file', error, 'MessageThread');
+        processedFile = file;
+      }
+    }
+
+    setSelectedFile(processedFile);
 
     // Create preview for images
-    if (file.type.startsWith('image/')) {
+    if (processedFile.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e) => {
         setFilePreview(e.target.result);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(processedFile);
     } else {
       setFilePreview(null);
     }
@@ -675,6 +819,74 @@ function MessageThread({ conversation, currentUser, onClose }) {
     }
   };
 
+  /**
+   * Handle loading older messages
+   */
+  const handleLoadOlderMessages = async () => {
+    if (!hasMoreMessages || loadingOlderMessages || messages.length === 0) return;
+
+    setLoadingOlderMessages(true);
+
+    try {
+      // Get the oldest message
+      const oldestMessage = messages[0];
+
+      // Load older messages
+      const result = await loadOlderMessages(conversation.id, oldestMessage, 50);
+
+      if (result.messages.length > 0) {
+        // Save current scroll height before adding messages
+        const container = messagesListRef.current;
+        if (container) {
+          previousScrollHeightRef.current = container.scrollHeight;
+        }
+
+        // Prepend older messages to the list
+        setMessages(prevMessages => [...result.messages, ...prevMessages]);
+
+        // After messages are rendered, restore scroll position
+        setTimeout(() => {
+          if (container && previousScrollHeightRef.current) {
+            const newScrollHeight = container.scrollHeight;
+            const scrollDiff = newScrollHeight - previousScrollHeightRef.current;
+            container.scrollTop = scrollDiff;
+          }
+        }, 50);
+      }
+
+      setHasMoreMessages(result.hasMore);
+    } catch (error) {
+      logger.error('Failed to load older messages', error, 'MessageThread');
+    } finally {
+      setLoadingOlderMessages(false);
+    }
+  };
+
+  /**
+   * Handle scroll event for infinite scroll
+   */
+  const handleScroll = () => {
+    const container = messagesListRef.current;
+    if (!container) return;
+
+    // Check if scrolled to top (with a small threshold)
+    if (container.scrollTop < 100 && hasMoreMessages && !loadingOlderMessages) {
+      handleLoadOlderMessages();
+    }
+  };
+
+  // Add scroll listener for infinite scroll
+  useEffect(() => {
+    const container = messagesListRef.current;
+    if (!container) return;
+
+    container.addEventListener('scroll', handleScroll);
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [hasMoreMessages, loadingOlderMessages, messages.length]);
+
   if (!conversation) return null;
 
   return (
@@ -716,6 +928,37 @@ function MessageThread({ conversation, currentUser, onClose }) {
           >
             <Search size={20} />
           </button>
+
+          <button
+            className="thread-action-btn"
+            onClick={() => setShowMediaGallery(true)}
+            title="Ver multimedia compartido"
+          >
+            <ImageIcon size={20} />
+          </button>
+
+          <div style={{ position: 'relative' }}>
+            <button
+              className="thread-action-btn"
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              title="Exportar conversación"
+            >
+              <FileText size={20} />
+            </button>
+
+            {showExportMenu && (
+              <div className="thread-menu">
+                <button onClick={() => handleExport('txt')}>
+                  <FileText size={16} />
+                  Exportar como TXT
+                </button>
+                <button onClick={() => handleExport('json')}>
+                  <FileText size={16} />
+                  Exportar como JSON
+                </button>
+              </div>
+            )}
+          </div>
 
           <button
             className="thread-menu-btn"
@@ -792,6 +1035,14 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
       {/* Messages List */}
       <div className="messages-list" ref={messagesListRef}>
+        {/* Loading Older Messages Indicator */}
+        {loadingOlderMessages && (
+          <div className="loading-older-messages">
+            <div className="spinner-small"></div>
+            <span>Cargando mensajes anteriores...</span>
+          </div>
+        )}
+
         {messages.length === 0 ? (
           <div className="messages-empty">
             <p>No hay mensajes aún. ¡Inicia la conversación!</p>
@@ -800,7 +1051,15 @@ function MessageThread({ conversation, currentUser, onClose }) {
             </p>
           </div>
         ) : (
-          messages.map((message, index) => {
+          <>
+            {/* Show "No more messages" indicator if at the top */}
+            {!hasMoreMessages && messages.length > 0 && (
+              <div className="no-more-messages">
+                <span>Inicio de la conversación</span>
+              </div>
+            )}
+
+            {messages.map((message, index) => {
             const isSearchResult = searchResults.some(r => r.id === message.id);
             const isCurrentSearchResult = searchResults[currentSearchIndex]?.id === message.id;
 
@@ -824,12 +1083,15 @@ function MessageThread({ conversation, currentUser, onClose }) {
                 onReply={handleReplyToMessage}
                 onScrollToMessage={scrollToMessage}
                 onImageClick={setLightboxImage}
+                onStar={handleToggleStar}
+                onForward={handleForwardMessage}
                 ref={(el) => {
                   if (el) searchResultRefs.current[message.id] = el;
                 }}
               />
             );
-          })
+          })}
+          </>
         )}
         {isOtherUserTyping && (
           <div className="typing-indicator">
@@ -1036,6 +1298,50 @@ function MessageThread({ conversation, currentUser, onClose }) {
           </div>
         </div>
       )}
+
+      {/* Forward Modal */}
+      {showForwardModal && forwardingMessage && (
+        <div className="forward-modal-overlay" onClick={() => setShowForwardModal(false)}>
+          <div className="forward-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="forward-modal-header">
+              <h3>Reenviar mensaje a...</h3>
+              <button onClick={() => setShowForwardModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="forward-modal-body">
+              {availableConversations.length === 0 ? (
+                <p className="no-conversations">No hay otras conversaciones disponibles</p>
+              ) : (
+                availableConversations.map(conv => (
+                  <div
+                    key={conv.id}
+                    className="forward-conversation-item"
+                    onClick={() => handleSendForward(conv.id)}
+                  >
+                    <div className="forward-avatar">
+                      {conv.otherUser.name?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                    <div className="forward-info">
+                      <strong>{conv.otherUser.name || 'Usuario'}</strong>
+                      <span>{conv.otherUser.email}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Media Gallery */}
+      {showMediaGallery && (
+        <MediaGallery
+          conversationId={conversation.id}
+          onClose={() => setShowMediaGallery(false)}
+          onImageClick={setLightboxImage}
+        />
+      )}
     </div>
   );
 }
@@ -1057,7 +1363,9 @@ const MessageBubble = forwardRef(({
   onEdit,
   onReply,
   onScrollToMessage,
-  onImageClick
+  onImageClick,
+  onStar,
+  onForward
 }, ref) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -1175,6 +1483,14 @@ const MessageBubble = forwardRef(({
                 <button onClick={() => { onReply(message); setShowContextMenu(false); }}>
                   <Reply size={14} />
                   Responder
+                </button>
+                <button onClick={() => { onStar?.(message.id, message.starredBy?.includes(currentUserId)); setShowContextMenu(false); }}>
+                  <Star size={14} className={message.starredBy?.includes(currentUserId) ? 'starred' : ''} />
+                  {message.starredBy?.includes(currentUserId) ? 'Quitar favorito' : 'Marcar favorito'}
+                </button>
+                <button onClick={() => { onForward?.(message); setShowContextMenu(false); }}>
+                  <Share2 size={14} />
+                  Reenviar
                 </button>
                 {isOwn && canEdit() && !message.attachment && (
                   <button onClick={() => { onEdit(message); setShowContextMenu(false); }}>

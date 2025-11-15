@@ -14,6 +14,7 @@ import {
   where,
   orderBy,
   limit,
+  startAfter,
   onSnapshot,
   serverTimestamp,
   writeBatch,
@@ -311,6 +312,63 @@ export function subscribeToMessages(conversationId, callback) {
     // Call callback with empty array to prevent loading state
     callback([]);
   });
+}
+
+/**
+ * Load older messages for infinite scroll
+ * @param {string} conversationId - Conversation ID
+ * @param {Object} oldestMessage - The oldest message currently loaded (with createdAt)
+ * @param {number} limitCount - Number of messages to load
+ * @returns {Promise<Object>} Object with messages array and hasMore flag
+ */
+export async function loadOlderMessages(conversationId, oldestMessage, limitCount = 50) {
+  try {
+    const messagesRef = collection(db, 'messages');
+
+    // Build query to get messages older than the oldest one we have
+    const q = query(
+      messagesRef,
+      where('conversationId', '==', conversationId),
+      orderBy('createdAt', 'desc'),
+      startAfter(oldestMessage.createdAt),
+      limit(limitCount)
+    );
+
+    const snapshot = await getDocs(q);
+
+    const messages = snapshot.docs.map(doc => {
+      const data = doc.data();
+      let createdAt;
+
+      // Handle timestamp with fallback
+      if (data.createdAt?.toDate) {
+        createdAt = data.createdAt.toDate();
+      } else if (data.createdAt) {
+        createdAt = new Date(data.createdAt);
+      } else {
+        createdAt = new Date();
+        logger.warn(`Message ${doc.id} has no createdAt timestamp`, 'Messages');
+      }
+
+      return {
+        id: doc.id,
+        ...data,
+        createdAt
+      };
+    }).reverse(); // Oldest first
+
+    const hasMore = snapshot.docs.length === limitCount;
+
+    logger.info(`Loaded ${messages.length} older messages for conversation ${conversationId}`, 'Messages');
+
+    return {
+      messages,
+      hasMore
+    };
+  } catch (error) {
+    logger.error('Error loading older messages', error, 'Messages');
+    throw error;
+  }
 }
 
 /**
