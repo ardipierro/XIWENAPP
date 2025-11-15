@@ -29,7 +29,7 @@ function SettingsPanel() {
   ];
 
   return (
-    <div className="w-full">
+    <div className="universal-panel universal-panel--scrollable w-full">
       <PageHeader
         icon={Settings}
         title="Configuración"

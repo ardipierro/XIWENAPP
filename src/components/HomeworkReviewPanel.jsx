@@ -210,7 +210,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="universal-panel space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
