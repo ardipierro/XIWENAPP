@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { CreditCard, Plus, Sparkles, Search, Grid3x3, List, Eye, Edit, Trash2, Play, Download, Share2, Award, Trophy, BarChart3 } from 'lucide-react';
-import { BaseButton, BaseInput, BaseCard, BaseBadge, BaseLoading, BaseAlert, BaseEmptyState, BaseModal } from './common';
+import { BaseButton, BaseInput, BaseCard, BaseBadge, BaseLoading, BaseAlert, BaseEmptyState, BaseModal, BaseTabs } from './common';
 import FlashCardGeneratorModal from './FlashCardGeneratorModal';
 import FlashCardViewer from './FlashCardViewer';
 import FlashCardEditor from './FlashCardEditor';
@@ -223,22 +223,16 @@ export function FlashCardManager({ user }) {
       </div>
 
       {/* Tabs */}
-      <div className="flashcard-manager__tabs">
-        <button
-          className={`flashcard-manager__tab ${activeTab === 'collections' ? 'flashcard-manager__tab--active' : ''}`}
-          onClick={() => setActiveTab('collections')}
-        >
-          <CreditCard size={18} />
-          Colecciones
-        </button>
-        <button
-          className={`flashcard-manager__tab ${activeTab === 'stats' ? 'flashcard-manager__tab--active' : ''}`}
-          onClick={() => setActiveTab('stats')}
-        >
-          <BarChart3 size={18} />
-          Estadísticas
-        </button>
-      </div>
+      <BaseTabs
+        tabs={[
+          { id: 'collections', label: 'Colecciones', icon: CreditCard },
+          { id: 'stats', label: 'Estadísticas', icon: BarChart3 }
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        variant="underline"
+        size="md"
+      />
 
       {/* Success/Error Messages */}
       {successMessage && (
