@@ -12,6 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
 import CreditBadge from './common/CreditBadge';
+import UserProfileModal from './UserProfileModal';
 
 /**
  * TopBar universal con sistema de créditos y permisos
@@ -26,6 +27,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const { selectedFont, fontWeight, fontSize } = useFont();
   const { getRoleLabel } = usePermissions();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
@@ -108,7 +110,13 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
 
           {showUserMenu && (
             <div className="universal-topbar__dropdown">
-              <button className="universal-topbar__dropdown-item">
+              <button
+                className="universal-topbar__dropdown-item"
+                onClick={() => {
+                  setShowProfileModal(true);
+                  setShowUserMenu(false);
+                }}
+              >
                 <User size={16} />
                 <span>Mi Perfil</span>
               </button>
@@ -128,6 +136,14 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           )}
         </div>
       </div>
+
+      {/* User Profile Modal */}
+      {showProfileModal && (
+        <UserProfileModal
+          user={effectiveUser}
+          onClose={() => setShowProfileModal(false)}
+        />
+      )}
     </header>
   );
 }
