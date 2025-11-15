@@ -3,7 +3,7 @@
  * @module components/InteractiveBookViewer
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   BookOpen,
   Sparkles,
@@ -48,6 +48,7 @@ import {
   FullDialoguePlayer
 } from './interactive-book';
 import SettingsModal from './SettingsModal';
+import SelectionDetector from './translation/SelectionDetector';
 
 /**
  * Visualizador del libro interactivo ADE1
@@ -507,7 +508,8 @@ function InteractiveBookViewer() {
 
         {/* Content */}
         {isExpanded && (
-          <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-6">
+          <SelectionDetector enabled={isExpanded}>
+            <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-6">
             {/* Diálogo */}
             {unit.content?.dialogue && (
               <div>
@@ -593,7 +595,8 @@ function InteractiveBookViewer() {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          </SelectionDetector>
         )}
       </div>
     );
