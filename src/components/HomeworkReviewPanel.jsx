@@ -22,7 +22,9 @@ import {
   Lightbulb,
   ChevronDown,
   ChevronUp,
-  Upload
+  Upload,
+  Loader,
+  RefreshCw
 } from 'lucide-react';
 import {
   BaseButton,
@@ -211,14 +213,28 @@ function ReviewCard({ review, onSelect }) {
   const performanceIcon = grade >= 90 ? Award : grade >= 70 ? TrendingUp : TrendingDown;
   const PerformanceIcon = performanceIcon;
 
+  // Check if task is being processed
+  const isProcessing = review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing';
+  const isFailed = review.status === REVIEW_STATUS.FAILED || review.status === 'failed';
+
   return (
     <BaseCard hover onClick={onSelect} className="cursor-pointer">
       <div className="space-y-3">
         {/* Student Info */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-              <User size={16} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
+            <div className={`p-2 rounded-lg ${
+              isProcessing ? 'bg-blue-100 dark:bg-blue-900/20' :
+              isFailed ? 'bg-red-100 dark:bg-red-900/20' :
+              'bg-gray-100 dark:bg-gray-800'
+            }`}>
+              {isProcessing ? (
+                <RefreshCw size={16} strokeWidth={2} className="text-blue-600 dark:text-blue-400 animate-spin" />
+              ) : isFailed ? (
+                <AlertCircle size={16} strokeWidth={2} className="text-red-600 dark:text-red-400" />
+              ) : (
+                <User size={16} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
+              )}
             </div>
             <div>
               <p className="font-medium text-gray-900 dark:text-white text-sm">
@@ -229,7 +245,18 @@ function ReviewCard({ review, onSelect }) {
               </p>
             </div>
           </div>
-          <Clock size={16} strokeWidth={2} className="text-orange-500" />
+          {isProcessing ? (
+            <BaseBadge variant="info" size="sm">
+              <Loader size={12} className="animate-spin" />
+              Procesando
+            </BaseBadge>
+          ) : isFailed ? (
+            <BaseBadge variant="danger" size="sm">
+              Error
+            </BaseBadge>
+          ) : (
+            <Clock size={16} strokeWidth={2} className="text-orange-500" />
+          )}
         </div>
 
         {/* Image Preview */}
@@ -241,24 +268,62 @@ function ReviewCard({ review, onSelect }) {
           />
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2">
-            <BaseBadge variant={gradeColor}>
-              {grade}/100
-            </BaseBadge>
-            <PerformanceIcon size={14} strokeWidth={2} className="text-gray-400" />
+        {/* Stats or Processing Message */}
+        {isProcessing ? (
+          <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+              <RefreshCw size={14} className="animate-spin" />
+              <span className="font-medium">IA analizando la tarea...</span>
+            </div>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+              Esto puede tardar 10-30 segundos
+            </p>
           </div>
-          <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-            <AlertCircle size={14} strokeWidth={2} />
-            {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
+        ) : isFailed ? (
+          <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
+              <AlertCircle size={14} />
+              <span className="font-medium">Error al procesar</span>
+            </div>
+            {review.errorMessage && (
+              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                {review.errorMessage}
+              </p>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center gap-2">
+              <BaseBadge variant={gradeColor}>
+                {grade}/100
+              </BaseBadge>
+              <PerformanceIcon size={14} strokeWidth={2} className="text-gray-400" />
+            </div>
+            <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+              <AlertCircle size={14} strokeWidth={2} />
+              {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
+            </div>
+          </div>
+        )}
 
         {/* View Button */}
-        <BaseButton variant="outline" size="sm" fullWidth>
-          <Eye size={16} strokeWidth={2} />
-          Revisar
+        <BaseButton
+          variant={isProcessing ? "ghost" : "outline"}
+          size="sm"
+          fullWidth
+          disabled={isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <Loader size={16} strokeWidth={2} className="animate-spin" />
+              Espera...
+            </>
+          ) : (
+            <>
+              <Eye size={16} strokeWidth={2} />
+              Revisar
+            </>
+          )}
         </BaseButton>
       </div>
     </BaseCard>
@@ -410,6 +475,36 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         {success && (
           <BaseAlert variant="success" onClose={() => setSuccess(null)}>
             {success}
+          </BaseAlert>
+        )}
+
+        {/* Processing Alert */}
+        {(review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing') && (
+          <BaseAlert variant="info">
+            <div className="flex items-center gap-3">
+              <RefreshCw size={18} className="animate-spin" />
+              <div>
+                <p className="font-semibold">IA está analizando esta tarea</p>
+                <p className="text-sm mt-1">
+                  El análisis automático puede tardar 10-30 segundos. La página se actualizará cuando esté listo.
+                </p>
+              </div>
+            </div>
+          </BaseAlert>
+        )}
+
+        {/* Failed Alert */}
+        {(review.status === REVIEW_STATUS.FAILED || review.status === 'failed') && (
+          <BaseAlert variant="danger">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={18} />
+              <div>
+                <p className="font-semibold">Error al procesar la tarea</p>
+                {review.errorMessage && (
+                  <p className="text-sm mt-1">{review.errorMessage}</p>
+                )}
+              </div>
+            </div>
           </BaseAlert>
         )}
 

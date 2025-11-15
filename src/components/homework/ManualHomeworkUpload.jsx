@@ -135,16 +135,16 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
         imageUrl: uploadResult.url,
         filename: selectedFile.name,
         imageSize: selectedFile.size,
-        status: REVIEW_STATUS.PENDING_REVIEW, // Manual uploads go straight to pending review (no AI processing needed)
+        status: REVIEW_STATUS.PROCESSING, // Manual uploads will be analyzed by AI automatically
         isManualUpload: true, // Flag to distinguish manual uploads
         uploadedBy: teacherId,
-        isFreeCorrection: false, // Assuming manual uploads are not free corrections
+        isFreeCorrection: false,
         needsStudentAssignment: !selectedStudentId, // Flag to indicate if student needs to be assigned later
-        // Initialize empty corrections for manual uploads
+        // These will be populated by the Cloud Function after AI analysis
         aiSuggestions: [],
         detailedCorrections: [],
         errorSummary: { total: 0 },
-        overallFeedback: 'Tarea subida manualmente - pendiente de revisión',
+        overallFeedback: '',
         suggestedGrade: 0
       };
 
