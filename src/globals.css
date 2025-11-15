@@ -1673,12 +1673,16 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
    SCROLLBAR VISIBLE PARA DASHBOARD LAYOUT
    ============================================ */
 
-/* Scrollbar siempre visible para el contenedor principal del dashboard */
+/* Scrollbar del contenedor principal del dashboard - solo cuando es necesario */
 .dashboard-layout main,
 .universal-dashboard__content {
-  /* Asegurar que el scrollbar sea visible */
-  overflow-y: scroll !important;
+  /* Scrollbar automático (solo aparece cuando hay contenido que scrollear) */
+  overflow-y: auto !important;
   overflow-x: hidden;
+  /* Reservar espacio para scrollbar y prevenir layout shift */
+  scrollbar-gutter: stable;
+  /* Prevenir scroll bounce/overscroll */
+  overscroll-behavior-y: contain;
 }
 
 /* Webkit (Chrome, Safari, Edge) */

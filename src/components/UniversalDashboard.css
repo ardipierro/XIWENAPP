@@ -33,8 +33,12 @@
   margin-left: 0;
   padding: 2rem;
   height: calc(100vh - 64px);
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
+  /* Prevenir layout shift cuando aparece/desaparece scrollbar */
+  scrollbar-gutter: stable;
+  /* Prevenir scroll bounce/overscroll */
+  overscroll-behavior-y: contain;
   transition: margin-left 0.3s ease, margin-top 0.3s ease;
 }
 
