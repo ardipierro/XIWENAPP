@@ -133,6 +133,27 @@ export default function UniversalUserManager({ user, userRole }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userManagement.users.length]); // Solo cuando cambia la cantidad de usuarios
 
+  // Detectar retorno del modo "Ver como" y reabrir perfil
+  useEffect(() => {
+    const viewAsReturnUserId = sessionStorage.getItem('viewAsReturnUserId');
+    const viewAsReturning = sessionStorage.getItem('viewAsReturning');
+
+    if (viewAsReturning === 'true' && viewAsReturnUserId && userManagement.users.length > 0) {
+      // Encontrar el usuario en la lista
+      const userToOpen = userManagement.users.find(u => u.id === viewAsReturnUserId);
+
+      if (userToOpen) {
+        logger.debug('🔙 Reabriendo perfil después de ViewAs:', userToOpen.name);
+        setSelectedUserProfile(userToOpen);
+        setShowUserProfile(true);
+      }
+
+      // Limpiar flags
+      sessionStorage.removeItem('viewAsReturning');
+      sessionStorage.removeItem('viewAsReturnUserId');
+    }
+  }, [userManagement.users]);
+
   /**
    * Cargar counts de cursos enrollados por estudiante
    */

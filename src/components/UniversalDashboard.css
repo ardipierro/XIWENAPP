@@ -35,7 +35,17 @@
   height: calc(100vh - 64px);
   overflow-y: scroll;
   overflow-x: hidden;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease, margin-top 0.3s ease;
+}
+
+/* Cuando ViewAs está activo, mover todo hacia abajo */
+.universal-dashboard--viewing-as .universal-dashboard__content {
+  margin-top: calc(64px + 44px); /* TopBar + ViewAs Banner */
+  height: calc(100vh - 64px - 44px);
+}
+
+.universal-dashboard--viewing-as .universal-dashboard__overlay {
+  top: calc(64px + 44px);
 }
 
 /* Welcome View */
@@ -149,6 +159,16 @@
   .universal-dashboard__overlay {
     top: 56px;
     display: block;
+  }
+
+  /* Ajuste para ViewAs en mobile */
+  .universal-dashboard--viewing-as .universal-dashboard__content {
+    margin-top: calc(56px + 38px); /* TopBar mobile + ViewAs Banner mobile */
+    height: calc(100vh - 56px - 38px);
+  }
+
+  .universal-dashboard--viewing-as .universal-dashboard__overlay {
+    top: calc(56px + 38px);
   }
 
   .universal-dashboard__welcome h1 {

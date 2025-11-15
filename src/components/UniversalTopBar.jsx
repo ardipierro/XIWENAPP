@@ -7,6 +7,7 @@
 import { Menu, Bell, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useViewAs } from '../contexts/ViewAsContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -21,10 +22,14 @@ import './UniversalTopBar.css';
  */
 export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const { user, logout } = useAuth();
+  const { getEffectiveUser } = useViewAs();
   const { theme, toggleTheme } = useTheme();
   const { selectedFont, fontWeight, fontSize } = useFont();
   const { getRoleLabel } = usePermissions();
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Usuario efectivo: ViewAs user si está activo, sino el user normal
+  const effectiveUser = getEffectiveUser(user);
 
   const handleLogout = async () => {
     try {
@@ -91,14 +96,14 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
             aria-label="Menú de usuario"
           >
             <div className="universal-topbar__avatar">
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt={user.displayName} />
+              {effectiveUser?.photoURL ? (
+                <img src={effectiveUser.photoURL} alt={effectiveUser.displayName || effectiveUser.name} />
               ) : (
                 <User size={20} />
               )}
             </div>
             <span className="universal-topbar__username">
-              {user?.displayName || user?.email}
+              {effectiveUser?.displayName || effectiveUser?.name || effectiveUser?.email}
             </span>
           </button>
 

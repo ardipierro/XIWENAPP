@@ -5,11 +5,14 @@
  */
 
 import logger from '../utils/logger';
-import { useState, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useViewAs } from '../contexts/ViewAsContext';
 import { usePermissions } from '../hooks/usePermissions';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
+import ViewAsBanner from './ViewAsBanner';
 import { BaseLoading } from './common';
 import './UniversalDashboard.css';
 
@@ -42,13 +45,12 @@ const GuardianView = lazy(() => import('./guardian/GuardianView'));
 /**
  * Vista de inicio (placeholder)
  */
-function HomeView() {
-  const { user } = useAuth();
+function HomeView({ user }) {
   const { getRoleLabel } = usePermissions();
 
   return (
     <div className="universal-dashboard__welcome">
-      <h1>¡Bienvenido, {user?.displayName || 'Usuario'}!</h1>
+      <h1>¡Bienvenido, {user?.displayName || user?.name || 'Usuario'}!</h1>
       <p>Rol: <strong>{getRoleLabel()}</strong></p>
       <p>Este es el nuevo Universal Dashboard con sistema de permisos y créditos integrado.</p>
 
@@ -90,10 +92,20 @@ function PlaceholderView({ title }) {
  * Dashboard Universal
  */
 export function UniversalDashboard() {
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
+  const { getEffectiveUser, isViewingAs } = useViewAs();
   const { initialized, can } = usePermissions();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [currentPath, setCurrentPath] = useState('/dashboard-v2');
+  const [currentPath, setCurrentPath] = useState(location.pathname);
+
+  // Usuario efectivo: ViewAs user si está activo, sino el user normal
+  const effectiveUser = getEffectiveUser(user);
+
+  // Sincronizar currentPath con la URL actual
+  useEffect(() => {
+    setCurrentPath(location.pathname);
+  }, [location.pathname]);
 
   // Student course navigation states
   const [selectedCourseId, setSelectedCourseId] = useState(null);
@@ -157,44 +169,73 @@ export function UniversalDashboard() {
         {(() => {
           switch (currentPath) {
             case '/dashboard-v2':
-              return <HomeView />;
+              return <HomeView user={effectiveUser} />;
+
+            // Legacy Routes - Default views for each role
+            case '/admin':
+              // Admin default view -> User Management
+              if (!can('view-all-users')) return <PlaceholderView title="Sin acceso" />;
+              return <UniversalUserManager user={effectiveUser} userRole={effectiveUser.role} />;
+
+            case '/student':
+              // Student default view -> My Courses
+              return <MyCourses user={effectiveUser} onSelectCourse={handleSelectCourse} />;
+
+            case '/teacher':
+              // Teacher default view -> Class Management
+              if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
+              return <ClassSessionManager user={effectiveUser} />;
+
+            case '/guardian':
+              // Guardian default view -> Guardian View
+              if (!can('view-linked-students') && !can('view-all-users')) {
+                return <PlaceholderView title="Sin acceso" />;
+              }
+              return (
+                <GuardianView
+                  user={effectiveUser}
+                  onViewStudentDetails={(studentId) => {
+                    logger.debug('Ver detalles de estudiante:', studentId);
+                  }}
+                />
+              );
 
             case '/dashboard-v2/content':
               return <PlaceholderView title="Mi Contenido" />;
 
             // CALENDARIO - Todos los roles
             case '/dashboard-v2/calendar':
-              return <UnifiedCalendar user={user} userRole={initialized ? can('view-all-users') ? 'admin' : 'user' : 'user'} />;
+              return <UnifiedCalendar user={effectiveUser} userRole={initialized ? can('view-all-users') ? 'admin' : 'user' : 'user'} />;
 
             // MENSAJES - Todos con permiso
             case '/dashboard-v2/messages':
               if (!can('send-messages')) return <PlaceholderView title="Sin acceso" />;
-              return <MessagesPanel userId={user.uid} userRole={user.role} />;
+              return <MessagesPanel user={effectiveUser} />;
 
             // CONTENIDOS - Teachers + Admin (incluye Exercise Builder y Configurar IA en tabs)
             case '/dashboard-v2/unified-content':
               if (!can('create-content')) return <PlaceholderView title="Sin acceso" />;
-              return <ContentManagerTabs user={user} userRole={user.role} />;
+              return <ContentManagerTabs user={effectiveUser} userRole={effectiveUser.role} />;
 
             // ESTUDIANTES (redirige a /users)
             case '/dashboard-v2/students':
               if (!can('view-own-students')) return <PlaceholderView title="Sin acceso" />;
-              return <UniversalUserManager user={user} userRole={user.role} />;
+              return <UniversalUserManager user={effectiveUser} userRole={effectiveUser.role} />;
 
             // CLASES - ClassSessionManager integrado
             case '/dashboard-v2/classes':
               if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
-              return <ClassSessionManager user={user} />;
+              return <ClassSessionManager user={effectiveUser} />;
 
             // ASISTENCIAS
             case '/dashboard-v2/attendance':
               if (!can('view-class-analytics')) return <PlaceholderView title="Sin acceso" />;
-              return <AttendanceView user={user} />;
+              return <AttendanceView user={effectiveUser} />;
 
             // REVISAR TAREAS IA - Feature estrella
             case '/dashboard-v2/homework-review':
               if (!can('grade-assignments')) return <PlaceholderView title="Sin acceso" />;
-              return <HomeworkReviewPanel user={user} />;
+              return <HomeworkReviewPanel user={effectiveUser} />;
 
             // MIS CURSOS (Students)
             case '/dashboard-v2/my-courses':
@@ -202,7 +243,7 @@ export function UniversalDashboard() {
               if (selectedContentId && selectedCourseId) {
                 return (
                   <ContentPlayer
-                    user={user}
+                    user={effectiveUser}
                     courseId={selectedCourseId}
                     contentId={selectedContentId}
                     onBack={handleBackToCourseViewer}
@@ -214,7 +255,7 @@ export function UniversalDashboard() {
               if (selectedCourseId) {
                 return (
                   <CourseViewer
-                    user={user}
+                    user={effectiveUser}
                     courseId={selectedCourseId}
                     onSelectContent={handleSelectContent}
                     onBack={handleBackToCourses}
@@ -223,14 +264,14 @@ export function UniversalDashboard() {
               }
 
               // Por defecto, mostrar lista de cursos
-              return <MyCourses user={user} onSelectCourse={handleSelectCourse} />;
+              return <MyCourses user={effectiveUser} onSelectCourse={handleSelectCourse} />;
 
             // MIS TAREAS (Students)
             case '/dashboard-v2/my-assignments':
               if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
               return (
                 <MyAssignmentsView
-                  user={user}
+                  user={effectiveUser}
                   onSelectAssignment={(assignmentId) => {
                     setSelectedAssignmentId(assignmentId);
                     // TODO: Navegar a vista de hacer/ver tarea
@@ -244,7 +285,7 @@ export function UniversalDashboard() {
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
               return (
                 <LiveGamesView
-                  user={user}
+                  user={effectiveUser}
                   onJoinGame={(gameId) => {
                     logger.debug('Unirse a juego:', gameId);
                     // TODO: Implementar lógica para unirse al juego
@@ -262,7 +303,7 @@ export function UniversalDashboard() {
               }
               return (
                 <GuardianView
-                  user={user}
+                  user={effectiveUser}
                   onViewStudentDetails={(studentId) => {
                     logger.debug('Ver detalles de estudiante:', studentId);
                     // TODO: Navegar a vista detallada del estudiante
@@ -274,12 +315,12 @@ export function UniversalDashboard() {
             // MIS PAGOS (Students)
             case '/dashboard-v2/my-payments':
               if (!can('view-own-credits')) return <PlaceholderView title="Sin acceso" />;
-              return <StudentFeesPanel user={user} />;
+              return <StudentFeesPanel user={effectiveUser} />;
 
             // ANALYTICS - AnalyticsDashboard integrado
             case '/dashboard-v2/analytics':
               if (!can('view-own-analytics')) return <PlaceholderView title="Sin acceso" />;
-              return <AnalyticsDashboard user={user} />;
+              return <AnalyticsDashboard user={effectiveUser} />;
 
             // GESTIÓN DE USUARIOS/ESTUDIANTES (Universal)
             case '/dashboard-v2/users':
@@ -287,12 +328,12 @@ export function UniversalDashboard() {
               if (!can('view-all-users') && !can('view-own-students')) {
                 return <PlaceholderView title="Sin acceso" />;
               }
-              return <UniversalUserManager user={user} userRole={user.role} />;
+              return <UniversalUserManager user={effectiveUser} userRole={effectiveUser.role} />;
 
             // GESTIÓN DE CRÉDITOS (Admin) - CreditManager integrado
             case '/dashboard-v2/credits':
               if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
-              return <CreditManager userId={user.uid} currentUser={user} />;
+              return <CreditManager userId={effectiveUser.uid} currentUser={effectiveUser} />;
 
             // SISTEMA DE PAGOS (Admin)
             case '/dashboard-v2/payments':
@@ -313,7 +354,10 @@ export function UniversalDashboard() {
   };
 
   return (
-    <div className="universal-dashboard">
+    <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
+      {/* ViewAs Banner - Siempre arriba de todo */}
+      <ViewAsBanner />
+
       {/* TopBar */}
       <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
 

@@ -1,7 +1,7 @@
 import { Eye, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useViewAs } from '../contexts/ViewAsContext';
-import { BaseButton } from './common';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Banner que indica que estás viendo la app como otro usuario
@@ -9,6 +9,7 @@ import { BaseButton } from './common';
  */
 function ViewAsBanner() {
   const navigate = useNavigate();
+  const { userRole } = useAuth();
   const { isViewingAs, viewAsUser, returnToUserId, stopViewingAs, clearViewAsState } = useViewAs();
 
   if (!isViewingAs) {
@@ -16,22 +17,28 @@ function ViewAsBanner() {
   }
 
   const handleExitViewAs = () => {
-    // Marcar que estamos procesando el retorno (para mostrar loading)
-    sessionStorage.setItem('viewAsReturning', 'true');
-
-    // Guardar el userId del usuario que estábamos viendo
-    if (returnToUserId) {
-      sessionStorage.setItem('viewAsReturnUserId', returnToUserId);
+    // Guardar el userId del usuario que estábamos viendo ANTES de limpiar
+    const userIdToReturn = returnToUserId || viewAsUser?.id;
+    if (userIdToReturn) {
+      sessionStorage.setItem('viewAsReturnUserId', userIdToReturn);
+      sessionStorage.setItem('viewAsReturning', 'true');
     }
 
-    // Desactivar modo "Ver como"
+    // Desactivar modo "Ver como" ANTES de navegar para que los permisos se restauren
     stopViewingAs();
+    clearViewAsState();
 
-    // Navegar al UniversalDashboard con la vista de usuarios
-    navigate('/dashboard-v2/users');
+    // Determinar la ruta a la que volver según el rol del usuario REAL (admin)
+    const getRoleBasedRoute = () => {
+      if (userRole === 'admin') return '/admin';
+      if (userRole === 'teacher' || userRole === 'trial_teacher') return '/teacher';
+      return '/dashboard-v2';
+    };
 
-    // Limpiar el contexto después de navegar
-    setTimeout(() => clearViewAsState(), 100);
+    // Pequeño delay para que React actualice los permisos antes de navegar
+    setTimeout(() => {
+      navigate(getRoleBasedRoute());
+    }, 50);
   };
 
   return (
@@ -44,16 +51,35 @@ function ViewAsBanner() {
           <strong className="font-extrabold mr-1 hidden sm:inline">Modo Visualización:</strong> Viendo como {viewAsUser?.name || viewAsUser?.email}
         </div>
       </div>
-      <BaseButton
+      <button
         onClick={handleExitViewAs}
-        variant="ghost"
-        size="sm"
-        icon={ArrowLeft}
-        className="bg-orange-600 hover:bg-orange-700 text-white border-none"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.375rem 0.75rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.25)',
+          color: 'white',
+          border: '1px solid rgba(255, 255, 255, 0.4)',
+          borderRadius: '0.5rem',
+          fontWeight: '600',
+          fontSize: '0.875rem',
+          cursor: 'pointer',
+          transition: 'all 0.2s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.35)';
+          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)';
+          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+        }}
       >
+        <ArrowLeft size={16} strokeWidth={2} />
         <span className="hidden sm:inline">Volver a Admin</span>
         <span className="sm:hidden">Admin</span>
-      </BaseButton>
+      </button>
     </div>
   );
 }
