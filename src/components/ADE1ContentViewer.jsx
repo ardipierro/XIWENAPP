@@ -522,7 +522,7 @@ export default function ADE1ContentViewer() {
               onClick={handlePrevSlide}
               disabled={currentSlide === 0}
               variant="outline"
-              leftIcon={<ChevronLeft size={16} />}
+              icon={ChevronLeft}
             >
               Anterior
             </BaseButton>
@@ -535,7 +535,7 @@ export default function ADE1ContentViewer() {
               onClick={handleNextSlide}
               disabled={currentSlide === totalSlides - 1}
               variant="primary"
-              rightIcon={<ChevronRight size={16} />}
+              iconRight={ChevronRight}
             >
               Siguiente
             </BaseButton>
