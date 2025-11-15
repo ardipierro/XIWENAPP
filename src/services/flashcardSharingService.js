@@ -3,7 +3,7 @@
  * @module services/flashcardSharingService
  */
 
-import { firestore } from '../firebase/config';
+import { db } from '../firebase/config';
 import {
   collection,
   doc,
@@ -15,7 +15,7 @@ import {
   Timestamp,
   deleteDoc,
   updateDoc
-} from 'firebase/firestore';
+} from 'firebase/db';
 import { createFlashCardCollection } from '../firebase/flashcards';
 import logger from '../utils/logger';
 
@@ -29,7 +29,7 @@ import logger from '../utils/logger';
 export async function shareCollection(collectionId, teacherEmail, sharedBy) {
   try {
     // Verificar que el teacher receptor existe
-    const usersRef = collection(firestore, 'users');
+    const usersRef = collection(db, 'users');
     const q = query(usersRef, where('email', '==', teacherEmail));
     const snapshot = await getDocs(q);
 
@@ -46,7 +46,7 @@ export async function shareCollection(collectionId, teacherEmail, sharedBy) {
     }
 
     // Crear registro de compartición
-    const shareRef = doc(firestore, 'flashcard_shares', `${collectionId}_${recipientDoc.id}`);
+    const shareRef = doc(db, 'flashcard_shares', `${collectionId}_${recipientDoc.id}`);
 
     await setDoc(shareRef, {
       collectionId,
@@ -84,7 +84,7 @@ export async function shareCollection(collectionId, teacherEmail, sharedBy) {
  */
 export async function getSharedCollections(userId) {
   try {
-    const sharesRef = collection(firestore, 'flashcard_shares');
+    const sharesRef = collection(db, 'flashcard_shares');
     const q = query(
       sharesRef,
       where('sharedWith.uid', '==', userId),
@@ -119,7 +119,7 @@ export async function getSharedCollections(userId) {
  */
 export async function getPendingInvitations(userId) {
   try {
-    const sharesRef = collection(firestore, 'flashcard_shares');
+    const sharesRef = collection(db, 'flashcard_shares');
     const q = query(
       sharesRef,
       where('sharedWith.uid', '==', userId),
@@ -146,7 +146,7 @@ export async function getPendingInvitations(userId) {
  */
 export async function acceptShare(shareId) {
   try {
-    const shareRef = doc(firestore, 'flashcard_shares', shareId);
+    const shareRef = doc(db, 'flashcard_shares', shareId);
     await updateDoc(shareRef, {
       status: 'accepted',
       acceptedAt: Timestamp.now()
@@ -168,7 +168,7 @@ export async function acceptShare(shareId) {
  */
 export async function declineShare(shareId) {
   try {
-    const shareRef = doc(firestore, 'flashcard_shares', shareId);
+    const shareRef = doc(db, 'flashcard_shares', shareId);
     await deleteDoc(shareRef);
 
     logger.info('Share declined:', shareId);
@@ -189,7 +189,7 @@ export async function declineShare(shareId) {
 export async function duplicateSharedCollection(collectionId, userId) {
   try {
     // Obtener colección original
-    const collectionRef = doc(firestore, 'flashcard_collections', collectionId);
+    const collectionRef = doc(db, 'flashcard_collections', collectionId);
     const collectionDoc = await getDoc(collectionRef);
 
     if (!collectionDoc.exists()) {

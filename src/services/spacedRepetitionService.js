@@ -6,7 +6,7 @@
  * a través de repetición espaciada adaptativa.
  */
 
-import { firestore } from '../firebase/config';
+import { db } from '../firebase/config';
 import {
   collection,
   doc,
@@ -97,7 +97,7 @@ export function initializeCardProgress() {
 export async function saveCardProgress(userId, collectionId, cardId, quality) {
   try {
     const progressRef = doc(
-      firestore,
+      db,
       'flashcard_progress',
       `${userId}_${collectionId}_${cardId}`
     );
@@ -151,7 +151,7 @@ export async function saveCardProgress(userId, collectionId, cardId, quality) {
  */
 export async function getCardsForReview(userId, collectionId) {
   try {
-    const progressRef = collection(firestore, 'flashcard_progress');
+    const progressRef = collection(db, 'flashcard_progress');
     const q = query(
       progressRef,
       where('userId', '==', userId),
@@ -187,7 +187,7 @@ export async function getCardsForReview(userId, collectionId) {
  */
 export async function getCollectionProgress(userId, collectionId) {
   try {
-    const progressRef = collection(firestore, 'flashcard_progress');
+    const progressRef = collection(db, 'flashcard_progress');
     const q = query(
       progressRef,
       where('userId', '==', userId),
@@ -229,7 +229,7 @@ export async function getCollectionProgress(userId, collectionId) {
  */
 export async function getUserReviewStats(userId, collectionId = null) {
   try {
-    const progressRef = collection(firestore, 'flashcard_progress');
+    const progressRef = collection(db, 'flashcard_progress');
     let q = query(progressRef, where('userId', '==', userId));
 
     if (collectionId) {
@@ -309,7 +309,7 @@ export async function getUserReviewStats(userId, collectionId = null) {
 export async function markCardAsMastered(userId, collectionId, cardId) {
   try {
     const progressRef = doc(
-      firestore,
+      db,
       'flashcard_progress',
       `${userId}_${collectionId}_${cardId}`
     );
@@ -344,7 +344,7 @@ export async function markCardAsMastered(userId, collectionId, cardId) {
 export async function resetCardProgress(userId, collectionId, cardId) {
   try {
     const progressRef = doc(
-      firestore,
+      db,
       'flashcard_progress',
       `${userId}_${collectionId}_${cardId}`
     );

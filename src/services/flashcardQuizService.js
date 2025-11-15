@@ -3,8 +3,8 @@
  * @module services/flashcardQuizService
  */
 
-import { firestore } from '../firebase/config';
-import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/db';
 import logger from '../utils/logger';
 
 /**
@@ -207,7 +207,7 @@ export function calculateQuizScore(questions, answers) {
  */
 export async function saveQuizResult(userId, collectionId, quizResults) {
   try {
-    const resultRef = doc(collection(firestore, 'flashcard_quiz_results'));
+    const resultRef = doc(collection(db, 'flashcard_quiz_results'));
 
     await setDoc(resultRef, {
       userId,
@@ -233,7 +233,7 @@ export async function saveQuizResult(userId, collectionId, quizResults) {
  */
 export async function getQuizHistory(userId, collectionId = null) {
   try {
-    const resultsRef = collection(firestore, 'flashcard_quiz_results');
+    const resultsRef = collection(db, 'flashcard_quiz_results');
     let q = query(resultsRef, where('userId', '==', userId));
 
     if (collectionId) {

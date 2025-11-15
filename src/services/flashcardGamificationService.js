@@ -3,8 +3,8 @@
  * @module services/flashcardGamificationService
  */
 
-import { firestore } from '../firebase/config';
-import { collection, doc, setDoc, getDoc, getDocs, query, where, Timestamp, updateDoc, increment } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { collection, doc, setDoc, getDoc, getDocs, query, where, Timestamp, updateDoc, increment } from 'firebase/db';
 import logger from '../utils/logger';
 
 /**
@@ -113,7 +113,7 @@ export const BADGES = {
  */
 export async function initializeUserGamification(userId) {
   try {
-    const userRef = doc(firestore, 'flashcard_gamification', userId);
+    const userRef = doc(db, 'flashcard_gamification', userId);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
@@ -146,7 +146,7 @@ export async function initializeUserGamification(userId) {
  */
 export async function awardPoints(userId, points, reason = '') {
   try {
-    const userRef = doc(firestore, 'flashcard_gamification', userId);
+    const userRef = doc(db, 'flashcard_gamification', userId);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
@@ -169,7 +169,7 @@ export async function awardPoints(userId, points, reason = '') {
     });
 
     // Registrar en historial
-    const historyRef = doc(collection(firestore, 'flashcard_gamification_history'));
+    const historyRef = doc(collection(db, 'flashcard_gamification_history'));
     await setDoc(historyRef, {
       userId,
       points,
@@ -195,7 +195,7 @@ export async function awardPoints(userId, points, reason = '') {
  */
 export async function awardBadge(userId, badgeId) {
   try {
-    const userRef = doc(firestore, 'flashcard_gamification', userId);
+    const userRef = doc(db, 'flashcard_gamification', userId);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
@@ -241,7 +241,7 @@ export async function awardBadge(userId, badgeId) {
  */
 export async function updatePracticeStreak(userId) {
   try {
-    const userRef = doc(firestore, 'flashcard_gamification', userId);
+    const userRef = doc(db, 'flashcard_gamification', userId);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
@@ -339,7 +339,7 @@ export async function checkAndAwardBadges(userId, stats) {
  */
 export async function getUserGamification(userId) {
   try {
-    const userRef = doc(firestore, 'flashcard_gamification', userId);
+    const userRef = doc(db, 'flashcard_gamification', userId);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
@@ -379,7 +379,7 @@ export async function getUserGamification(userId) {
  */
 export async function getLeaderboard(limit = 10) {
   try {
-    const gamificationRef = collection(firestore, 'flashcard_gamification');
+    const gamificationRef = collection(db, 'flashcard_gamification');
     const snapshot = await getDocs(gamificationRef);
 
     const users = snapshot.docs
