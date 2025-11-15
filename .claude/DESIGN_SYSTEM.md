@@ -736,14 +736,268 @@ style={{ zIndex: 1000 }}
 
 ---
 
+## 🏷️ Sistema de Badges
+
+### 1. Arquitectura Centralizada
+
+El sistema de badges está **completamente centralizado** en `/src/config/badgeSystem.js`:
+
+```javascript
+// ⭐ ÚNICO LUGAR donde se definen badges
+import { getBadgeForContentType, getBadgeForDifficulty } from '@/config/badgeSystem';
+```
+
+**Componentes del sistema:**
+- `src/config/badgeSystem.js` - Configuración central
+- `src/components/common/CategoryBadge.jsx` - Componente inteligente
+- `src/hooks/useBadgeConfig.js` - Hook para gestión
+- `src/components/settings/BadgeCustomizerTab.jsx` - UI de administración
+
+---
+
+### 2. Categorías de Badges
+
+| Categoría | Descripción | Permite Custom |
+|-----------|-------------|----------------|
+| **contentType** | Tipos de contenido (curso, lección, video) | ❌ No |
+| **exerciseType** | Tipos de ejercicio (múltiple choice, fill-blank) | ❌ No |
+| **difficulty** | Niveles de dificultad (beginner, intermediate, advanced) | ✅ Sí |
+| **cefr** | Niveles CEFR (A1, A2, B1, B2, C1, C2) | ❌ No |
+| **status** | Estados de contenido (draft, review, published) | ❌ No |
+| **theme** | Categorías temáticas (vocabulario, gramática) | ✅ Sí |
+| **feature** | Características (con audio, con video, interactivo) | ✅ Sí |
+
+---
+
+### 3. Uso del Componente CategoryBadge
+
+**Mapeo automático por tipo:**
+
+```jsx
+import { CategoryBadge } from './components/common';
+
+// Badge de tipo de contenido
+<CategoryBadge type="content" value="course" />
+// Renderiza: 📚 Curso (color azul automático)
+
+// Badge de dificultad
+<CategoryBadge type="difficulty" value="intermediate" />
+// Renderiza: 🟡 Intermedio (color amarillo automático)
+
+// Badge de status
+<CategoryBadge type="status" value="published" />
+// Renderiza: ✅ Publicado (color verde automático)
+
+// Badge custom directo por key
+<CategoryBadge badgeKey="THEME_VOCABULARY" />
+```
+
+**Props disponibles:**
+- `type` - Categoría: `'content' | 'exercise' | 'difficulty' | 'cefr' | 'status' | 'custom'`
+- `value` - Valor dentro de la categoría (ej: `'course'`, `'intermediate'`)
+- `badgeKey` - Clave directa (ej: `'CONTENT_COURSE'`)
+- `size` - Tamaño: `'sm' | 'md' | 'lg'`
+- `showIcon` - Mostrar icono emoji (default: `true`)
+- `showLabel` - Mostrar texto del label (default: `true`)
+
+---
+
+### 4. Gestión desde Settings (Solo Admin)
+
+Los administradores pueden acceder a **Settings → Badges** para:
+
+✅ **Ver todas las categorías** organizadas en secciones expandibles
+✅ **Editar colores** de badges existentes con color picker
+✅ **Agregar badges custom** en categorías permitidas (difficulty, theme, feature)
+✅ **Eliminar badges custom** (los del sistema no se pueden eliminar)
+✅ **Vista previa en tiempo real** de los cambios
+✅ **Exportar/importar** configuración (guardada en localStorage)
+
+**Ejemplo de flujo:**
+1. Admin abre Settings → Badges
+2. Expande "Categorías Temáticas"
+3. Click en "Agregar"
+4. Rellena: Label="Deportes", Icon="⚽", Color=#10b981
+5. Click "Agregar Badge"
+6. Badge disponible inmediatamente en toda la app
+7. Click "Guardar Cambios" para persistir
+
+---
+
+### 5. Hook useBadgeConfig
+
+Para componentes que necesitan gestionar badges programáticamente:
+
+```javascript
+import { useBadgeConfig } from './hooks';
+
+function MyComponent() {
+  const {
+    config,           // Configuración actual completa
+    hasChanges,       // Boolean: hay cambios sin guardar
+    updateColor,      // (badgeKey, color) => void
+    addBadge,         // (category, key, data) => void
+    removeBadge,      // (badgeKey) => void
+    save,             // () => boolean
+    reset,            // () => void
+  } = useBadgeConfig();
+
+  // Ejemplo: cambiar color de un badge
+  const handleColorChange = () => {
+    updateColor('CONTENT_COURSE', '#ff0000');
+    save();
+  };
+}
+```
+
+---
+
+### 6. Helpers de Configuración
+
+```javascript
+import {
+  getBadgeForContentType,
+  getBadgeForDifficulty,
+  getBadgeForStatus,
+  getBadgeByKey,
+  getBadgesByCategory,
+} from './config/badgeSystem';
+
+// Obtener configuración de un badge específico
+const courseBadge = getBadgeForContentType('course');
+// Retorna: { variant: 'primary', color: '#3b82f6', label: 'Curso', icon: '📚' }
+
+// Obtener todos los badges de una categoría
+const themeBadges = getBadgesByCategory('theme');
+// Retorna objeto con todos los badges de la categoría
+```
+
+---
+
+### 7. Persistencia y Sincronización
+
+**Storage:**
+- Los badges custom y colores personalizados se guardan en `localStorage`
+- Key: `xiwen_badge_config`
+- Formato: JSON con override sobre defaults
+
+**Sincronización:**
+- Los cambios disparan evento `xiwen_badge_config_changed`
+- Todos los componentes se actualizan automáticamente
+- CSS variables aplicadas en `initBadgeSystem()` al cargar
+
+**Inicialización:**
+```javascript
+// En main.jsx
+import { initBadgeSystem } from './config/badgeSystem';
+initBadgeSystem(); // Aplicar colores guardados
+```
+
+---
+
+### 8. Agregar Nueva Categoría
+
+Si en el futuro necesitas agregar una categoría nueva:
+
+1. **Editar `badgeSystem.js`:**
+```javascript
+// Agregar badges de la categoría
+export const DEFAULT_BADGE_CONFIG = {
+  // ... existentes
+
+  // Nueva categoría: Países
+  COUNTRY_SPAIN: {
+    variant: 'primary',
+    color: '#ef4444',
+    label: 'España',
+    icon: '🇪🇸',
+    category: 'country'
+  },
+  COUNTRY_MEXICO: {
+    variant: 'success',
+    color: '#10b981',
+    label: 'México',
+    icon: '🇲🇽',
+    category: 'country'
+  },
+};
+
+// Agregar categoría al BADGE_CATEGORIES
+export const BADGE_CATEGORIES = {
+  // ... existentes
+
+  country: {
+    label: 'Países',
+    description: 'Países de habla hispana',
+    icon: '🌍',
+    allowCustom: true,
+  },
+};
+
+// Agregar mapeo (opcional)
+export const BADGE_MAPPINGS = {
+  // ... existentes
+
+  country: {
+    'spain': 'COUNTRY_SPAIN',
+    'mexico': 'COUNTRY_MEXICO',
+  },
+};
+```
+
+2. **Uso inmediato:**
+```jsx
+<CategoryBadge type="country" value="spain" />
+// o
+<CategoryBadge badgeKey="COUNTRY_SPAIN" />
+```
+
+---
+
+### 9. Mejores Prácticas
+
+✅ **SIEMPRE** usar `<CategoryBadge>` en lugar de `<BaseBadge>` para badges del sistema
+✅ **SIEMPRE** mapear por tipo+valor en lugar de usar colores hardcoded
+✅ **EVITAR** crear badges inline con colores custom (usar el sistema)
+✅ **PREFERIR** iconos emoji monocromáticos (🟢🟡🔴) sobre imágenes
+✅ **DOCUMENTAR** nuevas categorías en `badgeSystem.js`
+
+❌ **NUNCA** hardcodear colores: `<BaseBadge variant="success">Curso</BaseBadge>`
+✅ **SIEMPRE** usar sistema: `<CategoryBadge type="content" value="course" />`
+
+---
+
+### 10. Estructura de Archivos
+
+```
+src/
+├── config/
+│   └── badgeSystem.js           ← ⭐ Configuración central
+│
+├── components/
+│   ├── common/
+│   │   ├── BaseBadge.jsx         ← Componente base visual
+│   │   └── CategoryBadge.jsx     ← ⭐ Wrapper inteligente
+│   │
+│   └── settings/
+│       └── BadgeCustomizerTab.jsx ← ⭐ UI de gestión
+│
+└── hooks/
+    └── useBadgeConfig.js         ← ⭐ Hook de gestión
+```
+
+---
+
 ## 📦 Recursos
 
 ### Archivos Clave
 - `tailwind.config.js` - Configuración de Tailwind
 - `src/globals.css` - CSS Variables y componentes @apply
+- `src/config/badgeSystem.js` - **⭐ Sistema de badges centralizado**
 - `src/components/common/BaseModal.jsx` - Modal estándar
 - `src/components/common/BaseButton.jsx` - Botón estándar
 - `src/components/common/BaseCard.jsx` - Card estándar
+- `src/components/common/CategoryBadge.jsx` - **⭐ Badge inteligente**
 - `src/contexts/ThemeContext.jsx` - Dark mode context
 
 ### Herramientas
@@ -754,4 +1008,4 @@ style={{ zIndex: 1000 }}
 ---
 
 **Mantenido por:** Claude Code
-**Última revisión:** 2025-11-11
+**Última revisión:** 2025-11-15
