@@ -119,7 +119,7 @@ export async function sendMessage({ conversationId, senderId, senderName, receiv
 
     await batch.commit();
 
-    logger.info('Message sent', 'Messages');
+    logger.info(`Message sent successfully to conversation ${conversationId}`, 'Messages');
     return messageRef.id;
   } catch (error) {
     logger.error('Error sending message', error, 'Messages');
@@ -256,15 +256,35 @@ export function subscribeToMessages(conversationId, callback) {
   );
 
   return onSnapshot(q, (snapshot) => {
-    const messages = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate()
-    })).reverse();
+    const messages = snapshot.docs.map(doc => {
+      const data = doc.data();
+      let createdAt;
 
+      // Handle timestamp with fallback
+      if (data.createdAt?.toDate) {
+        createdAt = data.createdAt.toDate();
+      } else if (data.createdAt) {
+        // If createdAt exists but is not a Firestore Timestamp
+        createdAt = new Date(data.createdAt);
+      } else {
+        // Fallback to current time if no timestamp
+        createdAt = new Date();
+        logger.warn(`Message ${doc.id} has no createdAt timestamp`, 'Messages');
+      }
+
+      return {
+        id: doc.id,
+        ...data,
+        createdAt
+      };
+    }).reverse();
+
+    logger.info(`Loaded ${messages.length} messages for conversation ${conversationId}`, 'Messages');
     callback(messages);
   }, (error) => {
     logger.error('Error in messages subscription', error, 'Messages');
+    // Call callback with empty array to prevent loading state
+    callback([]);
   });
 }
 

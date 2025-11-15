@@ -74,9 +74,13 @@ function MessageThread({ conversation, currentUser, onClose }) {
   useEffect(() => {
     if (!conversation?.id) return;
 
+    logger.info(`Subscribing to messages for conversation: ${conversation.id}`, 'MessageThread');
+
     const unsubscribe = subscribeToMessages(conversation.id, (updatedMessages) => {
+      logger.info(`Received ${updatedMessages.length} messages`, 'MessageThread');
       setMessages(updatedMessages);
-      scrollToBottom();
+      // Use setTimeout to ensure DOM has updated before scrolling
+      setTimeout(() => scrollToBottom(), 100);
     });
 
     // Mark messages as read when opening conversation
@@ -440,7 +444,12 @@ function MessageThread({ conversation, currentUser, onClose }) {
     setSending(false);
 
     if (result) {
+      logger.info('Message sent successfully', 'MessageThread');
       inputRef.current?.focus();
+      // Ensure scroll to bottom after sending
+      setTimeout(() => scrollToBottom(), 200);
+    } else {
+      logger.error('Failed to send message - no result returned', 'MessageThread');
     }
   };
 
@@ -569,6 +578,9 @@ function MessageThread({ conversation, currentUser, onClose }) {
         {messages.length === 0 ? (
           <div className="messages-empty">
             <p>No hay mensajes aún. ¡Inicia la conversación!</p>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
+              Escribe un mensaje abajo para empezar
+            </p>
           </div>
         ) : (
           messages.map((message, index) => {
@@ -713,7 +725,7 @@ function MessageThread({ conversation, currentUser, onClose }) {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            rows={1}
+            rows={3}
             disabled={sending || uploading}
           />
 
@@ -752,8 +764,14 @@ const MessageBubble = forwardRef(({
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const formatTime = (date) => {
     if (!date) return '';
-    const d = date instanceof Date ? date : new Date(date);
-    return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    try {
+      const d = date instanceof Date ? date : new Date(date);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      logger.error('Error formatting time', error, 'MessageBubble');
+      return '';
+    }
   };
 
   const formatFileSize = (bytes) => {

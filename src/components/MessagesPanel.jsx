@@ -12,6 +12,7 @@ import {
 import MessageThread from './MessageThread';
 import NewMessageModal from './NewMessageModal';
 import BaseButton from './common/BaseButton';
+import logger from '../utils/logger';
 import './Messages.css';
 
 /**
@@ -42,6 +43,7 @@ function MessagesPanel({ user }) {
    * Handle conversation selection
    */
   const handleSelectConversation = (conversation) => {
+    logger.info(`Selecting conversation with ${conversation.otherUser.name}`, 'MessagesPanel');
     setSelectedConversation(conversation);
   };
 
