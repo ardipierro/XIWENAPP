@@ -93,7 +93,7 @@ function SettingsPanel() {
               size="md"
               icon={Type}
               title="Probador de Fuentes Chinas"
-              description="Visualiza cómo se ve el nombre de la aplicación \"西文教室\" (Aula de Español) con diferentes fuentes chinas"
+              description={'Visualiza cómo se ve el nombre de la aplicación "西文教室" (Aula de Español) con diferentes fuentes chinas'}
             >
               {/* Selector de fuente */}
               <div className="mb-6">

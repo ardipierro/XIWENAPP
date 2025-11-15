@@ -5,7 +5,7 @@ import GradingInterface from './components/GradingInterface';
 import GamificationPanel from './components/GamificationPanel';
 import UnifiedCalendar from './components/UnifiedCalendar';
 import GuardianLinkingInterface from './components/GuardianLinkingInterface';
-import GuardianDashboard from './components/GuardianDashboard';
+// GuardianDashboard removed - now uses UniversalDashboard
 import { BaseButton } from './components/common';
 
 /**
@@ -190,7 +190,11 @@ export default function TestPage() {
         )}
 
         {currentView === 'guardian' && (
-          <GuardianDashboard user={mockGuardianUser} />
+          <div className="p-8 text-center">
+            <p className="text-gray-600 dark:text-gray-400">
+              GuardianDashboard eliminado - Ahora usa UniversalDashboard con role='guardian'
+            </p>
+          </div>
         )}
 
         {currentView === 'guardian-linking' && (
