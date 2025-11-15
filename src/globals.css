@@ -4724,3 +4724,9 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     align-items: flex-start;
   }
 }
+
+/* ============================================
+   UNIVERSAL PANEL BASE STYLES
+   Asegurar padding consistente en todos los paneles
+   ============================================ */
+
