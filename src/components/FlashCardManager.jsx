@@ -6,6 +6,14 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Plus, Sparkles, Search, Grid3x3, List, Eye, Edit, Trash2, Play } from 'lucide-react';
 import { BaseButton, BaseInput, BaseCard, BaseBadge, BaseLoading, BaseAlert, BaseEmptyState } from './common';
+import FlashCardGeneratorModal from './FlashCardGeneratorModal';
+import FlashCardViewer from './FlashCardViewer';
+import FlashCardEditor from './FlashCardEditor';
+import {
+  getAllFlashCardCollections,
+  getFlashCardCollectionsByTeacher,
+  deleteFlashCardCollection
+} from '../firebase/flashcards';
 import logger from '../utils/logger';
 import './FlashCardManager.css';
 
@@ -16,84 +24,106 @@ import './FlashCardManager.css';
  */
 export function FlashCardManager({ user }) {
   const [collections, setCollections] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-  const [showGenerator, setShowGenerator] = useState(false);
 
-  // Cargar colecciones (TODO: integrar con Firebase)
+  // Modals
+  const [showGenerator, setShowGenerator] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
+  const [showViewer, setShowViewer] = useState(false);
+
+  // Selected items
+  const [selectedCollectionId, setSelectedCollectionId] = useState(null);
+  const [editingCollectionId, setEditingCollectionId] = useState(null);
+
+  // Alerts
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  // Cargar colecciones
   useEffect(() => {
-    loadCollections();
+    if (user) {
+      loadCollections();
+    }
   }, [user]);
 
   const loadCollections = async () => {
     try {
       setLoading(true);
-      // TODO: Cargar desde Firebase
-      // const result = await getFlashCardCollections(user.uid);
-      // setCollections(result);
 
-      // Mock data de ejemplo
-      setCollections([
-        {
-          id: '1',
-          name: 'Expresiones Cotidianas A2',
-          description: 'Frases útiles para el día a día',
-          level: 'A2',
-          cardCount: 24,
-          imageUrl: null,
-          createdAt: new Date(),
-        },
-        {
-          id: '2',
-          name: 'Modismos Argentinos',
-          description: 'Expresiones típicas de Argentina',
-          level: 'B1',
-          cardCount: 36,
-          imageUrl: null,
-          createdAt: new Date(),
-        },
-      ]);
+      // Si es admin, cargar todas; si es teacher, solo las suyas
+      const result = user.role === 'admin'
+        ? await getAllFlashCardCollections()
+        : await getFlashCardCollectionsByTeacher(user.uid);
 
-      logger.info('FlashCard collections loaded', 'FlashCardManager');
+      setCollections(result || []);
+      logger.info(`Loaded ${result?.length || 0} flashcard collections`, 'FlashCardManager');
     } catch (err) {
       logger.error('Error loading collections:', err, 'FlashCardManager');
+      setErrorMessage('Error al cargar colecciones');
     } finally {
       setLoading(false);
     }
   };
 
+  // Handlers
   const handleCreateManual = () => {
-    logger.info('Create manual collection clicked', 'FlashCardManager');
-    // TODO: Abrir modal para crear colección manual
+    setEditingCollectionId(null);
+    setShowEditor(true);
   };
 
   const handleGenerateAI = () => {
-    logger.info('Generate with AI clicked', 'FlashCardManager');
     setShowGenerator(true);
-    // TODO: Abrir modal del generador automático
   };
 
-  const handleViewCollection = (collection) => {
-    logger.info('View collection:', collection.id, 'FlashCardManager');
-    // TODO: Abrir visor de flashcards
+  const handleViewCollection = (collectionId) => {
+    setSelectedCollectionId(collectionId);
+    setShowViewer(true);
   };
 
-  const handleEditCollection = (collection) => {
-    logger.info('Edit collection:', collection.id, 'FlashCardManager');
-    // TODO: Abrir editor de colección
+  const handleEditCollection = (collectionId) => {
+    setEditingCollectionId(collectionId);
+    setShowEditor(true);
   };
 
   const handleDeleteCollection = async (collectionId) => {
     if (!confirm('¿Estás seguro de eliminar esta colección?')) return;
 
-    logger.info('Delete collection:', collectionId, 'FlashCardManager');
-    // TODO: Eliminar de Firebase
+    try {
+      const result = await deleteFlashCardCollection(collectionId);
+
+      if (result.success) {
+        setSuccessMessage('Colección eliminada exitosamente');
+        await loadCollections();
+
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setErrorMessage(result.error || 'Error al eliminar colección');
+        setTimeout(() => setErrorMessage(null), 3000);
+      }
+    } catch (err) {
+      logger.error('Error deleting collection:', err);
+      setErrorMessage('Error al eliminar colección');
+      setTimeout(() => setErrorMessage(null), 3000);
+    }
   };
 
-  const handlePracticeCollection = (collection) => {
-    logger.info('Practice collection:', collection.id, 'FlashCardManager');
-    // TODO: Abrir modo de práctica
+  const handlePracticeCollection = (collectionId) => {
+    setSelectedCollectionId(collectionId);
+    setShowViewer(true);
+  };
+
+  const handleGeneratorSuccess = (collectionId) => {
+    setSuccessMessage('¡Colección generada exitosamente!');
+    loadCollections();
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
+  const handleEditorSave = (collectionId) => {
+    setSuccessMessage('Colección guardada exitosamente');
+    loadCollections();
+    setTimeout(() => setSuccessMessage(null), 3000);
   };
 
   // Filtrar colecciones por búsqueda
@@ -101,8 +131,8 @@ export function FlashCardManager({ user }) {
     if (!searchTerm) return true;
     const lowerSearch = searchTerm.toLowerCase();
     return (
-      col.name.toLowerCase().includes(lowerSearch) ||
-      col.description.toLowerCase().includes(lowerSearch)
+      col.name?.toLowerCase().includes(lowerSearch) ||
+      col.description?.toLowerCase().includes(lowerSearch)
     );
   });
 
@@ -141,6 +171,19 @@ export function FlashCardManager({ user }) {
         </div>
       </div>
 
+      {/* Success/Error Messages */}
+      {successMessage && (
+        <BaseAlert variant="success" className="mb-4">
+          {successMessage}
+        </BaseAlert>
+      )}
+
+      {errorMessage && (
+        <BaseAlert variant="error" className="mb-4">
+          {errorMessage}
+        </BaseAlert>
+      )}
+
       {/* Filters */}
       <div className="flashcard-manager__filters">
         <div className="flashcard-manager__search">
@@ -174,9 +217,14 @@ export function FlashCardManager({ user }) {
           title="No hay colecciones de flashcards"
           description="Crea tu primera colección o genera una automáticamente con IA"
           action={
-            <BaseButton variant="primary" icon={Sparkles} onClick={handleGenerateAI}>
-              Generar con IA
-            </BaseButton>
+            <div className="flex gap-3">
+              <BaseButton variant="secondary" icon={Plus} onClick={handleCreateManual}>
+                Crear Manual
+              </BaseButton>
+              <BaseButton variant="primary" icon={Sparkles} onClick={handleGenerateAI}>
+                Generar con IA
+              </BaseButton>
+            </div>
           }
         />
       ) : (
@@ -194,8 +242,13 @@ export function FlashCardManager({ user }) {
                     {collection.level}
                   </BaseBadge>
                   <BaseBadge variant="default" size="sm">
-                    {collection.cardCount} tarjetas
+                    {collection.cardCount || collection.cards?.length || 0} tarjetas
                   </BaseBadge>
+                  {collection.category && (
+                    <BaseBadge variant="default" size="sm">
+                      {collection.category}
+                    </BaseBadge>
+                  )}
                 </div>
 
                 {/* Title */}
@@ -214,7 +267,7 @@ export function FlashCardManager({ user }) {
                     variant="primary"
                     icon={Play}
                     size="sm"
-                    onClick={() => handlePracticeCollection(collection)}
+                    onClick={() => handlePracticeCollection(collection.id)}
                   >
                     Practicar
                   </BaseButton>
@@ -222,13 +275,13 @@ export function FlashCardManager({ user }) {
                     variant="ghost"
                     icon={Eye}
                     size="sm"
-                    onClick={() => handleViewCollection(collection)}
+                    onClick={() => handleViewCollection(collection.id)}
                   />
                   <BaseButton
                     variant="ghost"
                     icon={Edit}
                     size="sm"
-                    onClick={() => handleEditCollection(collection)}
+                    onClick={() => handleEditCollection(collection.id)}
                   />
                   <BaseButton
                     variant="ghost"
@@ -243,20 +296,29 @@ export function FlashCardManager({ user }) {
         </div>
       )}
 
-      {/* Generator Modal (placeholder) */}
-      {showGenerator && (
-        <div className="flashcard-generator-placeholder">
-          <BaseCard className="p-8">
-            <h2 className="text-xl font-bold mb-4">Generador de FlashCards con IA</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Esta funcionalidad será implementada próximamente.
-            </p>
-            <BaseButton onClick={() => setShowGenerator(false)}>
-              Cerrar
-            </BaseButton>
-          </BaseCard>
-        </div>
-      )}
+      {/* Generator Modal */}
+      <FlashCardGeneratorModal
+        isOpen={showGenerator}
+        onClose={() => setShowGenerator(false)}
+        onSuccess={handleGeneratorSuccess}
+        user={user}
+      />
+
+      {/* Editor Modal */}
+      <FlashCardEditor
+        isOpen={showEditor}
+        onClose={() => setShowEditor(false)}
+        onSave={handleEditorSave}
+        collectionId={editingCollectionId}
+        user={user}
+      />
+
+      {/* Viewer Modal */}
+      <FlashCardViewer
+        isOpen={showViewer}
+        onClose={() => setShowViewer(false)}
+        collectionId={selectedCollectionId}
+      />
     </div>
   );
 }

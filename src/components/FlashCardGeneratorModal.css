@@ -1,0 +1,121 @@
+/**
+ * FlashCard Generator Modal - Estilos
+ */
+
+.flashcard-generator {
+  padding: 1.5rem;
+}
+
+/* Form */
+.flashcard-generator__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.flashcard-generator__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.flashcard-generator__field label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.flashcard-generator__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Progress */
+.flashcard-generator__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  min-height: 300px;
+  justify-content: center;
+}
+
+.flashcard-generator__progress-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.flashcard-generator__progress-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.flashcard-generator__progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.flashcard-generator__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+/* Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Dark Mode */
+.dark .flashcard-generator__field label {
+  color: var(--dark-text-primary);
+}
+
+.dark .flashcard-generator__progress-header h3 {
+  color: var(--dark-text-primary);
+}
+
+.dark .flashcard-generator__progress-bar {
+  background-color: var(--dark-bg-secondary);
+}
+
+.dark .flashcard-generator__actions {
+  border-top-color: var(--dark-border);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .flashcard-generator {
+    padding: 1rem;
+  }
+
+  .flashcard-generator__actions {
+    flex-direction: column-reverse;
+  }
+
+  .flashcard-generator__actions button {
+    width: 100%;
+  }
+}
