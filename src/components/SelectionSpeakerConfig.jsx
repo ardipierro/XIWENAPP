@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { Volume2, Play, Settings, Check, Info } from 'lucide-react';
 import PropTypes from 'prop-types';
 import logger from '../utils/logger';
+import { hasAICredential } from '../utils/credentialsHelper';
 import {
   BaseButton,
   BaseSelect,
@@ -22,11 +23,32 @@ const SelectionSpeakerConfig = ({ config, onSave, onClose }) => {
   const [localConfig, setLocalConfig] = useState(config);
   const [testingVoice, setTestingVoice] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [hasElevenLabsKey, setHasElevenLabsKey] = useState(false);
+  const [checkingCredentials, setCheckingCredentials] = useState(true);
 
   // Update local config when prop changes
   useEffect(() => {
     setLocalConfig(config);
   }, [config]);
+
+  // Check if ElevenLabs API key is configured
+  useEffect(() => {
+    const checkCredentials = async () => {
+      try {
+        setCheckingCredentials(true);
+        const hasKey = await hasAICredential('elevenlabs');
+        setHasElevenLabsKey(hasKey);
+        logger.info(`ElevenLabs API key ${hasKey ? 'found' : 'not found'}`, 'SelectionSpeakerConfig');
+      } catch (err) {
+        logger.error('Error checking ElevenLabs credentials:', err, 'SelectionSpeakerConfig');
+        setHasElevenLabsKey(false);
+      } finally {
+        setCheckingCredentials(false);
+      }
+    };
+
+    checkCredentials();
+  }, []);
 
   /**
    * Get available voices for current provider
@@ -147,14 +169,20 @@ const SelectionSpeakerConfig = ({ config, onSave, onClose }) => {
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-semibold text-gray-900 dark:text-white">
                     ElevenLabs
                   </span>
                   <BaseBadge variant="warning" size="sm">PREMIUM</BaseBadge>
+                  {!checkingCredentials && hasElevenLabsKey && (
+                    <BaseBadge variant="success" size="sm">✓ CONFIGURADO</BaseBadge>
+                  )}
                 </div>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  Voces de alta calidad. Requiere API key.
+                  {hasElevenLabsKey
+                    ? 'Voces de alta calidad. API key configurada.'
+                    : 'Voces de alta calidad. Requiere API key.'
+                  }
                 </p>
               </div>
               {localConfig.provider === 'elevenlabs' && (
@@ -264,20 +292,34 @@ const SelectionSpeakerConfig = ({ config, onSave, onClose }) => {
         </div>
       </BaseAlert>
 
-      {/* ElevenLabs Warning */}
-      {localConfig.provider === 'elevenlabs' && (
-        <BaseAlert variant="warning" border>
-          <div className="flex gap-2">
-            <Settings size={16} className="flex-shrink-0 mt-0.5" />
-            <div className="text-sm">
-              <p className="font-medium mb-1">⚠️ Configuración requerida</p>
-              <p className="text-gray-600 dark:text-gray-400">
-                Para usar ElevenLabs, configura tu API key en la sección{' '}
-                <span className="font-semibold">Configuración → Credenciales</span>.
-              </p>
+      {/* ElevenLabs Status */}
+      {localConfig.provider === 'elevenlabs' && !checkingCredentials && (
+        hasElevenLabsKey ? (
+          <BaseAlert variant="success" border>
+            <div className="flex gap-2">
+              <Check size={16} className="flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium mb-1">✅ API Key Configurada</p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  ElevenLabs está configurado correctamente. Los alumnos podrán usar voces premium.
+                </p>
+              </div>
             </div>
-          </div>
-        </BaseAlert>
+          </BaseAlert>
+        ) : (
+          <BaseAlert variant="warning" border>
+            <div className="flex gap-2">
+              <Settings size={16} className="flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium mb-1">⚠️ Configuración requerida</p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Para usar ElevenLabs, configura tu API key en la sección{' '}
+                  <span className="font-semibold">Configuración → Credenciales</span>.
+                </p>
+              </div>
+            </div>
+          </BaseAlert>
+        )
       )}
 
       {/* Actions */}
