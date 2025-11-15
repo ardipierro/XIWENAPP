@@ -22,13 +22,15 @@ import {
   Mic,
   Bookmark,
   TrendingUp,
-  Type
+  Type,
+  Database
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge } from './common';
 import ViewCustomizer from './interactive-book/ViewCustomizer';
 import AIImageGenerator from './interactive-book/AIImageGenerator';
 import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
+import AudioCacheTab from './settings/AudioCacheTab';
 
 /**
  * Modal de configuración completo con tabs
@@ -156,6 +158,12 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       label: 'Audio y Voces',
       icon: Volume2,
       description: 'TTS, personajes y velocidad'
+    },
+    {
+      id: 'cache',
+      label: 'Caché de Audio',
+      icon: Database,
+      description: 'Gestión de audios TTS cacheados'
     },
     {
       id: 'advanced',
@@ -682,7 +690,14 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
           )}
 
           {/* ========================================= */}
-          {/* TAB 4: AVANZADO (Progreso + Imágenes IA) */}
+          {/* TAB: CACHÉ DE AUDIO */}
+          {/* ========================================= */}
+          {activeTab === 'cache' && (
+            <AudioCacheTab />
+          )}
+
+          {/* ========================================= */}
+          {/* TAB: AVANZADO (Progreso + Imágenes IA) */}
           {/* ========================================= */}
           {activeTab === 'advanced' && (
             <div className="space-y-8">
