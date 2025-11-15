@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 /**
@@ -10,18 +10,24 @@ import { X } from 'lucide-react';
  * 3. Modal de formulario
  * 4. Modal fullscreen
  *
+ * RESPONSIVE MÓVIL:
+ * - Modales 'lg' y 'xl' se abren automáticamente en fullscreen en móviles
+ * - Modales 'sm' y 'md' mantienen su tamaño
+ * - Breakpoint: 768px (tablets y menores)
+ *
  * @param {boolean} isOpen - Controla si el modal está visible
  * @param {function} onClose - Callback cuando se cierra el modal
  * @param {string} title - Título del modal
  * @param {node} icon - Icono opcional en el header (Lucide icon component)
  * @param {node} children - Contenido del modal
  * @param {node} footer - Footer custom (buttons, actions)
- * @param {string} size - Tamaño del modal: 'sm', 'md', 'lg', 'xl', 'fullscreen'
+ * @param {string} size - Tamaño del modal: 'sm', 'md', 'lg', 'xl', 'full', 'fullscreen'
  * @param {boolean} showCloseButton - Mostrar botón X de cerrar
  * @param {boolean} closeOnOverlayClick - Cerrar al hacer click fuera
  * @param {string} className - Clases CSS adicionales
  * @param {boolean} isDanger - Estilo de peligro (rojo)
  * @param {boolean} loading - Estado de carga (deshabilita botones)
+ * @param {boolean} forceFullscreenMobile - Forzar fullscreen en móvil (override automático)
  */
 function BaseModal({
   isOpen,
@@ -35,8 +41,23 @@ function BaseModal({
   closeOnOverlayClick = true,
   className = '',
   isDanger = false,
-  loading = false
+  loading = false,
+  forceFullscreenMobile = null // null = auto, true = forzar, false = nunca
 }) {
+  // Detectar móvil (< 768px)
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (!isOpen) return null;
 
   const handleOverlayClick = (e) => {
@@ -45,21 +66,43 @@ function BaseModal({
     }
   };
 
+  // Determinar tamaño efectivo del modal
+  let effectiveSize = size;
+
+  if (isMobile) {
+    // Lógica de fullscreen automático en móviles
+    if (forceFullscreenMobile === true) {
+      effectiveSize = 'fullscreen';
+    } else if (forceFullscreenMobile === false) {
+      effectiveSize = size; // Mantener tamaño original
+    } else {
+      // Auto: lg y xl se convierten a fullscreen en móviles
+      if (size === 'lg' || size === 'xl') {
+        effectiveSize = 'fullscreen';
+      }
+    }
+  }
+
   // Tailwind size classes
   const sizeClasses = {
     'sm': 'max-w-sm',
     'md': 'max-w-lg',
     'lg': 'max-w-3xl',
     'xl': 'max-w-5xl',
+    'full': 'w-screen h-screen max-w-none rounded-none', // Alias de fullscreen
     'fullscreen': 'w-screen h-screen max-w-none rounded-none'
   };
+
+  // Verificar si es fullscreen
+  const isFullscreen = effectiveSize === 'fullscreen' || effectiveSize === 'full';
 
   return (
     // Overlay con backdrop blur
     <div
       className={`
         fixed inset-0
-        flex items-center justify-center p-4
+        flex items-center justify-center
+        ${isFullscreen ? 'p-0' : 'p-4'}
         bg-black/50 dark:bg-black/70 backdrop-blur-sm
         animate-in fade-in duration-200
         ${isDanger ? 'bg-red-500/10' : ''}
@@ -70,8 +113,8 @@ function BaseModal({
       {/* Modal box */}
       <div
         className={`
-          relative w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]
-          rounded-xl
+          relative w-full ${sizeClasses[effectiveSize]}
+          ${isFullscreen ? '' : 'max-h-[calc(100vh-2rem)] rounded-xl'}
           flex flex-col
           animate-in zoom-in-95 slide-in-from-bottom-4 duration-300
           ${loading ? 'pointer-events-none opacity-70' : ''}

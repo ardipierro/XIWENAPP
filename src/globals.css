@@ -1807,6 +1807,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   font-weight: 700;
   margin: 0;
   color: var(--color-text-primary);
+  white-space: nowrap; /* CRÍTICO: Prevenir quiebre en 2 líneas */
 }
 
 .universal-topbar__subtitle {
@@ -2328,7 +2329,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   }
 
   .universal-topbar__title h1 {
-    font-size: 1rem;
+    font-size: 0.95rem; /* Reducido para móviles */
   }
 
   .universal-topbar__subtitle,
@@ -2377,6 +2378,21 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
   .universal-dashboard__features {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Móviles muy pequeños (iPhone SE, etc) */
+@media (max-width: 375px) {
+  .universal-topbar {
+    padding: 0 0.75rem; /* Menos padding en móviles pequeños */
+  }
+
+  .universal-topbar__title h1 {
+    font-size: 0.85rem; /* Aún más pequeño para móviles tiny */
+  }
+
+  .universal-topbar__left {
+    gap: 0.5rem; /* Reducir gap entre hamburger y logo */
   }
 }
 
