@@ -199,20 +199,25 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
           disabled={uploading}
           className="input w-full"
         >
-          <option value="">Sin asignar (asignar después)</option>
+          <option value="">⚠️ Sin asignar (asignar después)</option>
           {students.length > 0 ? (
             students.map(student => (
               <option key={student.id} value={student.id}>
-                {student.name || student.email}
+                👤 {student.name || student.email}
               </option>
             ))
           ) : (
             <option value="" disabled>No hay estudiantes disponibles</option>
           )}
         </select>
-        {!selectedStudentId && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Puedes asignar el estudiante más tarde al revisar la corrección
+        {!selectedStudentId ? (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 font-medium bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
+            ⚠️ Esta tarea aparecerá como "Sin asignar" hasta que la asignes a un estudiante
+          </p>
+        ) : (
+          <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-medium bg-green-50 dark:bg-green-900/20 p-2 rounded flex items-center gap-1">
+            <span>✅</span>
+            <span>Se asignará a: <strong>{students.find(s => s.id === selectedStudentId)?.name || students.find(s => s.id === selectedStudentId)?.email}</strong></span>
           </p>
         )}
       </div>
@@ -275,6 +280,34 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
         )}
       </div>
 
+      {/* Upload Summary */}
+      {selectedFile && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+          <h4 className="text-sm font-bold text-blue-900 dark:text-blue-100 mb-2">
+            📋 Resumen de la tarea a enviar
+          </h4>
+          <div className="space-y-1.5 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-blue-700 dark:text-blue-300 font-medium">Estudiante:</span>
+              <span className={`font-bold ${selectedStudentId ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
+                {selectedStudentId
+                  ? `✅ ${students.find(s => s.id === selectedStudentId)?.name || students.find(s => s.id === selectedStudentId)?.email}`
+                  : '⚠️ Sin asignar'
+                }
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-700 dark:text-blue-300 font-medium">Archivo:</span>
+              <span className="font-bold text-blue-900 dark:text-blue-100">{selectedFile.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-700 dark:text-blue-300 font-medium">Procesamiento:</span>
+              <span className="font-bold text-orange-700 dark:text-orange-300">🤖 IA automática (10-30s)</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <BaseButton
@@ -292,7 +325,7 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
           fullWidth
         >
           <Upload size={18} />
-          {uploading ? 'Subiendo...' : 'Enviar a Corrección'}
+          {uploading ? 'Subiendo...' : 'Enviar a Corrección IA'}
         </BaseButton>
       </div>
     </div>

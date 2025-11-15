@@ -3,7 +3,7 @@
  * @module components/HomeworkReviewPanel
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   CheckCircle,
   Clock,
@@ -24,7 +24,8 @@ import {
   ChevronUp,
   Upload,
   Loader,
-  RefreshCw
+  RefreshCw,
+  Maximize2
 } from 'lucide-react';
 import {
   BaseButton,
@@ -53,6 +54,84 @@ import {
 } from '../firebase/homework_reviews';
 import logger from '../utils/logger';
 import { useAuth } from '../contexts/AuthContext';
+
+/**
+ * Interactive Image Container - Handles zoom and pan interactions
+ */
+function InteractiveImageContainer({ zoom, setZoom, pan, setPan, children }) {
+  const containerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(prevZoom => {
+        const newZoom = Math.min(Math.max(0.5, prevZoom + delta), 5);
+        // Reset position if zooming out to 1
+        if (newZoom === 1) {
+          setPan({ x: 0, y: 0 });
+        }
+        return newZoom;
+      });
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [setZoom, setPan]);
+
+  const handleMouseDown = (e) => {
+    // Don't start dragging if clicking on the debug panel
+    if (e.target.closest('[data-debug-panel]')) {
+      return;
+    }
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - pan.x,
+      y: e.clientY - pan.y
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      setPan({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900 select-none"
+      style={{
+        cursor: isDragging ? 'grabbing' : 'grab',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+        msUserSelect: 'none',
+        WebkitUserDrag: 'none'
+      }}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      {children}
+    </div>
+  );
+}
 
 /**
  * Homework Review Panel Component
@@ -216,47 +295,73 @@ function ReviewCard({ review, onSelect }) {
   // Check if task is being processed
   const isProcessing = review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing';
   const isFailed = review.status === REVIEW_STATUS.FAILED || review.status === 'failed';
+  const isPendingReview = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
 
   return (
-    <BaseCard hover onClick={onSelect} className="cursor-pointer">
+    <BaseCard
+      hover
+      onClick={onSelect}
+      className={`cursor-pointer relative ${
+        isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
+        isFailed ? 'border-2 border-red-400 dark:border-red-500' :
+        isPendingReview ? 'border-2 border-green-400 dark:border-green-500' :
+        ''
+      }`}
+    >
       <div className="space-y-3">
+        {/* Large Status Badge - Top Right Corner */}
+        <div className="absolute -top-2 -right-2 z-10">
+          {isProcessing ? (
+            <div className="bg-orange-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+              <RefreshCw size={14} className="animate-spin" />
+              <span className="text-xs font-bold">PROCESANDO</span>
+            </div>
+          ) : isFailed ? (
+            <div className="bg-red-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+              <AlertCircle size={14} />
+              <span className="text-xs font-bold">ERROR</span>
+            </div>
+          ) : isPendingReview ? (
+            <div className="bg-green-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+              <CheckCircle size={14} />
+              <span className="text-xs font-bold">LISTO</span>
+            </div>
+          ) : null}
+        </div>
+
         {/* Student Info */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <div className={`p-2 rounded-lg ${
-              isProcessing ? 'bg-blue-100 dark:bg-blue-900/20' :
-              isFailed ? 'bg-red-100 dark:bg-red-900/20' :
+            <div className={`p-2.5 rounded-lg ${
+              isProcessing ? 'bg-orange-100 dark:bg-orange-900/30' :
+              isFailed ? 'bg-red-100 dark:bg-red-900/30' :
+              isPendingReview ? 'bg-green-100 dark:bg-green-900/30' :
               'bg-gray-100 dark:bg-gray-800'
             }`}>
               {isProcessing ? (
-                <RefreshCw size={16} strokeWidth={2} className="text-blue-600 dark:text-blue-400 animate-spin" />
+                <RefreshCw size={20} strokeWidth={2.5} className="text-orange-600 dark:text-orange-400 animate-spin" />
               ) : isFailed ? (
-                <AlertCircle size={16} strokeWidth={2} className="text-red-600 dark:text-red-400" />
+                <AlertCircle size={20} strokeWidth={2.5} className="text-red-600 dark:text-red-400" />
+              ) : isPendingReview ? (
+                <CheckCircle size={20} strokeWidth={2.5} className="text-green-600 dark:text-green-400" />
               ) : (
-                <User size={16} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
+                <User size={20} strokeWidth={2.5} className="text-gray-600 dark:text-gray-400" />
               )}
             </div>
             <div>
-              <p className="font-medium text-gray-900 dark:text-white text-sm">
-                {review.studentName || 'Estudiante'}
+              <p className="font-semibold text-gray-900 dark:text-white">
+                {review.studentName || 'Sin asignar'}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {review.createdAt?.toDate?.().toLocaleDateString('es-ES')}
+                {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
+                  day: 'numeric',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
               </p>
             </div>
           </div>
-          {isProcessing ? (
-            <BaseBadge variant="info" size="sm">
-              <Loader size={12} className="animate-spin" />
-              Procesando
-            </BaseBadge>
-          ) : isFailed ? (
-            <BaseBadge variant="danger" size="sm">
-              Error
-            </BaseBadge>
-          ) : (
-            <Clock size={16} strokeWidth={2} className="text-orange-500" />
-          )}
         </div>
 
         {/* Image Preview */}
@@ -270,26 +375,45 @@ function ReviewCard({ review, onSelect }) {
 
         {/* Stats or Processing Message */}
         {isProcessing ? (
-          <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
-              <RefreshCw size={14} className="animate-spin" />
-              <span className="font-medium">IA analizando la tarea...</span>
+          <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-600 rounded-lg p-3.5">
+            <div className="flex items-center gap-2.5 text-sm text-orange-800 dark:text-orange-200">
+              <RefreshCw size={18} className="animate-spin flex-shrink-0" strokeWidth={2.5} />
+              <span className="font-bold">IA analizando la tarea...</span>
             </div>
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              Esto puede tardar 10-30 segundos
+            <p className="text-xs text-orange-700 dark:text-orange-300 mt-2 ml-6 font-medium">
+              ⏱️ Esto puede tardar 10-30 segundos
             </p>
           </div>
         ) : isFailed ? (
-          <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-3">
-            <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
-              <AlertCircle size={14} />
-              <span className="font-medium">Error al procesar</span>
+          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-600 rounded-lg p-3.5">
+            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
+              <AlertCircle size={18} strokeWidth={2.5} className="flex-shrink-0" />
+              <span className="font-bold">Error al procesar</span>
             </div>
             {review.errorMessage && (
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+              <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
                 {review.errorMessage}
               </p>
             )}
+          </div>
+        ) : isPendingReview ? (
+          <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-600 rounded-lg p-3">
+            <div className="flex items-center gap-2.5 text-sm text-green-800 dark:text-green-200 mb-2">
+              <CheckCircle size={16} strokeWidth={2.5} className="flex-shrink-0" />
+              <span className="font-bold">✅ Análisis completado</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2">
+                <BaseBadge variant={gradeColor} className="text-sm">
+                  {grade}/100
+                </BaseBadge>
+                <PerformanceIcon size={14} strokeWidth={2} className="text-gray-400" />
+              </div>
+              <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                <AlertCircle size={14} strokeWidth={2} />
+                {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-2">
@@ -308,20 +432,25 @@ function ReviewCard({ review, onSelect }) {
 
         {/* View Button */}
         <BaseButton
-          variant={isProcessing ? "ghost" : "outline"}
+          variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
           size="sm"
           fullWidth
           disabled={isProcessing}
+          className={
+            isProcessing ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
+            isPendingReview ? 'bg-green-600 hover:bg-green-700 text-white font-semibold' :
+            ''
+          }
         >
           {isProcessing ? (
             <>
-              <Loader size={16} strokeWidth={2} className="animate-spin" />
-              Espera...
+              <Loader size={16} strokeWidth={2.5} className="animate-spin" />
+              ⏳ Espera...
             </>
           ) : (
             <>
-              <Eye size={16} strokeWidth={2} />
-              Revisar
+              <Eye size={18} strokeWidth={2.5} />
+              {isPendingReview ? '👁️ Ver Corrección' : 'Ver Detalles'}
             </>
           )}
         </BaseButton>
@@ -359,6 +488,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
   });
   const [highlightOpacity, setHighlightOpacity] = useState(0.25);
   const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
   const [useWavyUnderline, setUseWavyUnderline] = useState(true);
 
   const handleApprove = async () => {
@@ -584,24 +714,38 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
           )}
 
           <div className="space-y-2">
-            <div className="flex items-center justify-end gap-2">
-              {review.words && review.words.length > 0 && (
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                {review.words && review.words.length > 0 && (
+                  <BaseButton
+                    variant={showErrorOverlay ? 'primary' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowErrorOverlay(!showErrorOverlay)}
+                  >
+                    {showErrorOverlay ? '👁️ Ocultar' : '👁️ Mostrar'} Controles
+                  </BaseButton>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <BaseBadge variant="secondary" size="sm" className="cursor-help" title="Arrastra la imagen para moverla. Usa la rueda del mouse para zoom.">
+                  🖱️ Arrastra y zoom
+                </BaseBadge>
                 <BaseButton
-                  variant={showErrorOverlay ? 'primary' : 'outline'}
+                  variant="outline"
                   size="sm"
-                  onClick={() => setShowErrorOverlay(!showErrorOverlay)}
+                  onClick={() => setShowImageLightbox(true)}
                 >
-                  {showErrorOverlay ? '👁️ Ocultar' : '👁️ Mostrar'} Controles
+                  <Maximize2 size={14} />
+                  Pantalla completa
                 </BaseButton>
-              )}
-              <BaseBadge variant="info" size="sm">
-                Click para ampliar
-              </BaseBadge>
+              </div>
             </div>
 
-            <div
-              className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 max-h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
-              onClick={() => setShowImageLightbox(true)}
+            <InteractiveImageContainer
+              zoom={zoom}
+              setZoom={setZoom}
+              pan={pan}
+              setPan={setPan}
             >
               <ImageOverlay
                 imageUrl={review.imageUrl}
@@ -611,21 +755,24 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                 visibleErrorTypes={visibleErrorTypes}
                 highlightOpacity={highlightOpacity}
                 zoom={zoom}
+                pan={pan}
                 useWavyUnderline={useWavyUnderline}
                 className="max-w-full max-h-96"
               />
-            </div>
+            </InteractiveImageContainer>
           </div>
           {review.words && review.words.length > 0 && (
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              💡 Usa los controles para:
-              <span className="ml-2">🔴 Filtrar por tipo</span>
+              💡 Controles disponibles:
+              <span className="ml-2">🖱️ Arrastra la imagen</span>
               <span className="mx-1">•</span>
-              <span>🔍 Zoom y pan</span>
+              <span>🔍 Rueda del mouse para zoom</span>
+              <span className="mx-1">•</span>
+              <span>🔴 Filtrar por tipo</span>
               <span className="mx-1">•</span>
               <span>✨ Subrayado ondulado</span>
               <span className="mx-1">•</span>
-              <span>🎨 Ajustar opacidad</span>
+              <span>🎨 Opacidad</span>
             </div>
           )}
           {!review.words || review.words.length === 0 && (
@@ -807,12 +954,18 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         </div>
       </div>
 
-      {/* Image Lightbox */}
+      {/* Image Lightbox with Error Overlays */}
       <ImageLightbox
         isOpen={showImageLightbox}
         onClose={() => setShowImageLightbox(false)}
         imageUrl={review.imageUrl}
         alt="Tarea del estudiante"
+        words={review.words || []}
+        errors={updatedCorrections}
+        showOverlay={showErrorOverlay}
+        visibleErrorTypes={visibleErrorTypes}
+        highlightOpacity={highlightOpacity}
+        useWavyUnderline={useWavyUnderline}
       />
     </BaseModal>
   );

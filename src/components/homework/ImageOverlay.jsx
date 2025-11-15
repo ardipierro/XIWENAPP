@@ -13,8 +13,9 @@
  * - Improved matching with fuzzy logic
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 /**
  * Error type to color mapping
@@ -106,6 +107,7 @@ export default function ImageOverlay({
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
   const [imageNaturalDimensions, setImageNaturalDimensions] = useState({ width: 0, height: 0 });
   const [debugInfo, setDebugInfo] = useState(null);
+  const [debugExpanded, setDebugExpanded] = useState(true);
   const imageRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -153,7 +155,13 @@ export default function ImageOverlay({
         wordsCount: words?.length || 0,
         errorsCount: errors?.length || 0
       });
-      return [];
+      return { highlights: [], stats: null };
+    }
+
+    // Wait for image dimensions to be available
+    if (imageDimensions.width === 0 || imageNaturalDimensions.width === 0) {
+      console.log('[ImageOverlay] Waiting for image dimensions...');
+      return { highlights: [], stats: null };
     }
 
     const highlights = [];
@@ -315,11 +323,30 @@ export default function ImageOverlay({
       );
     }
 
-    setDebugInfo(matchingStats);
-    return highlights;
+    // Return both highlights and stats (stats will be handled separately)
+    return { highlights, stats: matchingStats };
   };
 
-  const highlights = getErrorHighlights();
+  // Memoize highlights calculation to prevent infinite re-renders
+  const { highlights, stats } = useMemo(() => {
+    return getErrorHighlights();
+  }, [
+    words,
+    errors,
+    imageDimensions.width,
+    imageDimensions.height,
+    imageNaturalDimensions.width,
+    imageNaturalDimensions.height,
+    visibleErrorTypes,
+    showOverlay
+  ]);
+
+  // Update debug info when stats change (separate from render)
+  useEffect(() => {
+    if (stats) {
+      setDebugInfo(stats);
+    }
+  }, [stats]);
 
   // Calculate container transform for zoom and pan
   const containerTransform = `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`;
@@ -328,14 +355,15 @@ export default function ImageOverlay({
     <div
       ref={containerRef}
       className={`relative inline-block ${className}`}
-      style={{ maxWidth: '100%', overflow: 'hidden' }}
+      style={{ maxWidth: '100%', overflow: 'hidden', pointerEvents: 'none' }}
     >
       {/* Image with zoom/pan transform */}
       <div
         style={{
           transform: containerTransform,
           transformOrigin: 'top left',
-          transition: 'transform 0.2s ease-out'
+          transition: 'transform 0.2s ease-out',
+          pointerEvents: 'none'
         }}
       >
         <img
@@ -343,7 +371,7 @@ export default function ImageOverlay({
           src={imageUrl}
           alt="Homework"
           className="w-full h-auto"
-          style={{ display: 'block' }}
+          style={{ display: 'block', pointerEvents: 'none' }}
         />
 
         {/* Overlay SVG */}
@@ -355,7 +383,8 @@ export default function ImageOverlay({
             style={{
               position: 'absolute',
               top: 0,
-              left: 0
+              left: 0,
+              pointerEvents: 'none'
             }}
           >
             {highlights.map((highlight) => (
@@ -409,39 +438,62 @@ export default function ImageOverlay({
         )}
       </div>
 
-      {/* Enhanced Debug info (only in development) */}
+      {/* Enhanced Debug info (only in development) - Collapsible */}
       {import.meta.env.DEV && (
-        <div className="absolute top-2 left-2 bg-black/90 text-white text-xs p-3 rounded pointer-events-none z-10 font-mono max-w-xs">
-          <div className="font-bold mb-1">🐛 Debug Info</div>
-          <div className="space-y-0.5">
-            <div>Words: {words.length}</div>
-            <div>Errors: {errors.length}</div>
-            <div className={`font-bold ${highlights.length > 0 ? 'text-green-400' : 'text-red-400'}`}>
-              Highlights: {highlights.length}
+        <div
+          data-debug-panel
+          className="absolute bottom-2 right-2 bg-black/95 text-white text-[10px] rounded z-10 font-mono max-w-[280px] pointer-events-auto"
+        >
+          {/* Header - clickable */}
+          <div
+            className="flex items-center justify-between gap-2 p-2 cursor-pointer hover:bg-white/10 rounded-t"
+            onClick={() => setDebugExpanded(!debugExpanded)}
+          >
+            <div className="font-bold text-[11px] flex items-center gap-1">
+              🐛 Debug Info
+              {!debugExpanded && debugInfo && (
+                <span className={`ml-1 ${highlights.length > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  ({debugInfo.matched}/{debugInfo.attempted})
+                </span>
+              )}
             </div>
-            {debugInfo && (
-              <>
-                <div>Matched: {debugInfo.matched}/{debugInfo.attempted}</div>
-                <div>Filtered: {debugInfo.filteredByType}</div>
-                <div className="text-yellow-300">
-                  Unmatched: {debugInfo.unmatched?.length || 0}
-                </div>
-              </>
-            )}
-            <div>Zoom: {(zoom * 100).toFixed(0)}%</div>
-            <div>Scale: {imageDimensions.width}x{imageDimensions.height}</div>
-            <div className="text-xs text-gray-400">
-              {imageNaturalDimensions.width}x{imageNaturalDimensions.height}
-            </div>
+            {debugExpanded ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
           </div>
-          {debugInfo && debugInfo.unmatched?.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-gray-600">
-              <div className="text-yellow-300 mb-1">Unmatched (sample):</div>
-              {debugInfo.unmatched.slice(0, 2).map((err, idx) => (
-                <div key={idx} className="text-xs truncate">
-                  • {err.errorText}
+
+          {/* Expandable content */}
+          {debugExpanded && (
+            <div className="px-2 pb-2 space-y-0.5 border-t border-white/20">
+              <div className="mt-1.5">Words: {words.length}</div>
+              <div>Errors: {errors.length}</div>
+              <div className={`font-bold ${highlights.length > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                Highlights: {highlights.length}
+              </div>
+              {debugInfo && (
+                <>
+                  <div>Matched: {debugInfo.matched}/{debugInfo.attempted}</div>
+                  <div>Filtered: {debugInfo.filteredByType}</div>
+                  <div className="text-yellow-300">
+                    Unmatched: {debugInfo.unmatched?.length || 0}
+                  </div>
+                </>
+              )}
+              <div className="pt-1 border-t border-white/10">
+                <div>Zoom: {(zoom * 100).toFixed(0)}%</div>
+                <div>Display: {imageDimensions.width}x{imageDimensions.height}</div>
+                <div className="text-xs text-gray-400">
+                  Natural: {imageNaturalDimensions.width}x{imageNaturalDimensions.height}
                 </div>
-              ))}
+              </div>
+              {debugInfo && debugInfo.unmatched?.length > 0 && (
+                <div className="pt-1 border-t border-white/10">
+                  <div className="text-yellow-300 mb-1">Unmatched (sample):</div>
+                  {debugInfo.unmatched.slice(0, 2).map((err, idx) => (
+                    <div key={idx} className="text-[9px] truncate">
+                      • {err.errorText}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

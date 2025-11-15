@@ -6,22 +6,43 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { BaseButton } from './index';
+import ImageOverlay from '../homework/ImageOverlay';
 
 /**
  * ImageLightbox Component
  * Modal para visualizar imágenes con zoom (rueda/pinch) y pan (drag)
+ * Ahora soporta overlays de errores
  *
  * @param {boolean} isOpen - Si el lightbox está abierto
  * @param {function} onClose - Callback al cerrar
  * @param {string} imageUrl - URL de la imagen
  * @param {string} alt - Texto alternativo
+ * @param {Array} words - Coordenadas de palabras (para overlay)
+ * @param {Array} errors - Errores detectados (para overlay)
+ * @param {boolean} showOverlay - Mostrar overlay de errores
+ * @param {Object} visibleErrorTypes - Tipos de errores visibles
+ * @param {number} highlightOpacity - Opacidad de highlights
+ * @param {boolean} useWavyUnderline - Usar subrayado ondulado
  */
-export default function ImageLightbox({ isOpen, onClose, imageUrl, alt = 'Imagen' }) {
+export default function ImageLightbox({
+  isOpen,
+  onClose,
+  imageUrl,
+  alt = 'Imagen',
+  words = [],
+  errors = [],
+  showOverlay = false,
+  visibleErrorTypes = {},
+  highlightOpacity = 0.25,
+  useWavyUnderline = true
+}) {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef(null);
+
+  const containerRef = useRef(null);
 
   // Reset when opening
   useEffect(() => {
@@ -31,34 +52,45 @@ export default function ImageLightbox({ isOpen, onClose, imageUrl, alt = 'Imagen
     }
   }, [isOpen]);
 
+  // Zoom con rueda del mouse - usar event listener con passive:false
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setScale(prevScale => {
+        const newScale = Math.min(Math.max(0.5, prevScale + delta), 5);
+        // Reset position if zooming out to 1
+        if (newScale === 1) {
+          setPosition({ x: 0, y: 0 });
+        }
+        return newScale;
+      });
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  // Zoom con rueda del mouse
-  const handleWheel = (e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    const newScale = Math.min(Math.max(0.5, scale + delta), 5);
-    setScale(newScale);
-
-    // Reset position if zooming out to 1
-    if (newScale === 1) {
-      setPosition({ x: 0, y: 0 });
-    }
-  };
-
-  // Start drag
+  // Start drag (now works at any zoom level)
   const handleMouseDown = (e) => {
-    if (scale > 1) {
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y
-      });
-    }
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
   };
 
   const handleTouchStart = (e) => {
-    if (scale > 1 && e.touches.length === 1) {
+    if (e.touches.length === 1) {
       setIsDragging(true);
       setDragStart({
         x: e.touches[0].clientX - position.x,
@@ -67,9 +99,9 @@ export default function ImageLightbox({ isOpen, onClose, imageUrl, alt = 'Imagen
     }
   };
 
-  // Drag
+  // Drag (now works at any zoom level)
   const handleMouseMove = (e) => {
-    if (isDragging && scale > 1) {
+    if (isDragging) {
       setPosition({
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y
@@ -78,7 +110,7 @@ export default function ImageLightbox({ isOpen, onClose, imageUrl, alt = 'Imagen
   };
 
   const handleTouchMove = (e) => {
-    if (isDragging && scale > 1 && e.touches.length === 1) {
+    if (isDragging && e.touches.length === 1) {
       setPosition({
         x: e.touches[0].clientX - dragStart.x,
         y: e.touches[0].clientY - dragStart.y
@@ -164,9 +196,9 @@ export default function ImageLightbox({ isOpen, onClose, imageUrl, alt = 'Imagen
 
       {/* Image Container */}
       <div
+        ref={containerRef}
         className="relative w-full h-full flex items-center justify-center overflow-hidden"
         onClick={(e) => e.stopPropagation()}
-        onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -175,28 +207,51 @@ export default function ImageLightbox({ isOpen, onClose, imageUrl, alt = 'Imagen
         onTouchMove={handleTouchMove}
         onTouchEnd={handleMouseUp}
         style={{
-          cursor: isDragging ? 'grabbing' : scale > 1 ? 'grab' : 'default'
+          cursor: isDragging ? 'grabbing' : 'grab'
         }}
       >
-        <img
+        <div
           ref={imageRef}
-          src={imageUrl}
-          alt={alt}
-          className="max-w-full max-h-full object-contain select-none"
+          className="select-none"
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
             transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-            touchAction: 'none'
+            touchAction: 'none',
+            maxWidth: '90vw',
+            maxHeight: '90vh'
           }}
           draggable={false}
-        />
+        >
+          <ImageOverlay
+            imageUrl={imageUrl}
+            words={words}
+            errors={errors}
+            showOverlay={showOverlay}
+            visibleErrorTypes={visibleErrorTypes}
+            highlightOpacity={highlightOpacity}
+            zoom={1}
+            pan={{ x: 0, y: 0 }}
+            useWavyUnderline={useWavyUnderline}
+            className="w-full h-full"
+          />
+        </div>
       </div>
 
       {/* Instructions */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm px-4 py-2 rounded-full">
-        {scale > 1
-          ? 'Arrastra para mover • Rueda para zoom'
-          : 'Rueda del mouse o pinch para zoom'}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-4 py-2 rounded-full backdrop-blur-sm max-w-md text-center">
+        {showOverlay && errors.length > 0 ? (
+          <span>
+            {scale > 1
+              ? '✨ Arrastra para mover • Rueda para zoom • Errores resaltados'
+              : '✨ Rueda para zoom • Errores resaltados en colores'}
+          </span>
+        ) : (
+          <span>
+            {scale > 1
+              ? 'Arrastra para mover • Rueda para zoom'
+              : 'Rueda del mouse o pinch para zoom'}
+          </span>
+        )}
       </div>
     </div>
   );
