@@ -5,7 +5,7 @@
  */
 
 import { Menu, Bell, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -28,9 +28,27 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const { getRoleLabel } = usePermissions();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const userMenuRef = useRef(null);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
+
+  // Cerrar menú cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   const handleLogout = async () => {
     try {
@@ -38,6 +56,11 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
+  };
+
+  const handleUserMenuToggle = () => {
+    console.log('Toggle user menu, current state:', showUserMenu);
+    setShowUserMenu(!showUserMenu);
   };
 
   return (
@@ -90,10 +113,10 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         </button>
 
         {/* User Menu */}
-        <div className="universal-topbar__user-menu">
+        <div className="universal-topbar__user-menu" ref={userMenuRef}>
           <button
             className="universal-topbar__user-btn"
-            onClick={() => setShowUserMenu(!showUserMenu)}
+            onClick={handleUserMenuToggle}
             aria-label="Menú de usuario"
           >
             <div className="universal-topbar__avatar">
