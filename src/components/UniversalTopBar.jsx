@@ -37,17 +37,23 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        console.log('Click outside detected, closing menu');
         setShowUserMenu(false);
       }
     };
 
     if (showUserMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+      // Pequeño delay para evitar que el click que abrió el menú lo cierre inmediatamente
+      const timer = setTimeout(() => {
+        console.log('Adding mousedown listener');
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
   }, [showUserMenu]);
 
   const handleLogout = async () => {
