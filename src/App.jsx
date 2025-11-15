@@ -20,12 +20,8 @@ import OfflineIndicator from './components/OfflineIndicator.jsx';
 import { setupAutoSync } from './utils/syncQueue.js';
 import { syncOperation } from './utils/offlineFirestore.js';
 
-// Lazy imports for dashboards (code splitting)
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
-const TeacherDashboard = lazy(() => import('./components/TeacherDashboard'));
-const StudentDashboard = lazy(() => import('./components/StudentDashboard'));
-const GuardianDashboard = lazy(() => import('./components/GuardianDashboard'));
-const UniversalDashboard = lazy(() => import('./components/UniversalDashboard')); // POC: Universal Dashboard
+// Universal Dashboard - Dashboard unificado para todos los roles
+const UniversalDashboard = lazy(() => import('./components/UniversalDashboard'));
 const TestPage = lazy(() => import('./TestPage'));
 const PaymentResult = lazy(() => import('./components/PaymentResult'));
 const DesignLab = lazy(() => import('./components/DesignLab'));
@@ -185,12 +181,12 @@ function App() {
             }
           />
 
-          {/* Protected Routes - requieren autenticación */}
+          {/* Legacy Routes - Redireccionados a Universal Dashboard */}
           <Route
             path="/admin/*"
             element={
               <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={ADMIN_ROLES}>
-                <AdminDashboard user={effectiveUser} userRole={effectiveRole} />
+                <UniversalDashboard />
               </ProtectedRoute>
             }
           />
@@ -199,7 +195,7 @@ function App() {
             path="/student/*"
             element={
               <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={STUDENT_ROLES}>
-                <StudentDashboard user={effectiveUser} userRole={effectiveRole} />
+                <UniversalDashboard />
               </ProtectedRoute>
             }
           />
@@ -208,7 +204,7 @@ function App() {
             path="/guardian/*"
             element={
               <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={GUARDIAN_ROLES}>
-                <GuardianDashboard user={effectiveUser} userRole={effectiveRole} />
+                <UniversalDashboard />
               </ProtectedRoute>
             }
           />
@@ -217,7 +213,7 @@ function App() {
             path="/teacher/*"
             element={
               <ProtectedRoute user={user} userRole={effectiveRole} allowedRoles={TEACHER_ROLES}>
-                <TeacherDashboard user={effectiveUser} userRole={effectiveRole} />
+                <UniversalDashboard />
               </ProtectedRoute>
             }
           />

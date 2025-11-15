@@ -32,12 +32,12 @@ import { getAllContent } from '../firebase/content';
 import ClassSessionModal from './ClassSessionModal';
 import {
   BaseButton,
-  BaseCard,
   BaseBadge,
   BaseLoading,
   BaseEmptyState,
   BaseAlert
 } from './common';
+import { UniversalCard } from './cards';
 
 /**
  * Gestor de Sesiones de Clase Unificadas
@@ -655,7 +655,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSessions.map(session => (
-            <BaseCard
+            <UniversalCard variant="default" size="md"
               key={session.id}
               title={session.name}
               subtitle={session.courseName}
@@ -748,7 +748,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                   )}
                 </div>
               </div>
-            </BaseCard>
+            </UniversalCard>
           ))}
         </div>
       )}

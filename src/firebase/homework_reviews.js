@@ -42,7 +42,8 @@ export async function createHomeworkReview(reviewData) {
     const reviewsRef = collection(db, 'homework_reviews');
     const docRef = await addDoc(reviewsRef, {
       ...reviewData,
-      status: REVIEW_STATUS.PROCESSING,
+      // Only set status to PROCESSING if not already provided (for manual uploads it may be PENDING_REVIEW)
+      status: reviewData.status || REVIEW_STATUS.PROCESSING,
       teacherReviewed: false,
       createdAt: serverTimestamp()
     });
@@ -369,6 +370,31 @@ export function subscribeToPendingReviews(callback) {
 }
 
 /**
+ * Assign or reassign student to a homework review
+ * @param {string} reviewId - Review ID
+ * @param {string} studentId - Student ID to assign (or null to unassign)
+ * @param {string} studentName - Student name
+ * @returns {Promise<Object>} Result
+ */
+export async function assignStudentToReview(reviewId, studentId, studentName) {
+  try {
+    const docRef = doc(db, 'homework_reviews', reviewId);
+    await updateDoc(docRef, {
+      studentId: studentId || null,
+      studentName: studentName || 'Sin asignar',
+      needsStudentAssignment: !studentId,
+      studentAssignedAt: studentId ? serverTimestamp() : null
+    });
+
+    logger.info(`Assigned student ${studentId || 'none'} to review ${reviewId}`, 'HomeworkReviews');
+    return { success: true };
+  } catch (error) {
+    logger.error(`Error assigning student to review ${reviewId}`, 'HomeworkReviews', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Delete a homework review
  * @param {string} reviewId - Review ID
  * @returns {Promise<Object>} Result
@@ -396,6 +422,7 @@ export default {
   getReviewsByStudent,
   getPendingReviews,
   approveReview,
+  assignStudentToReview,
   subscribeToReview,
   subscribeToPendingReviews,
   deleteHomeworkReview

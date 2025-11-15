@@ -7,12 +7,12 @@ import { getStudentEnrollments, ensureStudentProfile } from '../../firebase/fire
 // Base Components
 import {
   BaseButton,
-  BaseCard,
   BaseLoading,
   BaseEmptyState,
   BaseBadge,
   BaseAlert
 } from '../common';
+import { UniversalCard } from '../cards';
 
 function MyCourses({ user, onSelectCourse }) {
   const [courses, setCourses] = useState([]);
@@ -200,7 +200,9 @@ function MyCourses({ user, onSelectCourse }) {
                 const courseImage = enrollment.course?.imageUrl || null;
 
                 return (
-                  <BaseCard
+                  <UniversalCard
+                    variant="default"
+                    size="md"
                     key={enrollment.enrollmentId}
                     image={courseImage}
                     title={enrollment.course?.name || 'Curso sin nombre'}
@@ -249,7 +251,7 @@ function MyCourses({ user, onSelectCourse }) {
                     >
                       {progressPercent === 0 ? 'Comenzar' : progressPercent === 100 ? 'Revisar' : 'Continuar'} →
                     </BaseButton>
-                  </BaseCard>
+                  </UniversalCard>
                 );
               })}
             </div>

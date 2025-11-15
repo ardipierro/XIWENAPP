@@ -10,16 +10,13 @@ import {
   Users,
   Calendar,
   Sparkles,
-  BarChart3,
   Settings,
   UserCog,
-  CreditCard,
   MessageSquare,
   Gamepad2,
   Video,
   Layers,
   CheckCircle,
-  ClipboardList,
   CheckSquare,
   DollarSign,
 } from 'lucide-react';
@@ -37,13 +34,6 @@ const MENU_ITEMS = [
     icon: Home,
     path: '/dashboard-v2',
     permission: null, // null = todos pueden acceder
-  },
-  {
-    id: 'content',
-    label: 'Mi Contenido',
-    icon: BookOpen,
-    path: '/dashboard-v2/content',
-    permission: null,
   },
   {
     id: 'calendar',
@@ -100,13 +90,6 @@ const MENU_ITEMS = [
     permission: 'manage-classes',
   },
   {
-    id: 'attendance',
-    label: 'Asistencias',
-    icon: ClipboardList,
-    path: '/dashboard-v2/attendance',
-    permission: 'view-class-analytics',
-  },
-  {
     id: 'homework-review',
     label: 'Revisar Tareas IA',
     icon: CheckCircle,
@@ -151,18 +134,6 @@ const MENU_ITEMS = [
   },
 
   // DIVIDER
-  { type: 'divider', id: 'div4', showIf: ['view-own-analytics'] },
-
-  // ANALYTICS
-  {
-    id: 'analytics',
-    label: 'Analytics',
-    icon: BarChart3,
-    path: '/dashboard-v2/analytics',
-    permission: 'view-own-analytics',
-  },
-
-  // DIVIDER
   { type: 'divider', id: 'div5', showIf: ['view-all-users'] },
 
   // ADMIN ONLY
@@ -172,20 +143,6 @@ const MENU_ITEMS = [
     icon: UserCog,
     path: '/dashboard-v2/users',
     permission: 'view-all-users',
-  },
-  {
-    id: 'credits',
-    label: 'Gestión de Créditos',
-    icon: CreditCard,
-    path: '/dashboard-v2/credits',
-    permission: 'manage-credits',
-  },
-  {
-    id: 'payments',
-    label: 'Sistema de Pagos',
-    icon: DollarSign,
-    path: '/dashboard-v2/payments',
-    permission: 'manage-credits',
   },
   {
     id: 'ai-config',

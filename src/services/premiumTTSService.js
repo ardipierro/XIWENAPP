@@ -5,12 +5,14 @@
  */
 
 import logger from '../utils/logger';
+import { getAICredential } from '../utils/credentialsHelper';
 
 class PremiumTTSService {
   constructor() {
     this.apiKey = null; // Usuario puede configurar su key
     this.useElevenLabs = false;
     this.useFreeAPI = true; // Usar APIs gratuitas primero
+    this.credentialLoadPromise = null; // Promise para cargar credenciales
 
     // Voices configuradas
     this.voices = {
@@ -40,8 +42,8 @@ class PremiumTTSService {
       provider: 'google-cloud'
     };
 
-    // Load API key from localStorage on initialization
-    this.loadApiKeyFromStorage();
+    // Iniciar carga de API key (no bloquea constructor)
+    this.ensureApiKey();
   }
 
   /**
@@ -59,19 +61,40 @@ class PremiumTTSService {
   }
 
   /**
-   * Carga la API key desde localStorage
+   * Asegura que la API key esté cargada desde el sistema unificado de credenciales
+   * Busca en: localStorage → Firebase functions → Firebase credentials
+   * @returns {Promise<void>}
    */
-  loadApiKeyFromStorage() {
-    try {
-      const storedKey = localStorage.getItem('ai_credentials_elevenlabs');
-      if (storedKey && storedKey.trim()) {
-        this.apiKey = storedKey.trim();
-        this.useElevenLabs = true;
-        logger.info('🔑 ElevenLabs API key cargada desde localStorage');
-      }
-    } catch (err) {
-      logger.warn('⚠️ No se pudo cargar la API key de ElevenLabs:', err);
+  async ensureApiKey() {
+    // Si ya tenemos la key cargada, no recargar
+    if (this.apiKey) {
+      return;
     }
+
+    // Si ya hay una carga en progreso, esperar a que termine
+    if (this.credentialLoadPromise) {
+      return this.credentialLoadPromise;
+    }
+
+    // Iniciar carga de credenciales
+    this.credentialLoadPromise = (async () => {
+      try {
+        const credential = await getAICredential('elevenlabs');
+        if (credential && credential.trim()) {
+          this.apiKey = credential.trim();
+          this.useElevenLabs = true;
+          logger.info('🔑 ElevenLabs API key cargada desde sistema unificado', 'PremiumTTSService');
+        } else {
+          logger.info('ℹ️ ElevenLabs API key no configurada', 'PremiumTTSService');
+        }
+      } catch (err) {
+        logger.warn('⚠️ No se pudo cargar la API key de ElevenLabs', 'PremiumTTSService', err);
+      } finally {
+        this.credentialLoadPromise = null;
+      }
+    })();
+
+    return this.credentialLoadPromise;
   }
 
   /**
@@ -79,6 +102,9 @@ class PremiumTTSService {
    * @returns {Promise<Array>} - Array de voces con metadata
    */
   async getAllVoices() {
+    // Asegurar que la API key esté cargada
+    await this.ensureApiKey();
+
     if (!this.apiKey) {
       throw new Error('ElevenLabs API key no configurada');
     }
@@ -112,6 +138,9 @@ class PremiumTTSService {
    * @param {Object} voiceSettings - Configuración de voz (opcional)
    */
   async generateWithElevenLabs(text, voiceId = 'EXAVITQu4vr4xnSDxMaL', voiceSettings = null) {
+    // Asegurar que la API key esté cargada
+    await this.ensureApiKey();
+
     if (!this.apiKey) {
       throw new Error('ElevenLabs API key no configurada');
     }
@@ -260,13 +289,18 @@ class PremiumTTSService {
     }
 
     // 1. Intentar ElevenLabs si está configurado
-    if (preferPremium && this.useElevenLabs && this.apiKey) {
-      try {
-        logger.info(`🎤 Generando con ElevenLabs (Premium) - Voz: ${targetVoice}...`);
-        const voiceId = this.voices.elevenLabs[targetVoice] || this.voices.elevenLabs[`es-AR-${gender}`];
-        return await this.generateWithElevenLabs(text, voiceId);
-      } catch (err) {
-        logger.warn('⚠️ ElevenLabs falló, probando alternativas...');
+    if (preferPremium) {
+      // Asegurar que la API key esté cargada
+      await this.ensureApiKey();
+
+      if (this.useElevenLabs && this.apiKey) {
+        try {
+          logger.info(`🎤 Generando con ElevenLabs (Premium) - Voz: ${targetVoice}...`);
+          const voiceId = this.voices.elevenLabs[targetVoice] || this.voices.elevenLabs[`es-AR-${gender}`];
+          return await this.generateWithElevenLabs(text, voiceId);
+        } catch (err) {
+          logger.warn('⚠️ ElevenLabs falló, probando alternativas...');
+        }
       }
     }
 

@@ -44,18 +44,18 @@ import {
 import logger from '../utils/logger';
 import {
   BaseButton,
-  BaseCard,
   BaseInput,
   BaseSelect,
   BaseBadge,
   BaseLoading,
   BaseAlert,
-  BaseEmptyState
+  BaseEmptyState,
+  BaseModal
 } from './common';
+import { UniversalCard } from './cards';
 import CreateContentModal from './CreateContentModal';
 import ContentAnalytics from './ContentAnalytics';
-import { BaseModal } from './common';
-import { FillGap, MultipleChoice } from './ExerciseGeneratorContent';
+import ContentViewer from './ContentViewer';
 
 // ============================================
 // CONSTANTS
@@ -152,7 +152,6 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [viewingContent, setViewingContent] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [newlyCreatedId, setNewlyCreatedId] = useState(null);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Cargar contenidos
@@ -300,7 +299,6 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const handleView = (content) => {
     setViewingContent(content);
     setShowViewModal(true);
-    setIsVideoPlaying(false); // Resetear estado del video al abrir modal
     logger.info('Viewing content:', content);
   };
 
@@ -504,246 +502,15 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         )}
       </BaseModal>
 
-      {/* View Content Modal */}
-      <BaseModal
+      {/* View Content Modal - Uses ContentViewer for intelligent rendering */}
+      <ContentViewer
+        content={viewingContent}
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
           setViewingContent(null);
         }}
-        title={viewingContent?.title || 'Ver Contenido'}
-        icon={Eye}
-        size="xl"
-      >
-        {viewingContent && (
-          <div className="space-y-4">
-            {/* Metadata */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tipo</p>
-                <p className="text-base font-semibold text-gray-900 dark:text-white">
-                  {CONTENT_TYPE_CONFIG[viewingContent.type]?.label || viewingContent.type}
-                </p>
-              </div>
-              {viewingContent.metadata?.difficulty && (
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Dificultad</p>
-                  <p className="text-base font-semibold text-gray-900 dark:text-white">
-                    {viewingContent.metadata.difficulty}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Description */}
-            {viewingContent.description && (
-              <div>
-                <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Descripción</h4>
-                <p className="text-gray-600 dark:text-gray-400">{viewingContent.description}</p>
-              </div>
-            )}
-
-            {/* Content Body */}
-            <div>
-              {/* Video Player */}
-              {viewingContent.type === CONTENT_TYPES.VIDEO && viewingContent.url && (
-                <div className="mb-4 space-y-4">
-                  <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Video</h4>
-
-                  {/* Video iframe player con thumbnail */}
-                  <div className="relative w-full bg-black rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
-                    {!isVideoPlaying && viewingContent.videoData?.thumbnailUrl ? (
-                      // Mostrar thumbnail con botón de play
-                      <>
-                        <img
-                          src={viewingContent.videoData.thumbnailUrl}
-                          alt={viewingContent.title}
-                          className="absolute top-0 left-0 w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <button
-                            onClick={() => setIsVideoPlaying(true)}
-                            className="group w-20 h-20 rounded-full bg-white/90 hover:bg-white hover:scale-110 transition-all flex items-center justify-center shadow-xl"
-                            aria-label="Reproducir video"
-                          >
-                            <Play className="w-10 h-10 ml-1 transition-colors text-gray-900 dark:text-gray-900" strokeWidth={2} fill="currentColor" />
-                          </button>
-                        </div>
-                      </>
-                    ) : isVideoPlaying ? (
-                      // Mostrar embed code personalizado o iframe estándar
-                      viewingContent.body ? (
-                        // Si hay código embed personalizado, usarlo
-                        <div
-                          className="absolute top-0 left-0 w-full h-full"
-                          dangerouslySetInnerHTML={{ __html: viewingContent.body }}
-                        />
-                      ) : (
-                        // Si no hay embed code, usar iframe con la URL
-                        <iframe
-                          src={viewingContent.url}
-                          className="absolute top-0 left-0 w-full h-full"
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          title={viewingContent.title}
-                        />
-                      )
-                    ) : null}
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      URL: <a href={viewingContent.url} target="_blank" rel="noopener noreferrer" className="hover:underline text-primary-600 dark:text-primary-400">{viewingContent.url}</a>
-                    </p>
-
-                    {viewingContent.body && (
-                      <details className="text-xs">
-                        <summary className="cursor-pointer text-gray-600 dark:text-gray-400">
-                          Ver código embed
-                        </summary>
-                        <pre className="mt-2 p-2 rounded text-[10px] overflow-x-auto bg-gray-100 dark:bg-gray-800">
-                          <code>{viewingContent.body}</code>
-                        </pre>
-                      </details>
-                    )}
-                  </div>
-
-                  {/* Bunny.net Metadata */}
-                  {viewingContent.videoData && (
-                    <div className="pt-4 space-y-3 border-t border-gray-200 dark:border-gray-700">
-                      <h5 className="text-xs font-semibold flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <span className="text-orange-500">🐰</span>
-                        Datos de Bunny.net
-                      </h5>
-
-                      {/* Thumbnail */}
-                      {viewingContent.videoData.thumbnailUrl && (
-                        <div>
-                          <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Thumbnail:</p>
-                          <img
-                            src={viewingContent.videoData.thumbnailUrl}
-                            alt="Video thumbnail"
-                            className="w-full max-w-sm rounded-lg border border-gray-200 dark:border-gray-700"
-                            onError={(e) => { e.target.style.display = 'none'; }}
-                          />
-                        </div>
-                      )}
-
-                      {/* Preview Animation */}
-                      {viewingContent.videoData.previewUrl && (
-                        <div>
-                          <p className="text-xs mb-1 text-gray-600 dark:text-gray-400">Vista Previa Animada:</p>
-                          <img
-                            src={viewingContent.videoData.previewUrl}
-                            alt="Video preview animation"
-                            className="w-full max-w-sm rounded-lg border border-gray-200 dark:border-gray-700"
-                            onError={(e) => { e.target.style.display = 'none'; }}
-                          />
-                        </div>
-                      )}
-
-                      {/* GUID and Collection ID */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        {viewingContent.videoData.videoGuid && (
-                          <div>
-                            <span className="font-medium text-gray-600 dark:text-gray-400">Video GUID:</span>
-                            <p className="font-mono text-[10px] break-all text-gray-900 dark:text-white">{viewingContent.videoData.videoGuid}</p>
-                          </div>
-                        )}
-                        {viewingContent.videoData.collectionId && (
-                          <div>
-                            <span className="font-medium text-gray-600 dark:text-gray-400">Collection ID:</span>
-                            <p className="font-mono text-gray-900 dark:text-white">{viewingContent.videoData.collectionId}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Link */}
-              {viewingContent.type === CONTENT_TYPES.LINK && viewingContent.url && (
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">Enlace</h4>
-                  <a
-                    href={viewingContent.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
-                  >
-                    Abrir enlace
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                </div>
-              )}
-
-              {/* Exercises */}
-              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">
-                {viewingContent.type === CONTENT_TYPES.EXERCISE ? 'Ejercicios' : 'Contenido'}
-              </h4>
-              {viewingContent.type === CONTENT_TYPES.EXERCISE ? (
-                <div className="space-y-4">
-                  {(() => {
-                    try {
-                      const exercises = JSON.parse(viewingContent.body);
-                      return exercises.map((ex, idx) => (
-                        <div key={idx} className="p-6 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                          <div className="flex items-center gap-2 mb-4">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
-                              {idx + 1}
-                            </span>
-                            <span className="text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
-                              {ex.type}
-                            </span>
-                          </div>
-
-                          {/* Render interactive exercise */}
-                          {ex.type === 'gap-fill' && (
-                            <FillGap
-                              sentence={ex.sentence}
-                              answer={ex.answer}
-                            />
-                          )}
-
-                          {ex.type === 'multiple-choice' && (
-                            <MultipleChoice
-                              question={ex.question}
-                              options={ex.options}
-                              correctIndex={ex.correctIndex}
-                            />
-                          )}
-
-                          {/* For other types, show JSON for now */}
-                          {!['gap-fill', 'multiple-choice'].includes(ex.type) && (
-                            <pre className="text-sm whitespace-pre-wrap text-gray-600 dark:text-gray-400">
-                              {JSON.stringify(ex, null, 2)}
-                            </pre>
-                          )}
-                        </div>
-                      ));
-                    } catch (e) {
-                      return <p className="text-red-600 dark:text-red-400">Error al parsear ejercicios: {e.message}</p>;
-                    }
-                  })()}
-                </div>
-              ) : (
-                <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                  <pre className="text-sm whitespace-pre-wrap text-gray-600 dark:text-gray-400">
-                    {viewingContent.body || 'Sin contenido'}
-                  </pre>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </BaseModal>
+      />
     </div>
   );
 }
@@ -947,7 +714,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
 
   // Grid View
   return (
-    <BaseCard
+    <UniversalCard variant="default" size="md"
       id={`content-${content.id}`}
       className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
       image={renderImageOrIcon()}
@@ -1026,7 +793,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           <BaseButton variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
         </div>
       </div>
-    </BaseCard>
+    </UniversalCard>
   );
 }
 

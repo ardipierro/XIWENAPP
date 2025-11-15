@@ -7,7 +7,8 @@
 import { useState, useEffect } from 'react';
 import { User, Volume2, Settings as SettingsIcon, Play, Sparkles, Globe, Save } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { BaseCard, BaseButton, BaseBadge } from '../common';
+import { BaseButton, BaseBadge } from '../common';
+import { UniversalCard } from '../cards';
 import ttsService from '../../services/ttsService';
 import premiumTTSService from '../../services/premiumTTSService';
 import { getAICredential } from '../../utils/credentialsHelper';
@@ -450,7 +451,9 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
       {isOpen && (
         <>
           {!alwaysOpen ? (
-            <BaseCard
+            <UniversalCard
+              variant="default"
+              size="md"
               title="Configuración de Voces por Personaje"
               subtitle="Asigna diferentes voces y configuraciones a cada personaje del diálogo"
             >
@@ -465,7 +468,7 @@ function CharacterVoiceManager({ characters = [], onConfigChange, alwaysOpen = f
                   characters.map(char => renderCharacterCard(char.id))
                 )}
               </div>
-            </BaseCard>
+            </UniversalCard>
           ) : (
             /* Contenido SIN BaseCard cuando alwaysOpen=true */
             <div className="space-y-4">

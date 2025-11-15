@@ -54,6 +54,16 @@ service firebase.storage {
                    && isValidSize();
     }
 
+    // Carpeta de tareas (Manual Homework Upload)
+    // Teachers/admins can upload homework images for students
+    match /homework/{teacherId}/{studentFolder}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated()
+                   && request.auth.uid == teacherId
+                   && isImage()
+                   && isValidSize();
+    }
+
     // Bloquear todo lo demás por defecto
     match /{allPaths=**} {
       allow read: if false;

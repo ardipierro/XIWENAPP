@@ -68,12 +68,12 @@
 }
 
 
-/* Contenido scrolleable */
+/* Contenido sin scroll */
 .sidemenu-content {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
 }
 
@@ -161,8 +161,9 @@
   text-overflow: ellipsis;
 }
 
-/* Divisor */
+/* Divisor - Oculto */
 .sidemenu-divider {
+  display: none;
   height: 1px;
   background: var(--color-bg-tertiary);
   margin: 8px 0;

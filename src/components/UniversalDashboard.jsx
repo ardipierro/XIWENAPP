@@ -4,6 +4,7 @@
  * @module components/UniversalDashboard
  */
 
+import logger from '../utils/logger';
 import { useState, lazy, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -26,6 +27,19 @@ const CreditManager = lazy(() => import('./CreditManager'));
 const AIConfigPanel = lazy(() => import('./AIConfigPanel'));
 const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const UniversalUserManager = lazy(() => import('./UniversalUserManager'));
+
+// Student views
+const MyCourses = lazy(() => import('./student/MyCourses'));
+const CourseViewer = lazy(() => import('./student/CourseViewer'));
+const ContentPlayer = lazy(() => import('./student/ContentPlayer'));
+const MyAssignmentsView = lazy(() => import('./student/MyAssignmentsView'));
+const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
+
+// Games views
+const LiveGamesView = lazy(() => import('./games/LiveGamesView'));
+
+// Guardian views
+const GuardianView = lazy(() => import('./guardian/GuardianView'));
 
 /**
  * Vista de inicio (placeholder)
@@ -83,6 +97,11 @@ export function UniversalDashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [currentPath, setCurrentPath] = useState('/dashboard-v2');
 
+  // Student course navigation states
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [selectedContentId, setSelectedContentId] = useState(null);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState(null);
+
   // Loading state
   if (authLoading || !initialized) {
     return (
@@ -111,6 +130,24 @@ export function UniversalDashboard() {
 
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  // Student course navigation handlers
+  const handleSelectCourse = (courseId) => {
+    setSelectedCourseId(courseId);
+  };
+
+  const handleSelectContent = (contentId) => {
+    setSelectedContentId(contentId);
+  };
+
+  const handleBackToCourses = () => {
+    setSelectedCourseId(null);
+    setSelectedContentId(null);
+  };
+
+  const handleBackToCourseViewer = () => {
+    setSelectedContentId(null);
   };
 
   /**
@@ -168,22 +205,83 @@ export function UniversalDashboard() {
 
             // MIS CURSOS (Students)
             case '/dashboard-v2/my-courses':
-              return <PlaceholderView title="Mis Cursos" />;
+              // Si hay contenido seleccionado, mostrar ContentPlayer
+              if (selectedContentId && selectedCourseId) {
+                return (
+                  <ContentPlayer
+                    user={user}
+                    courseId={selectedCourseId}
+                    contentId={selectedContentId}
+                    onBack={handleBackToCourseViewer}
+                  />
+                );
+              }
+
+              // Si hay curso seleccionado, mostrar CourseViewer
+              if (selectedCourseId) {
+                return (
+                  <CourseViewer
+                    user={user}
+                    courseId={selectedCourseId}
+                    onSelectContent={handleSelectContent}
+                    onBack={handleBackToCourses}
+                  />
+                );
+              }
+
+              // Por defecto, mostrar lista de cursos
+              return <MyCourses user={user} onSelectCourse={handleSelectCourse} />;
 
             // MIS TAREAS (Students)
             case '/dashboard-v2/my-assignments':
               if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Mis Tareas" />;
+              return (
+                <MyAssignmentsView
+                  user={user}
+                  onSelectAssignment={(assignmentId) => {
+                    setSelectedAssignmentId(assignmentId);
+                    // TODO: Navegar a vista de hacer/ver tarea
+                    logger.debug('Assignment seleccionado:', assignmentId);
+                  }}
+                />
+              );
 
             // JUEGOS
             case '/dashboard-v2/games':
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Juegos" />;
+              return (
+                <LiveGamesView
+                  user={user}
+                  onJoinGame={(gameId) => {
+                    logger.debug('Unirse a juego:', gameId);
+                    // TODO: Implementar lógica para unirse al juego
+                    // Posiblemente navegar a /game/:gameId o abrir modal
+                  }}
+                />
+              );
+
+            // VISTA DE TUTOR/GUARDIÁN
+            case '/dashboard-v2/guardian':
+              // Guardians ven el progreso de sus estudiantes asignados
+              // Admin también puede acceder para debugging/soporte
+              if (!can('view-linked-students') && !can('view-all-users')) {
+                return <PlaceholderView title="Sin acceso" />;
+              }
+              return (
+                <GuardianView
+                  user={user}
+                  onViewStudentDetails={(studentId) => {
+                    logger.debug('Ver detalles de estudiante:', studentId);
+                    // TODO: Navegar a vista detallada del estudiante
+                    // Posiblemente navegar a /student/:studentId o abrir modal
+                  }}
+                />
+              );
 
             // MIS PAGOS (Students)
             case '/dashboard-v2/my-payments':
               if (!can('view-own-credits')) return <PlaceholderView title="Sin acceso" />;
-              return <PlaceholderView title="Mis Pagos" />;
+              return <StudentFeesPanel user={user} />;
 
             // ANALYTICS - AnalyticsDashboard integrado
             case '/dashboard-v2/analytics':

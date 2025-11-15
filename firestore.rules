@@ -366,8 +366,11 @@ service cloud.firestore {
     // Homework reviews - AI-analyzed homework submissions
     match /homework_reviews/{reviewId} {
       // Students can create reviews for their own homework
+      // Teachers and admins can create reviews for any student (manual upload)
       allow create: if isAuthenticated() &&
-        request.resource.data.studentId == request.auth.uid;
+        (request.resource.data.studentId == request.auth.uid ||
+         isTeacher() ||
+         isAdmin());
 
       // Students can read their own reviews (only teacher-approved ones for assignments)
       // Teachers and admins can read all reviews

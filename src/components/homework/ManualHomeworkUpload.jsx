@@ -6,21 +6,22 @@
 import { useState, useEffect } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { BaseButton, BaseAlert, BaseLoading, BaseSelect } from '../common';
-import { getStudentsByTeacher } from '../../firebase/users';
-import { createHomeworkReview } from '../../firebase/homework_reviews';
+import { getStudentsByTeacher, getAllUsers } from '../../firebase/users';
+import { createHomeworkReview, REVIEW_STATUS } from '../../firebase/homework_reviews';
 import { uploadImage } from '../../firebase/storage';
 import logger from '../../utils/logger';
 
 /**
  * Manual Homework Upload Component
- * Allows teachers to upload homework images for students manually
+ * Allows teachers/admins to upload homework images for students manually
  *
  * @param {Object} props
  * @param {string} props.teacherId - Current teacher ID
+ * @param {string} props.userRole - Current user role (admin/teacher)
  * @param {function} props.onSuccess - Callback when upload succeeds
  * @param {function} props.onCancel - Callback when cancelled
  */
-export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel }) {
+export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, onCancel }) {
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -32,14 +33,24 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
   // Load students on mount
   useEffect(() => {
     loadStudents();
-  }, [teacherId]);
+  }, [teacherId, userRole]);
 
   const loadStudents = async () => {
     try {
       setLoading(true);
-      const studentsList = await getStudentsByTeacher(teacherId);
+      let studentsList = [];
+
+      // Admin can see ALL students, Teacher only sees their own
+      if (userRole === 'admin') {
+        const allUsers = await getAllUsers({ role: 'student', activeOnly: true });
+        studentsList = allUsers;
+        logger.info(`[ADMIN] Loaded ${studentsList.length} students (all active)`, 'ManualHomeworkUpload');
+      } else {
+        studentsList = await getStudentsByTeacher(teacherId);
+        logger.info(`[TEACHER] Loaded ${studentsList.length} students for teacher ${teacherId}`, 'ManualHomeworkUpload');
+      }
+
       setStudents(studentsList);
-      logger.info(`Loaded ${studentsList.length} students for teacher ${teacherId}`, 'ManualHomeworkUpload');
     } catch (err) {
       logger.error('Error loading students', 'ManualHomeworkUpload', err);
       setError('Error al cargar la lista de estudiantes');
@@ -89,11 +100,6 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
   };
 
   const handleSubmit = async () => {
-    if (!selectedStudentId) {
-      setError('Por favor selecciona un estudiante');
-      return;
-    }
-
     if (!selectedFile) {
       setError('Por favor selecciona una imagen');
       return;
@@ -108,7 +114,10 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
       // Upload image to Firebase Storage
       logger.info('Uploading homework image...', 'ManualHomeworkUpload');
       const timestamp = Date.now();
-      const storagePath = `homework/${teacherId}/${selectedStudentId}/${timestamp}_${selectedFile.name}`;
+
+      // If no student selected, store in 'unassigned' folder
+      const studentFolder = selectedStudentId || 'unassigned';
+      const storagePath = `homework/${teacherId}/${studentFolder}/${timestamp}_${selectedFile.name}`;
 
       const uploadResult = await uploadImage(selectedFile, storagePath);
 
@@ -120,15 +129,23 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
 
       // Create homework review record
       const reviewData = {
-        studentId: selectedStudentId,
-        studentName: selectedStudent?.name || selectedStudent?.email || 'Estudiante',
+        studentId: selectedStudentId || null,
+        studentName: selectedStudent?.name || selectedStudent?.email || 'Sin asignar',
         teacherId: teacherId,
         imageUrl: uploadResult.url,
         filename: selectedFile.name,
         imageSize: selectedFile.size,
+        status: REVIEW_STATUS.PENDING_REVIEW, // Manual uploads go straight to pending review (no AI processing needed)
         isManualUpload: true, // Flag to distinguish manual uploads
         uploadedBy: teacherId,
-        isFreeCorrection: false // Assuming manual uploads are not free corrections
+        isFreeCorrection: false, // Assuming manual uploads are not free corrections
+        needsStudentAssignment: !selectedStudentId, // Flag to indicate if student needs to be assigned later
+        // Initialize empty corrections for manual uploads
+        aiSuggestions: [],
+        detailedCorrections: [],
+        errorSummary: { total: 0 },
+        overallFeedback: 'Tarea subida manualmente - pendiente de revisión',
+        suggestedGrade: 0
       };
 
       const result = await createHomeworkReview(reviewData);
@@ -163,19 +180,6 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
     );
   }
 
-  if (students.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
-          No hay estudiantes asignados a tu cuenta
-        </p>
-        <BaseButton variant="outline" onClick={onCancel}>
-          Cerrar
-        </BaseButton>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {error && (
@@ -187,7 +191,7 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
       {/* Student Selector */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Estudiante *
+          Estudiante (opcional)
         </label>
         <select
           value={selectedStudentId}
@@ -195,19 +199,28 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
           disabled={uploading}
           className="input w-full"
         >
-          <option value="">Selecciona un estudiante...</option>
-          {students.map(student => (
-            <option key={student.id} value={student.id}>
-              {student.name || student.email}
-            </option>
-          ))}
+          <option value="">Sin asignar (asignar después)</option>
+          {students.length > 0 ? (
+            students.map(student => (
+              <option key={student.id} value={student.id}>
+                {student.name || student.email}
+              </option>
+            ))
+          ) : (
+            <option value="" disabled>No hay estudiantes disponibles</option>
+          )}
         </select>
+        {!selectedStudentId && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Puedes asignar el estudiante más tarde al revisar la corrección
+          </p>
+        )}
       </div>
 
       {/* Image Upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Imagen de la Tarea *
+          Imagen de la Tarea
         </label>
 
         {!selectedFile ? (
@@ -274,7 +287,7 @@ export default function ManualHomeworkUpload({ teacherId, onSuccess, onCancel })
         <BaseButton
           variant="primary"
           onClick={handleSubmit}
-          disabled={!selectedStudentId || !selectedFile || uploading}
+          disabled={!selectedFile || uploading}
           loading={uploading}
           fullWidth
         >

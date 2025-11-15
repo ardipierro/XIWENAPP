@@ -394,14 +394,23 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
   };
 
   const handleViewAs = () => {
+    console.log('🔄 [UserProfile] handleViewAs clicked');
+    console.log('📋 Current user:', currentUser);
+    console.log('👤 Selected user:', selectedUser);
+
     // Guardar userId para reabrir el perfil al volver
     sessionStorage.setItem('viewAsReturnUserId', selectedUser.id);
+    console.log('💾 Saved returnUserId:', selectedUser.id);
 
     // Activar modo "Ver como"
+    console.log('🚀 Calling startViewingAs...');
     startViewingAs(currentUser, selectedUser);
+    console.log('✅ startViewingAs called');
 
-    // Navegar según el rol del usuario
-    navigate('/dashboard');
+    // Navegar al UniversalDashboard (v2)
+    console.log('🧭 Navigating to /dashboard-v2');
+    navigate('/dashboard-v2');
+    console.log('✅ Navigate called');
   };
 
   const isCourseEnrolled = (courseId) => {
@@ -481,17 +490,30 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
               </span>
 
               {/* Badge Ver como (clickeable) */}
-              {isAdmin && currentUser.uid !== selectedUser.id && (
-                <span
-                  onClick={handleViewAs}
-                  className="profile-role-badge cursor-pointer hover:opacity-80 transition-opacity"
-                  style={{ background: '#fb923c', color: 'white', border: '1px solid #fb923c' }}
-                  title="Cambiar a la vista de este usuario"
-                >
-                  <Eye size={16} strokeWidth={2} className="inline mr-1" />
-                  Ver como
-                </span>
-              )}
+              {(() => {
+                console.log('👁️ [UserProfile] Rendering Ver como badge check:');
+                console.log('  - isAdmin:', isAdmin);
+                console.log('  - currentUser:', currentUser);
+                console.log('  - currentUser.uid:', currentUser?.uid);
+                console.log('  - selectedUser.id:', selectedUser.id);
+                console.log('  - Show button?:', isAdmin && currentUser?.uid !== selectedUser.id);
+
+                return isAdmin && currentUser?.uid !== selectedUser.id && (
+                  <span
+                    onClick={(e) => {
+                      console.log('🖱️ [UserProfile] Ver como badge clicked!');
+                      e.stopPropagation();
+                      handleViewAs();
+                    }}
+                    className="profile-role-badge cursor-pointer hover:opacity-80 transition-opacity"
+                    style={{ background: '#fb923c', color: 'white', border: '1px solid #fb923c' }}
+                    title="Cambiar a la vista de este usuario"
+                  >
+                    <Eye size={16} strokeWidth={2} className="inline mr-1" />
+                    Ver como
+                  </span>
+                );
+              })()}
             </div>
           </div>
         </div>

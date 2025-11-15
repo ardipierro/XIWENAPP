@@ -34,7 +34,6 @@ import {
 } from '../firebase/studentPayments';
 import {
   BaseButton,
-  BaseCard,
   BaseInput,
   BaseSelect,
   BaseBadge,
@@ -43,6 +42,7 @@ import {
   BaseAlert,
   BaseModal
 } from './common';
+import { UniversalCard } from './cards';
 
 function AdminPaymentsPanel() {
   const [loading, setLoading] = useState(true);
@@ -184,57 +184,41 @@ function AdminPaymentsPanel() {
       {/* Statistics Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <BaseCard
+          <UniversalCard
+            variant="stats"
+            size="md"
             icon={DollarSign}
             title="Ingresos Totales"
-            variant="elevated"
-          >
-            <p className="text-3xl font-bold text-zinc-900 dark:text-white">
-              {formatCurrency(stats.payments.totalRevenue)}
-            </p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-              {stats.payments.approved} pagos aprobados
-            </p>
-          </BaseCard>
+            bigNumber={formatCurrency(stats.payments.totalRevenue)}
+            description={`${stats.payments.approved} pagos aprobados`}
+          />
 
-          <BaseCard
+          <UniversalCard
+            variant="stats"
+            size="md"
             icon={Users}
             title="Inscripciones Activas"
-            variant="elevated"
-          >
-            <p className="text-3xl font-bold text-zinc-900 dark:text-white">
-              {stats.enrollments.active}
-            </p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-              de {stats.enrollments.total} totales
-            </p>
-          </BaseCard>
+            bigNumber={stats.enrollments.active}
+            description={`de ${stats.enrollments.total} totales`}
+          />
 
-          <BaseCard
+          <UniversalCard
+            variant="stats"
+            size="md"
             icon={CreditCard}
             title="Cuotas Pendientes"
-            variant="elevated"
-          >
-            <p className="text-3xl font-bold text-zinc-900 dark:text-white">
-              {stats.monthlyFees.pending + stats.monthlyFees.overdue}
-            </p>
-            <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-              {stats.monthlyFees.overdue} vencidas
-            </p>
-          </BaseCard>
+            bigNumber={stats.monthlyFees.pending + stats.monthlyFees.overdue}
+            description={`${stats.monthlyFees.overdue} vencidas`}
+          />
 
-          <BaseCard
+          <UniversalCard
+            variant="stats"
+            size="md"
             icon={TrendingUp}
             title="Recaudado Este Mes"
-            variant="elevated"
-          >
-            <p className="text-3xl font-bold text-zinc-900 dark:text-white">
-              {formatCurrency(stats.monthlyFees.collectedAmount)}
-            </p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-              de {formatCurrency(stats.monthlyFees.totalAmount)}
-            </p>
-          </BaseCard>
+            bigNumber={formatCurrency(stats.monthlyFees.collectedAmount)}
+            description={`de ${formatCurrency(stats.monthlyFees.totalAmount)}`}
+          />
         </div>
       )}
 
@@ -286,7 +270,12 @@ function AdminPaymentsPanel() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Recent Payments */}
-          <BaseCard title="Últimos Pagos" icon={CreditCard}>
+          <UniversalCard
+            variant="default"
+            size="md"
+            icon={CreditCard}
+            title="Últimos Pagos"
+          >
             {payments.length === 0 ? (
               <BaseEmptyState
                 icon={CreditCard}
@@ -327,7 +316,7 @@ function AdminPaymentsPanel() {
                 ))}
               </div>
             )}
-          </BaseCard>
+          </UniversalCard>
 
           {/* Overdue Fees Alert */}
           {stats && stats.monthlyFees.overdue > 0 && (
@@ -378,42 +367,33 @@ function AdminPaymentsPanel() {
           ) : (
             <div className="space-y-3">
               {filteredFees.map((fee) => (
-                <BaseCard
+                <UniversalCard
                   key={fee.id}
-                  hover
+                  variant="compact"
+                  size="sm"
+                  title={fee.studentName}
+                  subtitle={fee.monthName}
+                  badges={[
+                    { variant: getStatusVariant(fee.status), children: getStatusLabel(fee.status) }
+                  ]}
                   onClick={() => {
                     setSelectedFee(fee);
                     setShowFeeModal(true);
                   }}
                 >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold text-zinc-900 dark:text-white">
-                        {fee.studentName}
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="text-right">
+                      <p className="font-bold text-zinc-900 dark:text-white">
+                        {formatCurrency(fee.finalAmount + (fee.lateFee || 0))}
                       </p>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                        {fee.monthName}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-bold text-zinc-900 dark:text-white">
-                          {formatCurrency(fee.finalAmount + (fee.lateFee || 0))}
+                      {fee.lateFee > 0 && (
+                        <p className="text-xs text-red-600 dark:text-red-400">
+                          +{formatCurrency(fee.lateFee)} mora
                         </p>
-                        {fee.lateFee > 0 && (
-                          <p className="text-xs text-red-600 dark:text-red-400">
-                            +{formatCurrency(fee.lateFee)} mora
-                          </p>
-                        )}
-                      </div>
-
-                      <BaseBadge variant={getStatusVariant(fee.status)}>
-                        {getStatusLabel(fee.status)}
-                      </BaseBadge>
+                      )}
                     </div>
                   </div>
-                </BaseCard>
+                </UniversalCard>
               ))}
             </div>
           )}
@@ -432,36 +412,31 @@ function AdminPaymentsPanel() {
           ) : (
             <div className="space-y-3">
               {payments.map((payment) => (
-                <BaseCard key={payment.id}>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold text-zinc-900 dark:text-white">
-                        {payment.payerName || 'Estudiante'}
-                      </p>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-                        {payment.payerEmail}
-                      </p>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                        {formatDate(payment.createdAt)}
-                      </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
-                        ID: {payment.mercadopagoPaymentId}
-                      </p>
-                    </div>
-
+                <UniversalCard
+                  key={payment.id}
+                  variant="compact"
+                  size="md"
+                  title={payment.payerName || 'Estudiante'}
+                  subtitle={payment.payerEmail}
+                  description={formatDate(payment.createdAt)}
+                  badges={[
+                    { variant: getStatusVariant(payment.status), children: getStatusLabel(payment.status) }
+                  ]}
+                >
+                  <div className="flex justify-between items-start mt-2">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-500">
+                      ID: {payment.mercadopagoPaymentId}
+                    </p>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-zinc-900 dark:text-white">
                         {formatCurrency(payment.amount)}
                       </p>
-                      <BaseBadge variant={getStatusVariant(payment.status)}>
-                        {getStatusLabel(payment.status)}
-                      </BaseBadge>
-                      <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400">
                         {payment.paymentMethod}
                       </p>
                     </div>
                   </div>
-                </BaseCard>
+                </UniversalCard>
               ))}
             </div>
           )}
@@ -480,26 +455,25 @@ function AdminPaymentsPanel() {
           ) : (
             <div className="space-y-3">
               {enrollments.map((enrollment) => (
-                <BaseCard key={enrollment.id}>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold text-zinc-900 dark:text-white">
-                        {enrollment.studentName}
+                <UniversalCard
+                  key={enrollment.id}
+                  variant="compact"
+                  size="md"
+                  title={enrollment.studentName}
+                  subtitle={enrollment.studentEmail}
+                  description={`Año: ${enrollment.academicYear}`}
+                  badges={[
+                    { variant: getStatusVariant(enrollment.status), children: getStatusLabel(enrollment.status) }
+                  ]}
+                >
+                  <div className="mt-2 space-y-2">
+                    {enrollment.discount > 0 && (
+                      <p className="text-sm text-green-600 dark:text-green-400">
+                        Descuento: {enrollment.discount}% - {enrollment.discountReason}
                       </p>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                        {enrollment.studentEmail}
-                      </p>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-                        Año: {enrollment.academicYear}
-                      </p>
-                      {enrollment.discount > 0 && (
-                        <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                          Descuento: {enrollment.discount}% - {enrollment.discountReason}
-                        </p>
-                      )}
-                    </div>
+                    )}
 
-                    <div className="text-right space-y-2">
+                    <div className="flex justify-between items-start">
                       <div>
                         <p className="text-sm text-zinc-600 dark:text-zinc-400">
                           Matrícula
@@ -516,7 +490,7 @@ function AdminPaymentsPanel() {
                         </div>
                       </div>
 
-                      <div>
+                      <div className="text-right">
                         <p className="text-sm text-zinc-600 dark:text-zinc-400">
                           Cuota
                         </p>
@@ -524,13 +498,9 @@ function AdminPaymentsPanel() {
                           {formatCurrency(enrollment.cuotaAmount)}
                         </p>
                       </div>
-
-                      <BaseBadge variant={getStatusVariant(enrollment.status)}>
-                        {getStatusLabel(enrollment.status)}
-                      </BaseBadge>
                     </div>
                   </div>
-                </BaseCard>
+                </UniversalCard>
               ))}
             </div>
           )}
