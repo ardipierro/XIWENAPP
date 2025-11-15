@@ -99,11 +99,22 @@ export function ThemeProvider({ children }) {
   // Aplicar colores personalizados del tema actual
   const applyCustomColors = (theme) => {
     const saved = localStorage.getItem('customThemeColors');
+    const root = document.documentElement;
+
+    // Lista de todas las posibles variables de color a limpiar
+    const colorVars = [
+      'bg-primary', 'bg-secondary', 'bg-tertiary', 'bg-hover',
+      'text-primary', 'text-secondary', 'text-muted',
+      'border', 'border-focus',
+      'success', 'error', 'warning', 'info',
+      'accent'
+    ];
+
     if (!saved) {
-      // Si no hay colores personalizados, limpiar cualquier override
-      const root = document.documentElement;
-      // Remover todas las variables CSS inline para que usen los valores por defecto
-      root.style.cssText = '';
+      // Si no hay colores personalizados, remover solo las variables de color
+      colorVars.forEach(varName => {
+        root.style.removeProperty(`--color-${varName}`);
+      });
       return;
     }
 
@@ -112,15 +123,20 @@ export function ThemeProvider({ children }) {
       const themeColors = customColors[theme];
 
       if (themeColors) {
-        const root = document.documentElement;
+        // Primero limpiar todas las variables de color previas
+        colorVars.forEach(varName => {
+          root.style.removeProperty(`--color-${varName}`);
+        });
+
         // Aplicar cada color personalizado como variable CSS inline
         Object.entries(themeColors).forEach(([key, value]) => {
           root.style.setProperty(`--color-${key}`, value);
         });
       } else {
-        // Si no hay colores para este tema, limpiar overrides
-        const root = document.documentElement;
-        root.style.cssText = '';
+        // Si no hay colores para este tema, limpiar solo variables de color
+        colorVars.forEach(varName => {
+          root.style.removeProperty(`--color-${varName}`);
+        });
       }
     } catch (error) {
       logger.error('Error applying custom theme colors:', error);

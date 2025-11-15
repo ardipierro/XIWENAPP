@@ -9,7 +9,7 @@ import { Palette, RotateCcw, Download, Upload, Check } from 'lucide-react';
 import { THEMES, THEME_INFO } from '../contexts/ThemeContext';
 import BaseButton from './common/BaseButton';
 
-// Colores por defecto de cada tema (extraídos de globals.css)
+// Colores por defecto de cada tema (sincronizados exactamente con globals.css)
 const DEFAULT_THEME_COLORS = {
   light: {
     // Fondos
@@ -33,24 +33,24 @@ const DEFAULT_THEME_COLORS = {
     'accent': '#6366f1',
   },
   dark: {
-    // Fondos
-    'bg-primary': '#09090b',
-    'bg-secondary': '#18181b',
-    'bg-tertiary': '#27272a',
-    'bg-hover': '#3f3f46',
+    // Fondos (sincronizado con .dark en globals.css)
+    'bg-primary': '#111827',
+    'bg-secondary': '#1f2937',
+    'bg-tertiary': '#374151',
+    'bg-hover': '#4b5563',
     // Textos
     'text-primary': '#f4f4f5',
     'text-secondary': '#a1a1aa',
     'text-muted': '#71717a',
     // Bordes
-    'border': '#27272a',
-    'border-focus': '#3f3f46',
+    'border': '#374151',
+    'border-focus': '#4b5563',
     // Semánticos
     'success': '#10b981',
     'error': '#ef4444',
     'warning': '#f59e0b',
     'info': '#06b6d4',
-    // Acento
+    // Acento (usa el de :root)
     'accent': '#6366f1',
   },
   ocean: {
@@ -195,14 +195,23 @@ function ThemeCustomizer() {
 
   // Actualizar color
   const updateColor = (colorKey, value) => {
-    setCustomColors(prev => ({
-      ...prev,
+    const newCustomColors = {
+      ...customColors,
       [selectedTheme]: {
-        ...(prev[selectedTheme] || {}),
+        ...(customColors[selectedTheme] || {}),
         [colorKey]: value
       }
-    }));
+    };
+
+    setCustomColors(newCustomColors);
     setHasChanges(true);
+
+    // Aplicar inmediatamente si es el tema activo (para preview en tiempo real)
+    const isCurrentTheme = document.documentElement.classList.contains(selectedTheme);
+    if (isCurrentTheme) {
+      const root = document.documentElement;
+      root.style.setProperty(`--color-${colorKey}`, value);
+    }
   };
 
   // Guardar cambios
