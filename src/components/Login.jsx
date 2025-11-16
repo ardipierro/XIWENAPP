@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { LogIn, UserPlus, AlertCircle, CheckCircle, Loader, Lock } from 'lucide-react';
+import { LogIn, UserPlus, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import useAuth from '../hooks/useAuth.js';
 import { PASSWORD_RESET_NOTIFICATION_DURATION } from '../constants/auth.js';
 import BaseButton from './common/BaseButton';
@@ -135,13 +135,10 @@ function Login() {
         <div className="text-center">
           <h1
             onClick={() => window.location.href = '/'}
-            className="text-4xl font-bold text-gray-900 dark:text-white cursor-pointer mb-2"
+            className="text-4xl font-bold text-gray-900 dark:text-white cursor-pointer mb-8"
           >
             西文教室
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            {isRegistering ? 'Crear cuenta de profesor' : 'Plataforma Educativa'}
-          </p>
         </div>
 
         {/* Formulario */}
@@ -326,17 +323,6 @@ function Login() {
             )}
           </div>
         </form>
-
-        {/* Footer */}
-        <div className="text-center space-y-2 pt-4">
-          <p className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <Lock size={14} />
-            <span>Acceso exclusivo para profesores</span>
-          </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            Todas las preguntas, alumnos e historial son compartidos entre profesores
-          </p>
-        </div>
       </div>
     </div>
   );
