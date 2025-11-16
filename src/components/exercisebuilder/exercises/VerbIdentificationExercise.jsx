@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { Check, X, Star, BookOpen, RotateCcw, Eye } from 'lucide-react';
-import { BaseButton, BaseBadge, BaseCard } from '../../common';
+import { BaseButton, BaseBadge, BaseCard, CategoryBadge } from '../../common';
 import { useExerciseState } from '../../../hooks/useExerciseState';
 import { useExerciseBuilderConfig } from '../../../hooks/useExerciseBuilderConfig';
 import logger from '../../../utils/logger';
@@ -179,9 +179,7 @@ export function VerbIdentificationExercise({
     <BaseCard
       title={instruction}
       badges={[
-        <BaseBadge key="level" variant="info" size="sm">
-          {cefrLevel}
-        </BaseBadge>,
+        <CategoryBadge key="level" type="cefr" value={cefrLevel} size="sm" />,
         <BaseBadge key="type" variant="default" size="sm">
           Identificar Verbos
         </BaseBadge>
