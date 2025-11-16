@@ -1,11 +1,13 @@
 /**
  * @fileoverview Panel de Configuración con 8 pestañas
+ * Migrado a BaseTabs para consistencia con otros componentes
  * @module components/SettingsPanel
  */
 
 import { useState } from 'react';
 import { Settings, Key, Bell, User, Globe, Palette, Type, Home, Database } from 'lucide-react';
 import PageHeader from './common/PageHeader';
+import BaseTabs from './common/BaseTabs';
 import CredentialsTab from './settings/CredentialsTab';
 import LandingPageTab from './settings/LandingPageTab';
 import AudioCacheTab from './settings/AudioCacheTab';
@@ -36,28 +38,15 @@ function SettingsPanel() {
         description="Administra la configuración de tu cuenta y de la aplicación"
       />
 
-      {/* Tabs */}
-      <div className="w-full border-b border-gray-200 dark:border-gray-700 mb-8">
-        <div className="flex gap-1 flex-wrap -mb-px">
-          {tabs.map(tab => {
-            const TabIcon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium whitespace-nowrap transition-all border-b-2 rounded-t-lg ${
-                  isActive
-                    ? 'border-indigo-500 text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-zinc-800'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
-              >
-                <TabIcon size={20} />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+      {/* Tabs - Migrado a BaseTabs para consistencia */}
+      <div className="mb-6">
+        <BaseTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="underline"
+          size="md"
+        />
       </div>
 
       {/* Tab Content */}
