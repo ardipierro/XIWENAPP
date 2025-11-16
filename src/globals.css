@@ -3232,81 +3232,90 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 /* Mobile Responsive - Fullscreen alternating views */
 @media (max-width: 768px) {
-  /* Panel principal - fullscreen container */
+  /* ===== TRUE FULLSCREEN - Sin bordes ni padding ===== */
+
+  /* Panel principal - fullscreen sin bordes */
   .messages-panel {
     flex-direction: column;
     min-height: 100vh !important;
     height: 100vh;
     max-height: 100vh;
-    border-radius: 0; /* Sin border radius en fullscreen */
-    box-shadow: none;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden; /* Evitar scroll en el container principal */
   }
 
-  /* Mobile Sidebar - Fullscreen cuando visible */
-  .messages-sidebar-mobile {
-    width: 100%;
-    height: 100vh;
-    max-height: 100vh;
-    border-right: none;
-    border-bottom: none;
-    overflow: hidden;
-  }
-
+  /* Mobile Sidebar - Fullscreen */
+  .messages-sidebar-mobile,
   .messages-sidebar {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     max-height: 100vh;
-    border-right: none;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden; /* Container no hace scroll */
   }
 
-  /* Mobile Main Thread - Fullscreen cuando visible */
-  .messages-main-mobile {
-    width: 100%;
-    height: 100vh;
-    max-height: 100vh;
-    overflow: hidden;
-  }
-
+  /* Mobile Main Thread - Fullscreen */
+  .messages-main-mobile,
   .messages-main {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     max-height: 100vh;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden; /* Container no hace scroll */
   }
 
-  /* Header más compacto en móvil */
+  /* ===== SIDEBAR HEADER ===== */
   .messages-sidebar-header {
-    padding: 16px;
-    min-height: 64px; /* Touch target */
+    padding: 12px 16px;
+    min-height: 60px;
+    flex-shrink: 0; /* No se comprime */
   }
 
   .header-title h2 {
     font-size: 20px;
   }
 
-  /* Botón nuevo mensaje - Touch target */
   .btn-new-message {
     min-width: 44px;
     min-height: 44px;
     padding: 12px;
   }
 
-  /* Búsqueda más compacta */
+  /* ===== BÚSQUEDA ===== */
   .messages-search {
-    padding: 12px 16px;
+    padding: 8px 16px;
+    flex-shrink: 0; /* No se comprime */
   }
 
-  /* Lista de conversaciones - Altura dinámica */
+  /* ===== LISTA DE CONVERSACIONES - ÚNICO CON SCROLL ===== */
   .conversations-list {
     flex: 1;
-    overflow-y: auto;
-    height: calc(100vh - 140px); /* Restar header (64px) + search (76px) */
-    max-height: calc(100vh - 140px);
+    overflow-y: auto; /* Solo esta lista hace scroll */
+    overflow-x: hidden;
+    height: auto;
+    max-height: none;
+    -webkit-overflow-scrolling: touch; /* Smooth scroll en iOS */
   }
 
   /* Conversation items - Touch targets */
   .conversation-item {
-    padding: 16px;
-    min-height: 72px; /* Touch target + content */
+    padding: 12px 16px;
+    min-height: 72px;
+    border-left: none;
+    border-right: none;
+  }
+
+  .conversation-item:first-child {
+    border-top: none;
   }
 
   .conversation-avatar {
@@ -3315,19 +3324,30 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     font-size: 20px;
   }
 
-  /* Thread Header - Con botón back */
-  .thread-header {
-    padding: 12px 16px;
-    min-height: 64px;
-    gap: 12px;
+  /* ===== THREAD LAYOUT - Sin scroll doble ===== */
+  .message-thread {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden; /* Container no hace scroll */
   }
 
-  /* Botón Back - Touch target prominente */
+  /* Thread Header - Simplificado */
+  .thread-header {
+    padding: 10px 16px;
+    min-height: 60px;
+    gap: 12px;
+    flex-shrink: 0; /* No se comprime */
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Botón Back - Touch target */
   .thread-back-btn {
     min-width: 44px;
     min-height: 44px;
     padding: 10px;
-    background: var(--color-bg-tertiary);
+    background: transparent;
     border: none;
     border-radius: 10px;
     color: var(--color-text-primary);
@@ -3339,13 +3359,12 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     flex-shrink: 0;
   }
 
-  .thread-back-btn:hover,
   .thread-back-btn:active {
-    background: var(--color-bg-hover);
+    background: var(--color-bg-tertiary);
     transform: scale(0.95);
   }
 
-  /* Thread user info más compacto */
+  /* Thread user info */
   .thread-user-info {
     flex: 1;
     min-width: 0;
@@ -3360,6 +3379,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
   .thread-user-details h3 {
     font-size: 16px;
+    font-weight: 600;
   }
 
   .thread-user-email {
@@ -3369,57 +3389,143 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     text-overflow: ellipsis;
   }
 
-  /* Thread actions - Más compactos */
+  /* Thread actions - Solo menú en mobile */
   .thread-actions {
-    gap: 6px;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
-  .thread-action-btn,
-  .thread-menu-btn,
-  .thread-close-btn {
+  .thread-menu-btn {
     min-width: 44px;
     min-height: 44px;
     padding: 10px;
   }
 
-  /* Ocultar algunos botones en móvil para ahorrar espacio */
-  .thread-action-btn:not(:first-child):not(:nth-child(2)) {
-    display: none;
+  /* Menu dropdown */
+  .thread-menu {
+    right: 0;
+    top: calc(100% + 4px);
+    min-width: 220px;
   }
 
-  /* Message bubbles más anchas en móvil */
+  .menu-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 8px 0;
+  }
+
+  /* ===== MESSAGES LIST - ÚNICO CON SCROLL ===== */
+  .messages-list {
+    flex: 1;
+    overflow-y: auto; /* Solo esta lista hace scroll */
+    overflow-x: hidden;
+    padding: 16px;
+    -webkit-overflow-scrolling: touch; /* Smooth scroll en iOS */
+  }
+
+  /* Message bubbles más anchas */
   .message-bubble {
     max-width: 85%;
   }
 
-  /* Input área - Touch friendly */
+  /* ===== INPUT AREA - 2 FILAS ===== */
   .message-input-container {
-    padding: 12px 16px;
-    gap: 10px;
+    padding: 0;
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0; /* No se comprime */
   }
 
-  .message-input-container textarea {
-    min-height: 44px;
-    max-height: 120px;
+  /* Input area mobile - Grid de 2 filas */
+  .input-area-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
 
-  /* Botones de input - Touch targets */
-  .input-action-btn,
-  .send-btn {
+  /* Fila 1: Action buttons */
+  .input-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .input-action-btn {
     min-width: 44px;
     min-height: 44px;
     padding: 10px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* New message modal fullscreen */
+  .input-action-btn:active {
+    background: var(--color-bg-secondary);
+    transform: scale(0.95);
+  }
+
+  .input-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Fila 2: Textarea + Send */
+  .input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .message-input {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 12px;
+    font-size: 16px; /* Evitar zoom en iOS */
+    resize: none;
+  }
+
+  .send-button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+    flex-shrink: 0;
+  }
+
+  /* Reply/Edit bars */
+  .reply-bar,
+  .edit-bar {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* File preview */
+  .file-preview-container {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* ===== NEW MESSAGE MODAL ===== */
   .new-message-modal {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     max-height: 100vh;
-    border-radius: 0;
+    border-radius: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Transitions suaves entre vistas */
+  /* ===== TRANSITIONS ===== */
   .messages-sidebar-mobile,
   .messages-main-mobile {
     animation: slideIn 0.3s ease-out;
@@ -3434,6 +3540,12 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
       opacity: 1;
       transform: translateX(0);
     }
+  }
+
+  /* ===== SEARCH BAR ===== */
+  .thread-search-bar {
+    flex-shrink: 0;
+    padding: 12px 16px;
   }
 }
 
