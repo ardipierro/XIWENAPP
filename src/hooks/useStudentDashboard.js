@@ -10,7 +10,7 @@ import {
   ensureStudentProfile,
   getStudentEnrollments
 } from '../firebase/firestore';
-import { getInstancesForStudent } from '../firebase/classInstances';
+import { getStudentSessions } from '../firebase/classSessions';
 import { subscribeToLiveWhiteboards } from '../firebase/whiteboard';
 
 /**
@@ -91,10 +91,10 @@ export function useStudentDashboard(user, studentProp) {
         if (profileData) {
           // Load data in parallel
           const dataStart = performance.now();
-          const [history, enrollments, instances] = await Promise.all([
+          const [history, enrollments, sessions] = await Promise.all([
             getStudentGameHistory(profileData.id),
             getStudentEnrollments(profileData.id),
-            getInstancesForStudent(profileData.id, 10)
+            getStudentSessions(profileData.id)
           ]);
 
           logger.debug(`⏱️ [useStudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
@@ -103,13 +103,19 @@ export function useStudentDashboard(user, studentProp) {
           calculateStats(history);
           setEnrolledCourses(enrollments);
 
-          // Filter future instances
+          // Filter future sessions (single sessions with scheduledStart)
           const now = new Date();
-          const futureInstances = instances.filter(inst => {
-            const instanceDate = inst.date.toDate ? inst.date.toDate() : new Date(inst.date);
-            return instanceDate >= now;
+          const futureSessions = sessions.filter(session => {
+            if (session.status === 'live') return true; // Always show live sessions
+            if (session.type === 'single' && session.scheduledStart) {
+              const sessionDate = session.scheduledStart.toDate ?
+                session.scheduledStart.toDate() : new Date(session.scheduledStart);
+              return sessionDate >= now;
+            }
+            if (session.type === 'recurring') return true; // Show recurring
+            return false;
           });
-          setUpcomingClasses(futureInstances.slice(0, 3)); // Show first 3 upcoming classes
+          setUpcomingClasses(futureSessions.slice(0, 3)); // Show first 3 upcoming classes
         }
 
         logger.debug(`⏱️ [useStudentDashboard] TOTAL: ${(performance.now() - startTime).toFixed(0)}ms`);
