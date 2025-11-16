@@ -69,6 +69,9 @@ export function EnhancedTextEditor({
   isTeacher = false,
   blockId
 }) {
+  // 🎨 DEBUG: Confirmar que se está usando el NUEVO editor
+  console.log('🎨✨ EnhancedTextEditor CARGADO - Versión COMPLETA con 12 fuentes, lápiz avanzado, imágenes, etc.');
+
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);

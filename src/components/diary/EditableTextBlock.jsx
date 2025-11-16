@@ -39,6 +39,9 @@ export function EditableTextBlock({
   isTeacher = false,
   blockId
 }) {
+  // ⚠️ DEBUG: Este es el editor VIEJO (solo con herramientas básicas)
+  console.warn('⚠️ EditableTextBlock CARGADO - Versión BÁSICA (solo negrita, cursiva, H1-H3)');
+
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
