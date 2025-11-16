@@ -135,10 +135,13 @@ function Login() {
         <div className="text-center">
           <h1
             onClick={() => window.location.href = '/'}
-            className="text-4xl font-bold text-gray-900 dark:text-white cursor-pointer mb-8"
+            className="text-4xl font-bold text-gray-900 dark:text-white cursor-pointer mb-2"
           >
             西文教室
           </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+            inscripción aula de español
+          </p>
         </div>
 
         {/* Formulario */}
