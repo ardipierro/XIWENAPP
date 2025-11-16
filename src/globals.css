@@ -3255,7 +3255,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column;
-    background: var(--color-bg-primary);
+    background: #0000ff !important; /* DEBUG: AZUL */
   }
 
   /* Mobile Sidebar - Fullscreen cuando visible */
@@ -3270,7 +3270,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column;
-    background: var(--color-bg-primary);
+    background: #ff00ff !important; /* DEBUG: MAGENTA */
   }
 
   /* Mobile Main Thread - Fullscreen cuando visible */
@@ -3285,7 +3285,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column;
-    background: var(--color-bg-primary);
+    background: #00ffff !important; /* DEBUG: CYAN */
   }
 
   /* ===== MESSAGE THREAD - Flexbox correcto, altura completa ===== */
@@ -3300,6 +3300,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     padding: 0 !important;
     margin: 0 !important;
     gap: 0 !important;
+    background: #ffa500 !important; /* DEBUG: NARANJA */
   }
 
   /* ===== SIDEBAR HEADER - Fixed height, visible ===== */
