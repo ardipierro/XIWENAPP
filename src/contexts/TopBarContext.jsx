@@ -4,7 +4,7 @@
  * @module contexts/TopBarContext
  */
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 const TopBarContext = createContext();
 
@@ -63,13 +63,13 @@ export function TopBarProvider({ children }) {
     }));
   }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     config,
     updateTopBar,
     resetTopBar,
     addAction,
     removeAction
-  };
+  }), [config, updateTopBar, resetTopBar, addAction, removeAction]);
 
   return (
     <TopBarContext.Provider value={value}>

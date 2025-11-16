@@ -4,7 +4,7 @@
  * @module components/UniversalTopBar
  */
 
-import { Menu, Bell, User, Settings, LogOut, Sun, Moon, MessageCircle } from 'lucide-react';
+import { Menu, Bell, User, Settings, LogOut, Sun, Moon, MessageCircle, ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,9 +12,11 @@ import { useViewAs } from '../contexts/ViewAsContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
+import { useTopBar } from '../contexts/TopBarContext';
 import useUnreadMessages from '../hooks/useUnreadMessages';
 import CreditBadge from './common/CreditBadge';
 import UserProfileModal from './UserProfileModal';
+import { BaseButton } from './common';
 import logger from '../utils/logger';
 
 /**
@@ -30,6 +32,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const { theme, toggleTheme } = useTheme();
   const { selectedFont, fontWeight, fontSize } = useFont();
   const { getRoleLabel, can } = usePermissions();
+  const { config } = useTopBar();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -55,6 +58,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
     <header className="universal-topbar">
       {/* Left Section */}
       <div className="universal-topbar__left">
+        {/* Menu button - siempre visible */}
         <button
           className="universal-topbar__menu-btn"
           onClick={onMenuToggle}
@@ -63,7 +67,8 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           <Menu size={24} />
         </button>
 
-        <div className="universal-topbar__title">
+        {/* App title - siempre visible */}
+        <div className="universal-topbar__app-title">
           <h1 style={{
             fontFamily: selectedFont,
             fontWeight: fontWeight,
@@ -72,11 +77,49 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
             西文教室
           </h1>
         </div>
+
+        {/* Back button - solo si hay configuración dinámica */}
+        {config.showBackButton && (
+          <button
+            className="universal-topbar__back-btn"
+            onClick={config.onBack}
+            aria-label="Volver"
+            title="Volver"
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
+
+        {/* Dynamic title - título del diario/página actual */}
+        {config.title && config.title !== 'Dashboard' && (
+          <div className="universal-topbar__page-title">
+            <span className="universal-topbar__page-title-text">{config.title}</span>
+            {config.subtitle && (
+              <span className="universal-topbar__page-subtitle">{config.subtitle}</span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Center Section - Removido CreditBadge */}
+      {/* Center Section - Actions from context */}
       <div className="universal-topbar__center">
-        {/* Badge de créditos eliminado */}
+        {config.actions && config.actions.length > 0 && (
+          <div className="universal-topbar__actions">
+            {config.actions.map((action) => (
+              <BaseButton
+                key={action.key}
+                variant={action.variant || 'secondary'}
+                size="sm"
+                onClick={action.onClick}
+                disabled={action.disabled}
+                className="universal-topbar__action-btn"
+              >
+                {action.icon}
+                <span>{action.label}</span>
+              </BaseButton>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Right Section */}

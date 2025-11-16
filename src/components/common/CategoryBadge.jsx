@@ -18,6 +18,7 @@ import {
   getBadgeForDifficulty,
   getBadgeForCEFR,
   getBadgeForStatus,
+  getBadgeForRole,
   getBadgeByKey,
 } from '../../config/badgeSystem';
 
@@ -25,8 +26,8 @@ import {
  * Badge inteligente con mapeo automático de categorías
  *
  * @param {Object} props
- * @param {string} props.type - Tipo de categoría: 'content' | 'exercise' | 'difficulty' | 'cefr' | 'status' | 'custom'
- * @param {string} props.value - Valor dentro de la categoría (ej: 'course', 'intermediate')
+ * @param {string} props.type - Tipo de categoría: 'content' | 'exercise' | 'difficulty' | 'cefr' | 'status' | 'role' | 'custom'
+ * @param {string} props.value - Valor dentro de la categoría (ej: 'course', 'intermediate', 'admin')
  * @param {string} props.badgeKey - Clave directa del badge (alternativa a type+value)
  * @param {string} props.size - Tamaño del badge: 'sm' | 'md' | 'lg'
  * @param {boolean} props.showIcon - Mostrar icono emoji
@@ -67,6 +68,9 @@ function CategoryBadge({
         break;
       case 'status':
         badgeConfig = getBadgeForStatus(value);
+        break;
+      case 'role':
+        badgeConfig = getBadgeForRole(value);
         break;
       case 'custom':
         badgeConfig = getBadgeByKey(value);
@@ -135,7 +139,7 @@ function hexToRgb(hex) {
 }
 
 CategoryBadge.propTypes = {
-  type: PropTypes.oneOf(['content', 'exercise', 'difficulty', 'cefr', 'status', 'custom']),
+  type: PropTypes.oneOf(['content', 'exercise', 'difficulty', 'cefr', 'status', 'role', 'custom']),
   value: PropTypes.string,
   badgeKey: PropTypes.string,
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
