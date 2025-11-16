@@ -67,13 +67,10 @@ function SettingsPanel() {
       {/* Tab Content */}
       <div className="w-full">
         {activeTab === 'general' && (
-          <div className="w-full space-y-6">
+          <div className="w-full space-y-8">
             {/* Idioma y Región */}
-            <UniversalCard
-              variant="default"
-              size="md"
-              title="Idioma y Región"
-            >
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Idioma y Región</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Idioma de la interfaz</label>
@@ -84,14 +81,14 @@ function SettingsPanel() {
                   </select>
                 </div>
               </div>
-            </UniversalCard>
+            </div>
+
+            {/* Separador */}
+            <div className="border-t border-gray-200 dark:border-gray-700"></div>
 
             {/* Notificaciones */}
-            <UniversalCard
-              variant="default"
-              size="md"
-              title="Notificaciones"
-            >
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notificaciones</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                   <div>
@@ -101,21 +98,21 @@ function SettingsPanel() {
                   <input type="checkbox" className="w-5 h-5" defaultChecked />
                 </div>
               </div>
-            </UniversalCard>
+            </div>
+
+            {/* Separador */}
+            <div className="border-t border-gray-200 dark:border-gray-700"></div>
 
             {/* Cuenta */}
-            <UniversalCard
-              variant="default"
-              size="md"
-              title="Cuenta"
-            >
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cuenta</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre completo</label>
                   <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="Tu nombre" />
                 </div>
               </div>
-            </UniversalCard>
+            </div>
           </div>
         )}
 
