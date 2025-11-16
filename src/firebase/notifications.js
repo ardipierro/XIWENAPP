@@ -103,7 +103,7 @@ export async function notifyClassStarted(studentIds, classData) {
   const notifications = studentIds.map(studentId => ({
     userId: studentId,
     type: NOTIFICATION_TYPES.CLASS_STARTED,
-    title: '● ¡Clase en Vivo!',
+    title: '🔴 ¡Clase en Vivo!',
     message: `${classData.name} con ${classData.teacherName} ha comenzado`,
     data: {
       sessionId: classData.sessionId,

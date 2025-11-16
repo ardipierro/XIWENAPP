@@ -80,7 +80,7 @@ function NotificationCenter({ userId, showToasts = true }) {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'class_started':
-        return '●';
+        return '🔴';
       case 'class_starting_soon':
         return '⏰';
       case 'class_ended':

@@ -24,22 +24,22 @@ const ERROR_TYPE_CONFIG = {
   spelling: {
     label: 'Ortografía',
     color: 'bg-red-500',
-    icon: '○'
+    icon: '🔴'
   },
   grammar: {
     label: 'Gramática',
     color: 'bg-orange-500',
-    icon: '◇'
+    icon: '🟠'
   },
   punctuation: {
     label: 'Puntuación',
     color: 'bg-yellow-500',
-    icon: '△'
+    icon: '🟡'
   },
   vocabulary: {
     label: 'Vocabulario',
     color: 'bg-blue-500',
-    icon: '□'
+    icon: '🔵'
   }
 };
 

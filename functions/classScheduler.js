@@ -117,7 +117,7 @@ exports.scheduledClassStarter = onSchedule({
             batch.set(notificationRef, {
               userId: studentId,
               type: 'class_started',
-              title: '● ¡Clase en Vivo!',
+              title: '🔴 ¡Clase en Vivo!',
               message: `${session.name} con ${session.teacherName} ha comenzado`,
               data: {
                 sessionId: sessionId,
