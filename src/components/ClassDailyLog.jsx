@@ -4,7 +4,7 @@
  * @module components/ClassDailyLog
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Plus,
   Save,
@@ -22,6 +22,7 @@ import {
   Users,
   Activity
 } from 'lucide-react';
+import { useTopBar } from '../contexts/TopBarContext';
 import logger from '../utils/logger';
 import {
   subscribeToLog,
@@ -36,6 +37,7 @@ import { saveStudentExerciseResult } from '../firebase/exerciseProgress';
 import {
   BaseButton,
   BaseBadge,
+  CategoryBadge,
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
@@ -73,9 +75,9 @@ function ClassDailyLog({ logId, user, onBack }) {
   const [lastSaved, setLastSaved] = useState(null);
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [topBarVisible, setTopBarVisible] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  const { updateTopBar, resetTopBar } = useTopBar();
   const contentSelectorModal = useModal();
   const autoSaveIntervalRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -83,6 +85,50 @@ function ClassDailyLog({ logId, user, onBack }) {
 
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
   const isStudent = user?.role === 'student' || user?.role === 'trial';
+
+  // Extract specific log properties to avoid infinite loops from object reference changes
+  const logMeta = useMemo(() => ({
+    name: log?.name,
+    courseName: log?.courseName,
+    groupName: log?.groupName,
+    status: log?.status
+  }), [log?.name, log?.courseName, log?.groupName, log?.status]);
+
+  // Handler para guardar cambios
+  const handleSave = useCallback(async () => {
+    if (!isTeacher) return;
+
+    setSaving(true);
+    try {
+      await updateLog(logId, {
+        updatedAt: new Date()
+      });
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+      logger.info('💾 Diario guardado');
+    } catch (err) {
+      logger.error('Error guardando diario:', err);
+      setError('Error al guardar');
+    } finally {
+      setSaving(false);
+    }
+  }, [isTeacher, logId]);
+
+  // Handler para finalizar el diario
+  const handleEndLog = useCallback(async () => {
+    if (!confirm('¿Finalizar esta clase? Los estudiantes ya no podrán verla en vivo.')) return;
+
+    try {
+      const result = await endLog(logId);
+      if (result.success) {
+        logger.info('🏁 Diario finalizado');
+        if (onBack) onBack();
+      }
+    } catch (err) {
+      logger.error('Error finalizando diario:', err);
+      setError('Error al finalizar');
+    }
+  }, [logId, onBack]);
 
   // Suscribirse a cambios en tiempo real
   useEffect(() => {
@@ -127,7 +173,67 @@ function ClassDailyLog({ logId, user, onBack }) {
         clearInterval(autoSaveIntervalRef.current);
       }
     };
-  }, [isTeacher, log, hasUnsavedChanges]);
+  }, [isTeacher, log, hasUnsavedChanges, handleSave]);
+
+  // Configurar TopBar del app con botones dinámicos
+  useEffect(() => {
+    if (!logMeta.name) return;
+
+    const actions = [];
+
+    // Botones solo para profesores
+    if (isTeacher) {
+      actions.push({
+        key: 'add-content',
+        label: 'Agregar Contenido',
+        icon: <Plus size={16} />,
+        onClick: contentSelectorModal.open,
+        variant: 'primary'
+      });
+
+      actions.push({
+        key: 'save',
+        label: saving ? 'Guardando...' : 'Guardar',
+        icon: <Save size={16} />,
+        onClick: handleSave,
+        disabled: saving,
+        variant: 'secondary'
+      });
+
+      if (logMeta.status === 'active') {
+        actions.push({
+          key: 'end-log',
+          label: 'Finalizar Clase',
+          onClick: handleEndLog,
+          variant: 'danger'
+        });
+      }
+    }
+
+    // Botón de índice
+    actions.push({
+      key: 'toggle-sidebar',
+      label: sidebarOpen ? 'Cerrar Índice' : 'Índice',
+      icon: <Menu size={16} />,
+      onClick: () => setSidebarOpen(!sidebarOpen)
+    });
+
+    updateTopBar({
+      title: logMeta.name,
+      subtitle: `${logMeta.courseName ? '📚 ' + logMeta.courseName : ''} ${logMeta.groupName ? '👥 ' + logMeta.groupName : ''}`.trim(),
+      showBackButton: true,
+      onBack: onBack,
+      actions: actions
+    });
+
+    // Reset TopBar al desmontar
+    return () => {
+      resetTopBar();
+    };
+    // updateTopBar and resetTopBar are stable context functions, safe to omit
+    // contentSelectorModal.open is stable from useMemo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logMeta, isTeacher, saving, sidebarOpen, onBack, handleSave, handleEndLog]);
 
   // Guardar scroll position periódicamente
   useEffect(() => {
@@ -151,25 +257,6 @@ function ClassDailyLog({ logId, user, onBack }) {
       container.removeEventListener('scroll', handleScroll);
     };
   }, [isTeacher, log, logId]);
-
-  const handleSave = async () => {
-    if (!isTeacher) return;
-
-    setSaving(true);
-    try {
-      await updateLog(logId, {
-        updatedAt: new Date()
-      });
-      setLastSaved(new Date());
-      setHasUnsavedChanges(false);
-      logger.info('💾 Diario guardado');
-    } catch (err) {
-      logger.error('Error guardando diario:', err);
-      setError('Error al guardar');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleAddContent = async (content) => {
     try {
@@ -221,21 +308,6 @@ function ClassDailyLog({ logId, user, onBack }) {
     if (entryElement) {
       entryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setSidebarOpen(false);
-    }
-  };
-
-  const handleEndLog = async () => {
-    if (!confirm('¿Finalizar esta clase? Los estudiantes ya no podrán verla en vivo.')) return;
-
-    try {
-      const result = await endLog(logId);
-      if (result.success) {
-        logger.info('🏁 Diario finalizado');
-        if (onBack) onBack();
-      }
-    } catch (err) {
-      logger.error('Error finalizando diario:', err);
-      setError('Error al finalizar');
     }
   };
 
@@ -348,9 +420,11 @@ function ClassDailyLog({ logId, user, onBack }) {
                   {content.title}
                 </h2>
                 <div className="flex items-center gap-2 mt-2">
-                  <BaseBadge variant="primary" size="sm">
-                    {content.type}
-                  </BaseBadge>
+                  <CategoryBadge
+                    type="content"
+                    value={content.type}
+                    size="sm"
+                  />
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     Agregado: {entry.addedAt?.toDate?.().toLocaleTimeString() || 'Ahora'}
                   </span>
@@ -503,102 +577,7 @@ function ClassDailyLog({ logId, user, onBack }) {
   }
 
   return (
-    <div className="class-daily-log h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
-      {/* Top Bar */}
-      <div
-        className={`
-          bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700
-          transition-all duration-300 flex-shrink-0
-          ${topBarVisible ? 'h-16' : 'h-2'}
-        `}
-      >
-        {topBarVisible ? (
-          <div className="h-full px-6 flex items-center justify-between">
-            {/* Left */}
-            <div className="flex items-center gap-4">
-              <BaseButton
-                variant="ghost"
-                icon={ChevronLeft}
-                onClick={onBack}
-                size="sm"
-              >
-                Volver
-              </BaseButton>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-                  {log.name}
-                </h1>
-                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  {log.courseName && <span>📚 {log.courseName}</span>}
-                  {log.groupName && <span>👥 {log.groupName}</span>}
-                </div>
-              </div>
-            </div>
-
-            {/* Center */}
-            <div className="flex items-center gap-2">
-              {log.status === 'active' && (
-                <BaseBadge variant="success" icon={Activity}>
-                  En Vivo
-                </BaseBadge>
-              )}
-              {lastSaved && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Guardado: {lastSaved.toLocaleTimeString()}
-                </span>
-              )}
-            </div>
-
-            {/* Right */}
-            <div className="flex items-center gap-3">
-              {isTeacher && (
-                <>
-                  <BaseButton
-                    variant="primary"
-                    icon={Plus}
-                    onClick={contentSelectorModal.open}
-                    size="sm"
-                  >
-                    Agregar Contenido
-                  </BaseButton>
-                  <BaseButton
-                    variant="secondary"
-                    icon={Save}
-                    onClick={handleSave}
-                    loading={saving}
-                    size="sm"
-                  >
-                    Guardar
-                  </BaseButton>
-                  {log.status === 'active' && (
-                    <BaseButton
-                      variant="danger"
-                      onClick={handleEndLog}
-                      size="sm"
-                    >
-                      Finalizar Clase
-                    </BaseButton>
-                  )}
-                </>
-              )}
-              <BaseButton
-                variant="ghost"
-                icon={Menu}
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                size="sm"
-              />
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setTopBarVisible(true)}
-            className="w-full h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <ChevronRight size={16} className="text-gray-400" />
-          </button>
-        )}
-      </div>
-
+    <div className="class-daily-log fixed inset-0 flex bg-gray-100 dark:bg-gray-900 mt-12 md:mt-14 lg:mt-16">
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar (Índice) */}

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import logger from '../utils/logger';
 import { useSubmission } from '../hooks/useAssignments';
 import { CheckCircle, XCircle, Clock, User, Calendar, FileText, Send } from 'lucide-react';
-import { BaseButton, BaseModal, BaseLoading, BaseAlert, BaseBadge } from './common';
+import { BaseButton, BaseModal, BaseLoading, BaseAlert, BaseBadge, CategoryBadge } from './common';
 
 export default function GradingInterface({ assignment, teacherId, onClose }) {
   const { submissions, grade: gradeSubmission, loading } = useSubmission(assignment.id);
@@ -80,12 +80,12 @@ export default function GradingInterface({ assignment, teacherId, onClose }) {
       <div className="mb-4">
         <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
           <span>{submissions.length} entregas</span>
-          <BaseBadge variant="warning">
+          <CategoryBadge type="status" value="draft">
             {pendingSubmissions.length} pendientes
-          </BaseBadge>
-          <BaseBadge variant="success">
+          </CategoryBadge>
+          <CategoryBadge type="status" value="published">
             {gradedSubmissions.length} calificadas
-          </BaseBadge>
+          </CategoryBadge>
         </div>
       </div>
 

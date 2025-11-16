@@ -10,6 +10,7 @@ import {
   BaseLoading,
   BaseEmptyState,
   BaseBadge,
+  CategoryBadge,
   BaseAlert
 } from '../common';
 import { UniversalCard } from '../cards';
@@ -91,6 +92,18 @@ function MyCourses({ user, onSelectCourse }) {
   };
 
   const getStatusBadge = (status) => {
+    // Map course status to system status
+    const statusMap = {
+      'completed': 'archived',
+      'in_progress': 'published',
+      'not_started': 'draft'
+    };
+
+    const mappedStatus = statusMap[status] || 'draft';
+    return <CategoryBadge type="status" value={mappedStatus} size="sm" />;
+  };
+
+  const getStatusBadgeOld = (status) => {
     switch (status) {
       case 'completed':
         return (

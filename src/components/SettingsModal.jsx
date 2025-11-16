@@ -57,7 +57,7 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
       try {
         setDisplaySettings(JSON.parse(saved));
       } catch (err) {
-        console.error('Error loading display settings:', err);
+        logger.error('Error loading display settings:', err);
       }
     }
   }, []);
@@ -129,9 +129,9 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
       window.dispatchEvent(new Event('xiwen_settings_changed'));
 
       // Feedback de éxito
-      console.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
+      logger.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
     } catch (err) {
-      console.error('Error aplicando preset:', err);
+      logger.error('Error aplicando preset:', err);
       alert('❌ Error al aplicar el preset. Por favor intenta nuevamente.');
     }
   };

@@ -1,6 +1,6 @@
 /**
  * useTranslator Hook
- * Custom hook for translating text using AI with caching
+ * Custom hook for translating text using AI or Dictionaries with caching
  */
 
 import { useState, useCallback } from 'react';
@@ -9,6 +9,7 @@ import {
   getCachedTranslation,
   setCachedTranslation
 } from '../utils/translationCache';
+import { searchInDictionaries } from '../services/dictionaryService';
 import logger from '../utils/logger';
 
 /**
@@ -105,6 +106,61 @@ export function useTranslator() {
   }, []);
 
   /**
+   * Helper: Translate using AI
+   */
+  const translateWithAI = async (trimmedText, config) => {
+    // Get AI configuration
+    const aiConfig = await getAIConfig();
+
+    // Get translator function config (functions is an object, not an array)
+    const translatorConfig = aiConfig.functions?.translator;
+
+    if (!translatorConfig || !translatorConfig.enabled) {
+      throw new Error('El traductor no está habilitado. Por favor, configúralo en la sección de AI.');
+    }
+
+    // Use provider from content config if specified, otherwise use translator config
+    const provider = config.ai?.provider || translatorConfig.provider;
+    const model = config.ai?.model || translatorConfig.model;
+
+    // Build the prompt
+    const prompt = `Traduce la siguiente palabra o frase del español al chino simplificado.
+Proporciona:
+1. La traducción en chino (caracteres simplificados)
+2. La pronunciación en pinyin
+3. Al menos 2-3 significados o usos diferentes
+4. Un ejemplo de uso en contexto (español → chino)
+
+Texto a traducir: "${trimmedText}"
+
+Formato de respuesta (JSON):
+{
+  "chinese": "工作",
+  "pinyin": "gōngzuò",
+  "meanings": ["Trabajo, empleo", "Labor, tarea", "Obra"],
+  "example": {
+    "spanish": "Voy al trabajo",
+    "chinese": "我去上班"
+  }
+}`;
+
+    // Call AI
+    logger.info(`Translating with AI (${provider}): ${trimmedText}`, 'useTranslator');
+    const response = await callAI(
+      provider,
+      prompt,
+      {
+        model: model,
+        systemPrompt: translatorConfig.systemPrompt,
+        parameters: translatorConfig.parameters
+      }
+    );
+
+    // Parse response
+    return parseAIResponse(response, trimmedText);
+  };
+
+  /**
    * Translate text from Spanish to Chinese
    * @param {string} text - Text to translate
    * @param {string} sourceLang - Source language (default: 'es')
@@ -130,51 +186,39 @@ export function useTranslator() {
         return cached;
       }
 
-      // Get AI configuration
-      const aiConfig = await getAIConfig();
+      // Load translator configuration
+      const configStr = localStorage.getItem('xiwen_translator_config');
+      const config = configStr ? JSON.parse(configStr) : { mode: 'ai' };
 
-      // Get translator function config (functions is an object, not an array)
-      const translatorConfig = aiConfig.functions?.translator;
+      logger.info(`Translation mode: ${config.mode}`, 'useTranslator');
 
-      if (!translatorConfig || !translatorConfig.enabled) {
-        throw new Error('El traductor no está habilitado. Por favor, configúralo en la sección de AI.');
-      }
+      let translationData = null;
 
-      // Build the prompt
-      const prompt = `Traduce la siguiente palabra o frase del español al chino simplificado.
-Proporciona:
-1. La traducción en chino (caracteres simplificados)
-2. La pronunciación en pinyin
-3. Al menos 2-3 significados o usos diferentes
-4. Un ejemplo de uso en contexto (español → chino)
+      // MODO DICTIONARY: Solo usar diccionarios
+      if (config.mode === 'dictionary') {
+        translationData = await searchInDictionaries(trimmedText, config.dictionary);
 
-Texto a traducir: "${trimmedText}"
-
-Formato de respuesta (JSON):
-{
-  "chinese": "工作",
-  "pinyin": "gōngzuò",
-  "meanings": ["Trabajo, empleo", "Labor, tarea", "Obra"],
-  "example": {
-    "spanish": "Voy al trabajo",
-    "chinese": "我去上班"
-  }
-}`;
-
-      // Call AI
-      logger.info(`Translating: ${trimmedText}`, 'useTranslator');
-      const response = await callAI(
-        translatorConfig.provider,
-        prompt,
-        {
-          model: translatorConfig.model,
-          systemPrompt: translatorConfig.systemPrompt,
-          parameters: translatorConfig.parameters
+        if (!translationData) {
+          throw new Error('Palabra no encontrada en el diccionario. Prueba con el modo Híbrido o IA.');
         }
-      );
+      }
+      // MODO HYBRID: Diccionario primero, AI como fallback
+      else if (config.mode === 'hybrid') {
+        // Intentar con diccionario
+        translationData = await searchInDictionaries(trimmedText, config.dictionary);
 
-      // Parse response
-      const translationData = parseAIResponse(response, trimmedText);
+        // Si no encuentra y tiene fallback habilitado, usar AI
+        if (!translationData && config.dictionary?.fallbackToAI !== false) {
+          logger.info('Dictionary not found, falling back to AI', 'useTranslator');
+          translationData = await translateWithAI(trimmedText, config);
+        } else if (!translationData) {
+          throw new Error('Palabra no encontrada en el diccionario.');
+        }
+      }
+      // MODO AI (default): Solo usar IA
+      else {
+        translationData = await translateWithAI(trimmedText, config);
+      }
 
       // Cache the translation
       setCachedTranslation(trimmedText, translationData, sourceLang, targetLang);

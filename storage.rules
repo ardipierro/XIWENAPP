@@ -80,6 +80,14 @@ service firebase.storage {
       allow delete: if isAuthenticated();
     }
 
+    // Carpeta de banners de usuario (para perfiles, etc.)
+    match /banners/{fileName} {
+      allow read: if true; // Cualquiera puede leer
+      allow write: if isAuthenticated()
+                   && isImage()
+                   && isValidSize();
+    }
+
     // Bloquear todo lo demás por defecto
     match /{allPaths=**} {
       allow read: if false;

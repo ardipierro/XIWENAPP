@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { CheckCircle, XCircle, Lightbulb, RefreshCw, MessageSquare } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge } from '../../common';
+import { BaseButton, BaseCard, BaseBadge, CategoryBadge } from '../../common';
 import { useExerciseState } from '../../../hooks/useExerciseState';
 
 /**
@@ -105,7 +105,7 @@ export function DialogueCompletionExercise({
             </p>
           </div>
         </div>
-        <BaseBadge variant="default">{cefrLevel}</BaseBadge>
+        <CategoryBadge type="cefr" value={cefrLevel} />
       </div>
 
       {/* Diálogo */}

@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { CheckCircle, XCircle, Lightbulb, RefreshCw, ArrowRightLeft } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge } from '../../common';
+import { BaseButton, BaseCard, BaseBadge, CategoryBadge } from '../../common';
 import { useExerciseState } from '../../../hooks/useExerciseState';
 // import { flexibleValidation } from '../../../services/aiService'; // Función no disponible actualmente
 
@@ -92,7 +92,7 @@ export function GrammarTransformationExercise({
             </p>
           </div>
         </div>
-        <BaseBadge variant="default">{cefrLevel}</BaseBadge>
+        <CategoryBadge type="cefr" value={cefrLevel} />
       </div>
 
       {/* Oración original */}
