@@ -191,19 +191,21 @@ export function FlashCardManager({ user }) {
   }
 
   return (
-    <div className="flashcard-manager">
+    <div className="w-full">
       {/* Header */}
-      <div className="flashcard-manager__header">
-        <div className="flashcard-manager__header-text">
-          <h1 className="flashcard-manager__title">
-            <CreditCard size={28} className="flashcard-manager__title-icon" />
-            Colecciones de FlashCards
-          </h1>
-          <p className="flashcard-manager__subtitle">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <CreditCard size={28} className="text-zinc-700 dark:text-zinc-300" />
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+              Colecciones de FlashCards
+            </h1>
+          </div>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Crea y gestiona tarjetas de vocabulario y expresiones
           </p>
         </div>
-        <div className="flashcard-manager__header-actions">
+        <div className="flex gap-3">
           <BaseButton
             variant="secondary"
             icon={Plus}
@@ -255,30 +257,30 @@ export function FlashCardManager({ user }) {
       {activeTab === 'collections' && (
         <>
           {/* Filters */}
-          <div className="flashcard-manager__filters">
-        <div className="flashcard-manager__search">
-          <BaseInput
-            icon={Search}
-            placeholder="Buscar colecciones..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="flashcard-manager__view-toggle">
-          <BaseButton
-            variant={viewMode === 'grid' ? 'primary' : 'ghost'}
-            icon={Grid3x3}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-          />
-          <BaseButton
-            variant={viewMode === 'list' ? 'primary' : 'ghost'}
-            icon={List}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          />
-        </div>
-      </div>
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 mb-6">
+            <div className="flex-1">
+              <BaseInput
+                icon={Search}
+                placeholder="Buscar colecciones..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <BaseButton
+                variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+                icon={Grid3x3}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+              />
+              <BaseButton
+                variant={viewMode === 'list' ? 'primary' : 'ghost'}
+                icon={List}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              />
+            </div>
+          </div>
 
       {/* Collections Grid/List */}
       {filteredCollections.length === 0 ? (
@@ -298,16 +300,18 @@ export function FlashCardManager({ user }) {
           }
         />
       ) : (
-        <div className={`flashcard-manager__collections flashcard-manager__collections--${viewMode}`}>
+        <div className={viewMode === 'grid'
+          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+          : 'flex flex-col gap-3'}>
           {filteredCollections.map(collection => (
             <BaseCard
               key={collection.id}
-              className="flashcard-collection-card"
+              className="group hover:shadow-lg transition-all duration-200"
               image={collection.imageUrl || null}
             >
-              <div className="flashcard-collection-card__content">
+              <div className="p-4 flex flex-col h-full">
                 {/* Badges */}
-                <div className="flashcard-collection-card__badges">
+                <div className="flex flex-wrap gap-2 mb-3">
                   <CategoryBadge
                     type="cefr"
                     value={collection.level}
@@ -324,17 +328,17 @@ export function FlashCardManager({ user }) {
                 </div>
 
                 {/* Title */}
-                <h3 className="flashcard-collection-card__title">
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2 line-clamp-2">
                   {collection.name}
                 </h3>
 
                 {/* Description */}
-                <p className="flashcard-collection-card__description">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 flex-1 line-clamp-3">
                   {collection.description}
                 </p>
 
                 {/* Actions */}
-                <div className="flashcard-collection-card__actions">
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-700">
                   <BaseButton
                     variant="primary"
                     icon={Play}
@@ -395,11 +399,11 @@ export function FlashCardManager({ user }) {
           title="Exportar Colección"
           size="small"
         >
-          <div className="flashcard-export-menu">
-            <p className="flashcard-export-menu__description">
+          <div className="space-y-4">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Selecciona el formato de exportación:
             </p>
-            <div className="flashcard-export-menu__buttons">
+            <div className="flex flex-col gap-2">
               <BaseButton
                 variant="outline"
                 icon={Download}
