@@ -3299,6 +3299,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     overflow: hidden !important;
     padding: 0 !important;
     margin: 0 !important;
+    gap: 0 !important;
   }
 
   /* ===== SIDEBAR HEADER - Fixed height, visible ===== */
@@ -3507,15 +3508,16 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     max-width: 85%;
   }
 
-  /* ===== INPUT CONTAINER - Fixed height al final ===== */
+  /* ===== INPUT CONTAINER - Fixed height al final, pegado al bottom ===== */
   .message-input-container {
     position: relative !important;
     flex-shrink: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
     background: var(--color-bg-secondary);
-    border: none;
+    border: none !important;
     border-top: 1px solid var(--color-border);
+    border-bottom: none !important;
   }
 
   /* Input area mobile - 2 filas */
@@ -3523,6 +3525,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     display: flex;
     flex-direction: column;
     gap: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* Fila 1: Action buttons */
@@ -3534,6 +3538,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     padding: 8px 16px;
     min-height: 52px;
     max-height: 52px;
+    margin: 0 !important;
     background: var(--color-bg-tertiary);
     border-bottom: 1px solid var(--color-border);
   }
@@ -3570,6 +3575,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     gap: 8px;
     padding: 12px 16px;
     min-height: 68px;
+    margin: 0 !important;
   }
 
   .message-input {
