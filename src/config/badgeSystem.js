@@ -368,6 +368,58 @@ export const DEFAULT_BADGE_CONFIG = {
     description: 'Creado con asistencia de IA',
     category: 'feature'
   },
+
+  // ========================================
+  // ROLES DE USUARIO
+  // ========================================
+  ROLE_ADMIN: {
+    variant: 'warning',
+    color: '#f59e0b',
+    label: 'Admin',
+    icon: '👑',
+    description: 'Administrador del sistema',
+    category: 'role'
+  },
+  ROLE_TEACHER: {
+    variant: 'info',
+    color: '#8b5cf6',
+    label: 'Profesor',
+    icon: '👨‍🏫',
+    description: 'Profesor activo',
+    category: 'role'
+  },
+  ROLE_TRIAL_TEACHER: {
+    variant: 'info',
+    color: '#a78bfa',
+    label: 'Profesor Prueba',
+    icon: '👨‍🏫',
+    description: 'Profesor en periodo de prueba',
+    category: 'role'
+  },
+  ROLE_STUDENT: {
+    variant: 'primary',
+    color: '#3b82f6',
+    label: 'Alumno',
+    icon: '🎓',
+    description: 'Estudiante activo',
+    category: 'role'
+  },
+  ROLE_LISTENER: {
+    variant: 'success',
+    color: '#10b981',
+    label: 'Oyente',
+    icon: '👂',
+    description: 'Oyente sin evaluación',
+    category: 'role'
+  },
+  ROLE_TRIAL: {
+    variant: 'secondary',
+    color: '#71717a',
+    label: 'Prueba',
+    icon: '🔬',
+    description: 'Cuenta en periodo de prueba',
+    category: 'role'
+  },
 };
 
 // ============================================
@@ -416,6 +468,12 @@ export const BADGE_CATEGORIES = {
     description: 'Atributos especiales del contenido',
     icon: '⭐',
     allowCustom: true,
+  },
+  role: {
+    label: 'Roles de Usuario',
+    description: 'Perfiles y permisos en el sistema',
+    icon: '👥',
+    allowCustom: false, // Roles fijos del sistema
   },
 };
 
@@ -473,6 +531,16 @@ export const BADGE_MAPPINGS = {
     'review': 'STATUS_REVIEW',
     'published': 'STATUS_PUBLISHED',
     'archived': 'STATUS_ARCHIVED',
+  },
+
+  // Role → Badge key
+  role: {
+    'admin': 'ROLE_ADMIN',
+    'teacher': 'ROLE_TEACHER',
+    'trial_teacher': 'ROLE_TRIAL_TEACHER',
+    'student': 'ROLE_STUDENT',
+    'listener': 'ROLE_LISTENER',
+    'trial': 'ROLE_TRIAL',
   },
 };
 

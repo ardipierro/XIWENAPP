@@ -28,7 +28,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useUserManagement } from '../hooks/useUserManagement';
 import { createUser, deleteUser } from '../firebase/users';
 import SearchBar from './common/SearchBar';
-import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge } from './common';
+import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge, CategoryBadge } from './common';
 import { UniversalCard, CardGrid } from './cards';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
@@ -46,18 +46,6 @@ const getAvatarColor = (role) => {
     trial: '#06b6d4', // cyan
   };
   return colors[role] || '#6b7280'; // gray fallback
-};
-
-const getRoleBadge = (role) => {
-  const badges = {
-    admin: { label: 'Admin', variant: 'warning' },
-    teacher: { label: 'Profesor', variant: 'info' },
-    trial_teacher: { label: 'Profesor Prueba', variant: 'info' },
-    student: { label: 'Alumno', variant: 'primary' },
-    listener: { label: 'Oyente', variant: 'success' },
-    trial: { label: 'Prueba', variant: 'secondary' }
-  };
-  return badges[role] || { label: role, variant: 'secondary' };
 };
 
 /**
@@ -369,7 +357,6 @@ export default function UniversalUserManager({ user, userRole }) {
             {userManagement.filteredUsers.map((userItem) => {
               const initial = userItem.name?.charAt(0).toUpperCase() || '?';
               const avatarColor = getAvatarColor(userItem.role);
-              const roleBadge = getRoleBadge(userItem.role);
 
               return (
                 <div
@@ -403,9 +390,7 @@ export default function UniversalUserManager({ user, userRole }) {
 
                       {/* Badge Rol */}
                       <div className="flex-shrink-0">
-                        <BaseBadge variant={roleBadge.variant} size="sm">
-                          {roleBadge.label}
-                        </BaseBadge>
+                        <CategoryBadge type="role" value={userItem.role} size="sm" />
                       </div>
 
                       {/* Stats */}
@@ -468,7 +453,6 @@ export default function UniversalUserManager({ user, userRole }) {
             {userManagement.filteredUsers.map((userItem) => {
               const initial = userItem.name?.charAt(0).toUpperCase() || '?';
               const avatarColor = getAvatarColor(userItem.role);
-              const roleBadge = getRoleBadge(userItem.role);
 
               return (
                 <UniversalCard
@@ -480,7 +464,7 @@ export default function UniversalUserManager({ user, userRole }) {
                   avatarColor={avatarColor}
                   title={userItem.name}
                   subtitle={userItem.email}
-                  badges={[{ variant: roleBadge.variant, children: roleBadge.label }]}
+                  badges={[<CategoryBadge key="role" type="role" value={userItem.role} size="sm" />]}
                   stats={[
                     { label: 'Cursos', value: enrollmentCounts[userItem.id] || 0, icon: BookOpen },
                     { label: 'Créditos', value: userItem.credits || 0, icon: DollarSign }
