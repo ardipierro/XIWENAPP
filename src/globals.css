@@ -3239,6 +3239,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   bottom: 0 !important;
   width: 100vw !important;
   height: calc(100vh - 56px) !important;
+  min-height: calc(100vh - 56px) !important;
+  max-height: calc(100vh - 56px) !important;
   padding: 0 !important;
   margin: 0 !important;
   border: none !important;
