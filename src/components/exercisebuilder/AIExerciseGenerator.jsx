@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { Sparkles, FileText, Wand2, Download, Eye } from 'lucide-react';
-import { BaseButton, BaseBadge, BaseAlert } from '../common';
+import { BaseButton, BaseBadge, CategoryBadge, BaseAlert } from '../common';
 import { UniversalCard } from '../cards';
 import { generateExercisesFromText } from '../../services/aiService';
 import logger from '../../utils/logger';
@@ -226,10 +226,11 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
                 className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <BaseBadge variant="default">
-                    Ejercicio {idx + 1} - {exercise.type.toUpperCase()}
-                  </BaseBadge>
-                  <BaseBadge variant="success">{cefrLevel}</BaseBadge>
+                  <CategoryBadge
+                    type="exercise"
+                    value={exercise.type}
+                  />
+                  <CategoryBadge type="cefr" value={cefrLevel} />
                 </div>
 
                 {/* MCQ Preview */}

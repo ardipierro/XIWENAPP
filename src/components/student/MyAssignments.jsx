@@ -14,6 +14,7 @@ import {
   BaseLoading,
   BaseEmptyState,
   BaseBadge,
+  CategoryBadge,
   BaseAlert
 } from '../common';
 import { UniversalCard } from '../cards';
@@ -116,16 +117,15 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
   };
 
   const getDifficultyBadge = (difficulty) => {
-    switch (difficulty) {
-      case 'easy':
-        return <BaseBadge variant="success" size="sm">Fácil</BaseBadge>;
-      case 'medium':
-        return <BaseBadge variant="warning" size="sm">Medio</BaseBadge>;
-      case 'hard':
-        return <BaseBadge variant="danger" size="sm">Difícil</BaseBadge>;
-      default:
-        return <BaseBadge variant="default" size="sm">Medio</BaseBadge>;
-    }
+    // Map assignment difficulty to system difficulty
+    const difficultyMap = {
+      'easy': 'beginner',
+      'medium': 'intermediate',
+      'hard': 'advanced'
+    };
+
+    const mappedDifficulty = difficultyMap[difficulty] || 'intermediate';
+    return <CategoryBadge type="difficulty" value={mappedDifficulty} size="sm" />;
   };
 
   const contentAssignments = getContentAssignments();

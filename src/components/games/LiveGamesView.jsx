@@ -20,7 +20,8 @@ import {
   BaseButton,
   BaseLoading,
   BaseEmptyState,
-  BaseBadge
+  BaseBadge,
+  CategoryBadge
 } from '../common';
 import { UniversalCard } from '../cards';
 
@@ -72,19 +73,18 @@ function LiveGamesView({ user, onJoinGame }) {
     return true;
   });
 
-  // Get status badge
+  // Get status badge - Mapped to system status
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'waiting':
-        return <BaseBadge variant="warning" icon={Clock}>Esperando</BaseBadge>;
-      case 'active':
-      case 'in_progress':
-        return <BaseBadge variant="success" icon={Play}>En progreso</BaseBadge>;
-      case 'finished':
-        return <BaseBadge variant="default" icon={Trophy}>Finalizado</BaseBadge>;
-      default:
-        return <BaseBadge variant="default">{status}</BaseBadge>;
-    }
+    // Map game status to system status
+    const statusMap = {
+      'waiting': 'draft',        // Esperando → Borrador
+      'active': 'published',     // Activo → Publicado
+      'in_progress': 'published', // En progreso → Publicado
+      'finished': 'archived'     // Finalizado → Archivado
+    };
+
+    const mappedStatus = statusMap[status] || 'draft';
+    return <CategoryBadge type="status" value={mappedStatus} />;
   };
 
   // Get game type label

@@ -47,6 +47,7 @@ import {
   BaseInput,
   BaseSelect,
   BaseBadge,
+  CategoryBadge,
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
@@ -564,14 +565,16 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 flex-wrap">
                   {viewingContent.metadata?.exerciseType && (
-                    <BaseBadge variant="warning">
-                      {viewingContent.metadata.exerciseType}
-                    </BaseBadge>
+                    <CategoryBadge
+                      type="exercise"
+                      value={viewingContent.metadata.exerciseType}
+                    />
                   )}
                   {viewingContent.metadata?.difficulty && (
-                    <BaseBadge variant="info">
-                      {viewingContent.metadata.difficulty}
-                    </BaseBadge>
+                    <CategoryBadge
+                      type="difficulty"
+                      value={viewingContent.metadata.difficulty}
+                    />
                   )}
                   {viewingContent.metadata?.points && (
                     <BaseBadge variant="success">
@@ -784,11 +787,20 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           <div className="flex-1 min-w-0 py-4 px-4">
             {/* Badges */}
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <BaseBadge variant={getBadgeVariant(content.type)} size="sm">
-                {config.label}
-              </BaseBadge>
-              {/* FASE 10: Status badge */}
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`}>
+              <CategoryBadge
+                type="content"
+                value={content.type}
+                size="sm"
+              />
+              {/* Status badge */}
+              {content.status && (
+                <CategoryBadge
+                  type="status"
+                  value={content.status}
+                  size="sm"
+                />
+              )}
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`} style={{ display: 'none' }}>
                 {getStatusLabel(content.status || CONTENT_STATUS.DRAFT)}
               </span>
               {content.metadata?.difficulty && (
@@ -865,11 +877,20 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       <div className="flex flex-col h-full">
         {/* Badges Section */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <BaseBadge variant={getBadgeVariant(content.type)} size="sm">
-            {config.label}
-          </BaseBadge>
-          {/* FASE 10: Status badge */}
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`}>
+          <CategoryBadge
+            type="content"
+            value={content.type}
+            size="sm"
+          />
+          {/* Status badge */}
+          {content.status && (
+            <CategoryBadge
+              type="status"
+              value={content.status}
+              size="sm"
+            />
+          )}
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`} style={{ display: 'none' }}>
             {getStatusLabel(content.status || CONTENT_STATUS.DRAFT)}
           </span>
           {content.metadata?.difficulty && (

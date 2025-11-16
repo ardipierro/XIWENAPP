@@ -37,6 +37,7 @@ import {
   BaseInput,
   BaseSelect,
   BaseBadge,
+  CategoryBadge,
   BaseLoading,
   BaseEmptyState,
   BaseAlert,
@@ -280,9 +281,10 @@ function AdminPaymentsPanel() {
                       <p className="font-bold style={{ color: 'var(--color-text-primary)' }}">
                         {formatCurrency(payment.amount)}
                       </p>
-                      <BaseBadge variant={getStatusVariant(payment.status)}>
-                        {getStatusLabel(payment.status)}
-                      </BaseBadge>
+                      <CategoryBadge
+                        type="status"
+                        value={payment.status === 'pending' ? 'draft' : payment.status === 'completed' ? 'published' : 'archived'}
+                      />
                     </div>
                   </div>
                 ))}

@@ -37,6 +37,7 @@ import { saveStudentExerciseResult } from '../firebase/exerciseProgress';
 import {
   BaseButton,
   BaseBadge,
+  CategoryBadge,
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
@@ -406,9 +407,11 @@ function ClassDailyLog({ logId, user, onBack }) {
                   {content.title}
                 </h2>
                 <div className="flex items-center gap-2 mt-2">
-                  <BaseBadge variant="primary" size="sm">
-                    {content.type}
-                  </BaseBadge>
+                  <CategoryBadge
+                    type="content"
+                    value={content.type}
+                    size="sm"
+                  />
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     Agregado: {entry.addedAt?.toDate?.().toLocaleTimeString() || 'Ahora'}
                   </span>

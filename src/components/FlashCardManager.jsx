@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { CreditCard, Plus, Sparkles, Search, Grid3x3, List, Eye, Edit, Trash2, Play, Download, Share2, Award, Trophy, BarChart3 } from 'lucide-react';
-import { BaseButton, BaseInput, BaseCard, BaseBadge, BaseLoading, BaseAlert, BaseEmptyState, BaseModal, BaseTabs } from './common';
+import { BaseButton, BaseInput, BaseCard, BaseBadge, CategoryBadge, BaseLoading, BaseAlert, BaseEmptyState, BaseModal, BaseTabs } from './common';
 import FlashCardGeneratorModal from './FlashCardGeneratorModal';
 import FlashCardViewer from './FlashCardViewer';
 import FlashCardEditor from './FlashCardEditor';
@@ -308,9 +308,11 @@ export function FlashCardManager({ user }) {
               <div className="flashcard-collection-card__content">
                 {/* Badges */}
                 <div className="flashcard-collection-card__badges">
-                  <BaseBadge variant="info" size="sm">
-                    {collection.level}
-                  </BaseBadge>
+                  <CategoryBadge
+                    type="cefr"
+                    value={collection.level}
+                    size="sm"
+                  />
                   <BaseBadge variant="default" size="sm">
                     {collection.cardCount || collection.cards?.length || 0} tarjetas
                   </BaseBadge>

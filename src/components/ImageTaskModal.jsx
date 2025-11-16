@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { X, Play, Download, Image as ImageIcon, CheckCircle, XCircle } from 'lucide-react';
-import { BaseButton, BaseModal, BaseBadge, BaseLoading } from './common';
+import { BaseButton, BaseModal, BaseBadge, BaseLoading, CategoryBadge } from './common';
 import { executeImageTask } from '../utils/imageGenerationTasks';
 import logger from '../utils/logger';
 
@@ -56,16 +56,6 @@ export default function ImageTaskModal({ task, onClose }) {
     return Math.round((successful / results.results.length) * 100);
   };
 
-  const getLevelColor = (level) => {
-    const colors = {
-      A1: 'success',
-      A2: 'info',
-      B1: 'warning',
-      B2: 'danger'
-    };
-    return colors[level] || 'default';
-  };
-
   return (
     <BaseModal
       isOpen={true}
@@ -84,9 +74,9 @@ export default function ImageTaskModal({ task, onClose }) {
               {task.name}
             </h3>
             <div className="flex gap-2 mt-2">
-              <BaseBadge variant={getLevelColor(task.level)}>
+              <CategoryBadge type="cefr" value={task.level}>
                 Nivel {task.level}
-              </BaseBadge>
+              </CategoryBadge>
               <BaseBadge variant="default">
                 {task.items.length} elementos
               </BaseBadge>
