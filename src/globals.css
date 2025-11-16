@@ -3260,73 +3260,86 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     overflow: hidden !important;
     display: flex;
     flex-direction: column;
+    z-index: 1000;
   }
 
   /* Mobile Sidebar - Fullscreen cuando visible */
   .messages-sidebar-mobile,
   .messages-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
     border-radius: 0 !important;
     overflow: hidden !important;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
+    background: var(--color-bg-primary);
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   /* Mobile Main Thread - Fullscreen cuando visible */
   .messages-main-mobile,
   .messages-main {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
     border-radius: 0 !important;
     overflow: hidden !important;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
+    background: var(--color-bg-primary);
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   /* ===== MESSAGE THREAD - Flexbox correcto ===== */
   .message-thread {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
     overflow: hidden !important;
     padding: 0 !important;
     margin: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
-  /* ===== SIDEBAR HEADER - Fixed height ===== */
+  /* ===== SIDEBAR HEADER - Fixed height, visible ===== */
   .messages-sidebar-header {
+    position: relative !important;
     flex-shrink: 0 !important;
-    padding: 12px 16px;
-    min-height: 60px;
-    max-height: 60px;
-    border: none;
-    border-bottom: 1px solid var(--color-border);
+    padding: 12px 16px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    height: 60px !important;
+    border: none !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    background: var(--color-bg-secondary) !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   .header-title h2 {
     font-size: 20px;
     margin: 0;
+    color: var(--color-text-primary);
   }
 
   .btn-new-message {
@@ -3374,18 +3387,27 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     font-size: 20px;
   }
 
-  /* ===== THREAD HEADER - Fixed height ===== */
+  /* ===== THREAD HEADER - Fixed height, visible ===== */
   .thread-header {
+    position: relative !important;
     flex-shrink: 0 !important;
-    padding: 10px 16px;
-    min-height: 60px;
-    max-height: 60px;
-    gap: 12px;
-    border: none;
-    border-bottom: 1px solid var(--color-border);
+    padding: 10px 16px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    height: 60px !important;
+    gap: 12px !important;
+    border: none !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    background: var(--color-bg-secondary) !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
-  /* Botón Back - Touch target */
+  /* Botón Back - Touch target, visible */
   .thread-back-btn {
     min-width: 44px;
     min-height: 44px;
@@ -3396,7 +3418,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     color: var(--color-text-primary);
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
@@ -3412,6 +3434,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     flex: 1;
     min-width: 0;
     gap: 10px;
+    display: flex;
+    align-items: center;
   }
 
   .thread-avatar {
@@ -3424,6 +3448,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     font-size: 16px;
     font-weight: 600;
     margin: 0;
+    color: var(--color-text-primary);
   }
 
   .thread-user-email {
@@ -3431,12 +3456,15 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--color-text-secondary);
   }
 
   /* Thread actions */
   .thread-actions {
     gap: 8px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
   }
 
   .thread-menu-btn {
@@ -3460,11 +3488,24 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
   /* ===== SEARCH BAR - Fixed height si visible ===== */
   .thread-search-bar {
+    position: relative !important;
     flex-shrink: 0 !important;
     padding: 12px 16px;
     min-height: 60px;
     max-height: 60px;
     border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+  }
+
+  /* ===== BÚSQUEDA - Fixed height ===== */
+  .messages-search {
+    position: relative !important;
+    flex-shrink: 0 !important;
+    padding: 8px 16px;
+    min-height: 52px;
+    max-height: 52px;
+    border: none;
+    background: var(--color-bg-secondary);
   }
 
   /* ===== MESSAGES LIST - Resto del espacio con scroll ===== */
@@ -3486,6 +3527,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
   /* ===== INPUT CONTAINER - Fixed height al final ===== */
   .message-input-container {
+    position: relative !important;
     flex-shrink: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -3596,6 +3638,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     border-radius: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    z-index: 1100;
   }
 
   /* ===== TRANSITIONS ===== */
