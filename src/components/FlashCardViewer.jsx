@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, RotateCw, Check, X, HelpCircle, Volume2, Star, Zap } from 'lucide-react';
-import { BaseButton, BaseModal, BaseBadge, BaseAlert } from './common';
+import { BaseButton, BaseModal, BaseBadge, BaseAlert, CategoryBadge } from './common';
 import { getFlashCardCollectionById } from '../firebase/flashcards';
 import { generateFallbackAudio } from '../services/elevenLabsService';
 import { saveCardProgress, getCollectionProgress } from '../services/spacedRepetitionService';
@@ -184,9 +184,11 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
         {/* Header Info */}
         <div className="flashcard-viewer__header">
           <div className="flashcard-viewer__badges">
-            <BaseBadge variant="info" size="sm">
-              {collection.level}
-            </BaseBadge>
+            <CategoryBadge
+              type="cefr"
+              value={collection.level}
+              size="sm"
+            />
             <BaseBadge variant="default" size="sm">
               {currentIndex + 1} / {collection.cards.length}
             </BaseBadge>

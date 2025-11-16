@@ -17,7 +17,8 @@ import {
   BaseButton,
   BaseCard,
   BaseBadge,
-  BaseAlert
+  BaseAlert,
+  CategoryBadge
 } from '../common';
 
 const ERROR_TYPE_CONFIG = {
@@ -160,15 +161,15 @@ export default function CorrectionReviewPanel({ review, onCorrectionsUpdate }) {
             Revisar Correcciones ({counts.total})
           </h3>
           <div className="flex gap-2 mt-2">
-            <BaseBadge variant="warning" size="sm">
+            <CategoryBadge type="status" value="draft" size="sm">
               {counts.pending} pendientes
-            </BaseBadge>
-            <BaseBadge variant="success" size="sm">
+            </CategoryBadge>
+            <CategoryBadge type="status" value="published" size="sm">
               {counts.approved} aprobadas
-            </BaseBadge>
-            <BaseBadge variant="danger" size="sm">
+            </CategoryBadge>
+            <CategoryBadge type="status" value="archived" size="sm">
               {counts.rejected} rechazadas
-            </BaseBadge>
+            </CategoryBadge>
           </div>
         </div>
 
