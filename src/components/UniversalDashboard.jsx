@@ -13,7 +13,8 @@ import { usePermissions } from '../hooks/usePermissions';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
 import ViewAsBanner from './ViewAsBanner';
-import { BaseLoading } from './common';
+import { BaseLoading, BaseButton } from './common';
+import { UniversalCard } from './cards';
 
 // Lazy load de componentes pesados
 const UnifiedCalendar = lazy(() => import('./UnifiedCalendar'));
@@ -57,42 +58,50 @@ function HomeView({ user, onNavigate }) {
       <p>Rol: <strong>{getRoleLabel()}</strong></p>
       <p>Este es el nuevo Universal Dashboard con sistema de permisos y créditos integrado.</p>
 
-      <div className="universal-dashboard__features">
-        <div className="feature-card">
-          <h3>✅ Sistema de Permisos</h3>
-          <p>Acceso basado en roles con permisos granulares</p>
-        </div>
-        <div className="feature-card">
-          <h3>💳 Sistema de Créditos</h3>
-          <p>Gestión unificada de créditos en tiempo real</p>
-        </div>
-        <div className="feature-card">
-          <h3>🎨 UI Consistente</h3>
-          <p>Misma experiencia para todos los roles</p>
-        </div>
-        <div className="feature-card">
-          <h3>🚀 Altamente Escalable</h3>
-          <p>Fácil agregar nuevos roles y features</p>
-        </div>
+      {/* Feature cards con UniversalCard */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <UniversalCard
+          variant="default"
+          size="md"
+          title="✅ Sistema de Permisos"
+          description="Acceso basado en roles con permisos granulares"
+        />
+        <UniversalCard
+          variant="default"
+          size="md"
+          title="💳 Sistema de Créditos"
+          description="Gestión unificada de créditos en tiempo real"
+        />
+        <UniversalCard
+          variant="default"
+          size="md"
+          title="🎨 UI Consistente"
+          description="Misma experiencia para todos los roles"
+        />
+        <UniversalCard
+          variant="default"
+          size="md"
+          title="🚀 Altamente Escalable"
+          description="Fácil agregar nuevos roles y features"
+        />
       </div>
 
       {/* Acceso rápido a contenido ADE1 */}
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4">📚 Contenido Interactivo</h2>
-        <div className="universal-dashboard__features">
-          <div
-            className="feature-card cursor-pointer hover:shadow-lg transition-shadow"
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <UniversalCard
+            variant="default"
+            size="md"
+            title="📖 ADE1 2026 - Fonética"
+            description="Libro interactivo con 120+ slides y ejercicios de fonética española"
             onClick={() => onNavigate && onNavigate('/dashboard-v2/ade1-content')}
-            role="button"
-            tabIndex={0}
-            onKeyPress={(e) => e.key === 'Enter' && onNavigate && onNavigate('/dashboard-v2/ade1-content')}
-          >
-            <h3>📖 ADE1 2026 - Fonética</h3>
-            <p>Libro interactivo con 120+ slides y ejercicios de fonética española</p>
-            <button className="mt-3 px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600">
-              Ver contenido →
-            </button>
-          </div>
+            actions={[
+              <BaseButton key="view" variant="primary" size="sm" fullWidth>
+                Ver contenido →
+              </BaseButton>
+            ]}
+          />
         </div>
       </div>
     </div>

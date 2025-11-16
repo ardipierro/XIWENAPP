@@ -5,6 +5,7 @@ import {
   Moon, Layout, CreditCard, Award, BookText, Mic, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import BaseButton from './components/common/BaseButton';
+import { UniversalCard } from './components/cards';
 import { getLandingConfig } from './firebase/landingConfig';
 import logger from './utils/logger';
 import './LandingPage.css';
@@ -185,13 +186,14 @@ function LandingPage({ onNavigateToLogin, onNavigateToRegister }) {
             {config.features.map((feature) => {
               const Icon = ICON_MAP[feature.icon] || BookOpen;
               return (
-                <div className="feature-card" key={feature.id}>
-                  <div className="feature-icon">
-                    <Icon size={40} strokeWidth={2} />
-                  </div>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.description}</p>
-                </div>
+                <UniversalCard
+                  key={feature.id}
+                  variant="default"
+                  size="md"
+                  icon={Icon}
+                  title={feature.title}
+                  description={feature.description}
+                />
               );
             })}
           </div>
