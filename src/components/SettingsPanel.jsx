@@ -1,5 +1,5 @@
 /**
- * @fileoverview Panel de Configuración con 9 pestañas
+ * @fileoverview Panel de Configuración con 8 pestañas
  * @module components/SettingsPanel
  */
 
@@ -29,9 +29,7 @@ function SettingsPanel() {
     { id: 'badges', label: 'Badges', icon: Tag },
     { id: 'cardsystem', label: 'Card System', icon: LayoutGrid },
     { id: 'cache', label: 'Caché de Audio', icon: Database },
-    { id: 'landing', label: 'Landing Page', icon: Home },
-    { id: 'notifications', label: 'Notificaciones', icon: Bell },
-    { id: 'account', label: 'Cuenta', icon: User }
+    { id: 'landing', label: 'Landing Page', icon: Home }
   ];
 
   return (
@@ -70,10 +68,10 @@ function SettingsPanel() {
       <div className="w-full">
         {activeTab === 'general' && (
           <div className="w-full space-y-6">
+            {/* Idioma y Región */}
             <UniversalCard
               variant="default"
               size="md"
-              icon={Globe}
               title="Idioma y Región"
             >
               <div className="space-y-4">
@@ -84,6 +82,37 @@ function SettingsPanel() {
                     <option>English</option>
                     <option>中文</option>
                   </select>
+                </div>
+              </div>
+            </UniversalCard>
+
+            {/* Notificaciones */}
+            <UniversalCard
+              variant="default"
+              size="md"
+              title="Notificaciones"
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-white">Notificaciones por email</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Recibe actualizaciones importantes</div>
+                  </div>
+                  <input type="checkbox" className="w-5 h-5" defaultChecked />
+                </div>
+              </div>
+            </UniversalCard>
+
+            {/* Cuenta */}
+            <UniversalCard
+              variant="default"
+              size="md"
+              title="Cuenta"
+            >
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre completo</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="Tu nombre" />
                 </div>
               </div>
             </UniversalCard>
@@ -278,45 +307,6 @@ function SettingsPanel() {
         {activeTab === 'landing' && (
           <div className="w-full">
             <LandingPageTab />
-          </div>
-        )}
-
-        {activeTab === 'notifications' && (
-          <div className="w-full space-y-6">
-            <UniversalCard
-              variant="default"
-              size="md"
-              icon={Bell}
-              title="Notificaciones"
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white">Notificaciones por email</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Recibe actualizaciones importantes</div>
-                  </div>
-                  <input type="checkbox" className="w-5 h-5" defaultChecked />
-                </div>
-              </div>
-            </UniversalCard>
-          </div>
-        )}
-
-        {activeTab === 'account' && (
-          <div className="w-full space-y-6">
-            <UniversalCard
-              variant="default"
-              size="md"
-              icon={User}
-              title="Cuenta"
-            >
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre completo</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="Tu nombre" />
-                </div>
-              </div>
-            </UniversalCard>
           </div>
         )}
       </div>
