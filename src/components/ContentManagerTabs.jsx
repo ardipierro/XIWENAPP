@@ -5,12 +5,13 @@
  */
 
 import { useState } from 'react';
-import { Layers, Lightbulb, BookOpen, Edit3, CreditCard } from 'lucide-react';
+import { Layers, Lightbulb, BookOpen, Edit3, CreditCard, Package } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import BaseTabs from './common/BaseTabs';
 import UnifiedContentManager from './UnifiedContentManager';
 import AIConfigPanel from './AIConfigPanel';
 import InteractiveBookViewer from './InteractiveBookViewer';
+import SlidePackageGenerator from './SlidePackageGenerator';
 import ContentReader from './ContentReader';
 import FlashCardManager from './FlashCardManager';
 import { usePermissions } from '../hooks/usePermissions';
@@ -42,6 +43,12 @@ const TABS = [
     id: 'libro-ade1',
     label: 'Libro ADE 1',
     icon: BookOpen,
+    permission: 'create-content', // Mismo permiso que contenidos
+  },
+  {
+    id: 'slide-generator',
+    label: 'Generador PPT ADE1',
+    icon: Package,
     permission: 'create-content', // Mismo permiso que contenidos
   },
   {
@@ -83,6 +90,8 @@ export function ContentManagerTabs({ user, userRole }) {
         return <FlashCardManager user={user} />;
       case 'libro-ade1':
         return <InteractiveBookViewer />;
+      case 'slide-generator':
+        return <SlidePackageGenerator />;
       case 'visor-contenidos':
         return (
           <ContentReader
