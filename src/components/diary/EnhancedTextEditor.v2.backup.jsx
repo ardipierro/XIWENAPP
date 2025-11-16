@@ -7,7 +7,6 @@ import { FontFamily } from '@tiptap/extension-font-family';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
-import Image from '@tiptap/extension-image';
 import {
   Bold,
   Italic,
@@ -25,22 +24,15 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
-  Layers,
-  Image as ImageIcon
+  Layers
 } from 'lucide-react';
 import { ColorPicker } from './ColorPicker';
 import { HighlightPicker } from './HighlightPicker';
-import { PencilPresetsExtended } from './PencilPresetsExtended';
-import { ColorFavorites } from './ColorFavorites';
+import { PencilPresets } from './PencilPresets';
 import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
 import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { ZoomControls } from './ZoomControls';
-import { ImageUploader } from './ImageUploader';
-import { VersionHistory } from './VersionHistory';
 import { exportToPDF } from '../../utils/pdfExport';
-import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
-import { useTouchGestures } from '../../hooks/useTouchGestures';
-import { auth } from '../../firebase/config';
 
 /**
  * EnhancedTextEditor - Editor de texto avanzado con todas las características
