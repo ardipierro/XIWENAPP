@@ -34,3 +34,6 @@ export { useViewMode, default as useViewModeDefault } from './useViewMode.js';
 
 // Badge system hooks
 export { default as useBadgeConfig } from './useBadgeConfig.js';
+
+// Media query hooks
+export { useMediaQuery, useIsMobile, useIsTablet, useIsDesktop, useBreakpoint, default as useMediaQueryDefault } from './useMediaQuery.js';

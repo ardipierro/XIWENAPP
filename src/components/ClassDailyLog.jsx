@@ -47,6 +47,7 @@ import ContentSelectorModal from './ContentSelectorModal';
 import {
   UnifiedExerciseRenderer,
   EditableTextBlock,
+  EnhancedTextEditor,
   InSituContentEditor
 } from './diary';
 
@@ -320,7 +321,8 @@ function ClassDailyLog({ logId, user, onBack }) {
               ...entry,
               contentData: {
                 ...entry.contentData,
-                html: data.content
+                html: data.content,
+                drawings: data.drawings // Guardar trazos de lápiz
               },
               updatedAt: data.updatedAt
             }
@@ -332,7 +334,7 @@ function ClassDailyLog({ logId, user, onBack }) {
         updatedAt: Date.now()
       });
 
-      logger.info('✏️ Bloque de texto actualizado');
+      logger.info('✏️ Bloque de texto actualizado (con dibujos)');
       setHasUnsavedChanges(true);
     } catch (err) {
       logger.error('Error actualizando bloque de texto:', err);
@@ -462,11 +464,12 @@ function ClassDailyLog({ logId, user, onBack }) {
   const renderContentBody = (content) => {
     switch (content.type) {
       case 'text-block':
-        // Nuevo: Bloque de texto editable
+        // Nuevo: Bloque de texto editable con características avanzadas
         return (
-          <EditableTextBlock
+          <EnhancedTextEditor
             blockId={content.id}
             initialContent={content.html || '<p>Escribe aquí...</p>'}
+            initialDrawings={content.drawings || '[]'}
             isTeacher={isTeacher}
             onSave={handleUpdateTextBlock}
           />
