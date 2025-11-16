@@ -62,9 +62,10 @@ function ClassDailyLogManager({ user }) {
       setLoading(true);
       setError(null);
 
+      const userId = user.uid || user.id; // Soporta user de Auth (uid) y ViewAs (id)
       const [logsData, coursesData] = await Promise.all([
-        getTeacherLogs(user.uid),
-        getCourses(user.uid)
+        getTeacherLogs(userId),
+        getCourses(userId)
       ]);
 
       setLogs(logsData || []);
@@ -83,8 +84,8 @@ function ClassDailyLogManager({ user }) {
     try {
       const result = await createLog({
         ...logData,
-        teacherId: user.uid,
-        teacherName: user.displayName || user.email
+        teacherId: user.uid || user.id, // Soporta user de Auth (uid) y ViewAs (id)
+        teacherName: user.displayName || user.name || user.email
       });
 
       if (result.success) {
