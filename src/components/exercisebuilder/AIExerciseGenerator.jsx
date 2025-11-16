@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Sparkles, FileText, Wand2, Download, Eye, Edit3, Save } from 'lucide-react';
+import { Sparkles, Download, Eye, Edit3, Save, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { BaseButton, BaseBadge, CategoryBadge, BaseAlert } from '../common';
 import { UniversalCard } from '../cards';
 import { generateExercisesFromText } from '../../services/aiService';
@@ -29,6 +29,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
   const [showPreview, setShowPreview] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
   const [saveMessage, setSaveMessage] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   const exerciseTypes = [
     { value: 'mcq', label: 'Opción Múltiple', icon: '📝', description: 'Preguntas con varias opciones de respuesta' },
@@ -189,35 +190,30 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
         </BaseAlert>
       )}
 
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Sparkles className="text-purple-600 dark:text-purple-400" size={28} />
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Generador de Ejercicios con IA
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Pega un texto y genera ejercicios automáticamente
-          </p>
-        </div>
+      {/* Info colapsable */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setShowInfo(!showInfo)}
+          className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+        >
+          <Info size={18} />
+          <span className="font-medium">Información sobre generación con IA</span>
+          {showInfo ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
       </div>
 
-      <BaseAlert variant="info">
-        <div className="flex items-start gap-2">
-          <Sparkles size={20} className="flex-shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-medium mb-1">Generación Inteligente</p>
-            <p>
-              El sistema analiza el texto y crea ejercicios adaptados al nivel CEFR seleccionado.
-              Si tienes un proveedor de IA configurado (OpenAI, Claude, etc.), lo usará automáticamente.
-              De lo contrario, usará generación basada en reglas.
-            </p>
-          </div>
+      {showInfo && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            El sistema analiza el texto y crea ejercicios adaptados al nivel CEFR seleccionado.
+            Si tienes un proveedor de IA configurado (OpenAI, Claude, etc.), lo usará automáticamente.
+            De lo contrario, usará generación basada en reglas.
+          </p>
         </div>
-      </BaseAlert>
+      )}
 
       {/* Área de texto fuente */}
-      <UniversalCard variant="default" size="md" title="Texto Fuente" icon={FileText}>
+      <UniversalCard variant="default" size="md" title="Texto Fuente">
         <textarea
           value={sourceText}
           onChange={(e) => setSourceText(e.target.value)}
@@ -234,7 +230,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
       </UniversalCard>
 
       {/* Configuración */}
-      <UniversalCard variant="default" size="md" title="Configuración de Generación" icon={Wand2}>
+      <UniversalCard variant="default" size="md" title="Configuración de Generación">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Tipo de ejercicio - DROPDOWN */}
           <div>
