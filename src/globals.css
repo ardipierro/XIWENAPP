@@ -208,8 +208,8 @@
     --z-dropdown: 1000;
     --z-sticky: 1020;
     --z-fixed: 1030;
-    --z-modal-backdrop: 9999;  /* Por encima de ViewAsBanner (1000) y TopBar (100) */
-    --z-modal: 10000;           /* Modal content por encima del backdrop */
+    --z-modal-backdrop: 10000;  /* Por encima de TODO (TopBar: 9999) */
+    --z-modal: 10001;           /* Modal content por encima del backdrop */
     --z-popover: 1060;
     --z-tooltip: 1070;
 
