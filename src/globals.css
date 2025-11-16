@@ -789,6 +789,44 @@
   }
 
   /* ============================================
+     ESTÁNDARES DE SPACING (Fase 3 - Unificación UI)
+     ============================================
+
+     MÁRGENES ESTANDARIZADOS:
+     - PageHeader: mb-6 (built-in, 24px)
+     - Tabs Container: mb-6 (24px)
+     - Content Sections: space-y-6 (24px entre secciones)
+     - Cards dentro de grid: gap-4 o gap-6 (16-24px)
+
+     PADDING ESTANDARIZADO:
+     - Containers principales: w-full (sin padding extra)
+     - UniversalCard: p-6 (built-in, 24px)
+     - Modal body: p-6 (24px)
+     - Tab content: sin padding extra (el contenido define su spacing)
+
+     COMPONENTES QUE USAN ESTOS ESTÁNDARES:
+     ✅ SettingsPanel (Fase 1)
+     ✅ ContentManagerTabs (Fase 2)
+     ✅ ClassSessionManager (Fase 2)
+     ✅ SettingsModal
+     ✅ ClassSessionModal
+
+     USO CORRECTO:
+     ```jsx
+     <div className="w-full">
+       <PageHeader ... /> {/* mb-6 automático */}
+       <div className="mb-6">
+         <BaseTabs ... />
+       </div>
+       <div className="space-y-6">
+         <UniversalCard ... /> {/* p-6 automático */}
+         <UniversalCard ... />
+       </div>
+     </div>
+     ```
+     ============================================ */
+
+  /* ============================================
      DROPDOWNS - Sistema unificado
      ============================================ */
 
@@ -3840,101 +3878,13 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
  * Content Manager Tabs - Estilos
  */
 
-.content-manager-tabs {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-}
-
-/* Tab Navigation */
-.content-manager-tabs__nav {
-  display: flex;
-  gap: 0.5rem;
-  padding: 1rem;
-  background-color: var(--color-bg-primary);
-  overflow-x: auto;
-}
-
-.content-manager-tabs__tab {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background-color: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  color: var(--color-text-secondary);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  border-radius: 8px 8px 0 0;
-}
-
-.content-manager-tabs__tab:hover {
-  background-color: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
-.content-manager-tabs__tab--active {
-  background-color: var(--color-bg-tertiary);
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-}
-
-.content-manager-tabs__tab-icon {
-  flex-shrink: 0;
-}
-
-.content-manager-tabs__tab-label {
-  flex-shrink: 0;
-}
-
-/* Tab Content */
-.content-manager-tabs__content {
-  flex: 1;
-  overflow-y: auto;
-  background-color: var(--color-bg-primary);
-}
-
-/* Dark Mode - Las variables CSS ya se actualizan automáticamente con .dark */
-/* No se necesitan overrides adicionales porque var(--color-*) cambia automáticamente */
-
-/* Responsive */
-@media (max-width: 768px) {
-  .content-manager-tabs__nav {
-    padding: 0.75rem;
-  }
-
-  .content-manager-tabs__tab {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
-
-  .content-manager-tabs__tab-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  /* Ocultar labels de tabs en móvil muy pequeño si es necesario */
-  .content-manager-tabs__tab-label {
-    display: inline; /* Mantener visible en móvil normal */
-  }
-}
-
-/* Móviles muy pequeños - ContentManagerTabs */
-@media (max-width: 480px) {
-  .content-manager-tabs__tab {
-    padding: 0.5rem 0.75rem; /* Aún más compacto */
-    font-size: 0.8125rem; /* 13px */
-  }
-
-  .content-manager-tabs__tab-label {
-    font-size: 0.8125rem;
-  }
-}
+/* ============================================
+   CONTENT MANAGER TABS
+   ============================================
+   DEPRECATED: Ahora usa BaseTabs (migrado en Fase 2)
+   Estos estilos se mantienen temporalmente por compatibilidad
+   pero pueden eliminarse en el futuro.
+   ============================================ */
 
 /* ============================================
    CALENDAR VIEW - ESTILOS CONSISTENTES
