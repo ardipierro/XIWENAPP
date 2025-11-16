@@ -20,6 +20,7 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [resetEmailSent, setResetEmailSent] = useState(false);
@@ -140,7 +141,7 @@ function Login() {
             西文教室
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-            inscripción aula de español
+            aula de español
           </p>
         </div>
 
@@ -256,6 +257,23 @@ function Login() {
             </div>
           )}
 
+          {/* Recordame (solo en login) */}
+          {!isRegistering && (
+            <div className="flex items-center gap-2">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                disabled={loading}
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Recordame
+              </label>
+            </div>
+          )}
+
           {/* Mensajes de error */}
           {error && (
             <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center gap-2 text-red-800 dark:text-red-200" role="alert">
@@ -280,7 +298,7 @@ function Login() {
             loading={loading}
             icon={loading ? undefined : (isRegistering ? UserPlus : LogIn)}
             fullWidth
-            className="mt-6 !py-2.5 text-sm"
+            className="!py-2.5 text-sm"
           >
             {loading ? 'Cargando...' : (isRegistering ? 'Crear cuenta' : 'Ingresar')}
           </BaseButton>
