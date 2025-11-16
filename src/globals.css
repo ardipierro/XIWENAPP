@@ -3230,6 +3230,12 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   opacity: 0.5;
 }
 
+/* ===== DEBUG GLOBAL - Aplicar SIEMPRE para probar ===== */
+.messages-panel {
+  background: #0000ff !important; /* DEBUG: AZUL GLOBAL */
+  outline: 20px solid #ff0000 !important; /* DEBUG: Outline ROJO global */
+}
+
 /* Mobile Responsive - Fullscreen alternating views */
 @media (max-width: 768px) {
   /* ===== AJUSTAR DASHBOARD CONTENT PARA MENSAJES ===== */
