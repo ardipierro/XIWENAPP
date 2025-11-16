@@ -1,9 +1,10 @@
 /**
  * TranslationPopup Component
  * Displays translation results in a beautiful popup near the selected text
+ * Now supports customizable sections based on user configuration
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Copy, Check, Loader2, Languages } from 'lucide-react';
 import PropTypes from 'prop-types';
 
@@ -15,7 +16,20 @@ const TranslationPopup = ({
   error = null
 }) => {
   const popupRef = useRef(null);
-  const [copied, setCopied] = React.useState(false);
+  const [copied, setCopied] = useState(false);
+  const [config, setConfig] = useState(null);
+
+  // Load configuration
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('xiwen_translator_config');
+      if (saved) {
+        setConfig(JSON.parse(saved));
+      }
+    } catch (err) {
+      console.error('Error loading translator config:', err);
+    }
+  }, []);
 
   // Close on ESC key
   useEffect(() => {
@@ -73,7 +87,7 @@ const TranslationPopup = ({
     }
 
     const { top, left, width } = position;
-    const popupWidth = 320;
+    const popupWidth = config?.display?.popupWidth || 320;
     const popupMaxHeight = 400;
 
     // Calculate positions
@@ -99,7 +113,14 @@ const TranslationPopup = ({
       ...baseStyle,
       top: `${finalTop}px`,
       left: `${finalLeft}px`,
+      width: `${popupWidth}px`
     };
+  };
+
+  // Helper: Check if section is enabled
+  const isSectionEnabled = (sectionName) => {
+    if (!config?.sections) return true; // Show all if no config
+    return config.sections[sectionName] !== false;
   };
 
   return (
@@ -155,28 +176,36 @@ const TranslationPopup = ({
             </div>
 
             {/* Chinese Translation */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-blue-900 dark:text-blue-100" style={{ fontFamily: 'serif' }}>
-                  {translation.chinese}
-                </span>
-                {translation.pinyin && (
-                  <span className="text-sm text-blue-700 dark:text-blue-300 italic">
-                    {translation.pinyin}
+            {isSectionEnabled('chinese') && translation.chinese && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className="font-bold text-blue-900 dark:text-blue-100"
+                    style={{
+                      fontFamily: 'serif',
+                      fontSize: `${config?.display?.chineseFontSize || 24}px`
+                    }}
+                  >
+                    {translation.chinese}
                   </span>
-                )}
+                  {isSectionEnabled('pinyin') && translation.pinyin && (
+                    <span className="text-sm text-blue-700 dark:text-blue-300 italic">
+                      {translation.pinyin}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Meanings */}
-            {translation.meanings && translation.meanings.length > 0 && (
+            {isSectionEnabled('meanings') && translation.meanings && translation.meanings.length > 0 && (
               <div>
                 <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <span className="text-base">💡</span>
+                  {config?.display?.showIcons !== false && <span className="text-base">💡</span>}
                   Significados:
                 </div>
                 <ul className="space-y-1.5">
-                  {translation.meanings.map((meaning, index) => (
+                  {translation.meanings.slice(0, config?.sections?.meaningsLimit || 3).map((meaning, index) => (
                     <li
                       key={index}
                       className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-2"
@@ -190,10 +219,10 @@ const TranslationPopup = ({
             )}
 
             {/* Example */}
-            {translation.example && (
+            {isSectionEnabled('example') && translation.example && (
               <div>
                 <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <span className="text-base">📝</span>
+                  {config?.display?.showIcons !== false && <span className="text-base">📝</span>}
                   Ejemplo:
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 space-y-2">
@@ -210,6 +239,59 @@ const TranslationPopup = ({
                     </span>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Synonyms (NEW) */}
+            {isSectionEnabled('synonyms') && translation.synonyms && translation.synonyms.length > 0 && (
+              <div>
+                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                  {config?.display?.showIcons !== false && <span className="text-base">🔄</span>}
+                  Sinónimos:
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {translation.synonyms.map((syn, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded"
+                    >
+                      {syn}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* HSK Level (NEW) */}
+            {isSectionEnabled('hskLevel') && translation.hskLevel && (
+              <div>
+                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                  {config?.display?.showIcons !== false && <span className="text-base">📊</span>}
+                  Nivel HSK:
+                </div>
+                <span className="inline-block px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-semibold rounded">
+                  HSK {translation.hskLevel}
+                </span>
+              </div>
+            )}
+
+            {/* Classifier (NEW) */}
+            {isSectionEnabled('classifier') && translation.classifier && (
+              <div>
+                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                  {config?.display?.showIcons !== false && <span className="text-base">🔢</span>}
+                  Clasificador (量词):
+                </div>
+                <span className="text-sm text-gray-700 dark:text-gray-300 font-serif">
+                  {translation.classifier}
+                </span>
+              </div>
+            )}
+
+            {/* Source indicator */}
+            {translation.source && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-right">
+                Fuente: {translation.source === 'local' ? 'Diccionario local' : translation.source === 'mdbg' ? 'MDBG CC-CEDICT' : 'AI'}
               </div>
             )}
           </div>
