@@ -663,17 +663,16 @@
 
   /* Inputs */
   .input {
-    @apply w-full px-3.5 py-2.5 text-base leading-normal;
-    @apply rounded-md;
-    @apply transition-none outline-none;
+    @apply w-full px-4 py-2 text-base leading-normal;
+    @apply rounded-lg;
+    @apply transition-all outline-none;
     color: var(--color-text-primary);
-    background: var(--color-bg-tertiary);
+    background: var(--color-bg-primary);
     border: 1px solid var(--color-border);
   }
 
   .input:focus {
     border-color: var(--color-border-focus);
-    background: var(--color-bg-primary);
     box-shadow: 0 0 0 2px rgba(var(--color-border-focus), 0.2);
   }
 
@@ -689,12 +688,12 @@
 
   /* Select / Dropdown */
   .select {
-    @apply w-full px-3.5 py-2.5 text-base leading-normal;
-    @apply rounded-md;
-    @apply transition-none outline-none cursor-pointer;
+    @apply w-full px-4 py-2 text-base leading-normal;
+    @apply rounded-lg;
+    @apply transition-all outline-none cursor-pointer;
     @apply appearance-none bg-no-repeat;
     color: var(--color-text-primary);
-    background: var(--color-bg-tertiary);
+    background: var(--color-bg-primary);
     border: 1px solid var(--color-border);
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.5rem center;
@@ -704,7 +703,6 @@
 
   .select:focus {
     border-color: var(--color-border-focus);
-    background: var(--color-bg-primary);
     box-shadow: 0 0 0 2px rgba(var(--color-border-focus), 0.2);
   }
 
