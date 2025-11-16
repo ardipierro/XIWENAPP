@@ -3245,6 +3245,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     padding: 0 !important;
     margin: 0 !important;
     overflow: hidden !important;
+    scrollbar-gutter: auto !important; /* Quitar reserva de espacio para scrollbar */
+    overscroll-behavior-y: none !important;
     display: flex !important;
     flex-direction: column;
   }
