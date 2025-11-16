@@ -453,14 +453,63 @@ export function UniversalCard({
       {/* Live Indicator (absolute position) */}
       {renderLiveIndicator()}
 
-      {/* Header */}
-      {renderHeader()}
+      {/* Header - Solo en modo vertical */}
+      {layout !== 'horizontal' && renderHeader()}
 
       {/* Content */}
       <div className={classes.content} style={styles.content}>
         {layout === 'horizontal' ? (
           <>
-            {/* Horizontal Layout - MEJORADO: Distribuido a lo largo de toda la fila */}
+            {/* Horizontal Layout - Avatar/Icono pequeño a la izquierda */}
+
+            {/* Avatar/Icono/Imagen a la izquierda (48px) */}
+            {(avatar || Icon || image) && (
+              <div className="flex-shrink-0 mr-4">
+                {/* Avatar */}
+                {avatar && (
+                  <div
+                    className="rounded-full flex items-center justify-center text-white font-bold shadow-md"
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      fontSize: '18px',
+                      backgroundColor: avatarColor || '#3b82f6',
+                    }}
+                  >
+                    {typeof avatar === 'string' && avatar.length <= 2
+                      ? avatar.toUpperCase()
+                      : avatar}
+                  </div>
+                )}
+
+                {/* Icono */}
+                {Icon && !avatar && (
+                  <div
+                    className="rounded-lg flex items-center justify-center"
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      background: 'var(--color-bg-tertiary)',
+                    }}
+                  >
+                    <Icon size={24} style={{ color: 'var(--color-text-secondary)' }} />
+                  </div>
+                )}
+
+                {/* Imagen */}
+                {image && !avatar && !Icon && (
+                  <img
+                    src={image}
+                    alt={title}
+                    className="rounded-lg object-cover"
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                    }}
+                  />
+                )}
+              </div>
+            )}
 
             {/* Sección 1: Texto principal (flex-1) */}
             <div className="flex-1 flex flex-col justify-center min-w-0">
