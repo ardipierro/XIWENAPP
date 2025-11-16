@@ -12,7 +12,7 @@ import {
 } from '../firebase/firestore';
 import { getContentByTeacher } from '../firebase/content';
 import { getExercisesByTeacher } from '../firebase/exercises';
-import { getClassesByTeacher } from '../firebase/classes';
+import { getTeacherSessions } from '../firebase/classSessions';
 import logger from '../utils/logger';
 
 /**
@@ -36,7 +36,7 @@ export async function loadDashboardData(teacherId, isAdmin) {
     if (!isAdmin) {
       promises.push(getContentByTeacher(teacherId));
       promises.push(getExercisesByTeacher(teacherId));
-      promises.push(getClassesByTeacher(teacherId));
+      promises.push(getTeacherSessions(teacherId));
     }
 
     const results = await Promise.all(promises);
@@ -44,7 +44,7 @@ export async function loadDashboardData(teacherId, isAdmin) {
     const [students, games, categories, courses] = results;
     const teacherContent = !isAdmin ? results[4] : [];
     const teacherExercises = !isAdmin ? results[5] : [];
-    const teacherClasses = !isAdmin ? results[6] : [];
+    const teacherClasses = !isAdmin ? results[6] : []; // Now using sessions instead of classes
 
     // Calcular estadísticas
     const stats = {
@@ -151,7 +151,7 @@ export async function refreshDashboardData(currentScreen, teacherId, isAdmin) {
         return { exercises };
 
       case 'classes':
-        const classes = await getClassesByTeacher(teacherId);
+        const classes = await getTeacherSessions(teacherId);
         return { classes };
 
       default:

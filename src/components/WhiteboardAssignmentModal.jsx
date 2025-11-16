@@ -1,23 +1,19 @@
 import logger from '../utils/logger';
 
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, Radio, Edit } from 'lucide-react';
+import { UserPlus, Radio, Edit } from 'lucide-react';
 import { getUsersByRole } from '../firebase/users';
-import { getGroupsByTeacher } from '../firebase/groups';
-import { assignStudentsToWhiteboard, assignGroupsToWhiteboard, startLiveSession, updateWhiteboardSession } from '../firebase/whiteboard';
-import { auth } from '../firebase/config';
+import { assignStudentsToWhiteboard, startLiveSession, updateWhiteboardSession } from '../firebase/whiteboard';
 import { BaseModal, BaseButton, BaseInput, BaseTabs } from './common';
 
 /**
- * Modal for editing whiteboard details, assigning students/groups, and starting live sessions
+ * Modal for editing whiteboard details, assigning students, and starting live sessions
  */
 function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
-  const [activeTab, setActiveTab] = useState('details'); // 'details', 'students', or 'groups'
+  const [activeTab, setActiveTab] = useState('details'); // 'details' or 'students'
   const [title, setTitle] = useState(session.title || '');
   const [students, setStudents] = useState([]);
-  const [groups, setGroups] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
-  const [selectedGroups, setSelectedGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -30,9 +26,6 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
     if (session.assignedStudents) {
       setSelectedStudents(session.assignedStudents);
     }
-    if (session.assignedGroups) {
-      setSelectedGroups(session.assignedGroups);
-    }
   }, [session]);
 
   const loadData = async () => {
@@ -41,12 +34,6 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
       // Load students
       const studentsData = await getUsersByRole('student');
       setStudents(studentsData);
-
-      // Load groups
-      if (auth.currentUser) {
-        const groupsData = await getGroupsByTeacher(auth.currentUser.uid);
-        setGroups(groupsData);
-      }
     } catch (error) {
       logger.error('Error loading data:', error);
     } finally {
@@ -59,14 +46,6 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
       prev.includes(studentId)
         ? prev.filter(id => id !== studentId)
         : [...prev, studentId]
-    );
-  };
-
-  const toggleGroup = (groupId) => {
-    setSelectedGroups(prev =>
-      prev.includes(groupId)
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
     );
   };
 
@@ -85,7 +64,6 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
 
       // Save assignments
       await assignStudentsToWhiteboard(session.id, selectedStudents);
-      await assignGroupsToWhiteboard(session.id, selectedGroups);
 
       alert('Cambios guardados exitosamente');
       onClose();
@@ -103,8 +81,8 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
       return;
     }
 
-    if (selectedStudents.length === 0 && selectedGroups.length === 0) {
-      alert('Debes asignar al menos un estudiante o grupo antes de iniciar la sesión');
+    if (selectedStudents.length === 0) {
+      alert('Debes asignar al menos un estudiante antes de iniciar la sesión');
       return;
     }
 
@@ -117,7 +95,6 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
 
       // Save assignments
       await assignStudentsToWhiteboard(session.id, selectedStudents);
-      await assignGroupsToWhiteboard(session.id, selectedGroups);
 
       // Generate live session ID
       const liveSessionId = `live_${session.id}_${Date.now()}`;
@@ -176,8 +153,7 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
         <BaseTabs
           tabs={[
             { id: 'details', label: 'Detalles', icon: Edit },
-            { id: 'students', label: 'Estudiantes', icon: UserPlus, badge: selectedStudents.length },
-            { id: 'groups', label: 'Grupos', icon: Users, badge: selectedGroups.length }
+            { id: 'students', label: 'Estudiantes', icon: UserPlus, badge: selectedStudents.length }
           ]}
           activeTab={activeTab}
           onChange={setActiveTab}
@@ -211,7 +187,6 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
                     <li>• Creada: {new Date(session.createdAt?.seconds * 1000 || Date.now()).toLocaleDateString()}</li>
                     <li>• Diapositivas: {session.slides?.length || 0}</li>
                     <li>• Estudiantes asignados: {selectedStudents.length}</li>
-                    <li>• Grupos asignados: {selectedGroups.length}</li>
                   </ul>
                 </div>
               </div>
@@ -245,39 +220,6 @@ function WhiteboardAssignmentModal({ session, onClose, onGoLive }) {
                             {student.email}
                           </div>
                         )}
-                      </div>
-                    </label>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* Groups Tab */}
-            {activeTab === 'groups' && (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {groups.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    No hay grupos disponibles
-                  </div>
-                ) : (
-                  groups.map(group => (
-                    <label
-                      key={group.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedGroups.includes(group.id)}
-                        onChange={() => toggleGroup(group.id)}
-                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-500"
-                      />
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-900 dark:text-gray-100">
-                          {group.name}
-                        </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">
-                          {group.studentCount || 0} estudiantes
-                        </div>
                       </div>
                     </label>
                   ))
