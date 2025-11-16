@@ -131,16 +131,16 @@ function Login() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-full max-w-sm space-y-6">
+      <div className="w-full max-w-xs space-y-6">
         {/* Header */}
         <div className="text-center">
           <h1
             onClick={() => window.location.href = '/'}
-            className="text-4xl font-bold text-gray-900 dark:text-white cursor-pointer mb-2"
+            className="text-5xl font-bold text-gray-900 dark:text-white cursor-pointer mb-2"
           >
             西文教室
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+          <p className="text-gray-600 dark:text-gray-400 text-base mb-6">
             aula de español
           </p>
         </div>
