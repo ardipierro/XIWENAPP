@@ -157,7 +157,7 @@ function Login() {
               required
               disabled={loading}
               className={`
-                w-full px-4 py-3 rounded-lg border transition-colors
+                w-full px-3.5 py-2.5 rounded-lg border transition-colors text-sm
                 ${hasFieldError('email')
                   ? 'border-red-500 dark:border-red-400'
                   : 'border-gray-300 dark:border-gray-600'
@@ -193,7 +193,7 @@ function Login() {
               required
               disabled={loading}
               className={`
-                w-full px-4 py-3 rounded-lg border transition-colors
+                w-full px-3.5 py-2.5 rounded-lg border transition-colors text-sm
                 ${hasFieldError('password')
                   ? 'border-red-500 dark:border-red-400'
                   : 'border-gray-300 dark:border-gray-600'
@@ -230,7 +230,7 @@ function Login() {
                 required
                 disabled={loading}
                 className={`
-                  w-full px-4 py-3 rounded-lg border transition-colors
+                  w-full px-3.5 py-2.5 rounded-lg border transition-colors text-sm
                   ${hasFieldError('confirmPassword')
                     ? 'border-red-500 dark:border-red-400'
                     : 'border-gray-300 dark:border-gray-600'
@@ -273,6 +273,7 @@ function Login() {
           <BaseButton
             type="submit"
             variant="primary"
+            size="sm"
             disabled={loading}
             loading={loading}
             icon={loading ? undefined : (isRegistering ? UserPlus : LogIn)}
