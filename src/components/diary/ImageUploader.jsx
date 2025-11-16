@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Image, Upload, Link2, X } from 'lucide-react';
-import { uploadToStorage } from '../../firebase/storage';
+import { uploadImage } from '../../firebase/storage';
 
 /**
  * ImageUploader - Componente para subir imágenes al editor
@@ -38,13 +38,15 @@ export function ImageUploader({ onImageInsert, userId }) {
     try {
       // Subir a Firebase Storage
       const path = `diary-images/${userId}/${Date.now()}-${file.name}`;
-      const url = await uploadToStorage(file, path, (progress) => {
-        setUploadProgress(progress);
-      });
+      const result = await uploadImage(file, path);
 
-      onImageInsert(url);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      if (result.success) {
+        onImageInsert(result.url);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        throw new Error(result.error);
       }
     } catch (error) {
       console.error('Error uploading image:', error);
