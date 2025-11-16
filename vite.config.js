@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import viteCompression from 'vite-plugin-compression'
 
 /**
  * Vite Config - Mobile First Optimized
@@ -23,6 +24,14 @@ export default defineConfig({
         // Solo precachear assets críticos (reducido para móviles)
         globPatterns: ['**/*.{js,css,html,ico,svg}'],
         maximumFileSizeToCacheInBytes: 2 * 1024 * 1024, // 2 MB (reducido de 5 MB)
+
+        // Offline fallback
+        navigateFallback: '/offline.html',
+        navigateFallbackDenylist: [
+          /^\/api\//,  // No usar fallback para API calls
+          /^\/login/, // No usar fallback en login
+          /^\/register/ // No usar fallback en register
+        ],
 
         // Excluir chunks grandes del precaché (usar runtime caching)
         globIgnores: [
@@ -86,6 +95,22 @@ export default defineConfig({
           }
         ]
       }
+    }),
+
+    // Compresión Brotli y Gzip para assets
+    viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240, // Solo archivos > 10KB
+      algorithm: 'gzip',
+      ext: '.gz'
+    }),
+    viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'brotliCompress',
+      ext: '.br'
     })
   ],
 
