@@ -31,15 +31,22 @@ const MENU_ITEMS = [
     id: 'home',
     label: 'Inicio',
     icon: Home,
-    path: '/dashboard-v2',
+    path: '/dashboard',
     permission: null, // null = todos pueden acceder
   },
   {
     id: 'calendar',
     label: 'Calendario',
     icon: Calendar,
-    path: '/dashboard-v2/calendar',
+    path: '/dashboard/calendar',
     permission: null, // Todos pueden ver el calendario
+  },
+  {
+    id: 'messages',
+    label: 'Mensajes',
+    icon: MessageSquare,
+    path: '/dashboard/messages',
+    permission: 'send-messages',
   },
 
   // DIVIDER
@@ -50,7 +57,7 @@ const MENU_ITEMS = [
     id: 'unified-content',
     label: 'Contenidos',
     icon: Layers,
-    path: '/dashboard-v2/unified-content',
+    path: '/dashboard/unified-content',
     permission: 'create-content',
     description: 'Crear y editar cursos, lecciones, ejercicios, videos y links',
   },
@@ -63,7 +70,7 @@ const MENU_ITEMS = [
     id: 'students',
     label: 'Mis Estudiantes',
     icon: Users,
-    path: '/dashboard-v2/users', // Ruta unificada
+    path: '/dashboard/users', // Ruta unificada
     permission: 'view-own-students',
     hideIf: ['view-all-users'], // Ocultar si es admin (verá "Gestión de Usuarios")
   },
@@ -71,14 +78,14 @@ const MENU_ITEMS = [
     id: 'classes',
     label: 'Clases',
     icon: Video,
-    path: '/dashboard-v2/classes',
+    path: '/dashboard/classes',
     permission: 'manage-classes',
   },
   {
     id: 'daily-logs',
     label: 'Diarios de Clase',
     icon: BookOpen,
-    path: '/dashboard-v2/daily-logs',
+    path: '/dashboard/daily-logs',
     permission: 'manage-classes',
     description: 'Feed continuo de contenidos mostrados en clase',
   },
@@ -86,7 +93,7 @@ const MENU_ITEMS = [
     id: 'homework-review',
     label: 'Tareas',
     icon: CheckCircle,
-    path: '/dashboard-v2/homework-review',
+    path: '/dashboard/homework-review',
     permission: 'grade-assignments',
     badge: 'IA',
   },
@@ -99,7 +106,7 @@ const MENU_ITEMS = [
     id: 'my-courses',
     label: 'Mis Cursos',
     icon: BookOpen,
-    path: '/dashboard-v2/my-courses',
+    path: '/dashboard/my-courses',
     permission: 'view-all-content',
     hideIf: ['create-content'], // No mostrar a teachers/admins
   },
@@ -107,7 +114,7 @@ const MENU_ITEMS = [
     id: 'my-classes',
     label: 'Mis Clases',
     icon: Video,
-    path: '/dashboard-v2/my-classes',
+    path: '/dashboard/my-classes',
     permission: 'view-all-content',
     hideIf: ['create-content'], // No mostrar a teachers/admins
   },
@@ -115,21 +122,21 @@ const MENU_ITEMS = [
     id: 'my-assignments',
     label: 'Mis Tareas',
     icon: CheckSquare,
-    path: '/dashboard-v2/my-assignments',
+    path: '/dashboard/my-assignments',
     permission: 'view-own-assignments',
   },
   {
     id: 'games',
     label: 'Juegos',
     icon: Gamepad2,
-    path: '/dashboard-v2/games',
+    path: '/dashboard/games',
     permission: 'play-live-games',
   },
   {
     id: 'my-payments',
     label: 'Mis Pagos',
     icon: DollarSign,
-    path: '/dashboard-v2/my-payments',
+    path: '/dashboard/my-payments',
     permission: 'view-own-credits',
     hideIf: ['manage-credits'], // No mostrar a admins
   },
@@ -142,14 +149,14 @@ const MENU_ITEMS = [
     id: 'users',
     label: 'Usuarios',
     icon: UserCog,
-    path: '/dashboard-v2/users',
+    path: '/dashboard/users',
     permission: 'view-all-users',
   },
   {
     id: 'system-settings',
     label: 'Configuración',
     icon: Settings,
-    path: '/dashboard-v2/system-settings',
+    path: '/dashboard/system-settings',
     permission: 'manage-system-settings',
   },
 ];

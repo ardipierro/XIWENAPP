@@ -400,7 +400,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
     startViewingAs(currentUser, selectedUser);
 
     // Navegar directamente al home del dashboard
-    navigate('/dashboard-v2', { replace: true });
+    navigate('/dashboard', { replace: true });
   };
 
   const isCourseEnrolled = (courseId) => {

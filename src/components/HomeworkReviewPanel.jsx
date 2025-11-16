@@ -25,8 +25,11 @@ import {
   Upload,
   Loader,
   RefreshCw,
-  Maximize2
+  Maximize2,
+  ClipboardList
 } from 'lucide-react';
+import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
 import {
   BaseButton,
   BaseCard,
@@ -145,6 +148,8 @@ export default function HomeworkReviewPanel({ teacherId }) {
   const [selectedReview, setSelectedReview] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
     loadPendingReviews();
@@ -209,43 +214,64 @@ export default function HomeworkReviewPanel({ teacherId }) {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Revisar Correcciones
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Correcciones completadas por IA pendientes de tu aprobación
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <BaseButton
-            variant="primary"
-            size="md"
-            onClick={() => setShowUploadModal(true)}
-          >
-            <Upload size={18} strokeWidth={2} />
-            Subir Tarea
-          </BaseButton>
-          <BaseBadge variant="warning" size="lg">
-            {reviews.length} pendiente{reviews.length !== 1 ? 's' : ''}
-          </BaseBadge>
-        </div>
-      </div>
+  // Filter reviews based on search term
+  const filteredReviews = reviews.filter(review => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      review.studentName?.toLowerCase().includes(searchLower) ||
+      review.aiProvider?.toLowerCase().includes(searchLower) ||
+      review.aiModel?.toLowerCase().includes(searchLower) ||
+      review.status?.toLowerCase().includes(searchLower)
+    );
+  });
 
-      {/* Reviews Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {reviews.map(review => (
-          <ReviewCard
-            key={review.id}
-            review={review}
-            onSelect={() => handleSelectReview(review)}
+  return (
+    <div className="w-full">
+      {/* Page Header */}
+      <PageHeader
+        icon={ClipboardList}
+        title="Revisar Correcciones"
+        actionLabel="Subir Tarea"
+        onAction={() => setShowUploadModal(true)}
+      />
+
+      {/* SearchBar */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar correcciones..."
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        className="mb-6"
+      />
+
+      {/* Reviews Grid/List */}
+      {filteredReviews.length === 0 ? (
+        reviews.length === 0 ? (
+          <BaseEmptyState
+            icon={CheckCircle}
+            title="No hay correcciones pendientes"
+            description="Todas las tareas enviadas han sido revisadas"
           />
-        ))}
-      </div>
+        ) : (
+          <BaseEmptyState
+            icon={ClipboardList}
+            title="No se encontraron correcciones"
+            description={`No hay correcciones que coincidan con "${searchTerm}"`}
+          />
+        )
+      ) : (
+        <div className={viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'flex flex-col gap-4'}>
+          {filteredReviews.map(review => (
+            <ReviewCard
+              key={review.id}
+              review={review}
+              onSelect={() => handleSelectReview(review)}
+              viewMode={viewMode}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Detail Modal */}
       {showDetailModal && selectedReview && (
@@ -285,7 +311,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
 /**
  * Review Card Component
  */
-function ReviewCard({ review, onSelect }) {
+function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
   const grade = review.suggestedGrade || 0;
   const gradeColor = grade >= 90 ? 'success' : grade >= 70 ? 'primary' : grade >= 50 ? 'warning' : 'danger';
 
@@ -297,6 +323,92 @@ function ReviewCard({ review, onSelect }) {
   const isFailed = review.status === REVIEW_STATUS.FAILED || review.status === 'failed';
   const isPendingReview = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
 
+  // List view (horizontal layout)
+  if (viewMode === 'list') {
+    return (
+      <BaseCard
+        hover
+        onClick={onSelect}
+        className={`cursor-pointer relative ${
+          isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
+          isFailed ? 'border-2 border-red-400 dark:border-red-500' :
+          isPendingReview ? 'border-2 border-green-400 dark:border-green-500' :
+          ''
+        }`}
+      >
+        <div className="flex items-center gap-4">
+          {/* Status Badge */}
+          <div className="flex-shrink-0">
+            {isProcessing ? (
+              <BaseBadge variant="warning" icon={RefreshCw} size="sm" className="animate-pulse">
+                PROCESANDO
+              </BaseBadge>
+            ) : isFailed ? (
+              <BaseBadge variant="danger" icon={AlertCircle} size="sm">
+                ERROR
+              </BaseBadge>
+            ) : isPendingReview ? (
+              <BaseBadge variant="success" icon={CheckCircle} size="sm">
+                LISTO
+              </BaseBadge>
+            ) : null}
+          </div>
+
+          {/* Image Thumbnail */}
+          <div className="flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <img
+              src={review.imageUrl}
+              alt="Vista previa"
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-gray-900 dark:text-white mb-1">
+              {review.studentName || 'Sin asignar'}
+            </p>
+            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+              <span className="flex items-center gap-1">
+                <Calendar size={12} />
+                {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
+                  day: 'numeric',
+                  month: 'short'
+                })}
+              </span>
+              <span className="flex items-center gap-1">
+                <BaseBadge variant={gradeColor} size="sm">
+                  {grade}/100
+                </BaseBadge>
+              </span>
+              <span className="flex items-center gap-1">
+                <AlertCircle size={12} />
+                {review.errorSummary?.total || 0} errores
+              </span>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 flex-shrink-0">
+            <BaseButton
+              variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
+              size="sm"
+              disabled={isProcessing}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect();
+              }}
+            >
+              <Eye size={16} strokeWidth={2.5} />
+              {isPendingReview ? 'Ver Corrección' : 'Ver Detalles'}
+            </BaseButton>
+          </div>
+        </div>
+      </BaseCard>
+    );
+  }
+
+  // Grid view (vertical layout - original)
   return (
     <BaseCard
       hover
@@ -310,7 +422,7 @@ function ReviewCard({ review, onSelect }) {
     >
       <div className="space-y-3">
         {/* Large Status Badge - Top Right Corner */}
-        <div className="absolute -top-2 -right-2 z-10">
+        <div className="absolute top-2 right-2 z-10">
           {isProcessing ? (
             <div className="bg-orange-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
               <RefreshCw size={14} className="animate-spin" />
@@ -450,7 +562,7 @@ function ReviewCard({ review, onSelect }) {
           ) : (
             <>
               <Eye size={18} strokeWidth={2.5} />
-              {isPendingReview ? '👁️ Ver Corrección' : 'Ver Detalles'}
+              {isPendingReview ? 'Ver Corrección' : 'Ver Detalles'}
             </>
           )}
         </BaseButton>

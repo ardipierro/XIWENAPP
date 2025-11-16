@@ -36,6 +36,8 @@ import {
   BaseSelect,
   useModal
 } from './common';
+import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
 import { UniversalCard } from './cards';
 import ClassDailyLog from './ClassDailyLog';
 
@@ -46,6 +48,8 @@ function ClassDailyLogManager({ user }) {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [activeLogId, setActiveLogId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid');
 
   const createModal = useModal();
 
@@ -139,68 +143,84 @@ function ClassDailyLogManager({ user }) {
     return <BaseLoading variant="fullscreen" text="Cargando diarios de clase..." />;
   }
 
+  // Filtrar logs según searchTerm
+  const filteredLogs = logs.filter(log => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      log.name?.toLowerCase().includes(searchLower) ||
+      log.description?.toLowerCase().includes(searchLower) ||
+      log.courseName?.toLowerCase().includes(searchLower)
+    );
+  });
+
   return (
-    <div className="p-6 min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Diarios de Clase
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {logs.length} diarios totales
-            </p>
-          </div>
+    <div className="w-full">
+      {/* Page Header */}
+      <PageHeader
+        icon={BookOpen}
+        title="Diarios de Clase"
+        actionLabel="Nuevo Diario"
+        onAction={createModal.open}
+      />
 
-          <BaseButton
-            variant="primary"
-            icon={Plus}
-            onClick={createModal.open}
-          >
-            Nuevo Diario
-          </BaseButton>
-        </div>
+      {/* Message */}
+      {message && (
+        <BaseAlert
+          variant={message.type === 'success' ? 'success' : 'danger'}
+          dismissible
+          onDismiss={() => setMessage(null)}
+          className="mb-4"
+        >
+          {message.text}
+        </BaseAlert>
+      )}
 
-        {/* Message */}
-        {message && (
-          <BaseAlert
-            variant={message.type === 'success' ? 'success' : 'danger'}
-            dismissible
-            onDismiss={() => setMessage(null)}
-          >
-            {message.text}
-          </BaseAlert>
-        )}
+      {/* Error */}
+      {error && (
+        <BaseAlert variant="danger" dismissible onDismiss={() => setError(null)} className="mb-4">
+          {error}
+        </BaseAlert>
+      )}
 
-        {/* Error */}
-        {error && (
-          <BaseAlert variant="danger" dismissible onDismiss={() => setError(null)}>
-            {error}
-          </BaseAlert>
-        )}
-      </div>
+      {/* SearchBar */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar diarios..."
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        className="mb-6"
+      />
 
       {/* Logs List */}
-      {logs.length === 0 ? (
-        <BaseEmptyState
-          icon={BookOpen}
-          title="No hay diarios de clase"
-          description="Crea tu primer diario para comenzar a registrar tus clases"
-          action={
-            <BaseButton variant="primary" icon={Plus} onClick={createModal.open}>
-              Crear Primer Diario
-            </BaseButton>
-          }
-        />
+      {filteredLogs.length === 0 ? (
+        logs.length === 0 ? (
+          <BaseEmptyState
+            icon={BookOpen}
+            title="No hay diarios de clase"
+            description="Crea tu primer diario para comenzar a registrar tus clases"
+            action={
+              <BaseButton variant="primary" icon={Plus} onClick={createModal.open}>
+                Crear Primer Diario
+              </BaseButton>
+            }
+          />
+        ) : (
+          <BaseEmptyState
+            icon={BookOpen}
+            title="No se encontraron diarios"
+            description={`No hay diarios que coincidan con "${searchTerm}"`}
+          />
+        )
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {logs.map((log) => (
+        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-4'}>
+          {filteredLogs.map((log) => (
             <LogCard
               key={log.id}
               log={log}
               onOpen={handleOpenLog}
               onDelete={handleDeleteLog}
+              viewMode={viewMode}
             />
           ))}
         </div>
@@ -221,7 +241,7 @@ function ClassDailyLogManager({ user }) {
 // LOG CARD
 // ============================================
 
-function LogCard({ log, onOpen, onDelete }) {
+function LogCard({ log, onOpen, onDelete, viewMode = 'grid' }) {
   const statusConfig = {
     active: { variant: 'success', label: 'Activa', icon: Activity },
     ended: { variant: 'default', label: 'Finalizada', icon: CheckCircle },
@@ -230,6 +250,60 @@ function LogCard({ log, onOpen, onDelete }) {
 
   const config = statusConfig[log.status] || statusConfig.active;
 
+  if (viewMode === 'list') {
+    // Vista de lista (horizontal)
+    return (
+      <UniversalCard variant="default" size="md" hover>
+        <div className="flex items-center gap-4">
+          {/* Status Badge */}
+          <BaseBadge variant={config.variant} icon={config.icon} size="sm">
+            {config.label}
+          </BaseBadge>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+              {log.name}
+            </h3>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              {log.courseName && (
+                <div className="flex items-center gap-1">
+                  <BookOpen size={14} />
+                  <span>{log.courseName}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <Calendar size={14} />
+                <span>{log.createdAt?.toDate?.().toLocaleDateString() || 'Sin fecha'}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock size={14} />
+                <span>{log.entries?.length || 0} contenidos</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 flex-shrink-0">
+            <BaseButton
+              variant="primary"
+              icon={Play}
+              onClick={() => onOpen(log.id)}
+            >
+              Abrir
+            </BaseButton>
+            <BaseButton
+              variant="danger"
+              icon={Trash2}
+              onClick={() => onDelete(log.id)}
+            />
+          </div>
+        </div>
+      </UniversalCard>
+    );
+  }
+
+  // Vista de grilla (vertical)
   return (
     <UniversalCard variant="default" size="md" hover>
       <div className="space-y-4">

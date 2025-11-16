@@ -147,7 +147,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         {can('send-messages') && (
           <button
             className="universal-topbar__icon-btn universal-topbar__notifications"
-            onClick={() => navigate('/dashboard-v2/messages')}
+            onClick={() => navigate('/dashboard/messages')}
             aria-label="Mensajes"
             title="Mensajes"
           >

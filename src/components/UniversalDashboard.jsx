@@ -19,6 +19,7 @@ import { UniversalCard } from './cards';
 
 // Lazy load de componentes pesados
 const UnifiedCalendar = lazy(() => import('./UnifiedCalendar'));
+const MessagesPanel = lazy(() => import('./MessagesPanel'));
 const HomeworkReviewPanel = lazy(() => import('./HomeworkReviewPanel'));
 const AdminPaymentsPanel = lazy(() => import('./AdminPaymentsPanel'));
 const ContentManagerTabs = lazy(() => import('./ContentManagerTabs'));
@@ -96,7 +97,7 @@ function HomeView({ user, onNavigate }) {
             size="md"
             title="📖 ADE1 2026 - Fonética"
             description="Libro interactivo con 120+ slides y ejercicios de fonética española"
-            onClick={() => onNavigate && onNavigate('/dashboard-v2/ade1-content')}
+            onClick={() => onNavigate && onNavigate('/dashboard/ade1-content')}
             actions={[
               <BaseButton key="view" variant="primary" size="sm" fullWidth>
                 Ver contenido →
@@ -219,7 +220,7 @@ export function UniversalDashboard() {
       <Suspense fallback={<BaseLoading size="large" text="Cargando..." />}>
         {(() => {
           switch (currentPath) {
-            case '/dashboard-v2':
+            case '/dashboard':
               return <HomeView user={effectiveUser} onNavigate={handleNavigate} />;
 
             // Legacy Routes - Default views for each role
@@ -251,49 +252,54 @@ export function UniversalDashboard() {
                 />
               );
 
-            case '/dashboard-v2/content':
+            case '/dashboard/content':
               return <PlaceholderView title="Mi Contenido" />;
 
             // CALENDARIO - Todos los roles
-            case '/dashboard-v2/calendar':
+            case '/dashboard/calendar':
               return <UnifiedCalendar userId={effectiveUser.uid} userRole={effectiveUser.role} />;
 
+            // MENSAJES - Todos los roles con permiso send-messages
+            case '/dashboard/messages':
+              if (!can('send-messages')) return <PlaceholderView title="Sin acceso a mensajes" />;
+              return <MessagesPanel user={effectiveUser} />;
+
             // CONTENIDOS - Teachers + Admin (incluye Exercise Builder y Configurar IA en tabs)
-            case '/dashboard-v2/unified-content':
+            case '/dashboard/unified-content':
               if (!can('create-content')) return <PlaceholderView title="Sin acceso" />;
               return <ContentManagerTabs user={effectiveUser} userRole={effectiveUser.role} />;
 
             // ADE1 2026 CONTENT VIEWER - Libro interactivo
-            case '/dashboard-v2/ade1-content':
+            case '/dashboard/ade1-content':
               return <ADE1ContentViewer />;
 
             // ESTUDIANTES (redirige a /users)
-            case '/dashboard-v2/students':
+            case '/dashboard/students':
               if (!can('view-own-students')) return <PlaceholderView title="Sin acceso" />;
               return <UniversalUserManager user={effectiveUser} userRole={effectiveUser.role} />;
 
             // CLASES - ClassSessionManager integrado
-            case '/dashboard-v2/classes':
+            case '/dashboard/classes':
               if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
               return <ClassSessionManager user={effectiveUser} />;
 
             // DIARIOS DE CLASE - ClassDailyLogManager integrado
-            case '/dashboard-v2/daily-logs':
+            case '/dashboard/daily-logs':
               if (!can('manage-classes')) return <PlaceholderView title="Sin acceso" />;
               return <ClassDailyLogManager user={effectiveUser} />;
 
             // ASISTENCIAS
-            case '/dashboard-v2/attendance':
+            case '/dashboard/attendance':
               if (!can('view-class-analytics')) return <PlaceholderView title="Sin acceso" />;
               return <AttendanceView user={effectiveUser} />;
 
             // REVISAR TAREAS IA - Feature estrella
-            case '/dashboard-v2/homework-review':
+            case '/dashboard/homework-review':
               if (!can('grade-assignments')) return <PlaceholderView title="Sin acceso" />;
               return <HomeworkReviewPanel user={effectiveUser} />;
 
             // MIS CURSOS (Students)
-            case '/dashboard-v2/my-courses':
+            case '/dashboard/my-courses':
               // Si hay contenido seleccionado, mostrar ContentPlayer
               if (selectedContentId && selectedCourseId) {
                 return (
@@ -322,7 +328,7 @@ export function UniversalDashboard() {
               return <MyCourses user={effectiveUser} onSelectCourse={handleSelectCourse} />;
 
             // MIS TAREAS (Students)
-            case '/dashboard-v2/my-assignments':
+            case '/dashboard/my-assignments':
               if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
               return (
                 <MyAssignmentsView
@@ -336,12 +342,12 @@ export function UniversalDashboard() {
               );
 
             // MIS CLASES (Students)
-            case '/dashboard-v2/my-classes':
+            case '/dashboard/my-classes':
               if (!can('view-all-content')) return <PlaceholderView title="Sin acceso" />;
               return <StudentSessionsView student={effectiveUser} />;
 
             // JUEGOS
-            case '/dashboard-v2/games':
+            case '/dashboard/games':
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
               return (
                 <LiveGamesView
@@ -355,7 +361,7 @@ export function UniversalDashboard() {
               );
 
             // VISTA DE TUTOR/GUARDIÁN
-            case '/dashboard-v2/guardian':
+            case '/dashboard/guardian':
               // Guardians ven el progreso de sus estudiantes asignados
               // Admin también puede acceder para debugging/soporte
               if (!can('view-linked-students') && !can('view-all-users')) {
@@ -373,17 +379,17 @@ export function UniversalDashboard() {
               );
 
             // MIS PAGOS (Students)
-            case '/dashboard-v2/my-payments':
+            case '/dashboard/my-payments':
               if (!can('view-own-credits')) return <PlaceholderView title="Sin acceso" />;
               return <StudentFeesPanel user={effectiveUser} />;
 
             // ANALYTICS - AnalyticsDashboard integrado
-            case '/dashboard-v2/analytics':
+            case '/dashboard/analytics':
               if (!can('view-own-analytics')) return <PlaceholderView title="Sin acceso" />;
               return <AnalyticsDashboard user={effectiveUser} />;
 
             // GESTIÓN DE USUARIOS/ESTUDIANTES (Universal)
-            case '/dashboard-v2/users':
+            case '/dashboard/users':
               // Permitir acceso a admin (view-all-users) y teachers (view-own-students)
               if (!can('view-all-users') && !can('view-own-students')) {
                 return <PlaceholderView title="Sin acceso" />;
@@ -391,17 +397,17 @@ export function UniversalDashboard() {
               return <UniversalUserManager user={effectiveUser} userRole={effectiveUser.role} />;
 
             // GESTIÓN DE CRÉDITOS (Admin) - CreditManager integrado
-            case '/dashboard-v2/credits':
+            case '/dashboard/credits':
               if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
               return <CreditManager userId={effectiveUser.uid} currentUser={effectiveUser} />;
 
             // SISTEMA DE PAGOS (Admin)
-            case '/dashboard-v2/payments':
+            case '/dashboard/payments':
               if (!can('manage-credits')) return <PlaceholderView title="Sin acceso" />;
               return <AdminPaymentsPanel />;
 
             // CONFIGURACIÓN (Admin) - SettingsPanel integrado
-            case '/dashboard-v2/system-settings':
+            case '/dashboard/system-settings':
               if (!can('manage-system-settings')) return <PlaceholderView title="Sin acceso" />;
               return <SettingsPanel />;
 

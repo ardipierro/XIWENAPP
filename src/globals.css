@@ -471,7 +471,7 @@
    COMPONENTES REUTILIZABLES - @apply Tailwind
    ============================================ */
 
-@layer components {
+/* @layer components { */
   /* Botones Base */
   .btn {
     @apply inline-flex items-center justify-center gap-2;
@@ -812,18 +812,9 @@
      ✅ ClassSessionModal
 
      USO CORRECTO:
-     ```jsx
-     <div className="w-full">
-       <PageHeader ... /> {/* mb-6 automático */}
-       <div className="mb-6">
-         <BaseTabs ... />
-       </div>
-       <div className="space-y-6">
-         <UniversalCard ... /> {/* p-6 automático */}
-         <UniversalCard ... />
-       </div>
-     </div>
-     ```
+     Estructura: div.w-full > PageHeader + div.mb-6 (BaseTabs) + div.space-y-6 (UniversalCards)
+     PageHeader tiene mb-6 automático
+     UniversalCard tiene p-6 automático
      ============================================ */
 
   /* ============================================
@@ -1417,13 +1408,12 @@
       @apply px-2 py-1;
     }
   }
-}
 
 /* ============================================
    UTILIDADES PERSONALIZADAS
    ============================================ */
 
-@layer utilities {
+/* @layer utilities { */
   .text-gradient {
     @apply bg-gradient-to-r from-primary to-secondary;
     @apply bg-clip-text text-transparent;
@@ -1512,7 +1502,6 @@
     color: var(--color-text-primary);
     transform: scale(1.05);
   }
-}
 
 /* ============================================
    ESTILOS GLOBALES PARA INPUTS Y FORMS
@@ -2454,7 +2443,6 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
   .universal-topbar__app-title h1 {
     font-size: 0.95rem; /* Reducido para móviles */
-  }
   }
 
   .universal-topbar__left {
@@ -5118,6 +5106,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     text-align: center;
   }
 }
+
 /* ============================================
    CREDIT MANAGER - ESTILOS MINIMALISTAS
    ============================================ */

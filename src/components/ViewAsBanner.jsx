@@ -32,7 +32,7 @@ function ViewAsBanner() {
     const getRoleBasedRoute = () => {
       if (userRole === 'admin') return '/admin';
       if (userRole === 'teacher' || userRole === 'trial_teacher') return '/teacher';
-      return '/dashboard-v2';
+      return '/dashboard';
     };
 
     // Pequeño delay para que React actualice los permisos antes de navegar

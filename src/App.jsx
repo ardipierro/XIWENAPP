@@ -167,9 +167,9 @@ function App() {
             }
           />
 
-          {/* POC: Universal Dashboard - Dashboard unificado con permisos y créditos */}
+          {/* Universal Dashboard - Dashboard unificado con permisos y créditos */}
           <Route
-            path="/dashboard-v2/*"
+            path="/dashboard/*"
             element={
               <ProtectedRoute
                 user={user}
@@ -216,12 +216,6 @@ function App() {
                 <UniversalDashboard />
               </ProtectedRoute>
             }
-          />
-
-          {/* Dashboard redirect - redirige según rol */}
-          <Route
-            path="/dashboard"
-            element={<DashboardRedirect user={user} userRole={effectiveRole} />}
           />
 
           {/* 404 */}

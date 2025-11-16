@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Key, Sparkles, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { Key, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../../firebase/aiConfig';
 import { BaseAlert, BaseLoading } from '../common';
 import SearchBar from '../common/SearchBar';
@@ -392,15 +392,6 @@ function CredentialsTab() {
 
   return (
     <div className="w-full">
-      {/* Banner Info */}
-      <div className="w-full flex items-start gap-3 p-5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl shadow-lg mb-6">
-        <Sparkles size={24} className="flex-shrink-0" />
-        <div className="text-sm md:text-base">
-          <strong className="block mb-1">Gestión de credenciales IA</strong>
-          Configura las API keys de tus proveedores de IA
-        </div>
-      </div>
-
       {/* Alerts */}
       {error && <BaseAlert variant="danger" title="Error" dismissible onDismiss={() => setError(null)}>{error}</BaseAlert>}
       {success && <BaseAlert variant="success" title="Éxito" dismissible onDismiss={() => setSuccess(null)}>{success}</BaseAlert>}

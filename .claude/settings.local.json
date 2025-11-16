@@ -153,7 +153,11 @@
       "Bash(git show:*)",
       "Bash(timeout 3 bash:*)",
       "Bash(grammar)",
-      "Bash(del screenshot.png)"
+      "Bash(del screenshot.png)",
+      "Bash(powershell -Command \"Get-Content ''C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\globals.css'' | Measure-Object -Line\")",
+      "Bash(powershell -Command:*)",
+      "Bash(\"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\globals.css\")",
+      "Bash(git clean:*)"
     ],
     "deny": [],
     "ask": []
