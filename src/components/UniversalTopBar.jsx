@@ -4,13 +4,15 @@
  * @module components/UniversalTopBar
  */
 
-import { Menu, Bell, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, Bell, User, Settings, LogOut, Sun, Moon, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
+import useUnreadMessages from '../hooks/useUnreadMessages';
 import CreditBadge from './common/CreditBadge';
 import UserProfileModal from './UserProfileModal';
 import logger from '../utils/logger';
@@ -22,16 +24,20 @@ import logger from '../utils/logger';
  * @param {boolean} props.menuOpen - Estado del menú
  */
 export function UniversalTopBar({ onMenuToggle, menuOpen }) {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { getEffectiveUser } = useViewAs();
   const { theme, toggleTheme } = useTheme();
   const { selectedFont, fontWeight, fontSize } = useFont();
-  const { getRoleLabel } = usePermissions();
+  const { getRoleLabel, can } = usePermissions();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
+
+  // Mensajes no leídos
+  const unreadMessages = useUnreadMessages(effectiveUser?.uid);
 
   const handleLogout = async () => {
     try {
@@ -93,6 +99,21 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           <Bell size={20} />
           <span className="universal-topbar__badge">3</span>
         </button>
+
+        {/* Messages */}
+        {can('send-messages') && (
+          <button
+            className="universal-topbar__icon-btn universal-topbar__notifications"
+            onClick={() => navigate('/dashboard-v2/messages')}
+            aria-label="Mensajes"
+            title="Mensajes"
+          >
+            <MessageCircle size={20} />
+            {unreadMessages > 0 && (
+              <span className="universal-topbar__badge">{unreadMessages}</span>
+            )}
+          </button>
+        )}
 
         {/* User Menu */}
         <div className="universal-topbar__user-menu">
