@@ -550,6 +550,25 @@ export default function UniversalUserManager({ user, userRole }) {
                   </th>
                   <th>
                     <div
+                      onClick={() => userManagement.handleSort('enrollments')}
+                      className={`sortable-header ${
+                        userManagement.sortField === 'enrollments' ? 'active' : ''
+                      }`}
+                    >
+                      <span>Cursos</span>
+                      {userManagement.sortField === 'enrollments' ? (
+                        userManagement.sortDirection === 'asc' ? (
+                          <ArrowUp size={14} />
+                        ) : (
+                          <ArrowDown size={14} />
+                        )
+                      ) : (
+                        <ArrowUpDown size={14} className="sort-icon-inactive" />
+                      )}
+                    </div>
+                  </th>
+                  <th>
+                    <div
                       onClick={() => userManagement.handleSort('credits')}
                       className={`sortable-header ${
                         userManagement.sortField === 'credits' ? 'active' : ''
@@ -575,7 +594,10 @@ export default function UniversalUserManager({ user, userRole }) {
                   <tr key={userItem.id}>
                     <td>
                       <div className="flex items-center gap-3">
-                        <div className="user-avatar">
+                        <div
+                          className="user-avatar"
+                          style={{ backgroundColor: getAvatarColor(userItem.role) }}
+                        >
                           {userItem.name?.charAt(0).toUpperCase() || '?'}
                         </div>
                         <span className="font-semibold">{userItem.name || 'Sin nombre'}</span>
@@ -583,12 +605,17 @@ export default function UniversalUserManager({ user, userRole }) {
                     </td>
                     <td>{userItem.email}</td>
                     <td>
-                      <span className="role-badge" data-role={userItem.role}>
-                        {userItem.role}
+                      <CategoryBadge type="role" value={userItem.role} size="sm" />
+                    </td>
+                    <td>
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {enrollmentCounts[userItem.id] || 0}
                       </span>
                     </td>
                     <td>
-                      <span className="font-bold">{userItem.credits || 0}</span>
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {userItem.credits || 0}
+                      </span>
                     </td>
                     <td>
                       <div className="flex gap-2">
