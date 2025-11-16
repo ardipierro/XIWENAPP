@@ -124,19 +124,20 @@ function SettingsPanel() {
 
         {activeTab === 'fonts' && (
           <div className="w-full space-y-6">
-            <UniversalCard
-              variant="default"
-              size="md"
-              icon={Type}
-              title="Probador de Fuentes Chinas"
-              description={'Visualiza cómo se ve el nombre de la aplicación "西文教室" (Aula de Español) con diferentes fuentes chinas'}
-            >
-              {/* Selector de fuente */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Selecciona una fuente ({availableFonts.length} disponibles):
-                </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-96 overflow-y-auto pr-2">
+            {/* Título y descripción */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Probador de Fuentes Chinas</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Visualiza cómo se ve el nombre de la aplicación "西文教室" (Aula de Español) con diferentes fuentes chinas
+              </p>
+            </div>
+
+            {/* Selector de fuente */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Selecciona una fuente ({availableFonts.length} disponibles):
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-96 overflow-y-auto pr-2">
                   {availableFonts.map((font) => {
                     const styleColors = {
                       modern: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
@@ -173,107 +174,106 @@ function SettingsPanel() {
                       </button>
                     );
                   })}
+              </div>
+            </div>
+
+            {/* Controles de peso y tamaño */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Toggle de negrita */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Peso de la fuente:
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setFontWeight('normal')}
+                    className={`flex-1 p-3 border-2 rounded-lg transition-all font-medium ${
+                      fontWeight === 'normal'
+                        ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
+                    }`}
+                  >
+                    Normal
+                  </button>
+                  <button
+                    onClick={() => setFontWeight('bold')}
+                    className={`flex-1 p-3 border-2 rounded-lg transition-all font-bold ${
+                      fontWeight === 'bold'
+                        ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
+                    }`}
+                  >
+                    Negrita
+                  </button>
                 </div>
               </div>
 
-              {/* Controles de peso y tamaño */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* Toggle de negrita */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Peso de la fuente:
-                  </label>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setFontWeight('normal')}
-                      className={`flex-1 p-3 border-2 rounded-lg transition-all font-medium ${
-                        fontWeight === 'normal'
-                          ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
-                      }`}
-                    >
-                      Normal
-                    </button>
-                    <button
-                      onClick={() => setFontWeight('bold')}
-                      className={`flex-1 p-3 border-2 rounded-lg transition-all font-bold ${
-                        fontWeight === 'bold'
-                          ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
-                      }`}
-                    >
-                      Negrita
-                    </button>
-                  </div>
-                </div>
-
-                {/* Slider de tamaño */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Tamaño: <span className="text-indigo-600 dark:text-indigo-400 font-bold">{fontSize.toFixed(2)}rem</span>
-                  </label>
-                  <div className="space-y-2">
-                    <input
-                      type="range"
-                      min="0.75"
-                      max="2.5"
-                      step="0.05"
-                      value={fontSize}
-                      onChange={(e) => setFontSize(parseFloat(e.target.value))}
-                      className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider-purple"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span>Pequeño (0.75rem)</span>
-                      <span>Grande (2.5rem)</span>
-                    </div>
+              {/* Slider de tamaño */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Tamaño: <span className="text-indigo-600 dark:text-indigo-400 font-bold">{fontSize.toFixed(2)}rem</span>
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="range"
+                    min="0.75"
+                    max="2.5"
+                    step="0.05"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider-purple"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Pequeño (0.75rem)</span>
+                    <span>Grande (2.5rem)</span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Vista previa grande */}
-              <div className="mt-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800 rounded-xl border-2 border-gray-200 dark:border-gray-700">
-                <div className="text-center">
-                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    Vista Previa (así se verá en la barra superior):
-                  </div>
-                  <div className="mb-6 p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700">
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                      TopBar Preview (tamaño real):
-                    </div>
-                    <div
-                      className="text-gray-900 dark:text-gray-100 transition-all duration-300"
-                      style={{
-                        fontFamily: selectedFont,
-                        fontWeight: fontWeight,
-                        fontSize: `${fontSize}rem`
-                      }}
-                    >
-                      西文教室
-                    </div>
+            {/* Vista previa grande */}
+            <div className="mt-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800 rounded-xl border-2 border-gray-200 dark:border-gray-700">
+              <div className="text-center">
+                <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  Vista Previa (así se verá en la barra superior):
+                </div>
+                <div className="mb-6 p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    TopBar Preview (tamaño real):
                   </div>
                   <div
-                    className="text-gray-900 dark:text-gray-100 transition-all duration-300 mb-4"
+                    className="text-gray-900 dark:text-gray-100 transition-all duration-300"
                     style={{
                       fontFamily: selectedFont,
                       fontWeight: fontWeight,
-                      fontSize: `${fontSize * 3}rem`
+                      fontSize: `${fontSize}rem`
                     }}
                   >
                     西文教室
                   </div>
-                  <div className="text-base text-gray-600 dark:text-gray-400 italic">
-                    (Aula de Español)
-                  </div>
+                </div>
+                <div
+                  className="text-gray-900 dark:text-gray-100 transition-all duration-300 mb-4"
+                  style={{
+                    fontFamily: selectedFont,
+                    fontWeight: fontWeight,
+                    fontSize: `${fontSize * 3}rem`
+                  }}
+                >
+                  西文教室
+                </div>
+                <div className="text-base text-gray-600 dark:text-gray-400 italic">
+                  (Aula de Español)
                 </div>
               </div>
+            </div>
 
-              {/* Nota informativa */}
-              <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
-                <p className="text-sm text-green-800 dark:text-green-200">
-                  <strong>✨ Nota:</strong> Los cambios se aplican automáticamente al logo "西文教室" en la barra superior y se guardan en tu navegador.
-                </p>
-              </div>
-            </UniversalCard>
+            {/* Nota informativa */}
+            <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+              <p className="text-sm text-green-800 dark:text-green-200">
+                <strong>✨ Nota:</strong> Los cambios se aplican automáticamente al logo "西文教室" en la barra superior y se guardan en tu navegador.
+              </p>
+            </div>
           </div>
         )}
 
