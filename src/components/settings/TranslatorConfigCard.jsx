@@ -4,9 +4,7 @@
  * @module components/settings/TranslatorConfigCard
  */
 
-import { useState } from 'react';
-import { Languages, ChevronDown, ChevronUp, Info } from 'lucide-react';
-import { UniversalCard } from '../cards';
+import { Info } from 'lucide-react';
 import { BaseSelect, BaseButton } from '../common';
 import PropTypes from 'prop-types';
 
@@ -71,8 +69,6 @@ CheckboxItem.propTypes = {
  * Tarjeta de configuración del traductor
  */
 function TranslatorConfigCard({ config, onChange }) {
-  const [expanded, setExpanded] = useState(true);
-
   // Handlers
   const updateMode = (mode) => {
     onChange({ ...config, mode });
@@ -191,23 +187,7 @@ function TranslatorConfigCard({ config, onChange }) {
   };
 
   return (
-    <UniversalCard
-      variant="default"
-      size="md"
-      icon={Languages}
-      title="Traductor Visual"
-      description="Configura el popup de traducción al seleccionar texto"
-      actions={
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        >
-          {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-        </button>
-      }
-    >
-      {expanded && (
-        <div className="space-y-6 pt-4">
+    <div className="space-y-6">
 
           {/* 1. MODO DE TRADUCCIÓN */}
           <div>
@@ -472,9 +452,7 @@ function TranslatorConfigCard({ config, onChange }) {
             </p>
           </div>
 
-        </div>
-      )}
-    </UniversalCard>
+    </div>
   );
 }
 
