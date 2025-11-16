@@ -3233,20 +3233,25 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 /* Mobile Responsive - Fullscreen alternating views */
 @media (max-width: 768px) {
   /* ===== AJUSTAR DASHBOARD CONTENT PARA MENSAJES ===== */
-  /* Mantener margin-top para no quedar debajo del topbar */
+  /* Fix para Safari iOS: usar min-height en lugar de height */
   .universal-dashboard__content:has(.messages-panel) {
     padding: 0 !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     margin-bottom: 0 !important;
     /* MANTENER margin-top: 56px del topbar */
+    min-height: calc(100vh - 56px) !important;
+    height: auto !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column;
   }
 
-  /* ===== PANEL PRINCIPAL - Ocupa todo el espacio disponible ===== */
+  /* ===== PANEL PRINCIPAL - Flex para ocupar todo el espacio ===== */
   .messages-panel {
     width: 100% !important;
-    height: 100% !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
