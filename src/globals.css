@@ -3237,30 +3237,23 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   .universal-dashboard__content:has(.messages-panel) {
     padding: 0 !important;
     margin: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
   }
 
-  /* ===== TRUE FULLSCREEN - Sin bordes ni padding ===== */
-
-  /* Panel principal - fullscreen sin bordes */
+  /* ===== PANEL PRINCIPAL - Ocupa todo el espacio del dashboard ===== */
   .messages-panel {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    min-height: 100vh !important;
-    max-height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     overflow: hidden !important;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
-    z-index: 1000;
+    background: var(--color-bg-primary);
   }
 
   /* Mobile Sidebar - Fullscreen cuando visible */
@@ -3276,8 +3269,6 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     display: flex !important;
     flex-direction: column;
     background: var(--color-bg-primary);
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 
   /* Mobile Main Thread - Fullscreen cuando visible */
@@ -3293,8 +3284,6 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     display: flex !important;
     flex-direction: column;
     background: var(--color-bg-primary);
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 
   /* ===== MESSAGE THREAD - Flexbox correcto ===== */
@@ -3303,17 +3292,13 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     flex-direction: column;
     width: 100% !important;
     height: 100% !important;
-    max-height: 100% !important;
     overflow: hidden !important;
     padding: 0 !important;
     margin: 0 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 
   /* ===== SIDEBAR HEADER - Fixed height, visible ===== */
   .messages-sidebar-header {
-    position: relative !important;
     flex-shrink: 0 !important;
     padding: 12px 16px !important;
     min-height: 60px !important;
@@ -3321,13 +3306,10 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     height: 60px !important;
     border: none !important;
     border-bottom: 1px solid var(--color-border) !important;
-    background: #ff0000 !important; /* DEBUG: ROJO - Si ves esto, el CSS se está cargando */
-    z-index: 10 !important;
+    background: var(--color-bg-secondary) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 
   .header-title {
@@ -3389,7 +3371,6 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
   /* ===== THREAD HEADER - Fixed height, visible ===== */
   .thread-header {
-    position: relative !important;
     flex-shrink: 0 !important;
     padding: 10px 16px !important;
     min-height: 60px !important;
@@ -3398,13 +3379,10 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     gap: 12px !important;
     border: none !important;
     border-bottom: 1px solid var(--color-border) !important;
-    background: #00ff00 !important; /* DEBUG: VERDE - Si ves esto, el CSS se está cargando */
-    z-index: 10 !important;
+    background: var(--color-bg-secondary) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 
   /* Botón Back - Touch target, visible */
