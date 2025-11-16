@@ -11,7 +11,23 @@ import {
   MultipleChoiceExercise,
   FillInBlankExercise,
   MatchingExercise,
-  TrueFalseExercise
+  TrueFalseExercise,
+  AudioListeningExercise,
+  TextSelectionExercise,
+  DragDropOrderExercise,
+  DialogueRolePlayExercise,
+  VerbIdentificationExercise,
+  InteractiveReadingExercise,
+  AIAudioPronunciationExercise,
+  FreeDragDropExercise,
+  ClozeTestExercise,
+  SentenceBuilderExercise,
+  DictationExercise,
+  ErrorDetectionExercise,
+  CollocationMatchingExercise,
+  GrammarTransformationExercise,
+  HotspotImageExercise,
+  DialogueCompletionExercise
 } from './exercises';
 
 /**
@@ -79,10 +95,43 @@ export function ExerciseEditorModal({ exercise, isOpen, onClose, onSave }) {
         return <MatchingExercise {...previewProps} />;
       case 'truefalse':
         return <TrueFalseExercise {...previewProps} />;
+      case 'audio-listening':
+        return <AudioListeningExercise {...previewProps} />;
+      case 'text-selection':
+        return <TextSelectionExercise {...previewProps} />;
+      case 'dragdrop-order':
+        return <DragDropOrderExercise {...previewProps} />;
+      case 'dialogue-roleplay':
+        return <DialogueRolePlayExercise {...previewProps} />;
+      case 'verb-identification':
+        return <VerbIdentificationExercise {...previewProps} />;
+      case 'interactive-reading':
+        return <InteractiveReadingExercise {...previewProps} />;
+      case 'ai-audio-pronunciation':
+        return <AIAudioPronunciationExercise {...previewProps} />;
+      case 'free-dragdrop':
+        return <FreeDragDropExercise {...previewProps} />;
+      case 'cloze':
+        return <ClozeTestExercise {...previewProps} />;
+      case 'sentence-builder':
+        return <SentenceBuilderExercise {...previewProps} />;
+      case 'dictation':
+        return <DictationExercise {...previewProps} />;
+      case 'error-detection':
+        return <ErrorDetectionExercise {...previewProps} />;
+      case 'collocation-matching':
+        return <CollocationMatchingExercise {...previewProps} />;
+      case 'grammar-transformation':
+        return <GrammarTransformationExercise {...previewProps} />;
+      case 'hotspot-image':
+        return <HotspotImageExercise {...previewProps} />;
+      case 'dialogue-completion':
+        return <DialogueCompletionExercise {...previewProps} />;
       default:
         return (
           <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-            Preview no disponible para este tipo de ejercicio
+            <p className="font-medium mb-2">Preview no disponible</p>
+            <p className="text-sm">Tipo de ejercicio: {localExercise.type}</p>
           </div>
         );
     }

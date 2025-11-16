@@ -35,7 +35,22 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
     { value: 'blank', label: 'Llenar Espacios', icon: '✏️', description: 'Completar palabras o frases faltantes' },
     { value: 'truefalse', label: 'Verdadero/Falso', icon: '✅', description: 'Determinar si una afirmación es verdadera o falsa' },
     { value: 'cloze', label: 'Cloze Test', icon: '🔤', description: 'Completar múltiples espacios en un texto' },
-    { value: 'match', label: 'Emparejar', icon: '🔗', description: 'Relacionar términos con sus definiciones' }
+    { value: 'match', label: 'Emparejar', icon: '🔗', description: 'Relacionar términos con sus definiciones' },
+    { value: 'audio-listening', label: 'Comprensión Auditiva', icon: '🎧', description: 'Escuchar audio y responder preguntas' },
+    { value: 'text-selection', label: 'Selección de Texto', icon: '🎯', description: 'Seleccionar palabras o frases específicas' },
+    { value: 'dragdrop-order', label: 'Ordenar Palabras', icon: '🔀', description: 'Arrastrar palabras para formar oraciones' },
+    { value: 'dialogue-roleplay', label: 'Diálogo Interactivo', icon: '💬', description: 'Completar diálogos con respuestas apropiadas' },
+    { value: 'verb-identification', label: 'Identificar Verbos', icon: '🔍', description: 'Seleccionar verbos en un texto' },
+    { value: 'interactive-reading', label: 'Lectura Interactiva', icon: '📖', description: 'Lectura con vocabulario clickeable' },
+    { value: 'ai-audio-pronunciation', label: 'Pronunciación con IA', icon: '🎤', description: 'Practicar pronunciación con audio generado' },
+    { value: 'free-dragdrop', label: 'Clasificación Drag & Drop', icon: '📦', description: 'Arrastrar elementos a categorías' },
+    { value: 'sentence-builder', label: 'Construir Oraciones', icon: '🏗️', description: 'Construir oraciones desde cero' },
+    { value: 'dictation', label: 'Dictado', icon: '✍️', description: 'Escribir lo que se escucha' },
+    { value: 'error-detection', label: 'Detectar Errores', icon: '🔴', description: 'Encontrar errores gramaticales' },
+    { value: 'collocation-matching', label: 'Colocaciones', icon: '🤝', description: 'Emparejar palabras que van juntas' },
+    { value: 'grammar-transformation', label: 'Transformación Gramatical', icon: '🔄', description: 'Transformar estructuras gramaticales' },
+    { value: 'hotspot-image', label: 'Imagen Interactiva', icon: '🖼️', description: 'Clickear en puntos específicos de una imagen' },
+    { value: 'dialogue-completion', label: 'Completar Diálogo', icon: '💭', description: 'Completar espacios en un diálogo' }
   ];
 
   const handleGenerate = async () => {
@@ -394,7 +409,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
                       {exercise.sentence}
                     </p>
                     <p className="text-sm text-green-600 dark:text-green-400">
-                      Respuesta: {exercise.correctAnswer?.[0]}
+                      Respuesta: {exercise.correctAnswer?.[0] || exercise.correctAnswer}
                     </p>
                   </div>
                 )}
@@ -407,6 +422,49 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
                     </p>
                     <p className="text-sm text-green-600 dark:text-green-400">
                       Respuesta: {exercise.correctAnswer ? 'Verdadero' : 'Falso'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Match Preview */}
+                {exercise.type === 'match' && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      {exercise.title || 'Ejercicio de Emparejar'}
+                    </p>
+                    <div className="space-y-1">
+                      {exercise.pairs?.slice(0, 3).map((pair, i) => (
+                        <div key={i} className="text-sm text-gray-600 dark:text-gray-400">
+                          • {pair.left} → {pair.right}
+                        </div>
+                      ))}
+                      {exercise.pairs?.length > 3 && (
+                        <p className="text-xs text-gray-500">... y {exercise.pairs.length - 3} más</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Cloze Preview */}
+                {exercise.type === 'cloze' && (
+                  <div>
+                    <p className="text-gray-900 dark:text-white mb-2">
+                      {exercise.text?.substring(0, 100)}...
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Respuestas: {exercise.correctAnswers?.join(', ')}
+                    </p>
+                  </div>
+                )}
+
+                {/* Otros tipos - Preview genérico */}
+                {!['mcq', 'blank', 'truefalse', 'match', 'cloze'].includes(exercise.type) && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      {exercise.title || exercise.instruction || exercise.question || 'Ejercicio generado'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Tipo: {exerciseTypes.find(t => t.value === exercise.type)?.label || exercise.type}
                     </p>
                   </div>
                 )}
