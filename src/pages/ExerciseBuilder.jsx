@@ -11,9 +11,6 @@ import {
   BookOpen,
   Download,
   Upload,
-  Home,
-  Star,
-  TrendingUp,
   Save
 } from 'lucide-react';
 import { BaseButton, BaseCard, BaseBadge, BaseEmptyState, BaseLoading, BaseAlert } from '../components/common';
@@ -50,7 +47,7 @@ export function ExerciseBuilder() {
   const { config, loading } = useExerciseBuilderConfig();
   const { exportContent, loading: exportLoading, error: exportError, success: exportSuccess } = useContentExport();
   const { user } = useAuth();
-  const [activeView, setActiveView] = useState('home'); // home | parser | examples | stats
+  const [activeView, setActiveView] = useState('parser'); // parser | examples
   const [generatedExercises, setGeneratedExercises] = useState([]);
   const [stats, setStats] = useState({
     totalExercises: 0,
@@ -148,10 +145,8 @@ export function ExerciseBuilder() {
   };
 
   const views = [
-    { id: 'home', label: 'Inicio', icon: Home },
     { id: 'parser', label: 'Parser', icon: FileText },
-    { id: 'examples', label: 'Ejemplos', icon: Layers },
-    { id: 'stats', label: 'Estadísticas', icon: TrendingUp }
+    { id: 'examples', label: 'Ejemplos', icon: Layers }
   ];
 
   // Ejemplos predefinidos
@@ -498,9 +493,6 @@ export function ExerciseBuilder() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <BaseBadge variant="info" size="sm">
-                Nivel: {config.cefrLevel}
-              </BaseBadge>
               <SettingsPanel />
             </div>
           </div>
@@ -530,74 +522,6 @@ export function ExerciseBuilder() {
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Home */}
-        {activeView === 'home' && (
-          <div className="space-y-8">
-            <BaseCard
-              icon={BookOpen}
-              title="Bienvenido al Design Lab"
-              subtitle="Tu espacio para crear y probar ejercicios de ELE"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <BaseCard variant="flat" hover>
-                  <div className="text-center p-4">
-                    <FileText size={32} className="mx-auto text-blue-500 mb-3" strokeWidth={2} />
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                      Parser de Texto
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Convierte texto plano en ejercicios interactivos
-                    </p>
-                  </div>
-                </BaseCard>
-
-                <BaseCard variant="flat" hover>
-                  <div className="text-center p-4">
-                    <Layers size={32} className="mx-auto text-green-500 mb-3" strokeWidth={2} />
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                      Ejemplos Listos
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Explora ejercicios prediseñados para inspirarte
-                    </p>
-                  </div>
-                </BaseCard>
-
-                <BaseCard variant="flat" hover>
-                  <div className="text-center p-4">
-                    <TrendingUp size={32} className="mx-auto text-purple-500 mb-3" strokeWidth={2} />
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                      Estadísticas
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Analiza tu progreso y resultados
-                    </p>
-                  </div>
-                </BaseCard>
-              </div>
-
-              <div className="flex gap-3">
-                <BaseButton
-                  variant="primary"
-                  icon={FileText}
-                  onClick={() => setActiveView('parser')}
-                  fullWidth
-                >
-                  Ir al Parser
-                </BaseButton>
-                <BaseButton
-                  variant="outline"
-                  icon={Layers}
-                  onClick={() => setActiveView('examples')}
-                  fullWidth
-                >
-                  Ver Ejemplos
-                </BaseButton>
-              </div>
-            </BaseCard>
-          </div>
-        )}
-
         {/* Parser */}
         {activeView === 'parser' && (
           <TextToExerciseParser onExerciseGenerated={handleExerciseGenerated} />
@@ -664,89 +588,6 @@ export function ExerciseBuilder() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Stats */}
-        {activeView === 'stats' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Estadísticas de Progreso
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <BaseCard variant="elevated">
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-zinc-600 dark:text-zinc-400 mb-2">
-                    {stats.totalExercises}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Ejercicios Realizados
-                  </div>
-                </div>
-              </BaseCard>
-
-              <BaseCard variant="elevated">
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
-                    {stats.completedExercises}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Correctos
-                  </div>
-                </div>
-              </BaseCard>
-
-              <BaseCard variant="elevated">
-                <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                    {stats.averageScore}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Puntuación Media
-                  </div>
-                </div>
-              </BaseCard>
-
-              <BaseCard variant="elevated">
-                <div className="text-center p-4">
-                  <div className="flex items-center justify-center gap-1 mb-2">
-                    {[...Array(3)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={24}
-                        strokeWidth={2}
-                        className={
-                          i < Math.round((stats.completedExercises / Math.max(stats.totalExercises, 1)) * 3)
-                            ? 'text-amber-500 fill-amber-500'
-                            : 'text-gray-300 dark:text-gray-600'
-                        }
-                      />
-                    ))}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Nivel de Dominio
-                  </div>
-                </div>
-              </BaseCard>
-            </div>
-
-            {stats.totalExercises === 0 && (
-              <BaseEmptyState
-                icon={TrendingUp}
-                title="No hay estadísticas aún"
-                description="Completa algunos ejercicios para ver tu progreso"
-                action={
-                  <BaseButton
-                    variant="primary"
-                    icon={Layers}
-                    onClick={() => setActiveView('examples')}
-                  >
-                    Ver Ejemplos
-                  </BaseButton>
-                }
-              />
-            )}
           </div>
         )}
       </main>
