@@ -28,7 +28,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'primary',
     color: '#3b82f6',
     label: 'Curso',
-    icon: '📚',
+    icon: '■',
     description: 'Contenedor de lecciones y ejercicios',
     category: 'contentType'
   },
@@ -36,7 +36,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'success',
     color: '#10b981',
     label: 'Lección',
-    icon: '📝',
+    icon: '▪',
     description: 'Contenido teórico',
     category: 'contentType'
   },
@@ -44,7 +44,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'info',
     color: '#8b5cf6',
     label: 'Lectura',
-    icon: '📖',
+    icon: '▸',
     description: 'Documento de lectura',
     category: 'contentType'
   },
@@ -52,7 +52,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'danger',
     color: '#ef4444',
     label: 'Video',
-    icon: '🎥',
+    icon: '▶',
     description: 'Contenido multimedia',
     category: 'contentType'
   },
@@ -60,7 +60,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'default',
     color: '#71717a',
     label: 'Link',
-    icon: '🔗',
+    icon: '⌁',
     description: 'Recurso externo',
     category: 'contentType'
   },
@@ -68,7 +68,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#f59e0b',
     label: 'Ejercicio',
-    icon: '✏️',
+    icon: '✎',
     description: 'Práctica con preguntas',
     category: 'contentType'
   },
@@ -76,7 +76,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'info',
     color: '#06b6d4',
     label: 'Juego en Vivo',
-    icon: '🎮',
+    icon: '◆',
     description: 'Sesión interactiva',
     category: 'contentType'
   },
@@ -88,7 +88,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'primary',
     color: '#3b82f6',
     label: 'Opción Múltiple',
-    icon: '☑️',
+    icon: '☐',
     description: 'Selección de respuestas',
     category: 'exerciseType'
   },
@@ -96,7 +96,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'success',
     color: '#10b981',
     label: 'Llenar Espacios',
-    icon: '📝',
+    icon: '⎽',
     description: 'Completar oraciones',
     category: 'exerciseType'
   },
@@ -104,7 +104,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#f59e0b',
     label: 'Emparejar',
-    icon: '🔗',
+    icon: '⇌',
     description: 'Relacionar elementos',
     category: 'exerciseType'
   },
@@ -112,7 +112,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'info',
     color: '#8b5cf6',
     label: 'Ordenar',
-    icon: '🔢',
+    icon: '#',
     description: 'Secuenciar elementos',
     category: 'exerciseType'
   },
@@ -120,7 +120,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'danger',
     color: '#ef4444',
     label: 'Verdadero/Falso',
-    icon: '✓✗',
+    icon: '✓',
     description: 'Evaluación binaria',
     category: 'exerciseType'
   },
@@ -128,7 +128,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'primary',
     color: '#3b82f6',
     label: 'Respuesta Corta',
-    icon: '✍️',
+    icon: '✎',
     description: 'Respuesta textual breve',
     category: 'exerciseType'
   },
@@ -136,7 +136,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'info',
     color: '#06b6d4',
     label: 'Ensayo',
-    icon: '📄',
+    icon: '≡',
     description: 'Respuesta extensa',
     category: 'exerciseType'
   },
@@ -144,7 +144,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#f59e0b',
     label: 'Comprensión Auditiva',
-    icon: '🎧',
+    icon: '♫',
     description: 'Ejercicio de audio',
     category: 'exerciseType'
   },
@@ -184,7 +184,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'success',
     color: '#10b981',
     label: 'A1',
-    icon: '🌱',
+    icon: '∘',
     description: 'Básico - Acceso',
     category: 'cefr'
   },
@@ -192,7 +192,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'success',
     color: '#16a34a',
     label: 'A2',
-    icon: '🌿',
+    icon: '◦',
     description: 'Básico - Plataforma',
     category: 'cefr'
   },
@@ -200,7 +200,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#f59e0b',
     label: 'B1',
-    icon: '🌾',
+    icon: '○',
     description: 'Intermedio - Umbral',
     category: 'cefr'
   },
@@ -208,7 +208,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#d97706',
     label: 'B2',
-    icon: '🌻',
+    icon: '◎',
     description: 'Intermedio - Avanzado',
     category: 'cefr'
   },
@@ -216,7 +216,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'danger',
     color: '#ef4444',
     label: 'C1',
-    icon: '🌳',
+    icon: '●',
     description: 'Avanzado - Dominio',
     category: 'cefr'
   },
@@ -224,7 +224,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'danger',
     color: '#dc2626',
     label: 'C2',
-    icon: '🏆',
+    icon: '◉',
     description: 'Avanzado - Maestría',
     category: 'cefr'
   },
@@ -236,7 +236,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'default',
     color: '#71717a',
     label: 'Borrador',
-    icon: '📝',
+    icon: '○',
     description: 'En edición',
     category: 'status'
   },
@@ -244,7 +244,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#f59e0b',
     label: 'En Revisión',
-    icon: '👀',
+    icon: '◷',
     description: 'Pendiente de aprobación',
     category: 'status'
   },
@@ -252,7 +252,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'success',
     color: '#10b981',
     label: 'Publicado',
-    icon: '✅',
+    icon: '✓',
     description: 'Visible para estudiantes',
     category: 'status'
   },
@@ -260,7 +260,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'default',
     color: '#a1a1aa',
     label: 'Archivado',
-    icon: '📦',
+    icon: '□',
     description: 'No visible',
     category: 'status'
   },
@@ -272,7 +272,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'primary',
     color: '#3b82f6',
     label: 'Vocabulario',
-    icon: '📚',
+    icon: '∀',
     description: 'Palabras y expresiones',
     category: 'theme'
   },
@@ -280,7 +280,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'info',
     color: '#8b5cf6',
     label: 'Gramática',
-    icon: '📖',
+    icon: '≡',
     description: 'Reglas y estructuras',
     category: 'theme'
   },
@@ -288,7 +288,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'success',
     color: '#10b981',
     label: 'Conversación',
-    icon: '💬',
+    icon: '⌲',
     description: 'Diálogo y comunicación',
     category: 'theme'
   },
@@ -296,7 +296,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#f59e0b',
     label: 'Pronunciación',
-    icon: '🗣️',
+    icon: '♪',
     description: 'Fonética y entonación',
     category: 'theme'
   },
@@ -304,7 +304,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'info',
     color: '#06b6d4',
     label: 'Comprensión Lectora',
-    icon: '📖',
+    icon: '▸',
     description: 'Lectura y comprensión',
     category: 'theme'
   },
@@ -312,7 +312,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#f59e0b',
     label: 'Comprensión Auditiva',
-    icon: '🎧',
+    icon: '♫',
     description: 'Escucha y comprensión',
     category: 'theme'
   },
