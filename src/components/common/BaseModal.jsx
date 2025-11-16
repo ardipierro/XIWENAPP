@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 /**
@@ -56,7 +57,7 @@ function BaseModal({
     'fullscreen': 'w-screen h-screen max-w-none rounded-none'
   };
 
-  return (
+  const modalContent = (
     // Overlay con backdrop blur
     <div
       className={`
@@ -173,6 +174,9 @@ function BaseModal({
       </div>
     </div>
   );
+
+  // Renderizar usando portal para evitar problemas con overflow de contenedores padre
+  return createPortal(modalContent, document.body);
 }
 
 /**

@@ -4,6 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { BaseButton } from './index';
 import ImageOverlay from '../homework/ImageOverlay';
@@ -142,10 +143,10 @@ export default function ImageLightbox({
     setPosition({ x: 0, y: 0 });
   };
 
-  return (
+  const lightboxContent = (
     <div
       className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center"
-      style={{ zIndex: 9999 }}
+      style={{ zIndex: 'var(--z-modal-backdrop)' }}
       onClick={onClose}
     >
       {/* Close Button */}
@@ -255,4 +256,7 @@ export default function ImageLightbox({
       </div>
     </div>
   );
+
+  // Renderizar usando portal para evitar problemas con overflow de contenedores padre
+  return createPortal(lightboxContent, document.body);
 }

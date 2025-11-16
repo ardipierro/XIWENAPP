@@ -20,6 +20,7 @@ import {
   BaseLoading,
   BaseEmptyState,
   BaseBadge,
+  CategoryBadge,
   BaseAlert
 } from '../common';
 import { UniversalCard } from '../cards';
@@ -87,18 +88,16 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
 
   // Get status badge
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'pending':
-        return <BaseBadge variant="warning" icon={Clock}>Pendiente</BaseBadge>;
-      case 'submitted':
-        return <BaseBadge variant="info" icon={CheckCircle}>Entregada</BaseBadge>;
-      case 'graded':
-        return <BaseBadge variant="success" icon={CheckCircle}>Calificada</BaseBadge>;
-      case 'late':
-        return <BaseBadge variant="danger" icon={AlertCircle}>Tarde</BaseBadge>;
-      default:
-        return <BaseBadge variant="default">{status}</BaseBadge>;
-    }
+    // Map assignment status to system status
+    const statusMap = {
+      'pending': 'draft',
+      'submitted': 'review',
+      'graded': 'published',
+      'late': 'archived'
+    };
+
+    const mappedStatus = statusMap[status] || 'draft';
+    return <CategoryBadge type="status" value={mappedStatus} />;
   };
 
   // Loading state

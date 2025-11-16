@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useClassNotifications from '../hooks/useClassNotifications';
 import { deleteNotification, deleteReadNotifications } from '../firebase/notifications';
+import logger from '../utils/logger';
 
 /**
  * Centro de notificaciones con toast automático para clases iniciadas
@@ -64,7 +65,7 @@ function NotificationCenter({ userId, showToasts = true }) {
     try {
       await deleteNotification(notificationId);
     } catch (error) {
-      console.error('Error eliminando notificación:', error);
+      logger.error('Error eliminando notificación:', error);
     }
   };
 
@@ -72,7 +73,7 @@ function NotificationCenter({ userId, showToasts = true }) {
     try {
       await deleteReadNotifications(userId);
     } catch (error) {
-      console.error('Error limpiando notificaciones leídas:', error);
+      logger.error('Error limpiando notificaciones leídas:', error);
     }
   };
 

@@ -5,7 +5,7 @@
 
 import { useState, useRef } from 'react';
 import { CheckCircle, XCircle, Lightbulb, RefreshCw, Volume2, PlayCircle } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge } from '../../common';
+import { BaseButton, BaseCard, BaseBadge, CategoryBadge } from '../../common';
 import { useExerciseState } from '../../../hooks/useExerciseState';
 
 /**
@@ -88,7 +88,7 @@ export function DictationExercise({
             </p>
           </div>
         </div>
-        <BaseBadge variant="default">{cefrLevel}</BaseBadge>
+        <CategoryBadge type="cefr" value={cefrLevel} />
       </div>
 
       {/* Controles de audio */}

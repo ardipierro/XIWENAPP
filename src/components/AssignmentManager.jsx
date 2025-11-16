@@ -26,6 +26,7 @@ import {
   BaseModal,
   BaseInput,
   BaseBadge,
+  CategoryBadge,
   BaseLoading,
   BaseEmptyState
 } from './common';
@@ -238,9 +239,10 @@ function AssignmentCard({ assignment, courses, onEdit, onDelete, onViewStats }) 
                   </div>
                 )}
 
-                <BaseBadge variant={assignment.status === 'active' ? 'success' : 'info'}>
-                  {assignment.status === 'active' ? 'Activa' : 'Archivada'}
-                </BaseBadge>
+                <CategoryBadge
+                  type="status"
+                  value={assignment.status === 'active' ? 'published' : 'archived'}
+                />
               </div>
             </div>
           </div>

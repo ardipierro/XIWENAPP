@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Maximize2, Minimize2 } from 'lucide-react';
 import logger from '../../utils/logger';
 
@@ -74,7 +75,7 @@ function ExpandableModal({
     ? 'w-screen h-screen max-w-none rounded-none m-0'
     : `${sizeClasses[size]} max-h-[calc(100vh-2rem)]`;
 
-  return (
+  const modalContent = (
     // Overlay con backdrop blur
     <div
       className={`
@@ -223,6 +224,9 @@ function ExpandableModal({
       </div>
     </div>
   );
+
+  // Renderizar usando portal para evitar problemas con overflow de contenedores padre
+  return createPortal(modalContent, document.body);
 }
 
 export default ExpandableModal;

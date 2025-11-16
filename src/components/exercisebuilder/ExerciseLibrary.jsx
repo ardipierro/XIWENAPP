@@ -14,7 +14,7 @@ import {
   Grid,
   List
 } from 'lucide-react';
-import { BaseButton, BaseBadge, BaseAlert } from '../common';
+import { BaseButton, BaseBadge, CategoryBadge, BaseAlert } from '../common';
 import { UniversalCard } from '../cards';
 import {
   EXERCISE_TEMPLATES,

@@ -41,13 +41,6 @@ const MENU_ITEMS = [
     path: '/dashboard-v2/calendar',
     permission: null, // Todos pueden ver el calendario
   },
-  {
-    id: 'messages',
-    label: 'Mensajes',
-    icon: MessageSquare,
-    path: '/dashboard-v2/messages',
-    permission: 'send-messages',
-  },
 
   // DIVIDER
   { type: 'divider', id: 'div1' },
@@ -107,6 +100,14 @@ const MENU_ITEMS = [
     label: 'Mis Cursos',
     icon: BookOpen,
     path: '/dashboard-v2/my-courses',
+    permission: 'view-all-content',
+    hideIf: ['create-content'], // No mostrar a teachers/admins
+  },
+  {
+    id: 'my-classes',
+    label: 'Mis Clases',
+    icon: Video,
+    path: '/dashboard-v2/my-classes',
     permission: 'view-all-content',
     hideIf: ['create-content'], // No mostrar a teachers/admins
   },

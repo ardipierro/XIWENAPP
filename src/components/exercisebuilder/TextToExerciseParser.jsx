@@ -267,35 +267,256 @@ export function TextToExerciseParser({ onExerciseGenerated }) {
     setParseError(null);
   };
 
+  // 19 Ejemplos organizados por categorías
   const exampleTexts = {
-    mcq: `[TIPO: MCQ]
+    // FASE 1: BÁSICOS
+    mcq: {
+      label: 'Opción Múltiple',
+      icon: '📝',
+      category: 'Básicos',
+      text: `[TIPO: MCQ]
 ¿Cómo se dice "hello" en español?
 [hola]* [adiós] [gracias] [por favor]
 EXPLICACION: "Hola" es el saludo más común en español.
 NIVEL: A1
-PISTA: Es un saludo informal`,
+PISTA: Es un saludo informal`
+    },
 
-    blank: `[TIPO: BLANK]
+    blank: {
+      label: 'Completar Espacios',
+      icon: '✏️',
+      category: 'Básicos',
+      text: `[TIPO: BLANK]
 Me ___ María.
 RESPUESTA: llamo
 EXPLICACION: Usamos "me llamo" para presentarnos.
 NIVEL: A1
-PISTA: Es un verbo reflexivo`,
+PISTA: Es un verbo reflexivo`
+    },
 
-    match: `[TIPO: MATCH]
+    match: {
+      label: 'Emparejar',
+      icon: '🔗',
+      category: 'Básicos',
+      text: `[TIPO: MATCH]
 TITULO: Empareja las palabras con su traducción
 tener sed -> to be thirsty
 tener hambre -> to be hungry
 tener frío -> to be cold
 tener calor -> to be hot
 EXPLICACION: En español usamos "tener" para estas expresiones.
-NIVEL: B1`,
+NIVEL: B1`
+    },
 
-    truefalse: `[TIPO: TRUEFALSE]
+    truefalse: {
+      label: 'Verdadero/Falso',
+      icon: '✅',
+      category: 'Básicos',
+      text: `[TIPO: TRUEFALSE]
 En español, los adjetivos siempre van antes del sustantivo.
 RESPUESTA: false
 EXPLICACION: En español, la mayoría de los adjetivos van después del sustantivo.
 NIVEL: A2`
+    },
+
+    // FASE 2: AUDIO (Nota: Parser no genera componentes de audio, pero muestra sintaxis)
+    audiolistening: {
+      label: 'Comprensión Auditiva',
+      icon: '🎧',
+      category: 'Audio',
+      text: `[TIPO: AUDIO]
+AUDIO: /audio/dialogo-restaurante.mp3
+TRANSCRIPT: ¿Qué desea ordenar? - Quiero una pizza por favor.
+PREGUNTA: ¿Qué quiere ordenar la persona?
+[pizza]* [hamburguesa] [ensalada] [pasta]
+EXPLICACION: La persona dice "quiero una pizza".
+NIVEL: A2`
+    },
+
+    aiaudio: {
+      label: 'Pronunciación IA',
+      icon: '🎤',
+      category: 'Audio',
+      text: `[TIPO: AI_AUDIO]
+La jirafa jaranera jugaba en el jardín
+FONETICA: la xi.ˈɾa.fa xa.ɾa.ˈne.ɾa xu.ˈɣa.βa en el xaɾ.ˈdin
+DIFICULTAD: hard
+TIP: La 'j' en español es gutural
+NIVEL: B2`
+    },
+
+    dictation: {
+      label: 'Dictado',
+      icon: '📝',
+      category: 'Audio',
+      text: `[TIPO: DICTATION]
+AUDIO: /audio/dictado-01.mp3
+RESPUESTA: El perro corre por el parque
+EXPLICACION: Dictado de una oración simple en presente.
+NIVEL: A1`
+    },
+
+    // FASE 3: INTERACTIVOS
+    textselection: {
+      label: 'Selección de Texto',
+      icon: '🎯',
+      category: 'Interactivos',
+      text: `[TIPO: TEXT_SELECTION]
+INSTRUCCION: Selecciona todos los verbos
+TEXTO: María estudia español todos los días. Juan trabaja en un banco.
+PALABRAS: estudia|trabaja
+EXPLICACION: Los verbos son acciones.
+NIVEL: A2`
+    },
+
+    dragdrop: {
+      label: 'Ordenar Arrastrando',
+      icon: '🔄',
+      category: 'Interactivos',
+      text: `[TIPO: DRAG_DROP]
+INSTRUCCION: Ordena las palabras para formar la oración
+PALABRAS: Yo|me|levanto|a|las|ocho
+EXPLICACION: El orden correcto en español.
+NIVEL: A1`
+    },
+
+    freedragdrop: {
+      label: 'Categorizar Arrastrando',
+      icon: '📦',
+      category: 'Interactivos',
+      text: `[TIPO: FREE_DRAG]
+TITULO: Clasifica por género
+CATEGORIA: Masculino|Femenino
+ITEMS: el libro→Masculino|la mesa→Femenino|el coche→Masculino|la casa→Femenino
+EXPLICACION: Los sustantivos en español tienen género.
+NIVEL: A1`
+    },
+
+    dialoguerole: {
+      label: 'Diálogo por Roles',
+      icon: '💬',
+      category: 'Interactivos',
+      text: `[TIPO: DIALOGUE_ROLE]
+CONTEXTO: En un restaurante
+ROLE_A: Mesero|ROLE_B: Cliente
+USER_ROLE: B
+A: Buenas tardes, ¿qué desea ordenar?
+B: [USER_INPUT]|Quiero una pizza|Una pizza por favor
+A: ¿Qué sabor de pizza prefiere?
+EXPLICACION: Usa expresiones corteses como "por favor".
+NIVEL: A2`
+    },
+
+    dialoguecompletion: {
+      label: 'Completar Diálogo',
+      icon: '💭',
+      category: 'Interactivos',
+      text: `[TIPO: DIALOGUE_COMPLETE]
+A: ¿Cómo te llamas?
+B: [Me llamo Ana]*[Soy Ana][Mi nombre Ana]
+A: Encantado de conocerte
+EXPLICACION: "Me llamo" es la forma más formal.
+NIVEL: A1`
+    },
+
+    // FASE 4: LENGUAJE
+    verbid: {
+      label: 'Identificar Verbos',
+      icon: '🔤',
+      category: 'Lenguaje',
+      text: `[TIPO: VERB_ID]
+INSTRUCCION: Selecciona todos los verbos conjugados
+TEXTO: María estudia español. Juan trabaja mucho. Ellos viven en Madrid.
+VERBOS: estudia→estudiar→presente|trabaja→trabajar→presente|viven→vivir→presente
+EXPLICACION: Los verbos conjugados indican la acción.
+NIVEL: B1`
+    },
+
+    grammar: {
+      label: 'Transformación Gramatical',
+      icon: '🔄',
+      category: 'Lenguaje',
+      text: `[TIPO: GRAMMAR_TRANSFORM]
+INSTRUCCION: Transforma al pasado
+ORACION: Yo como pizza
+RESPUESTA: Yo comí pizza|Comí pizza
+EXPLICACION: Pretérito indefinido de "comer".
+NIVEL: B1`
+    },
+
+    error: {
+      label: 'Detectar Errores',
+      icon: '🔍',
+      category: 'Lenguaje',
+      text: `[TIPO: ERROR_DETECT]
+TEXTO: Yo *es* estudiante. María *trabaja* en el banco.
+ERRORES: es→soy
+EXPLICACION: Con "yo" usamos "soy", no "es".
+NIVEL: A2`
+    },
+
+    collocation: {
+      label: 'Colocaciones',
+      icon: '🔗',
+      category: 'Lenguaje',
+      text: `[TIPO: COLLOCATION]
+TITULO: Empareja las colocaciones
+hacer -> la cama
+tomar -> una decisión
+poner -> la mesa
+dar -> las gracias
+EXPLICACION: Colocaciones comunes en español.
+NIVEL: B2`
+    },
+
+    // FASE 5: COMPLEJOS
+    cloze: {
+      label: 'Cloze Test',
+      icon: '📋',
+      category: 'Complejos',
+      text: `[TIPO: CLOZE]
+El [___] corre por el [___] mientras el niño [___].
+RESPUESTAS: perro|parque|juega
+BANCO: perro|gato|parque|casa|juega|duerme
+EXPLICACION: Completa el texto con las palabras del banco.
+NIVEL: A1`
+    },
+
+    sentencebuilder: {
+      label: 'Construir Oraciones',
+      icon: '🏗️',
+      category: 'Complejos',
+      text: `[TIPO: SENTENCE_BUILD]
+PALABRAS: María|estudia|español|todos|los|días
+ORDEN_CORRECTO: María|estudia|español|todos|los|días
+EXPLICACION: Sujeto + Verbo + Objeto + Complemento.
+NIVEL: A2`
+    },
+
+    reading: {
+      label: 'Lectura Interactiva',
+      icon: '📖',
+      category: 'Complejos',
+      text: `[TIPO: INTERACTIVE_READING]
+TITULO: Un día en Barcelona
+TEXTO: Barcelona es una ciudad cosmopolita situada en la costa mediterránea...
+VOCABULARIO: cosmopolita→international→国际化的|costa→coast→海岸|mediterránea→Mediterranean→地中海的
+PREGUNTA: ¿Dónde está situada Barcelona?
+[En la costa atlántica][En la costa mediterránea]*[En el interior]
+NIVEL: B1`
+    },
+
+    hotspot: {
+      label: 'Puntos en Imagen',
+      icon: '🖼️',
+      category: 'Complejos',
+      text: `[TIPO: HOTSPOT]
+IMAGEN: /images/room.jpg
+HOTSPOTS: 100,150→mesa|200,300→silla|150,100→lámpara
+INSTRUCCION: Haz clic en la mesa
+EXPLICACION: Identifica objetos en la imagen.
+NIVEL: A1`
+    }
   };
 
   return (
@@ -325,23 +546,46 @@ NIVEL: A2`
               </BaseAlert>
             )}
 
-            {/* Ejemplos rápidos */}
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Ejemplos rápidos:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(exampleTexts).map(([key, text]) => (
-                  <BaseButton
-                    key={key}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setInputText(text)}
-                  >
-                    {key.toUpperCase()}
-                  </BaseButton>
-                ))}
+            {/* Ejemplos organizados por categorías */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  📚 19 Ejemplos de Sintaxis (Click para cargar):
+                </p>
+                <BaseBadge variant="primary">
+                  {Object.keys(exampleTexts).length} tipos
+                </BaseBadge>
               </div>
+
+              {/* Agrupar por categorías */}
+              {['Básicos', 'Audio', 'Interactivos', 'Lenguaje', 'Complejos'].map(category => {
+                const examples = Object.entries(exampleTexts).filter(([_, ex]) => ex.category === category);
+                return (
+                  <div key={category} className="space-y-2">
+                    <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                      {category}
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                      {examples.map(([key, example]) => (
+                        <button
+                          key={key}
+                          onClick={() => setInputText(example.text)}
+                          className="flex items-center gap-2 p-3 rounded-lg border-2 border-gray-200
+                                   dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400
+                                   bg-white dark:bg-gray-800 transition-all hover:shadow-md group"
+                        >
+                          <span className="text-xl flex-shrink-0 group-hover:scale-110 transition-transform">
+                            {example.icon}
+                          </span>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white text-left">
+                            {example.label}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <BaseButton
