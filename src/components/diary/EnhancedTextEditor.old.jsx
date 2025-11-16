@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
@@ -22,37 +22,34 @@ import {
   X,
   Edit2,
   ChevronDown,
-  ChevronUp,
-  Download,
-  Layers
+  ChevronUp
 } from 'lucide-react';
 import { ColorPicker } from './ColorPicker';
 import { HighlightPicker } from './HighlightPicker';
 import { PencilPresets } from './PencilPresets';
-import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
-import { StrokeWidthSelector } from './StrokeWidthSelector';
-import { ZoomControls } from './ZoomControls';
-import { exportToPDF } from '../../utils/pdfExport';
+import { DrawingCanvas } from './DrawingCanvas';
 
 /**
- * EnhancedTextEditor - Editor de texto avanzado con todas las características
+ * EnhancedTextEditor - Editor de texto enriquecido con todas las características
  *
- * Características COMPLETAS:
+ * Características:
  * - Formato básico: negrita, cursiva, subrayado
  * - Encabezados H1, H2, H3
  * - Listas con viñetas y numeradas
  * - Alineación de texto
- * - **12 fuentes** (5 clásicas + 7 Google Fonts)
+ * - Selector de fuente (5 opciones)
  * - Tamaños de fuente personalizados
- * - Color de fuente con picker
- * - Resaltador con 6 colores
+ * - Color de fuente
+ * - Resaltador con colores
  * - Lápiz/dibujo con perfect-freehand
- * - **Undo/Redo** para trazos de lápiz
- * - **Capas** (dibujos sobre/bajo texto)
- * - **Zoom** (0.5x - 3x)
- * - **Selector de grosor** (1-20px)
- * - **Exportar a PDF**
+ * - Guardado en Firebase
  * - Dark mode compatible
+ *
+ * @param {string} initialContent - HTML inicial del bloque
+ * @param {string} initialDrawings - JSON de trazos de dibujo iniciales
+ * @param {Function} onSave - Callback al guardar
+ * @param {boolean} isTeacher - Si es profesor (puede editar)
+ * @param {string} blockId - ID único del bloque
  */
 export function EnhancedTextEditor({
   initialContent = '<p>Escribe aquí...</p>',
@@ -78,28 +75,6 @@ export function EnhancedTextEditor({
       return [];
     }
   });
-
-  // NEW: Advanced drawing states
-  const [zoom, setZoom] = useState(1);
-  const [drawingLayer, setDrawingLayer] = useState('over'); // 'over' | 'under'
-
-  const editorContainerRef = useRef(null);
-
-  // Fuentes disponibles (5 clásicas + 7 Google Fonts)
-  const fontFamilies = [
-    { label: 'Arial', value: 'Arial, sans-serif', type: 'classic' },
-    { label: 'Times New Roman', value: 'Times New Roman, serif', type: 'classic' },
-    { label: 'Courier New', value: 'Courier New, monospace', type: 'classic' },
-    { label: 'Georgia', value: 'Georgia, serif', type: 'classic' },
-    { label: 'Verdana', value: 'Verdana, sans-serif', type: 'classic' },
-    { label: 'Inter', value: 'Inter, sans-serif', type: 'google' },
-    { label: 'Playfair Display', value: 'Playfair Display, serif', type: 'google' },
-    { label: 'Roboto Mono', value: 'Roboto Mono, monospace', type: 'google' },
-    { label: 'Merriweather', value: 'Merriweather, serif', type: 'google' },
-    { label: 'Open Sans', value: 'Open Sans, sans-serif', type: 'google' },
-    { label: 'Lora', value: 'Lora, serif', type: 'google' },
-    { label: 'Comic Neue', value: 'Comic Neue, cursive', type: 'google' },
-  ];
 
   const editor = useEditor({
     extensions: [
@@ -179,27 +154,12 @@ export function EnhancedTextEditor({
     setIsEditing(false);
     setDrawingMode(false);
     setSaveError(null);
-    setZoom(1);
   };
 
   const handlePencilPresetSelect = (preset) => {
     setPencilColor(preset.color);
     setPencilOpacity(preset.opacity);
     setPencilSize(preset.size);
-  };
-
-  // NEW: Exportar a PDF
-  const handleExportPDF = async () => {
-    if (!editorContainerRef.current) return;
-
-    const filename = `texto-${blockId || Date.now()}.pdf`;
-    const result = await exportToPDF(editorContainerRef.current, filename);
-
-    if (result.success) {
-      alert('✅ PDF descargado exitosamente');
-    } else {
-      alert('❌ Error al exportar PDF: ' + result.error);
-    }
   };
 
   if (!editor) {
@@ -211,7 +171,7 @@ export function EnhancedTextEditor({
   }
 
   return (
-    <div className="enhanced-text-editor-v2 group relative my-4">
+    <div className="enhanced-text-editor group relative my-4">
       {/* Botón "Editar" solo para profesores (visible al hover) */}
       {isTeacher && !isEditing && (
         <button
@@ -362,18 +322,6 @@ export function EnhancedTextEditor({
               {showAdvancedTools ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
 
-            {/* Exportar PDF */}
-            <button
-              onClick={handleExportPDF}
-              className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-semibold
-                       bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200
-                       hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
-              title="Exportar a PDF"
-            >
-              <Download size={14} />
-              PDF
-            </button>
-
             {/* Botones de acción */}
             <div className="ml-auto flex gap-2">
               <button
@@ -414,16 +362,11 @@ export function EnhancedTextEditor({
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                            focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                 >
-                  <optgroup label="Fuentes Clásicas">
-                    {fontFamilies.filter(f => f.type === 'classic').map(font => (
-                      <option key={font.value} value={font.value}>{font.label}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Google Fonts">
-                    {fontFamilies.filter(f => f.type === 'google').map(font => (
-                      <option key={font.value} value={font.value}>{font.label}</option>
-                    ))}
-                  </optgroup>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="Times New Roman, serif">Times New Roman</option>
+                  <option value="Courier New, monospace">Courier New</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="Verdana, sans-serif">Verdana</option>
                 </select>
               </div>
 
@@ -448,51 +391,20 @@ export function EnhancedTextEditor({
             </div>
           )}
 
-          {/* Toolbar de lápiz (solo si está en modo dibujo) */}
+          {/* Presets de lápiz (solo si está en modo dibujo) */}
           {drawingMode && (
             <div className="pencil-toolbar p-3 bg-purple-50 dark:bg-purple-900/20
                            border-b border-purple-200 dark:border-purple-800">
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3 mb-2">
                 <Pen size={16} className="text-purple-600 dark:text-purple-400" />
                 <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
                   Modo Lápiz Activo
                 </span>
-
-                {/* Toggle de capa */}
-                <button
-                  onClick={() => setDrawingLayer(drawingLayer === 'over' ? 'under' : 'over')}
-                  className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg
-                           bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700
-                           hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
-                  title="Cambiar capa de dibujo"
-                >
-                  <Layers size={14} className="text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs font-semibold text-purple-900 dark:text-purple-100">
-                    Capa: {drawingLayer === 'over' ? 'Superior' : 'Inferior'}
-                  </span>
-                </button>
               </div>
-
-              {/* Presets de lápiz */}
               <PencilPresets
                 onSelect={handlePencilPresetSelect}
                 current={{ color: pencilColor, opacity: pencilOpacity, size: pencilSize }}
               />
-
-              {/* Controles adicionales */}
-              <div className="flex gap-3 mt-3">
-                {/* Selector de grosor */}
-                <StrokeWidthSelector
-                  value={pencilSize}
-                  onChange={setPencilSize}
-                />
-
-                {/* Controles de zoom */}
-                <ZoomControls
-                  zoom={zoom}
-                  onZoomChange={setZoom}
-                />
-              </div>
             </div>
           )}
         </div>
@@ -507,11 +419,8 @@ export function EnhancedTextEditor({
       )}
 
       {/* Editor de texto con canvas de dibujo */}
-      <div
-        ref={editorContainerRef}
-        className="editor-container relative"
-        style={{ minHeight: '150px' }}
-      >
+      <div className="editor-container relative"
+           style={{ minHeight: '150px' }}>
         <div
           className={`
             bg-white dark:bg-gray-900
@@ -524,15 +433,13 @@ export function EnhancedTextEditor({
           <EditorContent editor={editor} />
         </div>
 
-        {/* Canvas de dibujo avanzado con todas las características */}
+        {/* Canvas de dibujo superpuesto */}
         {isEditing && (
-          <DrawingCanvasAdvanced
+          <DrawingCanvas
             enabled={drawingMode}
             color={pencilColor}
             opacity={pencilOpacity}
             size={pencilSize}
-            zoom={zoom}
-            layer={drawingLayer}
             onStrokesChange={setDrawingStrokes}
             initialStrokes={drawingStrokes}
           />
@@ -543,8 +450,7 @@ export function EnhancedTextEditor({
       {!isEditing && isTeacher && (
         <div className="mt-2 text-xs text-gray-500 dark:text-gray-500 italic opacity-0
                        group-hover:opacity-100 transition-opacity">
-          💡 Pasa el mouse y haz clic en "Editar" para usar el editor avanzado con 12 fuentes,
-          colores, resaltador, lápiz con undo/redo, zoom, capas y exportar a PDF
+          💡 Pasa el mouse y haz clic en "Editar" para modificar este bloque con herramientas avanzadas
         </div>
       )}
     </div>
