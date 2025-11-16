@@ -3230,6 +3230,27 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   opacity: 0.5;
 }
 
+/* ===== MOBILE MESSAGING - REGLA GLOBAL (Media query no funciona correctamente) ===== */
+.messages-panel {
+  position: fixed !important;
+  top: 56px !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: calc(100vh - 56px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column;
+  background: var(--color-bg-primary);
+  z-index: 50 !important;
+}
+
 /* Mobile Responsive - Fullscreen alternating views */
 @media (max-width: 768px) {
   /* ===== AJUSTAR DASHBOARD CONTENT PARA MENSAJES ===== */
@@ -3239,27 +3260,6 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     overflow: hidden !important;
     scrollbar-gutter: auto !important;
     overscroll-behavior-y: none !important;
-  }
-
-  /* ===== PANEL PRINCIPAL - Position fixed para fullscreen ===== */
-  .messages-panel {
-    position: fixed !important;
-    top: 56px !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: calc(100vh - 56px) !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column;
-    background: var(--color-bg-primary);
-    z-index: 50 !important; /* Debajo del side menu (90) pero arriba del contenido */
   }
 
   /* Mobile Sidebar - Fullscreen cuando visible */
