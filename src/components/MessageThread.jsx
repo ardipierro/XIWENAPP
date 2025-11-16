@@ -1234,7 +1234,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
           </div>
         )}
 
-        {/* Input Area - 2 filas en mobile, 1 fila en desktop */}
+        {/* Input Area - 1 fila simplificada */}
         <div className={`input-area ${isMobile ? 'input-area-mobile' : ''}`}>
           <input
             ref={fileInputRef}
@@ -1244,19 +1244,10 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
             style={{ display: 'none' }}
           />
 
-          {/* Fila 1: Action Buttons (solo en mobile) */}
-          {isMobile && (
-            <div className="input-actions-row">
-              <button
-                type="button"
-                className="input-action-btn"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={sending || uploading}
-                title="Adjuntar archivo"
-              >
-                <Paperclip size={22} />
-              </button>
-
+          {/* Una sola fila: Emoji + Textarea + Send */}
+          <div className="input-row">
+            {/* Mobile: Solo emoji a la izquierda */}
+            {isMobile && (
               <div style={{ position: 'relative' }}>
                 <button
                   type="button"
@@ -1275,21 +1266,8 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
                   />
                 )}
               </div>
+            )}
 
-              <button
-                type="button"
-                className="input-action-btn"
-                onClick={() => setShowVoiceRecorder(true)}
-                disabled={sending || uploading || showVoiceRecorder}
-                title="Mensaje de voz"
-              >
-                <Mic size={22} />
-              </button>
-            </div>
-          )}
-
-          {/* Fila 2: Textarea + Send (mobile) / Todo en una fila (desktop) */}
-          <div className="input-row">
             {/* Desktop: Botones a la izquierda */}
             {!isMobile && (
               <>
@@ -1349,7 +1327,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
               }}
               onKeyPress={handleKeyPress}
               onKeyDown={handleKeyDown}
-              rows={isMobile ? 2 : 3}
+              rows={isMobile ? 1 : 3}
               disabled={sending || uploading}
             />
 
