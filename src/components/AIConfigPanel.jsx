@@ -25,7 +25,7 @@ import SelectionSpeakerConfig from './SelectionSpeakerConfig';
 import ProfileEditor from './homework/ProfileEditor';
 import ImageTaskModal from './ImageTaskModal';
 import TranslatorConfigCard from './settings/TranslatorConfigCard';
-import { AIExerciseGenerator } from './exercisebuilder/AIExerciseGenerator';
+import { ExerciseBuilderModal } from './exercisebuilder/ExerciseBuilderModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
 import { IMAGE_GENERATION_TASKS } from '../utils/imageGenerationTasks';
 import { useAuth } from '../contexts/AuthContext';
@@ -54,6 +54,9 @@ function AIConfigPanel() {
   // Estado para configuración del traductor
   const [translatorConfig, setTranslatorConfig] = useState(null);
   const [showTranslatorModal, setShowTranslatorModal] = useState(false);
+
+  // Estado para Exercise Builder
+  const [showExerciseBuilder, setShowExerciseBuilder] = useState(false);
 
   // Get current user and role
   const { user, userRole } = useAuth();
@@ -201,6 +204,13 @@ function AIConfigPanel() {
   };
 
   /**
+   * Abrir modal de Exercise Builder
+   */
+  const handleConfigureExerciseBuilder = () => {
+    setShowExerciseBuilder(true);
+  };
+
+  /**
    * Guardar configuración de función
    */
   const handleSaveFunction = async (functionId, functionConfig) => {
@@ -290,7 +300,7 @@ function AIConfigPanel() {
   });
 
   /**
-   * Obtener todas las funciones (AI + Perfiles + Tareas + Traductor)
+   * Obtener todas las funciones (AI + Perfiles + Tareas + Traductor + Exercise Builder)
    */
   const getAllFunctions = () => {
     const aiFunctions = [...AI_FUNCTIONS];
@@ -312,7 +322,22 @@ function AIConfigPanel() {
       }
     };
 
-    return [...aiFunctions, ...profileFunctions, ...taskFunctions, translatorFunction];
+    // Agregar función del Exercise Builder
+    const exerciseBuilderFunction = {
+      id: 'exercise_builder',
+      name: 'Generador de Ejercicios',
+      description: 'Crea ejercicios con IA a partir de texto. 19 tipos disponibles',
+      icon: Sparkles,
+      category: 'content',
+      isExerciseBuilder: true,
+      defaultConfig: {
+        enabled: true,
+        provider: 'exercise-builder',
+        model: 'ai-generator'
+      }
+    };
+
+    return [...aiFunctions, ...profileFunctions, ...taskFunctions, translatorFunction, exerciseBuilderFunction];
   };
 
   /**
@@ -396,7 +421,7 @@ function AIConfigPanel() {
   // RENDER PRINCIPAL
   // ============================================================================
   return (
-    <div className="ai-config-panel space-y-8">
+    <div className="ai-config-panel">
 
       {/* Alerts */}
       {error && (
@@ -422,27 +447,6 @@ function AIConfigPanel() {
           {success}
         </BaseAlert>
       )}
-
-      {/* NUEVO: Exercise Builder integrado como sección destacada */}
-      <section className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/10 dark:to-indigo-900/10 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-800">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-purple-600 dark:bg-purple-500 rounded-lg">
-            <Sparkles className="text-white" size={24} />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Generador de Ejercicios con IA
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Crea ejercicios personalizados usando inteligencia artificial
-            </p>
-          </div>
-        </div>
-        <AIExerciseGenerator />
-      </section>
-
-      {/* Separador visual */}
-      <div className="border-t-2 border-gray-200 dark:border-gray-700"></div>
 
       {/* Search Bar */}
       <SearchBar
@@ -532,6 +536,19 @@ function AIConfigPanel() {
               );
             }
 
+            // Si es el Exercise Builder
+            if (func.isExerciseBuilder) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={handleConfigureExerciseBuilder}
+                  viewMode="grid"
+                />
+              );
+            }
+
             // Función de IA normal
             return (
               <AIFunctionCard
@@ -582,6 +599,19 @@ function AIConfigPanel() {
                   aiFunction={func}
                   config={func.defaultConfig}
                   onConfigure={handleConfigureTranslator}
+                  viewMode="list"
+                />
+              );
+            }
+
+            // Si es el Exercise Builder
+            if (func.isExerciseBuilder) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={handleConfigureExerciseBuilder}
                   viewMode="list"
                 />
               );
@@ -681,6 +711,14 @@ function AIConfigPanel() {
             }}
           />
         </BaseModal>
+      )}
+
+      {/* Exercise Builder Modal */}
+      {showExerciseBuilder && (
+        <ExerciseBuilderModal
+          isOpen={showExerciseBuilder}
+          onClose={() => setShowExerciseBuilder(false)}
+        />
       )}
     </div>
   );
