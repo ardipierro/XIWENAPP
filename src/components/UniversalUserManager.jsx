@@ -28,7 +28,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useUserManagement } from '../hooks/useUserManagement';
 import { createUser, deleteUser } from '../firebase/users';
 import SearchBar from './common/SearchBar';
-import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge, CategoryBadge } from './common';
+import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge, CategoryBadge, BaseModal } from './common';
 import { UniversalCard, CardGrid } from './cards';
 import AddUserModal from './AddUserModal';
 import UserProfile from './UserProfile';
@@ -245,22 +245,6 @@ export default function UniversalUserManager({ user, userRole }) {
   // Loading state
   if (userManagement.loading && userManagement.users.length === 0) {
     return <BaseLoading size="large" text={`Cargando ${title.toLowerCase()}...`} />;
-  }
-
-  // User Profile view
-  if (showUserProfile && selectedUserProfile) {
-    return (
-      <UserProfile
-        selectedUser={selectedUserProfile}
-        currentUser={user}
-        isAdmin={isAdmin()}
-        onBack={() => {
-          setShowUserProfile(false);
-          setSelectedUserProfile(null);
-        }}
-        onUpdate={handleUpdateUser}
-      />
-    );
   }
 
   return (
@@ -660,6 +644,31 @@ export default function UniversalUserManager({ user, userRole }) {
         confirmText="Eliminar"
         cancelText="Cancelar"
       />
+
+      {/* User Profile Modal */}
+      <BaseModal
+        isOpen={showUserProfile && !!selectedUserProfile}
+        onClose={() => {
+          setShowUserProfile(false);
+          setSelectedUserProfile(null);
+        }}
+        title={selectedUserProfile?.name || 'Perfil de Usuario'}
+        size="xl"
+      >
+        {selectedUserProfile && (
+          <UserProfile
+            selectedUser={selectedUserProfile}
+            currentUser={user}
+            isAdmin={isAdmin()}
+            inModal={true}
+            onBack={() => {
+              setShowUserProfile(false);
+              setSelectedUserProfile(null);
+            }}
+            onUpdate={handleUpdateUser}
+          />
+        )}
+      </BaseModal>
     </div>
   );
 }

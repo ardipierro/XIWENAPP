@@ -3,7 +3,7 @@
  * @module hooks/useModal
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 /**
  * Hook para manejar estado y acciones de modales
@@ -35,11 +35,13 @@ export function useModal() {
    * Toggle del estado del modal
    */
   const toggle = useCallback(() => {
-    setIsOpen(prev => !prev);
-    if (isOpen) {
-      setTimeout(() => setData(null), 300);
-    }
-  }, [isOpen]);
+    setIsOpen(prev => {
+      if (prev) {
+        setTimeout(() => setData(null), 300);
+      }
+      return !prev;
+    });
+  }, []);
 
   /**
    * Actualiza los datos del modal sin cerrarlo
@@ -49,14 +51,14 @@ export function useModal() {
     setData(newData);
   }, []);
 
-  return {
+  return useMemo(() => ({
     isOpen,
     data,
     open,
     close,
     toggle,
     updateData
-  };
+  }), [isOpen, data, open, close, toggle, updateData]);
 }
 
 export default useModal;

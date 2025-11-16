@@ -52,7 +52,7 @@ import CreditManager from './CreditManager';
 import StudentSessionsView from './StudentSessionsView';
 import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
-import { BaseAlert, BaseTabs } from './common';
+import { BaseAlert, BaseTabs, CategoryBadge } from './common';
 import BaseButton from './common/BaseButton';
 
 // Icon mapping for role icons from roleConfig
@@ -66,7 +66,7 @@ const ICON_MAP = {
   'User': User
 };
 
-function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
+function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inModal = false }) {
   const { startViewingAs } = useViewAs();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const navigate = useNavigate();
@@ -437,70 +437,88 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Header */}
-      <div className="modal-header flex-shrink-0">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="profile-avatar-large">
-            {(() => {
-              const iconName = ROLE_INFO[selectedUser.role]?.icon || 'User';
-              const IconComponent = ICON_MAP[iconName] || User;
-              return <IconComponent size={48} strokeWidth={2} />;
-            })()}
-          </div>
-          <div className="flex-1">
-            <h3 className="modal-title mb-2 sm:mb-2">{selectedUser.name || selectedUser.email}</h3>
-            <div className="flex items-center gap-2 flex-wrap mt-2">
-              {/* Badge de Rol */}
-              <span className="profile-role-badge">
-                {(() => {
-                  const iconName = ROLE_INFO[selectedUser.role]?.icon || 'User';
-                  const IconComponent = ICON_MAP[iconName] || User;
-                  return <IconComponent size={16} strokeWidth={2} className="inline mr-1" />;
-                })()}
-                {ROLE_INFO[selectedUser.role]?.name}
-              </span>
+      {/* Header - Solo mostrar si NO está en modal */}
+      {!inModal && (
+        <div className="modal-header flex-shrink-0">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="profile-avatar-large">
+              {(() => {
+                const iconName = ROLE_INFO[selectedUser.role]?.icon || 'User';
+                const IconComponent = ICON_MAP[iconName] || User;
+                return <IconComponent size={48} strokeWidth={2} />;
+              })()}
+            </div>
+            <div className="flex-1">
+              <h3 className="modal-title mb-2 sm:mb-2">{selectedUser.name || selectedUser.email}</h3>
+              <div className="flex items-center gap-2 flex-wrap mt-2">
+                {/* Badge de Rol */}
+                <CategoryBadge type="role" value={selectedUser.role} />
 
-              {/* Badge de Estado */}
-              <span className={`profile-status-badge status-${selectedUser.status}`}>
-                {selectedUser.status === 'active' ? (
-                  <span className="flex items-center gap-1">
-                    <CheckCircle size={16} strokeWidth={2} /> Activo
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Ban size={16} strokeWidth={2} /> Suspendido
+                {/* Badge de Estado */}
+                <CategoryBadge type="status" value={selectedUser.status} />
+
+                {/* Badge de Créditos */}
+                <span className="profile-role-badge" style={{ background: '#fbbf24', color: '#78350f', border: '1px solid #fbbf24' }}>
+                  <CreditCard size={16} strokeWidth={2} className="inline mr-1" />
+                  {userCredits} créditos
+                </span>
+
+                {/* Badge Ver como (clickeable) */}
+                {isAdmin && currentUser?.uid !== selectedUser.id && (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewAs();
+                    }}
+                    className="profile-role-badge cursor-pointer hover:opacity-80 transition-opacity"
+                    style={{ background: '#fb923c', color: 'white', border: '1px solid #fb923c' }}
+                    title="Cambiar a la vista de este usuario"
+                  >
+                    <Eye size={16} strokeWidth={2} className="inline mr-1" />
+                    Ver como
                   </span>
                 )}
-              </span>
-
-              {/* Badge de Créditos */}
-              <span className="profile-role-badge" style={{ background: '#fbbf24', color: '#78350f', border: '1px solid #fbbf24' }}>
-                <CreditCard size={16} strokeWidth={2} className="inline mr-1" />
-                {userCredits} créditos
-              </span>
-
-              {/* Badge Ver como (clickeable) */}
-              {isAdmin && currentUser?.uid !== selectedUser.id && (
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleViewAs();
-                  }}
-                  className="profile-role-badge cursor-pointer hover:opacity-80 transition-opacity"
-                  style={{ background: '#fb923c', color: 'white', border: '1px solid #fb923c' }}
-                  title="Cambiar a la vista de este usuario"
-                >
-                  <Eye size={16} strokeWidth={2} className="inline mr-1" />
-                  Ver como
-                </span>
-              )}
+              </div>
             </div>
           </div>
+          <button onClick={onBack} className="modal-close-btn" title="Cerrar">
+            ×
+          </button>
         </div>
-        <button onClick={onBack} className="modal-close-btn" title="Cerrar">
-          ×
-        </button>
-      </div>
+      )}
+
+      {/* Badges en modal - Mostrar solo si está en modal */}
+      {inModal && (
+        <div className="flex items-center gap-2 flex-wrap mb-4">
+          {/* Badge de Rol */}
+          <CategoryBadge type="role" value={selectedUser.role} />
+
+          {/* Badge de Estado */}
+          <CategoryBadge type="status" value={selectedUser.status} />
+
+          {/* Badge de Créditos */}
+          <span className="profile-role-badge" style={{ background: '#fbbf24', color: '#78350f', border: '1px solid #fbbf24' }}>
+            <CreditCard size={16} strokeWidth={2} className="inline mr-1" />
+            {userCredits} créditos
+          </span>
+
+          {/* Badge Ver como (clickeable) */}
+          {isAdmin && currentUser?.uid !== selectedUser.id && (
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewAs();
+              }}
+              className="profile-role-badge cursor-pointer hover:opacity-80 transition-opacity"
+              style={{ background: '#fb923c', color: 'white', border: '1px solid #fb923c' }}
+              title="Cambiar a la vista de este usuario"
+            >
+              <Eye size={16} strokeWidth={2} className="inline mr-1" />
+              Ver como
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Message */}
       {message.text && (

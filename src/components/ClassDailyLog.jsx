@@ -4,7 +4,7 @@
  * @module components/ClassDailyLog
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Plus,
   Save,
@@ -86,6 +86,50 @@ function ClassDailyLog({ logId, user, onBack }) {
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
   const isStudent = user?.role === 'student' || user?.role === 'trial';
 
+  // Extract specific log properties to avoid infinite loops from object reference changes
+  const logMeta = useMemo(() => ({
+    name: log?.name,
+    courseName: log?.courseName,
+    groupName: log?.groupName,
+    status: log?.status
+  }), [log?.name, log?.courseName, log?.groupName, log?.status]);
+
+  // Handler para guardar cambios
+  const handleSave = useCallback(async () => {
+    if (!isTeacher) return;
+
+    setSaving(true);
+    try {
+      await updateLog(logId, {
+        updatedAt: new Date()
+      });
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+      logger.info('💾 Diario guardado');
+    } catch (err) {
+      logger.error('Error guardando diario:', err);
+      setError('Error al guardar');
+    } finally {
+      setSaving(false);
+    }
+  }, [isTeacher, logId]);
+
+  // Handler para finalizar el diario
+  const handleEndLog = useCallback(async () => {
+    if (!confirm('¿Finalizar esta clase? Los estudiantes ya no podrán verla en vivo.')) return;
+
+    try {
+      const result = await endLog(logId);
+      if (result.success) {
+        logger.info('🏁 Diario finalizado');
+        if (onBack) onBack();
+      }
+    } catch (err) {
+      logger.error('Error finalizando diario:', err);
+      setError('Error al finalizar');
+    }
+  }, [logId, onBack]);
+
   // Suscribirse a cambios en tiempo real
   useEffect(() => {
     if (!logId) {
@@ -129,11 +173,11 @@ function ClassDailyLog({ logId, user, onBack }) {
         clearInterval(autoSaveIntervalRef.current);
       }
     };
-  }, [isTeacher, log, hasUnsavedChanges]);
+  }, [isTeacher, log, hasUnsavedChanges, handleSave]);
 
   // Configurar TopBar del app con botones dinámicos
   useEffect(() => {
-    if (!log) return;
+    if (!logMeta.name) return;
 
     const actions = [];
 
@@ -156,7 +200,7 @@ function ClassDailyLog({ logId, user, onBack }) {
         variant: 'secondary'
       });
 
-      if (log.status === 'active') {
+      if (logMeta.status === 'active') {
         actions.push({
           key: 'end-log',
           label: 'Finalizar Clase',
@@ -175,8 +219,8 @@ function ClassDailyLog({ logId, user, onBack }) {
     });
 
     updateTopBar({
-      title: log.name,
-      subtitle: `${log.courseName ? '📚 ' + log.courseName : ''} ${log.groupName ? '👥 ' + log.groupName : ''}`.trim(),
+      title: logMeta.name,
+      subtitle: `${logMeta.courseName ? '📚 ' + logMeta.courseName : ''} ${logMeta.groupName ? '👥 ' + logMeta.groupName : ''}`.trim(),
       showBackButton: true,
       onBack: onBack,
       actions: actions
@@ -186,7 +230,10 @@ function ClassDailyLog({ logId, user, onBack }) {
     return () => {
       resetTopBar();
     };
-  }, [log, isTeacher, saving, sidebarOpen, updateTopBar, resetTopBar, onBack, handleSave, handleEndLog, contentSelectorModal]);
+    // updateTopBar and resetTopBar are stable context functions, safe to omit
+    // contentSelectorModal.open is stable from useMemo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logMeta, isTeacher, saving, sidebarOpen, onBack, handleSave, handleEndLog]);
 
   // Guardar scroll position periódicamente
   useEffect(() => {
@@ -210,25 +257,6 @@ function ClassDailyLog({ logId, user, onBack }) {
       container.removeEventListener('scroll', handleScroll);
     };
   }, [isTeacher, log, logId]);
-
-  const handleSave = useCallback(async () => {
-    if (!isTeacher) return;
-
-    setSaving(true);
-    try {
-      await updateLog(logId, {
-        updatedAt: new Date()
-      });
-      setLastSaved(new Date());
-      setHasUnsavedChanges(false);
-      logger.info('💾 Diario guardado');
-    } catch (err) {
-      logger.error('Error guardando diario:', err);
-      setError('Error al guardar');
-    } finally {
-      setSaving(false);
-    }
-  }, [isTeacher, logId]);
 
   const handleAddContent = async (content) => {
     try {
@@ -282,21 +310,6 @@ function ClassDailyLog({ logId, user, onBack }) {
       setSidebarOpen(false);
     }
   };
-
-  const handleEndLog = useCallback(async () => {
-    if (!confirm('¿Finalizar esta clase? Los estudiantes ya no podrán verla en vivo.')) return;
-
-    try {
-      const result = await endLog(logId);
-      if (result.success) {
-        logger.info('🏁 Diario finalizado');
-        if (onBack) onBack();
-      }
-    } catch (err) {
-      logger.error('Error finalizando diario:', err);
-      setError('Error al finalizar');
-    }
-  }, [logId, onBack]);
 
   // Actualizar bloque de texto
   const handleUpdateTextBlock = async (data) => {

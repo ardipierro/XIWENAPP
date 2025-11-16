@@ -9,6 +9,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
+import { TopBarProvider } from '../contexts/TopBarContext';
 import { usePermissions } from '../hooks/usePermissions';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
@@ -18,7 +19,6 @@ import { UniversalCard } from './cards';
 
 // Lazy load de componentes pesados
 const UnifiedCalendar = lazy(() => import('./UnifiedCalendar'));
-const MessagesPanel = lazy(() => import('./MessagesPanel'));
 const HomeworkReviewPanel = lazy(() => import('./HomeworkReviewPanel'));
 const AdminPaymentsPanel = lazy(() => import('./AdminPaymentsPanel'));
 const ContentManagerTabs = lazy(() => import('./ContentManagerTabs'));
@@ -258,11 +258,6 @@ export function UniversalDashboard() {
             case '/dashboard-v2/calendar':
               return <UnifiedCalendar userId={effectiveUser.uid} userRole={effectiveUser.role} />;
 
-            // MENSAJES - Todos con permiso
-            case '/dashboard-v2/messages':
-              if (!can('send-messages')) return <PlaceholderView title="Sin acceso" />;
-              return <MessagesPanel user={effectiveUser} />;
-
             // CONTENIDOS - Teachers + Admin (incluye Exercise Builder y Configurar IA en tabs)
             case '/dashboard-v2/unified-content':
               if (!can('create-content')) return <PlaceholderView title="Sin acceso" />;
@@ -419,33 +414,35 @@ export function UniversalDashboard() {
   };
 
   return (
-    <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
-      {/* ViewAs Banner - Siempre arriba de todo */}
-      <ViewAsBanner />
+    <TopBarProvider>
+      <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
+        {/* ViewAs Banner - Siempre arriba de todo */}
+        <ViewAsBanner />
 
-      {/* TopBar */}
-      <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
+        {/* TopBar */}
+        <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
 
-      {/* SideMenu */}
-      <UniversalSideMenu
-        isOpen={menuOpen}
-        currentPath={currentPath}
-        onNavigate={handleNavigate}
-      />
-
-      {/* Overlay para mobile */}
-      {menuOpen && (
-        <div
-          className="universal-dashboard__overlay"
-          onClick={() => setMenuOpen(false)}
+        {/* SideMenu */}
+        <UniversalSideMenu
+          isOpen={menuOpen}
+          currentPath={currentPath}
+          onNavigate={handleNavigate}
         />
-      )}
 
-      {/* Content Area */}
-      <main className={`universal-dashboard__content ${menuOpen ? 'universal-dashboard__content--menu-open' : ''}`}>
-        {renderContent()}
-      </main>
-    </div>
+        {/* Overlay para mobile */}
+        {menuOpen && (
+          <div
+            className="universal-dashboard__overlay"
+            onClick={() => setMenuOpen(false)}
+          />
+        )}
+
+        {/* Content Area */}
+        <main className={`universal-dashboard__content ${menuOpen ? 'universal-dashboard__content--menu-open' : ''}`}>
+          {renderContent()}
+        </main>
+      </div>
+    </TopBarProvider>
   );
 }
 

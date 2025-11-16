@@ -642,6 +642,14 @@ export function getBadgeForStatus(status) {
 }
 
 /**
+ * Obtiene la configuración de badge para un rol de usuario
+ */
+export function getBadgeForRole(role) {
+  const key = BADGE_MAPPINGS.role[role];
+  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.ROLE_STUDENT;
+}
+
+/**
  * Obtiene todos los badges de una categoría
  */
 export function getBadgesByCategory(categoryName) {
