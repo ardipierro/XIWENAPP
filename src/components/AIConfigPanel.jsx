@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers } from 'lucide-react';
+import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers, Sparkles } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import { getCorrectionProfilesByTeacher } from '../firebase/correctionProfiles';
 import logger from '../utils/logger';
@@ -25,6 +25,7 @@ import SelectionSpeakerConfig from './SelectionSpeakerConfig';
 import ProfileEditor from './homework/ProfileEditor';
 import ImageTaskModal from './ImageTaskModal';
 import TranslatorConfigCard from './settings/TranslatorConfigCard';
+import { AIExerciseGenerator } from './exercisebuilder/AIExerciseGenerator';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
 import { IMAGE_GENERATION_TASKS } from '../utils/imageGenerationTasks';
 import { useAuth } from '../contexts/AuthContext';
@@ -395,7 +396,7 @@ function AIConfigPanel() {
   // RENDER PRINCIPAL
   // ============================================================================
   return (
-    <div className="ai-config-panel">
+    <div className="ai-config-panel space-y-8">
 
       {/* Alerts */}
       {error && (
@@ -421,6 +422,27 @@ function AIConfigPanel() {
           {success}
         </BaseAlert>
       )}
+
+      {/* NUEVO: Exercise Builder integrado como sección destacada */}
+      <section className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/10 dark:to-indigo-900/10 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-800">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-purple-600 dark:bg-purple-500 rounded-lg">
+            <Sparkles className="text-white" size={24} />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Generador de Ejercicios con IA
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Crea ejercicios personalizados usando inteligencia artificial
+            </p>
+          </div>
+        </div>
+        <AIExerciseGenerator />
+      </section>
+
+      {/* Separador visual */}
+      <div className="border-t-2 border-gray-200 dark:border-gray-700"></div>
 
       {/* Search Bar */}
       <SearchBar
