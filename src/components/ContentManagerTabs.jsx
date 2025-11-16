@@ -1,11 +1,13 @@
 /**
  * @fileoverview Content Manager Tabs - Gestión de contenidos con pestañas
- * Incluye: Contenidos, Exercise Builder, Configurar IA, FlashCards, Libro ADE 1, Visor de Contenidos
+ * Migrado a PageHeader + BaseTabs para consistencia
  * @module components/ContentManagerTabs
  */
 
 import { useState } from 'react';
 import { Layers, Sparkles, Lightbulb, BookOpen, Edit3, CreditCard } from 'lucide-react';
+import PageHeader from './common/PageHeader';
+import BaseTabs from './common/BaseTabs';
 import UnifiedContentManager from './UnifiedContentManager';
 import ExerciseBuilder from '../pages/ExerciseBuilder';
 import AIConfigPanel from './AIConfigPanel';
@@ -104,32 +106,29 @@ export function ContentManagerTabs({ user, userRole }) {
   };
 
   return (
-    <div className="content-manager-tabs">
-      {/* Tab Navigation */}
-      {visibleTabs.length > 1 && (
-        <div className="content-manager-tabs__nav">
-          {visibleTabs.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
+    <div className="w-full">
+      {/* Page Header */}
+      <PageHeader
+        icon={Layers}
+        title="Gestión de Contenidos"
+        description="Administra contenidos, ejercicios y material educativo"
+      />
 
-            return (
-              <button
-                key={tab.id}
-                className={`content-manager-tabs__tab ${
-                  isActive ? 'content-manager-tabs__tab--active' : ''
-                }`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <Icon size={18} className="content-manager-tabs__tab-icon" />
-                <span className="content-manager-tabs__tab-label">{tab.label}</span>
-              </button>
-            );
-          })}
+      {/* Tabs - Solo si hay múltiples tabs visibles */}
+      {visibleTabs.length > 1 && (
+        <div className="mb-6">
+          <BaseTabs
+            tabs={visibleTabs}
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            variant="underline"
+            size="md"
+          />
         </div>
       )}
 
       {/* Tab Content */}
-      <div className="content-manager-tabs__content">
+      <div className="w-full">
         {renderTabContent()}
       </div>
     </div>

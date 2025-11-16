@@ -15,6 +15,7 @@ import {
   X,
   Zap
 } from 'lucide-react';
+import PageHeader from './common/PageHeader';
 import logger from '../utils/logger';
 import {
   getTeacherSessions,
@@ -472,27 +473,15 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
   }
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Sesiones de Clase
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {sessions.length} sesiones totales
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <BaseButton
-            variant="primary"
-            icon={Plus}
-            onClick={() => setShowModal(true)}
-          >
-            Nueva Sesión
-          </BaseButton>
-        </div>
-      </div>
+    <div className="w-full">
+      {/* Page Header */}
+      <PageHeader
+        icon={Calendar}
+        title="Sesiones de Clase"
+        description={`${sessions.length} sesiones totales`}
+        actionLabel="Nueva Sesión"
+        onAction={() => setShowModal(true)}
+      />
 
       {/* Mensaje */}
       {message.text && (
