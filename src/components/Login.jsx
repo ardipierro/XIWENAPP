@@ -130,7 +130,7 @@ function Login() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="text-center">
           <h1
@@ -273,12 +273,11 @@ function Login() {
           <BaseButton
             type="submit"
             variant="primary"
-            size="sm"
             disabled={loading}
             loading={loading}
             icon={loading ? undefined : (isRegistering ? UserPlus : LogIn)}
             fullWidth
-            className="mt-6"
+            className="mt-6 !py-2.5 text-sm"
           >
             {loading ? 'Cargando...' : (isRegistering ? 'Crear cuenta' : 'Ingresar')}
           </BaseButton>
