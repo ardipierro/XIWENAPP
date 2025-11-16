@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/inject-preload.cjs",
+    "build:clean": "vite build",
     "preview": "vite preview",
+    "icons:generate": "node scripts/generate-icons.cjs",
     "emulators": "firebase emulators:start",
     "test:seed": "node test/seed-test-data.js",
     "test:functions": "node test/test-functions.js",
