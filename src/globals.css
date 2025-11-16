@@ -3288,12 +3288,14 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     background: var(--color-bg-primary);
   }
 
-  /* ===== MESSAGE THREAD - Flexbox correcto ===== */
+  /* ===== MESSAGE THREAD - Flexbox correcto, altura completa ===== */
   .message-thread {
     display: flex !important;
     flex-direction: column;
     width: 100% !important;
     height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
     overflow: hidden !important;
     padding: 0 !important;
     margin: 0 !important;
