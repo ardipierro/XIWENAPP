@@ -1,6 +1,6 @@
 import logger from '../utils/logger';
 
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject, uploadBytesResumable } from 'firebase/storage';
 import { storage } from './config';
 
 /**
@@ -19,6 +19,49 @@ export async function uploadImage(file, path) {
     logger.error('Error al subir imagen:', error);
     return { success: false, error: error.message };
   }
+}
+
+/**
+ * Sube un archivo a Firebase Storage con callback de progreso
+ * @param {File} file - El archivo a subir
+ * @param {string} path - Ruta donde guardar
+ * @param {Function} onProgress - Callback para reportar progreso (0-100)
+ * @returns {Promise<string>} URL de descarga del archivo
+ */
+export async function uploadToStorage(file, path, onProgress) {
+  return new Promise((resolve, reject) => {
+    try {
+      const storageRef = ref(storage, path);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          // Calcular progreso
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          if (onProgress) {
+            onProgress(Math.round(progress));
+          }
+        },
+        (error) => {
+          logger.error('Error al subir archivo:', error);
+          reject(error);
+        },
+        async () => {
+          // Upload completado
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(downloadURL);
+          } catch (error) {
+            reject(error);
+          }
+        }
+      );
+    } catch (error) {
+      logger.error('Error iniciando upload:', error);
+      reject(error);
+    }
+  });
 }
 
 /**
