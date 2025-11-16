@@ -3249,7 +3249,9 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     right: 0 !important;
     bottom: 0 !important;
     width: 100vw !important;
-    height: auto !important;
+    height: calc(100vh - 56px) !important;
+    min-height: calc(100vh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
@@ -3258,7 +3260,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column;
-    background: #0000ff !important; /* DEBUG: AZUL */
+    background: #0000ff !important; /* DEBUG: AZUL BRILLANTE */
+    outline: 20px solid #0000ff !important; /* DEBUG: Outline azul MUY visible */
     z-index: 50 !important; /* Debajo del side menu (90) pero arriba del contenido */
   }
 
