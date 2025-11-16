@@ -20,25 +20,35 @@ export default defineConfig({
       manifest: false, // Usar manifest.json estático en public/
       injectRegister: 'auto',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB (por Excalidraw y vendor)
+        // Solo precachear assets críticos (reducido para móviles)
+        globPatterns: ['**/*.{js,css,html,ico,svg}'],
+        maximumFileSizeToCacheInBytes: 2 * 1024 * 1024, // 2 MB (reducido de 5 MB)
 
-        // Excluir archivos muy grandes del precaché (usar runtime caching)
+        // Excluir chunks grandes del precaché (usar runtime caching)
         globIgnores: [
-          '**/excalidraw*.js',  // Lazy load bajo demanda
-          '**/vendor*.js'       // Cargado bajo demanda
+          '**/excalidraw*.js',           // Lazy load bajo demanda
+          '**/vendor*.js',               // Cargado bajo demanda
+          '**/ContentManagerTabs*.js',   // 484 KB - runtime cache
+          '**/ClassDailyLogManager*.js', // 407 KB - runtime cache
+          '**/PieChart*.js',             // 321 KB (recharts) - runtime cache
+          '**/recharts*.js',             // Recharts chunks - runtime cache
+          '**/ContentReader*.js',        // 89 KB - solo cuando se usa
+          '**/MessagesPanel*.js',        // 45 KB - runtime cache
+          '**/HomeworkReview*.js',       // 52 KB - runtime cache
+          '**/TestPage*.js',             // 80 KB - runtime cache
+          '**/AnalyticsDashboard*.js'    // 26 KB - runtime cache
         ],
 
         // Estrategia de caché optimizada para móvil
         runtimeCaching: [
           {
-            // Runtime caching para chunks grandes (excalidraw, vendor)
-            urlPattern: /assets\/(excalidraw|vendor)-.*\.js$/,
+            // Runtime caching para chunks grandes excluidos del precache
+            urlPattern: /assets\/(excalidraw|vendor|ContentManagerTabs|ClassDailyLogManager|PieChart|recharts|ContentReader|MessagesPanel|HomeworkReview|TestPage|AnalyticsDashboard)-.*\.js$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'large-chunks-cache',
               expiration: {
-                maxEntries: 10,
+                maxEntries: 20,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 días
               },
               cacheableResponse: {
@@ -112,8 +122,7 @@ export default defineConfig({
     // Rollup optimizations
     rollupOptions: {
       output: {
-        // Chunking automático - Dejar que Vite optimice
-        // Solo excluir Excalidraw para evitar circular deps
+        // Code splitting estratégico para optimizar bundle size
         manualChunks: (id) => {
           // Excalidraw - NO incluir en ningún chunk manual
           // Dejar que Vite lo maneje automáticamente para evitar circular deps
@@ -121,8 +130,59 @@ export default defineConfig({
             return; // undefined = dejar que Vite decida
           }
 
-          // Dejar que Vite maneje el resto automáticamente
-          // Esto evita problemas de dependencias circulares y referencias
+          // Separar vendors pesados en chunks propios
+          if (id.includes('node_modules')) {
+            // Firebase - chunk separado (200 KB)
+            if (id.includes('firebase')) {
+              return 'vendor-firebase';
+            }
+
+            // React - chunk separado (core framework)
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+
+            // Recharts - chunk separado (321 KB)
+            if (id.includes('recharts')) {
+              return 'vendor-recharts';
+            }
+
+            // LiveKit - chunk separado (150 KB)
+            if (id.includes('livekit') || id.includes('@livekit')) {
+              return 'vendor-livekit';
+            }
+
+            // Tiptap - chunk separado (100 KB)
+            if (id.includes('@tiptap')) {
+              return 'vendor-tiptap';
+            }
+
+            // DND Kit - chunk separado
+            if (id.includes('@dnd-kit')) {
+              return 'vendor-dndkit';
+            }
+
+            // Resto de vendors
+            return 'vendor-other';
+          }
+
+          // Separar componentes por rol/área
+          if (id.includes('/components/student/')) {
+            return 'routes-student';
+          }
+
+          if (id.includes('/components/teacher/')) {
+            return 'routes-teacher';
+          }
+
+          if (id.includes('/components/admin/')) {
+            return 'routes-admin';
+          }
+
+          // Ejercicios en chunk separado
+          if (id.includes('Exercise.jsx') || id.includes('Exercise.js')) {
+            return 'exercises';
+          }
         },
 
         // Naming strategy optimizado

@@ -4,7 +4,7 @@
  * @module components/ClassDailyLog
  */
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import {
   Plus,
   Save,
@@ -46,9 +46,13 @@ import {
 import ContentSelectorModal from './ContentSelectorModal';
 import {
   UnifiedExerciseRenderer,
-  EditableTextBlock,
   InSituContentEditor
 } from './diary';
+
+// Lazy load para componentes pesados (Tiptap: 100 KB)
+const EditableTextBlock = lazy(() =>
+  import('./diary/EditableTextBlock').then(module => ({ default: module.EditableTextBlock }))
+);
 
 // ============================================
 // CONTENT TYPE ICONS
@@ -464,12 +468,14 @@ function ClassDailyLog({ logId, user, onBack }) {
       case 'text-block':
         // Nuevo: Bloque de texto editable
         return (
-          <EditableTextBlock
-            blockId={content.id}
-            initialContent={content.html || '<p>Escribe aquí...</p>'}
-            isTeacher={isTeacher}
-            onSave={handleUpdateTextBlock}
-          />
+          <Suspense fallback={<BaseLoading message="Cargando editor..." />}>
+            <EditableTextBlock
+              blockId={content.id}
+              initialContent={content.html || '<p>Escribe aquí...</p>'}
+              isTeacher={isTeacher}
+              onSave={handleUpdateTextBlock}
+            />
+          </Suspense>
         );
 
       case 'lesson':
