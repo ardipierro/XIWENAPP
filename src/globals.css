@@ -3233,28 +3233,20 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 /* Mobile Responsive - Fullscreen alternating views */
 @media (max-width: 768px) {
   /* ===== AJUSTAR DASHBOARD CONTENT PARA MENSAJES ===== */
-  /* Usar positioning absoluto para evitar problemas de calc() */
   .universal-dashboard__content:has(.messages-panel) {
-    position: absolute !important;
-    top: 56px !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    height: auto !important;
     padding: 0 !important;
     margin: 0 !important;
     overflow: hidden !important;
-    scrollbar-gutter: auto !important; /* Quitar reserva de espacio para scrollbar */
+    scrollbar-gutter: auto !important;
     overscroll-behavior-y: none !important;
-    display: flex !important;
-    flex-direction: column;
   }
 
-  /* ===== PANEL PRINCIPAL - Ocupa todo el espacio del padre absoluto ===== */
+  /* ===== PANEL PRINCIPAL - Altura 100vh menos topbar ===== */
   .messages-panel {
     width: 100% !important;
-    height: 100% !important;
+    height: calc(100vh - 56px) !important;
+    min-height: calc(100vh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
