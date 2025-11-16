@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 /**
@@ -22,6 +23,7 @@ import { X } from 'lucide-react';
  * @param {string} className - Clases CSS adicionales
  * @param {boolean} isDanger - Estilo de peligro (rojo)
  * @param {boolean} loading - Estado de carga (deshabilita botones)
+ * @param {boolean} noPadding - Remover padding del body (para contenido edge-to-edge)
  */
 function BaseModal({
   isOpen,
@@ -35,7 +37,8 @@ function BaseModal({
   closeOnOverlayClick = true,
   className = '',
   isDanger = false,
-  loading = false
+  loading = false,
+  noPadding = false
 }) {
   if (!isOpen) return null;
 
@@ -54,7 +57,7 @@ function BaseModal({
     'fullscreen': 'w-screen h-screen max-w-none rounded-none'
   };
 
-  return (
+  const modalContent = (
     // Overlay con backdrop blur
     <div
       className={`
@@ -153,7 +156,7 @@ function BaseModal({
 
         {/* Body - scrollable */}
         <div
-          className="flex-1 px-6 py-6 overflow-y-auto"
+          className={`flex-1 overflow-y-auto ${noPadding ? '' : 'px-6 py-6'}`}
           style={{ color: 'var(--color-text-primary)' }}
         >
           {children}
@@ -171,6 +174,9 @@ function BaseModal({
       </div>
     </div>
   );
+
+  // Renderizar usando portal para evitar problemas con overflow de contenedores padre
+  return createPortal(modalContent, document.body);
 }
 
 /**

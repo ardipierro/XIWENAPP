@@ -49,7 +49,7 @@ import {
   unlinkGuardianFromStudent
 } from '../firebase/guardians';
 import CreditManager from './CreditManager';
-import StudentClassView from './StudentClassView';
+import StudentSessionsView from './StudentSessionsView';
 import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { BaseAlert, BaseTabs } from './common';
@@ -960,7 +960,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate }) {
         {/* Tab: Clases */}
         {activeTab === 'classes' && (
           <div>
-            <StudentClassView student={selectedUser} />
+            <StudentSessionsView student={selectedUser} />
           </div>
         )}
 

@@ -23,7 +23,8 @@ import {
   Bookmark,
   TrendingUp,
   Type,
-  Database
+  Database,
+  Tag
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge, BaseTabs } from './common';
@@ -31,12 +32,13 @@ import ViewCustomizer from './interactive-book/ViewCustomizer';
 import AIImageGenerator from './interactive-book/AIImageGenerator';
 import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
 import AudioCacheTab from './settings/AudioCacheTab';
+import BadgeCustomizerTab from './settings/BadgeCustomizerTab';
 import logger from '../utils/logger';
 
 /**
  * Modal de configuración completo con tabs
  */
-function SettingsModal({ isOpen, onClose, characters = [] }) {
+function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
   const [activeTab, setActiveTab] = useState('appearance');
   const [displaySettings, setDisplaySettings] = useState({
     zoom: 100,
@@ -55,7 +57,7 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       try {
         setDisplaySettings(JSON.parse(saved));
       } catch (err) {
-        console.error('Error loading display settings:', err);
+        logger.error('Error loading display settings:', err);
       }
     }
   }, []);
@@ -127,14 +129,14 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       window.dispatchEvent(new Event('xiwen_settings_changed'));
 
       // Feedback de éxito
-      console.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
+      logger.info(`✅ Preset "${presetName}" aplicado: ${rate}x a ${characterIds.length} personaje(s)`);
     } catch (err) {
-      console.error('Error aplicando preset:', err);
+      logger.error('Error aplicando preset:', err);
       alert('❌ Error al aplicar el preset. Por favor intenta nuevamente.');
     }
   };
 
-  // ✅ 6 tabs principales (Apariencia, Pantalla, Fuentes, Audio, Caché, Avanzado)
+  // ✅ 7 tabs principales (Apariencia, Pantalla, Fuentes, Audio, Caché, Badges, Avanzado)
   const tabs = [
     {
       id: 'appearance',
@@ -165,6 +167,12 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
       label: 'Caché de Audio',
       icon: Database,
       description: 'Gestión de audios TTS cacheados'
+    },
+    {
+      id: 'badges',
+      label: 'Badges',
+      icon: Tag,
+      description: 'Sistema de etiquetas y categorías'
     },
     {
       id: 'advanced',
@@ -694,6 +702,13 @@ function SettingsModal({ isOpen, onClose, characters = [] }) {
           )}
 
           {/* ========================================= */}
+          {/* TAB: BADGES (Sistema de Etiquetas) */}
+          {/* ========================================= */}
+          {activeTab === 'badges' && (
+            <BadgeCustomizerTab user={user} />
+          )}
+
+          {/* ========================================= */}
           {/* TAB: AVANZADO (Progreso + Imágenes IA) */}
           {/* ========================================= */}
           {activeTab === 'advanced' && (
@@ -793,7 +808,11 @@ SettingsModal.propTypes = {
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired
     })
-  )
+  ),
+  user: PropTypes.shape({
+    uid: PropTypes.string,
+    role: PropTypes.string,
+  })
 };
 
 export default SettingsModal;

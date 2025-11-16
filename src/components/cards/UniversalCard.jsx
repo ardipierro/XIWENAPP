@@ -173,15 +173,16 @@ export function UniversalCard({
       return null;
     }
 
-    // Auto-detectar si el header tiene contenido visual
-    const hasHeaderContent = image || Icon || avatar || badge;
+    // Auto-detectar si el header tiene contenido visual REAL
+    // Badge solo NO cuenta como contenido visual
+    const hasVisualContent = image || Icon || avatar;
 
     // Determinar si mostrar el header:
     // - Si showHeader es explícito (true/false), usarlo
-    // - Si es undefined, auto-detectar basado en contenido
+    // - Si es undefined, auto-detectar basado en contenido VISUAL
     const shouldShowHeader = showHeader !== undefined
       ? showHeader
-      : hasHeaderContent;
+      : hasVisualContent;
 
     // Si no debe mostrarse, retornar null
     if (!shouldShowHeader) {
@@ -289,7 +290,7 @@ export function UniversalCard({
     if (!badges || badges.length === 0 || !variantConfig.showBadges) return null;
 
     return (
-      <div className={`flex flex-wrap gap-2 ${layout === 'horizontal' ? 'mt-0' : 'mt-3'}`}>
+      <div className="flex flex-wrap gap-2">
         {badges.map((badgeProps, index) => {
           const { key, ...restProps } = badgeProps;
           return (
@@ -311,10 +312,7 @@ export function UniversalCard({
 
     return (
       <div
-        className={`flex ${
-          isHorizontal ? 'flex-row' : 'flex-col'
-        } gap-4 ${isCompact ? 'mt-0' : 'mt-4 pt-4 border-t'}`}
-        style={!isCompact ? { borderColor: 'var(--color-border)' } : {}}
+        className={`flex ${isHorizontal ? 'flex-row' : 'flex-col'} gap-4`}
       >
         {stats.map((stat, index) => {
           const StatIcon = stat.icon;
@@ -422,7 +420,7 @@ export function UniversalCard({
     if (!actions) return null;
 
     return (
-      <div className="flex gap-2 mt-4 pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+      <div className="flex gap-2">
         {Array.isArray(actions) ? (
           actions.map((action, index) => (
             <div key={index} onClick={(e) => e.stopPropagation()}>
@@ -462,7 +460,9 @@ export function UniversalCard({
       <div className={classes.content} style={styles.content}>
         {layout === 'horizontal' ? (
           <>
-            {/* Horizontal Layout */}
+            {/* Horizontal Layout - MEJORADO: Distribuido a lo largo de toda la fila */}
+
+            {/* Sección 1: Texto principal (flex-1) */}
             <div className="flex-1 flex flex-col justify-center min-w-0">
               {title && (
                 <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
@@ -479,21 +479,21 @@ export function UniversalCard({
               )}
             </div>
 
-            {/* Badges */}
-            {badges && badges.length > 0 && (
-              <div className="flex-shrink-0">
-                {renderBadges()}
-              </div>
-            )}
-
-            {/* Stats */}
+            {/* Sección 2: Stats (espacio medio si existen) */}
             {stats && stats.length > 0 && (
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 px-4">
                 {renderStats()}
               </div>
             )}
 
-            {/* Actions */}
+            {/* Sección 3: Badges (espacio medio si existen) */}
+            {badges && badges.length > 0 && (
+              <div className="flex-shrink-0 px-4">
+                {renderBadges()}
+              </div>
+            )}
+
+            {/* Sección 4: Actions (al final) */}
             {actions && (
               <div className="flex-shrink-0 flex gap-2">
                 {Array.isArray(actions) ? (
@@ -510,50 +510,73 @@ export function UniversalCard({
           </>
         ) : (
           <>
-            {/* Vertical Layout */}
-            <div className="card-text">
-              {title && (
-                <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
-                  {title}
-                </h3>
-              )}
+            {/* Vertical Layout - MEJORADO: Con footer sticky */}
 
-              {subtitle && (
-                <p
-                  className={classes.subtitle}
-                  style={{ color: 'var(--color-text-secondary)' }}
-                >
-                  {subtitle}
-                </p>
-              )}
+            {/* Contenido principal (flex-1 para empujar footer abajo) */}
+            <div className="flex-1 flex flex-col">
+              <div className="card-text">
+                {title && (
+                  <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
+                    {title}
+                  </h3>
+                )}
 
-              {description && (
-                <p
-                  className={`${classes.description} mt-2`}
-                  style={{ color: 'var(--color-text-secondary)' }}
-                >
-                  {description}
-                </p>
-              )}
+                {subtitle && (
+                  <p
+                    className={classes.subtitle}
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {subtitle}
+                  </p>
+                )}
+
+                {description && (
+                  <p
+                    className={`${classes.description} mt-2`}
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {description}
+                  </p>
+                )}
+              </div>
+
+              {/* Meta Info (variant='class') */}
+              {renderMeta()}
+
+              {/* Big Number (variant='stats') */}
+              {renderBigNumber()}
+
+              {/* Custom Children */}
+              {children}
             </div>
 
-            {/* Meta Info (variant='class') */}
-            {renderMeta()}
+            {/* Footer sticky (mt-auto para pegarlo al fondo) */}
+            {(badges?.length > 0 || stats?.length > 0 || actions) && variantConfig.footerSticky && (
+              <div className={`mt-auto pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
+                {/* Badges */}
+                {renderBadges()}
 
-            {/* Badges */}
-            {renderBadges()}
+                {/* Stats */}
+                {renderStats()}
 
-            {/* Stats */}
-            {renderStats()}
+                {/* Actions */}
+                {renderActions()}
+              </div>
+            )}
 
-            {/* Big Number (variant='stats') */}
-            {renderBigNumber()}
+            {/* Footer NO sticky (para stats cards y otros que no necesitan) */}
+            {(badges?.length > 0 || stats?.length > 0 || actions) && !variantConfig.footerSticky && (
+              <div className={`pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
+                {/* Badges */}
+                {renderBadges()}
 
-            {/* Custom Children */}
-            {children}
+                {/* Stats */}
+                {renderStats()}
 
-            {/* Actions */}
-            {renderActions()}
+                {/* Actions */}
+                {renderActions()}
+              </div>
+            )}
           </>
         )}
       </div>

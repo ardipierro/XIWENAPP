@@ -245,6 +245,46 @@ export const getUserAvatar = async (userId) => {
   }
 };
 
+/**
+ * Actualizar banner del usuario
+ */
+export const updateUserBanner = async (userId, bannerUrl) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      banner: bannerUrl,
+      updatedAt: serverTimestamp()
+    });
+    logger.debug('✅ Banner actualizado a:', bannerUrl);
+    return true;
+  } catch (error) {
+    logger.error('❌ Error actualizando banner:', error);
+    return false;
+  }
+};
+
+/**
+ * Obtener banner del usuario
+ */
+export const getUserBanner = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const banner = userSnap.data().banner;
+      logger.debug('✅ Banner obtenido:', banner);
+      return banner || null;
+    }
+
+    logger.debug('⚠️ Usuario no encontrado, sin banner');
+    return null;
+  } catch (error) {
+    logger.error('❌ Error obteniendo banner:', error);
+    return null;
+  }
+};
+
 // ============================================
 // CATEGORÍAS DE PREGUNTAS
 // ============================================

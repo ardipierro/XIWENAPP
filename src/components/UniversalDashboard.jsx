@@ -35,6 +35,7 @@ const CourseViewer = lazy(() => import('./student/CourseViewer'));
 const ContentPlayer = lazy(() => import('./student/ContentPlayer'));
 const MyAssignmentsView = lazy(() => import('./student/MyAssignmentsView'));
 const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
+const StudentSessionsView = lazy(() => import('./StudentSessionsView'));
 
 // Games views
 const LiveGamesView = lazy(() => import('./games/LiveGamesView'));
@@ -329,6 +330,11 @@ export function UniversalDashboard() {
                   }}
                 />
               );
+
+            // MIS CLASES (Students)
+            case '/dashboard-v2/my-classes':
+              if (!can('view-all-content')) return <PlaceholderView title="Sin acceso" />;
+              return <StudentSessionsView student={effectiveUser} />;
 
             // JUEGOS
             case '/dashboard-v2/games':

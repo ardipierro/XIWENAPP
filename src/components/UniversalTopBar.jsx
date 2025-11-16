@@ -4,14 +4,18 @@
  * @module components/UniversalTopBar
  */
 
-import { Menu, Bell, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, Bell, User, Settings, LogOut, Sun, Moon, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
+import useUnreadMessages from '../hooks/useUnreadMessages';
 import CreditBadge from './common/CreditBadge';
+import UserProfileModal from './UserProfileModal';
+import logger from '../utils/logger';
 
 /**
  * TopBar universal con sistema de créditos y permisos
@@ -20,22 +24,31 @@ import CreditBadge from './common/CreditBadge';
  * @param {boolean} props.menuOpen - Estado del menú
  */
 export function UniversalTopBar({ onMenuToggle, menuOpen }) {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { getEffectiveUser } = useViewAs();
   const { theme, toggleTheme } = useTheme();
   const { selectedFont, fontWeight, fontSize } = useFont();
-  const { getRoleLabel } = usePermissions();
+  const { getRoleLabel, can } = usePermissions();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
+
+  // Mensajes no leídos
+  const unreadMessages = useUnreadMessages(effectiveUser?.uid);
 
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      logger.error('Error al cerrar sesión:', error);
     }
+  };
+
+  const handleUserMenuToggle = () => {
+    setShowUserMenu(!showUserMenu);
   };
 
   return (
@@ -87,11 +100,26 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           <span className="universal-topbar__badge">3</span>
         </button>
 
+        {/* Messages */}
+        {can('send-messages') && (
+          <button
+            className="universal-topbar__icon-btn universal-topbar__notifications"
+            onClick={() => navigate('/dashboard-v2/messages')}
+            aria-label="Mensajes"
+            title="Mensajes"
+          >
+            <MessageCircle size={20} />
+            {unreadMessages > 0 && (
+              <span className="universal-topbar__badge">{unreadMessages}</span>
+            )}
+          </button>
+        )}
+
         {/* User Menu */}
         <div className="universal-topbar__user-menu">
           <button
             className="universal-topbar__user-btn"
-            onClick={() => setShowUserMenu(!showUserMenu)}
+            onClick={handleUserMenuToggle}
             aria-label="Menú de usuario"
           >
             <div className="universal-topbar__avatar">
@@ -108,18 +136,30 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
 
           {showUserMenu && (
             <div className="universal-topbar__dropdown">
-              <button className="universal-topbar__dropdown-item">
+              <button
+                className="universal-topbar__dropdown-item"
+                onClick={() => {
+                  setShowProfileModal(true);
+                  setShowUserMenu(false);
+                }}
+              >
                 <User size={16} />
                 <span>Mi Perfil</span>
               </button>
-              <button className="universal-topbar__dropdown-item">
+              <button
+                className="universal-topbar__dropdown-item"
+                onClick={() => setShowUserMenu(false)}
+              >
                 <Settings size={16} />
                 <span>Configuración</span>
               </button>
               <div className="universal-topbar__dropdown-divider" />
               <button
                 className="universal-topbar__dropdown-item universal-topbar__dropdown-item--danger"
-                onClick={handleLogout}
+                onClick={() => {
+                  setShowUserMenu(false);
+                  handleLogout();
+                }}
               >
                 <LogOut size={16} />
                 <span>Cerrar Sesión</span>
@@ -128,6 +168,15 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           )}
         </div>
       </div>
+
+      {/* User Profile Modal */}
+      {showProfileModal && (
+        <UserProfileModal
+          isOpen={showProfileModal}
+          user={effectiveUser}
+          onClose={() => setShowProfileModal(false)}
+        />
+      )}
     </header>
   );
 }

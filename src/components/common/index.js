@@ -23,6 +23,7 @@ export { default as ImageLightbox } from './ImageLightbox';
 
 // Feedback & Status
 export { default as BaseBadge } from './BaseBadge';
+export { default as CategoryBadge } from './CategoryBadge';
 export { default as BaseLoading } from './BaseLoading';
 export { default as BaseAlert } from './BaseAlert';
 

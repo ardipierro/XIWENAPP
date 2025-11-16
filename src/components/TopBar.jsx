@@ -15,7 +15,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Bell, MessageCircle, Shield, Lightbulb, ArrowLeft } from 'lucide-react';
 import UserMenu from './UserMenu.jsx';
 import AvatarSelector, { AVATARS } from './AvatarSelector.jsx';
-import ProfilePanel from './ProfilePanel.jsx';
+import UserProfileModal from './UserProfileModal.jsx';
 import ThemeSwitcher from './ThemeSwitcher.jsx';
 import AIAssistantModal from './AIAssistantModal.jsx';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
@@ -417,15 +417,14 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
         />
       )}
 
-      {/* Profile Panel */}
-      {showProfilePanel && (
-        <ProfilePanel
-          user={user}
-          userRole={userRole}
-          onClose={() => setShowProfilePanel(false)}
-          onUpdate={loadUserAvatar}
-        />
-      )}
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={showProfilePanel}
+        onClose={() => setShowProfilePanel(false)}
+        user={user}
+        userRole={userRole}
+        onUpdate={loadUserAvatar}
+      />
 
       {/* AI Assistant Modal */}
       <AIAssistantModal

@@ -31,3 +31,6 @@ export { useEnrollments } from './useEnrollments.js';
 
 // Card system hooks
 export { useViewMode, default as useViewModeDefault } from './useViewMode.js';
+
+// Badge system hooks
+export { default as useBadgeConfig } from './useBadgeConfig.js';
