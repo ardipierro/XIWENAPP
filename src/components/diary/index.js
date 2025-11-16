@@ -28,7 +28,7 @@
  */
 
 export { UnifiedExerciseRenderer } from './UnifiedExerciseRenderer';
-export { EditableTextBlock } from './EditableTextBlock';
+// export { EditableTextBlock } from './EditableTextBlock'; // DEPRECATED - Usar EnhancedTextEditor
 export { EnhancedTextEditor } from './EnhancedTextEditor';
 export { InSituContentEditor } from './InSituContentEditor';
 export { ColorPicker } from './ColorPicker';
