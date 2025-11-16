@@ -3230,58 +3230,210 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   opacity: 0.5;
 }
 
-/* Responsive */
+/* Mobile Responsive - Fullscreen alternating views */
 @media (max-width: 768px) {
+  /* Panel principal - fullscreen container */
   .messages-panel {
     flex-direction: column;
-    min-height: auto !important; /* ← CRÍTICO: Eliminar 600px en móvil */
-    max-height: calc(100vh - 180px); /* Altura máxima razonable */
-    height: auto; /* Auto-adjust */
+    min-height: 100vh !important;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0; /* Sin border radius en fullscreen */
+    box-shadow: none;
+  }
+
+  /* Mobile Sidebar - Fullscreen cuando visible */
+  .messages-sidebar-mobile {
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-right: none;
+    border-bottom: none;
+    overflow: hidden;
   }
 
   .messages-sidebar {
     width: 100%;
-    max-height: 35vh; /* Máximo 35% del viewport */
-    min-height: 180px; /* Mínimo razonable para ver conversaciones */
+    height: 100vh;
+    max-height: 100vh;
     border-right: none;
-    border-bottom: 1px solid var(--color-border);
-    overflow-y: auto; /* Scroll si hay muchas conversaciones */
+  }
+
+  /* Mobile Main Thread - Fullscreen cuando visible */
+  .messages-main-mobile {
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
   }
 
   .messages-main {
-    flex: 1;
-    min-height: 400px; /* Espacio mínimo para el thread */
-    max-height: 60vh; /* Máximo 60% del viewport */
-  }
-
-  .message-bubble {
-    max-width: 85%; /* Más ancho en móvil */
-  }
-
-  .new-message-modal {
     width: 100%;
-    max-height: 90vh;
+    height: 100vh;
+    max-height: 100vh;
   }
 
-  /* Ajustar header del sidebar en móvil */
+  /* Header más compacto en móvil */
   .messages-sidebar-header {
-    padding: 16px; /* Menos padding */
+    padding: 16px;
+    min-height: 64px; /* Touch target */
   }
 
   .header-title h2 {
-    font-size: 18px; /* Texto más pequeño */
+    font-size: 20px;
+  }
+
+  /* Botón nuevo mensaje - Touch target */
+  .btn-new-message {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 12px;
   }
 
   /* Búsqueda más compacta */
   .messages-search {
-    padding: 10px 16px;
+    padding: 12px 16px;
   }
 
-  /* Lista de conversaciones scrolleable */
+  /* Lista de conversaciones - Altura dinámica */
   .conversations-list {
     flex: 1;
     overflow-y: auto;
-    max-height: calc(35vh - 140px); /* Restar header y búsqueda */
+    height: calc(100vh - 140px); /* Restar header (64px) + search (76px) */
+    max-height: calc(100vh - 140px);
+  }
+
+  /* Conversation items - Touch targets */
+  .conversation-item {
+    padding: 16px;
+    min-height: 72px; /* Touch target + content */
+  }
+
+  .conversation-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  /* Thread Header - Con botón back */
+  .thread-header {
+    padding: 12px 16px;
+    min-height: 64px;
+    gap: 12px;
+  }
+
+  /* Botón Back - Touch target prominente */
+  .thread-back-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+    background: var(--color-bg-tertiary);
+    border: none;
+    border-radius: 10px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .thread-back-btn:hover,
+  .thread-back-btn:active {
+    background: var(--color-bg-hover);
+    transform: scale(0.95);
+  }
+
+  /* Thread user info más compacto */
+  .thread-user-info {
+    flex: 1;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .thread-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .thread-user-details h3 {
+    font-size: 16px;
+  }
+
+  .thread-user-email {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Thread actions - Más compactos */
+  .thread-actions {
+    gap: 6px;
+  }
+
+  .thread-action-btn,
+  .thread-menu-btn,
+  .thread-close-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+  }
+
+  /* Ocultar algunos botones en móvil para ahorrar espacio */
+  .thread-action-btn:not(:first-child):not(:nth-child(2)) {
+    display: none;
+  }
+
+  /* Message bubbles más anchas en móvil */
+  .message-bubble {
+    max-width: 85%;
+  }
+
+  /* Input área - Touch friendly */
+  .message-input-container {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .message-input-container textarea {
+    min-height: 44px;
+    max-height: 120px;
+  }
+
+  /* Botones de input - Touch targets */
+  .input-action-btn,
+  .send-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+  }
+
+  /* New message modal fullscreen */
+  .new-message-modal {
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  /* Transitions suaves entre vistas */
+  .messages-sidebar-mobile,
+  .messages-main-mobile {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 }
 

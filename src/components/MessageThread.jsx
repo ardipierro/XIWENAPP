@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText, ArrowLeft } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -58,8 +58,9 @@ const safeAsync = async (fn, options = {}) => {
  * @param {Object} props.conversation - Conversation data
  * @param {Object} props.currentUser - Current user
  * @param {Function} props.onClose - Close handler (mobile)
+ * @param {boolean} props.isMobile - Mobile mode flag
  */
-function MessageThread({ conversation, currentUser, onClose }) {
+function MessageThread({ conversation, currentUser, onClose, isMobile = false }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -910,6 +911,17 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
       {/* Thread Header */}
       <div className="thread-header">
+        {/* Mobile Back Button */}
+        {isMobile && onClose && (
+          <button
+            className="thread-back-btn"
+            onClick={onClose}
+            title="Volver a conversaciones"
+          >
+            <ArrowLeft size={24} />
+          </button>
+        )}
+
         <div className="thread-user-info">
           <div className="thread-avatar">
             {conversation.otherUser.name?.charAt(0).toUpperCase() || '?'}
