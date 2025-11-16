@@ -3522,7 +3522,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     flex-shrink: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
-    background: var(--color-bg-secondary);
+    background: #ff0000 !important; /* DEBUG: ROJO BRILLANTE */
     border: none !important;
     border-top: 1px solid var(--color-border);
     border-bottom: none !important;
@@ -3532,6 +3532,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   .input-area-mobile {
     margin: 0 !important;
     padding: 0 !important;
+    background: #00ff00 !important; /* DEBUG: VERDE BRILLANTE */
   }
 
   /* Una sola fila: Emoji + Textarea + Send */
@@ -3543,7 +3544,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     min-height: 60px !important;
     max-height: 60px !important;
     margin: 0 !important;
-    background: var(--color-bg-secondary) !important;
+    background: #ffff00 !important; /* DEBUG: AMARILLO BRILLANTE */
   }
 
   .input-action-btn {
