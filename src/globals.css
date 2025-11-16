@@ -3232,16 +3232,18 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 /* Mobile Responsive - Fullscreen alternating views */
 @media (max-width: 768px) {
-  /* ===== ELIMINAR PADDING DEL DASHBOARD CONTENT ===== */
-  /* El dashboard wrapper agrega padding que causa bordes blancos */
+  /* ===== AJUSTAR DASHBOARD CONTENT PARA MENSAJES ===== */
+  /* Mantener margin-top para no quedar debajo del topbar */
   .universal-dashboard__content:has(.messages-panel) {
     padding: 0 !important;
-    margin: 0 !important;
-    height: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    /* MANTENER margin-top: 56px del topbar */
     overflow: hidden !important;
   }
 
-  /* ===== PANEL PRINCIPAL - Ocupa todo el espacio del dashboard ===== */
+  /* ===== PANEL PRINCIPAL - Ocupa todo el espacio disponible ===== */
   .messages-panel {
     width: 100% !important;
     height: 100% !important;
