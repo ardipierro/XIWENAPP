@@ -111,6 +111,14 @@ const MENU_ITEMS = [
     hideIf: ['create-content'], // No mostrar a teachers/admins
   },
   {
+    id: 'my-classes',
+    label: 'Mis Clases',
+    icon: Video,
+    path: '/dashboard-v2/my-classes',
+    permission: 'view-all-content',
+    hideIf: ['create-content'], // No mostrar a teachers/admins
+  },
+  {
     id: 'my-assignments',
     label: 'Mis Tareas',
     icon: CheckSquare,

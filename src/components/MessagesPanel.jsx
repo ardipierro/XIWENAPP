@@ -11,7 +11,7 @@ import {
 } from '../firebase/messages';
 import MessageThread from './MessageThread';
 import NewMessageModal from './NewMessageModal';
-import BaseButton from './common/BaseButton';
+import { BaseButton, BaseEmptyState, BaseLoading } from './common';
 import logger from '../utils/logger';
 
 /**
@@ -90,44 +90,45 @@ function MessagesPanel({ user }) {
         </div>
 
         <div className="messages-search">
-          <Search size={16} />
-          <input
-            type="text"
-            placeholder="Buscar conversaciones..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <BaseButton
-              variant="ghost"
-              icon={X}
-              onClick={() => setSearchTerm('')}
-              className="clear-search"
+          <div className="search-input-container">
+            <Search size={16} />
+            <input
+              type="text"
+              placeholder="Buscar conversaciones..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-          )}
+            {searchTerm && (
+              <BaseButton
+                variant="ghost"
+                icon={X}
+                onClick={() => setSearchTerm('')}
+                className="clear-search"
+              />
+            )}
+          </div>
         </div>
 
         <div className="conversations-list">
           {loading ? (
-            <div className="loading-state">
-              <div className="spinner"></div>
-              <p>Cargando mensajes...</p>
+            <div className="p-6">
+              <BaseLoading variant="spinner" size="md" text="Cargando mensajes..." />
             </div>
           ) : filteredConversations.length === 0 ? (
-            <div className="empty-state">
-              <MessageCircle size={48} />
-              <p>
-                {searchTerm
-                  ? 'No se encontraron conversaciones'
-                  : 'No tienes conversaciones aún'}
-              </p>
-              <BaseButton
-                variant="primary"
-                onClick={() => setShowNewMessage(true)}
-              >
-                Iniciar conversación
-              </BaseButton>
-            </div>
+            <BaseEmptyState
+              icon={MessageCircle}
+              title={searchTerm ? 'No se encontraron conversaciones' : 'No tienes conversaciones aún'}
+              description={searchTerm ? 'Intenta con otro término de búsqueda' : 'Inicia una conversación para comenzar'}
+              size="md"
+              action={
+                <BaseButton
+                  variant="primary"
+                  onClick={() => setShowNewMessage(true)}
+                >
+                  Iniciar conversación
+                </BaseButton>
+              }
+            />
           ) : (
             filteredConversations.map(conversation => (
               <ConversationItem
@@ -150,17 +151,22 @@ function MessagesPanel({ user }) {
             onClose={() => setSelectedConversation(null)}
           />
         ) : (
-          <div className="messages-empty-state">
-            <MessageCircle size={64} />
-            <h3>Selecciona una conversación</h3>
-            <p>Elige una conversación de la lista o inicia una nueva</p>
-            <BaseButton
-              variant="primary"
-              icon={Plus}
-              onClick={() => setShowNewMessage(true)}
-            >
-              Nuevo mensaje
-            </BaseButton>
+          <div className="p-8">
+            <BaseEmptyState
+              icon={MessageCircle}
+              title="Selecciona una conversación"
+              description="Elige una conversación de la lista o inicia una nueva"
+              size="lg"
+              action={
+                <BaseButton
+                  variant="primary"
+                  icon={Plus}
+                  onClick={() => setShowNewMessage(true)}
+                >
+                  Nuevo mensaje
+                </BaseButton>
+              }
+            />
           </div>
         )}
       </div>

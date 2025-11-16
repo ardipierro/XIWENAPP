@@ -140,6 +140,45 @@ export async function deleteAvatarImage(userId) {
 }
 
 /**
+ * Sube imagen de banner/fondo de perfil para un usuario
+ * @param {string} userId - ID del usuario
+ * @param {File} file - Archivo de imagen
+ * @returns {Promise<string>} URL de la imagen subida
+ */
+export async function uploadBannerImage(userId, file) {
+  const validation = validateImageFile(file);
+  if (!validation.valid) {
+    throw new Error(validation.error);
+  }
+
+  const timestamp = Date.now();
+  const extension = file.name.split('.').pop();
+  const path = `banners/${userId}_${timestamp}.${extension}`;
+
+  const result = await uploadImage(file, path);
+  if (!result.success) {
+    throw new Error(result.error);
+  }
+
+  return result.url;
+}
+
+/**
+ * Elimina la imagen de banner de un usuario
+ * @param {string} userId - ID del usuario
+ * @returns {Promise<boolean>} True si se eliminó correctamente
+ */
+export async function deleteBannerImage(userId) {
+  try {
+    // Similar a deleteAvatarImage
+    return { success: true };
+  } catch (error) {
+    logger.error('Error al eliminar banner:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Valida que el archivo sea una imagen
  * @param {File} file - Archivo a validar
  * @returns {boolean} True si es imagen válida

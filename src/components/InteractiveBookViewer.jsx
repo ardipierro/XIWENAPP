@@ -32,7 +32,8 @@ import {
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
-  useModal
+  useModal,
+  CategoryBadge
 } from './common';
 import { UniversalCard } from './cards';
 import {
@@ -386,18 +387,11 @@ function InteractiveBookViewer() {
                 {exercise.type}
               </BaseBadge>,
               exercise.difficulty && (
-                <BaseBadge
+                <CategoryBadge
                   key="difficulty"
-                  variant={
-                    exercise.difficulty === 'beginner'
-                      ? 'success'
-                      : exercise.difficulty === 'intermediate'
-                      ? 'warning'
-                      : 'danger'
-                  }
-                >
-                  {exercise.difficulty}
-                </BaseBadge>
+                  type="difficulty"
+                  value={exercise.difficulty}
+                />
               ),
               exercise.points && (
                 <BaseBadge key="points" variant="info">
@@ -466,9 +460,11 @@ function InteractiveBookViewer() {
                     <BaseBadge variant="primary" size="sm">
                       {unit.type}
                     </BaseBadge>
-                    <BaseBadge variant="info" size="sm">
-                      {unit.cefrLevel}
-                    </BaseBadge>
+                    <CategoryBadge
+                      type="cefr"
+                      value={unit.cefrLevel}
+                      size="sm"
+                    />
                   </>
                 )}
                 <span className="text-xs text-gray-600 dark:text-gray-400">
@@ -731,6 +727,7 @@ function InteractiveBookViewer() {
               isOpen={settingsModal.isOpen}
               onClose={settingsModal.close}
               characters={characters}
+              user={user}
             />
 
             {/* Unidades */}

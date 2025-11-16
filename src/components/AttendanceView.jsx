@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { getTeacherSessions, getClassSession } from '../firebase/classSessions';
 import { getSessionAttendance, markBulkAttendance, updateAttendanceStatus } from '../firebase/attendance';
-import { getGroupMembers } from '../firebase/groups';
+import { getUserProfile } from '../firebase/firestore';
 import BaseButton from './common/BaseButton';
 
 /**
@@ -73,15 +73,30 @@ function AttendanceView({ teacher }) {
       const attendanceData = await getSessionAttendance(selectedSession.id);
       setAttendance(attendanceData);
 
-      // Cargar miembros del grupo (si tiene assignedGroups)
+      // Cargar estudiantes asignados directamente de la sesión
       let members = [];
-      if (selectedSession.assignedGroups && selectedSession.assignedGroups.length > 0) {
-        // Por ahora, cargar solo del primer grupo asignado
-        const groupId = selectedSession.assignedGroups[0];
-        members = await getGroupMembers(groupId);
-      } else if (selectedSession.groupId) {
-        // Fallback para sesiones antiguas que usan groupId
-        members = await getGroupMembers(selectedSession.groupId);
+      if (selectedSession.assignedStudents && selectedSession.assignedStudents.length > 0) {
+        // Cargar perfiles de estudiantes
+        const studentPromises = selectedSession.assignedStudents.map(async (studentId) => {
+          try {
+            const profile = await getUserProfile(studentId);
+            return {
+              id: studentId,
+              studentId: studentId,
+              studentName: profile?.name || 'Estudiante',
+              studentEmail: profile?.email || ''
+            };
+          } catch (err) {
+            logger.warn('No se pudo cargar perfil de estudiante:', studentId);
+            return {
+              id: studentId,
+              studentId: studentId,
+              studentName: 'Estudiante',
+              studentEmail: ''
+            };
+          }
+        });
+        members = await Promise.all(studentPromises);
       }
       setGroupMembers(members);
     } catch (error) {

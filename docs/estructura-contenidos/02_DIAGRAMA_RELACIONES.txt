@@ -1,0 +1,247 @@
+================================================================================
+         DIAGRAMA DE RELACIONES - ESTRUCTURA DE DATOS DE CONTENIDOS
+================================================================================
+
+1. COLECCIONES PRINCIPALES Y SUS RELACIONES
+────────────────────────────────────────────────────────────────────────────
+
+                          ┌─────────────────┐
+                          │    TEACHERS     │
+                          │   (creators)    │
+                          └────────┬────────┘
+                                   │ createdBy
+                    ┌──────────────┼──────────────┐
+                    │              │              │
+                    ▼              ▼              ▼
+            ┌─────────────┐ ┌────────────┐ ┌──────────────┐
+            │  CONTENTS   │ │ EXERCISES  │ │ FLASHCARDS   │
+            │ (unificado) │ │ (legacy)   │ │ COLLECTIONS  │
+            └──────┬──────┘ └─────┬──────┘ └──────────────┘
+                   │              │
+        ┌──────────┼──────────┐   │
+        │          │          │   │
+        ▼          ▼          ▼   ▼
+   ┌────────┐ ┌────────┐ ┌─────────────────┐
+   │COURSES │ │CLASSES │ │ COURSE_CONTENT  │ ◄── Relación N:N
+   └────┬───┘ └────┬───┘ │ (many-to-many)  │
+        │          │      └─────────────────┘
+        │          │
+        │     ┌────┴─────────────────────┐
+        │     │                          │
+        ▼     ▼                          ▼
+   ┌──────────────────┐          ┌──────────────────┐
+   │  ASSIGNMENTS     │          │   CONTENT ITEMS  │
+   │  (tareas)        │          │ (lessons, videos)│
+   └──────────────────┘          └──────────────────┘
+
+
+2. FLUJO DE ASIGNACIÓN DE CONTENIDO A ESTUDIANTES
+────────────────────────────────────────────────────────────────────────────
+
+   PROFESOR SELECCIONA CONTENIDO
+            │
+            ├──► [Opción 1] Asignar a CURSO
+            │         │
+            │         ▼
+            │    COURSE_CONTENT
+            │         │
+            │         ▼
+            │    Estudiantes inscritos en curso
+            │
+            ├──► [Opción 2] Asignar DIRECTAMENTE a ESTUDIANTE
+            │         │
+            │         ▼
+            │    STUDENT_ASSIGNMENTS
+            │         │
+            │         ▼
+            │    Estudiante individual recibe tarea
+            │
+            └──► [Opción 3] Asignar a GRUPO
+                      │
+                      ▼
+                 GROUP_ASSIGNMENTS
+                      │
+                      ▼
+                 Todos en el grupo reciben tarea
+
+
+3. COLECCIONES DE PROGRESO Y RASTREO
+────────────────────────────────────────────────────────────────────────────
+
+   ESTUDIANTE ACCEDE A CONTENIDO
+            │
+            ▼
+   STUDENT_ENROLLMENTS ──► Inscripción en curso
+            │
+            ▼
+   COURSE_PROGRESS ──► Progreso general del curso
+            │          (qué contenidos completó, tiempo)
+            │
+            ├──► STUDENT_CONTENT_PROGRESS
+            │    (detalle de cada contenido)
+            │
+            └──► STUDENT_EXERCISE_RESULTS
+                 (resultados de ejercicios)
+                      │
+                      ▼
+                 SUBMISSIONS
+                 (entregas de tareas)
+
+
+4. ESTRUCTURA COMPLETA DE CONTENIDO
+────────────────────────────────────────────────────────────────────────────
+
+                         UNIFIED CONTENT (/contents)
+                                   │
+                ┌──────────┬────────┼────────┬──────────┬────────┐
+                │          │        │        │          │        │
+            ┌───▼──┐ ┌─────▼─┐ ┌───▼──┐ ┌──▼───┐ ┌─────▼──┐ ┌───▼────┐
+            │COURSE│ │LESSON │ │READING│ │VIDEO │ │ LINK  │ │EXERCISE│
+            └──────┘ └───────┘ └───────┘ └──────┘ └───────┘ └────────┘
+
+            TODOS COMPARTEN:
+            • id, title, description
+            • createdBy, createdAt, updatedAt
+            • status (draft|review|published|archived)
+            • metadata (difficulty, tags)
+
+
+5. QUERIES MÁS IMPORTANTES
+────────────────────────────────────────────────────────────────────────────
+
+   Para Profesor:
+   ├─ getContentByTeacher(teacherId)
+   ├─ getCourseContents(courseId)
+   ├─ getCourseExercises(courseId)
+   └─ getFlashCardCollectionsByTeacher(teacherId)
+
+   Para Estudiante:
+   ├─ getStudentAssignments(studentId)
+   ├─ loadCourseProgress(userId, courseId)
+   ├─ getNextContent(studentId, courseId)
+   └─ getStudentStats(studentId)
+
+   Búsqueda:
+   ├─ searchContent(searchTerm)
+   ├─ getByType(type)
+   ├─ getByDifficulty(difficulty)
+   └─ getByTags(tags)
+
+
+6. RELACIÓN DETALLADA ENTRE TABLAS PRINCIPALES
+────────────────────────────────────────────────────────────────────────────
+
+   courses (1) ◄──────► (N) course_content ◄──────► (1) contents
+     ▲                                                     ▲
+     │                                                     │
+     │ (1)                                            (1)  │
+     │                                                     │
+   classes ────────────────────► contentIds[] (array)     │
+     ▲                                                     │
+     │ (1)                                                 │
+     │                                                     │
+   classes (1) ◄──────────────────────────────────────────┘
+     │
+     ├─► assignedStudents[] (array de studentIds)
+     └─► assignedGroups[] (array de groupIds)
+
+   Asignaciones Directas:
+   ┌──────────────────┐      ┌──────────────────┐
+   │ student_         │ (N)  │                  │ (1)
+   │ assignments  ◄───┼──────┤  contents        │
+   │              │   │      │                  │
+   └──────────────┴─┬─┘      └──────────────────┘
+              (1)  │
+                   ├─► studentId
+                   ├─► itemType (content|exercise|course)
+                   └─► itemId
+
+   Progreso:
+   course_progress
+   ├─► userId + courseId
+   ├─► completedContentIds[]
+   ├─► timeSpent { contentId: seconds }
+   └─► status (not_started|in_progress|completed)
+
+
+7. EQUIVALENCIAS Y ALTERNATIVAS
+────────────────────────────────────────────────────────────────────────────
+
+   PARA OBTENER CONTENIDO DE UN CURSO:
+   ├─ Vía course_content (Many-to-Many):
+   │  getCourseContents(courseId) → Array<content>
+   │
+   └─ Vía clase (directo en array):
+      class.contentIds → Array<contentId>
+
+   PARA ASIGNAR CONTENIDO:
+   ├─ A un CURSO:
+   │  addContentToCourse(courseId, contentId)
+   │
+   ├─ A un ESTUDIANTE:
+   │  assignToStudent(studentId, itemType, itemId)
+   │
+   └─ A un GRUPO:
+      assignToGroup(groupId, itemType, itemId)
+
+   PARA RASTREAR PROGRESO:
+   ├─ Nivel CURSO:
+   │  course_progress[userId_courseId]
+   │
+   ├─ Nivel CONTENIDO:
+   │  student_content_progress
+   │
+   └─ Nivel EJERCICIO:
+      student_exercise_results
+
+
+8. PATRONES DE ACCESO A DATOS
+────────────────────────────────────────────────────────────────────────────
+
+   BASE REPOSITORY (todos usan este patrón):
+   ┌─────────────────────────────────────┐
+   │ class UnifiedContentRepository       │
+   │ extends BaseRepository               │
+   │                                      │
+   │ ├─ create(data)                     │
+   │ ├─ getById(id)                      │
+   │ ├─ getAll(options)                  │
+   │ ├─ update(id, updates)              │
+   │ ├─ softDelete(id)                   │
+   │ ├─ hardDelete(id)                   │
+   │ │                                    │
+   │ ├─ getByType(type)                  │
+   │ ├─ getByTeacherAndType()            │
+   │ ├─ searchContent()                  │
+   │ └─ getByStatus()                    │
+   └─────────────────────────────────────┘
+
+   ARCHIVOS QUE LO IMPLEMENTAN:
+   ├─ content.js (UnifiedContentRepository)
+   ├─ exercises.js (ExercisesRepository)
+   └─ otros repositorios específicos
+
+
+9. CAMPOS DE RELACIÓN CLAVE
+────────────────────────────────────────────────────────────────────────────
+
+   En /contents:
+   └─ createdBy ──────► userId del profesor
+
+   En /course_content:
+   ├─ courseId ────────► ref a /courses
+   ├─ contentId ───────► ref a /contents
+   └─ order ───────────► posición en el curso
+
+   En /student_assignments:
+   ├─ studentId ───────► ref a /users
+   ├─ itemType ────────► 'content'|'exercise'|'course'
+   ├─ itemId ──────────► ref a /contents o /exercises
+   └─ assignedBy ──────► userId del profesor
+
+   En /course_progress:
+   ├─ userId ──────────► ref a /users
+   ├─ courseId ────────► ref a /courses
+   └─ completedContentIds ──► Array ref a /contents
+
+================================================================================

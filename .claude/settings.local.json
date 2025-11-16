@@ -152,7 +152,8 @@
       "Bash(del NUL)",
       "Bash(git show:*)",
       "Bash(timeout 3 bash:*)",
-      "Bash(grammar)"
+      "Bash(grammar)",
+      "Bash(del screenshot.png)"
     ],
     "deny": [],
     "ask": []

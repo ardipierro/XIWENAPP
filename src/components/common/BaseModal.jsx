@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 /**
@@ -28,6 +29,7 @@ import { X } from 'lucide-react';
  * @param {boolean} isDanger - Estilo de peligro (rojo)
  * @param {boolean} loading - Estado de carga (deshabilita botones)
  * @param {boolean} forceFullscreenMobile - Forzar fullscreen en móvil (override automático)
+ * @param {boolean} noPadding - Remover padding del body (para contenido edge-to-edge)
  */
 function BaseModal({
   isOpen,
@@ -42,7 +44,8 @@ function BaseModal({
   className = '',
   isDanger = false,
   loading = false,
-  forceFullscreenMobile = null // null = auto, true = forzar, false = nunca
+  forceFullscreenMobile = null, // null = auto, true = forzar, false = nunca
+  noPadding = false
 }) {
   // Detectar móvil (< 768px)
   const [isMobile, setIsMobile] = useState(
@@ -96,7 +99,7 @@ function BaseModal({
   // Verificar si es fullscreen
   const isFullscreen = effectiveSize === 'fullscreen' || effectiveSize === 'full';
 
-  return (
+  const modalContent = (
     // Overlay con backdrop blur
     <div
       className={`
@@ -196,7 +199,7 @@ function BaseModal({
 
         {/* Body - scrollable */}
         <div
-          className="flex-1 px-6 py-6 overflow-y-auto"
+          className={`flex-1 overflow-y-auto ${noPadding ? '' : 'px-6 py-6'}`}
           style={{ color: 'var(--color-text-primary)' }}
         >
           {children}
@@ -214,6 +217,9 @@ function BaseModal({
       </div>
     </div>
   );
+
+  // Renderizar usando portal para evitar problemas con overflow de contenedores padre
+  return createPortal(modalContent, document.body);
 }
 
 /**

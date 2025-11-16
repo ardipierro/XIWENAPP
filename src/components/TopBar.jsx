@@ -12,16 +12,17 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, MessageCircle, Shield, Lightbulb } from 'lucide-react';
+import { Bell, MessageCircle, Shield, Lightbulb, ArrowLeft } from 'lucide-react';
 import UserMenu from './UserMenu.jsx';
 import AvatarSelector, { AVATARS } from './AvatarSelector.jsx';
-import ProfilePanel from './ProfilePanel.jsx';
+import UserProfileModal from './UserProfileModal.jsx';
 import ThemeSwitcher from './ThemeSwitcher.jsx';
 import AIAssistantModal from './AIAssistantModal.jsx';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
 import { isAdminEmail } from '../firebase/roleConfig.js';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.js';
 import { useFont } from '../contexts/FontContext.jsx';
+import { useTopBar } from '../contexts/TopBarContext.jsx';
 import logger from '../utils/logger.js';
 
 /**
@@ -47,6 +48,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
   const [notificationCount] = useState(0); // Placeholder para futuro
   const messageCount = useUnreadMessages(user?.uid); // Real-time unread count
   const { selectedFont, fontWeight, fontSize } = useFont(); // Fuente del logo
+  const { config } = useTopBar(); // Configuración dinámica de TopBar
 
   // Verificar si es admin
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
@@ -126,40 +128,113 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
                    ${hasBanner ? 'top-[38px] sm:top-[44px]' : 'top-0'}`}
       >
         <div className="flex items-center justify-between h-full px-3 md:px-5">
-          {/* Sección Izquierda: Menú Hamburguesa + Logo */}
+          {/* Sección Izquierda: Menú Hamburguesa + Logo o Back Button */}
           <div className="flex items-center gap-3 md:gap-4">
-            {/* Hamburger Button */}
-            <button
-              onClick={onToggleSidebar}
-              className="flex flex-col justify-between
-                         w-5 h-3.5 p-0
-                         bg-transparent border-none cursor-pointer
-                         hover:opacity-70 transition-opacity"
-              aria-label="Toggle sidebar"
-              aria-expanded={sidebarOpen}
-            >
-              <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
-              <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
-              <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
-            </button>
+            {/* Back Button (si está configurado) */}
+            {config.showBackButton ? (
+              <button
+                onClick={config.onBack}
+                className="flex items-center gap-2
+                           p-2 rounded-lg
+                           bg-transparent border-none cursor-pointer
+                           text-zinc-900 dark:text-white
+                           hover:bg-zinc-100 dark:hover:bg-zinc-800
+                           transition-colors"
+                aria-label="Volver"
+              >
+                <ArrowLeft size={20} strokeWidth={2} />
+                <span className="hidden md:inline text-sm font-semibold">Volver</span>
+              </button>
+            ) : (
+              <>
+                {/* Hamburger Button */}
+                <button
+                  onClick={onToggleSidebar}
+                  className="flex flex-col justify-between
+                             w-5 h-3.5 p-0
+                             bg-transparent border-none cursor-pointer
+                             hover:opacity-70 transition-opacity"
+                  aria-label="Toggle sidebar"
+                  aria-expanded={sidebarOpen}
+                >
+                  <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
+                  <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
+                  <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
+                </button>
 
-            {/* Logo - Oculto en móvil */}
-            <button
-              onClick={() => handleNavigate('/')}
-              className="hidden md:flex items-center gap-2
-                         text-zinc-900 dark:text-white
-                         cursor-pointer select-none
-                         hover:opacity-80 transition-all duration-300"
-              style={{
-                fontFamily: selectedFont,
-                fontWeight: fontWeight,
-                fontSize: `${fontSize}rem`
-              }}
-              aria-label="Ir al inicio"
-            >
-              西文教室
-            </button>
+                {/* Logo - Oculto en móvil */}
+                <button
+                  onClick={() => handleNavigate('/')}
+                  className="hidden md:flex items-center gap-2
+                             text-zinc-900 dark:text-white
+                             cursor-pointer select-none
+                             hover:opacity-80 transition-all duration-300"
+                  style={{
+                    fontFamily: selectedFont,
+                    fontWeight: fontWeight,
+                    fontSize: `${fontSize}rem`
+                  }}
+                  aria-label="Ir al inicio"
+                >
+                  西文教室
+                </button>
+              </>
+            )}
           </div>
+
+          {/* Sección Central: Título Dinámico y Acciones */}
+          {(config.title || config.customContent || config.actions.length > 0) && (
+            <div className="flex items-center gap-3 flex-1 mx-4">
+              {/* Custom Content */}
+              {config.customContent ? (
+                <div className="flex-1">{config.customContent}</div>
+              ) : (
+                <>
+                  {/* Title & Subtitle */}
+                  {config.title && (
+                    <div className="flex flex-col justify-center flex-1">
+                      <h1 className="text-sm md:text-base font-bold text-zinc-900 dark:text-white truncate">
+                        {config.title}
+                      </h1>
+                      {config.subtitle && (
+                        <p className="text-xs text-zinc-600 dark:text-zinc-400 truncate">
+                          {config.subtitle}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Dynamic Actions */}
+                  {config.actions.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      {config.actions.map((action, index) => (
+                        <button
+                          key={action.key || index}
+                          onClick={action.onClick}
+                          disabled={action.disabled}
+                          className={`flex items-center gap-2
+                                     px-3 py-1.5 rounded-lg
+                                     text-sm font-medium
+                                     transition-colors
+                                     ${action.variant === 'primary'
+                                       ? 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700'
+                                       : action.variant === 'danger'
+                                       ? 'bg-red-600 text-white hover:bg-red-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700'
+                                       : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white hover:bg-zinc-300 dark:hover:bg-zinc-600 disabled:opacity-50'
+                                     }`}
+                          aria-label={action.label}
+                          title={action.title || action.label}
+                        >
+                          {action.icon && <span>{action.icon}</span>}
+                          <span className="hidden md:inline">{action.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {/* Sección Derecha: Acciones + Avatar */}
           <div className="flex items-center gap-2 md:gap-3">
@@ -342,15 +417,14 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
         />
       )}
 
-      {/* Profile Panel */}
-      {showProfilePanel && (
-        <ProfilePanel
-          user={user}
-          userRole={userRole}
-          onClose={() => setShowProfilePanel(false)}
-          onUpdate={loadUserAvatar}
-        />
-      )}
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={showProfilePanel}
+        onClose={() => setShowProfilePanel(false)}
+        user={user}
+        userRole={userRole}
+        onUpdate={loadUserAvatar}
+      />
 
       {/* AI Assistant Modal */}
       <AIAssistantModal

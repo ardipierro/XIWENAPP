@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Lightbulb, RefreshCw, Link } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge } from '../../common';
+import { BaseButton, BaseCard, BaseBadge, CategoryBadge } from '../../common';
 import { useExerciseState } from '../../../hooks/useExerciseState';
 
 /**
@@ -122,7 +122,7 @@ export function CollocationMatchingExercise({
             </p>
           </div>
         </div>
-        <BaseBadge variant="default">{cefrLevel}</BaseBadge>
+        <CategoryBadge type="cefr" value={cefrLevel} />
       </div>
 
       {/* Área de emparejamiento */}

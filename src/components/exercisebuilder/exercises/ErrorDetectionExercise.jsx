@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { CheckCircle, XCircle, Lightbulb, RefreshCw, Search } from 'lucide-react';
-import { BaseButton, BaseCard, BaseBadge } from '../../common';
+import { BaseButton, BaseCard, BaseBadge, CategoryBadge } from '../../common';
 import { useExerciseState } from '../../../hooks/useExerciseState';
 
 /**
@@ -104,7 +104,7 @@ export function ErrorDetectionExercise({
             </p>
           </div>
         </div>
-        <BaseBadge variant="default">{cefrLevel}</BaseBadge>
+        <CategoryBadge type="cefr" value={cefrLevel} />
       </div>
 
       {/* Texto con palabras clickeables */}
