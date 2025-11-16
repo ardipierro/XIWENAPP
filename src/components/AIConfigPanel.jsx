@@ -52,6 +52,7 @@ function AIConfigPanel() {
 
   // Estado para configuración del traductor
   const [translatorConfig, setTranslatorConfig] = useState(null);
+  const [showTranslatorModal, setShowTranslatorModal] = useState(false);
 
   // Get current user and role
   const { user, userRole } = useAuth();
@@ -192,6 +193,13 @@ function AIConfigPanel() {
   };
 
   /**
+   * Abrir modal de traductor visual
+   */
+  const handleConfigureTranslator = () => {
+    setShowTranslatorModal(true);
+  };
+
+  /**
    * Guardar configuración de función
    */
   const handleSaveFunction = async (functionId, functionConfig) => {
@@ -281,14 +289,29 @@ function AIConfigPanel() {
   });
 
   /**
-   * Obtener todas las funciones (AI + Perfiles + Tareas)
+   * Obtener todas las funciones (AI + Perfiles + Tareas + Traductor)
    */
   const getAllFunctions = () => {
     const aiFunctions = [...AI_FUNCTIONS];
     const profileFunctions = correctionProfiles.map(profileToFunction);
     const taskFunctions = IMAGE_GENERATION_TASKS.map(imageTaskToFunction);
 
-    return [...aiFunctions, ...profileFunctions, ...taskFunctions];
+    // Agregar función del traductor visual
+    const translatorFunction = {
+      id: 'translator_visual',
+      name: 'Traductor Visual',
+      description: 'Configura traducciones, diccionarios y contenidos interactivos',
+      icon: Layers,
+      category: 'content',
+      isTranslator: true,
+      defaultConfig: {
+        enabled: true,
+        provider: 'translator',
+        model: 'visual'
+      }
+    };
+
+    return [...aiFunctions, ...profileFunctions, ...taskFunctions, translatorFunction];
   };
 
   /**
@@ -373,22 +396,6 @@ function AIConfigPanel() {
   // ============================================================================
   return (
     <div className="ai-config-panel">
-      {/* Stats */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex gap-4">
-            <BaseBadge variant="success" size="lg">
-              {getEnabledCount()} funciones activas
-            </BaseBadge>
-            <BaseBadge variant="default" size="lg">
-              {correctionProfiles.length} perfiles de corrección
-            </BaseBadge>
-            <BaseBadge variant="default" size="lg">
-              {IMAGE_GENERATION_TASKS.length} tareas de demostración
-            </BaseBadge>
-          </div>
-        </div>
-      </div>
 
       {/* Alerts */}
       {error && (
@@ -424,39 +431,6 @@ function AIConfigPanel() {
         onViewModeChange={setViewMode}
         className="mb-6"
       />
-
-      {/* SECCIÓN ESPECIAL: Configuración de Contenidos */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <Layers className="w-5 h-5" />
-          Configuración de Contenidos
-        </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Configura cómo se muestran las traducciones, diccionarios y contenidos interactivos
-        </p>
-
-        {translatorConfig && (
-          <TranslatorConfigCard
-            config={translatorConfig}
-            onChange={(newConfig) => {
-              setTranslatorConfig(newConfig);
-              // Guardar automáticamente
-              localStorage.setItem('xiwen_translator_config', JSON.stringify(newConfig));
-              window.dispatchEvent(new CustomEvent('xiwen_translator_config_changed', { detail: newConfig }));
-              setSuccess('Configuración del traductor guardada');
-              setTimeout(() => setSuccess(null), 2000);
-            }}
-          />
-        )}
-      </div>
-
-      {/* Divider */}
-      <div className="my-8 border-t border-gray-300 dark:border-gray-700"></div>
-
-      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-        <Lightbulb className="w-5 h-5" />
-        Funciones de Inteligencia Artificial
-      </h2>
 
       {/* Category Filter */}
       <div className="mb-6 flex flex-wrap gap-2 items-center">
@@ -523,6 +497,19 @@ function AIConfigPanel() {
               );
             }
 
+            // Si es el traductor visual
+            if (func.isTranslator) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={handleConfigureTranslator}
+                  viewMode="grid"
+                />
+              );
+            }
+
             // Función de IA normal
             return (
               <AIFunctionCard
@@ -560,6 +547,19 @@ function AIConfigPanel() {
                   aiFunction={func}
                   config={func.defaultConfig}
                   onConfigure={() => handleConfigureImageTask(func.taskData)}
+                  viewMode="list"
+                />
+              );
+            }
+
+            // Si es el traductor visual
+            if (func.isTranslator) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={handleConfigureTranslator}
                   viewMode="list"
                 />
               );
@@ -636,6 +636,29 @@ function AIConfigPanel() {
           task={selectedImageTask}
           onClose={handleCloseImageTaskModal}
         />
+      )}
+
+      {/* Translator Config Modal */}
+      {showTranslatorModal && translatorConfig && (
+        <BaseModal
+          isOpen={showTranslatorModal}
+          onClose={() => setShowTranslatorModal(false)}
+          title="Traductor Visual"
+          icon={Layers}
+          size="xl"
+        >
+          <TranslatorConfigCard
+            config={translatorConfig}
+            onChange={(newConfig) => {
+              setTranslatorConfig(newConfig);
+              // Guardar automáticamente
+              localStorage.setItem('xiwen_translator_config', JSON.stringify(newConfig));
+              window.dispatchEvent(new CustomEvent('xiwen_translator_config_changed', { detail: newConfig }));
+              setSuccess('Configuración del traductor guardada');
+              setTimeout(() => setSuccess(null), 2000);
+            }}
+          />
+        </BaseModal>
       )}
     </div>
   );
