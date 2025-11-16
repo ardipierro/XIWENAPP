@@ -156,7 +156,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'success',
     color: '#10b981',
     label: 'Principiante',
-    icon: '🟢',
+    icon: '◐',
     description: 'Nivel básico',
     category: 'difficulty'
   },
@@ -164,7 +164,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'warning',
     color: '#f59e0b',
     label: 'Intermedio',
-    icon: '🟡',
+    icon: '◑',
     description: 'Nivel medio',
     category: 'difficulty'
   },
@@ -172,7 +172,7 @@ export const DEFAULT_BADGE_CONFIG = {
     variant: 'danger',
     color: '#ef4444',
     label: 'Avanzado',
-    icon: '🔴',
+    icon: '●',
     description: 'Nivel alto',
     category: 'difficulty'
   },

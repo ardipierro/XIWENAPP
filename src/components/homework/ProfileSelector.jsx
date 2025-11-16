@@ -237,8 +237,8 @@ export default function ProfileSelector({
                       }
                       size="sm"
                     >
-                      {strictness === 'lenient' ? '🟢 Leniente' :
-                       strictness === 'strict' ? '🔴 Estricto' : '🟡 Moderado'}
+                      {strictness === 'lenient' ? '◐ Leniente' :
+                       strictness === 'strict' ? '● Estricto' : '◑ Moderado'}
                     </BaseBadge>
                   </div>
                   <div>
