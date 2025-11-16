@@ -3230,31 +3230,30 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   opacity: 0.5;
 }
 
-/* ===== MOBILE MESSAGING - REGLA GLOBAL (Media query no funciona correctamente) ===== */
-.messages-panel {
-  position: fixed !important;
-  top: 56px !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: calc(100vh - 56px) !important;
-  min-height: calc(100vh - 56px) !important;
-  max-height: calc(100vh - 56px) !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column;
-  background: var(--color-bg-primary);
-  z-index: 50 !important;
-}
-
-/* Mobile Responsive - Fullscreen alternating views */
+/* ===== MOBILE MESSAGING ===== */
 @media (max-width: 768px) {
+  /* Panel principal - Fullscreen en mobile */
+  .messages-panel {
+    position: fixed !important;
+    top: 56px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - 56px) !important;
+    min-height: calc(100vh - 56px) !important;
+    max-height: calc(100vh - 56px) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column;
+    background: var(--color-bg-primary);
+    z-index: 50 !important;
+  }
   /* ===== AJUSTAR DASHBOARD CONTENT PARA MENSAJES ===== */
   .universal-dashboard__content:has(.messages-panel) {
     padding: 0 !important;
@@ -3991,6 +3990,94 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ===== TABLET MESSAGING (769px - 1024px) ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Panel principal - Layout de 2 columnas en tablet */
+  .messages-panel {
+    display: flex !important;
+    flex-direction: row !important;
+    height: 100% !important;
+    min-height: 600px !important;
+  }
+
+  /* Sidebar - Más estrecho en tablet */
+  .messages-sidebar {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    border-right: 1px solid var(--color-border) !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Main thread - Ocupa el resto del espacio */
+  .messages-main {
+    flex: 1 !important;
+    min-width: 0 !important; /* Importante para que flex funcione */
+  }
+
+  /* Ajustar header de sidebar */
+  .messages-sidebar-header {
+    padding: 16px !important;
+  }
+
+  .header-title h2 {
+    font-size: 18px !important;
+  }
+
+  /* Ajustar items de conversación */
+  .conversation-item {
+    padding: 14px 16px !important;
+  }
+
+  .conversation-avatar {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  /* Ajustar thread header */
+  .thread-header {
+    padding: 16px !important;
+  }
+
+  /* Ajustar burbuja de mensaje */
+  .message-bubble {
+    max-width: 70% !important;
+  }
+
+  /* Ajustar input area */
+  .message-input-container {
+    padding: 16px !important;
+  }
+
+  /* Ajustar botones de acción en thread */
+  .thread-action-btn {
+    padding: 8px !important;
+  }
+}
+
+/* ===== DESKTOP MESSAGING (1025px+) ===== */
+@media (min-width: 1025px) {
+  /* Panel principal - Layout de 2 columnas optimizado */
+  .messages-panel {
+    display: flex !important;
+    flex-direction: row !important;
+  }
+
+  /* Sidebar - Ancho óptimo en desktop */
+  .messages-sidebar {
+    width: 360px !important;
+    min-width: 360px !important;
+    max-width: 360px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Main thread - Resto del espacio */
+  .messages-main {
+    flex: 1 !important;
+    min-width: 0 !important;
   }
 }
 
