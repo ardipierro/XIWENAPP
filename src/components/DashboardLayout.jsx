@@ -14,6 +14,7 @@ import SideMenu from './SideMenu.jsx';
 import BottomNavigation from './BottomNavigation.jsx';
 import ViewAsBanner from './ViewAsBanner.jsx';
 import { useViewAs } from '../contexts/ViewAsContext';
+import { TopBarProvider } from '../contexts/TopBarContext';
 import { isAdminEmail } from '../firebase/roleConfig.js';
 
 /**
@@ -55,20 +56,21 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
   };
 
   return (
-    <div className={`dashboard-layout min-h-screen bg-gray-50 dark:bg-gray-900 transition-none ${isViewingAs ? 'has-banner' : ''}`}>
-      {/* Banner "Ver como" (solo visible cuando está activo) */}
-      <ViewAsBanner />
+    <TopBarProvider>
+      <div className={`dashboard-layout min-h-screen bg-gray-50 dark:bg-gray-900 transition-none ${isViewingAs ? 'has-banner' : ''}`}>
+        {/* Banner "Ver como" (solo visible cuando está activo) */}
+        <ViewAsBanner />
 
-      {/* Barra Superior */}
-      <TopBar
-        user={user}
-        userRole={userRole}
-        onToggleSidebar={toggleSidebar}
-        sidebarOpen={sidebarOpen}
-        isAdmin={isAdmin}
-        onMenuAction={onMenuAction}
-        hasBanner={isViewingAs}
-      />
+        {/* Barra Superior */}
+        <TopBar
+          user={user}
+          userRole={userRole}
+          onToggleSidebar={toggleSidebar}
+          sidebarOpen={sidebarOpen}
+          isAdmin={isAdmin}
+          onMenuAction={onMenuAction}
+          hasBanner={isViewingAs}
+        />
 
       {/* Menú Lateral */}
       <SideMenu
