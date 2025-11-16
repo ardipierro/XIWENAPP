@@ -46,7 +46,6 @@ import {
 import ContentSelectorModal from './ContentSelectorModal';
 import {
   UnifiedExerciseRenderer,
-  EditableTextBlock,
   EnhancedTextEditor,
   InSituContentEditor
 } from './diary';
