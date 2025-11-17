@@ -17,7 +17,7 @@ import {
   Layers,
   CheckCircle,
   CheckSquare,
-  DollarSign,
+  // DollarSign, // Ya no se usa - Sección de pagos eliminada
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 
@@ -124,14 +124,15 @@ const MENU_ITEMS = [
     path: '/dashboard/my-assignments',
     permission: 'view-own-assignments',
   },
-  {
-    id: 'my-payments',
-    label: 'Mis Pagos',
-    icon: DollarSign,
-    path: '/dashboard/my-payments',
-    permission: 'view-own-credits',
-    hideIf: ['manage-credits'], // No mostrar a admins
-  },
+  // DESHABILITADO - Sección de pagos eliminada del menú
+  // {
+  //   id: 'my-payments',
+  //   label: 'Mis Pagos',
+  //   icon: DollarSign,
+  //   path: '/dashboard/my-payments',
+  //   permission: 'view-own-credits',
+  //   hideIf: ['manage-credits'], // No mostrar a admins
+  // },
 
   // DIVIDER
   { type: 'divider', id: 'div5', showIf: ['view-all-users'] },
