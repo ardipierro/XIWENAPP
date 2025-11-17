@@ -13,7 +13,7 @@ import {
   Settings,
   UserCog,
   MessageSquare,
-  Gamepad2,
+  // Gamepad2, // Ya no se usa - Juegos eliminados
   Video,
   Layers,
   CheckCircle,
@@ -125,13 +125,14 @@ const MENU_ITEMS = [
     path: '/dashboard/my-assignments',
     permission: 'view-own-assignments',
   },
-  {
-    id: 'games',
-    label: 'Juegos',
-    icon: Gamepad2,
-    path: '/dashboard/games',
-    permission: 'play-live-games',
-  },
+  // DESHABILITADO - Juegos eliminados (se reemplazarán por ejercicios/competencias)
+  // {
+  //   id: 'games',
+  //   label: 'Juegos',
+  //   icon: Gamepad2,
+  //   path: '/dashboard/games',
+  //   permission: 'play-live-games',
+  // },
   // DESHABILITADO - Sección de pagos eliminada del menú
   // {
   //   id: 'my-payments',
