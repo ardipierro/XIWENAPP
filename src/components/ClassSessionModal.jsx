@@ -7,7 +7,9 @@ import {
   assignStudentToSession,
   unassignStudentFromSession,
   assignContentToSession,
-  unassignContentFromSession
+  unassignContentFromSession,
+  enrollStudentToSchedule,
+  unenrollStudentFromSchedule
 } from '../firebase/classSessions';
 
 /**
@@ -249,27 +251,76 @@ function ClassSessionModal({
   const handleAssignStudent = async (studentId) => {
     if (!session?.id) return;
     setAssignmentLoading(true);
-    const result = await assignStudentToSession(session.id, studentId);
-    if (result.success) {
-      showAssignmentMessage('success', '✅ Estudiante asignado');
-      // Refrescar la sesión para actualizar la UI
-      session.assignedStudents = [...(session.assignedStudents || []), studentId];
+
+    const studentName = students.find(s => s.id === studentId)?.name || '';
+    const isRecurring = session.type === 'recurring';
+
+    let result;
+    if (isRecurring) {
+      // Horario recurrente → usar enrollStudentToSchedule
+      result = await enrollStudentToSchedule(session.id, studentId, studentName);
+      if (result.success) {
+        showAssignmentMessage('success', '✅ Estudiante inscrito al horario (aplicará a todas las clases futuras)');
+        // Actualizar la sesión local
+        if (!session.studentEnrollments) session.studentEnrollments = [];
+        session.studentEnrollments.push({
+          studentId,
+          studentName,
+          enrolledAt: Timestamp.now(),
+          unenrolledAt: null,
+          status: 'active'
+        });
+      }
     } else {
+      // Sesión única → usar assignStudentToSession
+      result = await assignStudentToSession(session.id, studentId);
+      if (result.success) {
+        showAssignmentMessage('success', '✅ Estudiante asignado');
+        session.assignedStudents = [...(session.assignedStudents || []), studentId];
+      }
+    }
+
+    if (!result.success) {
       showAssignmentMessage('error', result.error || 'Error al asignar estudiante');
     }
+
     setAssignmentLoading(false);
   };
 
   const handleUnassignStudent = async (studentId) => {
     if (!session?.id) return;
     setAssignmentLoading(true);
-    const result = await unassignStudentFromSession(session.id, studentId);
-    if (result.success) {
-      showAssignmentMessage('success', '✅ Estudiante removido');
-      session.assignedStudents = (session.assignedStudents || []).filter(id => id !== studentId);
+
+    const isRecurring = session.type === 'recurring';
+
+    let result;
+    if (isRecurring) {
+      // Horario recurrente → usar unenrollStudentFromSchedule
+      result = await unenrollStudentFromSchedule(session.id, studentId);
+      if (result.success) {
+        showAssignmentMessage('success', '✅ Estudiante desinscrito del horario');
+        // Actualizar la sesión local
+        if (session.studentEnrollments) {
+          session.studentEnrollments = session.studentEnrollments.map(e =>
+            e.studentId === studentId
+              ? { ...e, unenrolledAt: Timestamp.now(), status: 'inactive' }
+              : e
+          );
+        }
+      }
     } else {
+      // Sesión única → usar unassignStudentFromSession
+      result = await unassignStudentFromSession(session.id, studentId);
+      if (result.success) {
+        showAssignmentMessage('success', '✅ Estudiante removido');
+        session.assignedStudents = (session.assignedStudents || []).filter(id => id !== studentId);
+      }
+    }
+
+    if (!result.success) {
       showAssignmentMessage('error', result.error || 'Error al remover estudiante');
     }
+
     setAssignmentLoading(false);
   };
 
@@ -789,54 +840,129 @@ function ClassSessionModal({
                 </div>
               ) : (
                 <>
-                  {/* Estudiantes Asignados */}
-                  <div className="space-y-3">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Users size={20} strokeWidth={2} />
-                      Estudiantes Asignados
-                    </h3>
-                    {(session.assignedStudents || []).length === 0 ? (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">No hay estudiantes asignados</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {students.filter(s => (session.assignedStudents || []).includes(s.id)).map(student => (
-                          <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">{student.name}</div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
-                            </div>
-                            <BaseButton
-                              variant="danger"
-                              size="sm"
-                              icon={Trash2}
-                              onClick={() => handleUnassignStudent(student.id)}
-                              disabled={assignmentLoading}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  {/* HORARIO RECURRENTE - Mostrar enrollments */}
+                  {session.type === 'recurring' ? (
+                    <>
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                          <Users size={20} strokeWidth={2} />
+                          Estudiantes Inscritos en el Horario
+                        </h3>
+                        {!session.studentEnrollments || session.studentEnrollments.filter(e => e.status === 'active').length === 0 ? (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">No hay estudiantes inscritos en este horario</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {session.studentEnrollments.filter(e => e.status === 'active').map(enrollment => {
+                              const student = students.find(s => s.id === enrollment.studentId);
+                              if (!student) return null;
 
-                  {/* Asignar Nuevo Estudiante */}
-                  {students.filter(s => !(session.assignedStudents || []).includes(s.id)).length > 0 && (
-                    <div className="space-y-3">
-                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Plus size={18} strokeWidth={2} />
-                        Asignar Estudiante
-                      </h4>
-                      <BaseSelect
-                        value=""
-                        onChange={(e) => e.target.value && handleAssignStudent(e.target.value)}
-                        options={[
-                          { value: '', label: 'Selecciona un estudiante...' },
-                          ...students
-                            .filter(s => !(session.assignedStudents || []).includes(s.id))
-                            .map(s => ({ value: s.id, label: `${s.name} (${s.email})` }))
-                        ]}
-                        disabled={assignmentLoading}
-                      />
-                    </div>
+                              return (
+                                <div key={enrollment.studentId} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                  <div className="flex-1">
+                                    <div className="font-medium text-gray-900 dark:text-white">{student.name}</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
+                                    <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                      📅 Inscrito desde: {enrollment.enrolledAt?.toDate().toLocaleDateString('es-ES', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </div>
+                                  </div>
+                                  <BaseButton
+                                    variant="danger"
+                                    size="sm"
+                                    icon={Trash2}
+                                    onClick={() => handleUnassignStudent(enrollment.studentId)}
+                                    disabled={assignmentLoading}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Asignar Nuevo Estudiante a Horario */}
+                      {students.filter(s => !session.studentEnrollments?.find(e => e.studentId === s.id && e.status === 'active')).length > 0 && (
+                        <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                          <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            <Plus size={18} strokeWidth={2} />
+                            Inscribir Nuevo Estudiante
+                          </h4>
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                            <p className="text-sm text-blue-800 dark:text-blue-200">
+                              💡 Al inscribir un estudiante, se agregará automáticamente a <strong>todas las clases futuras</strong> desde hoy en adelante.
+                            </p>
+                          </div>
+                          <BaseSelect
+                            value=""
+                            onChange={(e) => e.target.value && handleAssignStudent(e.target.value)}
+                            options={[
+                              { value: '', label: 'Selecciona un estudiante...' },
+                              ...students
+                                .filter(s => !session.studentEnrollments?.find(e => e.studentId === s.id && e.status === 'active'))
+                                .map(s => ({ value: s.id, label: `${s.name} (${s.email})` }))
+                            ]}
+                            disabled={assignmentLoading}
+                          />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* SESIÓN ÚNICA - Mostrar assignedStudents */
+                    <>
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                          <Users size={20} strokeWidth={2} />
+                          Estudiantes Asignados
+                        </h3>
+                        {(session.assignedStudents || session.eligibleStudentIds || []).length === 0 ? (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">No hay estudiantes asignados</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {students.filter(s => (session.assignedStudents || session.eligibleStudentIds || []).includes(s.id)).map(student => (
+                              <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <div>
+                                  <div className="font-medium text-gray-900 dark:text-white">{student.name}</div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
+                                </div>
+                                <BaseButton
+                                  variant="danger"
+                                  size="sm"
+                                  icon={Trash2}
+                                  onClick={() => handleUnassignStudent(student.id)}
+                                  disabled={assignmentLoading}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Asignar Nuevo Estudiante */}
+                      {students.filter(s => !(session.assignedStudents || session.eligibleStudentIds || []).includes(s.id)).length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            <Plus size={18} strokeWidth={2} />
+                            Asignar Estudiante
+                          </h4>
+                          <BaseSelect
+                            value=""
+                            onChange={(e) => e.target.value && handleAssignStudent(e.target.value)}
+                            options={[
+                              { value: '', label: 'Selecciona un estudiante...' },
+                              ...students
+                                .filter(s => !(session.assignedStudents || session.eligibleStudentIds || []).includes(s.id))
+                                .map(s => ({ value: s.id, label: `${s.name} (${s.email})` }))
+                            ]}
+                            disabled={assignmentLoading}
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
               )}
