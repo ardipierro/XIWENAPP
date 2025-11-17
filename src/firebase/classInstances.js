@@ -155,28 +155,26 @@ export async function startClassInstance(instanceId) {
 
     let meetSessionId = null;
 
-    // Crear meet_session si es modo 'live'
-    if (instance.mode === 'live') {
-      try {
-        meetSessionId = await createMeetSession({
-          classSessionId: instanceId,
-          ownerId: instance.teacherId,
-          ownerName: instance.teacherName,
-          roomName: instance.roomName,
-          sessionName: instance.scheduleName,
-          courseId: instance.courseId,
-          courseName: instance.courseName
-        });
+    // Crear meet_session (todas las clases son live ahora)
+    try {
+      meetSessionId = await createMeetSession({
+        classSessionId: instanceId,
+        ownerId: instance.teacherId,
+        ownerName: instance.teacherName,
+        roomName: instance.roomName,
+        sessionName: instance.scheduleName,
+        courseId: instance.courseId,
+        courseName: instance.courseName
+      });
 
-        // Guardar referencia
-        await updateDoc(docRef, {
-          meetSessionId: meetSessionId
-        });
+      // Guardar referencia
+      await updateDoc(docRef, {
+        meetSessionId: meetSessionId
+      });
 
-        logger.info('✅ Meet session creada:', meetSessionId);
-      } catch (meetError) {
-        logger.error('⚠️ Error creando meet session (no crítico):', meetError);
-      }
+      logger.info('✅ Meet session creada:', meetSessionId);
+    } catch (meetError) {
+      logger.error('⚠️ Error creando meet session (no crítico):', meetError);
     }
 
     // Notificar a estudiantes elegibles
@@ -246,14 +244,12 @@ export async function endClassInstance(instanceId, data = {}) {
 
     await updateDoc(docRef, updates);
 
-    // Finalizar meet_session si existe
-    if (instance.mode === 'live') {
-      try {
-        await endMeetSessionByClassId(instanceId);
-        logger.info('✅ Meet session finalizada');
-      } catch (meetError) {
-        logger.error('⚠️ Error finalizando meet session (no crítico):', meetError);
-      }
+    // Finalizar meet_session si existe (todas las clases son live ahora)
+    try {
+      await endMeetSessionByClassId(instanceId);
+      logger.info('✅ Meet session finalizada');
+    } catch (meetError) {
+      logger.error('⚠️ Error finalizando meet session (no crítico):', meetError);
     }
 
     // Notificar a estudiantes

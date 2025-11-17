@@ -57,7 +57,6 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
   const [editingSession, setEditingSession] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, scheduled, live, ended
-  const [filterMode, setFilterMode] = useState('all'); // all, live, async
   const [message, setMessage] = useState({ type: '', text: '' });
   const [actionLoading, setActionLoading] = useState(null);
 
@@ -331,11 +330,6 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
       return false;
     }
 
-    // Filtro por modo
-    if (filterMode !== 'all' && session.mode !== filterMode) {
-      return false;
-    }
-
     return true;
   });
 
@@ -357,15 +351,20 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
     );
   };
 
-  // Render badge por modo
-  const renderModeBadge = (mode) => {
-    return mode === 'live' ? (
-      <BaseBadge variant="default" icon={Video} size="sm">
-        En Vivo
-      </BaseBadge>
-    ) : (
-      <BaseBadge variant="default" icon={Calendar} size="sm">
-        Asíncrona
+  // Render badge por proveedor de video
+  const renderVideoProviderBadge = (videoProvider) => {
+    const providerConfig = {
+      livekit: { variant: 'primary', text: 'LiveKit', icon: Video },
+      meet: { variant: 'success', text: 'Google Meet', icon: Video },
+      zoom: { variant: 'default', text: 'Zoom', icon: Video },
+      voov: { variant: 'warning', text: 'Voov Meeting', icon: Video }
+    };
+
+    const config = providerConfig[videoProvider] || providerConfig.livekit;
+
+    return (
+      <BaseBadge variant={config.variant} icon={config.icon} size="sm">
+        {config.text}
       </BaseBadge>
     );
   };
@@ -533,98 +532,55 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
         </div>
 
         {/* Filtros rápidos */}
-        <div className="flex gap-4">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFilterStatus('all')}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all
-                ${filterStatus === 'all'
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-                }
-              `}
-            >
-              Todas
-            </button>
-            <button
-              onClick={() => setFilterStatus('live')}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all
-                ${filterStatus === 'live'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-                }
-              `}
-            >
-              En Vivo
-            </button>
-            <button
-              onClick={() => setFilterStatus('scheduled')}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all
-                ${filterStatus === 'scheduled'
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-                }
-              `}
-            >
-              Programadas
-            </button>
-            <button
-              onClick={() => setFilterStatus('ended')}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all
-                ${filterStatus === 'ended'
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-                }
-              `}
-            >
-              Finalizadas
-            </button>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFilterMode('all')}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all
-                ${filterMode === 'all'
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-                }
-              `}
-            >
-              Todos los modos
-            </button>
-            <button
-              onClick={() => setFilterMode('live')}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2
-                ${filterMode === 'live'
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-                }
-              `}
-            >
-              <Video size={16} strokeWidth={2} />
-              En Vivo
-            </button>
-            <button
-              onClick={() => setFilterMode('async')}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2
-                ${filterMode === 'async'
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-                }
-              `}
-            >
-              <Calendar size={16} strokeWidth={2} />
-              Asíncronas
-            </button>
-          </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFilterStatus('all')}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-medium transition-all
+              ${filterStatus === 'all'
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+              }
+            `}
+          >
+            Todas
+          </button>
+          <button
+            onClick={() => setFilterStatus('live')}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-medium transition-all
+              ${filterStatus === 'live'
+                ? 'bg-green-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+              }
+            `}
+          >
+            En Vivo
+          </button>
+          <button
+            onClick={() => setFilterStatus('scheduled')}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-medium transition-all
+              ${filterStatus === 'scheduled'
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+              }
+            `}
+          >
+            Programadas
+          </button>
+          <button
+            onClick={() => setFilterStatus('ended')}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-medium transition-all
+              ${filterStatus === 'ended'
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+              }
+            `}
+          >
+            Finalizadas
+          </button>
         </div>
       </div>
 
@@ -659,7 +615,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mt-3">
                 {renderStatusBadge(session.status)}
-                {renderModeBadge(session.mode)}
+                {renderVideoProviderBadge(session.videoProvider || 'livekit')}
                 {renderWhiteboardBadge(session.whiteboardType)}
               </div>
 
