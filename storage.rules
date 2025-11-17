@@ -80,6 +80,31 @@ service firebase.storage {
       allow delete: if isAuthenticated();
     }
 
+    // 🆕 Carpeta de mensajes (chat privado)
+    // Permite que usuarios autenticados suban archivos, imágenes y audios en sus conversaciones
+    match /messages/{conversationId}/{fileName} {
+      // Cualquier usuario autenticado puede leer archivos en conversaciones
+      // TODO: Mejorar para verificar que el usuario pertenece a la conversación
+      allow read: if isAuthenticated();
+
+      // Permitir subir archivos si:
+      // 1. Usuario está autenticado
+      // 2. Es imagen, audio o documento
+      // 3. Tamaño máximo 10MB (para permitir documentos y audios largos)
+      allow write: if isAuthenticated()
+                   && (request.resource.contentType.matches('image/.*')
+                       || request.resource.contentType.matches('audio/.*')
+                       || request.resource.contentType.matches('application/pdf')
+                       || request.resource.contentType.matches('application/msword')
+                       || request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.*')
+                       || request.resource.contentType.matches('text/plain')
+                       || request.resource.contentType.matches('application/zip'))
+                   && request.resource.size < 10 * 1024 * 1024;
+
+      // Permitir eliminación a usuarios autenticados
+      allow delete: if isAuthenticated();
+    }
+
     // Carpeta de banners de usuario (para perfiles, etc.)
     match /banners/{fileName} {
       allow read: if true; // Cualquiera puede leer
