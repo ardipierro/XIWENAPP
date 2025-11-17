@@ -170,8 +170,8 @@ function HomeView({ user, onNavigate }) {
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header - Solo fecha */}
-      <div className="mb-6">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-500 dark:text-gray-500">
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-500 dark:text-gray-500">
           {formattedDate}
         </h1>
       </div>
