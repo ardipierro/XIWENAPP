@@ -157,23 +157,31 @@ function HomeView({ user, onNavigate }) {
     return can(card.permission);
   });
 
+  // Formatear fecha completa con día de la semana
+  const today = new Date();
+  const dateOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  };
+  const formattedDate = today.toLocaleDateString('es-ES', dateOptions);
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-          ¡Bienvenido, {user?.displayName || user?.name || 'Usuario'}!
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          Accesos Directos
         </h1>
-        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
-          Rol: <strong className="text-gray-900 dark:text-white">{getRoleLabel()}</strong>
+        <p className="text-sm md:text-base text-gray-500 dark:text-gray-500">
+          {formattedDate}
         </p>
       </div>
 
       {/* Accesos directos */}
       <div>
-        <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-4">
-          Accesos Directos
-        </h2>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {visibleCards.map((card) => {
             const Icon = card.icon;
