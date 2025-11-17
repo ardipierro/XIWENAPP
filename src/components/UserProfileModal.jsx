@@ -402,9 +402,9 @@ function UserProfileModal({
           )}
         </div>
 
-        {/* Profile Header - Avatar + Info - FIJO */}
-        <div className="relative px-4 md:px-6 flex-shrink-0 border-b border-zinc-200 dark:border-zinc-800">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 -mt-10 md:-mt-14 pb-3">
+        {/* Profile Header - Avatar + Info - FIJO - Transparente sobre el banner */}
+        <div className="relative px-4 md:px-6 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 -mt-10 md:-mt-14 pb-4 border-b border-zinc-200 dark:border-zinc-800">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
               <div
@@ -451,7 +451,7 @@ function UserProfileModal({
 
             {/* User Info */}
             <div className="flex-1 text-center sm:text-left mb-1">
-              <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">
+              <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-1">
                 {user?.displayName || user?.name || user?.email || 'Usuario'}
               </h2>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -555,9 +555,10 @@ function UserProfileModal({
         </div>
 
         {/* Footer - SIEMPRE VISIBLE */}
-        <div className="flex-shrink-0 border-t border-zinc-200 dark:border-zinc-800
-                        bg-white dark:bg-zinc-950 px-4 md:px-6 py-3">
-          <div className="flex items-center justify-end gap-3">
+        <div
+          className="flex items-center justify-end gap-3 px-6 py-5 shrink-0"
+          style={{ borderTop: '1px solid var(--color-border)' }}
+        >
             {activeTab === 'info' ? (
               <>
                 {isEditing ? (
@@ -598,7 +599,6 @@ function UserProfileModal({
                 Cerrar
               </BaseButton>
             )}
-          </div>
         </div>
       </div>
     </BaseModal>
