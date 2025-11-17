@@ -333,61 +333,6 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
     return true;
   });
 
-  // Render badge por estado
-  const renderStatusBadge = (status) => {
-    const variants = {
-      scheduled: { variant: 'default', text: 'Programada' },
-      live: { variant: 'success', text: 'En Vivo', icon: Video },
-      ended: { variant: 'default', text: 'Finalizada' },
-      cancelled: { variant: 'danger', text: 'Cancelada' }
-    };
-
-    const config = variants[status] || variants.scheduled;
-
-    return (
-      <BaseBadge variant={config.variant} icon={config.icon} size="sm">
-        {config.text}
-      </BaseBadge>
-    );
-  };
-
-  // Render badge por proveedor de video
-  const renderVideoProviderBadge = (videoProvider) => {
-    const providerConfig = {
-      livekit: { variant: 'primary', text: 'LiveKit', icon: Video },
-      meet: { variant: 'success', text: 'Google Meet', icon: Video },
-      zoom: { variant: 'default', text: 'Zoom', icon: Video },
-      voov: { variant: 'warning', text: 'Voov Meeting', icon: Video }
-    };
-
-    const config = providerConfig[videoProvider] || providerConfig.livekit;
-
-    return (
-      <BaseBadge variant={config.variant} icon={config.icon} size="sm">
-        {config.text}
-      </BaseBadge>
-    );
-  };
-
-  // Render badge por pizarra
-  const renderWhiteboardBadge = (whiteboardType) => {
-    if (whiteboardType === 'canvas') {
-      return (
-        <BaseBadge variant="default" icon={Presentation} size="sm">
-          Canvas
-        </BaseBadge>
-      );
-    }
-    if (whiteboardType === 'excalidraw') {
-      return (
-        <BaseBadge variant="default" icon={PenTool} size="sm">
-          Excalidraw
-        </BaseBadge>
-      );
-    }
-    return null;
-  };
-
   // Calcular info de horarios recurrentes (usando instancias)
   const [scheduleStats, setScheduleStats] = useState({});
 
@@ -407,21 +352,17 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
     }
   };
 
-  // Render información de programación
+  // Generar texto de información de programación (retorna string para meta)
   const renderScheduleInfo = (session) => {
     if (session.type === 'single' && session.scheduledStart) {
       const date = session.scheduledStart.toDate();
-      return (
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          {date.toLocaleDateString('es-ES', {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit'
-          })}
-        </div>
-      );
+      return date.toLocaleDateString('es-ES', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
 
     if (session.type === 'recurring' && session.schedules?.length > 0) {
@@ -429,44 +370,17 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
       const time = session.schedules[0];
       const stats = scheduleStats[session.id];
 
-      return (
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-900 dark:text-white">
-            📅 {days}
-          </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            ⏰ {time.startTime} - {time.endTime}
-          </div>
-          {session.startDate && (
-            <div className="text-xs text-gray-500 dark:text-gray-500">
-              Inicio: {session.startDate.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
-            </div>
-          )}
-          {stats && (
-            <>
-              {stats.nextInstance && (
-                <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                  ⏰ Próxima: {stats.nextInstance.scheduledStart.toDate().toLocaleDateString('es-ES', {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </div>
-              )}
-              <div className="text-xs text-gray-500 dark:text-gray-500">
-                ✅ {stats.completed} completadas • 📆 {stats.scheduled} pendientes
-              </div>
-            </>
-          )}
-          {session.studentEnrollments && session.studentEnrollments.length > 0 && (
-            <div className="text-xs text-green-600 dark:text-green-400 font-medium">
-              👥 {session.studentEnrollments.filter(e => e.status === 'active').length} estudiantes activos
-            </div>
-          )}
-        </div>
-      );
+      let text = `${days} ${time.startTime}-${time.endTime}`;
+
+      if (stats?.nextInstance) {
+        const nextDate = stats.nextInstance.scheduledStart.toDate();
+        text += ` • Próxima: ${nextDate.toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'short'
+        })}`;
+      }
+
+      return text;
     }
 
     return null;
@@ -605,159 +519,185 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSessions.map(session => (
-            <UniversalCard variant="default" size="md"
-              key={session.id}
-              title={session.name}
-              subtitle={session.courseName}
-              hover
-            >
-              {/* Badges */}
-              <div className="flex flex-wrap gap-2 mt-3">
-                {renderStatusBadge(session.status)}
-                {renderVideoProviderBadge(session.videoProvider || 'livekit')}
-                {renderWhiteboardBadge(session.whiteboardType)}
-              </div>
+          {filteredSessions.map(session => {
+            // Preparar badges según el estado
+            const badges = [
+              { variant: session.status === 'live' ? 'success' : session.status === 'ended' ? 'default' : 'primary', children: session.status === 'live' ? 'En Vivo' : session.status === 'ended' ? 'Finalizada' : 'Programada' },
+              { variant: session.videoProvider === 'livekit' ? 'primary' : session.videoProvider === 'meet' ? 'success' : 'default', children: session.videoProvider === 'livekit' ? 'LiveKit' : session.videoProvider === 'meet' ? 'Google Meet' : session.videoProvider === 'zoom' ? 'Zoom' : 'Voov' }
+            ];
 
-              <div className="space-y-3">
-                {/* Descripción */}
-                {session.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-                    {session.description}
-                  </p>
-                )}
+            // Agregar badge de pizarra si existe
+            if (session.whiteboardType && session.whiteboardType !== 'none') {
+              badges.push({
+                variant: 'default',
+                icon: session.whiteboardType === 'canvas' ? Presentation : PenTool,
+                children: session.whiteboardType === 'canvas' ? 'Canvas' : 'Excalidraw'
+              });
+            }
 
-                {/* Programación */}
-                <div className="flex items-center gap-2">
-                  <Clock size={16} strokeWidth={2} className="text-gray-400" />
-                  {renderScheduleInfo(session)}
-                </div>
+            // Preparar meta info
+            const meta = [];
 
-                {/* Duración */}
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Duración: {session.duration} min
-                </div>
+            // Agregar info de programación
+            const scheduleText = renderScheduleInfo(session);
+            if (scheduleText) {
+              meta.push({ icon: '📅', text: scheduleText });
+            }
 
-                {/* Acciones */}
-                <div className="flex flex-col gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                  {/* HORARIO RECURRENTE */}
-                  {session.type === 'recurring' && (
-                    <>
-                      <div className="flex gap-2">
-                        <BaseButton
-                          variant="primary"
-                          size="sm"
-                          icon={Users}
-                          onClick={() => openEditModal(session)}
-                          fullWidth
-                        >
-                          Gestionar Estudiantes
-                        </BaseButton>
-                        <BaseButton
-                          variant="ghost"
-                          size="sm"
-                          icon={Calendar}
-                          onClick={() => {
-                            // TODO: Abrir modal de calendario de instancias
-                            setMessage({ type: 'info', text: 'Vista de calendario próximamente' });
-                          }}
-                        >
-                          Ver
-                        </BaseButton>
-                      </div>
-                      <div className="flex gap-2">
-                        <BaseButton
-                          variant="ghost"
-                          size="sm"
-                          icon={Edit}
-                          onClick={() => openEditModal(session)}
-                          fullWidth
-                        >
-                          Editar
-                        </BaseButton>
-                        <BaseButton
-                          variant="danger"
-                          size="sm"
-                          icon={Trash2}
-                          onClick={() => handleDelete(session)}
-                          loading={actionLoading === `delete-${session.id}`}
-                          fullWidth
-                        >
-                          Eliminar
-                        </BaseButton>
-                      </div>
-                    </>
-                  )}
+            // Agregar duración
+            if (session.duration) {
+              meta.push({ icon: '⏱️', text: `${session.duration} min` });
+            }
 
-                  {/* SESIÓN ÚNICA/INSTANCIA */}
-                  {session.type !== 'recurring' && (
-                    <>
-                      {session.status === 'scheduled' && (
-                        <BaseButton
-                          variant="success"
-                          size="sm"
-                          icon={Play}
-                          onClick={() => handleStartSession(session.id)}
-                          loading={actionLoading === `start-${session.id}`}
-                          fullWidth
-                        >
-                          Iniciar
-                        </BaseButton>
-                      )}
+            // Preparar actions según el tipo y estado
+            const actions = [];
 
-                      {session.status === 'live' && (
-                        <>
-                          <BaseButton
-                            variant="primary"
-                            size="sm"
-                            icon={Video}
-                            onClick={() => onJoinSession && onJoinSession(session)}
-                            fullWidth
-                          >
-                            Unirse
-                          </BaseButton>
-                          <BaseButton
-                            variant="danger"
-                            size="sm"
-                            icon={StopCircle}
-                            onClick={() => handleEndSession(session.id)}
-                            loading={actionLoading === `end-${session.id}`}
-                            fullWidth
-                          >
-                            Finalizar
-                          </BaseButton>
-                        </>
-                      )}
+            if (session.type === 'recurring') {
+              // Acciones para clase recurrente
+              actions.push(
+                <BaseButton
+                  key="manage"
+                  variant="primary"
+                  size="sm"
+                  icon={Users}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditModal(session);
+                  }}
+                  fullWidth
+                >
+                  Gestionar
+                </BaseButton>
+              );
+              actions.push(
+                <BaseButton
+                  key="edit"
+                  variant="ghost"
+                  size="sm"
+                  icon={Edit}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditModal(session);
+                  }}
+                />
+              );
+              actions.push(
+                <BaseButton
+                  key="delete"
+                  variant="danger"
+                  size="sm"
+                  icon={Trash2}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(session);
+                  }}
+                  loading={actionLoading === `delete-${session.id}`}
+                />
+              );
+            } else {
+              // Acciones para sesión única/instancia
+              if (session.status === 'scheduled') {
+                actions.push(
+                  <BaseButton
+                    key="start"
+                    variant="success"
+                    size="sm"
+                    icon={Play}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartSession(session.id);
+                    }}
+                    loading={actionLoading === `start-${session.id}`}
+                    fullWidth
+                  >
+                    Iniciar
+                  </BaseButton>
+                );
+              } else if (session.status === 'live') {
+                actions.push(
+                  <BaseButton
+                    key="join"
+                    variant="primary"
+                    size="sm"
+                    icon={Video}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onJoinSession && onJoinSession(session);
+                    }}
+                    fullWidth
+                  >
+                    Unirse
+                  </BaseButton>
+                );
+                actions.push(
+                  <BaseButton
+                    key="end"
+                    variant="danger"
+                    size="sm"
+                    icon={StopCircle}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEndSession(session.id);
+                    }}
+                    loading={actionLoading === `end-${session.id}`}
+                    fullWidth
+                  >
+                    Finalizar
+                  </BaseButton>
+                );
+              }
 
-                      {session.status === 'ended' && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400 text-center w-full py-2">
-                          Sesión finalizada
-                        </div>
-                      )}
+              // Botones de editar/eliminar para sesiones no live
+              if (session.status !== 'live') {
+                actions.push(
+                  <BaseButton
+                    key="edit"
+                    variant="ghost"
+                    size="sm"
+                    icon={Edit}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditModal(session);
+                    }}
+                  />
+                );
+                actions.push(
+                  <BaseButton
+                    key="delete"
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(session);
+                    }}
+                    loading={actionLoading === `delete-${session.id}`}
+                  />
+                );
+              }
+            }
 
-                      {session.status !== 'live' && (
-                        <div className="flex gap-2">
-                          <BaseButton
-                            variant="ghost"
-                            size="sm"
-                            icon={Edit}
-                            onClick={() => openEditModal(session)}
-                          />
-                          <BaseButton
-                            variant="danger"
-                            size="sm"
-                            icon={Trash2}
-                            onClick={() => handleDelete(session)}
-                            loading={actionLoading === `delete-${session.id}`}
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            </UniversalCard>
-          ))}
+            return (
+              <UniversalCard
+                key={session.id}
+                variant="class"
+                size="md"
+                title={session.name}
+                subtitle={session.courseName || 'Sin curso asignado'}
+                description={session.description}
+                badges={badges}
+                meta={meta}
+                actions={actions}
+                showLiveIndicator={session.status === 'live'}
+                liveText="EN VIVO"
+                onClick={() => {
+                  if (session.status === 'live' && onJoinSession) {
+                    onJoinSession(session);
+                  }
+                }}
+              />
+            );
+          })}
         </div>
       )}
 
