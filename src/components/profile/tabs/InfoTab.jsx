@@ -17,8 +17,9 @@ import logger from '../../../utils/logger';
  * @param {boolean} isAdmin - Si el usuario actual es admin
  * @param {boolean} isOwnProfile - Si está viendo su propio perfil
  * @param {Function} onUpdate - Callback al actualizar
+ * @param {Function} onEditingChange - Callback cuando cambia el modo de edición
  */
-function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate }) {
+function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingChange }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -49,11 +50,19 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate }) {
     });
   }, [user, userRole]);
 
+  // Notificar al padre cuando cambia el estado de edición
+  useEffect(() => {
+    if (onEditingChange) {
+      onEditingChange(editing);
+    }
+  }, [editing, onEditingChange]);
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    if (e) e.preventDefault();
     setSaving(true);
     setError('');
     setSuccess('');
@@ -113,65 +122,22 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate }) {
   const roleBadge = getRoleBadge();
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Mensajes de feedback */}
-      {error && (
-        <div className="p-3 px-4 rounded-lg text-sm font-semibold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="p-3 px-4 rounded-lg text-sm font-semibold bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">
-          {success}
-        </div>
-      )}
-
-      {/* Botones de acción */}
-      <div className="flex justify-end gap-2">
-        {!editing ? (
+    <div className="p-6">
+      {/* Botón Editar - Solo visible cuando NO está editando */}
+      {!editing && (canEditLimited || canEditAll) && (
+        <div className="flex justify-end mb-6">
           <BaseButton
             onClick={() => setEditing(true)}
             variant="secondary"
             size="sm"
-            disabled={!canEditLimited && !canEditAll}
           >
             Editar perfil
           </BaseButton>
-        ) : (
-          <>
-            <BaseButton
-              onClick={() => {
-                setEditing(false);
-                setFormData({
-                  name: user?.displayName || user?.name || '',
-                  email: user?.email || '',
-                  phone: user?.phone || '',
-                  address: user?.address || '',
-                  birthDate: user?.birthDate || '',
-                  role: userRole || 'student',
-                  status: user?.status || 'active'
-                });
-              }}
-              variant="ghost"
-              size="sm"
-            >
-              Cancelar
-            </BaseButton>
-            <BaseButton
-              onClick={handleSave}
-              variant="primary"
-              size="sm"
-              icon={Save}
-              disabled={saving}
-            >
-              {saving ? 'Guardando...' : 'Guardar'}
-            </BaseButton>
-          </>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Formulario */}
-      <div className="space-y-5">
+      <form id="profile-info-form" onSubmit={handleSave} className="space-y-5">
         {/* Nombre */}
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
@@ -351,7 +317,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate }) {
             </code>
           </div>
         )}
-      </div>
+      </form>
     </div>
   );
 }
