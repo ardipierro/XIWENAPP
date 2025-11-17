@@ -1,0 +1,192 @@
+SISTEMA DE BADGES - RUTAS DE ARCHIVOS PRINCIPALES
+===================================================
+
+DOCUMENTACIÓN GENERADA (en el root del proyecto)
+================================================
+/home/user/XIWENAPP/BADGE_SYSTEM_INDEX.md ..................... Índice maestro (empieza aquí)
+/home/user/XIWENAPP/BADGE_SYSTEM_SUMMARY.md ................... Resumen ejecutivo (10 minutos)
+/home/user/XIWENAPP/BADGE_SYSTEM_QUICK_REF.md ................ Referencia rápida (consulta)
+/home/user/XIWENAPP/BADGE_SYSTEM_ANALYSIS.md ................. Análisis completo (estudio profundo)
+
+
+ARCHIVOS DE CONFIGURACIÓN
+==========================
+/home/user/XIWENAPP/src/config/badgeSystem.js ................ PRINCIPAL - Configuración centralizada
+                                                                - DEFAULT_BADGE_CONFIG (57 badges)
+                                                                - BADGE_CATEGORIES (8 categorías)
+                                                                - BADGE_MAPPINGS (mapeo automático)
+                                                                - 15+ funciones helper
+
+/home/user/XIWENAPP/src/firebase/config.js ................... Configuración Firebase (relacionado)
+
+
+HOOKS Y LÓGICA DE NEGOCIO
+=========================
+/home/user/XIWENAPP/src/hooks/useBadgeConfig.js .............. PRINCIPAL - Hook de gestión
+                                                                - Estado: config, hasChanges
+                                                                - Métodos: save, reset, update*, add*, remove*
+
+/home/user/XIWENAPP/src/hooks/index.js ....................... Índice de hooks
+
+
+COMPONENTES - PANEL ADMIN (Settings)
+====================================
+/home/user/XIWENAPP/src/components/settings/BadgeCustomizerTab.jsx ....... PRINCIPAL - Panel customización
+                                                                           - BadgeCustomizerTab (principal)
+                                                                           - CategorySection (secciones)
+                                                                           - BadgeRow (filas)
+                                                                           - PreviewSection (preview)
+                                                                           - AddBadgeModal (agregar)
+
+/home/user/XIWENAPP/src/components/SettingsPanel.jsx ......... Panel general settings (contiene tab Badges)
+
+/home/user/XIWENAPP/src/components/SettingsModal.jsx ......... Modal alternativo (también contiene Badges)
+
+
+COMPONENTES - VISUALIZACIÓN DE BADGES
+======================================
+/home/user/XIWENAPP/src/components/common/BaseBadge.jsx ....... Badge genérico base
+                                                                - Variants: default, primary, success, warning, danger, info
+                                                                - Sizes: sm, md, lg
+
+/home/user/XIWENAPP/src/components/common/CategoryBadge.jsx ... Badge inteligente CON MAPEO AUTOMÁTICO
+                                                                - Mapea tipo + valor a badge automáticamente
+                                                                - O acepta badgeKey directo
+
+/home/user/XIWENAPP/src/components/common/CreditBadge.jsx .... Badge especial para créditos de usuario
+
+/home/user/XIWENAPP/src/components/common/index.js ........... Índice/barrel export de componentes base
+
+
+SISTEMA DE TEMAS
+================
+/home/user/XIWENAPP/src/contexts/ThemeContext.jsx ............ Contexto de temas globales
+                                                                - THEMES (6 temas: light, dark, ocean, etc)
+                                                                - ThemeProvider
+                                                                - useTheme hook
+
+/home/user/XIWENAPP/src/theme.js ............................ Design tokens centralizado
+                                                                - theme.colors
+                                                                - theme.backgrounds
+                                                                - theme.borders
+                                                                - theme.typography
+
+/home/user/XIWENAPP/src/components/ThemeCustomizer.jsx ........ Customizador de tema
+/home/user/XIWENAPP/src/components/ThemeBuilder.jsx .......... Constructor de tema
+/home/user/XIWENAPP/src/components/ThemeSwitcher.jsx ......... Selector de tema
+
+
+ESTILOS
+=======
+/home/user/XIWENAPP/src/globals.css .......................... CSS global
+                                                                - .badge, .badge-success, .badge-warning, etc
+                                                                - .content-card-badge
+                                                                - .role-badge
+                                                                - .status-badge
+
+/home/user/XIWENAPP/src/App.css .............................. Estilos adicionales
+
+/home/user/XIWENAPP/tailwind.config.js ....................... Configuración Tailwind
+
+
+CONTEXTOS Y UTILIDADES
+=======================
+/home/user/XIWENAPP/src/contexts/AuthContext.jsx ............ Contexto de autenticación (para validar admin)
+/home/user/XIWENAPP/src/contexts/FontContext.jsx ............ Contexto de fuentes
+/home/user/XIWENAPP/src/contexts/ViewAsContext.jsx .......... Contexto de vista
+
+/home/user/XIWENAPP/src/utils/logger.js ..................... Logger (usado en useBadgeConfig)
+
+
+COMPONENTES QUE USAN BADGES
+============================
+/home/user/XIWENAPP/src/components/UnifiedContentManager.jsx .. Usa CategoryBadge
+/home/user/XIWENAPP/src/components/FlashCardManager.jsx ....... Usa CategoryBadge
+/home/user/XIWENAPP/src/components/ClassDailyLog.jsx .......... Usa CategoryBadge
+/home/user/XIWENAPP/src/components/AdminPaymentsPanel.jsx ..... Usa CategoryBadge
+/home/user/XIWENAPP/src/components/homework/CorrectionReviewPanel.jsx ... Usa CategoryBadge
+/home/user/XIWENAPP/src/components/games/LiveGamesView.jsx ..... Usa CategoryBadge
+/home/user/XIWENAPP/src/components/guardian/GuardianView.jsx ... Usa CategoryBadge
+
+
+ARCHIVOS DE CONFIGURACIÓN DEL PROYECTO
+=======================================
+/home/user/XIWENAPP/package.json ............................... Dependencias
+/home/user/XIWENAPP/vite.config.js ............................ Configuración Vite
+/home/user/XIWENAPP/postcss.config.js ......................... Configuración PostCSS
+/home/user/XIWENAPP/tsconfig.json (si existe) ................. TypeScript config
+
+
+RUTAS RÁPIDAS PARA COPIAR Y PEGAR
+==================================
+
+Configuración:
+  src/config/badgeSystem.js
+
+Hook:
+  src/hooks/useBadgeConfig.js
+
+Panel Admin:
+  src/components/settings/BadgeCustomizerTab.jsx
+
+Componentes Visualización:
+  src/components/common/BaseBadge.jsx
+  src/components/common/CategoryBadge.jsx
+  src/components/common/CreditBadge.jsx
+
+Sistema de Temas:
+  src/contexts/ThemeContext.jsx
+  src/theme.js
+
+Documentación:
+  BADGE_SYSTEM_INDEX.md
+  BADGE_SYSTEM_SUMMARY.md
+  BADGE_SYSTEM_QUICK_REF.md
+  BADGE_SYSTEM_ANALYSIS.md
+
+
+IMPORTES FRECUENTES
+===================
+
+import useBadgeConfig from '../hooks/useBadgeConfig';
+
+import { 
+  getBadgeByKey, 
+  getBadgeForContentType, 
+  getBadgeForExerciseType 
+} from '../config/badgeSystem';
+
+import { BaseBadge, CategoryBadge, CreditBadge } from './common';
+
+import { useTheme } from '../contexts/ThemeContext';
+
+import { useAuth } from '../contexts/AuthContext';
+
+
+ESTRUCTURA DE ACCESO (desde componente en src/components/)
+===========================================================
+
+Para acceder a config:
+  '../config/badgeSystem.js'
+
+Para usar hook:
+  '../hooks/useBadgeConfig.js'
+
+Para importar componentes base:
+  './common' o './common/BaseBadge.jsx'
+
+Para acceder a contextos:
+  '../contexts/ThemeContext.jsx'
+  '../contexts/AuthContext.jsx'
+
+
+NOTAS IMPORTANTES
+=================
+
+1. Todos los paths son ABSOLUTOS /home/user/XIWENAPP/...
+2. Para imports relativos dentro de src/, usar ../
+3. BadgeCustomizerTab SOLO accesible para admin
+4. localStorage key: 'xiwen_badge_config'
+5. Configuración se aplica vía CSS variables automáticamente
+6. Eventos: 'xiwen_badge_config_changed', 'storage'
+
