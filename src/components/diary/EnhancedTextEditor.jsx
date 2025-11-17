@@ -31,6 +31,7 @@ import { ColorPicker } from './ColorPicker';
 import { HighlightPicker } from './HighlightPicker';
 import { PencilPresetsSimple } from './PencilPresetsSimple';
 import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
+import { DrawingViewer } from './DrawingViewer';
 import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { ZoomControls } from './ZoomControls';
 import { exportToPDF } from '../../utils/pdfExport';
@@ -579,6 +580,14 @@ export function EnhancedTextEditor({
             layer={drawingLayer}
             onStrokesChange={setDrawingStrokes}
             initialStrokes={drawingStrokes}
+          />
+        )}
+
+        {/* Visualizador de trazos (modo visualización) - ¡SOLUCIÓN AL BUG! */}
+        {!isEditing && drawingStrokes.length > 0 && (
+          <DrawingViewer
+            strokes={drawingStrokes}
+            zoom={1}
           />
         )}
       </div>
