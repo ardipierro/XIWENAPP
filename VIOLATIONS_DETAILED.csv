@@ -1,0 +1,49 @@
+Component,File,Violation Type,Count,Severity,Status
+REGLA_1,/src/App.css,CSS Custom,144,CRÍTICA,VIOLACIÓN
+REGLA_1,/src/LandingPage.css,CSS Custom,857,CRÍTICA,VIOLACIÓN
+REGLA_3,ContentReader.jsx,<button>,72,CRÍTICA,VIOLACIÓN
+REGLA_3,ContentReader.jsx,<input>,18,ALTA,VIOLACIÓN
+REGLA_3,Whiteboard.jsx,<button>,38,CRÍTICA,VIOLACIÓN
+REGLA_3,Whiteboard.jsx,<input>,6,ALTA,VIOLACIÓN
+REGLA_3,MessageThread.jsx,<button>,36,CRÍTICA,VIOLACIÓN
+REGLA_3,ThemeBuilder.jsx,<button>,21,CRÍTICA,VIOLACIÓN
+REGLA_3,ThemeBuilder.jsx,<input>,14,ALTA,VIOLACIÓN
+REGLA_3,SettingsModal.jsx,<button>,16,CRÍTICA,VIOLACIÓN
+REGLA_3,DesignLab.jsx,<button>,14,ALTA,VIOLACIÓN
+REGLA_3,DesignLab.jsx,<input>,7,ALTA,VIOLACIÓN
+REGLA_3,ViewCustomizer.jsx,<input>,13,ALTA,VIOLACIÓN
+REGLA_3,ClassScheduleManager.jsx,<input>,13,ALTA,VIOLACIÓN
+REGLA_3,UserProfile.jsx,<button>,13,ALTA,VIOLACIÓN
+REGLA_3,UniversalTopBar.jsx,<button>,9,ALTA,VIOLACIÓN
+REGLA_3,ClassSessionModal.jsx,<button>,9,ALTA,VIOLACIÓN
+REGLA_3,TopBar.jsx,<button>,9,ALTA,VIOLACIÓN
+REGLA_3,ClassSessionManager.jsx,<button>,8,ALTA,VIOLACIÓN
+REGLA_3,ContentStyleEditor.jsx,<input>,6,MEDIA,VIOLACIÓN
+REGLA_3,Whiteboard.jsx,<input>,6,MEDIA,VIOLACIÓN
+REGLA_3,CardSystemTab.jsx,<input>,7,MEDIA,VIOLACIÓN
+REGLA_3,SettingsPanel.jsx,<input>,7,MEDIA,VIOLACIÓN
+REGLA_3,LiveGameSetup.jsx,<input>,6,MEDIA,VIOLACIÓN
+REGLA_3,LiveGameSetup.jsx,<button>,10,ALTA,VIOLACIÓN
+REGLA_2,QuickHomeworkCorrection.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,ProfilePanel.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,StudentAssignmentsView.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,ThemeBuilder.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,ContentReader.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,BadgeCustomizerTab.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,ClassDailyLog.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,VersionHistory.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,ColorFavorites.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,PencilPresetsExtended.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,ExerciseLibrary.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,CoursePlayer.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_2,ClassDailyLogManager.jsx,Modal Custom,1,MEDIA,VIOLACIÓN
+REGLA_6,translationCache.js,console.*,18,MEDIA,VIOLACIÓN
+REGLA_6,meetSessions.js,console.*,15,MEDIA,VIOLACIÓN
+REGLA_6,notifications.js,console.*,15,MEDIA,VIOLACIÓN
+REGLA_6,ImageOverlay.jsx,console.*,11,MEDIA,VIOLACIÓN
+REGLA_6,homework_reviews.js,console.*,6,MEDIA,VIOLACIÓN
+REGLA_6,aiService.js,console.*,5,MEDIA,VIOLACIÓN
+REGLA_6,CardContainer.jsx,console.*,4,BAJA,VIOLACIÓN
+REGLA_6,badgeSystem.js,console.*,4,BAJA,VIOLACIÓN
+REGLA_6,InstallPrompt.jsx,console.*,3,BAJA,VIOLACIÓN
+REGLA_6,TTSSettings.jsx,console.*,3,BAJA,VIOLACIÓN
