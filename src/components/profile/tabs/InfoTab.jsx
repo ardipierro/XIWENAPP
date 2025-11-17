@@ -123,19 +123,6 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
 
   return (
     <div className="p-6">
-      {/* Botón Editar - Solo visible cuando NO está editando */}
-      {!editing && (canEditLimited || canEditAll) && (
-        <div className="flex justify-end mb-6">
-          <BaseButton
-            onClick={() => setEditing(true)}
-            variant="secondary"
-            size="sm"
-          >
-            Editar perfil
-          </BaseButton>
-        </div>
-      )}
-
       {/* Formulario */}
       <form id="profile-info-form" onSubmit={handleSave} className="space-y-5">
         {/* Nombre */}

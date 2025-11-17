@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Award, Save } from 'lucide-react';
+import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
 import ProfileTabs from './profile/ProfileTabs';
@@ -20,7 +20,6 @@ import InfoTab from './profile/tabs/InfoTab';
 import ClassesTab from './profile/tabs/ClassesTab';
 import ContentTab from './profile/tabs/ContentTab';
 import StudentsTab from './profile/tabs/StudentsTab';
-import BadgesTab from './profile/tabs/BadgesTab';
 import { AVATARS } from './AvatarSelector';
 import {
   getUserAvatar,
@@ -35,7 +34,6 @@ import {
   deleteBannerImage,
   validateImageFile
 } from '../firebase/storage';
-import { getUserGamification } from '../firebase/gamification';
 import logger from '../utils/logger';
 
 /**
@@ -61,7 +59,6 @@ function UserProfileModal({
   // Estados del perfil
   const [userAvatar, setUserAvatar] = useState('default');
   const [userBanner, setUserBanner] = useState(null);
-  const [gamification, setGamification] = useState(null);
 
   // Estados de edición y navegación
   const [uploading, setUploading] = useState(false);
@@ -99,10 +96,6 @@ function UserProfileModal({
             setUserBanner(banner);
             setUploadedBannerUrl(banner);
           }
-
-          // Cargar gamificación
-          const gamData = await getUserGamification(user.uid);
-          setGamification(gamData);
         } catch (err) {
           logger.error('Error loading profile:', err);
         }
@@ -303,14 +296,6 @@ function UserProfileModal({
       });
     }
 
-    // Tab de Badges - Todos los usuarios
-    tabs.push({
-      id: 'badges',
-      label: 'Gamificación',
-      icon: Award,
-      component: <BadgesTab user={user} isAdmin={isAdmin} />
-    });
-
     return tabs;
   };
 
@@ -418,7 +403,7 @@ function UserProfileModal({
         </div>
 
         {/* Profile Header - Avatar + Info - FIJO */}
-        <div className="relative px-4 md:px-6 flex-shrink-0 bg-gradient-to-b from-transparent via-black/50 to-black/80 dark:from-transparent dark:via-black/60 dark:to-black/90 border-b border-white/20 dark:border-white/10">
+        <div className="relative px-4 md:px-6 flex-shrink-0 border-b border-zinc-200 dark:border-zinc-800">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 -mt-10 md:-mt-14 pb-3">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
@@ -466,30 +451,15 @@ function UserProfileModal({
 
             {/* User Info */}
             <div className="flex-1 text-center sm:text-left mb-1">
-              <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg mb-1">
+              <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">
                 {user?.displayName || user?.name || user?.email || 'Usuario'}
               </h2>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {/* Badge de Rol */}
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600 shadow-lg">
-                  {isAdmin ? 'admin' : userRole}
-                </span>
-
-                {/* Stats de gamificación */}
-                {gamification && (
-                  <>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/90 text-white shadow-lg backdrop-blur-sm">
-                      ⭐ Nivel {gamification.level}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/90 text-white shadow-lg backdrop-blur-sm">
-                      ⚡ {gamification.xp} XP
-                    </span>
-                    {gamification.streakDays > 0 && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/90 text-white shadow-lg backdrop-blur-sm">
-                        🔥 {gamification.streakDays} días
-                      </span>
-                    )}
-                  </>
+                {(isAdmin || userRole) && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600">
+                    {isAdmin ? 'admin' : userRole}
+                  </span>
                 )}
               </div>
             </div>
@@ -584,31 +554,52 @@ function UserProfileModal({
           />
         </div>
 
-        {/* Footer Contextual - FIJO - Solo en InfoTab cuando está editando */}
-        {activeTab === 'info' && isEditing && (
-          <div className="flex-shrink-0 border-t-2 border-zinc-200 dark:border-zinc-800
-                          bg-white dark:bg-zinc-950 px-4 md:px-6 py-3 z-10">
-            <div className="flex items-center justify-end gap-3">
+        {/* Footer - SIEMPRE VISIBLE */}
+        <div className="flex-shrink-0 border-t border-zinc-200 dark:border-zinc-800
+                        bg-white dark:bg-zinc-950 px-4 md:px-6 py-3">
+          <div className="flex items-center justify-end gap-3">
+            {activeTab === 'info' ? (
+              <>
+                {isEditing ? (
+                  <>
+                    <BaseButton
+                      onClick={() => setIsEditing(false)}
+                      variant="ghost"
+                      size="md"
+                    >
+                      Cancelar
+                    </BaseButton>
+                    <BaseButton
+                      type="submit"
+                      form="profile-info-form"
+                      variant="primary"
+                      size="md"
+                    >
+                      <Save size={16} className="mr-2" />
+                      Guardar
+                    </BaseButton>
+                  </>
+                ) : (
+                  <BaseButton
+                    onClick={() => setIsEditing(true)}
+                    variant="primary"
+                    size="md"
+                  >
+                    Editar perfil
+                  </BaseButton>
+                )}
+              </>
+            ) : (
               <BaseButton
-                onClick={() => setIsEditing(false)}
+                onClick={onClose}
                 variant="ghost"
                 size="md"
               >
-                Cancelar
+                Cerrar
               </BaseButton>
-              <BaseButton
-                type="submit"
-                form="profile-info-form"
-                variant="primary"
-                size="md"
-                disabled={false}
-              >
-                <Save size={16} className="mr-2" />
-                Guardar cambios
-              </BaseButton>
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </BaseModal>
   );
