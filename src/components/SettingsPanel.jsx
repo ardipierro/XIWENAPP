@@ -19,7 +19,7 @@ import { useFont } from '../contexts/FontContext';
 import { useAuth } from '../contexts/AuthContext';
 
 function SettingsPanel() {
-  const [activeTab, setActiveTab] = useState('credentials');
+  const [activeTab, setActiveTab] = useState('general');
   const { selectedFont, setSelectedFont, fontWeight, setFontWeight, fontSize, setFontSize, availableFonts } = useFont();
   const { user } = useAuth();
 

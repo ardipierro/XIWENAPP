@@ -1,10 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Key, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../../firebase/aiConfig';
 import { BaseAlert, BaseLoading } from '../common';
 import SearchBar from '../common/SearchBar';
 import CredentialConfigModal from './CredentialConfigModal';
 import logger from '../../utils/logger';
+
+// ============================================================================
+// CACHE EN MEMORIA
+// ============================================================================
+// Cache para evitar llamadas repetidas durante la sesión
+const credentialsCache = {
+  config: null,
+  backendCreds: null,
+  timestamp: null,
+  CACHE_DURATION: 5 * 60 * 1000 // 5 minutos
+};
+
+function isCacheValid() {
+  if (!credentialsCache.timestamp) return false;
+  return Date.now() - credentialsCache.timestamp < credentialsCache.CACHE_DURATION;
+}
 
 // ============================================================================
 // PROVIDER CONFIGURATION
@@ -186,13 +202,17 @@ function CredentialsTab() {
   const [viewMode, setViewMode] = useState('grid');
   const [filter, setFilter] = useState('all');
   const [selectedProvider, setSelectedProvider] = useState(null);
+  const hasLoadedRef = useRef(false);
 
   // ============================================================================
-  // INITIALIZATION
+  // INITIALIZATION - LAZY LOADING
   // ============================================================================
-
+  // Solo cargar cuando el componente se monta por primera vez
   useEffect(() => {
-    loadAllCredentials();
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      loadAllCredentials();
+    }
   }, []);
 
   // Limpiar searchTerm si contiene email (autofill del navegador)
@@ -215,81 +235,133 @@ function CredentialsTab() {
     try {
       setLoading(true);
 
-      // 1. Cargar configuración de Firebase
-      const aiConfig = await getAIConfig();
-      setConfig(aiConfig);
+      // ============================================================
+      // USAR CACHE SI ESTÁ DISPONIBLE
+      // ============================================================
+      if (isCacheValid()) {
+        logger.info('✓ Using cached credentials (skip network calls)', 'CredentialsTab');
+        setConfig(credentialsCache.config);
+        setBackendCredentials(credentialsCache.backendCreds);
 
-      // 2. Cargar credenciales del backend (Secret Manager)
-      let backendCreds = {};
-      try {
-        const { checkAICredentials } = await import('../../firebase/aiConfig');
-        backendCreds = await checkAICredentials();
-        setBackendCredentials(backendCreds);
-        logger.info('Backend credentials loaded', 'CredentialsTab');
-      } catch (err) {
-        logger.warn('Could not load backend credentials', 'CredentialsTab');
+        // Construir credenciales desde cache
+        const loadedCredentials = buildCredentialsObject(
+          credentialsCache.config,
+          credentialsCache.backendCreds
+        );
+        setCredentials(loadedCredentials);
+        setLoading(false);
+        return;
       }
 
-      // 3. Construir objeto de credenciales con prioridad correcta
-      const loadedCredentials = {};
+      // ============================================================
+      // 1. CARGAR CONFIGURACIÓN DE FIREBASE (prioritario)
+      // ============================================================
+      const aiConfig = await getAIConfig();
+      setConfig(aiConfig);
+      credentialsCache.config = aiConfig;
 
-      AI_PROVIDERS.forEach(provider => {
-        const mapping = PROVIDER_MAPPINGS[provider.id];
-        if (!mapping) {
-          logger.warn(`No mapping found for provider: ${provider.id}`, 'CredentialsTab');
-          return;
-        }
-
-        let credentialValue = '';
-        let source = 'none';
-
-        // Prioridad 1: Backend Secret Manager (READ-ONLY)
-        if (mapping.backendName && backendCreds[mapping.backendName]) {
-          credentialValue = '***BACKEND***';
-          source = 'backend';
-        }
-        // Prioridad 2: localStorage (usuario configuró manualmente)
-        else {
-          const localStorageKey = `ai_credentials_${mapping.localStorageName}`;
-          const localValue = localStorage.getItem(localStorageKey);
-          if (localValue) {
-            credentialValue = localValue;
-            source = 'localStorage';
-          }
-          // Prioridad 3: Firestore functions[].apiKey
-          else if (aiConfig?.functions) {
-            for (const [funcId, funcConfig] of Object.entries(aiConfig.functions)) {
-              if (funcConfig.provider === mapping.firebaseName && funcConfig.apiKey?.trim()) {
-                credentialValue = funcConfig.apiKey;
-                source = 'firebase_functions';
-                break;
-              }
-            }
-          }
-          // Prioridad 4: Firestore credentials{} (legacy)
-          if (!credentialValue && aiConfig?.credentials?.[provider.apiKeyField]) {
-            credentialValue = aiConfig.credentials[provider.apiKeyField];
-            source = 'firebase_credentials';
-          }
-        }
-
-        loadedCredentials[provider.apiKeyField] = credentialValue;
-
-        // Log solo para debugging
-        if (provider.id === 'elevenlabs' || provider.id === 'google' || provider.id === 'xai') {
-          logger.info(`${provider.name}: ${source} - ${credentialValue ? '✓' : '✗'}`, 'CredentialsTab');
-        }
-      });
-
+      // ============================================================
+      // 2. CARGAR BACKEND CREDENTIALS (opcional, en segundo plano)
+      // ============================================================
+      // Primero mostrar credenciales de localStorage/Firebase
+      // Luego actualizar con backend en segundo plano
+      const loadedCredentials = buildCredentialsObject(aiConfig, {});
       setCredentials(loadedCredentials);
-      logger.info('All credentials loaded successfully', 'CredentialsTab');
+      setLoading(false); // ✅ Dejar de mostrar loading ANTES de checkAICredentials
+
+      // ✅ Cargar backend credentials en segundo plano (no bloquea la UI)
+      loadBackendCredentialsInBackground(aiConfig);
+
+      // Actualizar timestamp del cache
+      credentialsCache.timestamp = Date.now();
 
     } catch (err) {
       logger.error('Failed to load credentials', err, 'CredentialsTab');
       setError('Error al cargar credenciales');
-    } finally {
       setLoading(false);
     }
+  };
+
+  // ============================================================================
+  // HELPER: Cargar backend credentials en segundo plano
+  // ============================================================================
+  const loadBackendCredentialsInBackground = async (aiConfig) => {
+    try {
+      logger.info('Loading backend credentials in background...', 'CredentialsTab');
+      const { checkAICredentials } = await import('../../firebase/aiConfig');
+      const backendCreds = await checkAICredentials();
+
+      // Actualizar cache y estado
+      credentialsCache.backendCreds = backendCreds;
+      setBackendCredentials(backendCreds);
+
+      // Reconstruir credenciales con backend incluido
+      const updatedCredentials = buildCredentialsObject(aiConfig, backendCreds);
+      setCredentials(updatedCredentials);
+
+      logger.info('✓ Backend credentials loaded in background', 'CredentialsTab');
+    } catch (err) {
+      logger.warn('Could not load backend credentials (non-blocking)', 'CredentialsTab');
+      credentialsCache.backendCreds = {};
+    }
+  };
+
+  // ============================================================================
+  // HELPER: Construir objeto de credenciales
+  // ============================================================================
+  const buildCredentialsObject = (aiConfig, backendCreds) => {
+    const loadedCredentials = {};
+
+    AI_PROVIDERS.forEach(provider => {
+      const mapping = PROVIDER_MAPPINGS[provider.id];
+      if (!mapping) {
+        logger.warn(`No mapping found for provider: ${provider.id}`, 'CredentialsTab');
+        return;
+      }
+
+      let credentialValue = '';
+      let source = 'none';
+
+      // Prioridad 1: Backend Secret Manager (READ-ONLY)
+      if (mapping.backendName && backendCreds[mapping.backendName]) {
+        credentialValue = '***BACKEND***';
+        source = 'backend';
+      }
+      // Prioridad 2: localStorage (usuario configuró manualmente)
+      else {
+        const localStorageKey = `ai_credentials_${mapping.localStorageName}`;
+        const localValue = localStorage.getItem(localStorageKey);
+        if (localValue) {
+          credentialValue = localValue;
+          source = 'localStorage';
+        }
+        // Prioridad 3: Firestore functions[].apiKey
+        else if (aiConfig?.functions) {
+          for (const [funcId, funcConfig] of Object.entries(aiConfig.functions)) {
+            if (funcConfig.provider === mapping.firebaseName && funcConfig.apiKey?.trim()) {
+              credentialValue = funcConfig.apiKey;
+              source = 'firebase_functions';
+              break;
+            }
+          }
+        }
+        // Prioridad 4: Firestore credentials{} (legacy)
+        if (!credentialValue && aiConfig?.credentials?.[provider.apiKeyField]) {
+          credentialValue = aiConfig.credentials[provider.apiKeyField];
+          source = 'firebase_credentials';
+        }
+      }
+
+      loadedCredentials[provider.apiKeyField] = credentialValue;
+
+      // Log solo para debugging
+      if (provider.id === 'elevenlabs' || provider.id === 'google' || provider.id === 'xai') {
+        logger.info(`${provider.name}: ${source} - ${credentialValue ? '✓' : '✗'}`, 'CredentialsTab');
+      }
+    });
+
+    logger.info('Credentials object built successfully', 'CredentialsTab');
+    return loadedCredentials;
   };
 
   // ============================================================================
@@ -350,6 +422,10 @@ function CredentialsTab() {
         ...prev,
         [apiKeyField]: trimmedValue
       }));
+
+      // 6. Invalidar cache para forzar recarga en próxima visita
+      credentialsCache.config = updatedConfig;
+      credentialsCache.timestamp = Date.now();
 
       // Success feedback
       setSuccess('Credencial guardada exitosamente');
