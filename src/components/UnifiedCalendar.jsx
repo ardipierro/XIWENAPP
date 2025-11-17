@@ -197,8 +197,9 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
     <div className="w-full">
       {/* Header */}
       <div className="flex flex-col gap-4 mb-6">
-        {/* Título y Controles */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        {/* Línea 1: Título | ◀ Mes ▶ | Controles */}
+        <div className="relative flex items-center justify-between gap-4">
+          {/* Título a la izquierda */}
           <div className="flex items-center gap-3">
             <CalendarIcon size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -206,6 +207,32 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
             </h1>
           </div>
 
+          {/* Mes con navegación centrado (solo desktop) */}
+          {!isMobile && (
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+              <BaseButton
+                onClick={goToPrevious}
+                variant="ghost"
+                icon={ChevronLeft}
+                size="md"
+                className="min-w-tap-md"
+              />
+
+              <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white text-center min-w-[200px]">
+                {getDisplayText()}
+              </h2>
+
+              <BaseButton
+                onClick={goToNext}
+                variant="ghost"
+                icon={ChevronRight}
+                size="md"
+                className="min-w-tap-md"
+              />
+            </div>
+          )}
+
+          {/* Controles a la derecha */}
           <div className="flex items-center gap-2">
             {userRole === 'teacher' && onCreateSession && (
               <BaseButton
@@ -228,44 +255,57 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
                 size="md"
               />
             )}
-
-            {/* Botón Hoy */}
-            <BaseButton
-              onClick={goToToday}
-              variant="primary"
-              size={isMobile ? 'sm' : 'md'}
-            >
-              Hoy
-            </BaseButton>
-
-            {/* Desktop: View selector */}
-            {!isMobile && (
-              <BaseSelect
-                value={view}
-                onChange={(e) => setView(e.target.value)}
-                options={[
-                  { value: 'month', label: 'Mes' },
-                  { value: 'week', label: 'Semana' },
-                  { value: 'day', label: 'Día' }
-                ]}
-                className="w-auto"
-              />
-            )}
           </div>
         </div>
 
-        {/* Mes y Navegación */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        {/* Línea 2: Botón Hoy (centro) y Selector de vista (derecha) - solo desktop */}
+        {!isMobile && (
+          <div className="grid grid-cols-3 items-center gap-4">
+            {/* Espacio vacío a la izquierda */}
+            <div></div>
+
+            {/* Botón Hoy centrado */}
+            <div className="flex justify-center">
+              <BaseButton
+                onClick={goToToday}
+                variant="primary"
+                size="md"
+              >
+                Hoy
+              </BaseButton>
+            </div>
+
+            {/* Selector de vista a la derecha */}
+            <div className="flex justify-end">
+              <div className="w-auto min-w-[120px]">
+                <BaseSelect
+                  value={view}
+                  onChange={(e) => setView(e.target.value)}
+                  options={[
+                    { value: 'month', label: 'Mes' },
+                    { value: 'week', label: 'Semana' },
+                    { value: 'day', label: 'Día' }
+                  ]}
+                  size="md"
+                  className="w-auto"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile: Mes y navegación */}
+        {isMobile && (
+          <div className="flex items-center justify-center gap-3">
             <BaseButton
               onClick={goToPrevious}
               variant="ghost"
               icon={ChevronLeft}
-              size={isMobile ? 'sm' : 'md'}
+              size="sm"
               className="min-w-tap-md"
             />
 
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white min-w-[200px] text-center">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white text-center min-w-[180px]">
               {getDisplayText()}
             </h2>
 
@@ -273,11 +313,11 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
               onClick={goToNext}
               variant="ghost"
               icon={ChevronRight}
-              size={isMobile ? 'sm' : 'md'}
+              size="sm"
               className="min-w-tap-md"
             />
           </div>
-        </div>
+        )}
       </div>
 
       {/* Mobile: List or Simplified Calendar */}
