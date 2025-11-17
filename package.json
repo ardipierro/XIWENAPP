@@ -60,5 +60,8 @@
     "vite": "^5.0.8",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-pwa": "^1.1.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.53.2"
   }
 }
