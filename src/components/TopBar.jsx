@@ -53,6 +53,14 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
   // Verificar si es admin
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
 
+  // Debug logs
+  console.log('🔧 TopBar props:', {
+    userEmail: user?.email,
+    userRole,
+    isAdmin,
+    isAdminEmail: isAdminEmail(user?.email)
+  });
+
   // Cargar avatar del usuario al montar
   useEffect(() => {
     loadUserAvatar();
