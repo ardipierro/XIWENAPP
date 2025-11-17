@@ -32,12 +32,14 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { BaseButton, BaseBadge, BaseInput, BaseAlert } from '../common';
+import CategoryBadge from '../common/CategoryBadge';
 import useBadgeConfig from '../../hooks/useBadgeConfig';
 import {
   getIconLibraryConfig,
   saveIconLibraryConfig,
 } from '../../config/badgeSystem';
 import IconPickerModal from './IconPickerModal';
+import * as HeroIcons from '@heroicons/react/24/outline';
 import logger from '../../utils/logger';
 
 /**
@@ -139,7 +141,7 @@ function BadgeCustomizerTab({ user }) {
   const handleIconLibraryChange = (library) => {
     const newConfig = { ...iconLibraryConfig, library };
     setIconLibraryConfig(newConfig);
-    saveIconLibraryConfig(newConfig);
+    saveIconLibraryConfig(newConfig); // Esto dispara el evento 'iconLibraryChange'
     setSaveMessage({
       type: 'success',
       text: `✅ Estilo de iconos cambiado a: ${
@@ -147,8 +149,6 @@ function BadgeCustomizerTab({ user }) {
       }`,
     });
     setTimeout(() => setSaveMessage(null), 3000);
-    // Forzar re-render de badges
-    window.dispatchEvent(new Event('storage'));
   };
 
   return (
@@ -530,17 +530,10 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
       <div className="flex items-center justify-between gap-3">
         {/* Badge preview */}
         <div className="flex items-center gap-3 flex-1">
-          <BaseBadge
-            variant={badge.variant}
+          <CategoryBadge
+            badgeKey={badgeKey}
             size="md"
-            style={{
-              backgroundColor: badge.color,
-              color: getContrastText(badge.color),
-            }}
-          >
-            {badge.icon && <span className="mr-1">{badge.icon}</span>}
-            {badge.label}
-          </BaseBadge>
+          />
 
           <div className="flex-1">
             <div className="flex items-center gap-2">
@@ -654,20 +647,12 @@ function PreviewSection({ badges }) {
 
       <div className="flex flex-wrap gap-2">
         {previewBadges.map((badgeKey) => {
-          const badge = badges[badgeKey];
           return (
-            <BaseBadge
+            <CategoryBadge
               key={badgeKey}
-              variant={badge.variant}
+              badgeKey={badgeKey}
               size="md"
-              style={{
-                backgroundColor: badge.color,
-                color: getContrastText(badge.color),
-              }}
-            >
-              {badge.icon && <span className="mr-1">{badge.icon}</span>}
-              {badge.label}
-            </BaseBadge>
+            />
           );
         })}
       </div>
@@ -847,7 +832,11 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
                 color: getContrastText(formData.color),
               }}
             >
-              {formData.icon && <span className="mr-1">{formData.icon}</span>}
+              {iconType === 'heroicon' && formData.heroicon && (() => {
+                const IconComponent = HeroIcons[formData.heroicon];
+                return IconComponent ? <IconComponent className="mr-1" style={{ width: '16px', height: '16px' }} /> : null;
+              })()}
+              {iconType === 'emoji' && formData.icon && <span className="mr-1">{formData.icon}</span>}
               {formData.label || 'Nuevo Badge'}
             </BaseBadge>
           </div>
