@@ -1,7 +1,7 @@
 # 🃏 Sistema de Cards Unificado
 
-**Fecha:** 2025-11-15
-**Versión:** 1.1 - Footer Sticky + Mejoras de Color
+**Fecha:** 2025-11-17
+**Versión:** 1.2 - Footer Sticky Fix + UI Simplification
 **Estado:** ✅ Funcional
 
 ---
@@ -784,6 +784,93 @@ No necesitas hacer nada. Dark mode funciona out-of-the-box.
 
 ---
 
+## 🆕 Novedades
+
+### Versión 1.2 (2025-11-17)
+
+#### 1. **Footer Sticky - FIX CRÍTICO**
+
+**Problema identificado:** El footer no se pegaba correctamente a la base de las tarjetas en layouts verticales.
+
+**Causa:** El footer con `mt-auto` estaba fuera del contenedor `flex-1`, impidiendo que el flex layout funcionara correctamente.
+
+**Solución implementada:**
+```jsx
+// ❌ ANTES (Incorrecto)
+<div className={classes.content}>
+  <div className="flex-1 flex flex-col">
+    {/* Contenido */}
+  </div>
+  {/* Footer fuera del flex container */}
+  <div className="mt-auto">...</div>
+</div>
+
+// ✅ AHORA (Correcto)
+<div className={classes.content}>
+  <div className="flex-1 flex flex-col">
+    {/* Contenido */}
+    <div className="flex-1">...</div>
+
+    {/* Footer dentro del flex container */}
+    <div className="mt-auto">...</div>
+  </div>
+</div>
+```
+
+**Resultado:**
+- ✅ Footer siempre alineado a la base de la tarjeta
+- ✅ Grids con tarjetas de diferentes alturas ahora tienen footers alineados
+- ✅ Diseño visual más consistente y profesional
+
+#### 2. **Simplificación de Indicadores de Estado**
+
+**Problema:** En las tarjetas de corrección de tareas había **4 indicadores redundantes** del estado "LISTO":
+1. Badge en esquina superior derecha `[🟢 LISTO]`
+2. CheckCircle verde al lado del nombre del usuario
+3. Mensaje "✅ Análisis completado"
+4. Badge de calificación con fondo verde
+
+**Solución implementada:**
+- ✅ **MANTENER**: Badge principal en esquina superior derecha (único indicador de estado)
+- ❌ **ELIMINAR**: CheckCircle verde al lado del usuario → Cambiado a icono `<User>` neutral
+- ❌ **SIMPLIFICAR**: Eliminado mensaje redundante "✅ Análisis completado"
+- ✅ **MANTENER**: Badge de calificación con color semántico (información útil, no redundante)
+
+**Antes:**
+```
+┌─────────────────────────────────────┐
+│                    [🟢 LISTO]  ← #1 │
+│                                     │
+│  [✅]  Juan Pérez           ← #2    │
+│                                     │
+│  ┌─────────────────────────┐        │
+│  │ ✅ Análisis completado  │ ← #3   │
+│  │ [85/100] • 3 errores    │        │
+│  └─────────────────────────┘        │
+└─────────────────────────────────────┘
+```
+
+**Ahora:**
+```
+┌─────────────────────────────────────┐
+│                    [🟢 LISTO]  ← Único indicador claro │
+│                                     │
+│  [👤]  Juan Pérez           ← Neutral    │
+│                                     │
+│  ┌─────────────────────────┐        │
+│  │ [85/100] • 3 errores    │ ← Info útil
+│  └─────────────────────────┘        │
+└─────────────────────────────────────┘
+```
+
+**Beneficios:**
+- ✅ Reducción de ruido visual (de 4 a 2 elementos)
+- ✅ Jerarquía de información clara
+- ✅ Consistente con las directivas de diseño minimalista
+- ✅ Mejor experiencia de usuario
+
+---
+
 ## 🆕 Novedades Versión 1.1 (2025-11-15)
 
 ### 1. **Footer Sticky**
@@ -893,5 +980,5 @@ Antes de usar el sistema, verifica:
 ---
 
 **Autor:** Claude Code
-**Última actualización:** 2025-11-14
-**Estado:** ✅ FASE 1 Completada
+**Última actualización:** 2025-11-17
+**Estado:** ✅ Producción (v1.2)

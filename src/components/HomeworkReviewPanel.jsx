@@ -441,24 +441,11 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
           ) : null}
         </div>
 
-        {/* Student Info */}
+        {/* Student Info - Indicador neutral, el estado ya está en badge superior */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <div className={`p-2.5 rounded-lg ${
-              isProcessing ? 'bg-orange-100 dark:bg-orange-900/30' :
-              isFailed ? 'bg-red-100 dark:bg-red-900/30' :
-              isPendingReview ? 'bg-green-100 dark:bg-green-900/30' :
-              'bg-gray-100 dark:bg-gray-800'
-            }`}>
-              {isProcessing ? (
-                <RefreshCw size={20} strokeWidth={2.5} className="text-orange-600 dark:text-orange-400 animate-spin" />
-              ) : isFailed ? (
-                <AlertCircle size={20} strokeWidth={2.5} className="text-red-600 dark:text-red-400" />
-              ) : isPendingReview ? (
-                <CheckCircle size={20} strokeWidth={2.5} className="text-green-600 dark:text-green-400" />
-              ) : (
-                <User size={20} strokeWidth={2.5} className="text-gray-600 dark:text-gray-400" />
-              )}
+            <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-gray-800">
+              <User size={20} strokeWidth={2.5} className="text-gray-600 dark:text-gray-400" />
             </div>
             <div>
               <p className="font-semibold text-gray-900 dark:text-white">
@@ -509,11 +496,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
             )}
           </div>
         ) : isPendingReview ? (
-          <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-600 rounded-lg p-3">
-            <div className="flex items-center gap-2.5 text-sm text-green-800 dark:text-green-200 mb-2">
-              <CheckCircle size={16} strokeWidth={2.5} className="flex-shrink-0" />
-              <span className="font-bold">✅ Análisis completado</span>
-            </div>
+          <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-2">
                 <BaseBadge variant={gradeColor} className="text-sm">
