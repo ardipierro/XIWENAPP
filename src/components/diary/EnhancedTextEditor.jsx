@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { ColorPicker } from './ColorPicker';
 import { HighlightPicker } from './HighlightPicker';
-import { PencilPresetsExtended } from './PencilPresetsExtended';
+import { PencilPresetsSimple } from './PencilPresetsSimple';
 import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
 import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { ZoomControls } from './ZoomControls';
@@ -67,6 +67,7 @@ export function EnhancedTextEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [showAdvancedTools, setShowAdvancedTools] = useState(false);
+  const [, forceUpdate] = useState(0); // Para forzar re-render de estados activos
 
   // Drawing states
   const [drawingMode, setDrawingMode] = useState(false);
@@ -133,6 +134,10 @@ export function EnhancedTextEditor({
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[120px] px-4 py-3'
       }
+    },
+    onUpdate: () => {
+      // Forzar re-render cada vez que el contenido cambia
+      forceUpdate(n => n + 1);
     }
   });
 
@@ -508,10 +513,10 @@ export function EnhancedTextEditor({
                 </button>
               </div>
 
-              {/* Presets de lápiz (colapsable) */}
+              {/* Presets de lápiz simplificados (colapsable) */}
               {showPencilPresets && (
                 <div className="mb-3">
-                  <PencilPresetsExtended
+                  <PencilPresetsSimple
                     onSelect={handlePencilPresetSelect}
                     current={{ color: pencilColor, opacity: pencilOpacity, size: pencilSize }}
                   />
