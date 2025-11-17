@@ -78,7 +78,7 @@ function ClassDailyLog({ logId, user, onBack }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const { updateTopBar, resetTopBar } = useTopBar();
+  const { updateTopBar, resetTopBar, hideSidebar, showSidebar } = useTopBar();
   const contentSelectorModal = useModal();
   const autoSaveIntervalRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -86,6 +86,14 @@ function ClassDailyLog({ logId, user, onBack }) {
 
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
   const isStudent = user?.role === 'student' || user?.role === 'trial';
+
+  // Ocultar sidebar global al montar, restaurar al desmontar
+  useEffect(() => {
+    hideSidebar();
+    return () => {
+      showSidebar();
+    };
+  }, [hideSidebar, showSidebar]);
 
   // Extract specific log properties to avoid infinite loops from object reference changes
   const logMeta = useMemo(() => ({
