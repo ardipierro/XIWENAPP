@@ -325,9 +325,9 @@ function UserProfileModal({
       noPadding={true}
       className="!overflow-hidden !max-h-[90vh]"
     >
-      <div className="flex flex-col h-full max-h-[90vh]">
+      <div className="flex flex-col h-full">
         {/* Banner Section - FIJO */}
-        <div className="relative h-32 md:h-40 overflow-hidden flex-shrink-0 group">
+        <div className="relative h-28 md:h-36 overflow-hidden flex-shrink-0 group">
           {/* Banner Image o Gradient */}
           {userBanner ? (
             <img
@@ -409,7 +409,7 @@ function UserProfileModal({
 
         {/* Profile Header - Avatar + Info - FIJO */}
         <div className="relative px-4 md:px-6 flex-shrink-0 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 md:gap-4 -mt-12 md:-mt-16 pb-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 -mt-10 md:-mt-14 pb-2">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
               <div
@@ -457,8 +457,8 @@ function UserProfileModal({
             </div>
 
             {/* User Info */}
-            <div className="flex-1 text-center sm:text-left mb-2">
-              <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+            <div className="flex-1 text-center sm:text-left mb-1">
+              <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">
                 {user?.displayName || user?.name || user?.email || 'Usuario'}
               </h2>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -578,8 +578,8 @@ function UserProfileModal({
 
         {/* Footer Contextual - FIJO - Solo en InfoTab cuando está editando */}
         {activeTab === 'info' && isEditing && (
-          <div className="flex-shrink-0 border-t border-zinc-200 dark:border-zinc-800
-                          bg-white dark:bg-zinc-950 px-4 md:px-6 py-4">
+          <div className="flex-shrink-0 border-t-2 border-zinc-200 dark:border-zinc-800
+                          bg-white dark:bg-zinc-950 px-4 md:px-6 py-3 z-10">
             <div className="flex items-center justify-end gap-3">
               <BaseButton
                 onClick={() => setIsEditing(false)}
@@ -593,7 +593,9 @@ function UserProfileModal({
                 form="profile-info-form"
                 variant="primary"
                 size="md"
+                disabled={false}
               >
+                <Save size={16} className="mr-2" />
                 Guardar cambios
               </BaseButton>
             </div>
