@@ -235,37 +235,37 @@ export function EnhancedTextEditor({
       {/* Barra de herramientas (solo en modo edición) */}
       {isEditing && (
         <div className="toolbar-container sticky top-0 z-20 bg-white dark:bg-gray-900
-                       border-2 border-gray-300 dark:border-gray-600 rounded-t-lg shadow-lg">
+                       border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-sm">
           {/* Toolbar principal */}
-          <div className="toolbar-main flex flex-wrap items-center gap-1 p-3
+          <div className="toolbar-main flex flex-wrap items-center gap-2 p-3
                          border-b border-gray-200 dark:border-gray-700">
-            {/* Formato básico */}
-            <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+            {/* Formato básico - Grupo visual */}
+            <div className="flex gap-1 px-2 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 active={editor.isActive('bold')}
                 title="Negrita (Ctrl+B)"
               >
-                <Bold size={18} />
+                <Bold size={18} strokeWidth={2} />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 active={editor.isActive('italic')}
                 title="Cursiva (Ctrl+I)"
               >
-                <Italic size={18} />
+                <Italic size={18} strokeWidth={2} />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleUnderline().run()}
                 active={editor.isActive('underline')}
                 title="Subrayado (Ctrl+U)"
               >
-                <UnderlineIcon size={18} />
+                <UnderlineIcon size={18} strokeWidth={2} />
               </ToolbarButton>
             </div>
 
-            {/* Encabezados */}
-            <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+            {/* Encabezados - Grupo visual */}
+            <div className="flex gap-1 px-2 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                 active={editor.isActive('heading', { level: 1 })}
@@ -289,51 +289,51 @@ export function EnhancedTextEditor({
               </ToolbarButton>
             </div>
 
-            {/* Listas */}
-            <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+            {/* Listas - Grupo visual */}
+            <div className="flex gap-1 px-2 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
                 active={editor.isActive('bulletList')}
                 title="Lista con viñetas"
               >
-                <List size={18} />
+                <List size={18} strokeWidth={2} />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
                 active={editor.isActive('orderedList')}
                 title="Lista numerada"
               >
-                <ListOrdered size={18} />
+                <ListOrdered size={18} strokeWidth={2} />
               </ToolbarButton>
             </div>
 
-            {/* Alineación */}
-            <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+            {/* Alineación - Grupo visual */}
+            <div className="flex gap-1 px-2 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <ToolbarButton
                 onClick={() => editor.chain().focus().setTextAlign('left').run()}
                 active={editor.isActive({ textAlign: 'left' })}
                 title="Alinear izquierda"
               >
-                <AlignLeft size={18} />
+                <AlignLeft size={18} strokeWidth={2} />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().setTextAlign('center').run()}
                 active={editor.isActive({ textAlign: 'center' })}
                 title="Alinear centro"
               >
-                <AlignCenter size={18} />
+                <AlignCenter size={18} strokeWidth={2} />
               </ToolbarButton>
               <ToolbarButton
                 onClick={() => editor.chain().focus().setTextAlign('right').run()}
                 active={editor.isActive({ textAlign: 'right' })}
                 title="Alinear derecha"
               >
-                <AlignRight size={18} />
+                <AlignRight size={18} strokeWidth={2} />
               </ToolbarButton>
             </div>
 
-            {/* Color y Resaltador */}
-            <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+            {/* Color y Resaltador - Grupo visual */}
+            <div className="flex gap-1 px-2 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <ColorPicker
                 value={editor.getAttributes('textStyle').color || '#000000'}
                 onChange={(color) => editor.chain().focus().setColor(color).run()}
@@ -345,60 +345,66 @@ export function EnhancedTextEditor({
               />
             </div>
 
-            {/* Lápiz */}
-            <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+            {/* Lápiz - Grupo visual */}
+            <div className="flex gap-1 px-2 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <ToolbarButton
                 onClick={() => setDrawingMode(!drawingMode)}
                 active={drawingMode}
                 title="Modo lápiz / dibujar"
               >
-                <Pen size={18} />
+                <Pen size={18} strokeWidth={2} />
               </ToolbarButton>
             </div>
 
             {/* Toggle herramientas avanzadas */}
             <button
               onClick={() => setShowAdvancedTools(!showAdvancedTools)}
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold
-                       bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
+                       bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200
+                       border-2 border-gray-300 dark:border-gray-600
                        hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               title="Herramientas avanzadas"
             >
-              <Type size={14} />
-              {showAdvancedTools ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              <Type size={14} strokeWidth={2} />
+              <span className="text-xs">Fuentes</span>
+              {showAdvancedTools ? <ChevronUp size={14} strokeWidth={2} /> : <ChevronDown size={14} strokeWidth={2} />}
             </button>
 
             {/* Exportar PDF */}
             <button
               onClick={handleExportPDF}
-              className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-semibold
-                       bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200
-                       hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
+                       bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200
+                       border-2 border-gray-300 dark:border-gray-600
+                       hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               title="Exportar a PDF"
             >
-              <Download size={14} />
-              PDF
+              <Download size={14} strokeWidth={2} />
+              <span className="text-xs">PDF</span>
             </button>
 
             {/* Botones de acción */}
             <div className="ml-auto flex gap-2">
               <button
                 onClick={handleCancel}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-300 hover:bg-gray-400
-                         dark:bg-gray-600 dark:hover:bg-gray-500 rounded-lg transition-colors
-                         text-gray-800 dark:text-gray-100 font-semibold"
+                className="flex items-center gap-2 px-4 py-2.5 min-h-[42px]
+                         bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600
+                         border-2 border-gray-300 dark:border-gray-600
+                         rounded-lg transition-colors
+                         text-gray-800 dark:text-gray-100 font-medium"
               >
-                <X size={16} />
+                <X size={16} strokeWidth={2} />
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600
-                         disabled:bg-green-300 disabled:cursor-not-allowed
-                         text-white rounded-lg transition-colors font-semibold shadow-md"
+                className="flex items-center gap-2 px-4 py-2.5 min-h-[42px]
+                         bg-green-600 hover:bg-green-700
+                         disabled:bg-gray-300 disabled:cursor-not-allowed
+                         text-white rounded-lg transition-colors font-medium"
               >
-                <Save size={16} />
+                <Save size={16} strokeWidth={2} />
                 {isSaving ? 'Guardando...' : 'Guardar'}
               </button>
             </div>
@@ -465,16 +471,16 @@ export function EnhancedTextEditor({
 
           {/* Toolbar de lápiz (solo si está en modo dibujo) */}
           {drawingMode && (
-            <div className="pencil-toolbar p-3 bg-purple-50 dark:bg-purple-900/20
-                           border-b border-purple-200 dark:border-purple-800">
+            <div className="pencil-toolbar p-3 bg-gray-50 dark:bg-gray-800
+                           border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3 mb-3">
-                <Pen size={16} className="text-purple-600 dark:text-purple-400" />
+                <Pen size={16} strokeWidth={2} className="text-gray-600 dark:text-gray-400" />
                 <div className="flex flex-col flex-1">
-                  <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     Modo Lápiz Activo
                   </span>
-                  <span className="text-xs text-purple-700 dark:text-purple-300 italic">
-                    💡 Click en el botón 🖊️ arriba para cerrar el modo lápiz
+                  <span className="text-xs text-gray-600 dark:text-gray-400 italic">
+                    Haz clic en el botón de lápiz arriba para desactivar
                   </span>
                 </div>
 
@@ -482,27 +488,27 @@ export function EnhancedTextEditor({
                 <button
                   onClick={() => setShowPencilPresets(!showPencilPresets)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg
-                           bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700
-                           hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
+                           bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600
+                           hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                   title={showPencilPresets ? "Ocultar presets" : "Mostrar presets"}
                 >
-                  <Pen size={14} className="text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs font-semibold text-purple-900 dark:text-purple-100">
+                  <Pen size={14} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                  <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">
                     Presets
                   </span>
-                  {showPencilPresets ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  {showPencilPresets ? <ChevronUp size={14} strokeWidth={2} /> : <ChevronDown size={14} strokeWidth={2} />}
                 </button>
 
                 {/* Toggle de capa */}
                 <button
                   onClick={() => setDrawingLayer(drawingLayer === 'over' ? 'under' : 'over')}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg
-                           bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700
-                           hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
+                           bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600
+                           hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                   title="Cambiar capa de dibujo"
                 >
-                  <Layers size={14} className="text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs font-semibold text-purple-900 dark:text-purple-100">
+                  <Layers size={14} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+                  <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">
                     Capa: {drawingLayer === 'over' ? 'Superior' : 'Inferior'}
                   </span>
                 </button>
@@ -580,22 +586,21 @@ export function EnhancedTextEditor({
 
       {/* Footer info (solo en modo no-edición) */}
       {!isEditing && isTeacher && (
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-500 italic opacity-0
-                       group-hover:opacity-100 transition-opacity">
-          💡 Pasa el mouse y haz clic en "Editar" para usar el editor avanzado con 12 fuentes,
-          colores, resaltador, lápiz con undo/redo, zoom, capas y exportar a PDF
+        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 italic opacity-0
+                       group-hover:opacity-100 transition-opacity duration-200">
+          Pasa el mouse y haz clic en "Editar" para usar el editor avanzado con fuentes personalizadas,
+          colores, resaltador, lápiz, zoom, capas y exportar a PDF
         </div>
       )}
     </div>
   );
 }
 
-// Componente auxiliar para botones de la toolbar
+// Componente auxiliar para botones de la toolbar - DISEÑO MINIMALISTA
 function ToolbarButton({ onClick, active, children, title }) {
   const handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Ejecutar comando y forzar un pequeño delay para asegurar que se aplica
     onClick();
   };
 
@@ -606,10 +611,10 @@ function ToolbarButton({ onClick, active, children, title }) {
       onMouseDown={(e) => e.preventDefault()} // Prevenir pérdida de foco
       title={title}
       className={`
-        p-2 rounded transition-all
+        p-2.5 rounded-lg transition-colors duration-200
         ${active
-          ? 'bg-blue-500 text-white shadow-md'
-          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
+          ? 'bg-gray-800 dark:bg-gray-100 text-white dark:text-gray-900 border-2 border-gray-900 dark:border-gray-200'
+          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-2 border-transparent hover:bg-gray-200 dark:hover:bg-gray-600'
         }
       `}
     >
