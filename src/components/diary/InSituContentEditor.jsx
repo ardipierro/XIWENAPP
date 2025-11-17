@@ -363,12 +363,12 @@ function EditableHTMLContent({ data, onChange }) {
             initialContent={data.body || '<p>Escribe el contenido de la lección aquí...</p>'}
             initialDrawings={data.drawings || '[]'}
             isTeacher={true}
+            autoEdit={true}
             onSave={handleContentSave}
           />
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic">
-          💡 Usa el editor enriquecido para dar formato, agregar colores, dibujar, etc.
-          Haz clic en "Editar" arriba para comenzar.
+          ✅ El editor está listo para usar. <strong>Selecciona texto</strong> para aplicar formatos (negrita, colores, tamaños).
         </p>
       </div>
     </div>

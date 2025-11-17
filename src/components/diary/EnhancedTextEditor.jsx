@@ -60,9 +60,10 @@ export function EnhancedTextEditor({
   initialDrawings = '[]',
   onSave,
   isTeacher = false,
-  blockId
+  blockId,
+  autoEdit = false  // ← NUEVO: Comenzar en modo edición automáticamente
 }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(autoEdit);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [showAdvancedTools, setShowAdvancedTools] = useState(false);
@@ -83,6 +84,7 @@ export function EnhancedTextEditor({
   // NEW: Advanced drawing states
   const [zoom, setZoom] = useState(1);
   const [drawingLayer, setDrawingLayer] = useState('over'); // 'over' | 'under'
+  const [showPencilPresets, setShowPencilPresets] = useState(false); // ← NUEVO: Toggle para presets
 
   const editorContainerRef = useRef(null);
 
@@ -456,14 +458,34 @@ export function EnhancedTextEditor({
                            border-b border-purple-200 dark:border-purple-800">
               <div className="flex items-center gap-3 mb-3">
                 <Pen size={16} className="text-purple-600 dark:text-purple-400" />
-                <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
-                  Modo Lápiz Activo
-                </span>
+                <div className="flex flex-col flex-1">
+                  <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
+                    Modo Lápiz Activo
+                  </span>
+                  <span className="text-xs text-purple-700 dark:text-purple-300 italic">
+                    💡 Click en el botón 🖊️ arriba para cerrar el modo lápiz
+                  </span>
+                </div>
+
+                {/* Toggle mostrar presets */}
+                <button
+                  onClick={() => setShowPencilPresets(!showPencilPresets)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg
+                           bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700
+                           hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
+                  title={showPencilPresets ? "Ocultar presets" : "Mostrar presets"}
+                >
+                  <Pen size={14} className="text-purple-600 dark:text-purple-400" />
+                  <span className="text-xs font-semibold text-purple-900 dark:text-purple-100">
+                    Presets
+                  </span>
+                  {showPencilPresets ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
 
                 {/* Toggle de capa */}
                 <button
                   onClick={() => setDrawingLayer(drawingLayer === 'over' ? 'under' : 'over')}
-                  className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg
                            bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700
                            hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
                   title="Cambiar capa de dibujo"
@@ -475,11 +497,15 @@ export function EnhancedTextEditor({
                 </button>
               </div>
 
-              {/* Presets de lápiz */}
-              <PencilPresetsExtended
-                onSelect={handlePencilPresetSelect}
-                current={{ color: pencilColor, opacity: pencilOpacity, size: pencilSize }}
-              />
+              {/* Presets de lápiz (colapsable) */}
+              {showPencilPresets && (
+                <div className="mb-3">
+                  <PencilPresetsExtended
+                    onSelect={handlePencilPresetSelect}
+                    current={{ color: pencilColor, opacity: pencilOpacity, size: pencilSize }}
+                  />
+                </div>
+              )}
 
               {/* Controles adicionales */}
               <div className="flex gap-3 mt-3">
