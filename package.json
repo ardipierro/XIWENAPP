@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/inject-preload.cjs",
+    "build:clean": "vite build",
     "preview": "vite preview",
+    "icons:generate": "node scripts/generate-icons.cjs",
     "emulators": "firebase emulators:start",
     "test:seed": "node test/seed-test-data.js",
     "test:functions": "node test/test-functions.js",
@@ -55,6 +57,7 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "vite": "^5.0.8",
+    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-pwa": "^1.1.0"
   }
 }

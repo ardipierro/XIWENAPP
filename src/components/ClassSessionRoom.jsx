@@ -1,9 +1,11 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { X, Video, Presentation, PenTool, Maximize2, Minimize2, Users, Clock } from 'lucide-react';
 import logger from '../utils/logger';
-import LiveClassRoom from './LiveClassRoom';
 import Whiteboard from './Whiteboard';
-const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard'));
+
+// Lazy load para componentes pesados
+const LiveClassRoom = lazy(() => import('./LiveClassRoom')); // LiveKit: 150 KB
+const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard')); // Excalidraw: 500 KB
 import { BaseButton, BaseLoading, BaseAlert } from './common';
 import { getClassSession } from '../firebase/classSessions';
 import { createWhiteboardSession } from '../firebase/whiteboard';
@@ -185,17 +187,19 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
     // Si NO hay meetLink, usar LiveKit (videoconferencia integrada)
     return (
       <div className="h-full bg-gray-900">
-        <LiveClassRoom
-          liveClass={{
-            ...sessionData,
-            roomName: sessionData.roomName,
-            teacherId: sessionData.teacherId,
-            maxParticipants: sessionData.maxParticipants
-          }}
-          user={user}
-          userRole={userRole}
-          onLeave={onLeave}
-        />
+        <Suspense fallback={<BaseLoading message="Cargando sala de videoconferencia..." />}>
+          <LiveClassRoom
+            liveClass={{
+              ...sessionData,
+              roomName: sessionData.roomName,
+              teacherId: sessionData.teacherId,
+              maxParticipants: sessionData.maxParticipants
+            }}
+            user={user}
+            userRole={userRole}
+            onLeave={onLeave}
+          />
+        </Suspense>
       </div>
     );
   };

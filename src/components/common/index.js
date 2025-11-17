@@ -27,6 +27,17 @@ export { default as CategoryBadge } from './CategoryBadge';
 export { default as BaseLoading } from './BaseLoading';
 export { default as BaseAlert } from './BaseAlert';
 
+// Skeleton Screens - Loading placeholders
+export {
+  default as Skeleton,
+  SkeletonCard,
+  SkeletonListItem,
+  SkeletonDashboard,
+  SkeletonTable,
+  SkeletonText,
+  SkeletonProfile
+} from './SkeletonScreen';
+
 // Navigation & Menus
 export { default as BaseDropdown } from './BaseDropdown';
 export { default as BaseTabs } from './BaseTabs';

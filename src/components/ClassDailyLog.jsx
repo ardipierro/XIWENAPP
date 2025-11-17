@@ -4,7 +4,7 @@
  * @module components/ClassDailyLog
  */
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import {
   Plus,
   Save,
@@ -46,7 +46,6 @@ import {
 import ContentSelectorModal from './ContentSelectorModal';
 import {
   UnifiedExerciseRenderer,
-  EditableTextBlock,
   EnhancedTextEditor,
   InSituContentEditor
 } from './diary';
