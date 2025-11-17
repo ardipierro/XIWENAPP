@@ -32,7 +32,7 @@ import {
   updateLog,
   endLog
 } from '../firebase/classDailyLogs';
-import { getContentById } from '../firebase/content';
+import { getContentById, updateContent } from '../firebase/content';
 import { saveStudentExerciseResult } from '../firebase/exerciseProgress';
 import {
   BaseButton,
@@ -315,8 +315,11 @@ function ClassDailyLog({ logId, user, onBack }) {
   // Actualizar bloque de texto
   const handleUpdateTextBlock = async (data) => {
     try {
-      const updatedEntries = log.entries.map(entry =>
-        entry.id === data.blockId
+      const updatedEntries = log.entries.map(entry => {
+        // Buscar por contentData.id O por entry.id (compatibilidad)
+        const matches = entry.contentData?.id === data.blockId || entry.id === data.blockId;
+
+        return matches
           ? {
               ...entry,
               contentData: {
@@ -326,8 +329,8 @@ function ClassDailyLog({ logId, user, onBack }) {
               },
               updatedAt: data.updatedAt
             }
-          : entry
-      );
+          : entry;
+      });
 
       await updateLog(logId, {
         entries: updatedEntries,
@@ -345,6 +348,16 @@ function ClassDailyLog({ logId, user, onBack }) {
   // Actualizar contenido existente (ejercicios, lecciones, etc.)
   const handleUpdateContent = async (data) => {
     try {
+      // 1. Guardar en la colección contents (si no es un text-block temporal)
+      if (data.contentId && !data.contentId.startsWith('text-block-')) {
+        await updateContent(data.contentId, {
+          ...data.updatedData,
+          updatedAt: Date.now()
+        });
+        logger.info('✅ Contenido actualizado en colección contents');
+      }
+
+      // 2. Actualizar la copia local en el log
       const updatedEntries = log.entries.map(entry =>
         entry.contentId === data.contentId
           ? {
@@ -360,7 +373,7 @@ function ClassDailyLog({ logId, user, onBack }) {
         updatedAt: Date.now()
       });
 
-      logger.info('✏️ Contenido actualizado');
+      logger.info('✏️ Contenido actualizado en log');
       setHasUnsavedChanges(true);
     } catch (err) {
       logger.error('Error actualizando contenido:', err);

@@ -35,6 +35,18 @@ export function DrawingCanvasAdvanced({
 
   const [eraserMode, setEraserMode] = useState(false);
 
+  // Usar refs para propiedades que cambian frecuentemente (performance)
+  const colorRef = useRef(color);
+  const opacityRef = useRef(opacity);
+  const sizeRef = useRef(size);
+  const layerRef = useRef(layer);
+
+  // Actualizar refs cuando cambian las props
+  useEffect(() => { colorRef.current = color; }, [color]);
+  useEffect(() => { opacityRef.current = opacity; }, [opacity]);
+  useEffect(() => { sizeRef.current = size; }, [size]);
+  useEffect(() => { layerRef.current = layer; }, [layer]);
+
   // Configuración de perfect-freehand
   const strokeOptions = {
     size: size,
@@ -149,16 +161,28 @@ export function DrawingCanvasAdvanced({
     }
   }, [enabled, eraserMode, strokes, getRelativeCoordinates, addToHistory]);
 
-  // Continuar trazo
+  // Continuar trazo (con sampling para mejor performance)
   const handlePointerMove = useCallback((e) => {
     if (!isDrawing || !enabled || eraserMode) return;
 
     e.preventDefault();
     const { x, y, pressure } = getRelativeCoordinates(e);
-    setCurrentStroke(prev => [...prev, [x, y, pressure]]);
+
+    // Sampling: Solo agregar cada N puntos para reducir carga
+    setCurrentStroke(prev => {
+      // Si hay menos de 100 puntos, agregar todos
+      if (prev.length < 100) {
+        return [...prev, [x, y, pressure]];
+      }
+      // Si hay más, solo agregar 1 de cada 2 puntos
+      if (prev.length % 2 === 0) {
+        return [...prev, [x, y, pressure]];
+      }
+      return prev;
+    });
   }, [isDrawing, enabled, eraserMode, getRelativeCoordinates]);
 
-  // Finalizar trazo
+  // Finalizar trazo (optimizado con refs)
   const handlePointerUp = useCallback(() => {
     if (!isDrawing) return;
 
@@ -169,21 +193,21 @@ export function DrawingCanvasAdvanced({
       const stroke = getStroke(currentStroke, strokeOptions);
       const pathData = getSvgPathFromStroke(stroke);
 
-      // Guardar trazo con metadatos
+      // Guardar trazo con metadatos (usando refs para evitar re-renders)
       const newStroke = {
         id: Date.now(),
         pathData,
-        color,
-        opacity,
-        size,
-        layer // 'under' o 'over'
+        color: colorRef.current,
+        opacity: opacityRef.current,
+        size: sizeRef.current,
+        layer: layerRef.current
       };
 
       addToHistory([...strokes, newStroke]);
     }
 
     setCurrentStroke([]);
-  }, [isDrawing, eraserMode, currentStroke, color, opacity, size, layer, strokes, strokeOptions, getSvgPathFromStroke, addToHistory]);
+  }, [isDrawing, eraserMode, currentStroke, strokes, strokeOptions, getSvgPathFromStroke, addToHistory]);
 
   // Verificar si un punto está cerca de un trazo (simplificado)
   const isPointNearStroke = (x, y, stroke) => {

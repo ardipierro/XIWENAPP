@@ -7,7 +7,7 @@ import { FontFamily } from '@tiptap/extension-font-family';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
-import Image from '@tiptap/extension-image';
+import { FontSize } from './FontSizeExtension';
 import {
   Bold,
   Italic,
@@ -25,22 +25,15 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
-  Layers,
-  Image as ImageIcon
+  Layers
 } from 'lucide-react';
 import { ColorPicker } from './ColorPicker';
 import { HighlightPicker } from './HighlightPicker';
 import { PencilPresetsExtended } from './PencilPresetsExtended';
-import { ColorFavorites } from './ColorFavorites';
 import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
 import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { ZoomControls } from './ZoomControls';
-import { ImageUploader } from './ImageUploader';
-import { VersionHistory } from './VersionHistory';
 import { exportToPDF } from '../../utils/pdfExport';
-import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
-import { useTouchGestures } from '../../hooks/useTouchGestures';
-import { auth } from '../../firebase/config';
 
 /**
  * EnhancedTextEditor - Editor de texto avanzado con todas las características
@@ -124,6 +117,7 @@ export function EnhancedTextEditor({
       FontFamily.configure({
         types: ['textStyle'],
       }),
+      FontSize,
       Color,
       Highlight.configure({
         multicolor: true
@@ -441,7 +435,7 @@ export function EnhancedTextEditor({
                   Tamaño:
                 </label>
                 <select
-                  onChange={(e) => editor.chain().focus().setMark('textStyle', { fontSize: e.target.value }).run()}
+                  onChange={(e) => editor.chain().focus().setFontSize(e.target.value).run()}
                   className="px-3 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                            focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
@@ -482,7 +476,7 @@ export function EnhancedTextEditor({
               </div>
 
               {/* Presets de lápiz */}
-              <PencilPresets
+              <PencilPresetsExtended
                 onSelect={handlePencilPresetSelect}
                 current={{ color: pencilColor, opacity: pencilOpacity, size: pencilSize }}
               />
