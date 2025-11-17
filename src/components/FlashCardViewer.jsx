@@ -178,12 +178,11 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
       onClose={handleClose}
       title={collection.name}
       size="large"
-      className="flashcard-viewer-modal"
     >
-      <div className="flashcard-viewer">
+      <div className="w-full space-y-6">
         {/* Header Info */}
-        <div className="flashcard-viewer__header">
-          <div className="flashcard-viewer__badges">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
             <CategoryBadge
               type="cefr"
               value={collection.level}
@@ -198,85 +197,107 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
           </div>
 
           {/* Progress Bar */}
-          <div className="flashcard-viewer__progress-bar">
+          <div className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
             <div
-              className="flashcard-viewer__progress-fill"
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
-        {/* Flashcard */}
-        <div className="flashcard-viewer__card-container">
+        {/* Flashcard Container */}
+        <div className="w-full min-h-[400px] flex items-center justify-center perspective-1000">
           <div
-            className={`flashcard-viewer__card ${isFlipped ? 'flashcard-viewer__card--flipped' : ''}`}
+            className={`relative w-full max-w-2xl aspect-[3/2] cursor-pointer transition-transform duration-500 transform-style-3d ${
+              isFlipped ? 'rotate-y-180' : ''
+            }`}
             onClick={handleFlip}
+            style={{
+              transformStyle: 'preserve-3d',
+              transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+            }}
           >
             {/* Front (Spanish) */}
-            <div className="flashcard-viewer__card-face flashcard-viewer__card-front">
+            <div
+              className="absolute inset-0 backface-hidden rounded-xl shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-zinc-800 dark:to-zinc-900 border-2 border-blue-200 dark:border-blue-700 flex flex-col items-center justify-center p-8"
+              style={{ backfaceVisibility: 'hidden' }}
+            >
               {currentCard.imageUrl && (
-                <div className="flashcard-viewer__card-image">
-                  <img src={currentCard.imageUrl} alt={currentCard.spanish} />
+                <div className="w-full max-h-48 mb-6 rounded-lg overflow-hidden">
+                  <img
+                    src={currentCard.imageUrl}
+                    alt={currentCard.spanish}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
               )}
-              <div className="flashcard-viewer__card-content">
-                <div className="flashcard-viewer__card-text">
+              <div className="text-center flex-1 flex flex-col items-center justify-center">
+                <div className="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white mb-6">
                   {currentCard.spanish}
                 </div>
                 <button
-                  className="flashcard-viewer__audio-button"
+                  className="p-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     handlePlayAudio();
                   }}
                 >
-                  <Volume2 size={20} />
+                  <Volume2 size={24} />
                 </button>
               </div>
-              <div className="flashcard-viewer__flip-hint">
-                <RotateCw size={18} />
-                Click para voltear
+              <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <RotateCw size={16} />
+                <span>Click para voltear</span>
               </div>
             </div>
 
             {/* Back (Translation) */}
-            <div className="flashcard-viewer__card-face flashcard-viewer__card-back">
-              <div className="flashcard-viewer__card-content">
-                <div className="flashcard-viewer__card-translation">
+            <div
+              className="absolute inset-0 backface-hidden rounded-xl shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-zinc-800 dark:to-zinc-900 border-2 border-green-200 dark:border-green-700 flex flex-col items-center justify-center p-8"
+              style={{
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)'
+              }}
+            >
+              <div className="text-center flex-1 flex flex-col items-center justify-center">
+                <div className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-white mb-4">
                   {currentCard.translation}
                 </div>
                 {currentCard.context && (
-                  <div className="flashcard-viewer__card-context">
-                    <strong>Contexto:</strong> {currentCard.context}
+                  <div className="text-sm text-zinc-600 dark:text-zinc-300 max-w-md mt-4 p-4 bg-white/50 dark:bg-zinc-800/50 rounded-lg">
+                    <strong className="text-zinc-900 dark:text-white">Contexto:</strong>{' '}
+                    {currentCard.context}
                   </div>
                 )}
               </div>
-              <div className="flashcard-viewer__flip-hint">
-                <RotateCw size={18} />
-                Click para volver
+              <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <RotateCw size={16} />
+                <span>Click para volver</span>
               </div>
             </div>
           </div>
-
-          {/* Hint */}
-          {showHint && currentCard.hint && (
-            <BaseAlert variant="info" className="flashcard-viewer__hint">
-              <HelpCircle size={18} />
-              {currentCard.hint}
-            </BaseAlert>
-          )}
         </div>
 
+        {/* Hint */}
+        {showHint && currentCard.hint && (
+          <BaseAlert variant="info" className="mt-4">
+            <div className="flex items-start gap-2">
+              <HelpCircle size={18} className="flex-shrink-0 mt-0.5" />
+              <span>{currentCard.hint}</span>
+            </div>
+          </BaseAlert>
+        )}
+
         {/* Controls */}
-        <div className="flashcard-viewer__controls">
+        <div className="space-y-4">
           {/* Spaced Repetition Rating (mostrar cuando está volteada) */}
           {isFlipped && user && (
-            <div className="flashcard-viewer__rating-buttons">
+            <div className="flex flex-wrap gap-2 justify-center">
               <BaseButton
                 variant="outline"
                 size="sm"
                 onClick={() => handleRateCard(0)}
-                style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                className="border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <X size={16} />
                 Otra vez
@@ -285,7 +306,7 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
                 variant="outline"
                 size="sm"
                 onClick={() => handleRateCard(2)}
-                style={{ borderColor: '#f59e0b', color: '#f59e0b' }}
+                className="border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
               >
                 Difícil
               </BaseButton>
@@ -293,7 +314,7 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
                 variant="outline"
                 size="sm"
                 onClick={() => handleRateCard(3)}
-                style={{ borderColor: '#3b82f6', color: '#3b82f6' }}
+                className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
               >
                 <Check size={16} />
                 Bien
@@ -302,7 +323,7 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
                 variant="outline"
                 size="sm"
                 onClick={() => handleRateCard(5)}
-                style={{ borderColor: '#22c55e', color: '#22c55e' }}
+                className="border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
               >
                 <Zap size={16} />
                 Fácil
@@ -310,7 +331,8 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
             </div>
           )}
 
-          <div className="flashcard-viewer__nav-buttons">
+          {/* Navigation */}
+          <div className="flex items-center justify-between gap-4">
             <BaseButton
               variant="ghost"
               icon={ChevronLeft}
@@ -320,7 +342,7 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
               Anterior
             </BaseButton>
 
-            <div className="flashcard-viewer__center-buttons">
+            <div className="flex gap-2">
               {currentCard.hint && (
                 <BaseButton
                   variant="outline"
@@ -334,7 +356,7 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
 
               <BaseButton
                 variant={learned.has(currentIndex) ? 'success' : 'outline'}
-                icon={learned.has(currentIndex) ? Check : X}
+                icon={learned.has(currentIndex) ? Check : Star}
                 onClick={handleMarkLearned}
                 size="sm"
               >
@@ -355,12 +377,32 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
 
         {/* Summary */}
         {currentIndex === collection.cards.length - 1 && (
-          <BaseAlert variant="success" className="mt-4">
-            <Check size={18} />
-            ¡Has completado todas las tarjetas! {learnedCount} de {collection.cards.length} marcadas como aprendidas.
+          <BaseAlert variant="success">
+            <div className="flex items-start gap-2">
+              <Check size={18} className="flex-shrink-0 mt-0.5" />
+              <span>
+                ¡Has completado todas las tarjetas! {learnedCount} de {collection.cards.length} marcadas como aprendidas.
+              </span>
+            </div>
           </BaseAlert>
         )}
       </div>
+
+      <style jsx>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        .transform-style-3d {
+          transform-style: preserve-3d;
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+          transform: rotateY(180deg);
+        }
+      `}</style>
     </BaseModal>
   );
 }
