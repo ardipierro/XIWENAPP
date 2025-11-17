@@ -62,7 +62,7 @@ export default function UniversalUserManager({ user, userRole }) {
   });
 
   // Estados UI
-  const [viewMode, setViewMode] = useState('grid'); // 'table', 'grid', 'list'
+  const [viewMode, setViewMode] = useState('table'); // 'table', 'grid', 'list'
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [selectedUserProfile, setSelectedUserProfile] = useState(null);
