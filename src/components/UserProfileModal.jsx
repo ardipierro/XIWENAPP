@@ -321,8 +321,8 @@ function UserProfileModal({
       className="!overflow-hidden !h-[90vh] !max-h-[90vh]"
     >
       <div className="flex flex-col h-full overflow-hidden">
-        {/* Banner Section - FIJO */}
-        <div className="relative h-28 md:h-36 overflow-hidden flex-shrink-0 group">
+        {/* Banner Section - Más alto para incluir espacio del header */}
+        <div className="relative h-48 md:h-56 overflow-hidden flex-shrink-0 group">
           {/* Banner Image o Gradient */}
           {userBanner ? (
             <img
@@ -336,6 +336,9 @@ function UserProfileModal({
               style={{ background: getDefaultBannerGradient() }}
             />
           )}
+
+          {/* Overlay degradé para legibilidad del texto */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 pointer-events-none"></div>
 
           {/* Botón cerrar - Siempre visible */}
           <button
@@ -402,9 +405,9 @@ function UserProfileModal({
           )}
         </div>
 
-        {/* Profile Header - Avatar + Info - FIJO - Transparente sobre el banner */}
-        <div className="relative px-4 md:px-6 flex-shrink-0">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 -mt-10 md:-mt-14 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+        {/* Profile Header - Avatar + Info - Superpuesto al final del banner */}
+        <div className="relative px-4 md:px-6 flex-shrink-0 bg-transparent" style={{ marginTop: '-80px', background: 'transparent' }}>
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
               <div
