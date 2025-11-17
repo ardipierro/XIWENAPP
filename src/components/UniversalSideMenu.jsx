@@ -68,7 +68,7 @@ const MENU_ITEMS = [
   // GESTIÓN DE CLASES Y TAREAS (Teachers + Admin)
   {
     id: 'students',
-    label: 'Mis Estudiantes',
+    label: 'Estudiantes',
     icon: Users,
     path: '/dashboard/users', // Ruta unificada
     permission: 'view-own-students',
@@ -104,7 +104,7 @@ const MENU_ITEMS = [
   // STUDENT FEATURES
   {
     id: 'my-courses',
-    label: 'Mis Cursos',
+    label: 'Contenidos',
     icon: BookOpen,
     path: '/dashboard/my-courses',
     permission: 'view-all-content',
@@ -112,7 +112,7 @@ const MENU_ITEMS = [
   },
   {
     id: 'my-classes',
-    label: 'Mis Clases',
+    label: 'Clases',
     icon: Video,
     path: '/dashboard/my-classes',
     permission: 'view-all-content',
@@ -120,7 +120,7 @@ const MENU_ITEMS = [
   },
   {
     id: 'my-assignments',
-    label: 'Mis Tareas',
+    label: 'Tareas',
     icon: CheckSquare,
     path: '/dashboard/my-assignments',
     permission: 'view-own-assignments',
@@ -134,7 +134,7 @@ const MENU_ITEMS = [
   },
   {
     id: 'my-payments',
-    label: 'Mis Pagos',
+    label: 'Pagos',
     icon: DollarSign,
     path: '/dashboard/my-payments',
     permission: 'view-own-credits',

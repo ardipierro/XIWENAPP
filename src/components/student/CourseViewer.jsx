@@ -124,7 +124,7 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
       {/* Header */}
       <div className="course-viewer-header">
         <button className="btn-back" onClick={onBack}>
-          ← Volver a Mis Cursos
+          ← Volver a Contenidos
         </button>
 
         <div className="course-header-content">

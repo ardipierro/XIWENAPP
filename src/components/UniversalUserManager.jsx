@@ -238,7 +238,7 @@ export default function UniversalUserManager({ user, userRole }) {
   };
 
   // Determinar título e icono según rol
-  const title = isAdmin() ? 'Usuarios' : 'Mis Estudiantes';
+  const title = isAdmin() ? 'Usuarios' : 'Estudiantes';
   const TitleIcon = isAdmin() ? Crown : GraduationCap;
   const createButtonLabel = isAdmin() ? 'Nuevo Usuario' : 'Agregar Alumno';
 

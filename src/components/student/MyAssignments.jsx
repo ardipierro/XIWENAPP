@@ -202,7 +202,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
             <BaseEmptyState
               icon={FileText}
               title="No hay contenidos asignados"
-              description="Tu profesor aún no te ha asignado contenidos directamente. Los contenidos asignados a través de cursos se encuentran en 'Mis Cursos'."
+              description="Tu profesor aún no te ha asignado contenidos directamente. Los contenidos asignados a través de cursos se encuentran en 'Contenidos'."
               size="lg"
             />
           ) : (
@@ -261,7 +261,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
             <BaseEmptyState
               icon={Gamepad2}
               title="No hay ejercicios asignados"
-              description="Tu profesor aún no te ha asignado ejercicios directamente. Los ejercicios asignados a través de cursos se encuentran en 'Mis Cursos'."
+              description="Tu profesor aún no te ha asignado ejercicios directamente. Los ejercicios asignados a través de cursos se encuentran en 'Contenidos'."
               size="lg"
             />
           ) : (
