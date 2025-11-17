@@ -30,6 +30,7 @@ import { UniversalCard } from '../cards';
 import { BaseButton, BaseBadge } from '../common';
 import { cardVariants } from '../cards/cardConfig';
 import { scanCardUsage, analyzeImpact, getGlobalStats, findMigrationCandidates } from '../../utils/cardUsageScanner';
+import { useCardConfig } from '../../contexts/CardConfigContext';
 
 /**
  * CardSystemTab - Configurador avanzado de cards
@@ -37,9 +38,33 @@ import { scanCardUsage, analyzeImpact, getGlobalStats, findMigrationCandidates }
 function CardSystemTab() {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [selectedVariant, setSelectedVariant] = useState('default');
-  const [config, setConfig] = useState({...cardVariants});
   const [showImpactAnalysis, setShowImpactAnalysis] = useState(false);
   const [impactData, setImpactData] = useState(null);
+
+  // Hook para recargar config global después de guardar
+  const { reloadConfig } = useCardConfig();
+
+  // Estado de configuración editable (carga desde localStorage)
+  const [config, setConfig] = useState(() => {
+    const savedConfig = localStorage.getItem('xiwen_card_config');
+    if (savedConfig) {
+      try {
+        const parsed = JSON.parse(savedConfig);
+        const merged = {};
+        Object.keys(cardVariants).forEach(variant => {
+          merged[variant] = {
+            ...cardVariants[variant],
+            ...(parsed[variant] || {})
+          };
+        });
+        return merged;
+      } catch (e) {
+        console.error('Error loading saved card config:', e);
+        return {...cardVariants};
+      }
+    }
+    return {...cardVariants};
+  });
 
   // Usage data del scanner
   const usageData = scanCardUsage();
@@ -72,13 +97,14 @@ function CardSystemTab() {
     setImpactData(null);
   };
 
-  // Guardar configuración
+  // Guardar configuración y recargar config global
   const saveConfig = () => {
     localStorage.setItem('xiwen_card_config', JSON.stringify(config));
-    alert(`✅ Configuración guardada
+    reloadConfig(); // Recargar config global para que se aplique a todas las cards
+    alert(`✅ Configuración guardada y aplicada
 
 ${impactData?.affectedComponents || 0} componente(s) afectado(s).
-Los cambios se aplicarán al recargar la página.`);
+Los cambios se aplican instantáneamente en toda la app.`);
   };
 
   // Datos de ejemplo para las cards
@@ -165,6 +191,191 @@ Los cambios se aplicarán al recargar la página.`);
     low: 'text-green-600 dark:text-green-400',
     medium: 'text-yellow-600 dark:text-yellow-400',
     high: 'text-red-600 dark:text-red-400'
+  };
+
+  /**
+   * Renderiza un campo de configuración dinámicamente según el tipo de propiedad
+   */
+  const renderConfigField = (property, value, variant) => {
+    const labels = {
+      headerHeight: 'Altura del Header',
+      headerBg: 'Fondo del Header',
+      headerGradient: 'Gradiente del Header',
+      contentPadding: 'Padding del Contenido',
+      hoverEnabled: 'Hover Habilitado',
+      hoverTransform: 'Transform en Hover (translateY)',
+      hoverShadow: 'Sombra en Hover',
+      hoverBorderColor: 'Color de Borde en Hover',
+      normalShadow: 'Sombra Normal',
+      normalBorderColor: 'Color de Borde Normal',
+      transitionDuration: 'Duración de Transición',
+      transitionTiming: 'Timing de Transición',
+      showIcon: 'Mostrar Icono',
+      iconSize: 'Tamaño del Icono',
+      showAvatar: 'Mostrar Avatar',
+      avatarSize: 'Tamaño del Avatar',
+      showBadges: 'Mostrar Badges',
+      showStats: 'Mostrar Estadísticas',
+      statsLayout: 'Layout de Stats',
+      footerSticky: 'Footer Sticky',
+      footerSpacing: 'Espaciado del Footer',
+      footerAlignment: 'Alineación del Footer',
+      showLiveIndicator: 'Mostrar Indicador Live',
+      showMeta: 'Mostrar Meta Info',
+      showBigNumber: 'Mostrar Número Grande'
+    };
+
+    const label = labels[property] || property;
+
+    // Boolean fields
+    if (typeof value === 'boolean') {
+      return (
+        <div key={property} className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={value}
+            onChange={(e) => updateConfig(variant, property, e.target.checked)}
+            className="w-5 h-5"
+            id={`${variant}-${property}`}
+          />
+          <label htmlFor={`${variant}-${property}`} className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+            {label}
+          </label>
+        </div>
+      );
+    }
+
+    // Number fields
+    if (typeof value === 'number') {
+      return (
+        <div key={property}>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            {label}: {value}px
+          </label>
+          <input
+            type="range"
+            min="16"
+            max="64"
+            step="4"
+            value={value}
+            onChange={(e) => updateConfig(variant, property, parseInt(e.target.value))}
+            className="w-full"
+          />
+        </div>
+      );
+    }
+
+    // Select fields
+    if (property === 'footerSpacing') {
+      return (
+        <div key={property}>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            {label}:
+          </label>
+          <select
+            value={value}
+            onChange={(e) => updateConfig(variant, property, e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border"
+            style={{
+              background: 'var(--color-bg-tertiary)',
+              borderColor: 'var(--color-border)',
+              color: 'var(--color-text-primary)'
+            }}
+          >
+            <option value="gap-1">gap-1 (4px)</option>
+            <option value="gap-2">gap-2 (8px)</option>
+            <option value="gap-3">gap-3 (12px)</option>
+            <option value="gap-4">gap-4 (16px)</option>
+          </select>
+        </div>
+      );
+    }
+
+    if (property === 'footerAlignment') {
+      return (
+        <div key={property}>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            {label}:
+          </label>
+          <select
+            value={value}
+            onChange={(e) => updateConfig(variant, property, e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border"
+            style={{
+              background: 'var(--color-bg-tertiary)',
+              borderColor: 'var(--color-border)',
+              color: 'var(--color-text-primary)'
+            }}
+          >
+            <option value="start">Inicio</option>
+            <option value="center">Centro</option>
+            <option value="end">Final</option>
+          </select>
+        </div>
+      );
+    }
+
+    // Text fields (default)
+    return (
+      <div key={property}>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          {label}:
+        </label>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => updateConfig(variant, property, e.target.value)}
+          className="w-full px-3 py-2 rounded-lg border text-sm font-mono"
+          style={{
+            background: 'var(--color-bg-tertiary)',
+            borderColor: 'var(--color-border)',
+            color: 'var(--color-text-primary)'
+          }}
+          placeholder={typeof value === 'string' ? value : ''}
+        />
+      </div>
+    );
+  };
+
+  /**
+   * Renderiza todas las propiedades de configuración organizadas por categorías
+   */
+  const renderAllConfigFields = (variant) => {
+    const variantConfig = config[variant];
+    if (!variantConfig) return null;
+
+    const categories = {
+      '🎨 Header': ['headerHeight', 'headerBg', 'headerGradient'],
+      '📦 Contenido': ['contentPadding'],
+      '✨ Hover': ['hoverEnabled', 'hoverTransform', 'hoverShadow', 'hoverBorderColor'],
+      '🔲 Normal': ['normalShadow', 'normalBorderColor'],
+      '⏱️ Transiciones': ['transitionDuration', 'transitionTiming'],
+      '🎯 Iconos': ['showIcon', 'iconSize', 'showAvatar', 'avatarSize'],
+      '🏷️ Badges': ['showBadges'],
+      '📊 Stats': ['showStats', 'statsLayout', 'showBigNumber'],
+      '📍 Footer': ['footerSticky', 'footerSpacing', 'footerAlignment'],
+      '🔧 Extras': ['showLiveIndicator', 'showMeta']
+    };
+
+    return (
+      <div className="space-y-4">
+        {Object.entries(categories).map(([categoryName, properties]) => {
+          const existingProps = properties.filter(prop => variantConfig.hasOwnProperty(prop));
+          if (existingProps.length === 0) return null;
+
+          return (
+            <div key={categoryName}>
+              <h4 className="text-sm font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                {categoryName}
+              </h4>
+              <div className="space-y-3">
+                {existingProps.map(prop => renderConfigField(prop, variantConfig[prop], variant))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -318,104 +529,29 @@ Los cambios se aplicarán al recargar la página.`);
             </div>
           )}
 
-          {/* Configuration Controls */}
-          <div className="space-y-4 p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            {/* Content Padding */}
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                Padding del Contenido
-              </label>
-              <input
-                type="text"
-                value={config[selectedVariant].contentPadding}
-                onChange={(e) => updateConfig(selectedVariant, 'contentPadding', e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border"
-                style={{
-                  background: 'var(--color-bg-tertiary)',
-                  borderColor: 'var(--color-border)',
-                  color: 'var(--color-text-primary)'
-                }}
-                placeholder="20px, 24px..."
-              />
+          {/* Configuration Controls - Campos dinámicos */}
+          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <div className="max-h-[400px] overflow-y-auto pr-2">
+              {renderAllConfigFields(selectedVariant)}
             </div>
+          </div>
 
-            {/* Footer Sticky */}
-            {config[selectedVariant].footerSticky !== undefined && (
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={config[selectedVariant].footerSticky}
-                  onChange={(e) => updateConfig(selectedVariant, 'footerSticky', e.target.checked)}
-                  className="w-5 h-5"
-                />
-                <label className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                  Footer Sticky (pegado al fondo)
-                </label>
-              </div>
-            )}
-
-            {/* Hover Enabled */}
-            {config[selectedVariant].hoverEnabled !== undefined && (
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={config[selectedVariant].hoverEnabled}
-                  onChange={(e) => updateConfig(selectedVariant, 'hoverEnabled', e.target.checked)}
-                  className="w-5 h-5"
-                />
-                <label className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                  Hover Effect Enabled
-                </label>
-              </div>
-            )}
-
-            {/* Hover Transform */}
-            {config[selectedVariant].hoverTransform && config[selectedVariant].hoverEnabled && (
-              <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Hover Transform (translateY)
-                </label>
-                <input
-                  type="text"
-                  value={config[selectedVariant].hoverTransform}
-                  onChange={(e) => updateConfig(selectedVariant, 'hoverTransform', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border"
-                  style={{
-                    background: 'var(--color-bg-tertiary)',
-                    borderColor: 'var(--color-border)',
-                    color: 'var(--color-text-primary)'
-                  }}
-                  placeholder="-4px, -2px..."
-                />
-              </div>
-            )}
-
-            {/* Icon Size */}
-            {config[selectedVariant].iconSize && (
-              <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Tamaño del Icono: {config[selectedVariant].iconSize}px
-                </label>
-                <input
-                  type="range"
-                  min="16"
-                  max="64"
-                  step="4"
-                  value={config[selectedVariant].iconSize}
-                  onChange={(e) => updateConfig(selectedVariant, 'iconSize', parseInt(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-            )}
-
-            {/* Preview en Vivo */}
-            <div className="pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
-              <h4 className="text-sm font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
-                Preview en Vivo
-              </h4>
+          {/* Preview en Vivo */}
+          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <h4 className="text-sm font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+              Preview en Vivo
+            </h4>
+            <div className="space-y-3">
               <UniversalCard
                 {...exampleData[selectedVariant]}
                 size="md"
+                customConfig={config[selectedVariant]}
+              />
+              <UniversalCard
+                {...exampleData[selectedVariant]}
+                size="md"
+                description="Esta card tiene más texto para probar el footer sticky. Lorem ipsum dolor sit amet."
+                customConfig={config[selectedVariant]}
               />
             </div>
           </div>
