@@ -88,13 +88,14 @@ export function EnhancedTextEditor({
 
   const editorContainerRef = useRef(null);
 
-  // Fuentes disponibles (5 clásicas + 7 Google Fonts)
+  // Fuentes disponibles (5 clásicas + 9 Google Fonts)
   const fontFamilies = [
     { label: 'Arial', value: 'Arial, sans-serif', type: 'classic' },
     { label: 'Times New Roman', value: 'Times New Roman, serif', type: 'classic' },
     { label: 'Courier New', value: 'Courier New, monospace', type: 'classic' },
     { label: 'Georgia', value: 'Georgia, serif', type: 'classic' },
     { label: 'Verdana', value: 'Verdana, sans-serif', type: 'classic' },
+    { label: 'Montserrat', value: 'Montserrat, sans-serif', type: 'google' },
     { label: 'Inter', value: 'Inter, sans-serif', type: 'google' },
     { label: 'Playfair Display', value: 'Playfair Display, serif', type: 'google' },
     { label: 'Roboto Mono', value: 'Roboto Mono, monospace', type: 'google' },
@@ -102,6 +103,7 @@ export function EnhancedTextEditor({
     { label: 'Open Sans', value: 'Open Sans, sans-serif', type: 'google' },
     { label: 'Lora', value: 'Lora, serif', type: 'google' },
     { label: 'Comic Neue', value: 'Comic Neue, cursive', type: 'google' },
+    { label: 'Dreaming Outloud Pro', value: 'Dreaming Outloud Pro, cursive', type: 'custom' },
   ];
 
   const editor = useEditor({
@@ -428,6 +430,11 @@ export function EnhancedTextEditor({
                       <option key={font.value} value={font.value}>{font.label}</option>
                     ))}
                   </optgroup>
+                  <optgroup label="Fuentes Personalizadas">
+                    {fontFamilies.filter(f => f.type === 'custom').map(font => (
+                      <option key={font.value} value={font.value}>{font.label}</option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
 
@@ -447,6 +454,10 @@ export function EnhancedTextEditor({
                   <option value="20px">Mediano (20px)</option>
                   <option value="24px">Grande (24px)</option>
                   <option value="32px">Muy Grande (32px)</option>
+                  <option value="40px">Extra Grande (40px)</option>
+                  <option value="48px">Enorme (48px)</option>
+                  <option value="56px">Gigante (56px)</option>
+                  <option value="64px">Pantalla Completa (64px)</option>
                 </select>
               </div>
             </div>
@@ -581,10 +592,18 @@ export function EnhancedTextEditor({
 
 // Componente auxiliar para botones de la toolbar
 function ToolbarButton({ onClick, active, children, title }) {
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Ejecutar comando y forzar un pequeño delay para asegurar que se aplica
+    onClick();
+  };
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
+      onMouseDown={(e) => e.preventDefault()} // Prevenir pérdida de foco
       title={title}
       className={`
         p-2 rounded transition-all

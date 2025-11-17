@@ -20,32 +20,32 @@ export function PencilPresetsExtended({ onSelect, current = {}, onSaveCustom }) 
     }
   });
 
-  // Presets predefinidos expandidos
+  // Presets predefinidos expandidos con diferencias VISUALES claras
   const defaultPresets = [
-    // Lápices estándar
-    { name: 'Negro', color: '#000000', opacity: 1, size: 4, icon: '🖊️', category: 'Lápiz' },
-    { name: 'Azul', color: '#3B82F6', opacity: 1, size: 4, icon: '🖊️', category: 'Lápiz' },
-    { name: 'Rojo', color: '#EF4444', opacity: 1, size: 4, icon: '🖊️', category: 'Lápiz' },
-    { name: 'Verde', color: '#22C55E', opacity: 1, size: 4, icon: '🖊️', category: 'Lápiz' },
+    // Lápices estándar (grosor 3px - FINO)
+    { name: 'Negro', color: '#000000', opacity: 1, size: 3, icon: '🖊️', category: 'Lápiz' },
+    { name: 'Azul', color: '#3B82F6', opacity: 1, size: 3, icon: '🖊️', category: 'Lápiz' },
+    { name: 'Rojo', color: '#EF4444', opacity: 1, size: 3, icon: '🖊️', category: 'Lápiz' },
+    { name: 'Verde', color: '#22C55E', opacity: 1, size: 3, icon: '🖊️', category: 'Lápiz' },
 
-    // Marcadores
-    { name: 'Amarillo', color: '#EAB308', opacity: 0.4, size: 8, icon: '🖍️', category: 'Marcador' },
-    { name: 'Azul Claro', color: '#3B82F6', opacity: 0.3, size: 8, icon: '🖍️', category: 'Marcador' },
-    { name: 'Rosa', color: '#EC4899', opacity: 0.3, size: 8, icon: '🖍️', category: 'Marcador' },
-    { name: 'Verde Claro', color: '#22C55E', opacity: 0.3, size: 8, icon: '🖍️', category: 'Marcador' },
+    // Marcadores (grosor 10px - MEDIANO, semi-transparente)
+    { name: 'Amarillo', color: '#EAB308', opacity: 0.5, size: 10, icon: '🖍️', category: 'Marcador' },
+    { name: 'Azul Claro', color: '#3B82F6', opacity: 0.4, size: 10, icon: '🖍️', category: 'Marcador' },
+    { name: 'Rosa', color: '#EC4899', opacity: 0.4, size: 10, icon: '🖍️', category: 'Marcador' },
+    { name: 'Verde Claro', color: '#22C55E', opacity: 0.4, size: 10, icon: '🖍️', category: 'Marcador' },
 
-    // Tizas (trazo grueso, semitransparente)
-    { name: 'Tiza Blanca', color: '#F9FAFB', opacity: 0.8, size: 12, icon: '⬜', category: 'Tiza' },
-    { name: 'Tiza Amarilla', color: '#FEF08A', opacity: 0.7, size: 12, icon: '🟨', category: 'Tiza' },
-    { name: 'Tiza Azul', color: '#BFDBFE', opacity: 0.7, size: 12, icon: '🟦', category: 'Tiza' },
+    // Tizas (grosor 18px - GRUESO, muy transparente)
+    { name: 'Tiza Blanca', color: '#F9FAFB', opacity: 0.9, size: 18, icon: '⬜', category: 'Tiza' },
+    { name: 'Tiza Amarilla', color: '#FEF08A', opacity: 0.8, size: 18, icon: '🟨', category: 'Tiza' },
+    { name: 'Tiza Azul', color: '#BFDBFE', opacity: 0.8, size: 18, icon: '🟦', category: 'Tiza' },
 
-    // Pincel (trazo muy grueso)
-    { name: 'Pincel Negro', color: '#000000', opacity: 0.6, size: 16, icon: '🖌️', category: 'Pincel' },
-    { name: 'Pincel Rojo', color: '#EF4444', opacity: 0.5, size: 16, icon: '🖌️', category: 'Pincel' },
+    // Pincel (grosor 24px - MUY GRUESO)
+    { name: 'Pincel Negro', color: '#000000', opacity: 0.7, size: 24, icon: '🖌️', category: 'Pincel' },
+    { name: 'Pincel Rojo', color: '#EF4444', opacity: 0.6, size: 24, icon: '🖌️', category: 'Pincel' },
 
-    // Pluma fina (trazo muy delgado)
-    { name: 'Pluma Fina', color: '#000000', opacity: 1, size: 2, icon: '✒️', category: 'Pluma' },
-    { name: 'Pluma Azul', color: '#1E40AF', opacity: 1, size: 2, icon: '✒️', category: 'Pluma' },
+    // Pluma fina (grosor 1px - SUPER FINO)
+    { name: 'Pluma Fina', color: '#000000', opacity: 1, size: 1, icon: '✒️', category: 'Pluma' },
+    { name: 'Pluma Azul', color: '#1E40AF', opacity: 1, size: 1, icon: '✒️', category: 'Pluma' },
   ];
 
   const allPresets = [...defaultPresets, ...customPresets];
