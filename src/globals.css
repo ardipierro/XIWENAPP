@@ -2290,10 +2290,10 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 /* Responsive para .sidemenu */
 @media (min-width: 1024px) {
-  .sidemenu {
-    transform: translateX(0);
-  }
+  /* En desktop, el sidemenu respeta la clase .open para poder ocultarse */
+  /* No forzamos transform aquí para que .sidemenu.open del CSS base funcione */
 
+  /* Solo ocultamos el overlay en desktop */
   .sidemenu-overlay {
     display: none;
   }
