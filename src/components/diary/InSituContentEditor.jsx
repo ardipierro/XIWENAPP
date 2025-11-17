@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Edit2, Save, X, AlertCircle } from 'lucide-react';
+import { EnhancedTextEditor } from './EnhancedTextEditor';
 
 /**
  * InSituContentEditor - Permite editar texto de contenidos in-situ
@@ -314,8 +315,28 @@ function EditableExerciseFields({ data, onChange }) {
   );
 }
 
-// Editar contenido HTML (lecciones, lecturas)
+// Editar contenido HTML (lecciones, lecturas) - Componente con hook
 function EditableHTMLContent({ data, onChange }) {
+  const [tempTitle, setTempTitle] = React.useState(data.title || '');
+
+  // Actualizar título en tiempo real
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value;
+    setTempTitle(newTitle);
+    onChange({ ...data, title: newTitle });
+  };
+
+  // Manejar guardado del contenido desde EnhancedTextEditor
+  const handleContentSave = (saveData) => {
+    onChange({
+      ...data,
+      body: saveData.content,
+      drawings: saveData.drawings
+    });
+    // No cerrar el editor automáticamente, solo actualizar el contenido
+    return Promise.resolve();
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -324,24 +345,31 @@ function EditableHTMLContent({ data, onChange }) {
         </label>
         <input
           type="text"
-          value={data.title || ''}
-          onChange={(e) => onChange({ ...data, title: e.target.value })}
+          value={tempTitle}
+          onChange={handleTitleChange}
           className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                   focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+          placeholder="Título de la lección o lectura"
         />
       </div>
       <div>
         <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
-          Contenido HTML:
+          Contenido:
         </label>
-        <textarea
-          value={data.body || ''}
-          onChange={(e) => onChange({ ...data, body: e.target.value })}
-          className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
-                   bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                   font-mono text-sm"
-          rows={15}
-        />
+        <div className="border-2 border-purple-300 dark:border-purple-700 rounded-lg p-1">
+          <EnhancedTextEditor
+            blockId={data.id}
+            initialContent={data.body || '<p>Escribe el contenido de la lección aquí...</p>'}
+            initialDrawings={data.drawings || '[]'}
+            isTeacher={true}
+            onSave={handleContentSave}
+          />
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic">
+          💡 Usa el editor enriquecido para dar formato, agregar colores, dibujar, etc.
+          Haz clic en "Editar" arriba para comenzar.
+        </p>
       </div>
     </div>
   );
