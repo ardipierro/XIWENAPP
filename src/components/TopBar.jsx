@@ -10,7 +10,7 @@
  * - Safe areas para iOS
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Bell, MessageCircle, Shield, Lightbulb, ArrowLeft } from 'lucide-react';
 import UserMenu from './UserMenu.jsx';
@@ -49,17 +49,35 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
   const messageCount = useUnreadMessages(user?.uid); // Real-time unread count
   const { selectedFont, fontWeight, fontSize } = useFont(); // Fuente del logo
   const { config } = useTopBar(); // Configuración dinámica de TopBar
+  const userMenuRef = useRef(null);
 
   // Verificar si es admin
   const isAdmin = isAdminEmail(user?.email) || userRole === 'admin';
 
   // Debug logs
-  console.log('🔧 TopBar props:', {
+  logger.debug('TopBar props:', {
     userEmail: user?.email,
     userRole,
     isAdmin,
     isAdminEmail: isAdminEmail(user?.email)
   });
+
+  // Cerrar menú de usuario al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   // Cargar avatar del usuario al montar
   useEffect(() => {
@@ -346,7 +364,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
             />
 
             {/* User Section */}
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-3
