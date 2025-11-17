@@ -14,8 +14,10 @@ import { useFont } from '../contexts/FontContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTopBar } from '../contexts/TopBarContext';
 import useUnreadMessages from '../hooks/useUnreadMessages';
+import useClassNotifications from '../hooks/useClassNotifications';
 import CreditBadge from './common/CreditBadge';
 import UserProfileModal from './UserProfileModal';
+import NotificationCenter from './NotificationCenter';
 import { BaseButton } from './common';
 import logger from '../utils/logger';
 
@@ -35,12 +37,16 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const { config } = useTopBar();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
 
   // Mensajes no leídos
   const unreadMessages = useUnreadMessages(effectiveUser?.uid);
+
+  // Notificaciones no leídas
+  const { unreadCount } = useClassNotifications(effectiveUser?.uid);
 
   const handleLogout = async () => {
     try {
@@ -137,10 +143,14 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         {/* Notifications */}
         <button
           className="universal-topbar__icon-btn universal-topbar__notifications"
+          onClick={() => setShowNotifications(!showNotifications)}
           aria-label="Notificaciones"
+          title="Notificaciones"
         >
           <Bell size={20} />
-          <span className="universal-topbar__badge">3</span>
+          {unreadCount > 0 && (
+            <span className="universal-topbar__badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+          )}
         </button>
 
         {/* Messages */}
@@ -220,6 +230,15 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           onClose={() => setShowProfileModal(false)}
         />
       )}
+
+      {/* Notification Center */}
+      <NotificationCenter
+        userId={effectiveUser?.uid}
+        showButton={false}
+        showToasts={true}
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </header>
   );
 }
