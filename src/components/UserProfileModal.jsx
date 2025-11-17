@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save } from 'lucide-react';
+import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
 import ProfileTabs from './profile/ProfileTabs';
@@ -20,6 +20,8 @@ import InfoTab from './profile/tabs/InfoTab';
 import ClassesTab from './profile/tabs/ClassesTab';
 import ContentTab from './profile/tabs/ContentTab';
 import StudentsTab from './profile/tabs/StudentsTab';
+import CreditsTab from './profile/tabs/CreditsTab';
+import GuardiansTab from './profile/tabs/GuardiansTab';
 import { AVATARS } from './AvatarSelector';
 import {
   getUserAvatar,
@@ -44,6 +46,7 @@ import logger from '../utils/logger';
  * @param {object} user - Usuario a mostrar
  * @param {string} userRole - Rol del usuario
  * @param {string} currentUserRole - Rol del usuario actual (quien está viendo)
+ * @param {object} currentUser - Usuario actual completo (quien está viendo)
  * @param {boolean} isAdmin - Si el usuario actual es admin
  * @param {function} onUpdate - Callback cuando se actualiza el perfil
  */
@@ -53,6 +56,7 @@ function UserProfileModal({
   user,
   userRole,
   currentUserRole,
+  currentUser,
   isAdmin = false,
   onUpdate
 }) {
@@ -267,7 +271,7 @@ function UserProfileModal({
     });
 
     // Tab de Clases - Estudiantes y Profesores
-    if (userRole === 'student' || userRole === 'teacher' || userRole === 'trial_teacher') {
+    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial' || userRole === 'teacher' || userRole === 'trial_teacher') {
       tabs.push({
         id: 'classes',
         label: 'Clases',
@@ -276,8 +280,22 @@ function UserProfileModal({
       });
     }
 
+    // Tab de Créditos - Todos los usuarios
+    tabs.push({
+      id: 'credits',
+      label: 'Créditos',
+      icon: CreditCard,
+      component: (
+        <CreditsTab
+          user={user}
+          currentUser={currentUser || user}
+          onUpdate={onUpdate}
+        />
+      )
+    });
+
     // Tab de Contenidos - Solo Estudiantes
-    if (userRole === 'student') {
+    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
       tabs.push({
         id: 'content',
         label: 'Contenidos',
@@ -287,12 +305,22 @@ function UserProfileModal({
     }
 
     // Tab de Estudiantes - Solo Profesores
-    if (userRole === 'teacher' || userRole === 'trial_teacher') {
+    if (userRole === 'teacher' || userRole === 'trial_teacher' || userRole === 'admin') {
       tabs.push({
         id: 'students',
         label: 'Estudiantes',
         icon: Users,
         component: <StudentsTab user={user} />
+      });
+    }
+
+    // Tab de Tutores - Solo Estudiantes (condicional)
+    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
+      tabs.push({
+        id: 'guardians',
+        label: 'Tutores',
+        icon: UsersRound,
+        component: <GuardiansTab user={user} />
       });
     }
 

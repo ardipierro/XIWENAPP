@@ -31,7 +31,7 @@ import SearchBar from './common/SearchBar';
 import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge, CategoryBadge, BaseModal } from './common';
 import { UniversalCard, CardGrid } from './cards';
 import AddUserModal from './AddUserModal';
-import UserProfile from './UserProfile';
+import UserProfileModal from './UserProfileModal';
 import ConfirmModal from './ConfirmModal';
 import logger from '../utils/logger';
 
@@ -567,6 +567,25 @@ export default function UniversalUserManager({ user, userRole }) {
                       )}
                     </div>
                   </th>
+                  <th>
+                    <div
+                      onClick={() => userManagement.handleSort('createdAt')}
+                      className={`sortable-header ${
+                        userManagement.sortField === 'createdAt' ? 'active' : ''
+                      }`}
+                    >
+                      <span>Fecha de Registro</span>
+                      {userManagement.sortField === 'createdAt' ? (
+                        userManagement.sortDirection === 'asc' ? (
+                          <ArrowUp size={14} />
+                        ) : (
+                          <ArrowDown size={14} />
+                        )
+                      ) : (
+                        <ArrowUpDown size={14} className="sort-icon-inactive" />
+                      )}
+                    </div>
+                  </th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -574,7 +593,18 @@ export default function UniversalUserManager({ user, userRole }) {
                 {userManagement.filteredUsers.map((userItem) => (
                   <tr key={userItem.id}>
                     <td>
-                      <div className="flex items-center gap-3">
+                      <div
+                        className="flex items-center gap-3 cursor-pointer hover:opacity-70 transition-opacity"
+                        onClick={() => handleViewUserProfile(userItem)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleViewUserProfile(userItem);
+                          }
+                        }}
+                      >
                         <div className="user-avatar">
                           {userItem.name?.charAt(0).toUpperCase() || '?'}
                         </div>
@@ -583,22 +613,25 @@ export default function UniversalUserManager({ user, userRole }) {
                     </td>
                     <td>{userItem.email}</td>
                     <td>
-                      <span className="role-badge" data-role={userItem.role}>
-                        {userItem.role}
-                      </span>
+                      <CategoryBadge type="role" value={userItem.role} size="sm" />
                     </td>
                     <td>
                       <span className="font-bold">{userItem.credits || 0}</span>
                     </td>
                     <td>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {userItem.createdAt
+                          ? new Date(userItem.createdAt.seconds * 1000).toLocaleDateString('es-ES', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })
+                          : 'N/A'
+                        }
+                      </span>
+                    </td>
+                    <td>
                       <div className="flex gap-2">
-                        <BaseButton
-                          onClick={() => handleViewUserProfile(userItem)}
-                          variant="ghost"
-                          size="sm"
-                        >
-                          Ver
-                        </BaseButton>
                         {can('delete-users') && (
                           <BaseButton
                             onClick={() => {
@@ -607,9 +640,9 @@ export default function UniversalUserManager({ user, userRole }) {
                             }}
                             variant="danger"
                             size="sm"
-                          >
-                            Eliminar
-                          </BaseButton>
+                            icon={Trash2}
+                            title="Eliminar usuario"
+                          />
                         )}
                       </div>
                     </td>
@@ -646,29 +679,19 @@ export default function UniversalUserManager({ user, userRole }) {
       />
 
       {/* User Profile Modal */}
-      <BaseModal
+      <UserProfileModal
         isOpen={showUserProfile && !!selectedUserProfile}
         onClose={() => {
           setShowUserProfile(false);
           setSelectedUserProfile(null);
         }}
-        title={selectedUserProfile?.name || 'Perfil de Usuario'}
-        size="xl"
-      >
-        {selectedUserProfile && (
-          <UserProfile
-            selectedUser={selectedUserProfile}
-            currentUser={user}
-            isAdmin={isAdmin()}
-            inModal={true}
-            onBack={() => {
-              setShowUserProfile(false);
-              setSelectedUserProfile(null);
-            }}
-            onUpdate={handleUpdateUser}
-          />
-        )}
-      </BaseModal>
+        user={selectedUserProfile}
+        userRole={selectedUserProfile?.role}
+        currentUserRole={userRole}
+        currentUser={user}
+        isAdmin={isAdmin()}
+        onUpdate={handleUpdateUser}
+      />
     </div>
   );
 }
