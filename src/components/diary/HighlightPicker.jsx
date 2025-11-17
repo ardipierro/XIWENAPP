@@ -52,17 +52,21 @@ export function HighlightPicker({
         <div className="absolute top-full mt-2 z-50 bg-white dark:bg-gray-800 rounded-lg
                        shadow-xl border-2 border-gray-200 dark:border-gray-700 p-3 min-w-[240px]">
           {/* Header */}
-          <div className="flex items-center justify-between mb-3 pb-2 border-b
-                         border-gray-200 dark:border-gray-700">
-            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Resaltador
-            </span>
-            <button
-              onClick={() => setShowPicker(false)}
-              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <X size={16} className="text-gray-500" />
-            </button>
+          <div className="mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                Resaltador
+              </span>
+              <button
+                onClick={() => setShowPicker(false)}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <X size={16} className="text-gray-500" />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+              💡 Selecciona texto primero, luego elige un color
+            </p>
           </div>
 
           {/* Botón activar/desactivar modo resaltador */}
