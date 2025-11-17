@@ -869,6 +869,82 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   const gridImage = hasImage ? content.videoData.thumbnailUrl : undefined;
   const gridIcon = !hasImage ? IconComponent : undefined;
 
+  // Preparar badges (type, status, difficulty)
+  const contentBadges = [];
+
+  // Badge de tipo de contenido
+  if (content.type) {
+    contentBadges.push(
+      <CategoryBadge
+        key="type"
+        type="content"
+        value={content.type}
+        size="sm"
+      />
+    );
+  }
+
+  // Badge de status
+  if (content.status) {
+    contentBadges.push(
+      <CategoryBadge
+        key="status"
+        type="status"
+        value={content.status}
+        size="sm"
+      />
+    );
+  }
+
+  // Badge de dificultad
+  if (content.metadata?.difficulty) {
+    contentBadges.push(
+      <span
+        key="difficulty"
+        className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}
+      >
+        {content.metadata.difficulty}
+      </span>
+    );
+  }
+
+  // Preparar meta info (fecha, duración, puntos)
+  const contentMeta = [];
+
+  if (content.createdAt) {
+    contentMeta.push({
+      icon: <Calendar className="w-3.5 h-3.5" strokeWidth={2} />,
+      text: new Date(content.createdAt.toDate()).toLocaleDateString()
+    });
+  }
+
+  if (content.metadata?.duration) {
+    contentMeta.push({
+      icon: <Clock className="w-3.5 h-3.5" strokeWidth={2} />,
+      text: `${content.metadata.duration} min`
+    });
+  }
+
+  if (content.metadata?.points) {
+    contentMeta.push({
+      icon: <Target className="w-3.5 h-3.5" strokeWidth={2} />,
+      text: `${content.metadata.points} pts`
+    });
+  }
+
+  // Preparar actions
+  const contentActions = (
+    <div className="flex gap-2 w-full">
+      <BaseButton variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
+        Ver
+      </BaseButton>
+      <BaseButton variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
+        Editar
+      </BaseButton>
+      <BaseButton variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
+    </div>
+  );
+
   return (
     <UniversalCard
       variant={gridVariant}
@@ -877,90 +953,27 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
       image={gridImage}
       icon={gridIcon}
+      title={content.title}
+      description={content.description || config.description}
+      meta={contentMeta}
+      actions={contentActions}
     >
-      <div className="flex flex-col h-full">
-        {/* Badges Section */}
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <CategoryBadge
-            type="content"
-            value={content.type}
-            size="sm"
-          />
-          {/* Status badge */}
-          {content.status && (
-            <CategoryBadge
-              type="status"
-              value={content.status}
-              size="sm"
-            />
-          )}
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`} style={{ display: 'none' }}>
-            {getStatusLabel(content.status || CONTENT_STATUS.DRAFT)}
-          </span>
-          {content.metadata?.difficulty && (
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
-              {content.metadata.difficulty}
-            </span>
-          )}
-        </div>
-
-        {/* Título */}
-        <h3 className="text-lg font-semibold mb-2 line-clamp-2 text-gray-900 dark:text-white">
-          {content.title}
-        </h3>
-
-        {/* Descripción */}
-        <p className="text-sm mb-4 line-clamp-3 flex-grow text-gray-600 dark:text-gray-400">
-          {content.description || config.description}
-        </p>
-
-        {/* Metadata (fecha, duración, puntos, tags) */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-3 text-xs flex-wrap text-gray-600 dark:text-gray-400">
-            {content.createdAt && (
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
-                {new Date(content.createdAt.toDate()).toLocaleDateString()}
-              </div>
-            )}
-            {content.metadata?.duration && (
-              <div className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" strokeWidth={2} />
-                {content.metadata.duration} min
-              </div>
-            )}
-            {content.metadata?.points && (
-              <div className="flex items-center gap-1">
-                <Target className="w-3.5 h-3.5" strokeWidth={2} />
-                {content.metadata.points} pts
-              </div>
-            )}
-          </div>
-
-          {/* Tags */}
-          {content.metadata?.tags?.length > 0 && (
-            <div className="flex items-center gap-1 flex-wrap">
-              <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-              {content.metadata.tags.slice(0, 3).map((tag, idx) => (
-                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer - Action Buttons */}
-        <div className="flex gap-2 mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-          <BaseButton variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
-            Ver
-          </BaseButton>
-          <BaseButton variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
-            Editar
-          </BaseButton>
-          <BaseButton variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
-        </div>
+      {/* Badges personalizados */}
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        {contentBadges}
       </div>
+
+      {/* Tags si existen */}
+      {content.metadata?.tags?.length > 0 && (
+        <div className="flex items-center gap-1 flex-wrap mb-3">
+          <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+          {content.metadata.tags.slice(0, 3).map((tag, idx) => (
+            <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </UniversalCard>
   );
 }
