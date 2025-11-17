@@ -10,6 +10,7 @@
 
 import { useState } from 'react';
 import { BaseBadge } from '../common';
+import { useCardConfig } from '../../contexts/CardConfigContext';
 import {
   getVariantConfig,
   getSizeConfig,
@@ -118,11 +119,15 @@ export function UniversalCard({
   // Advanced
   className = '',
   style = {},
+  customConfig,            // Custom config override (para preview/testing)
 }) {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Get configurations
-  const variantConfig = getVariantConfig(variant);
+  // Get global saved config (si existe)
+  const { config: globalConfig } = useCardConfig();
+
+  // Get configurations (prioridad: customConfig > globalConfig > default)
+  const variantConfig = customConfig || (globalConfig && globalConfig[variant]) || getVariantConfig(variant);
   const sizeConfig = getSizeConfig(size);
   const layoutConfig = getLayoutConfig(layout);
 
