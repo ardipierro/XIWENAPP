@@ -2360,23 +2360,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   top: calc(64px + 44px);
 }
 
-.universal-dashboard__welcome {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.universal-dashboard__welcome h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.universal-dashboard__welcome p {
-  color: var(--color-text-muted);
-  font-size: 1.125rem;
-  margin-bottom: 2rem;
-}
+/* Estilos de .universal-dashboard__welcome eliminados - ahora usa Tailwind inline */
 
 .universal-dashboard__features {
   display: grid;

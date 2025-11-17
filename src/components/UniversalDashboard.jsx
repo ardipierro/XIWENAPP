@@ -16,6 +16,18 @@ import UniversalSideMenu from './UniversalSideMenu';
 import ViewAsBanner from './ViewAsBanner';
 import { BaseLoading, BaseButton } from './common';
 import { UniversalCard } from './cards';
+import {
+  Layers,
+  BookOpen,
+  MessageCircle,
+  Settings,
+  Users,
+  ClipboardCheck,
+  Gamepad2,
+  Target,
+  Calendar,
+  BarChart3
+} from 'lucide-react';
 
 // Lazy load de componentes pesados
 const UnifiedCalendar = lazy(() => import('./UnifiedCalendar'));
@@ -41,6 +53,7 @@ const StudentSessionsView = lazy(() => import('./StudentSessionsView'));
 
 // Games views
 const LiveGamesView = lazy(() => import('./games/LiveGamesView'));
+const GameContainer = lazy(() => import('./GameContainer'));
 
 // Guardian views
 const GuardianView = lazy(() => import('./guardian/GuardianView'));
@@ -49,53 +62,174 @@ const GuardianView = lazy(() => import('./guardian/GuardianView'));
 const ADE1ContentViewer = lazy(() => import('./ADE1ContentViewer'));
 
 /**
- * Vista de inicio (placeholder)
+ * Vista de inicio con accesos directos
  */
 function HomeView({ user, onNavigate }) {
-  const { getRoleLabel } = usePermissions();
+  const { getRoleLabel, can } = usePermissions();
+
+  // Definición de tarjetas de acceso directo
+  const quickAccessCards = [
+    {
+      title: 'Crear Contenido',
+      description: 'Gestiona contenidos, ejercicios y configura IA',
+      icon: Layers,
+      gradient: 'from-blue-500 to-indigo-600',
+      path: '/dashboard/unified-content',
+      permission: 'create-content'
+    },
+    {
+      title: 'Diario de Clases',
+      description: 'Crea y administra diarios de clase',
+      icon: BookOpen,
+      gradient: 'from-amber-500 to-orange-600',
+      path: '/dashboard/daily-logs',
+      permission: 'manage-classes'
+    },
+    {
+      title: 'Mensajería',
+      description: 'Comunícate con estudiantes y profesores',
+      icon: MessageCircle,
+      gradient: 'from-green-500 to-emerald-600',
+      path: '/dashboard/messages',
+      permission: 'send-messages'
+    },
+    {
+      title: 'Configuración',
+      description: 'Ajustes del sistema y credenciales',
+      icon: Settings,
+      gradient: 'from-gray-500 to-zinc-600',
+      path: '/dashboard/system-settings',
+      permission: 'manage-system-settings'
+    },
+    {
+      title: 'Clases',
+      description: 'Gestiona sesiones de clase en vivo',
+      icon: Users,
+      gradient: 'from-teal-500 to-cyan-600',
+      path: '/dashboard/classes',
+      permission: 'manage-classes'
+    },
+    {
+      title: 'Revisar Tareas',
+      description: 'Corrección de tareas con IA',
+      icon: ClipboardCheck,
+      gradient: 'from-pink-500 to-rose-600',
+      path: '/dashboard/homework-review',
+      permission: 'grade-assignments'
+    },
+    {
+      title: 'Juegos en Vivo',
+      description: 'Juegos en tiempo real con estudiantes',
+      icon: Gamepad2,
+      gradient: 'from-purple-500 to-indigo-600',
+      path: '/dashboard/games',
+      permission: 'play-live-games'
+    },
+    {
+      title: 'Juego por Turnos',
+      description: 'Juego clásico de preguntas',
+      icon: Target,
+      gradient: 'from-red-500 to-rose-600',
+      path: '/dashboard/turn-game',
+      permission: null // Disponible para todos
+    },
+    {
+      title: 'Calendario',
+      description: 'Eventos y clases programadas',
+      icon: Calendar,
+      gradient: 'from-cyan-500 to-blue-600',
+      path: '/dashboard/calendar',
+      permission: null // Disponible para todos
+    },
+    {
+      title: 'Analíticas',
+      description: 'Estadísticas y reportes',
+      icon: BarChart3,
+      gradient: 'from-violet-500 to-purple-600',
+      path: '/dashboard/analytics',
+      permission: 'view-own-analytics'
+    }
+  ];
+
+  // Filtrar tarjetas según permisos
+  const visibleCards = quickAccessCards.filter(card => {
+    if (!card.permission) return true; // Sin permiso requerido = visible para todos
+    return can(card.permission);
+  });
 
   return (
-    <div className="universal-dashboard__welcome">
-      <h1>¡Bienvenido, {user?.displayName || user?.name || 'Usuario'}!</h1>
-      <p>Rol: <strong>{getRoleLabel()}</strong></p>
-      <p>Este es el nuevo Universal Dashboard con sistema de permisos y créditos integrado.</p>
-
-      {/* Feature cards con UniversalCard */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <UniversalCard
-          variant="default"
-          size="md"
-          title="✅ Sistema de Permisos"
-          description="Acceso basado en roles con permisos granulares"
-        />
-        <UniversalCard
-          variant="default"
-          size="md"
-          title="💳 Sistema de Créditos"
-          description="Gestión unificada de créditos en tiempo real"
-        />
-        <UniversalCard
-          variant="default"
-          size="md"
-          title="🎨 UI Consistente"
-          description="Misma experiencia para todos los roles"
-        />
-        <UniversalCard
-          variant="default"
-          size="md"
-          title="🚀 Altamente Escalable"
-          description="Fácil agregar nuevos roles y features"
-        />
+    <div className="p-4 md:p-6 space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          ¡Bienvenido, {user?.displayName || user?.name || 'Usuario'}!
+        </h1>
+        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+          Rol: <strong className="text-gray-900 dark:text-white">{getRoleLabel()}</strong>
+        </p>
       </div>
 
-      {/* Acceso rápido a contenido ADE1 */}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">📚 Contenido Interactivo</h2>
+      {/* Accesos directos */}
+      <div>
+        <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-4">
+          Accesos Directos
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {visibleCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <div
+                key={card.path}
+                onClick={() => onNavigate && onNavigate(card.path)}
+                className="group cursor-pointer"
+              >
+                <div
+                  className="flex flex-col rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-1 h-full"
+                  style={{
+                    background: 'var(--color-bg-secondary)',
+                    border: '1px solid var(--color-border)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
+                    e.currentTarget.style.borderColor = 'var(--color-border-focus)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)';
+                    e.currentTarget.style.borderColor = 'var(--color-border)';
+                  }}
+                >
+                  {/* Icon header con gradient */}
+                  <div className={`p-5 bg-gradient-to-br ${card.gradient}`}>
+                    <Icon size={32} className="text-white" strokeWidth={2} />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      {card.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                      {card.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Acceso rápido a contenido ADE1 (temporal) */}
+      <div>
+        <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-4">
+          Contenido Interactivo
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <UniversalCard
             variant="default"
             size="md"
-            title="📖 ADE1 2026 - Fonética"
+            title="ADE1 2026 - Fonética"
             description="Libro interactivo con 120+ slides y ejercicios de fonética española"
             onClick={() => onNavigate && onNavigate('/dashboard/ade1-content')}
             actions={[
@@ -346,7 +480,7 @@ export function UniversalDashboard() {
               if (!can('view-all-content')) return <PlaceholderView title="Sin acceso" />;
               return <StudentSessionsView student={effectiveUser} />;
 
-            // JUEGOS
+            // JUEGOS EN VIVO
             case '/dashboard/games':
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
               return (
@@ -357,6 +491,14 @@ export function UniversalDashboard() {
                     // TODO: Implementar lógica para unirse al juego
                     // Posiblemente navegar a /game/:gameId o abrir modal
                   }}
+                />
+              );
+
+            // JUEGO POR TURNOS
+            case '/dashboard/turn-game':
+              return (
+                <GameContainer
+                  onBack={() => handleNavigate('/dashboard')}
                 />
               );
 
