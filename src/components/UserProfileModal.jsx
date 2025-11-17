@@ -314,13 +314,13 @@ function UserProfileModal({
       });
     }
 
-    // Tab de Tutores - Solo Estudiantes (condicional)
-    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
+    // Tab de Estudiantes Supervisados - Solo para Tutores
+    if (userRole === 'guardian') {
       tabs.push({
         id: 'guardians',
-        label: 'Tutores',
+        label: 'Estudiantes Supervisados',
         icon: UsersRound,
-        component: <GuardiansTab user={user} />
+        component: <GuardiansTab user={user} isTutor={true} />
       });
     }
 

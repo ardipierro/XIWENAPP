@@ -511,6 +511,11 @@ export default function UniversalUserManager({ user, userRole }) {
                     </div>
                   </th>
                   <th>
+                    <div className="sortable-header">
+                      <span>Nombre en Chino</span>
+                    </div>
+                  </th>
+                  <th>
                     <div
                       onClick={() => userManagement.handleSort('email')}
                       className={`sortable-header ${
@@ -610,6 +615,14 @@ export default function UniversalUserManager({ user, userRole }) {
                         </div>
                         <span className="font-semibold">{userItem.name || 'Sin nombre'}</span>
                       </div>
+                    </td>
+                    <td>
+                      <span className="text-sm">
+                        {userItem.chineseLastName && userItem.chineseFirstName
+                          ? `${userItem.chineseLastName}${userItem.chineseFirstName}`
+                          : userItem.chineseLastName || userItem.chineseFirstName || '-'
+                        }
+                      </span>
                     </td>
                     <td>{userItem.email}</td>
                     <td>

@@ -5,38 +5,46 @@
 
 import { useState, useEffect } from 'react';
 import { User, UsersRound } from 'lucide-react';
-import { getStudentGuardians } from '../../../firebase/guardians';
+import { getStudentGuardians, getGuardianStudents } from '../../../firebase/guardians';
 import { BaseAlert } from '../../common';
 import logger from '../../../utils/logger';
 
 /**
- * GuardiansTab - Pestaña de tutores vinculados al estudiante
+ * GuardiansTab - Pestaña de tutores vinculados al estudiante o estudiantes supervisados por tutor
  *
- * @param {object} user - Usuario estudiante
+ * @param {object} user - Usuario estudiante o tutor
+ * @param {boolean} isTutor - Si el usuario es tutor (muestra sus estudiantes) o estudiante (muestra sus tutores)
  */
-function GuardiansTab({ user }) {
-  const [guardians, setGuardians] = useState([]);
+function GuardiansTab({ user, isTutor = false }) {
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadGuardians();
-  }, [user?.uid, user?.id]);
+    loadData();
+  }, [user?.uid, user?.id, isTutor]);
 
-  const loadGuardians = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
       const userId = user?.uid || user?.id;
       if (!userId) return;
 
-      const guardianLinks = await getStudentGuardians(userId);
-      setGuardians(guardianLinks);
+      if (isTutor) {
+        // Cargar estudiantes supervisados por el tutor
+        const students = await getGuardianStudents(userId);
+        setItems(students);
+      } else {
+        // Cargar tutores del estudiante
+        const guardianLinks = await getStudentGuardians(userId);
+        setItems(guardianLinks);
+      }
     } catch (error) {
-      logger.error('Error al cargar tutores:', error);
+      logger.error('Error al cargar datos:', error);
       // Si es un error de permisos, no mostrar mensaje de error
       if (error.code !== 'permission-denied') {
-        logger.error('Error loading guardians:', error);
+        logger.error('Error loading data:', error);
       }
-      setGuardians([]); // Establecer array vacío en caso de error
+      setItems([]); // Establecer array vacío en caso de error
     } finally {
       setLoading(false);
     }
@@ -56,30 +64,37 @@ function GuardiansTab({ user }) {
       <div className="flex items-center gap-2 mb-6">
         <UsersRound size={24} strokeWidth={2} className="text-zinc-900 dark:text-white" />
         <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
-          Tutores Vinculados
+          {isTutor ? 'Estudiantes Supervisados' : 'Tutores Vinculados'}
         </h3>
       </div>
 
-      {guardians.length === 0 ? (
+      {items.length === 0 ? (
         <BaseAlert variant="info">
           <div className="flex items-start gap-3">
             <UsersRound size={20} strokeWidth={2} className="flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold mb-1">Sin tutores vinculados</p>
+              <p className="font-semibold mb-1">
+                {isTutor ? 'No hay estudiantes supervisados' : 'Sin tutores vinculados'}
+              </p>
               <p className="text-sm">
-                Este estudiante no tiene tutores asignados. La funcionalidad de tutores permite a padres o responsables acceder a información del estudiante.
+                {isTutor
+                  ? 'Este tutor no tiene estudiantes asignados.'
+                  : 'Este estudiante no tiene tutores asignados. La funcionalidad de tutores permite a padres o responsables acceder a información del estudiante.'
+                }
               </p>
-              <p className="text-xs mt-2 opacity-75">
-                Nota: Esta función requiere configuración de permisos en Firebase.
-              </p>
+              {!isTutor && (
+                <p className="text-xs mt-2 opacity-75">
+                  Nota: Esta función requiere configuración de permisos en Firebase.
+                </p>
+              )}
             </div>
           </div>
         </BaseAlert>
       ) : (
         <div className="space-y-3">
-          {guardians.map((guardian) => (
+          {items.map((item) => (
             <div
-              key={guardian.id}
+              key={item.relationId || item.id}
               className="p-4 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg"
             >
               <div className="flex items-center justify-between">
@@ -89,14 +104,18 @@ function GuardiansTab({ user }) {
                   </div>
                   <div>
                     <h4 className="font-semibold text-zinc-900 dark:text-white">
-                      {guardian.guardianName}
+                      {isTutor ? item.studentName : item.guardianName || item.guardianData?.name}
                     </h4>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                      {guardian.guardianEmail}
-                    </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
-                      Relación: {guardian.relationshipType || 'No especificada'}
-                    </p>
+                    {!isTutor && item.guardianData?.email && (
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                        {item.guardianData.email}
+                      </p>
+                    )}
+                    {item.relationship && (
+                      <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                        Relación: {item.relationship}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
