@@ -656,7 +656,6 @@ Los cambios se aplican instantáneamente en toda la app.`);
       </div>
       {/* Fin del grid de 3 columnas */}
     </div>
-    {/* Fin del container principal */}
   );
 }
 
