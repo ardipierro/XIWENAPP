@@ -91,6 +91,18 @@ export function EnhancedTextEditor({
   const [drawingLayer, setDrawingLayer] = useState('over'); // 'over' | 'under'
 
   const editorContainerRef = useRef(null);
+  const isApplyingHighlight = useRef(false); // ← FIX: Prevenir loop infinito
+  const highlighterModeRef = useRef(highlighterMode);
+  const highlighterColorRef = useRef(highlighterColor);
+
+  // Mantener refs actualizados
+  useEffect(() => {
+    highlighterModeRef.current = highlighterMode;
+  }, [highlighterMode]);
+
+  useEffect(() => {
+    highlighterColorRef.current = highlighterColor;
+  }, [highlighterColor]);
 
   // Fuentes disponibles (5 clásicas + 9 Google Fonts)
   const fontFamilies = [
@@ -138,16 +150,19 @@ export function EnhancedTextEditor({
         class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[120px] px-4 py-3'
       }
     },
-    // ← FIX: Forzar re-render cuando cambia el contenido/selección
+    // ← FIX: Forzar re-render solo cuando cambia el contenido (no la selección)
     onUpdate: () => {
       setEditorUpdateKey(prev => prev + 1);
     },
     onSelectionUpdate: ({ editor }) => {
-      setEditorUpdateKey(prev => prev + 1);
-
-      // ✅ FIX: Auto-resaltar cuando está en modo highlighter
-      if (highlighterMode && !editor.state.selection.empty) {
-        editor.chain().focus().setHighlight({ color: highlighterColor }).run();
+      // ✅ FIX: Auto-resaltar cuando está en modo highlighter (sin loop infinito)
+      if (highlighterModeRef.current && !editor.state.selection.empty && !isApplyingHighlight.current) {
+        isApplyingHighlight.current = true;
+        // Usar setTimeout para evitar que se dispare en el mismo ciclo
+        setTimeout(() => {
+          editor.chain().focus().setHighlight({ color: highlighterColorRef.current }).run();
+          isApplyingHighlight.current = false;
+        }, 0);
       }
     }
   });
