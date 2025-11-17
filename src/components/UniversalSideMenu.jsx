@@ -13,6 +13,7 @@ import {
   Settings,
   UserCog,
   MessageSquare,
+  Gamepad2,
   Video,
   Layers,
   CheckCircle,
@@ -67,7 +68,7 @@ const MENU_ITEMS = [
   // GESTIÓN DE CLASES Y TAREAS (Teachers + Admin)
   {
     id: 'students',
-    label: 'Mis Estudiantes',
+    label: 'Estudiantes',
     icon: Users,
     path: '/dashboard/users', // Ruta unificada
     permission: 'view-own-students',
@@ -103,7 +104,7 @@ const MENU_ITEMS = [
   // STUDENT FEATURES
   {
     id: 'my-courses',
-    label: 'Mis Cursos',
+    label: 'Contenidos',
     icon: BookOpen,
     path: '/dashboard/my-courses',
     permission: 'view-all-content',
@@ -111,7 +112,7 @@ const MENU_ITEMS = [
   },
   {
     id: 'my-classes',
-    label: 'Mis Clases',
+    label: 'Clases',
     icon: Video,
     path: '/dashboard/my-classes',
     permission: 'view-all-content',
@@ -119,10 +120,17 @@ const MENU_ITEMS = [
   },
   {
     id: 'my-assignments',
-    label: 'Mis Tareas',
+    label: 'Tareas',
     icon: CheckSquare,
     path: '/dashboard/my-assignments',
     permission: 'view-own-assignments',
+  },
+  {
+    id: 'games',
+    label: 'Juegos',
+    icon: Gamepad2,
+    path: '/dashboard/games',
+    permission: 'play-live-games',
   },
   // DESHABILITADO - Sección de pagos eliminada del menú
   // {
