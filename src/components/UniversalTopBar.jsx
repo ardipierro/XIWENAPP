@@ -33,7 +33,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const { getEffectiveUser } = useViewAs();
   const { theme, toggleTheme } = useTheme();
   const { selectedFont, fontWeight, fontSize } = useFont();
-  const { getRoleLabel, can } = usePermissions();
+  const { getRoleLabel, can, isAdmin, role } = usePermissions();
   const { config } = useTopBar();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -245,6 +245,9 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         <UserProfileModal
           isOpen={showProfileModal}
           user={effectiveUser}
+          userRole={role}
+          currentUserRole={role}
+          isAdmin={isAdmin()}
           onClose={() => setShowProfileModal(false)}
         />
       )}
