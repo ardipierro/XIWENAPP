@@ -168,7 +168,7 @@ function HomeView({ user, onNavigate }) {
   const formattedDate = today.toLocaleDateString('es-ES', dateOptions);
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="px-4 md:px-6 pt-2 md:pt-3 pb-4 md:pb-6 space-y-6">
       {/* Header - Solo fecha */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-500 dark:text-gray-500">
