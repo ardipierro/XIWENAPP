@@ -47,6 +47,15 @@ export function DrawingCanvasAdvanced({
   useEffect(() => { sizeRef.current = size; }, [size]);
   useEffect(() => { layerRef.current = layer; }, [layer]);
 
+  // FIX: Sincronizar initialStrokes cuando cambian (para editar bloques existentes)
+  useEffect(() => {
+    if (initialStrokes && initialStrokes.length > 0 && strokes.length === 0) {
+      setStrokes(initialStrokes);
+      setHistory([initialStrokes]);
+      setHistoryIndex(0);
+    }
+  }, [initialStrokes]);
+
   // Configuración de perfect-freehand
   const strokeOptions = {
     size: size,
@@ -269,7 +278,7 @@ export function DrawingCanvasAdvanced({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
         {/* Trazos de capa inferior (solo si estamos en capa 'over') */}
         {layer === 'over' && strokesUnder.map((stroke) => (
