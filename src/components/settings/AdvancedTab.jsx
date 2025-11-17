@@ -27,8 +27,8 @@ function AdvancedTab() {
           tabs={subTabs}
           activeTab={activeSubTab}
           onChange={setActiveSubTab}
-          variant="pills"
-          size="sm"
+          variant="underline"
+          size="md"
         />
       </div>
 
