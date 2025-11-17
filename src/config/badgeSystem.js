@@ -29,6 +29,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#3b82f6',
     label: 'Curso',
     icon: '📚',
+    heroicon: 'BookOpenIcon',
     description: 'Contenedor de lecciones y ejercicios',
     category: 'contentType'
   },
@@ -37,6 +38,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#10b981',
     label: 'Lección',
     icon: '📝',
+    heroicon: 'DocumentTextIcon',
     description: 'Contenido teórico',
     category: 'contentType'
   },
@@ -45,6 +47,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#8b5cf6',
     label: 'Lectura',
     icon: '📖',
+    heroicon: 'NewspaperIcon',
     description: 'Documento de lectura',
     category: 'contentType'
   },
@@ -53,6 +56,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#ef4444',
     label: 'Video',
     icon: '🎥',
+    heroicon: 'VideoCameraIcon',
     description: 'Contenido multimedia',
     category: 'contentType'
   },
@@ -61,6 +65,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#71717a',
     label: 'Link',
     icon: '🔗',
+    heroicon: 'LinkIcon',
     description: 'Recurso externo',
     category: 'contentType'
   },
@@ -69,6 +74,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'Ejercicio',
     icon: '✏️',
+    heroicon: 'PencilIcon',
     description: 'Práctica con preguntas',
     category: 'contentType'
   },
@@ -77,6 +83,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#06b6d4',
     label: 'Juego en Vivo',
     icon: '🎮',
+    heroicon: 'PuzzlePieceIcon',
     description: 'Sesión interactiva',
     category: 'contentType'
   },
@@ -89,6 +96,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#3b82f6',
     label: 'Opción Múltiple',
     icon: '☑️',
+    heroicon: 'CheckCircleIcon',
     description: 'Selección de respuestas',
     category: 'exerciseType'
   },
@@ -97,6 +105,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#10b981',
     label: 'Llenar Espacios',
     icon: '📝',
+    heroicon: 'DocumentTextIcon',
     description: 'Completar oraciones',
     category: 'exerciseType'
   },
@@ -105,6 +114,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'Emparejar',
     icon: '🔗',
+    heroicon: 'LinkIcon',
     description: 'Relacionar elementos',
     category: 'exerciseType'
   },
@@ -113,6 +123,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#8b5cf6',
     label: 'Ordenar',
     icon: '🔢',
+    heroicon: 'ListBulletIcon',
     description: 'Secuenciar elementos',
     category: 'exerciseType'
   },
@@ -121,6 +132,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#ef4444',
     label: 'Verdadero/Falso',
     icon: '✓✗',
+    heroicon: 'HandThumbUpIcon',
     description: 'Evaluación binaria',
     category: 'exerciseType'
   },
@@ -129,6 +141,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#3b82f6',
     label: 'Respuesta Corta',
     icon: '✍️',
+    heroicon: 'PencilSquareIcon',
     description: 'Respuesta textual breve',
     category: 'exerciseType'
   },
@@ -137,6 +150,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#06b6d4',
     label: 'Ensayo',
     icon: '📄',
+    heroicon: 'DocumentIcon',
     description: 'Respuesta extensa',
     category: 'exerciseType'
   },
@@ -145,6 +159,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'Comprensión Auditiva',
     icon: '🎧',
+    heroicon: 'MusicalNoteIcon',
     description: 'Ejercicio de audio',
     category: 'exerciseType'
   },
@@ -157,6 +172,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#10b981',
     label: 'Principiante',
     icon: '🟢',
+    heroicon: 'SignalIcon',
     description: 'Nivel básico',
     category: 'difficulty'
   },
@@ -165,6 +181,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'Intermedio',
     icon: '🟡',
+    heroicon: 'SignalIcon',
     description: 'Nivel medio',
     category: 'difficulty'
   },
@@ -173,6 +190,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#ef4444',
     label: 'Avanzado',
     icon: '🔴',
+    heroicon: 'SignalIcon',
     description: 'Nivel alto',
     category: 'difficulty'
   },
@@ -185,6 +203,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#10b981',
     label: 'A1',
     icon: '🌱',
+    heroicon: 'SparklesIcon',
     description: 'Básico - Acceso',
     category: 'cefr'
   },
@@ -193,6 +212,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#16a34a',
     label: 'A2',
     icon: '🌿',
+    heroicon: 'SparklesIcon',
     description: 'Básico - Plataforma',
     category: 'cefr'
   },
@@ -201,6 +221,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'B1',
     icon: '🌾',
+    heroicon: 'SparklesIcon',
     description: 'Intermedio - Umbral',
     category: 'cefr'
   },
@@ -209,6 +230,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#d97706',
     label: 'B2',
     icon: '🌻',
+    heroicon: 'StarIcon',
     description: 'Intermedio - Avanzado',
     category: 'cefr'
   },
@@ -217,6 +239,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#ef4444',
     label: 'C1',
     icon: '🌳',
+    heroicon: 'FireIcon',
     description: 'Avanzado - Dominio',
     category: 'cefr'
   },
@@ -225,6 +248,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#dc2626',
     label: 'C2',
     icon: '🏆',
+    heroicon: 'TrophyIcon',
     description: 'Avanzado - Maestría',
     category: 'cefr'
   },
@@ -237,6 +261,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#71717a',
     label: 'Borrador',
     icon: '📝',
+    heroicon: 'DocumentTextIcon',
     description: 'En edición',
     category: 'status'
   },
@@ -245,6 +270,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'En Revisión',
     icon: '👀',
+    heroicon: 'EyeIcon',
     description: 'Pendiente de aprobación',
     category: 'status'
   },
@@ -253,6 +279,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#10b981',
     label: 'Publicado',
     icon: '✅',
+    heroicon: 'CheckBadgeIcon',
     description: 'Visible para estudiantes',
     category: 'status'
   },
@@ -261,6 +288,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#a1a1aa',
     label: 'Archivado',
     icon: '📦',
+    heroicon: 'ArchiveBoxIcon',
     description: 'No visible',
     category: 'status'
   },
@@ -273,6 +301,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#3b82f6',
     label: 'Vocabulario',
     icon: '📚',
+    heroicon: 'BookOpenIcon',
     description: 'Palabras y expresiones',
     category: 'theme'
   },
@@ -281,6 +310,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#8b5cf6',
     label: 'Gramática',
     icon: '📖',
+    heroicon: 'NewspaperIcon',
     description: 'Reglas y estructuras',
     category: 'theme'
   },
@@ -289,6 +319,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#10b981',
     label: 'Conversación',
     icon: '💬',
+    heroicon: 'ChatBubbleLeftRightIcon',
     description: 'Diálogo y comunicación',
     category: 'theme'
   },
@@ -297,6 +328,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'Pronunciación',
     icon: '🗣️',
+    heroicon: 'SpeakerWaveIcon',
     description: 'Fonética y entonación',
     category: 'theme'
   },
@@ -305,6 +337,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#06b6d4',
     label: 'Comprensión Lectora',
     icon: '📖',
+    heroicon: 'NewspaperIcon',
     description: 'Lectura y comprensión',
     category: 'theme'
   },
@@ -313,6 +346,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'Comprensión Auditiva',
     icon: '🎧',
+    heroicon: 'MusicalNoteIcon',
     description: 'Escucha y comprensión',
     category: 'theme'
   },
@@ -321,6 +355,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#3b82f6',
     label: 'Escritura',
     icon: '✍️',
+    heroicon: 'PencilSquareIcon',
     description: 'Redacción y composición',
     category: 'theme'
   },
@@ -329,6 +364,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#ef4444',
     label: 'Cultura',
     icon: '🌍',
+    heroicon: 'GlobeAltIcon',
     description: 'Contexto cultural',
     category: 'theme'
   },
@@ -341,6 +377,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'Con Audio',
     icon: '🔊',
+    heroicon: 'SpeakerWaveIcon',
     description: 'Incluye audio TTS o grabado',
     category: 'feature'
   },
@@ -349,6 +386,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#ef4444',
     label: 'Con Video',
     icon: '🎥',
+    heroicon: 'VideoCameraIcon',
     description: 'Incluye contenido multimedia',
     category: 'feature'
   },
@@ -357,6 +395,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#06b6d4',
     label: 'Interactivo',
     icon: '🎮',
+    heroicon: 'PuzzlePieceIcon',
     description: 'Requiere participación activa',
     category: 'feature'
   },
@@ -365,6 +404,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#8b5cf6',
     label: 'Generado con IA',
     icon: '🤖',
+    heroicon: 'CpuChipIcon',
     description: 'Creado con asistencia de IA',
     category: 'feature'
   },
@@ -377,6 +417,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#f59e0b',
     label: 'Admin',
     icon: '👑',
+    heroicon: 'ShieldCheckIcon',
     description: 'Administrador del sistema',
     category: 'role'
   },
@@ -385,6 +426,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#8b5cf6',
     label: 'Profesor',
     icon: '👨‍🏫',
+    heroicon: 'AcademicCapIcon',
     description: 'Profesor activo',
     category: 'role'
   },
@@ -393,6 +435,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#a78bfa',
     label: 'Profesor Prueba',
     icon: '👨‍🏫',
+    heroicon: 'AcademicCapIcon',
     description: 'Profesor en periodo de prueba',
     category: 'role'
   },
@@ -401,6 +444,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#3b82f6',
     label: 'Alumno',
     icon: '🎓',
+    heroicon: 'AcademicCapIcon',
     description: 'Estudiante activo',
     category: 'role'
   },
@@ -409,6 +453,7 @@ export const DEFAULT_BADGE_CONFIG = {
     color: '#10b981',
     label: 'Oyente',
     icon: '👂',
+    heroicon: 'UserIcon',
     description: 'Oyente sin evaluación',
     category: 'role'
   },
@@ -418,9 +463,210 @@ export const DEFAULT_BADGE_CONFIG = {
     label: 'Prueba',
     icon: '🔬',
     description: 'Cuenta en periodo de prueba',
-    category: 'role'
+    category: 'role',
+    heroicon: 'BeakerIcon'
   },
 };
+
+// ============================================
+// MAPEO EMOJI → HEROICONS
+// ============================================
+
+/**
+ * Mapeo de iconos emoji a sus equivalentes Heroicons (outline)
+ * Los badges pueden usar emoji (multicolor) o heroicon (monocromático)
+ */
+export const EMOJI_TO_HEROICON = {
+  '📚': 'BookOpenIcon',
+  '📝': 'DocumentTextIcon',
+  '📖': 'NewspaperIcon',
+  '🎥': 'VideoCameraIcon',
+  '🔗': 'LinkIcon',
+  '✏️': 'PencilIcon',
+  '🎮': 'PuzzlePieceIcon',
+  '☑️': 'CheckCircleIcon',
+  '🔢': 'ListBulletIcon',
+  '✓✗': 'HandThumbUpIcon',
+  '✍️': 'PencilSquareIcon',
+  '📄': 'DocumentIcon',
+  '🎧': 'MusicalNoteIcon',
+  '🟢': 'SignalIcon',
+  '🟡': 'SignalIcon',
+  '🔴': 'SignalIcon',
+  '🌱': 'SparklesIcon',
+  '🌿': 'SparklesIcon',
+  '🌾': 'SparklesIcon',
+  '🌻': 'StarIcon',
+  '🌳': 'FireIcon',
+  '🏆': 'TrophyIcon',
+  '👀': 'EyeIcon',
+  '✅': 'CheckBadgeIcon',
+  '📦': 'ArchiveBoxIcon',
+  '💬': 'ChatBubbleLeftRightIcon',
+  '🗣️': 'SpeakerWaveIcon',
+  '🔊': 'SpeakerWaveIcon',
+  '🤖': 'CpuChipIcon',
+  '👑': 'ShieldCheckIcon',
+  '👨‍🏫': 'AcademicCapIcon',
+  '🎓': 'AcademicCapIcon',
+  '👂': 'EarIcon',
+  '🔬': 'BeakerIcon',
+  '🌍': 'GlobeAltIcon',
+};
+
+// ============================================
+// HEROICONS DISPONIBLES PARA PICKER
+// ============================================
+
+/**
+ * Lista curada de Heroicons más comunes para el picker
+ * Organizados por categorías para mejor UX
+ */
+export const AVAILABLE_HEROICONS = {
+  education: {
+    label: 'Educación',
+    icons: [
+      { name: 'AcademicCapIcon', label: 'Graduación' },
+      { name: 'BookOpenIcon', label: 'Libro Abierto' },
+      { name: 'NewspaperIcon', label: 'Documento' },
+      { name: 'DocumentTextIcon', label: 'Texto' },
+      { name: 'PencilIcon', label: 'Lápiz' },
+      { name: 'PencilSquareIcon', label: 'Escribir' },
+      { name: 'LanguageIcon', label: 'Idioma' },
+      { name: 'ChatBubbleLeftRightIcon', label: 'Conversación' },
+    ]
+  },
+  media: {
+    label: 'Multimedia',
+    icons: [
+      { name: 'VideoCameraIcon', label: 'Video' },
+      { name: 'MusicalNoteIcon', label: 'Audio' },
+      { name: 'SpeakerWaveIcon', label: 'Sonido' },
+      { name: 'MicrophoneIcon', label: 'Micrófono' },
+      { name: 'PhotoIcon', label: 'Imagen' },
+      { name: 'FilmIcon', label: 'Película' },
+    ]
+  },
+  actions: {
+    label: 'Acciones',
+    icons: [
+      { name: 'CheckCircleIcon', label: 'Check' },
+      { name: 'CheckBadgeIcon', label: 'Verificado' },
+      { name: 'XCircleIcon', label: 'Cerrar' },
+      { name: 'PlayIcon', label: 'Play' },
+      { name: 'PauseIcon', label: 'Pausa' },
+      { name: 'ArrowPathIcon', label: 'Refrescar' },
+      { name: 'PlusCircleIcon', label: 'Agregar' },
+      { name: 'MinusCircleIcon', label: 'Quitar' },
+    ]
+  },
+  interface: {
+    label: 'Interfaz',
+    icons: [
+      { name: 'StarIcon', label: 'Estrella' },
+      { name: 'HeartIcon', label: 'Corazón' },
+      { name: 'FireIcon', label: 'Fuego' },
+      { name: 'SparklesIcon', label: 'Brillo' },
+      { name: 'TrophyIcon', label: 'Trofeo' },
+      { name: 'BoltIcon', label: 'Rayo' },
+      { name: 'LightBulbIcon', label: 'Idea' },
+      { name: 'FlagIcon', label: 'Bandera' },
+    ]
+  },
+  status: {
+    label: 'Estados',
+    icons: [
+      { name: 'SignalIcon', label: 'Nivel' },
+      { name: 'ClockIcon', label: 'Tiempo' },
+      { name: 'EyeIcon', label: 'Ver' },
+      { name: 'EyeSlashIcon', label: 'Oculto' },
+      { name: 'LockClosedIcon', label: 'Bloqueado' },
+      { name: 'LockOpenIcon', label: 'Desbloqueado' },
+      { name: 'ArchiveBoxIcon', label: 'Archivado' },
+      { name: 'InboxIcon', label: 'Inbox' },
+    ]
+  },
+  system: {
+    label: 'Sistema',
+    icons: [
+      { name: 'CpuChipIcon', label: 'IA/Tech' },
+      { name: 'BeakerIcon', label: 'Prueba' },
+      { name: 'ShieldCheckIcon', label: 'Admin' },
+      { name: 'UserIcon', label: 'Usuario' },
+      { name: 'UsersIcon', label: 'Grupo' },
+      { name: 'Cog6ToothIcon', label: 'Config' },
+      { name: 'WrenchIcon', label: 'Herramienta' },
+      { name: 'LinkIcon', label: 'Enlace' },
+    ]
+  },
+  misc: {
+    label: 'Otros',
+    icons: [
+      { name: 'GlobeAltIcon', label: 'Mundo' },
+      { name: 'MapPinIcon', label: 'Ubicación' },
+      { name: 'CalendarIcon', label: 'Calendario' },
+      { name: 'TagIcon', label: 'Etiqueta' },
+      { name: 'FolderIcon', label: 'Carpeta' },
+      { name: 'ChartBarIcon', label: 'Gráfico' },
+      { name: 'PuzzlePieceIcon', label: 'Puzzle' },
+      { name: 'ListBulletIcon', label: 'Lista' },
+    ]
+  },
+};
+
+// ============================================
+// CONFIGURACIÓN GLOBAL DE ICONOS
+// ============================================
+
+/**
+ * Storage key para la configuración de librería de iconos
+ */
+export const ICON_LIBRARY_STORAGE_KEY = 'xiwen_icon_library_config';
+
+/**
+ * Configuración por defecto de librería de iconos
+ */
+export const DEFAULT_ICON_LIBRARY_CONFIG = {
+  library: 'emoji', // 'emoji' | 'heroicon' | 'none'
+  monochromeColor: null, // null = usar color del badge, o '#000000', '#ffffff', etc.
+};
+
+/**
+ * Obtiene la configuración actual de librería de iconos
+ */
+export function getIconLibraryConfig() {
+  const saved = localStorage.getItem(ICON_LIBRARY_STORAGE_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (err) {
+      console.error('Error loading icon library config:', err);
+      return DEFAULT_ICON_LIBRARY_CONFIG;
+    }
+  }
+  return DEFAULT_ICON_LIBRARY_CONFIG;
+}
+
+/**
+ * Guarda la configuración de librería de iconos
+ */
+export function saveIconLibraryConfig(config) {
+  try {
+    localStorage.setItem(ICON_LIBRARY_STORAGE_KEY, JSON.stringify(config));
+    return true;
+  } catch (err) {
+    console.error('Error saving icon library config:', err);
+    return false;
+  }
+}
+
+/**
+ * Restaura la configuración de librería de iconos por defecto
+ */
+export function resetIconLibraryConfig() {
+  localStorage.removeItem(ICON_LIBRARY_STORAGE_KEY);
+  return DEFAULT_ICON_LIBRARY_CONFIG;
+}
 
 // ============================================
 // CATEGORÍAS ORGANIZADAS
@@ -431,37 +677,45 @@ export const BADGE_CATEGORIES = {
     label: 'Tipos de Contenido',
     description: 'Clasificación principal del contenido educativo',
     icon: '📚',
-    allowCustom: false, // No permitir agregar customs (fijos del sistema)
+    allowCustom: true,
+    systemCategory: true, // Indica que es una categoría del sistema
+    warning: 'Esta es una categoría del sistema. Los badges custom no afectarán la lógica interna de la aplicación (ej: crear un curso seguirá usando los badges predefinidos).',
   },
   exerciseType: {
     label: 'Tipos de Ejercicio',
     description: 'Modalidades de práctica y evaluación',
     icon: '✏️',
-    allowCustom: false,
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los badges custom en esta categoría son solo visuales. Los ejercicios del sistema usarán los tipos predefinidos.',
   },
   difficulty: {
     label: 'Niveles de Dificultad',
     description: 'Grado de complejidad del contenido',
     icon: '📊',
-    allowCustom: true, // Permitir agregar niveles personalizados
+    allowCustom: true,
   },
   cefr: {
     label: 'Niveles CEFR',
     description: 'Marco Común Europeo de Referencia',
     icon: '🇪🇺',
-    allowCustom: false,
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los niveles CEFR son estándares internacionales. Los badges custom no modificarán el sistema de evaluación oficial.',
   },
   status: {
     label: 'Estados de Contenido',
     description: 'Ciclo de vida del contenido',
     icon: '🔄',
-    allowCustom: false,
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los estados del sistema (Borrador, Publicado, etc.) son fijos. Los badges custom son solo para uso decorativo.',
   },
   theme: {
     label: 'Categorías Temáticas',
     description: 'Áreas de conocimiento lingüístico',
     icon: '🎯',
-    allowCustom: true, // Permitir temas personalizados
+    allowCustom: true,
   },
   feature: {
     label: 'Características',
@@ -473,7 +727,9 @@ export const BADGE_CATEGORIES = {
     label: 'Roles de Usuario',
     description: 'Perfiles y permisos en el sistema',
     icon: '👥',
-    allowCustom: false, // Roles fijos del sistema
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los roles del sistema (Admin, Profesor, Alumno) son fijos y controlan permisos. Los badges custom son solo visuales.',
   },
 };
 

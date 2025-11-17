@@ -10,6 +10,7 @@
  * @module components/common/CategoryBadge
  */
 
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import BaseBadge from './BaseBadge';
 import {
@@ -20,7 +21,9 @@ import {
   getBadgeForStatus,
   getBadgeForRole,
   getBadgeByKey,
+  getIconLibraryConfig,
 } from '../../config/badgeSystem';
+import * as HeroIcons from '@heroicons/react/24/outline';
 
 /**
  * Badge inteligente con mapeo automático de categorías
@@ -45,6 +48,21 @@ function CategoryBadge({
   className = '',
   ...rest
 }) {
+  // Estado para configuración de iconos
+  const [iconLibraryConfig, setIconLibraryConfig] = useState(
+    getIconLibraryConfig()
+  );
+
+  // Escuchar cambios en la configuración de iconos
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIconLibraryConfig(getIconLibraryConfig());
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Obtener configuración del badge
   let badgeConfig;
 
@@ -89,6 +107,46 @@ function CategoryBadge({
     );
   }
 
+  // Renderizar icono según configuración
+  const renderIcon = () => {
+    if (!showIcon) return null;
+
+    const iconLibrary = iconLibraryConfig.library || 'emoji';
+
+    // Sin iconos
+    if (iconLibrary === 'none') return null;
+
+    // Heroicons
+    if (iconLibrary === 'heroicon') {
+      const iconName = badgeConfig.heroicon;
+      if (!iconName) return null;
+
+      const IconComponent = HeroIcons[iconName];
+      if (!IconComponent) return null;
+
+      return (
+        <IconComponent
+          className="mr-1"
+          style={{
+            width: size === 'sm' ? '14px' : size === 'lg' ? '20px' : '16px',
+            height: size === 'sm' ? '14px' : size === 'lg' ? '20px' : '16px',
+          }}
+        />
+      );
+    }
+
+    // Emoji (por defecto)
+    if (badgeConfig.icon) {
+      return (
+        <span className="mr-1" role="img" aria-label={badgeConfig.label}>
+          {badgeConfig.icon}
+        </span>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <BaseBadge
       variant={badgeConfig.variant}
@@ -101,11 +159,7 @@ function CategoryBadge({
       }}
       {...rest}
     >
-      {showIcon && badgeConfig.icon && (
-        <span className="mr-1" role="img" aria-label={badgeConfig.label}>
-          {badgeConfig.icon}
-        </span>
-      )}
+      {renderIcon()}
       {showLabel && badgeConfig.label}
     </BaseBadge>
   );
