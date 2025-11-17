@@ -5,7 +5,7 @@
  */
 
 import { Menu, Bell, User, Settings, LogOut, Sun, Moon, MessageCircle, ChevronLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
@@ -38,9 +38,27 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const userMenuRef = useRef(null);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
+
+  // Cerrar menú de usuario al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   // Mensajes no leídos
   const unreadMessages = useUnreadMessages(effectiveUser?.uid);
@@ -169,7 +187,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         )}
 
         {/* User Menu */}
-        <div className="universal-topbar__user-menu">
+        <div className="universal-topbar__user-menu" ref={userMenuRef}>
           <button
             className="universal-topbar__user-btn"
             onClick={handleUserMenuToggle}
