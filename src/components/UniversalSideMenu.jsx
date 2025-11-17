@@ -13,7 +13,6 @@ import {
   Settings,
   UserCog,
   MessageSquare,
-  Gamepad2,
   Video,
   Layers,
   CheckCircle,
@@ -124,13 +123,6 @@ const MENU_ITEMS = [
     icon: CheckSquare,
     path: '/dashboard/my-assignments',
     permission: 'view-own-assignments',
-  },
-  {
-    id: 'games',
-    label: 'Juegos',
-    icon: Gamepad2,
-    path: '/dashboard/games',
-    permission: 'play-live-games',
   },
   {
     id: 'my-payments',

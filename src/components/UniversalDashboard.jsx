@@ -14,19 +14,15 @@ import { usePermissions } from '../hooks/usePermissions';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
 import ViewAsBanner from './ViewAsBanner';
-import { BaseLoading, BaseButton } from './common';
-import { UniversalCard } from './cards';
+import { BaseLoading } from './common';
 import {
   Layers,
   BookOpen,
-  MessageCircle,
-  Settings,
   Users,
   ClipboardCheck,
-  Gamepad2,
   Target,
   Calendar,
-  BarChart3
+  Gamepad2
 } from 'lucide-react';
 
 // Lazy load de componentes pesados
@@ -52,7 +48,7 @@ const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
 const StudentSessionsView = lazy(() => import('./StudentSessionsView'));
 
 // Games views
-const LiveGamesView = lazy(() => import('./games/LiveGamesView'));
+const LiveGamesHub = lazy(() => import('./LiveGamesHub'));
 const GameContainer = lazy(() => import('./GameContainer'));
 
 // Guardian views
@@ -86,22 +82,6 @@ function HomeView({ user, onNavigate }) {
       permission: 'manage-classes'
     },
     {
-      title: 'Mensajería',
-      description: 'Comunícate con estudiantes y profesores',
-      icon: MessageCircle,
-      gradient: 'from-green-500 to-emerald-600',
-      path: '/dashboard/messages',
-      permission: 'send-messages'
-    },
-    {
-      title: 'Configuración',
-      description: 'Ajustes del sistema y credenciales',
-      icon: Settings,
-      gradient: 'from-gray-500 to-zinc-600',
-      path: '/dashboard/system-settings',
-      permission: 'manage-system-settings'
-    },
-    {
       title: 'Clases',
       description: 'Gestiona sesiones de clase en vivo',
       icon: Users,
@@ -116,14 +96,6 @@ function HomeView({ user, onNavigate }) {
       gradient: 'from-pink-500 to-rose-600',
       path: '/dashboard/homework-review',
       permission: 'grade-assignments'
-    },
-    {
-      title: 'Juegos en Vivo',
-      description: 'Juegos en tiempo real con estudiantes',
-      icon: Gamepad2,
-      gradient: 'from-purple-500 to-indigo-600',
-      path: '/dashboard/games',
-      permission: 'play-live-games'
     },
     {
       title: 'Juego por Turnos',
@@ -142,12 +114,20 @@ function HomeView({ user, onNavigate }) {
       permission: null // Disponible para todos
     },
     {
-      title: 'Analíticas',
-      description: 'Estadísticas y reportes',
-      icon: BarChart3,
-      gradient: 'from-violet-500 to-purple-600',
-      path: '/dashboard/analytics',
-      permission: 'view-own-analytics'
+      title: 'Juegos en Vivo',
+      description: 'Juegos en tiempo real con estudiantes',
+      icon: Gamepad2,
+      gradient: 'from-purple-500 to-indigo-600',
+      path: '/dashboard/games',
+      permission: 'play-live-games'
+    },
+    {
+      title: 'ADE1 2026 - Fonética',
+      description: 'Libro interactivo con 120+ slides y ejercicios',
+      icon: BookOpen,
+      gradient: 'from-emerald-500 to-teal-600',
+      path: '/dashboard/ade1-content',
+      permission: null // Disponible para todos
     }
   ];
 
@@ -168,10 +148,10 @@ function HomeView({ user, onNavigate }) {
   const formattedDate = today.toLocaleDateString('es-ES', dateOptions);
 
   return (
-    <div className="px-4 md:px-6 pt-2 md:pt-3 pb-4 md:pb-6 space-y-6">
+    <div className="space-y-6">
       {/* Header - Solo fecha */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-500 dark:text-gray-500">
+        <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
           {formattedDate}
         </h1>
       </div>
@@ -179,7 +159,7 @@ function HomeView({ user, onNavigate }) {
       {/* Tarjetas de acceso */}
       <div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {visibleCards.map((card) => {
             const Icon = card.icon;
             return (
@@ -222,24 +202,6 @@ function HomeView({ user, onNavigate }) {
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Acceso rápido a contenido ADE1 (temporal) */}
-      <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <UniversalCard
-            variant="default"
-            size="md"
-            title="ADE1 2026 - Fonética"
-            description="Libro interactivo con 120+ slides y ejercicios de fonética española"
-            onClick={() => onNavigate && onNavigate('/dashboard/ade1-content')}
-            actions={[
-              <BaseButton key="view" variant="primary" size="sm" fullWidth>
-                Ver contenido →
-              </BaseButton>
-            ]}
-          />
         </div>
       </div>
     </div>
@@ -485,16 +447,7 @@ export function UniversalDashboard() {
             // JUEGOS EN VIVO
             case '/dashboard/games':
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
-              return (
-                <LiveGamesView
-                  user={effectiveUser}
-                  onJoinGame={(gameId) => {
-                    logger.debug('Unirse a juego:', gameId);
-                    // TODO: Implementar lógica para unirse al juego
-                    // Posiblemente navegar a /game/:gameId o abrir modal
-                  }}
-                />
-              );
+              return <LiveGamesHub user={effectiveUser} />;
 
             // JUEGO POR TURNOS
             case '/dashboard/turn-game':
