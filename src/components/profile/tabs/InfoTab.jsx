@@ -28,6 +28,8 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
     phone: user?.phone || '',
     address: user?.address || '',
     birthDate: user?.birthDate || '',
+    chineseFirstName: user?.chineseFirstName || '',
+    chineseLastName: user?.chineseLastName || '',
     role: userRole || 'student',
     status: user?.status || 'active'
   });
@@ -45,6 +47,8 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
       phone: user?.phone || '',
       address: user?.address || '',
       birthDate: user?.birthDate || '',
+      chineseFirstName: user?.chineseFirstName || '',
+      chineseLastName: user?.chineseLastName || '',
       role: userRole || 'student',
       status: user?.status || 'active'
     });
@@ -76,6 +80,8 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
         if (formData.phone !== user?.phone) updates.phone = formData.phone;
         if (formData.address !== user?.address) updates.address = formData.address;
         if (formData.birthDate !== user?.birthDate) updates.birthDate = formData.birthDate;
+        if (formData.chineseFirstName !== user?.chineseFirstName) updates.chineseFirstName = formData.chineseFirstName;
+        if (formData.chineseLastName !== user?.chineseLastName) updates.chineseLastName = formData.chineseLastName;
       }
 
       // Admin puede editar todo
@@ -84,6 +90,8 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
         updates.phone = formData.phone;
         updates.address = formData.address;
         updates.birthDate = formData.birthDate;
+        updates.chineseFirstName = formData.chineseFirstName;
+        updates.chineseLastName = formData.chineseLastName;
         updates.role = formData.role;
         updates.status = formData.status;
       }
@@ -129,7 +137,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
             <User size={16} strokeWidth={2} />
-            Nombre
+            Nombre (Español)
           </label>
           <input
             type="text"
@@ -144,6 +152,46 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
             placeholder="Tu nombre completo"
             disabled={!editing || (!canEditLimited && !canEditAll)}
           />
+        </div>
+
+        {/* Nombre en Chino */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              Apellido en Chino
+            </label>
+            <input
+              type="text"
+              className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
+                         text-zinc-900 dark:text-zinc-50
+                         bg-white dark:bg-zinc-950
+                         border border-zinc-200 dark:border-zinc-800
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500
+                         disabled:opacity-60 disabled:cursor-not-allowed"
+              value={formData.chineseLastName}
+              onChange={(e) => handleChange('chineseLastName', e.target.value)}
+              placeholder="姓"
+              disabled={!editing || (!canEditLimited && !canEditAll)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              Nombre en Chino
+            </label>
+            <input
+              type="text"
+              className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
+                         text-zinc-900 dark:text-zinc-50
+                         bg-white dark:bg-zinc-950
+                         border border-zinc-200 dark:border-zinc-800
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500
+                         disabled:opacity-60 disabled:cursor-not-allowed"
+              value={formData.chineseFirstName}
+              onChange={(e) => handleChange('chineseFirstName', e.target.value)}
+              placeholder="名"
+              disabled={!editing || (!canEditLimited && !canEditAll)}
+            />
+          </div>
         </div>
 
         {/* Email */}
