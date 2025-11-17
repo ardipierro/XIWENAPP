@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Award } from 'lucide-react';
+import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Award, Save } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
 import ProfileTabs from './profile/ProfileTabs';
@@ -323,9 +323,9 @@ function UserProfileModal({
       size="xl"
       showCloseButton={false}
       noPadding={true}
-      className="!overflow-hidden !max-h-[90vh]"
+      className="!overflow-hidden !h-[90vh] !max-h-[90vh]"
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full overflow-hidden">
         {/* Banner Section - FIJO */}
         <div className="relative h-28 md:h-36 overflow-hidden flex-shrink-0 group">
           {/* Banner Image o Gradient */}
@@ -408,16 +408,14 @@ function UserProfileModal({
         </div>
 
         {/* Profile Header - Avatar + Info - FIJO */}
-        <div className="relative px-4 md:px-6 flex-shrink-0 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 -mt-10 md:-mt-14 pb-2">
+        <div className="relative px-4 md:px-6 flex-shrink-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent dark:from-black/90 dark:via-black/60 dark:to-transparent border-b border-white/20 dark:border-white/10">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 -mt-10 md:-mt-14 pb-3">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
               <div
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden transition-all"
+                className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden transition-all border-4 border-white shadow-2xl"
                 style={{
-                  background: 'var(--color-bg-secondary)',
-                  border: '4px solid var(--color-bg-primary)',
-                  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)'
+                  background: 'var(--color-bg-secondary)'
                 }}
               >
                 {uploadedAvatarUrl ? (
@@ -458,26 +456,26 @@ function UserProfileModal({
 
             {/* User Info */}
             <div className="flex-1 text-center sm:text-left mb-1">
-              <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">
+              <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg mb-1">
                 {user?.displayName || user?.name || user?.email || 'Usuario'}
               </h2>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {/* Badge de Rol */}
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600">
-                  {userRole}
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600 shadow-lg">
+                  {isAdmin ? 'admin' : userRole}
                 </span>
 
                 {/* Stats de gamificación */}
                 {gamification && (
                   <>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/90 text-white shadow-lg backdrop-blur-sm">
                       ⭐ Nivel {gamification.level}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/90 text-white shadow-lg backdrop-blur-sm">
                       ⚡ {gamification.xp} XP
                     </span>
                     {gamification.streakDays > 0 && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/90 text-white shadow-lg backdrop-blur-sm">
                         🔥 {gamification.streakDays} días
                       </span>
                     )}
