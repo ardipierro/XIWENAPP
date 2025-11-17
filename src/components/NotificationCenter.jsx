@@ -6,8 +6,13 @@ import logger from '../utils/logger';
 
 /**
  * Centro de notificaciones con toast automático para clases iniciadas
+ * @param {string} userId - ID del usuario
+ * @param {boolean} showToasts - Mostrar toasts automáticos (default: true)
+ * @param {boolean} showButton - Mostrar botón de campana (default: true)
+ * @param {boolean} isOpen - Control externo del panel (opcional)
+ * @param {Function} onClose - Callback cuando se cierra el panel (opcional)
  */
-function NotificationCenter({ userId, showToasts = true }) {
+function NotificationCenter({ userId, showToasts = true, showButton = true, isOpen: externalIsOpen, onClose }) {
   const navigate = useNavigate();
   const {
     notifications,
@@ -18,7 +23,28 @@ function NotificationCenter({ userId, showToasts = true }) {
     getClassStartedNotifications
   } = useClassNotifications(userId);
 
-  const [isOpen, setIsOpen] = useState(false);
+  // Usar estado externo si se proporciona, sino usar interno
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+
+  const togglePanel = () => {
+    if (onClose) {
+      // Modo controlado externamente
+      onClose();
+    } else {
+      // Modo interno
+      setInternalIsOpen(!internalIsOpen);
+    }
+  };
+
+  const closePanel = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      setInternalIsOpen(false);
+    }
+  };
+
   const [visibleToasts, setVisibleToasts] = useState(new Set());
 
   // Mostrar toasts automáticos para clases iniciadas
@@ -57,7 +83,7 @@ function NotificationCenter({ userId, showToasts = true }) {
       }
     }
 
-    setIsOpen(false);
+    closePanel();
   };
 
   const handleDeleteNotification = async (e, notificationId) => {
@@ -159,17 +185,20 @@ function NotificationCenter({ userId, showToasts = true }) {
       )}
 
       {/* Botón de notificaciones */}
-      <div className="notification-center">
-        <button
-          className="notification-bell"
-          onClick={() => setIsOpen(!isOpen)}
-          title="Notificaciones"
-        >
-          <span className="bell-icon">🔔</span>
-          {unreadCount > 0 && (
-            <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
-          )}
-        </button>
+      {showButton && (
+        <div className="notification-center">
+          <button
+            className="notification-bell"
+            onClick={togglePanel}
+            title="Notificaciones"
+          >
+            <span className="bell-icon">🔔</span>
+            {unreadCount > 0 && (
+              <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+            )}
+          </button>
+        </div>
+      )}
 
         {/* Panel de notificaciones */}
         {isOpen && (
@@ -224,13 +253,12 @@ function NotificationCenter({ userId, showToasts = true }) {
             </div>
           </div>
         )}
-      </div>
 
       {/* Overlay para cerrar el panel */}
       {isOpen && (
         <div
           className="notification-overlay"
-          onClick={() => setIsOpen(false)}
+          onClick={closePanel}
         />
       )}
     </>
