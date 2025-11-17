@@ -653,6 +653,8 @@ export function getIconLibraryConfig() {
 export function saveIconLibraryConfig(config) {
   try {
     localStorage.setItem(ICON_LIBRARY_STORAGE_KEY, JSON.stringify(config));
+    // Disparar evento personalizado para notificar cambios
+    window.dispatchEvent(new CustomEvent('iconLibraryChange', { detail: config }));
     return true;
   } catch (err) {
     console.error('Error saving icon library config:', err);

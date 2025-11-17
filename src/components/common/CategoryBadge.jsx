@@ -55,12 +55,12 @@ function CategoryBadge({
 
   // Escuchar cambios en la configuración de iconos
   useEffect(() => {
-    const handleStorageChange = () => {
-      setIconLibraryConfig(getIconLibraryConfig());
+    const handleIconLibraryChange = (event) => {
+      setIconLibraryConfig(event.detail || getIconLibraryConfig());
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('iconLibraryChange', handleIconLibraryChange);
+    return () => window.removeEventListener('iconLibraryChange', handleIconLibraryChange);
   }, []);
 
   // Obtener configuración del badge
