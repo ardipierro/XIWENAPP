@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrendingUp, Target, Zap, Award, Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { BaseCard, BaseBadge, BaseButton } from './common';
+import { BaseCard, BaseBadge, BaseButton, BaseLoading } from './common';
 import { getUserReviewStats } from '../services/spacedRepetitionService';
 import logger from '../utils/logger';
 
@@ -40,8 +40,8 @@ export function FlashCardStatsPanel({ user, collectionId = null }) {
 
   if (loading || !stats) {
     return (
-      <div className="flashcard-stats-panel">
-        <p className="flashcard-stats-panel__loading">Cargando estadísticas...</p>
+      <div className="w-full py-12">
+        <BaseLoading text="Cargando estadísticas..." />
       </div>
     );
   }
@@ -58,145 +58,174 @@ export function FlashCardStatsPanel({ user, collectionId = null }) {
   const getMasteryColor = () => {
     const level = getMasteryLevel();
     switch (level) {
-      case 'Experto': return '#22c55e';
-      case 'Avanzado': return '#3b82f6';
-      case 'Intermedio': return '#f59e0b';
-      default: return '#6b7280';
+      case 'Experto': return 'bg-green-500';
+      case 'Avanzado': return 'bg-blue-500';
+      case 'Intermedio': return 'bg-amber-500';
+      default: return 'bg-zinc-500';
     }
   };
 
   return (
-    <div className="flashcard-stats-panel">
+    <div className="w-full space-y-6">
       {/* Header */}
-      <div className="flashcard-stats-panel__header">
-        <div className="flashcard-stats-panel__title">
-          <TrendingUp size={24} />
-          <h2>Estadísticas de Aprendizaje</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <TrendingUp size={24} className="text-zinc-700 dark:text-zinc-300" />
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+            Estadísticas de Aprendizaje
+          </h2>
         </div>
         <BaseBadge
           variant="default"
-          style={{ backgroundColor: getMasteryColor(), color: 'white' }}
+          className={`${getMasteryColor()} text-white`}
         >
           {getMasteryLevel()}
         </BaseBadge>
       </div>
 
       {/* Main Stats Grid */}
-      <div className="flashcard-stats-panel__grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Due Today */}
-        <BaseCard className="flashcard-stats-panel__stat-card">
-          <div className="flashcard-stats-panel__stat-icon" style={{ color: '#ef4444' }}>
-            <Calendar size={32} />
-          </div>
-          <div className="flashcard-stats-panel__stat-info">
-            <div className="flashcard-stats-panel__stat-value">{stats.dueToday}</div>
-            <div className="flashcard-stats-panel__stat-label">Por revisar hoy</div>
+        <BaseCard className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-lg bg-red-100 dark:bg-red-900/30">
+              <Calendar size={32} className="text-red-600 dark:text-red-400" />
+            </div>
+            <div className="flex-1">
+              <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">
+                {stats.dueToday}
+              </div>
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                Por revisar hoy
+              </div>
+            </div>
           </div>
         </BaseCard>
 
         {/* Total Cards */}
-        <BaseCard className="flashcard-stats-panel__stat-card">
-          <div className="flashcard-stats-panel__stat-icon" style={{ color: '#3b82f6' }}>
-            <Target size={32} />
-          </div>
-          <div className="flashcard-stats-panel__stat-info">
-            <div className="flashcard-stats-panel__stat-value">{stats.totalCards}</div>
-            <div className="flashcard-stats-panel__stat-label">Total de tarjetas</div>
+        <BaseCard className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+              <Target size={32} className="text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">
+                {stats.totalCards}
+              </div>
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                Total de tarjetas
+              </div>
+            </div>
           </div>
         </BaseCard>
 
         {/* Mastered */}
-        <BaseCard className="flashcard-stats-panel__stat-card">
-          <div className="flashcard-stats-panel__stat-icon" style={{ color: '#22c55e' }}>
-            <CheckCircle size={32} />
-          </div>
-          <div className="flashcard-stats-panel__stat-info">
-            <div className="flashcard-stats-panel__stat-value">{stats.mastered}</div>
-            <div className="flashcard-stats-panel__stat-label">Dominadas</div>
+        <BaseCard className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900/30">
+              <CheckCircle size={32} className="text-green-600 dark:text-green-400" />
+            </div>
+            <div className="flex-1">
+              <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">
+                {stats.mastered}
+              </div>
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                Dominadas
+              </div>
+            </div>
           </div>
         </BaseCard>
 
         {/* Success Rate */}
-        <BaseCard className="flashcard-stats-panel__stat-card">
-          <div className="flashcard-stats-panel__stat-icon" style={{ color: '#a855f7' }}>
-            <Award size={32} />
-          </div>
-          <div className="flashcard-stats-panel__stat-info">
-            <div className="flashcard-stats-panel__stat-value">{stats.successRate}%</div>
-            <div className="flashcard-stats-panel__stat-label">Tasa de éxito</div>
+        <BaseCard className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+              <Award size={32} className="text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="flex-1">
+              <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">
+                {stats.successRate}%
+              </div>
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                Tasa de éxito
+              </div>
+            </div>
           </div>
         </BaseCard>
       </div>
 
       {/* Progress Breakdown */}
-      <BaseCard className="flashcard-stats-panel__breakdown">
-        <h3 className="flashcard-stats-panel__breakdown-title">
+      <BaseCard className="p-6">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
           Progreso por Estado
         </h3>
 
-        <div className="flashcard-stats-panel__breakdown-items">
+        <div className="space-y-4">
           {/* New Cards */}
-          <div className="flashcard-stats-panel__breakdown-item">
-            <div className="flashcard-stats-panel__breakdown-label">
-              <AlertCircle size={18} style={{ color: '#6b7280' }} />
-              Nuevas
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 min-w-[140px]">
+              <AlertCircle size={18} className="text-zinc-500" />
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Nuevas
+              </span>
             </div>
-            <div className="flashcard-stats-panel__breakdown-bar-container">
+            <div className="flex-1 h-3 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
               <div
-                className="flashcard-stats-panel__breakdown-bar"
+                className="h-full bg-zinc-500 transition-all duration-500"
                 style={{
                   width: stats.totalCards > 0
                     ? `${(stats.newCards / stats.totalCards) * 100}%`
-                    : '0%',
-                  backgroundColor: '#6b7280'
+                    : '0%'
                 }}
               />
             </div>
-            <div className="flashcard-stats-panel__breakdown-value">
+            <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 min-w-[40px] text-right">
               {stats.newCards}
             </div>
           </div>
 
           {/* Learning */}
-          <div className="flashcard-stats-panel__breakdown-item">
-            <div className="flashcard-stats-panel__breakdown-label">
-              <Zap size={18} style={{ color: '#f59e0b' }} />
-              En aprendizaje
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 min-w-[140px]">
+              <Zap size={18} className="text-amber-500" />
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                En aprendizaje
+              </span>
             </div>
-            <div className="flashcard-stats-panel__breakdown-bar-container">
+            <div className="flex-1 h-3 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
               <div
-                className="flashcard-stats-panel__breakdown-bar"
+                className="h-full bg-amber-500 transition-all duration-500"
                 style={{
                   width: stats.totalCards > 0
                     ? `${(stats.learning / stats.totalCards) * 100}%`
-                    : '0%',
-                  backgroundColor: '#f59e0b'
+                    : '0%'
                 }}
               />
             </div>
-            <div className="flashcard-stats-panel__breakdown-value">
+            <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 min-w-[40px] text-right">
               {stats.learning}
             </div>
           </div>
 
           {/* Mastered */}
-          <div className="flashcard-stats-panel__breakdown-item">
-            <div className="flashcard-stats-panel__breakdown-label">
-              <CheckCircle size={18} style={{ color: '#22c55e' }} />
-              Dominadas
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 min-w-[140px]">
+              <CheckCircle size={18} className="text-green-500" />
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Dominadas
+              </span>
             </div>
-            <div className="flashcard-stats-panel__breakdown-bar-container">
+            <div className="flex-1 h-3 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
               <div
-                className="flashcard-stats-panel__breakdown-bar"
+                className="h-full bg-green-500 transition-all duration-500"
                 style={{
                   width: stats.totalCards > 0
                     ? `${(stats.mastered / stats.totalCards) * 100}%`
-                    : '0%',
-                  backgroundColor: '#22c55e'
+                    : '0%'
                 }}
               />
             </div>
-            <div className="flashcard-stats-panel__breakdown-value">
+            <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 min-w-[40px] text-right">
               {stats.mastered}
             </div>
           </div>
@@ -204,31 +233,35 @@ export function FlashCardStatsPanel({ user, collectionId = null }) {
       </BaseCard>
 
       {/* Review Stats */}
-      <BaseCard className="flashcard-stats-panel__review-stats">
-        <h3 className="flashcard-stats-panel__breakdown-title">
+      <BaseCard className="p-6">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
           Estadísticas de Revisión
         </h3>
 
-        <div className="flashcard-stats-panel__review-grid">
-          <div className="flashcard-stats-panel__review-item">
-            <Clock size={20} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800">
+              <Clock size={24} className="text-zinc-600 dark:text-zinc-400" />
+            </div>
             <div>
-              <div className="flashcard-stats-panel__review-value">
+              <div className="text-2xl font-bold text-zinc-900 dark:text-white">
                 {stats.totalReviews}
               </div>
-              <div className="flashcard-stats-panel__review-label">
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
                 Total de revisiones
               </div>
             </div>
           </div>
 
-          <div className="flashcard-stats-panel__review-item">
-            <CheckCircle size={20} />
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900/30">
+              <CheckCircle size={24} className="text-green-600 dark:text-green-400" />
+            </div>
             <div>
-              <div className="flashcard-stats-panel__review-value">
+              <div className="text-2xl font-bold text-zinc-900 dark:text-white">
                 {stats.correctReviews}
               </div>
-              <div className="flashcard-stats-panel__review-label">
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
                 Respuestas correctas
               </div>
             </div>
@@ -236,11 +269,11 @@ export function FlashCardStatsPanel({ user, collectionId = null }) {
         </div>
       </BaseCard>
 
-      {/* Motivational Message */}
+      {/* Motivational Messages */}
       {stats.dueToday > 0 && (
-        <div className="flashcard-stats-panel__motivation">
-          <Zap size={20} />
-          <p>
+        <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+          <Zap size={20} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <p className="text-sm text-amber-900 dark:text-amber-200">
             ¡Tienes {stats.dueToday} {stats.dueToday === 1 ? 'tarjeta' : 'tarjetas'} para revisar hoy!
             {' '}Sigue así y pronto las dominarás todas.
           </p>
@@ -248,9 +281,9 @@ export function FlashCardStatsPanel({ user, collectionId = null }) {
       )}
 
       {stats.totalCards > 0 && stats.dueToday === 0 && (
-        <div className="flashcard-stats-panel__motivation" style={{ backgroundColor: '#dcfce7' }}>
-          <Award size={20} style={{ color: '#22c55e' }} />
-          <p>
+        <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+          <Award size={20} className="text-green-600 dark:text-green-400 flex-shrink-0" />
+          <p className="text-sm text-green-900 dark:text-green-200">
             🎉 ¡Excelente! No tienes tarjetas pendientes por hoy.
             {stats.mastered < stats.totalCards && ' Vuelve mañana para seguir practicando.'}
           </p>

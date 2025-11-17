@@ -5,14 +5,14 @@
  */
 
 import { useState } from 'react';
-import { Layers, Sparkles, Lightbulb, BookOpen, Edit3, CreditCard, Package } from 'lucide-react';
+import { Layers, Sparkles, Lightbulb, BookOpen, CreditCard, Package } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import BaseTabs from './common/BaseTabs';
 import UnifiedContentManager from './UnifiedContentManager';
 import AIConfigPanel from './AIConfigPanel';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import SlidePackageGenerator from './SlidePackageGenerator';
-import ContentReader from './ContentReader';
+// import ContentReader from './ContentReader'; // TEMPORALMENTE DESHABILITADO
 import FlashCardManager from './FlashCardManager';
 import { usePermissions } from '../hooks/usePermissions';
 
@@ -51,12 +51,13 @@ const TABS = [
     icon: Package,
     permission: 'create-content', // Mismo permiso que contenidos
   },
-  {
-    id: 'visor-contenidos',
-    label: 'Visor de Contenidos',
-    icon: Edit3,
-    permission: 'create-content', // Mismo permiso que contenidos
-  },
+  // TEMPORALMENTE DESHABILITADO
+  // {
+  //   id: 'visor-contenidos',
+  //   label: 'Visor de Contenidos',
+  //   icon: Edit3,
+  //   permission: 'create-content',
+  // },
 ];
 
 /**
@@ -92,15 +93,16 @@ export function ContentManagerTabs({ user, userRole }) {
         return <InteractiveBookViewer />;
       case 'slide-generator':
         return <SlidePackageGenerator />;
-      case 'visor-contenidos':
-        return (
-          <ContentReader
-            contentId="demo-content"
-            initialContent="<h1>Visor de Contenidos</h1><p>Este es el visor de contenidos con herramientas avanzadas de anotación.</p><p>Utiliza las herramientas de la barra lateral para:</p><ul><li>Resaltar texto</li><li>Dibujar y escribir</li><li>Agregar notas adhesivas</li><li>Insertar texto flotante</li></ul>"
-            userId={user?.uid}
-            readOnly={false}
-          />
-        );
+      // TEMPORALMENTE DESHABILITADO
+      // case 'visor-contenidos':
+      //   return (
+      //     <ContentReader
+      //       contentId="demo-content"
+      //       initialContent="<h1>Visor de Contenidos</h1><p>Este es el visor de contenidos con herramientas avanzadas de anotación.</p><p>Utiliza las herramientas de la barra lateral para:</p><ul><li>Resaltar texto</li><li>Dibujar y escribir</li><li>Agregar notas adhesivas</li><li>Insertar texto flotante</li></ul>"
+      //       userId={user?.uid}
+      //       readOnly={false}
+      //     />
+      //   );
       default:
         return null;
     }

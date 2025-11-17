@@ -13,7 +13,10 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
     role: 'student',
     password: '',
     phone: '',
-    notes: ''
+    notes: '',
+    chineseFirstName: '',
+    chineseLastName: '',
+    birthDate: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -96,7 +99,10 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
             role: 'student',
             password: '',
             phone: '',
-            notes: ''
+            notes: '',
+            chineseFirstName: '',
+            chineseLastName: '',
+            birthDate: ''
           });
           onClose();
         }
@@ -119,7 +125,10 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
         role: 'student',
         password: '',
         phone: '',
-        notes: ''
+        notes: '',
+        chineseFirstName: '',
+        chineseLastName: '',
+        birthDate: ''
       });
       setError('');
       setGeneratedPassword('');
@@ -152,7 +161,10 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 role: 'student',
                 password: '',
                 phone: '',
-                notes: ''
+                notes: '',
+                chineseFirstName: '',
+                chineseLastName: '',
+                birthDate: ''
               });
               onClose();
             }}
@@ -214,13 +226,49 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
           type="text"
           id="name"
           name="name"
-          label="Nombre completo"
+          label="Nombre completo (Español)"
           value={formData.name}
           onChange={handleChange}
           placeholder="Ej: Juan Pérez"
           disabled={loading}
           error={fieldErrors.name}
           helperText={fieldErrors.name || 'Opcional - puede configurarlo después'}
+        />
+
+        {/* Nombres en Chino */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <BaseInput
+            type="text"
+            id="chineseLastName"
+            name="chineseLastName"
+            label="Apellido en Chino"
+            value={formData.chineseLastName}
+            onChange={handleChange}
+            placeholder="姓"
+            disabled={loading}
+          />
+          <BaseInput
+            type="text"
+            id="chineseFirstName"
+            name="chineseFirstName"
+            label="Nombre en Chino"
+            value={formData.chineseFirstName}
+            onChange={handleChange}
+            placeholder="名"
+            disabled={loading}
+          />
+        </div>
+
+        {/* Fecha de nacimiento */}
+        <BaseInput
+          type="date"
+          id="birthDate"
+          name="birthDate"
+          label="Fecha de Nacimiento"
+          value={formData.birthDate}
+          onChange={handleChange}
+          disabled={loading}
+          helperText="Opcional - puede configurarlo después"
         />
 
         {/* Rol */}

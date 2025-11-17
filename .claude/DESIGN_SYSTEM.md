@@ -193,29 +193,71 @@ const sizes = {
 
 ---
 
-### 2. CARDS - Estándar Unificado
+### 2. CARDS - Estándar Unificado con Sticky Footer
 
-**Estructura Base:**
+**⭐ IMPORTANTE: Sistema de Cards Actualizado (v1.2)**
+
+Todas las cards ahora soportan **sticky footer** automáticamente. Hay 3 formas de crear cards:
+
+#### Opción 1: UniversalCard (Recomendado)
 ```jsx
-<div
-  className="flex flex-col rounded-xl overflow-hidden
-             transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
-             hover:-translate-y-1"
-  style={{
-    background: 'var(--color-bg-secondary)',
-    border: '1px solid var(--color-border)',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
-    e.currentTarget.style.borderColor = 'var(--color-border-focus)';
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)';
-    e.currentTarget.style.borderColor = 'var(--color-border)';
-  }}
+import { UniversalCard } from './components/cards';
+
+<UniversalCard
+  variant="default"
+  title="Título"
+  badges={[...]}
+  stats={[...]}
+  actions={[...]}  // Footer sticky automático
+/>
+```
+
+#### Opción 2: BaseCard
+```jsx
+import { BaseCard } from './components/common';
+
+<BaseCard
+  title="Título"
+  stats={...}
+  actions={...}  // Footer sticky automático con mt-auto
 >
-  {/* Card Content */}
+  {children}
+</BaseCard>
+```
+
+#### Opción 3: Clase .card (Legacy - Con sticky footer)
+```jsx
+<div className="card">
+  {/* Header opcional */}
+  <div className="card-header">
+    <h2 className="card-title">Título</h2>
+  </div>
+
+  {/* Body - DEBE tener clase card-body para flex-1 */}
+  <div className="card-body">
+    {/* Contenido principal */}
+  </div>
+
+  {/* Footer - DEBE tener clase card-footer para mt-auto */}
+  <div className="card-footer">
+    {/* Badges, stats, actions */}
+  </div>
+</div>
+```
+
+**❌ INCORRECTO (sin clases helper):**
+```jsx
+<div className="card">
+  <div>{/* Contenido */}</div>
+  <div>{/* Footer NO se pegará al fondo */}</div>
+</div>
+```
+
+**✅ CORRECTO (con clases helper):**
+```jsx
+<div className="card">
+  <div className="card-body">{/* Contenido - flex-1 */}</div>
+  <div className="card-footer">{/* Footer pegado al fondo - mt-auto */}</div>
 </div>
 ```
 
@@ -1008,4 +1050,4 @@ src/
 ---
 
 **Mantenido por:** Claude Code
-**Última revisión:** 2025-11-15
+**Última revisión:** 2025-11-17 (v1.2 - Sticky Footer Global Fix)

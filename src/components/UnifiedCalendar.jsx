@@ -194,81 +194,130 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className="w-full">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white">
-            Calendario
-          </h1>
-          <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 mt-1">
-            {getDisplayText()}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {userRole === 'teacher' && onCreateSession && (
-            <BaseButton
-              onClick={onCreateSession}
-              variant="primary"
-              icon={Plus}
-              size={isMobile ? 'md' : 'md'}
-              className={isMobile ? 'flex-1' : ''}
-            >
-              {isMobile ? 'Nueva' : 'Nueva Sesión'}
-            </BaseButton>
-          )}
+      <div className="flex flex-col gap-4 mb-6">
+        {/* Línea 1: Título | ◀ Mes ▶ | Controles */}
+        <div className="relative flex items-center justify-between gap-4">
+          {/* Título a la izquierda */}
+          <div className="flex items-center gap-3">
+            <CalendarIcon size={32} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Calendario
+            </h1>
+          </div>
 
-          {/* Mobile: List/Calendar toggle */}
-          {isMobile && (
-            <BaseButton
-              onClick={() => setMobileView(mobileView === 'list' ? 'calendar' : 'list')}
-              variant="ghost"
-              icon={mobileView === 'list' ? Grid : List}
-              size="md"
-            />
-          )}
-
-          {/* Desktop: View selector */}
+          {/* Mes con navegación centrado (solo desktop) */}
           {!isMobile && (
-            <BaseSelect
-              value={view}
-              onChange={(e) => setView(e.target.value)}
-              options={[
-                { value: 'month', label: 'Mes' },
-                { value: 'week', label: 'Semana' },
-                { value: 'day', label: 'Día' }
-              ]}
-              className="w-auto"
-            />
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+              <BaseButton
+                onClick={goToPrevious}
+                variant="ghost"
+                icon={ChevronLeft}
+                size="md"
+                className="min-w-tap-md"
+              />
+
+              <h2 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white text-center min-w-[200px]">
+                {getDisplayText()}
+              </h2>
+
+              <BaseButton
+                onClick={goToNext}
+                variant="ghost"
+                icon={ChevronRight}
+                size="md"
+                className="min-w-tap-md"
+              />
+            </div>
           )}
+
+          {/* Controles a la derecha */}
+          <div className="flex items-center gap-2">
+            {userRole === 'teacher' && onCreateSession && (
+              <BaseButton
+                onClick={onCreateSession}
+                variant="primary"
+                icon={Plus}
+                size={isMobile ? 'md' : 'md'}
+                className={isMobile ? 'flex-1' : ''}
+              >
+                {isMobile ? 'Nueva' : 'Nueva Sesión'}
+              </BaseButton>
+            )}
+
+            {/* Mobile: List/Calendar toggle */}
+            {isMobile && (
+              <BaseButton
+                onClick={() => setMobileView(mobileView === 'list' ? 'calendar' : 'list')}
+                variant="ghost"
+                icon={mobileView === 'list' ? Grid : List}
+                size="md"
+              />
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between gap-2">
-        <BaseButton
-          onClick={goToPrevious}
-          variant="ghost"
-          icon={ChevronLeft}
-          size={isMobile ? 'sm' : 'md'}
-          className="min-w-tap-md"
-        />
+        {/* Línea 2: Botón Hoy (centro) y Selector de vista (derecha) - solo desktop */}
+        {!isMobile && (
+          <div className="grid grid-cols-3 items-center gap-4">
+            {/* Espacio vacío a la izquierda */}
+            <div></div>
 
-        <BaseButton
-          onClick={goToToday}
-          variant="primary"
-          size={isMobile ? 'sm' : 'md'}
-        >
-          Hoy
-        </BaseButton>
+            {/* Botón Hoy centrado */}
+            <div className="flex justify-center">
+              <BaseButton
+                onClick={goToToday}
+                variant="primary"
+                size="md"
+              >
+                Hoy
+              </BaseButton>
+            </div>
 
-        <BaseButton
-          onClick={goToNext}
-          variant="ghost"
-          icon={ChevronRight}
-          size={isMobile ? 'sm' : 'md'}
-          className="min-w-tap-md"
-        />
+            {/* Selector de vista a la derecha */}
+            <div className="flex justify-end">
+              <div className="w-auto min-w-[120px]">
+                <BaseSelect
+                  value={view}
+                  onChange={(e) => setView(e.target.value)}
+                  options={[
+                    { value: 'month', label: 'Mes' },
+                    { value: 'week', label: 'Semana' },
+                    { value: 'day', label: 'Día' }
+                  ]}
+                  size="md"
+                  className="w-auto"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile: Mes y navegación */}
+        {isMobile && (
+          <div className="flex items-center justify-center gap-3">
+            <BaseButton
+              onClick={goToPrevious}
+              variant="ghost"
+              icon={ChevronLeft}
+              size="sm"
+              className="min-w-tap-md"
+            />
+
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white text-center min-w-[180px]">
+              {getDisplayText()}
+            </h2>
+
+            <BaseButton
+              onClick={goToNext}
+              variant="ghost"
+              icon={ChevronRight}
+              size="sm"
+              className="min-w-tap-md"
+            />
+          </div>
+        )}
       </div>
 
       {/* Mobile: List or Simplified Calendar */}
@@ -518,14 +567,14 @@ function MonthView({ currentDate, events, onEventClick }) {
             return (
               <div
                 key={dayIndex}
-                className={`p-2 border-r border-gray-200 dark:border-gray-700 last:border-r-0 min-h-[100px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 ${
-                  isToday(day) ? 'bg-gray-100 dark:bg-gray-800' : ''
+                className={`p-2 border-r border-gray-200 dark:border-gray-700 last:border-r-0 min-h-[100px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors ${
+                  isToday(day) ? 'bg-blue-50 dark:bg-blue-950 border-2 border-blue-400 dark:border-blue-600' : ''
                 }`}
                 onClick={() => setSelectedDate(day)}
               >
-                <div className={`text-sm font-medium mb-1 ${
+                <div className={`text-sm font-bold mb-1 ${
                   isToday(day)
-                    ? 'bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center'
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md'
                     : 'text-gray-900 dark:text-white'
                 }`}>
                   {day}
@@ -598,11 +647,11 @@ function WeekView({ currentDate, events, onEventClick }) {
 
           return (
             <div key={index} className="bg-white dark:bg-gray-800 min-h-[400px] p-3">
-              <div className={`text-center mb-3 ${isToday ? 'text-primary dark:text-primary font-bold' : 'text-gray-900 dark:text-white'}`}>
-                <div className="text-xs text-gray-600 dark:text-gray-400">
+              <div className={`text-center mb-3 ${isToday ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-900 dark:text-white'}`}>
+                <div className={`text-xs ${isToday ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
                   {day.toLocaleDateString('es-ES', { weekday: 'short' })}
                 </div>
-                <div className={`text-lg ${isToday ? 'bg-primary text-white w-8 h-8 rounded-full mx-auto flex items-center justify-center' : ''}`}>
+                <div className={`text-lg ${isToday ? 'bg-blue-600 dark:bg-blue-500 text-white w-10 h-10 rounded-full mx-auto flex items-center justify-center shadow-md font-bold' : ''}`}>
                   {day.getDate()}
                 </div>
               </div>
@@ -625,13 +674,30 @@ function DayView({ currentDate, events, onEventClick }) {
     return eventDate?.toDateString() === currentDate.toDateString();
   });
 
+  const isToday = currentDate.toDateString() === new Date().toDateString();
+
   return (
     <div className="space-y-4">
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {currentDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <div className={`rounded-lg p-4 ${
+        isToday
+          ? 'bg-blue-50 dark:bg-blue-950 border-2 border-blue-400 dark:border-blue-600'
+          : 'bg-gray-50 dark:bg-gray-900'
+      }`}>
+        <div className="flex items-center gap-2">
+          {isToday && (
+            <span className="inline-flex items-center justify-center bg-blue-600 dark:bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+              HOY
+            </span>
+          )}
+          <h3 className={`text-lg font-semibold ${
+            isToday ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
+          }`}>
+            {currentDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </h3>
+        </div>
+        <p className={`text-sm mt-1 ${
+          isToday ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'
+        }`}>
           {dayEvents.length} evento{dayEvents.length !== 1 ? 's' : ''}
         </p>
       </div>

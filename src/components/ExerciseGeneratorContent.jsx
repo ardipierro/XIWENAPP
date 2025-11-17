@@ -10,7 +10,7 @@ import BaseSelect from './common/BaseSelect';
 import BaseTextarea from './common/BaseTextarea';
 import BaseAlert from './common/BaseAlert';
 import BaseInput from './common/BaseInput';
-import aiService from '../services/aiService';
+import aiService from '../services/AIService';
 import { AI_PROVIDERS } from '../constants/aiFunctions';
 import { callAI, getAIConfig } from '../firebase/aiConfig';
 import logger from '../utils/logger';

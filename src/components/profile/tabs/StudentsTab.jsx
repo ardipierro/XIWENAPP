@@ -79,7 +79,7 @@ function StudentsTab({ user }) {
         <div>
           <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
             <Users size={20} strokeWidth={2} />
-            Mis Estudiantes ({students.length})
+            Estudiantes ({students.length})
           </h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
             Todos los estudiantes activos de la plataforma

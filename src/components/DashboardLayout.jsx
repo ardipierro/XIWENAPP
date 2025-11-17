@@ -8,28 +8,19 @@
  * - TopBar adaptativo
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TopBar from './TopBar.jsx';
 import SideMenu from './SideMenu.jsx';
 import BottomNavigation from './BottomNavigation.jsx';
 import ViewAsBanner from './ViewAsBanner.jsx';
 import { useViewAs } from '../contexts/ViewAsContext';
-import { TopBarProvider } from '../contexts/TopBarContext';
+import { TopBarProvider, useTopBar } from '../contexts/TopBarContext';
 import { isAdminEmail } from '../firebase/roleConfig.js';
 
 /**
- * Layout del Dashboard
- * Proporciona estructura común con sidebar, topbar y área de contenido
- *
- * @param {Object} props
- * @param {Object} props.user - Usuario autenticado
- * @param {string} props.userRole - Rol del usuario
- * @param {React.ReactNode} props.children - Contenido a renderizar
- * @param {Function} props.onMenuAction - Callback para acciones del menú
- * @param {string} props.currentScreen - Pantalla actual activa
- * @param {boolean} props.fullWidth - Si true, remueve el max-width del contenedor
+ * Componente interno que usa el TopBarContext
  */
-function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen, fullWidth = false }) {
+function DashboardLayoutInner({ user, userRole, children, onMenuAction, currentScreen, fullWidth }) {
   // Menú visible solo en desktop (>= 1025px)
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1025);
 
@@ -38,6 +29,17 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
 
   // Verificar si está en modo "Ver como"
   const { isViewingAs } = useViewAs();
+
+  // Registrar funciones de control del sidebar en el contexto
+  const { registerSidebarControl } = useTopBar();
+
+  useEffect(() => {
+    registerSidebarControl({
+      hide: () => setSidebarOpen(false),
+      show: () => setSidebarOpen(true),
+      toggle: () => setSidebarOpen(prev => !prev)
+    });
+  }, [registerSidebarControl]);
 
   /**
    * Toggle del sidebar
@@ -56,8 +58,7 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
   };
 
   return (
-    <TopBarProvider>
-      <div className={`dashboard-layout min-h-screen bg-gray-50 dark:bg-gray-900 transition-none ${isViewingAs ? 'has-banner' : ''}`}>
+    <div className={`dashboard-layout min-h-screen bg-gray-50 dark:bg-gray-900 transition-none ${isViewingAs ? 'has-banner' : ''}`}>
         {/* Banner "Ver como" (solo visible cuando está activo) */}
         <ViewAsBanner />
 
@@ -89,7 +90,7 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
           ${isViewingAs
             ? 'mt-[86px] md:mt-[100px] lg:mt-[108px] h-[calc(100vh-86px)] md:h-[calc(100vh-100px)] lg:h-[calc(100vh-108px)]'
             : 'mt-12 md:mt-14 lg:mt-16 h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] lg:h-[calc(100vh-64px)]'}
-          ${sidebarOpen ? 'ml-0 lg:ml-[200px]' : 'ml-0'}
+          ${sidebarOpen ? 'ml-0 lg:ml-[260px]' : 'ml-0'}
           transition-[margin-left] duration-200 ease-in-out
         `}
       >
@@ -106,6 +107,26 @@ function DashboardLayout({ user, userRole, children, onMenuAction, currentScreen
         onMenuAction={onMenuAction}
       />
     </div>
+  );
+}
+
+/**
+ * Layout del Dashboard
+ * Proporciona estructura común con sidebar, topbar y área de contenido
+ *
+ * @param {Object} props
+ * @param {Object} props.user - Usuario autenticado
+ * @param {string} props.userRole - Rol del usuario
+ * @param {React.ReactNode} props.children - Contenido a renderizar
+ * @param {Function} props.onMenuAction - Callback para acciones del menú
+ * @param {string} props.currentScreen - Pantalla actual activa
+ * @param {boolean} props.fullWidth - Si true, remueve el max-width del contenedor
+ */
+function DashboardLayout(props) {
+  return (
+    <TopBarProvider>
+      <DashboardLayoutInner {...props} />
+    </TopBarProvider>
   );
 }
 

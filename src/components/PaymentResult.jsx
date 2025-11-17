@@ -133,7 +133,7 @@ function PaymentResult() {
               </h3>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>✓ El pago se reflejará en tu cuenta inmediatamente</li>
-                <li>✓ Puedes descargar tu comprobante desde "Mis Pagos"</li>
+                <li>✓ Puedes descargar tu comprobante desde "Pagos"</li>
                 <li>✓ Revisa tu historial de pagos para más detalles</li>
               </ul>
             </div>
@@ -146,7 +146,7 @@ function PaymentResult() {
                 onClick={handleGoToPayments}
                 fullWidth
               >
-                Ver Mis Pagos
+                Ver Pagos
               </BaseButton>
 
               <BaseButton
@@ -207,7 +207,7 @@ function PaymentResult() {
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>⏳ El pago puede tardar hasta 48 horas en acreditarse</li>
                 <li>📧 Recibirás un email cuando se confirme</li>
-                <li>🔍 Puedes ver el estado en "Mis Pagos"</li>
+                <li>🔍 Puedes ver el estado en "Pagos"</li>
                 <li>💬 Contacta soporte si tienes dudas</li>
               </ul>
             </div>

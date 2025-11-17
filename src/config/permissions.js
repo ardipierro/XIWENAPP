@@ -90,7 +90,7 @@ export const PERMISSIONS = {
 
   // ==================== LIVE GAMES ====================
   'create-live-games': ['admin', 'teacher'],
-  'play-live-games': ['student', 'trial', 'listener'],
+  'play-live-games': ['admin', 'teacher', 'student', 'trial', 'listener'],
 
   // ==================== GUARDIAN SPECIFIC ====================
   'view-linked-students': ['guardian'],

@@ -1,0 +1,74 @@
+// ========================================
+// REGLAS DE FIRESTORE PARA SISTEMA DE HORARIOS RECURRENTES
+// ========================================
+// Agregar estas reglas a Firebase Console > Firestore > Rules
+
+// 1. RECURRING_SCHEDULES - Horarios Recurrentes
+match /recurring_schedules/{scheduleId} {
+  // READ: Profesores ven sus horarios, admins ven todo
+  allow read: if request.auth != null && (
+    request.auth.token.role == 'admin' ||
+    resource.data.teacherId == request.auth.uid
+  );
+
+  // CREATE: Solo admin y profesores pueden crear
+  allow create: if request.auth != null && (
+    request.auth.token.role == 'admin' ||
+    request.auth.token.role == 'teacher' ||
+    request.auth.token.role == 'trial_teacher'
+  );
+
+  // UPDATE: Solo el profesor owner o admin
+  allow update: if request.auth != null && (
+    request.auth.token.role == 'admin' ||
+    resource.data.teacherId == request.auth.uid
+  );
+
+  // DELETE: Solo admin o el profesor owner
+  allow delete: if request.auth != null && (
+    request.auth.token.role == 'admin' ||
+    resource.data.teacherId == request.auth.uid
+  );
+}
+
+// 2. CLASS_INSTANCES - Instancias de Clases
+match /class_instances/{instanceId} {
+  // READ: Profesores ven sus instancias, estudiantes ven las suyas, admins ven todo
+  allow read: if request.auth != null && (
+    request.auth.token.role == 'admin' ||
+    resource.data.teacherId == request.auth.uid ||
+    request.auth.uid in resource.data.eligibleStudentIds
+  );
+
+  // CREATE: Solo el sistema (via admin/teacher) puede crear instancias
+  allow create: if request.auth != null && (
+    request.auth.token.role == 'admin' ||
+    request.auth.token.role == 'teacher' ||
+    request.auth.token.role == 'trial_teacher'
+  );
+
+  // UPDATE: Solo el profesor owner o admin
+  allow update: if request.auth != null && (
+    request.auth.token.role == 'admin' ||
+    resource.data.teacherId == request.auth.uid
+  );
+
+  // DELETE: Solo admin
+  allow delete: if request.auth != null &&
+    request.auth.token.role == 'admin';
+}
+
+// ========================================
+// INSTRUCCIONES DE INSTALACIÓN
+// ========================================
+// 1. Ve a Firebase Console: https://console.firebase.google.com
+// 2. Selecciona tu proyecto: xiwen-app-2026
+// 3. Ve a Firestore Database > Rules
+// 4. Copia y pega estas reglas DENTRO del bloque:
+//    rules_version = '2';
+//    service cloud.firestore {
+//      match /databases/{database}/documents {
+//        // PEGA AQUÍ LAS REGLAS DE ARRIBA
+//      }
+//    }
+// 5. Click "Publish"

@@ -12,9 +12,10 @@
  * COMPONENTES DE EDICIÓN:
  * - ColorPicker: Selector de colores con presets
  * - ColorFavorites: Galería de colores favoritos guardados
- * - HighlightPicker: Selector de colores de resaltado
+ * - HighlightPicker: Selector de colores de resaltado con modo activo
  * - PencilPresets: Presets de estilos para el lápiz (básico, 8 presets)
  * - PencilPresetsExtended: 15+ presets expandidos + personalizables
+ * - SimplePencilPresets: Selector SIMPLE (5 grosores + 5 colores editables)
  *
  * DIBUJO:
  * - DrawingCanvas: Canvas de dibujo con perfect-freehand (básico)
@@ -36,6 +37,7 @@ export { ColorFavorites } from './ColorFavorites';
 export { HighlightPicker } from './HighlightPicker';
 export { PencilPresets } from './PencilPresets';
 export { PencilPresetsExtended } from './PencilPresetsExtended';
+export { SimplePencilPresets } from './SimplePencilPresets';
 export { DrawingCanvas } from './DrawingCanvas';
 export { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
 export { StrokeWidthSelector } from './StrokeWidthSelector';

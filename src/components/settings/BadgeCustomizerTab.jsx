@@ -27,9 +27,19 @@ import {
   Check,
   X,
   Info,
+  Smile,
+  Box,
+  EyeOff,
 } from 'lucide-react';
 import { BaseButton, BaseBadge, BaseInput, BaseAlert } from '../common';
+import CategoryBadge from '../common/CategoryBadge';
 import useBadgeConfig from '../../hooks/useBadgeConfig';
+import {
+  getIconLibraryConfig,
+  saveIconLibraryConfig,
+} from '../../config/badgeSystem';
+import IconPickerModal from './IconPickerModal';
+import * as HeroIcons from '@heroicons/react/24/outline';
 import logger from '../../utils/logger';
 
 /**
@@ -64,6 +74,11 @@ function BadgeCustomizerTab({ user }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState(null);
   const [saveMessage, setSaveMessage] = useState(null);
+
+  // Configuración de librería de iconos
+  const [iconLibraryConfig, setIconLibraryConfig] = useState(
+    getIconLibraryConfig()
+  );
 
   // Validar permisos de admin
   const isAdmin = user?.role === 'admin';
@@ -120,6 +135,20 @@ function BadgeCustomizerTab({ user }) {
   const handleOpenAddModal = (categoryKey) => {
     setAddModalCategory(categoryKey);
     setShowAddModal(true);
+  };
+
+  // Cambiar librería de iconos
+  const handleIconLibraryChange = (library) => {
+    const newConfig = { ...iconLibraryConfig, library };
+    setIconLibraryConfig(newConfig);
+    saveIconLibraryConfig(newConfig); // Esto dispara el evento 'iconLibraryChange'
+    setSaveMessage({
+      type: 'success',
+      text: `✅ Estilo de iconos cambiado a: ${
+        library === 'emoji' ? 'Emoji' : library === 'heroicon' ? 'Heroicons' : 'Sin iconos'
+      }`,
+    });
+    setTimeout(() => setSaveMessage(null), 3000);
   };
 
   return (
@@ -195,6 +224,160 @@ function BadgeCustomizerTab({ user }) {
         </div>
       )}
 
+      {/* Selector de Estilo de Iconos */}
+      <div
+        className="rounded-lg p-4"
+        style={{
+          border: '1px solid var(--color-border)',
+          background: 'var(--color-bg-secondary)',
+        }}
+      >
+        <h3
+          className="text-base font-semibold mb-3 flex items-center gap-2"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          <Palette size={18} />
+          Estilo de Iconos
+        </h3>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Selecciona cómo quieres que se muestren los iconos en todos los badges
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => handleIconLibraryChange('emoji')}
+            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
+            style={{
+              borderColor:
+                iconLibraryConfig.library === 'emoji'
+                  ? 'var(--color-primary)'
+                  : 'var(--color-border)',
+              background:
+                iconLibraryConfig.library === 'emoji'
+                  ? 'var(--color-bg-tertiary)'
+                  : 'var(--color-bg-primary)',
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <Smile
+                size={24}
+                style={{
+                  color:
+                    iconLibraryConfig.library === 'emoji'
+                      ? 'var(--color-primary)'
+                      : 'var(--color-text-secondary)',
+                }}
+              />
+              <span
+                className="font-medium"
+                style={{
+                  color:
+                    iconLibraryConfig.library === 'emoji'
+                      ? 'var(--color-primary)'
+                      : 'var(--color-text-primary)',
+                }}
+              >
+                Emoji
+              </span>
+              <span
+                className="text-xs text-center"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Iconos multicolor (actual)
+              </span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleIconLibraryChange('heroicon')}
+            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
+            style={{
+              borderColor:
+                iconLibraryConfig.library === 'heroicon'
+                  ? 'var(--color-primary)'
+                  : 'var(--color-border)',
+              background:
+                iconLibraryConfig.library === 'heroicon'
+                  ? 'var(--color-bg-tertiary)'
+                  : 'var(--color-bg-primary)',
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <Box
+                size={24}
+                style={{
+                  color:
+                    iconLibraryConfig.library === 'heroicon'
+                      ? 'var(--color-primary)'
+                      : 'var(--color-text-secondary)',
+                }}
+              />
+              <span
+                className="font-medium"
+                style={{
+                  color:
+                    iconLibraryConfig.library === 'heroicon'
+                      ? 'var(--color-primary)'
+                      : 'var(--color-text-primary)',
+                }}
+              >
+                Heroicons
+              </span>
+              <span
+                className="text-xs text-center"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Iconos monocromáticos
+              </span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleIconLibraryChange('none')}
+            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
+            style={{
+              borderColor:
+                iconLibraryConfig.library === 'none'
+                  ? 'var(--color-primary)'
+                  : 'var(--color-border)',
+              background:
+                iconLibraryConfig.library === 'none'
+                  ? 'var(--color-bg-tertiary)'
+                  : 'var(--color-bg-primary)',
+            }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <EyeOff
+                size={24}
+                style={{
+                  color:
+                    iconLibraryConfig.library === 'none'
+                      ? 'var(--color-primary)'
+                      : 'var(--color-text-secondary)',
+                }}
+              />
+              <span
+                className="font-medium"
+                style={{
+                  color:
+                    iconLibraryConfig.library === 'none'
+                      ? 'var(--color-primary)'
+                      : 'var(--color-text-primary)',
+                }}
+              >
+                Sin Iconos
+              </span>
+              <span
+                className="text-xs text-center"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Solo texto
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+
       {/* Categorías de Badges */}
       <div className="space-y-4">
         {Object.entries(categories).map(([categoryKey, categoryInfo]) => {
@@ -267,16 +450,18 @@ function CategorySection({
       }}
     >
       {/* Header */}
-      <button
-        onClick={onToggle}
-        className="w-full px-4 py-3 flex items-center justify-between hover:opacity-80 transition-opacity"
+      <div
+        className="px-4 py-3 flex items-center justify-between"
         style={{ background: 'var(--color-bg-tertiary)' }}
       >
-        <div className="flex items-center gap-3">
+        <button
+          onClick={onToggle}
+          className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity text-left"
+        >
           <span className="text-xl" role="img" aria-label={categoryInfo.label}>
             {categoryInfo.icon}
           </span>
-          <div className="text-left">
+          <div>
             <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               {categoryInfo.label}
             </h3>
@@ -284,7 +469,7 @@ function CategorySection({
               {categoryInfo.description} • {badgeCount} badge{badgeCount !== 1 ? 's' : ''}
             </p>
           </div>
-        </div>
+        </button>
 
         <div className="flex items-center gap-2">
           {categoryInfo.allowCustom && (
@@ -292,17 +477,20 @@ function CategorySection({
               variant="ghost"
               size="sm"
               icon={Plus}
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddBadge();
-              }}
+              onClick={onAddBadge}
             >
               Agregar
             </BaseButton>
           )}
-          {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+          <button
+            onClick={onToggle}
+            className="p-1 hover:opacity-70 transition-opacity"
+            aria-label={isExpanded ? 'Contraer' : 'Expandir'}
+          >
+            {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+          </button>
         </div>
-      </button>
+      </div>
 
       {/* Content */}
       {isExpanded && (
@@ -342,17 +530,10 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
       <div className="flex items-center justify-between gap-3">
         {/* Badge preview */}
         <div className="flex items-center gap-3 flex-1">
-          <BaseBadge
-            variant={badge.variant}
+          <CategoryBadge
+            badgeKey={badgeKey}
             size="md"
-            style={{
-              backgroundColor: badge.color,
-              color: getContrastText(badge.color),
-            }}
-          >
-            {badge.icon && <span className="mr-1">{badge.icon}</span>}
-            {badge.label}
-          </BaseBadge>
+          />
 
           <div className="flex-1">
             <div className="flex items-center gap-2">
@@ -466,20 +647,12 @@ function PreviewSection({ badges }) {
 
       <div className="flex flex-wrap gap-2">
         {previewBadges.map((badgeKey) => {
-          const badge = badges[badgeKey];
           return (
-            <BaseBadge
+            <CategoryBadge
               key={badgeKey}
-              variant={badge.variant}
+              badgeKey={badgeKey}
               size="md"
-              style={{
-                backgroundColor: badge.color,
-                color: getContrastText(badge.color),
-              }}
-            >
-              {badge.icon && <span className="mr-1">{badge.icon}</span>}
-              {badge.label}
-            </BaseBadge>
+            />
           );
         })}
       </div>
@@ -495,10 +668,14 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
   const [formData, setFormData] = useState({
     label: '',
     icon: '',
+    heroicon: '',
     description: '',
     color: '#3b82f6',
     variant: 'primary',
   });
+
+  const [showIconPicker, setShowIconPicker] = useState(false);
+  const [iconType, setIconType] = useState('emoji'); // 'emoji' | 'heroicon'
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -507,6 +684,11 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
       return;
     }
     onAdd(formData);
+  };
+
+  const handleIconSelect = (iconName) => {
+    setFormData({ ...formData, heroicon: iconName });
+    setShowIconPicker(false);
   };
 
   return (
@@ -531,6 +713,22 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
           Agregar Badge a {categoryInfo.label}
         </h3>
 
+        {/* Advertencia para categorías del sistema */}
+        {categoryInfo.systemCategory && (
+          <div
+            className="mb-4 p-3 rounded-lg flex items-start gap-2"
+            style={{
+              background: '#fef3c7',
+              border: '1px solid #f59e0b',
+            }}
+          >
+            <AlertCircle size={16} style={{ color: '#f59e0b', marginTop: '2px' }} />
+            <p className="text-sm" style={{ color: '#92400e' }}>
+              {categoryInfo.warning}
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <BaseInput
             label="Label *"
@@ -540,13 +738,63 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
             placeholder="Ej: Deportes"
           />
 
-          <BaseInput
-            label="Icono (emoji)"
-            value={formData.icon}
-            onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-            placeholder="⚽"
-            helperText="Un solo emoji monocromático"
-          />
+          {/* Selector de tipo de icono */}
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Icono
+            </label>
+            <div className="flex gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => setIconType('emoji')}
+                className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  background: iconType === 'emoji' ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
+                  color: iconType === 'emoji' ? '#ffffff' : 'var(--color-text-secondary)',
+                }}
+              >
+                Emoji
+              </button>
+              <button
+                type="button"
+                onClick={() => setIconType('heroicon')}
+                className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  background: iconType === 'heroicon' ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
+                  color: iconType === 'heroicon' ? '#ffffff' : 'var(--color-text-secondary)',
+                }}
+              >
+                Heroicon
+              </button>
+            </div>
+
+            {iconType === 'emoji' ? (
+              <BaseInput
+                value={formData.icon}
+                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                placeholder="⚽"
+                helperText="Un solo emoji"
+              />
+            ) : (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowIconPicker(true)}
+                  className="w-full px-4 py-2 rounded-lg border text-sm font-medium transition-colors"
+                  style={{
+                    background: 'var(--color-bg-tertiary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)',
+                  }}
+                >
+                  {formData.heroicon ? `Icono: ${formData.heroicon}` : 'Seleccionar Heroicon'}
+                </button>
+                <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  Click para abrir galería de iconos
+                </p>
+              </div>
+            )}
+          </div>
 
           <BaseInput
             label="Descripción"
@@ -584,7 +832,11 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
                 color: getContrastText(formData.color),
               }}
             >
-              {formData.icon && <span className="mr-1">{formData.icon}</span>}
+              {iconType === 'heroicon' && formData.heroicon && (() => {
+                const IconComponent = HeroIcons[formData.heroicon];
+                return IconComponent ? <IconComponent className="mr-1" style={{ width: '16px', height: '16px' }} /> : null;
+              })()}
+              {iconType === 'emoji' && formData.icon && <span className="mr-1">{formData.icon}</span>}
               {formData.label || 'Nuevo Badge'}
             </BaseBadge>
           </div>
@@ -599,6 +851,15 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
             </BaseButton>
           </div>
         </form>
+
+        {/* IconPicker Modal */}
+        {showIconPicker && (
+          <IconPickerModal
+            currentIcon={formData.heroicon}
+            onSelect={handleIconSelect}
+            onClose={() => setShowIconPicker(false)}
+          />
+        )}
       </div>
     </div>
   );

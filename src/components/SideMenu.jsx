@@ -20,7 +20,7 @@ import {
   Gamepad2,
   Zap,
   TrendingUp,
-  Trophy,
+  // Trophy, // Ya no se usa - Gamificación eliminada
   CalendarDays,
   CheckSquare,
   FileCheck,
@@ -122,13 +122,13 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
       return {
         items: [
           { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },
-          { icon: BookOpen, label: 'Mis Cursos', path: '/student', action: 'courses' },
+          { icon: BookOpen, label: 'Contenidos', path: '/student', action: 'courses' },
           { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'quickCorrection' },
-          { icon: Trophy, label: 'Gamificación', path: '/student', action: 'gamification' },
+          // { icon: Trophy, label: 'Gamificación', path: '/student', action: 'gamification' }, // ELIMINADO - Se reemplazará por ejercicios/competencias
           { icon: CalendarDays, label: 'Calendario', path: '/student', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/student', action: 'messages' },
-          { icon: Calendar, label: 'Mis Clases', path: '/student', action: 'classSessions' },
-          { icon: DollarSign, label: 'Mis Pagos', path: '/student', action: 'payments' },
+          { icon: Calendar, label: 'Clases', path: '/student', action: 'classSessions' },
+          { icon: DollarSign, label: 'Pagos', path: '/student', action: 'payments' },
         ]
       };
     }

@@ -1,6 +1,7 @@
 /**
  * @fileoverview Text-to-Speech service using Web Speech API
  * Genera audio a partir de texto usando voces del navegador
+ * ✅ Mejorado para iOS/Safari con manejo de AudioContext
  * @module services/ttsService
  */
 
@@ -12,6 +13,7 @@ class TTSService {
     this.voices = [];
     this.defaultVoice = null;
     this.audioCache = new Map();
+    this.audioContext = null; // ✅ AudioContext para iOS
 
     // Cargar voces cuando estén disponibles
     this.loadVoices();
@@ -19,6 +21,38 @@ class TTSService {
     // Las voces pueden tardar en cargar
     if (this.synth.onvoiceschanged !== undefined) {
       this.synth.onvoiceschanged = () => this.loadVoices();
+    }
+
+    // ✅ Inicializar AudioContext en primera interacción
+    this.initAudioContext();
+  }
+
+  /**
+   * ✅ Inicializa y resume el AudioContext (necesario para iOS/Safari)
+   */
+  initAudioContext() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!this.audioContext && AudioContext) {
+        this.audioContext = new AudioContext();
+        logger.info('🎵 AudioContext initialized');
+      }
+    } catch (error) {
+      logger.warn('⚠️ AudioContext not available:', error);
+    }
+  }
+
+  /**
+   * ✅ Resume AudioContext si está suspendido (iOS/Safari)
+   */
+  async resumeAudioContext() {
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      try {
+        await this.audioContext.resume();
+        logger.info('▶️ AudioContext resumed');
+      } catch (error) {
+        logger.error('❌ Error resuming AudioContext:', error);
+      }
     }
   }
 
@@ -56,6 +90,7 @@ class TTSService {
 
   /**
    * Genera audio a partir de texto usando Web Speech API
+   * ✅ Mejorado para iOS/Safari con manejo de AudioContext
    * @param {string} text - El texto a convertir en audio
    * @param {Object} options - Opciones de configuración
    * @returns {Promise<SpeechSynthesisUtterance>}
@@ -68,6 +103,9 @@ class TTSService {
       volume = 1.0,    // Volumen (0 - 1)
       lang = 'es-AR'
     } = options;
+
+    // ✅ Resume AudioContext si está suspendido (iOS/Safari)
+    await this.resumeAudioContext();
 
     return new Promise((resolve, reject) => {
       // Cancelar cualquier audio anterior
@@ -90,7 +128,10 @@ class TTSService {
         reject(error);
       };
 
-      this.synth.speak(utterance);
+      // ✅ Pequeño delay para iOS (workaround para Safari)
+      setTimeout(() => {
+        this.synth.speak(utterance);
+      }, 10);
     });
   }
 

@@ -224,26 +224,28 @@ export function FlashCardManager({ user }) {
       </div>
 
       {/* Tabs */}
-      <BaseTabs
-        tabs={[
-          { id: 'collections', label: 'Colecciones', icon: CreditCard },
-          { id: 'stats', label: 'Estadísticas', icon: BarChart3 }
-        ]}
-        activeTab={activeTab}
-        onChange={setActiveTab}
-        variant="underline"
-        size="md"
-      />
+      <div className="mb-6">
+        <BaseTabs
+          tabs={[
+            { id: 'collections', label: 'Colecciones', icon: CreditCard },
+            { id: 'stats', label: 'Estadísticas', icon: BarChart3 }
+          ]}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="underline"
+          size="md"
+        />
+      </div>
 
       {/* Success/Error Messages */}
       {successMessage && (
-        <BaseAlert variant="success" className="mb-4">
+        <BaseAlert variant="success" className="mb-6">
           {successMessage}
         </BaseAlert>
       )}
 
       {errorMessage && (
-        <BaseAlert variant="error" className="mb-4">
+        <BaseAlert variant="error" className="mb-6">
           {errorMessage}
         </BaseAlert>
       )}

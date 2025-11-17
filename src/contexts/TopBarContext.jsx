@@ -25,6 +25,7 @@ const DEFAULT_CONFIG = {
  */
 export function TopBarProvider({ children }) {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [sidebarControl, setSidebarControl] = useState(null);
 
   /**
    * Actualizar configuración de la TopBar
@@ -63,13 +64,51 @@ export function TopBarProvider({ children }) {
     }));
   }, []);
 
+  /**
+   * Registrar funciones de control del sidebar desde DashboardLayout
+   */
+  const registerSidebarControl = useCallback((control) => {
+    setSidebarControl(control);
+  }, []);
+
+  /**
+   * Ocultar sidebar
+   */
+  const hideSidebar = useCallback(() => {
+    if (sidebarControl?.hide) {
+      sidebarControl.hide();
+    }
+  }, [sidebarControl]);
+
+  /**
+   * Mostrar sidebar
+   */
+  const showSidebar = useCallback(() => {
+    if (sidebarControl?.show) {
+      sidebarControl.show();
+    }
+  }, [sidebarControl]);
+
+  /**
+   * Toggle sidebar
+   */
+  const toggleSidebar = useCallback(() => {
+    if (sidebarControl?.toggle) {
+      sidebarControl.toggle();
+    }
+  }, [sidebarControl]);
+
   const value = useMemo(() => ({
     config,
     updateTopBar,
     resetTopBar,
     addAction,
-    removeAction
-  }), [config, updateTopBar, resetTopBar, addAction, removeAction]);
+    removeAction,
+    registerSidebarControl,
+    hideSidebar,
+    showSidebar,
+    toggleSidebar
+  }), [config, updateTopBar, resetTopBar, addAction, removeAction, registerSidebarControl, hideSidebar, showSidebar, toggleSidebar]);
 
   return (
     <TopBarContext.Provider value={value}>

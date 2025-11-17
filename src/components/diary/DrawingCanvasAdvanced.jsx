@@ -48,8 +48,13 @@ export function DrawingCanvasAdvanced({
   useEffect(() => { layerRef.current = layer; }, [layer]);
 
   // FIX: Sincronizar initialStrokes cuando cambian (para editar bloques existentes)
+  // Usar stringify para comparar si realmente cambió el contenido
+  const initialStrokesRef = useRef(JSON.stringify(initialStrokes));
+
   useEffect(() => {
-    if (initialStrokes && initialStrokes.length > 0 && strokes.length === 0) {
+    const newInitialStrokes = JSON.stringify(initialStrokes);
+    if (newInitialStrokes !== initialStrokesRef.current) {
+      initialStrokesRef.current = newInitialStrokes;
       setStrokes(initialStrokes);
       setHistory([initialStrokes]);
       setHistoryIndex(0);
@@ -170,25 +175,15 @@ export function DrawingCanvasAdvanced({
     }
   }, [enabled, eraserMode, strokes, getRelativeCoordinates, addToHistory]);
 
-  // Continuar trazo (con sampling para mejor performance)
+  // Continuar trazo (SIN límite de puntos - el usuario necesita trazos largos continuos)
   const handlePointerMove = useCallback((e) => {
     if (!isDrawing || !enabled || eraserMode) return;
 
     e.preventDefault();
     const { x, y, pressure } = getRelativeCoordinates(e);
 
-    // Sampling: Solo agregar cada N puntos para reducir carga
-    setCurrentStroke(prev => {
-      // Si hay menos de 100 puntos, agregar todos
-      if (prev.length < 100) {
-        return [...prev, [x, y, pressure]];
-      }
-      // Si hay más, solo agregar 1 de cada 2 puntos
-      if (prev.length % 2 === 0) {
-        return [...prev, [x, y, pressure]];
-      }
-      return prev;
-    });
+    // Agregar TODOS los puntos sin límite
+    setCurrentStroke(prev => [...prev, [x, y, pressure]]);
   }, [isDrawing, enabled, eraserMode, getRelativeCoordinates]);
 
   // Finalizar trazo (optimizado con refs)

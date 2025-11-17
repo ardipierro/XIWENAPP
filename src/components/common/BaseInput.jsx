@@ -40,11 +40,11 @@ function BaseInput({
   const isPassword = type === 'password';
   const inputType = isPassword && showPassword ? 'text' : type;
 
-  // Size styles
-  const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-5 py-3 text-lg',
+  // Size styles (padding values in rem) - consistent with BaseSelect
+  const sizeStyles = {
+    sm: { pl: '0.75rem', pr: '0.75rem', py: '0.375rem', fontSize: '0.875rem' },
+    md: { pl: '1rem', pr: '1rem', py: '0.5rem', fontSize: '1rem' },
+    lg: { pl: '1.25rem', pr: '1.25rem', py: '0.75rem', fontSize: '1.125rem' },
   };
 
   const iconSizes = {
@@ -85,18 +85,16 @@ function BaseInput({
           placeholder={placeholder}
           disabled={disabled}
           required={required}
-          className={`
-            w-full rounded-lg border transition-all
-            focus:outline-none focus:ring-2 focus:border-transparent
-            ${Icon ? 'pl-10' : ''}
-            ${isPassword || IconRight ? 'pr-10' : ''}
-          `}
+          className="w-full rounded-lg border transition-all focus:outline-none focus:ring-2 focus:border-transparent"
           style={{
             backgroundColor: disabled ? 'var(--color-bg-tertiary)' : 'var(--color-bg-primary)',
             color: 'var(--color-text-primary)',
             borderColor: error ? 'var(--color-danger)' : 'var(--color-border)',
-            padding: sizes[size].split(' ').map(s => s.replace('px-', '').replace('py-', '')).join(' '),
-            fontSize: sizes[size].includes('text-sm') ? '0.875rem' : sizes[size].includes('text-lg') ? '1.125rem' : '1rem',
+            paddingLeft: Icon ? '2.5rem' : sizeStyles[size].pl,
+            paddingRight: (isPassword || IconRight) ? '2.5rem' : sizeStyles[size].pr,
+            paddingTop: sizeStyles[size].py,
+            paddingBottom: sizeStyles[size].py,
+            fontSize: sizeStyles[size].fontSize,
             cursor: disabled ? 'not-allowed' : 'text',
             opacity: disabled ? 0.6 : 1
           }}

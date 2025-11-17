@@ -9,13 +9,22 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
-import { TopBarProvider } from '../contexts/TopBarContext';
+import { TopBarProvider, useTopBar } from '../contexts/TopBarContext';
 import { usePermissions } from '../hooks/usePermissions';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
 import ViewAsBanner from './ViewAsBanner';
-import { BaseLoading, BaseButton } from './common';
+import { BaseLoading } from './common';
 import { UniversalCard } from './cards';
+import {
+  Layers,
+  BookOpen,
+  Users,
+  ClipboardCheck,
+  Target,
+  Calendar,
+  Gamepad2
+} from 'lucide-react';
 
 // Lazy load de componentes pesados
 const UnifiedCalendar = lazy(() => import('./UnifiedCalendar'));
@@ -40,7 +49,8 @@ const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
 const StudentSessionsView = lazy(() => import('./StudentSessionsView'));
 
 // Games views
-const LiveGamesView = lazy(() => import('./games/LiveGamesView'));
+const LiveGamesHub = lazy(() => import('./LiveGamesHub'));
+const GameContainer = lazy(() => import('./GameContainer'));
 
 // Guardian views
 const GuardianView = lazy(() => import('./guardian/GuardianView'));
@@ -49,62 +59,109 @@ const GuardianView = lazy(() => import('./guardian/GuardianView'));
 const ADE1ContentViewer = lazy(() => import('./ADE1ContentViewer'));
 
 /**
- * Vista de inicio (placeholder)
+ * Vista de inicio con accesos directos
  */
 function HomeView({ user, onNavigate }) {
-  const { getRoleLabel } = usePermissions();
+  const { getRoleLabel, can } = usePermissions();
+
+  // Definición de tarjetas de acceso directo
+  const quickAccessCards = [
+    {
+      title: 'Crear Contenido',
+      description: 'Gestiona contenidos, ejercicios y configura IA',
+      icon: Layers,
+      path: '/dashboard/unified-content',
+      permission: 'create-content'
+    },
+    {
+      title: 'Diario de Clases',
+      description: 'Crea y administra diarios de clase',
+      icon: BookOpen,
+      path: '/dashboard/daily-logs',
+      permission: 'manage-classes'
+    },
+    {
+      title: 'Clases',
+      description: 'Gestiona sesiones de clase en vivo',
+      icon: Users,
+      path: '/dashboard/classes',
+      permission: 'manage-classes'
+    },
+    {
+      title: 'Revisar Tareas',
+      description: 'Corrección de tareas con IA',
+      icon: ClipboardCheck,
+      path: '/dashboard/homework-review',
+      permission: 'grade-assignments'
+    },
+    {
+      title: 'Juego por Turnos',
+      description: 'Juego clásico de preguntas',
+      icon: Target,
+      path: '/dashboard/turn-game',
+      permission: null // Disponible para todos
+    },
+    {
+      title: 'Calendario',
+      description: 'Eventos y clases programadas',
+      icon: Calendar,
+      path: '/dashboard/calendar',
+      permission: null // Disponible para todos
+    },
+    {
+      title: 'Juegos en Vivo',
+      description: 'Juegos en tiempo real con estudiantes',
+      icon: Gamepad2,
+      path: '/dashboard/games',
+      permission: 'play-live-games'
+    },
+    {
+      title: 'ADE1 2026 - Fonética',
+      description: 'Libro interactivo con 120+ slides y ejercicios',
+      icon: BookOpen,
+      path: '/dashboard/ade1-content',
+      permission: null // Disponible para todos
+    }
+  ];
+
+  // Filtrar tarjetas según permisos
+  const visibleCards = quickAccessCards.filter(card => {
+    if (!card.permission) return true; // Sin permiso requerido = visible para todos
+    return can(card.permission);
+  });
+
+  // Formatear fecha completa con día de la semana
+  const today = new Date();
+  const dateOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  };
+  const formattedDate = today.toLocaleDateString('es-ES', dateOptions);
 
   return (
-    <div className="universal-dashboard__welcome">
-      <h1>¡Bienvenido, {user?.displayName || user?.name || 'Usuario'}!</h1>
-      <p>Rol: <strong>{getRoleLabel()}</strong></p>
-      <p>Este es el nuevo Universal Dashboard con sistema de permisos y créditos integrado.</p>
-
-      {/* Feature cards con UniversalCard */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <UniversalCard
-          variant="default"
-          size="md"
-          title="✅ Sistema de Permisos"
-          description="Acceso basado en roles con permisos granulares"
-        />
-        <UniversalCard
-          variant="default"
-          size="md"
-          title="💳 Sistema de Créditos"
-          description="Gestión unificada de créditos en tiempo real"
-        />
-        <UniversalCard
-          variant="default"
-          size="md"
-          title="🎨 UI Consistente"
-          description="Misma experiencia para todos los roles"
-        />
-        <UniversalCard
-          variant="default"
-          size="md"
-          title="🚀 Altamente Escalable"
-          description="Fácil agregar nuevos roles y features"
-        />
+    <div className="space-y-6">
+      {/* Header - Solo fecha */}
+      <div>
+        <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
+          {formattedDate}
+        </h1>
       </div>
 
-      {/* Acceso rápido a contenido ADE1 */}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">📚 Contenido Interactivo</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Tarjetas de acceso */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {visibleCards.map((card) => (
           <UniversalCard
+            key={card.path}
             variant="default"
             size="md"
-            title="📖 ADE1 2026 - Fonética"
-            description="Libro interactivo con 120+ slides y ejercicios de fonética española"
-            onClick={() => onNavigate && onNavigate('/dashboard/ade1-content')}
-            actions={[
-              <BaseButton key="view" variant="primary" size="sm" fullWidth>
-                Ver contenido →
-              </BaseButton>
-            ]}
+            icon={card.icon}
+            title={card.title}
+            description={card.description}
+            onClick={() => onNavigate && onNavigate(card.path)}
           />
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -123,19 +180,30 @@ function PlaceholderView({ title }) {
 }
 
 /**
- * Dashboard Universal
+ * Dashboard Universal - Componente interno que usa el TopBarContext
  */
-export function UniversalDashboard() {
+function UniversalDashboardInner() {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { getEffectiveUser, isViewingAs } = useViewAs();
   const { initialized, can } = usePermissions();
+  const { registerSidebarControl } = useTopBar();
+
   // En desktop (>= 1024px) el menú está abierto por defecto, en mobile cerrado
   const [menuOpen, setMenuOpen] = useState(window.innerWidth >= 1024);
   const [currentPath, setCurrentPath] = useState(location.pathname);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
+
+  // Registrar funciones de control del sidebar en el contexto
+  useEffect(() => {
+    registerSidebarControl({
+      hide: () => setMenuOpen(false),
+      show: () => setMenuOpen(true),
+      toggle: () => setMenuOpen(prev => !prev)
+    });
+  }, [registerSidebarControl]);
 
   // Sincronizar currentPath con la URL actual
   useEffect(() => {
@@ -346,17 +414,16 @@ export function UniversalDashboard() {
               if (!can('view-all-content')) return <PlaceholderView title="Sin acceso" />;
               return <StudentSessionsView student={effectiveUser} />;
 
-            // JUEGOS
+            // JUEGOS EN VIVO
             case '/dashboard/games':
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
+              return <LiveGamesHub user={effectiveUser} />;
+
+            // JUEGO POR TURNOS
+            case '/dashboard/turn-game':
               return (
-                <LiveGamesView
-                  user={effectiveUser}
-                  onJoinGame={(gameId) => {
-                    logger.debug('Unirse a juego:', gameId);
-                    // TODO: Implementar lógica para unirse al juego
-                    // Posiblemente navegar a /game/:gameId o abrir modal
-                  }}
+                <GameContainer
+                  onBack={() => handleNavigate('/dashboard')}
                 />
               );
 
@@ -420,34 +487,43 @@ export function UniversalDashboard() {
   };
 
   return (
-    <TopBarProvider>
-      <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
-        {/* ViewAs Banner - Siempre arriba de todo */}
-        <ViewAsBanner />
+    <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
+      {/* ViewAs Banner - Siempre arriba de todo */}
+      <ViewAsBanner />
 
-        {/* TopBar */}
-        <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
+      {/* TopBar */}
+      <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
 
-        {/* SideMenu */}
-        <UniversalSideMenu
-          isOpen={menuOpen}
-          currentPath={currentPath}
-          onNavigate={handleNavigate}
+      {/* SideMenu */}
+      <UniversalSideMenu
+        isOpen={menuOpen}
+        currentPath={currentPath}
+        onNavigate={handleNavigate}
+      />
+
+      {/* Overlay para mobile */}
+      {menuOpen && (
+        <div
+          className="universal-dashboard__overlay"
+          onClick={() => setMenuOpen(false)}
         />
+      )}
 
-        {/* Overlay para mobile */}
-        {menuOpen && (
-          <div
-            className="universal-dashboard__overlay"
-            onClick={() => setMenuOpen(false)}
-          />
-        )}
+      {/* Content Area */}
+      <main className={`universal-dashboard__content ${menuOpen ? 'universal-dashboard__content--menu-open' : ''}`}>
+        {renderContent()}
+      </main>
+    </div>
+  );
+}
 
-        {/* Content Area */}
-        <main className={`universal-dashboard__content ${menuOpen ? 'universal-dashboard__content--menu-open' : ''}`}>
-          {renderContent()}
-        </main>
-      </div>
+/**
+ * Dashboard Universal - Wrapper con TopBarProvider
+ */
+export function UniversalDashboard() {
+  return (
+    <TopBarProvider>
+      <UniversalDashboardInner />
     </TopBarProvider>
   );
 }

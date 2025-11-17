@@ -162,13 +162,21 @@ function AudioPlayer({
 
     setIsPlaying(true);
 
+    // ✅ Resume AudioContext si está suspendido (iOS/Safari)
+    await ttsService.resumeAudioContext();
+
     if (useTTS) {
       playTTS();
     } else if (audioRef.current) {
       try {
-        await audioRef.current.play();
+        // ✅ Manejo mejorado de la promesa de reproducción
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+        }
       } catch (err) {
-        logger.error('Error reproduciendo audio:', err);
+        logger.error('Error reproduciendo audio, fallback a TTS:', err);
+        // ✅ Si falla el audio real, intentar con TTS
         setUseTTS(true);
         playTTS();
       }
@@ -261,6 +269,9 @@ function AudioPlayer({
             // Si se obtuvo el audio (cacheado o generado), reproducirlo
             await new Promise((resolve, reject) => {
               const audio = new Audio(result.audioUrl);
+              // ✅ Habilitar reproducción inline en iOS
+              audio.setAttribute('playsinline', '');
+              audio.setAttribute('webkit-playsinline', '');
               ttsAudioRef.current = audio;
 
               // ✅ APLICAR VELOCIDAD Y VOLUMEN DE LA CONFIG
@@ -294,10 +305,15 @@ function AudioPlayer({
               };
 
               audio.onerror = (error) => {
+                logger.error('❌ Audio load error:', error);
                 reject(new Error('Audio file failed to load'));
               };
 
-              audio.play().catch(reject);
+              // ✅ Manejo mejorado de la promesa de reproducción (iOS/Safari)
+              const playPromise = audio.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(reject);
+              }
             });
 
             return; // Exit successfully if audio plays
@@ -325,6 +341,9 @@ function AudioPlayer({
           // Si se generó un archivo de audio, reproducirlo con velocidad ajustable
           await new Promise((resolve, reject) => {
             const audio = new Audio(result.audioUrl);
+            // ✅ Habilitar reproducción inline en iOS
+            audio.setAttribute('playsinline', '');
+            audio.setAttribute('webkit-playsinline', '');
             ttsAudioRef.current = audio;
 
             // ✅ APLICAR VELOCIDAD DE REPRODUCCIÓN
@@ -355,10 +374,15 @@ function AudioPlayer({
             };
 
             audio.onerror = (error) => {
+              logger.error('❌ Audio load error:', error);
               reject(new Error('Audio file failed to load'));
             };
 
-            audio.play().catch(reject);
+            // ✅ Manejo mejorado de la promesa de reproducción (iOS/Safari)
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(reject);
+            }
           });
 
           return; // Exit successfully if audio plays
@@ -645,8 +669,15 @@ function AudioPlayer({
       )}
 
       {/* Hidden audio element (usado solo si no es TTS) */}
+      {/* ✅ Mejorado para iOS con playsInline */}
       {!useTTS && audioUrl && (
-        <audio ref={audioRef} src={audioUrl} preload="metadata" />
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          preload="metadata"
+          playsInline
+          webkit-playsinline="true"
+        />
       )}
     </div>
   );

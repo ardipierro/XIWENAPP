@@ -25,7 +25,11 @@ import {
   startClassSession,
   endClassSession,
   getDayName,
-  createInstantMeetSession
+  createInstantMeetSession,
+  enrollStudentToSchedule,
+  unenrollStudentFromSchedule,
+  getScheduleInstances,
+  deleteRecurringSchedule
 } from '../firebase/classSessions';
 import { loadCourses, getAllUsers } from '../firebase/firestore';
 import { getAllContent } from '../firebase/content';
@@ -94,20 +98,13 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
         contenidos: contentsData.length
       });
 
-      // Log para debug: ver estructura de sesiones recurrentes
+      // Cargar estadísticas para horarios recurrentes
       const recurringSessions = sessionsData.filter(s => s.type === 'recurring');
       if (recurringSessions.length > 0) {
-        logger.info('Sesiones recurrentes encontradas:', recurringSessions.map(s => ({
-          id: s.id,
-          name: s.name,
-          type: s.type,
-          hasRecurringStartDate: !!s.recurringStartDate,
-          recurringStartDate: s.recurringStartDate,
-          hasRecurringWeeks: !!s.recurringWeeks,
-          recurringWeeks: s.recurringWeeks,
-          hasSchedules: !!s.schedules,
-          schedules: s.schedules
-        })));
+        logger.info(`📊 Cargando estadísticas para ${recurringSessions.length} horarios recurrentes...`);
+        for (const schedule of recurringSessions) {
+          await loadScheduleStats(schedule.id);
+        }
       }
     } catch (error) {
       logger.error('Error cargando datos:', error);
@@ -202,24 +199,37 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
     }
   };
 
-  const handleDelete = async (sessionId) => {
-    if (!confirm('¿Estás seguro de eliminar esta sesión?')) return;
+  const handleDelete = async (session) => {
+    const isRecurring = session.type === 'recurring';
+    const confirmMessage = isRecurring
+      ? `¿Estás seguro de eliminar esta CLASE recurrente?\n\nEsto eliminará:\n- La clase "${session.name}"\n- Todas las clases futuras programadas\n- NO se eliminarán las clases ya finalizadas\n\n⚠️ Esta acción no se puede deshacer.`
+      : '¿Estás seguro de eliminar esta sesión?';
+
+    if (!confirm(confirmMessage)) return;
 
     try {
-      setActionLoading(`delete-${sessionId}`);
+      setActionLoading(`delete-${session.id}`);
 
-      const result = await deleteClassSession(sessionId);
+      let result;
+      if (isRecurring) {
+        result = await deleteRecurringSchedule(session.id);
+      } else {
+        result = await deleteClassSession(session.id);
+      }
 
       if (result.success) {
-        setMessage({ type: 'success', text: 'Sesión eliminada exitosamente' });
+        setMessage({
+          type: 'success',
+          text: isRecurring ? 'Clase eliminada exitosamente' : 'Sesión eliminada exitosamente'
+        });
         await loadData();
-        logger.info('Sesión eliminada:', sessionId);
+        logger.info('Sesión/Clase eliminada:', session.id);
       } else {
-        setMessage({ type: 'error', text: result.error || 'Error al eliminar sesión' });
+        setMessage({ type: 'error', text: result.error || 'Error al eliminar' });
       }
     } catch (error) {
       logger.error('Error en handleDelete:', error);
-      setMessage({ type: 'error', text: 'Error al eliminar sesión' });
+      setMessage({ type: 'error', text: 'Error al eliminar' });
     } finally {
       setActionLoading(null);
     }
@@ -379,49 +389,23 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
     return null;
   };
 
-  // Calcular sesiones restantes para sesiones recurrentes
-  const calculateRemainingSessions = (session) => {
-    // Si no es recurring, no hay nada que calcular
-    if (session.type !== 'recurring') {
-      return null;
+  // Calcular info de horarios recurrentes (usando instancias)
+  const [scheduleStats, setScheduleStats] = useState({});
+
+  const loadScheduleStats = async (scheduleId) => {
+    try {
+      const instances = await getScheduleInstances(scheduleId);
+      const completed = instances.filter(i => i.status === 'ended').length;
+      const scheduled = instances.filter(i => i.status === 'scheduled').length;
+      const nextInstance = instances.find(i => i.status === 'scheduled');
+
+      setScheduleStats(prev => ({
+        ...prev,
+        [scheduleId]: { completed, scheduled, total: instances.length, nextInstance }
+      }));
+    } catch (error) {
+      logger.error('Error loading schedule stats:', error);
     }
-
-    // Si es recurring pero le faltan campos, solo hacer debug (no warn)
-    if (!session.schedules || !session.recurringStartDate || !session.recurringWeeks) {
-      logger.debug('Session missing required fields for remaining calculation:', {
-        id: session.id,
-        name: session.name,
-        type: session.type,
-        hasSchedules: !!session.schedules,
-        hasRecurringStartDate: !!session.recurringStartDate,
-        hasRecurringWeeks: !!session.recurringWeeks
-      });
-      return null;
-    }
-
-    const startDate = session.recurringStartDate.toDate();
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + (session.recurringWeeks * 7));
-
-    const now = new Date();
-    let total = 0;
-    let remaining = 0;
-
-    // Contar total y restantes
-    session.schedules.forEach(schedule => {
-      const currentDate = new Date(startDate);
-      while (currentDate <= endDate) {
-        if (currentDate.getDay() === schedule.day) {
-          total++;
-          if (currentDate > now) {
-            remaining++;
-          }
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-    });
-
-    return { total, remaining };
   };
 
   // Render información de programación
@@ -444,21 +428,42 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
     if (session.type === 'recurring' && session.schedules?.length > 0) {
       const days = session.schedules.map(s => getDayName(s.day)).join(', ');
       const time = session.schedules[0];
-      const sessionsInfo = calculateRemainingSessions(session);
+      const stats = scheduleStats[session.id];
 
       return (
-        <div className="space-y-1">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            {days} • {time.startTime} - {time.endTime}
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-gray-900 dark:text-white">
+            📅 {days}
           </div>
-          {session.recurringStartDate && (
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            ⏰ {time.startTime} - {time.endTime}
+          </div>
+          {session.startDate && (
             <div className="text-xs text-gray-500 dark:text-gray-500">
-              Inicio: {session.recurringStartDate.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+              Inicio: {session.startDate.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
           )}
-          {sessionsInfo && (
-            <div className="text-xs text-gray-500 dark:text-gray-500">
-              {sessionsInfo.remaining} de {sessionsInfo.total} sesiones restantes
+          {stats && (
+            <>
+              {stats.nextInstance && (
+                <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  ⏰ Próxima: {stats.nextInstance.scheduledStart.toDate().toLocaleDateString('es-ES', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              )}
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                ✅ {stats.completed} completadas • 📆 {stats.scheduled} pendientes
+              </div>
+            </>
+          )}
+          {session.studentEnrollments && session.studentEnrollments.length > 0 && (
+            <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+              👥 {session.studentEnrollments.filter(e => e.status === 'active').length} estudiantes activos
             </div>
           )}
         </div>
@@ -678,64 +683,119 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                 </div>
 
                 {/* Acciones */}
-                <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                  {session.status === 'scheduled' && (
-                    <BaseButton
-                      variant="success"
-                      size="sm"
-                      icon={Play}
-                      onClick={() => handleStartSession(session.id)}
-                      loading={actionLoading === `start-${session.id}`}
-                      fullWidth
-                    >
-                      Iniciar
-                    </BaseButton>
-                  )}
-
-                  {session.status === 'live' && (
+                <div className="flex flex-col gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  {/* HORARIO RECURRENTE */}
+                  {session.type === 'recurring' && (
                     <>
-                      <BaseButton
-                        variant="primary"
-                        size="sm"
-                        icon={Video}
-                        onClick={() => onJoinSession && onJoinSession(session)}
-                        fullWidth
-                      >
-                        Unirse
-                      </BaseButton>
-                      <BaseButton
-                        variant="danger"
-                        size="sm"
-                        icon={StopCircle}
-                        onClick={() => handleEndSession(session.id)}
-                        loading={actionLoading === `end-${session.id}`}
-                      >
-                        Finalizar
-                      </BaseButton>
+                      <div className="flex gap-2">
+                        <BaseButton
+                          variant="primary"
+                          size="sm"
+                          icon={Users}
+                          onClick={() => openEditModal(session)}
+                          fullWidth
+                        >
+                          Gestionar Estudiantes
+                        </BaseButton>
+                        <BaseButton
+                          variant="ghost"
+                          size="sm"
+                          icon={Calendar}
+                          onClick={() => {
+                            // TODO: Abrir modal de calendario de instancias
+                            setMessage({ type: 'info', text: 'Vista de calendario próximamente' });
+                          }}
+                        >
+                          Ver
+                        </BaseButton>
+                      </div>
+                      <div className="flex gap-2">
+                        <BaseButton
+                          variant="ghost"
+                          size="sm"
+                          icon={Edit}
+                          onClick={() => openEditModal(session)}
+                          fullWidth
+                        >
+                          Editar
+                        </BaseButton>
+                        <BaseButton
+                          variant="danger"
+                          size="sm"
+                          icon={Trash2}
+                          onClick={() => handleDelete(session)}
+                          loading={actionLoading === `delete-${session.id}`}
+                          fullWidth
+                        >
+                          Eliminar
+                        </BaseButton>
+                      </div>
                     </>
                   )}
 
-                  {session.status === 'ended' && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center w-full py-2">
-                      Sesión finalizada
-                    </div>
-                  )}
-
-                  {session.status !== 'live' && (
+                  {/* SESIÓN ÚNICA/INSTANCIA */}
+                  {session.type !== 'recurring' && (
                     <>
-                      <BaseButton
-                        variant="ghost"
-                        size="sm"
-                        icon={Edit}
-                        onClick={() => openEditModal(session)}
-                      />
-                      <BaseButton
-                        variant="danger"
-                        size="sm"
-                        icon={Trash2}
-                        onClick={() => handleDelete(session.id)}
-                        loading={actionLoading === `delete-${session.id}`}
-                      />
+                      {session.status === 'scheduled' && (
+                        <BaseButton
+                          variant="success"
+                          size="sm"
+                          icon={Play}
+                          onClick={() => handleStartSession(session.id)}
+                          loading={actionLoading === `start-${session.id}`}
+                          fullWidth
+                        >
+                          Iniciar
+                        </BaseButton>
+                      )}
+
+                      {session.status === 'live' && (
+                        <>
+                          <BaseButton
+                            variant="primary"
+                            size="sm"
+                            icon={Video}
+                            onClick={() => onJoinSession && onJoinSession(session)}
+                            fullWidth
+                          >
+                            Unirse
+                          </BaseButton>
+                          <BaseButton
+                            variant="danger"
+                            size="sm"
+                            icon={StopCircle}
+                            onClick={() => handleEndSession(session.id)}
+                            loading={actionLoading === `end-${session.id}`}
+                            fullWidth
+                          >
+                            Finalizar
+                          </BaseButton>
+                        </>
+                      )}
+
+                      {session.status === 'ended' && (
+                        <div className="text-sm text-gray-500 dark:text-gray-400 text-center w-full py-2">
+                          Sesión finalizada
+                        </div>
+                      )}
+
+                      {session.status !== 'live' && (
+                        <div className="flex gap-2">
+                          <BaseButton
+                            variant="ghost"
+                            size="sm"
+                            icon={Edit}
+                            onClick={() => openEditModal(session)}
+                          />
+                          <BaseButton
+                            variant="danger"
+                            size="sm"
+                            icon={Trash2}
+                            onClick={() => handleDelete(session)}
+                            loading={actionLoading === `delete-${session.id}`}
+                          />
+                        </div>
+                      )}
                     </>
                   )}
                 </div>

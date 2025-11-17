@@ -15,6 +15,8 @@ import LandingPage from './LandingPage';
 import Login from './components/Login.jsx';
 import JoinGamePage from './components/JoinGamePage.jsx';
 import OfflineIndicator from './components/OfflineIndicator.jsx';
+import InstallPrompt from './components/InstallPrompt.jsx';
+import ServiceWorkerUpdateNotification from './components/ServiceWorkerUpdateNotification.jsx';
 
 // Offline utilities
 import { setupAutoSync } from './utils/syncQueue.js';
@@ -97,6 +99,8 @@ function App() {
   return (
     <Router>
       <OfflineIndicator />
+      <InstallPrompt />
+      <ServiceWorkerUpdateNotification />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Public Routes - solo accesibles sin autenticación */}

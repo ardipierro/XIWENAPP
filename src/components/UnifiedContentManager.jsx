@@ -4,7 +4,7 @@
  * @module components/UnifiedContentManager
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import {
   BookOpen,
   FileText,
@@ -56,7 +56,9 @@ import {
 } from './common';
 import { UniversalCard } from './cards';
 import CreateContentModal from './CreateContentModal';
-import ContentAnalytics from './ContentAnalytics';
+
+// Lazy load para componentes pesados (Recharts: 321 KB)
+const ContentAnalytics = lazy(() => import('./ContentAnalytics'));
 
 // ============================================
 // CONSTANTS
@@ -488,10 +490,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         size="full"
       >
         {showAnalytics && (
-          <ContentAnalytics
-            teacherId={user.uid}
-            onClose={() => setShowAnalytics(false)}
-          />
+          <Suspense fallback={<BaseLoading message="Cargando analytics..." />}>
+            <ContentAnalytics
+              teacherId={user.uid}
+              onClose={() => setShowAnalytics(false)}
+            />
+          </Suspense>
         )}
       </BaseModal>
 
