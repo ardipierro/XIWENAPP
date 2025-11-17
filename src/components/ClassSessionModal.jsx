@@ -257,10 +257,10 @@ function ClassSessionModal({
 
     let result;
     if (isRecurring) {
-      // Horario recurrente → usar enrollStudentToSchedule
+      // Clase recurrente → usar enrollStudentToSchedule
       result = await enrollStudentToSchedule(session.id, studentId, studentName);
       if (result.success) {
-        showAssignmentMessage('success', '✅ Estudiante inscrito al horario (aplicará a todas las clases futuras)');
+        showAssignmentMessage('success', '✅ Estudiante inscrito a la clase (aplicará a todas las clases futuras)');
         // Actualizar la sesión local
         if (!session.studentEnrollments) session.studentEnrollments = [];
         session.studentEnrollments.push({
@@ -295,10 +295,10 @@ function ClassSessionModal({
 
     let result;
     if (isRecurring) {
-      // Horario recurrente → usar unenrollStudentFromSchedule
+      // Clase recurrente → usar unenrollStudentFromSchedule
       result = await unenrollStudentFromSchedule(session.id, studentId);
       if (result.success) {
-        showAssignmentMessage('success', '✅ Estudiante desinscrito del horario');
+        showAssignmentMessage('success', '✅ Estudiante desinscrito de la clase');
         // Actualizar la sesión local
         if (session.studentEnrollments) {
           session.studentEnrollments = session.studentEnrollments.map(e =>
@@ -840,16 +840,16 @@ function ClassSessionModal({
                 </div>
               ) : (
                 <>
-                  {/* HORARIO RECURRENTE - Mostrar enrollments */}
+                  {/* CLASE RECURRENTE - Mostrar enrollments */}
                   {session.type === 'recurring' ? (
                     <>
                       <div className="space-y-3">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                           <Users size={20} strokeWidth={2} />
-                          Estudiantes Inscritos en el Horario
+                          Estudiantes Inscritos en la Clase
                         </h3>
                         {!session.studentEnrollments || session.studentEnrollments.filter(e => e.status === 'active').length === 0 ? (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">No hay estudiantes inscritos en este horario</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">No hay estudiantes inscritos en esta clase</p>
                         ) : (
                           <div className="space-y-2">
                             {session.studentEnrollments.filter(e => e.status === 'active').map(enrollment => {

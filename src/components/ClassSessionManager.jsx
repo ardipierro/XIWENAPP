@@ -202,7 +202,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
   const handleDelete = async (session) => {
     const isRecurring = session.type === 'recurring';
     const confirmMessage = isRecurring
-      ? `¿Estás seguro de eliminar este HORARIO recurrente?\n\nEsto eliminará:\n- El horario "${session.name}"\n- Todas las clases futuras programadas\n- NO se eliminarán las clases ya finalizadas\n\n⚠️ Esta acción no se puede deshacer.`
+      ? `¿Estás seguro de eliminar esta CLASE recurrente?\n\nEsto eliminará:\n- La clase "${session.name}"\n- Todas las clases futuras programadas\n- NO se eliminarán las clases ya finalizadas\n\n⚠️ Esta acción no se puede deshacer.`
       : '¿Estás seguro de eliminar esta sesión?';
 
     if (!confirm(confirmMessage)) return;
@@ -220,10 +220,10 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
       if (result.success) {
         setMessage({
           type: 'success',
-          text: isRecurring ? 'Horario eliminado exitosamente' : 'Sesión eliminada exitosamente'
+          text: isRecurring ? 'Clase eliminada exitosamente' : 'Sesión eliminada exitosamente'
         });
         await loadData();
-        logger.info('Sesión/Horario eliminado:', session.id);
+        logger.info('Sesión/Clase eliminada:', session.id);
       } else {
         setMessage({ type: 'error', text: result.error || 'Error al eliminar' });
       }
