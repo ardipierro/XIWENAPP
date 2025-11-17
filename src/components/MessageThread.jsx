@@ -1244,106 +1244,112 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
             style={{ display: 'none' }}
           />
 
-          {/* Una sola fila: Emoji + Textarea + Send */}
+          {/* Una sola fila: Textarea con botones internos + Send/Mic */}
           <div className="input-row">
-            {/* Mobile: Solo emoji a la izquierda */}
-            {isMobile && (
-              <div style={{ position: 'relative' }}>
-                <button
-                  type="button"
-                  className="input-action-btn"
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  disabled={sending || uploading || showVoiceRecorder}
-                  title="Emojis"
-                >
-                  <Smile size={22} />
-                </button>
+            {/* Desktop: Botones externos eliminados */}
 
-                {showEmojiPicker && (
-                  <EmojiPicker
-                    onSelect={handleEmojiSelect}
-                    onClose={() => setShowEmojiPicker(false)}
-                  />
-                )}
-              </div>
-            )}
+            {/* Textarea con botones internos */}
+            <div className="textarea-wrapper">
+              <textarea
+                ref={inputRef}
+                className="message-input"
+                placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
+                value={editingMessage ? editingContent : newMessage}
+                onChange={(e) => {
+                  if (editingMessage) {
+                    setEditingContent(e.target.value);
+                  } else {
+                    setNewMessage(e.target.value);
+                  }
+                }}
+                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
+                rows={isMobile ? 1 : 3}
+                disabled={sending || uploading}
+              />
 
-            {/* Desktop: Botones a la izquierda */}
-            {!isMobile && (
-              <>
-                <button
-                  type="button"
-                  className="attach-button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={sending || uploading}
-                  title="Adjuntar archivo"
-                >
-                  <Paperclip size={20} />
-                </button>
+              {/* Botones internos - Solo visibles cuando NO hay texto */}
+              {!newMessage.trim() && !editingMessage && (
+                <div className="inner-input-buttons">
+                  {/* Lado izquierdo: Emoji */}
+                  <div className="inner-buttons-left">
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        className="inner-input-btn"
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        disabled={sending || uploading || showVoiceRecorder}
+                        title="Emojis"
+                      >
+                        <Smile size={20} />
+                      </button>
 
-                <div style={{ position: 'relative' }}>
-                  <button
-                    type="button"
-                    className="emoji-button"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    disabled={sending || uploading || showVoiceRecorder}
-                    title="Emojis"
-                  >
-                    <Smile size={20} />
-                  </button>
+                      {showEmojiPicker && (
+                        <EmojiPicker
+                          onSelect={handleEmojiSelect}
+                          onClose={() => setShowEmojiPicker(false)}
+                        />
+                      )}
+                    </div>
+                  </div>
 
-                  {showEmojiPicker && (
-                    <EmojiPicker
-                      onSelect={handleEmojiSelect}
-                      onClose={() => setShowEmojiPicker(false)}
-                    />
-                  )}
+                  {/* Lado derecho: Adjuntar + Imagen */}
+                  <div className="inner-buttons-right">
+                    <button
+                      type="button"
+                      className="inner-input-btn"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = handleFileSelect;
+                        input.click();
+                      }}
+                      disabled={sending || uploading}
+                      title="Enviar foto"
+                    >
+                      <ImageIcon size={20} />
+                    </button>
+
+                    <button
+                      type="button"
+                      className="inner-input-btn"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={sending || uploading}
+                      title="Adjuntar archivo"
+                    >
+                      <Paperclip size={20} />
+                    </button>
+                  </div>
                 </div>
-
-                <button
-                  type="button"
-                  className="voice-button"
-                  onClick={() => setShowVoiceRecorder(true)}
-                  disabled={sending || uploading || showVoiceRecorder}
-                  title="Mensaje de voz"
-                >
-                  <Mic size={20} />
-                </button>
-              </>
-            )}
-
-            {/* Textarea */}
-            <textarea
-              ref={inputRef}
-              className="message-input"
-              placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
-              value={editingMessage ? editingContent : newMessage}
-              onChange={(e) => {
-                if (editingMessage) {
-                  setEditingContent(e.target.value);
-                } else {
-                  setNewMessage(e.target.value);
-                }
-              }}
-              onKeyPress={handleKeyPress}
-              onKeyDown={handleKeyDown}
-              rows={isMobile ? 1 : 3}
-              disabled={sending || uploading}
-            />
-
-            {/* Send Button */}
-            <button
-              type="submit"
-              className="send-button"
-              disabled={(!newMessage.trim() && !selectedFile) || sending || uploading}
-              title={uploading ? 'Subiendo...' : 'Enviar'}
-            >
-              {uploading ? (
-                <div className="spinner-small"></div>
-              ) : (
-                <Send size={22} />
               )}
-            </button>
+            </div>
+
+            {/* Botón derecho: Micrófono (vacío) o Enviar (con texto) */}
+            {newMessage.trim() || selectedFile || editingMessage ? (
+              <button
+                type="submit"
+                className="send-button"
+                disabled={(!newMessage.trim() && !selectedFile) || sending || uploading}
+                title={uploading ? 'Subiendo...' : 'Enviar'}
+              >
+                {uploading ? (
+                  <div className="spinner-small"></div>
+                ) : (
+                  <Send size={22} />
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="voice-button"
+                onClick={() => setShowVoiceRecorder(true)}
+                disabled={sending || uploading || showVoiceRecorder}
+                title="Mensaje de voz"
+              >
+                <Mic size={22} />
+              </button>
+            )}
           </div>
         </div>
       </form>

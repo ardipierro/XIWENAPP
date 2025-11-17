@@ -3581,11 +3581,32 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     overflow: hidden !important;
   }
 
-  .send-button {
+  .send-button,
+  .voice-button {
     min-width: 44px !important;
     min-height: 44px !important;
     padding: 10px !important;
     flex-shrink: 0 !important;
+  }
+
+  /* Textarea wrapper en mobile */
+  .textarea-wrapper {
+    flex: 1 !important;
+  }
+
+  .textarea-wrapper .message-input {
+    padding: 8px 70px 8px 45px !important; /* Espacio para botones internos en mobile */
+  }
+
+  /* Botones internos en mobile */
+  .inner-input-buttons {
+    padding: 0 8px !important;
+  }
+
+  .inner-input-btn {
+    padding: 4px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
   }
 
   /* Reply/Edit bars */
@@ -3800,6 +3821,105 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* ===== Textarea Wrapper (con botones internos) ===== */
+.textarea-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
+.textarea-wrapper .message-input {
+  flex: 1;
+  padding: 12px 80px 12px 50px; /* Espacio para botones internos */
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 14px;
+  resize: none;
+  transition: border-color 0.2s, padding 0.3s;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.textarea-wrapper .message-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #6366f1);
+}
+
+/* Botones internos del textarea */
+.inner-input-buttons {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  pointer-events: none; /* No bloquear clicks en el textarea */
+  z-index: 1;
+}
+
+.inner-buttons-left,
+.inner-buttons-right {
+  display: flex;
+  gap: 6px;
+  pointer-events: auto; /* Habilitar clicks en los botones */
+}
+
+.inner-input-btn {
+  padding: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.inner-input-btn:hover:not(:disabled) {
+  background: var(--color-bg-secondary);
+  color: var(--color-primary, #6366f1);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.inner-input-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Ajuste del voice-button para que sea igual al send-button */
+.voice-button {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 12px;
+  background: var(--color-primary, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.voice-button:hover:not(:disabled) {
+  background: var(--color-primary-dark, #4f46e5);
+  transform: translateY(-2px);
+}
+
+.voice-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .attach-button {
@@ -4094,31 +4214,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   }
 }
 
-.voice-button {
-  padding: 10px;
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-border);
-  border-radius: 10px;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.voice-button:hover:not(:disabled) {
-  background: #ef4444;
-  color: white;
-  border-color: #ef4444;
-  transform: scale(1.05);
-}
-
-.voice-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+/* voice-button moved to line 3878 - unified with send-button style */
 
 /* Message Attachments Display */
 .message-attachment {
