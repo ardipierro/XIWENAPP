@@ -243,6 +243,7 @@ function UserProfileModal({
 
   // Callbacks para comunicación con InfoTab
   const handleEditingChange = (editing) => {
+    console.log('🔔 handleEditingChange called:', { editing, activeTab });
     setIsEditing(editing);
   };
 
@@ -314,6 +315,15 @@ function UserProfileModal({
   };
 
   const tabs = getTabs();
+
+  // Debug logs
+  console.log('📊 UserProfileModal state:', {
+    activeTab,
+    isEditing,
+    isAdmin,
+    userRole,
+    shouldShowFooter: activeTab === 'info' && isEditing
+  });
 
   return (
     <BaseModal
@@ -408,7 +418,7 @@ function UserProfileModal({
         </div>
 
         {/* Profile Header - Avatar + Info - FIJO */}
-        <div className="relative px-4 md:px-6 flex-shrink-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent dark:from-black/90 dark:via-black/60 dark:to-transparent border-b border-white/20 dark:border-white/10">
+        <div className="relative px-4 md:px-6 flex-shrink-0 bg-gradient-to-b from-transparent via-black/50 to-black/80 dark:from-transparent dark:via-black/60 dark:to-black/90 border-b border-white/20 dark:border-white/10">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 -mt-10 md:-mt-14 pb-3">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
