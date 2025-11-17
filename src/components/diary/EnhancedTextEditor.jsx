@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { ColorPicker } from './ColorPicker';
 import { HighlightPicker } from './HighlightPicker';
-import { PencilPresetsSimple } from './PencilPresetsSimple';
+import { SimplePencilPresets } from './SimplePencilPresets';
 import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
 import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { ZoomControls } from './ZoomControls';
@@ -516,9 +516,9 @@ export function EnhancedTextEditor({
               {/* Presets de lápiz simplificados (colapsable) */}
               {showPencilPresets && (
                 <div className="mb-3">
-                  <PencilPresetsSimple
+                  <SimplePencilPresets
                     onSelect={handlePencilPresetSelect}
-                    current={{ color: pencilColor, opacity: pencilOpacity, size: pencilSize }}
+                    current={{ color: pencilColor, size: pencilSize }}
                   />
                 </div>
               )}

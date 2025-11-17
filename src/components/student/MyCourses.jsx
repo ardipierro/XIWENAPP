@@ -132,9 +132,9 @@ function MyCourses({ user, onSelectCourse }) {
     return (
       <div className="p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Contenidos</h1>
         </div>
-        <BaseLoading variant="spinner" size="lg" text="Cargando tus cursos..." />
+        <BaseLoading variant="spinner" size="lg" text="Cargando contenidos..." />
       </div>
     );
   }
@@ -143,11 +143,11 @@ function MyCourses({ user, onSelectCourse }) {
     return (
       <div className="p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Contenidos</h1>
         </div>
         <BaseAlert
           variant="danger"
-          title="Error al cargar cursos"
+          title="Error al cargar contenidos"
           dismissible={false}
         >
           <p className="mb-4">{error}</p>
@@ -162,11 +162,11 @@ function MyCourses({ user, onSelectCourse }) {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mis Cursos</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Contenidos</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {courses.length === 0
-            ? 'Aún no tienes cursos asignados'
-            : `${courses.length} curso${courses.length !== 1 ? 's' : ''} disponible${courses.length !== 1 ? 's' : ''}`
+            ? 'Aún no tienes contenidos asignados'
+            : `${courses.length} contenido${courses.length !== 1 ? 's' : ''} disponible${courses.length !== 1 ? 's' : ''}`
           }
         </p>
       </div>
@@ -202,7 +202,7 @@ function MyCourses({ user, onSelectCourse }) {
           {filteredCourses.length === 0 ? (
             <BaseEmptyState
               icon={BookMarked}
-              title="No hay cursos en esta categoría"
+              title="No hay contenidos en esta categoría"
               description="Prueba con otro filtro"
               size="sm"
             />
@@ -275,8 +275,8 @@ function MyCourses({ user, onSelectCourse }) {
       {courses.length === 0 && (
         <BaseEmptyState
           icon={BookMarked}
-          title="No tienes cursos asignados"
-          description="Cuando tu profesor te asigne cursos, aparecerán aquí."
+          title="No tienes contenidos asignados"
+          description="Cuando tu profesor te asigne contenidos, aparecerán aquí."
           size="lg"
         />
       )}

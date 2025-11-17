@@ -205,4 +205,15 @@ PAIRS: cat = animal doméstico felino | dog = animal doméstico canino | bird = 
 }
 
 // Export singleton instance
-export default new AIService();
+const aiServiceInstance = new AIService();
+export default aiServiceInstance;
+
+/**
+ * Generate exercises from text (stub)
+ * @param {string} sourceText - Source text
+ * @param {Object} options - Options
+ * @returns {Promise<Array>} Exercises
+ */
+export async function generateExercisesFromText(sourceText, options = {}) {
+  return [];
+}

@@ -41,7 +41,7 @@ export const ROLE_INFO = {
     color: '#a1a1aa' // gris
   },
   [ROLES.STUDENT]: {
-    name: 'Alumno Regular',
+    name: 'Alumno',
     description: 'Acceso completo a juegos y progreso personal',
     icon: 'GraduationCap',
     color: '#71717a' // gris oscuro

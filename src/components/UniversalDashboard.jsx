@@ -9,24 +9,21 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
-import { TopBarProvider } from '../contexts/TopBarContext';
+import { TopBarProvider, useTopBar } from '../contexts/TopBarContext';
 import { usePermissions } from '../hooks/usePermissions';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
 import ViewAsBanner from './ViewAsBanner';
-import { BaseLoading, BaseButton } from './common';
+import { BaseLoading } from './common';
 import { UniversalCard } from './cards';
 import {
   Layers,
   BookOpen,
-  MessageCircle,
-  Settings,
   Users,
   ClipboardCheck,
-  Gamepad2,
   Target,
   Calendar,
-  BarChart3
+  Gamepad2
 } from 'lucide-react';
 
 // Lazy load de componentes pesados
@@ -52,7 +49,7 @@ const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
 const StudentSessionsView = lazy(() => import('./StudentSessionsView'));
 
 // Games views
-const LiveGamesView = lazy(() => import('./games/LiveGamesView'));
+const LiveGamesHub = lazy(() => import('./LiveGamesHub'));
 const GameContainer = lazy(() => import('./GameContainer'));
 
 // Guardian views
@@ -73,7 +70,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Crear Contenido',
       description: 'Gestiona contenidos, ejercicios y configura IA',
       icon: Layers,
-      gradient: 'from-blue-500 to-indigo-600',
       path: '/dashboard/unified-content',
       permission: 'create-content'
     },
@@ -81,31 +77,13 @@ function HomeView({ user, onNavigate }) {
       title: 'Diario de Clases',
       description: 'Crea y administra diarios de clase',
       icon: BookOpen,
-      gradient: 'from-amber-500 to-orange-600',
       path: '/dashboard/daily-logs',
       permission: 'manage-classes'
-    },
-    {
-      title: 'Mensajería',
-      description: 'Comunícate con estudiantes y profesores',
-      icon: MessageCircle,
-      gradient: 'from-green-500 to-emerald-600',
-      path: '/dashboard/messages',
-      permission: 'send-messages'
-    },
-    {
-      title: 'Configuración',
-      description: 'Ajustes del sistema y credenciales',
-      icon: Settings,
-      gradient: 'from-gray-500 to-zinc-600',
-      path: '/dashboard/system-settings',
-      permission: 'manage-system-settings'
     },
     {
       title: 'Clases',
       description: 'Gestiona sesiones de clase en vivo',
       icon: Users,
-      gradient: 'from-teal-500 to-cyan-600',
       path: '/dashboard/classes',
       permission: 'manage-classes'
     },
@@ -113,23 +91,13 @@ function HomeView({ user, onNavigate }) {
       title: 'Revisar Tareas',
       description: 'Corrección de tareas con IA',
       icon: ClipboardCheck,
-      gradient: 'from-pink-500 to-rose-600',
       path: '/dashboard/homework-review',
       permission: 'grade-assignments'
-    },
-    {
-      title: 'Juegos en Vivo',
-      description: 'Juegos en tiempo real con estudiantes',
-      icon: Gamepad2,
-      gradient: 'from-purple-500 to-indigo-600',
-      path: '/dashboard/games',
-      permission: 'play-live-games'
     },
     {
       title: 'Juego por Turnos',
       description: 'Juego clásico de preguntas',
       icon: Target,
-      gradient: 'from-red-500 to-rose-600',
       path: '/dashboard/turn-game',
       permission: null // Disponible para todos
     },
@@ -137,17 +105,22 @@ function HomeView({ user, onNavigate }) {
       title: 'Calendario',
       description: 'Eventos y clases programadas',
       icon: Calendar,
-      gradient: 'from-cyan-500 to-blue-600',
       path: '/dashboard/calendar',
       permission: null // Disponible para todos
     },
     {
-      title: 'Analíticas',
-      description: 'Estadísticas y reportes',
-      icon: BarChart3,
-      gradient: 'from-violet-500 to-purple-600',
-      path: '/dashboard/analytics',
-      permission: 'view-own-analytics'
+      title: 'Juegos en Vivo',
+      description: 'Juegos en tiempo real con estudiantes',
+      icon: Gamepad2,
+      path: '/dashboard/games',
+      permission: 'play-live-games'
+    },
+    {
+      title: 'ADE1 2026 - Fonética',
+      description: 'Libro interactivo con 120+ slides y ejercicios',
+      icon: BookOpen,
+      path: '/dashboard/ade1-content',
+      permission: null // Disponible para todos
     }
   ];
 
@@ -168,79 +141,27 @@ function HomeView({ user, onNavigate }) {
   const formattedDate = today.toLocaleDateString('es-ES', dateOptions);
 
   return (
-    <div className="px-4 md:px-6 pt-2 md:pt-3 pb-4 md:pb-6 space-y-6">
+    <div className="space-y-6">
       {/* Header - Solo fecha */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-500 dark:text-gray-500">
+        <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
           {formattedDate}
         </h1>
       </div>
 
       {/* Tarjetas de acceso */}
-      <div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {visibleCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <div
-                key={card.path}
-                onClick={() => onNavigate && onNavigate(card.path)}
-                className="group cursor-pointer"
-              >
-                <div
-                  className="flex flex-col rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-1 h-full"
-                  style={{
-                    background: 'var(--color-bg-secondary)',
-                    border: '1px solid var(--color-border)',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
-                    e.currentTarget.style.borderColor = 'var(--color-border-focus)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)';
-                    e.currentTarget.style.borderColor = 'var(--color-border)';
-                  }}
-                >
-                  {/* Icon header con gradient */}
-                  <div className={`p-5 bg-gradient-to-br ${card.gradient}`}>
-                    <Icon size={32} className="text-white" strokeWidth={2} />
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      {card.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 flex-1">
-                      {card.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Acceso rápido a contenido ADE1 (temporal) */}
-      <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {visibleCards.map((card) => (
           <UniversalCard
+            key={card.path}
             variant="default"
             size="md"
-            title="ADE1 2026 - Fonética"
-            description="Libro interactivo con 120+ slides y ejercicios de fonética española"
-            onClick={() => onNavigate && onNavigate('/dashboard/ade1-content')}
-            actions={[
-              <BaseButton key="view" variant="primary" size="sm" fullWidth>
-                Ver contenido →
-              </BaseButton>
-            ]}
+            icon={card.icon}
+            title={card.title}
+            description={card.description}
+            onClick={() => onNavigate && onNavigate(card.path)}
           />
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -259,19 +180,30 @@ function PlaceholderView({ title }) {
 }
 
 /**
- * Dashboard Universal
+ * Dashboard Universal - Componente interno que usa el TopBarContext
  */
-export function UniversalDashboard() {
+function UniversalDashboardInner() {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { getEffectiveUser, isViewingAs } = useViewAs();
   const { initialized, can } = usePermissions();
+  const { registerSidebarControl } = useTopBar();
+
   // En desktop (>= 1024px) el menú está abierto por defecto, en mobile cerrado
   const [menuOpen, setMenuOpen] = useState(window.innerWidth >= 1024);
   const [currentPath, setCurrentPath] = useState(location.pathname);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
+
+  // Registrar funciones de control del sidebar en el contexto
+  useEffect(() => {
+    registerSidebarControl({
+      hide: () => setMenuOpen(false),
+      show: () => setMenuOpen(true),
+      toggle: () => setMenuOpen(prev => !prev)
+    });
+  }, [registerSidebarControl]);
 
   // Sincronizar currentPath con la URL actual
   useEffect(() => {
@@ -485,16 +417,7 @@ export function UniversalDashboard() {
             // JUEGOS EN VIVO
             case '/dashboard/games':
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
-              return (
-                <LiveGamesView
-                  user={effectiveUser}
-                  onJoinGame={(gameId) => {
-                    logger.debug('Unirse a juego:', gameId);
-                    // TODO: Implementar lógica para unirse al juego
-                    // Posiblemente navegar a /game/:gameId o abrir modal
-                  }}
-                />
-              );
+              return <LiveGamesHub user={effectiveUser} />;
 
             // JUEGO POR TURNOS
             case '/dashboard/turn-game':
@@ -564,34 +487,43 @@ export function UniversalDashboard() {
   };
 
   return (
-    <TopBarProvider>
-      <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
-        {/* ViewAs Banner - Siempre arriba de todo */}
-        <ViewAsBanner />
+    <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
+      {/* ViewAs Banner - Siempre arriba de todo */}
+      <ViewAsBanner />
 
-        {/* TopBar */}
-        <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
+      {/* TopBar */}
+      <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
 
-        {/* SideMenu */}
-        <UniversalSideMenu
-          isOpen={menuOpen}
-          currentPath={currentPath}
-          onNavigate={handleNavigate}
+      {/* SideMenu */}
+      <UniversalSideMenu
+        isOpen={menuOpen}
+        currentPath={currentPath}
+        onNavigate={handleNavigate}
+      />
+
+      {/* Overlay para mobile */}
+      {menuOpen && (
+        <div
+          className="universal-dashboard__overlay"
+          onClick={() => setMenuOpen(false)}
         />
+      )}
 
-        {/* Overlay para mobile */}
-        {menuOpen && (
-          <div
-            className="universal-dashboard__overlay"
-            onClick={() => setMenuOpen(false)}
-          />
-        )}
+      {/* Content Area */}
+      <main className={`universal-dashboard__content ${menuOpen ? 'universal-dashboard__content--menu-open' : ''}`}>
+        {renderContent()}
+      </main>
+    </div>
+  );
+}
 
-        {/* Content Area */}
-        <main className={`universal-dashboard__content ${menuOpen ? 'universal-dashboard__content--menu-open' : ''}`}>
-          {renderContent()}
-        </main>
-      </div>
+/**
+ * Dashboard Universal - Wrapper con TopBarProvider
+ */
+export function UniversalDashboard() {
+  return (
+    <TopBarProvider>
+      <UniversalDashboardInner />
     </TopBarProvider>
   );
 }

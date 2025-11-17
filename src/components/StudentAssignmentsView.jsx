@@ -53,7 +53,7 @@ export default function StudentAssignmentsView({ studentId }) {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Mis Tareas</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Tareas</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
           {pendingCount > 0 && (
             <span className="text-orange-600 dark:text-orange-400 font-medium">

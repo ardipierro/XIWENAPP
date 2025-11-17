@@ -90,7 +90,7 @@ function DashboardLayoutInner({ user, userRole, children, onMenuAction, currentS
           ${isViewingAs
             ? 'mt-[86px] md:mt-[100px] lg:mt-[108px] h-[calc(100vh-86px)] md:h-[calc(100vh-100px)] lg:h-[calc(100vh-108px)]'
             : 'mt-12 md:mt-14 lg:mt-16 h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] lg:h-[calc(100vh-64px)]'}
-          ${sidebarOpen ? 'ml-0 lg:ml-[200px]' : 'ml-0'}
+          ${sidebarOpen ? 'ml-0 lg:ml-[260px]' : 'ml-0'}
           transition-[margin-left] duration-200 ease-in-out
         `}
       >

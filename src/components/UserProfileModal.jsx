@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Award } from 'lucide-react';
+import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
 import ProfileTabs from './profile/ProfileTabs';
@@ -20,7 +20,8 @@ import InfoTab from './profile/tabs/InfoTab';
 import ClassesTab from './profile/tabs/ClassesTab';
 import ContentTab from './profile/tabs/ContentTab';
 import StudentsTab from './profile/tabs/StudentsTab';
-import BadgesTab from './profile/tabs/BadgesTab';
+import CreditsTab from './profile/tabs/CreditsTab';
+import GuardiansTab from './profile/tabs/GuardiansTab';
 import { AVATARS } from './AvatarSelector';
 import {
   getUserAvatar,
@@ -35,7 +36,6 @@ import {
   deleteBannerImage,
   validateImageFile
 } from '../firebase/storage';
-import { getUserGamification } from '../firebase/gamification';
 import logger from '../utils/logger';
 
 /**
@@ -46,6 +46,7 @@ import logger from '../utils/logger';
  * @param {object} user - Usuario a mostrar
  * @param {string} userRole - Rol del usuario
  * @param {string} currentUserRole - Rol del usuario actual (quien está viendo)
+ * @param {object} currentUser - Usuario actual completo (quien está viendo)
  * @param {boolean} isAdmin - Si el usuario actual es admin
  * @param {function} onUpdate - Callback cuando se actualiza el perfil
  */
@@ -55,13 +56,13 @@ function UserProfileModal({
   user,
   userRole,
   currentUserRole,
+  currentUser,
   isAdmin = false,
   onUpdate
 }) {
   // Estados del perfil
   const [userAvatar, setUserAvatar] = useState('default');
   const [userBanner, setUserBanner] = useState(null);
-  const [gamification, setGamification] = useState(null);
 
   // Estados de edición y navegación
   const [uploading, setUploading] = useState(false);
@@ -99,10 +100,6 @@ function UserProfileModal({
             setUserBanner(banner);
             setUploadedBannerUrl(banner);
           }
-
-          // Cargar gamificación
-          const gamData = await getUserGamification(user.uid);
-          setGamification(gamData);
         } catch (err) {
           logger.error('Error loading profile:', err);
         }
@@ -243,6 +240,7 @@ function UserProfileModal({
 
   // Callbacks para comunicación con InfoTab
   const handleEditingChange = (editing) => {
+    console.log('🔔 handleEditingChange called:', { editing, activeTab });
     setIsEditing(editing);
   };
 
@@ -273,7 +271,7 @@ function UserProfileModal({
     });
 
     // Tab de Clases - Estudiantes y Profesores
-    if (userRole === 'student' || userRole === 'teacher' || userRole === 'trial_teacher') {
+    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial' || userRole === 'teacher' || userRole === 'trial_teacher') {
       tabs.push({
         id: 'classes',
         label: 'Clases',
@@ -282,8 +280,22 @@ function UserProfileModal({
       });
     }
 
+    // Tab de Créditos - Todos los usuarios
+    tabs.push({
+      id: 'credits',
+      label: 'Créditos',
+      icon: CreditCard,
+      component: (
+        <CreditsTab
+          user={user}
+          currentUser={currentUser || user}
+          onUpdate={onUpdate}
+        />
+      )
+    });
+
     // Tab de Contenidos - Solo Estudiantes
-    if (userRole === 'student') {
+    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
       tabs.push({
         id: 'content',
         label: 'Contenidos',
@@ -293,7 +305,7 @@ function UserProfileModal({
     }
 
     // Tab de Estudiantes - Solo Profesores
-    if (userRole === 'teacher' || userRole === 'trial_teacher') {
+    if (userRole === 'teacher' || userRole === 'trial_teacher' || userRole === 'admin') {
       tabs.push({
         id: 'students',
         label: 'Estudiantes',
@@ -302,18 +314,29 @@ function UserProfileModal({
       });
     }
 
-    // Tab de Badges - Todos los usuarios
-    tabs.push({
-      id: 'badges',
-      label: 'Gamificación',
-      icon: Award,
-      component: <BadgesTab user={user} isAdmin={isAdmin} />
-    });
+    // Tab de Estudiantes Supervisados - Solo para Tutores
+    if (userRole === 'guardian') {
+      tabs.push({
+        id: 'guardians',
+        label: 'Estudiantes Supervisados',
+        icon: UsersRound,
+        component: <GuardiansTab user={user} isTutor={true} />
+      });
+    }
 
     return tabs;
   };
 
   const tabs = getTabs();
+
+  // Debug logs
+  console.log('📊 UserProfileModal state:', {
+    activeTab,
+    isEditing,
+    isAdmin,
+    userRole,
+    shouldShowFooter: activeTab === 'info' && isEditing
+  });
 
   return (
     <BaseModal
@@ -323,11 +346,11 @@ function UserProfileModal({
       size="xl"
       showCloseButton={false}
       noPadding={true}
-      className="!overflow-hidden !max-h-[90vh]"
+      className="!overflow-hidden !h-[90vh] !max-h-[90vh]"
     >
-      <div className="flex flex-col h-full max-h-[90vh]">
-        {/* Banner Section - FIJO */}
-        <div className="relative h-32 md:h-40 overflow-hidden flex-shrink-0 group">
+      <div className="flex flex-col h-full overflow-hidden">
+        {/* Banner Section - Con avatar y nombre superpuestos */}
+        <div className="relative h-64 md:h-72 overflow-hidden flex-shrink-0 group">
           {/* Banner Image o Gradient */}
           {userBanner ? (
             <img
@@ -341,6 +364,9 @@ function UserProfileModal({
               style={{ background: getDefaultBannerGradient() }}
             />
           )}
+
+          {/* Overlay degradé para legibilidad del texto */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 pointer-events-none"></div>
 
           {/* Botón cerrar - Siempre visible */}
           <button
@@ -405,19 +431,16 @@ function UserProfileModal({
               </div>
             </div>
           )}
-        </div>
 
-        {/* Profile Header - Avatar + Info - FIJO */}
-        <div className="relative px-4 md:px-6 flex-shrink-0 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 md:gap-4 -mt-12 md:-mt-16 pb-4">
+          {/* Profile Header - Avatar + Info - ABSOLUTAMENTE dentro del banner */}
+          <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
               <div
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden transition-all"
+                className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden transition-all shadow-2xl"
                 style={{
-                  background: 'var(--color-bg-secondary)',
-                  border: '4px solid var(--color-bg-primary)',
-                  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)'
+                  background: 'var(--color-bg-secondary)'
                 }}
               >
                 {uploadedAvatarUrl ? (
@@ -457,36 +480,25 @@ function UserProfileModal({
             </div>
 
             {/* User Info */}
-            <div className="flex-1 text-center sm:text-left mb-2">
-              <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+            <div className="flex-1 text-center sm:text-left mb-1">
+              <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-1">
                 {user?.displayName || user?.name || user?.email || 'Usuario'}
               </h2>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {/* Badge de Rol */}
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600">
-                  {userRole}
-                </span>
-
-                {/* Stats de gamificación */}
-                {gamification && (
-                  <>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
-                      ⭐ Nivel {gamification.level}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
-                      ⚡ {gamification.xp} XP
-                    </span>
-                    {gamification.streakDays > 0 && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400">
-                        🔥 {gamification.streakDays} días
-                      </span>
-                    )}
-                  </>
+                {(isAdmin || userRole) && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600">
+                    {isAdmin ? 'admin' : userRole}
+                  </span>
                 )}
               </div>
             </div>
           </div>
+          </div>
         </div>
+
+        {/* Separador después del banner */}
+        <div className="flex-shrink-0 border-b border-zinc-200 dark:border-zinc-800"></div>
 
         {/* Mensajes de feedback - FIJO */}
         {(error || success) && (
@@ -576,29 +588,52 @@ function UserProfileModal({
           />
         </div>
 
-        {/* Footer Contextual - FIJO - Solo en InfoTab cuando está editando */}
-        {activeTab === 'info' && isEditing && (
-          <div className="flex-shrink-0 border-t border-zinc-200 dark:border-zinc-800
-                          bg-white dark:bg-zinc-950 px-4 md:px-6 py-4">
-            <div className="flex items-center justify-end gap-3">
+        {/* Footer - SIEMPRE VISIBLE */}
+        <div
+          className="flex items-center justify-end gap-3 px-6 py-5 shrink-0"
+          style={{ borderTop: '1px solid var(--color-border)' }}
+        >
+            {activeTab === 'info' ? (
+              <>
+                {isEditing ? (
+                  <>
+                    <BaseButton
+                      onClick={() => setIsEditing(false)}
+                      variant="ghost"
+                      size="md"
+                    >
+                      Cancelar
+                    </BaseButton>
+                    <BaseButton
+                      type="submit"
+                      form="profile-info-form"
+                      variant="primary"
+                      size="md"
+                    >
+                      <Save size={16} className="mr-2" />
+                      Guardar
+                    </BaseButton>
+                  </>
+                ) : (
+                  <BaseButton
+                    onClick={() => setIsEditing(true)}
+                    variant="primary"
+                    size="md"
+                  >
+                    Editar perfil
+                  </BaseButton>
+                )}
+              </>
+            ) : (
               <BaseButton
-                onClick={() => setIsEditing(false)}
+                onClick={onClose}
                 variant="ghost"
                 size="md"
               >
-                Cancelar
+                Cerrar
               </BaseButton>
-              <BaseButton
-                type="submit"
-                form="profile-info-form"
-                variant="primary"
-                size="md"
-              >
-                Guardar cambios
-              </BaseButton>
-            </div>
-          </div>
-        )}
+            )}
+        </div>
       </div>
     </BaseModal>
   );

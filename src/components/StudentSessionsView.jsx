@@ -204,7 +204,7 @@ function StudentSessionsView({ student }) {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Calendar size={28} />
-            Mis Clases
+            Clases
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {sessions.length} {sessions.length === 1 ? 'clase disponible' : 'clases disponibles'}

@@ -23,6 +23,7 @@ import {
   Activity
 } from 'lucide-react';
 import { useTopBar } from '../contexts/TopBarContext';
+import { useViewAs } from '../contexts/ViewAsContext';
 import logger from '../utils/logger';
 import {
   subscribeToLog,
@@ -78,6 +79,7 @@ function ClassDailyLog({ logId, user, onBack }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const { updateTopBar, resetTopBar, hideSidebar, showSidebar } = useTopBar();
+  const { isViewingAs } = useViewAs();
   const contentSelectorModal = useModal();
   const autoSaveIntervalRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -600,7 +602,7 @@ function ClassDailyLog({ logId, user, onBack }) {
   }
 
   return (
-    <div className="class-daily-log fixed inset-0 flex bg-gray-100 dark:bg-gray-900 mt-12 md:mt-14 lg:mt-16">
+    <div className={`class-daily-log fixed inset-0 flex bg-gray-100 dark:bg-gray-900 ${isViewingAs ? 'mt-[86px] md:mt-[100px] lg:mt-[108px]' : 'mt-12 md:mt-14 lg:mt-16'}`}>
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar (Índice) */}

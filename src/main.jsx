@@ -13,6 +13,7 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { FontProvider } from './contexts/FontContext.jsx';
 import { ViewAsProvider } from './contexts/ViewAsContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import { CardConfigProvider } from './contexts/CardConfigContext.jsx';
 
 // Error Boundary
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
@@ -25,9 +26,10 @@ import { initBadgeSystem } from './config/badgeSystem.js';
  * 1. ErrorBoundary - Captura errores de toda la app
  * 2. AuthProvider - Estado de autenticación global
  * 3. ThemeProvider - Tema (claro/oscuro)
- * 4. FontProvider - Fuente del logo de la aplicación
- * 5. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
- * 6. App - Componente principal
+ * 4. CardConfigProvider - Configuración global de cards
+ * 5. FontProvider - Fuente del logo de la aplicación
+ * 6. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
+ * 7. App - Componente principal
  */
 
 // Inicializar sistema de badges (aplicar colores guardados)
@@ -38,11 +40,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <AuthProvider>
         <ThemeProvider>
-          <FontProvider>
-            <ViewAsProvider>
-              <App />
-            </ViewAsProvider>
-          </FontProvider>
+          <CardConfigProvider>
+            <FontProvider>
+              <ViewAsProvider>
+                <App />
+              </ViewAsProvider>
+            </FontProvider>
+          </CardConfigProvider>
         </ThemeProvider>
       </AuthProvider>
     </ErrorBoundary>

@@ -26,7 +26,7 @@ import {
 import { UniversalCard } from '../cards';
 
 /**
- * Vista de Mis Tareas para estudiantes
+ * Vista de Tareas para estudiantes
  */
 function MyAssignmentsView({ user, onSelectAssignment }) {
   const [assignments, setAssignments] = useState([]);
@@ -125,7 +125,7 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Mis Tareas
+            Tareas
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {filteredAssignments.length} {filteredAssignments.length === 1 ? 'tarea' : 'tareas'}
