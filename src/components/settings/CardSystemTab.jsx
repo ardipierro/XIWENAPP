@@ -531,16 +531,19 @@ Los cambios se aplican instantáneamente en toda la app.`);
 
           {/* Configuration Controls - Campos dinámicos */}
           <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <div className="max-h-[400px] overflow-y-auto pr-2">
+            <div className="max-h-[600px] overflow-y-auto pr-2">
               {renderAllConfigFields(selectedVariant)}
             </div>
           </div>
+        </div>
 
-          {/* Preview en Vivo */}
-          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <h4 className="text-sm font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+        {/* COLUMNA 3: Preview + Usage Map (4 cols) */}
+        <div className="lg:col-span-4 space-y-4">
+          {/* Preview en Vivo - ARRIBA */}
+          <div>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
               Preview en Vivo
-            </h4>
+            </h3>
             <div className="space-y-3">
               <UniversalCard
                 {...exampleData[selectedVariant]}
@@ -555,13 +558,12 @@ Los cambios se aplican instantáneamente en toda la app.`);
               />
             </div>
           </div>
-        </div>
 
-        {/* COLUMNA 3: Usage Map (Dónde se usa) (4 cols) */}
-        <div className="lg:col-span-4 space-y-4">
-          <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-            Dónde se Usa
-          </h3>
+          {/* Dónde se Usa - DEBAJO */}
+          <div>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+              Dónde se Usa
+            </h3>
 
           {/* Stats del variant actual */}
           <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
@@ -585,13 +587,11 @@ Los cambios se aplican instantáneamente en toda la app.`);
                     border: '1px solid var(--color-border)'
                   }}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2">
+                    <FileCode size={14} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-text-secondary)' }} />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <FileCode size={14} style={{ color: 'var(--color-text-secondary)' }} />
-                        <div className="text-xs font-mono truncate" style={{ color: 'var(--color-text-primary)' }}>
-                          {usage.file.replace('src/components/', '')}
-                        </div>
+                      <div className="text-xs font-mono truncate mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                        {usage.file.replace('src/components/', '')}
                       </div>
                       <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                         Línea {usage.line}
@@ -602,7 +602,6 @@ Los cambios se aplican instantáneamente en toda la app.`);
                         </div>
                       )}
                     </div>
-                    <ExternalLink size={14} style={{ color: 'var(--color-text-secondary)' }} />
                   </div>
                 </div>
               ))}
@@ -650,9 +649,14 @@ Los cambios se aplican instantáneamente en toda la app.`);
               </div>
             </div>
           )}
+          </div>
+          {/* Fin de "Dónde se Usa" */}
         </div>
+        {/* Fin de Columna 3 */}
       </div>
+      {/* Fin del grid de 3 columnas */}
     </div>
+    {/* Fin del container principal */}
   );
 }
 
