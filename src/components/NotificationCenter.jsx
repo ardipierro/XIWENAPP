@@ -147,23 +147,39 @@ function NotificationCenter({ userId, showToasts = true, showButton = true, isOp
     notif => visibleToasts.has(notif.id) && notif.type === 'class_started'
   );
 
+  // Si no hay userId, no mostrar nada
+  if (!userId) {
+    return null;
+  }
+
   return (
     <>
       {/* Toasts flotantes */}
       {showToasts && activeToasts.length > 0 && (
-        <div className="fixed top-20 right-4 z-50 space-y-3 max-w-sm">
+        <div className="fixed top-20 right-4 space-y-3 max-w-sm" style={{ zIndex: 'var(--z-tooltip)' }}>
           {activeToasts.map(notif => (
             <div
               key={notif.id}
-              className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden animate-slide-in"
+              className="rounded-lg overflow-hidden animate-slide-in"
+              style={{
+                background: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-border)',
+                boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)'
+              }}
             >
-              <div className="flex items-center justify-between p-3 border-b border-zinc-200 dark:border-zinc-700">
+              <div
+                className="flex items-center justify-between p-3"
+                style={{ borderBottom: '1px solid var(--color-border)' }}
+              >
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{getNotificationIcon(notif.type)}</span>
-                  <span className="font-semibold text-zinc-900 dark:text-white">{notif.title}</span>
+                  <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                    {notif.title}
+                  </span>
                 </div>
                 <button
-                  className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 text-xl leading-none"
+                  className="text-xl leading-none transition-colors hover:opacity-70"
+                  style={{ color: 'var(--color-text-secondary)' }}
                   onClick={() => {
                     setVisibleToasts(prev => {
                       const newSet = new Set(prev);
@@ -176,9 +192,12 @@ function NotificationCenter({ userId, showToasts = true, showButton = true, isOp
                 </button>
               </div>
               <div className="p-3">
-                <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-3">{notif.message}</p>
+                <p className="text-sm mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+                  {notif.message}
+                </p>
                 <button
-                  className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium transition-colors"
+                  className="w-full px-4 py-2 rounded-md text-sm font-medium transition-colors hover:opacity-90"
+                  style={{ background: 'var(--color-accent)', color: '#ffffff' }}
                   onClick={() => handleNotificationClick(notif)}
                 >
                   Unirse Ahora
@@ -193,13 +212,17 @@ function NotificationCenter({ userId, showToasts = true, showButton = true, isOp
       {showButton && (
         <div className="relative">
           <button
-            className="relative flex items-center justify-center w-9 h-9 rounded-md text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="relative flex items-center justify-center w-9 h-9 rounded-md transition-colors hover:opacity-80"
+            style={{ color: 'var(--color-text-primary)' }}
             onClick={togglePanel}
             title="Notificaciones"
           >
             <span className="text-xl">🔔</span>
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1.5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full">
+              <span
+                className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1.5 flex items-center justify-center text-white text-[10px] font-bold rounded-full"
+                style={{ background: 'var(--color-error)' }}
+              >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
@@ -209,13 +232,27 @@ function NotificationCenter({ userId, showToasts = true, showButton = true, isOp
 
       {/* Panel de notificaciones */}
       {isOpen && (
-        <div className="fixed top-16 right-4 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-zinc-200 dark:border-zinc-700 z-[10000] overflow-hidden">
-          <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-700">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Notificaciones</h3>
+        <div
+          className="fixed top-16 right-4 w-96 max-w-[calc(100vw-2rem)] rounded-lg overflow-hidden"
+          style={{
+            background: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)',
+            zIndex: 'var(--z-modal)'
+          }}
+        >
+          <div
+            className="flex items-center justify-between p-4"
+            style={{ borderBottom: '1px solid var(--color-border)' }}
+          >
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Notificaciones
+            </h3>
             <div className="flex items-center gap-2">
               {notifications.some(n => n.read) && (
                 <button
-                  className="px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                  className="px-3 py-1 text-xs font-medium transition-colors hover:opacity-80"
+                  style={{ color: 'var(--color-text-secondary)' }}
                   onClick={handleClearRead}
                 >
                   Limpiar leídas
@@ -223,7 +260,8 @@ function NotificationCenter({ userId, showToasts = true, showButton = true, isOp
               )}
               {unreadCount > 0 && (
                 <button
-                  className="px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                  className="px-3 py-1 text-xs font-medium transition-colors hover:opacity-80"
+                  style={{ color: 'var(--color-accent)' }}
                   onClick={markAllAsRead}
                 >
                   Marcar todas
@@ -234,11 +272,11 @@ function NotificationCenter({ userId, showToasts = true, showButton = true, isOp
 
           <div className="max-h-[400px] overflow-y-auto">
             {loading ? (
-              <div className="flex items-center justify-center py-8 text-zinc-600 dark:text-zinc-400">
+              <div className="flex items-center justify-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
                 Cargando...
               </div>
             ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400">
+              <div className="flex flex-col items-center justify-center py-12" style={{ color: 'var(--color-text-muted)' }}>
                 <span className="text-4xl mb-2">📭</span>
                 <p className="text-sm">No tienes notificaciones</p>
               </div>
@@ -246,27 +284,30 @@ function NotificationCenter({ userId, showToasts = true, showButton = true, isOp
               notifications.map(notif => (
                 <div
                   key={notif.id}
-                  className={`flex items-start gap-3 p-4 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-700 last:border-b-0 ${
-                    notif.read
-                      ? 'bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-750'
-                      : 'bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30'
-                  }`}
+                  className="flex items-start gap-3 p-4 cursor-pointer transition-all hover:opacity-90"
+                  style={{
+                    background: notif.read ? 'var(--color-bg-secondary)' : 'var(--color-bg-tertiary)',
+                    borderBottom: '1px solid var(--color-border)'
+                  }}
                   onClick={() => handleNotificationClick(notif)}
                 >
                   <div className="text-2xl flex-shrink-0">{getNotificationIcon(notif.type)}</div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
+                    <h4 className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
                       {notif.title}
                     </h4>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-300 mt-1">
+                    <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                       {notif.message}
                     </p>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 block">
+                    <span className="text-xs mt-1 block" style={{ color: 'var(--color-text-muted)' }}>
                       {getRelativeTime(notif.createdAt)}
                     </span>
                   </div>
                   <button
-                    className="text-zinc-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 text-xl leading-none flex-shrink-0 transition-colors"
+                    className="text-xl leading-none flex-shrink-0 transition-colors"
+                    style={{ color: 'var(--color-text-muted)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-error)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
                     onClick={(e) => handleDeleteNotification(e, notif.id)}
                     title="Eliminar"
                   >
@@ -282,7 +323,8 @@ function NotificationCenter({ userId, showToasts = true, showButton = true, isOp
       {/* Overlay para cerrar el panel */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0"
+          style={{ zIndex: 'var(--z-modal-backdrop)' }}
           onClick={closePanel}
         />
       )}

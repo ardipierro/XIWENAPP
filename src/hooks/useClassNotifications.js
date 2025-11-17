@@ -5,6 +5,7 @@ import {
   markAsRead,
   markAllAsRead
 } from '../firebase/notifications';
+import logger from '../utils/logger';
 
 /**
  * Hook para manejar notificaciones de clases en tiempo real
@@ -56,7 +57,7 @@ export function useClassNotifications(userId, options = {}) {
     try {
       await markAsRead(notificationId);
     } catch (error) {
-      console.error('Error marcando notificación como leída:', error);
+      logger.error('Error marcando notificación como leída:', error);
     }
   };
 
@@ -64,7 +65,7 @@ export function useClassNotifications(userId, options = {}) {
     try {
       await markAllAsRead(userId);
     } catch (error) {
-      console.error('Error marcando todas como leídas:', error);
+      logger.error('Error marcando todas como leídas:', error);
     }
   };
 
