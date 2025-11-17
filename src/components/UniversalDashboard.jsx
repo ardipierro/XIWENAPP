@@ -9,7 +9,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
-import { TopBarProvider } from '../contexts/TopBarContext';
+import { TopBarProvider, useTopBar } from '../contexts/TopBarContext';
 import { usePermissions } from '../hooks/usePermissions';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
@@ -180,19 +180,30 @@ function PlaceholderView({ title }) {
 }
 
 /**
- * Dashboard Universal
+ * Dashboard Universal - Componente interno que usa el TopBarContext
  */
-export function UniversalDashboard() {
+function UniversalDashboardInner() {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { getEffectiveUser, isViewingAs } = useViewAs();
   const { initialized, can } = usePermissions();
+  const { registerSidebarControl } = useTopBar();
+
   // En desktop (>= 1024px) el menú está abierto por defecto, en mobile cerrado
   const [menuOpen, setMenuOpen] = useState(window.innerWidth >= 1024);
   const [currentPath, setCurrentPath] = useState(location.pathname);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
+
+  // Registrar funciones de control del sidebar en el contexto
+  useEffect(() => {
+    registerSidebarControl({
+      hide: () => setMenuOpen(false),
+      show: () => setMenuOpen(true),
+      toggle: () => setMenuOpen(prev => !prev)
+    });
+  }, [registerSidebarControl]);
 
   // Sincronizar currentPath con la URL actual
   useEffect(() => {
@@ -476,34 +487,43 @@ export function UniversalDashboard() {
   };
 
   return (
-    <TopBarProvider>
-      <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
-        {/* ViewAs Banner - Siempre arriba de todo */}
-        <ViewAsBanner />
+    <div className={`universal-dashboard ${isViewingAs ? 'universal-dashboard--viewing-as' : ''}`}>
+      {/* ViewAs Banner - Siempre arriba de todo */}
+      <ViewAsBanner />
 
-        {/* TopBar */}
-        <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
+      {/* TopBar */}
+      <UniversalTopBar onMenuToggle={handleMenuToggle} menuOpen={menuOpen} />
 
-        {/* SideMenu */}
-        <UniversalSideMenu
-          isOpen={menuOpen}
-          currentPath={currentPath}
-          onNavigate={handleNavigate}
+      {/* SideMenu */}
+      <UniversalSideMenu
+        isOpen={menuOpen}
+        currentPath={currentPath}
+        onNavigate={handleNavigate}
+      />
+
+      {/* Overlay para mobile */}
+      {menuOpen && (
+        <div
+          className="universal-dashboard__overlay"
+          onClick={() => setMenuOpen(false)}
         />
+      )}
 
-        {/* Overlay para mobile */}
-        {menuOpen && (
-          <div
-            className="universal-dashboard__overlay"
-            onClick={() => setMenuOpen(false)}
-          />
-        )}
+      {/* Content Area */}
+      <main className={`universal-dashboard__content ${menuOpen ? 'universal-dashboard__content--menu-open' : ''}`}>
+        {renderContent()}
+      </main>
+    </div>
+  );
+}
 
-        {/* Content Area */}
-        <main className={`universal-dashboard__content ${menuOpen ? 'universal-dashboard__content--menu-open' : ''}`}>
-          {renderContent()}
-        </main>
-      </div>
+/**
+ * Dashboard Universal - Wrapper con TopBarProvider
+ */
+export function UniversalDashboard() {
+  return (
+    <TopBarProvider>
+      <UniversalDashboardInner />
     </TopBarProvider>
   );
 }
