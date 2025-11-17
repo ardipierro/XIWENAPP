@@ -18,18 +18,94 @@ import { db } from './config';
 import { createMeetSession, endMeetSessionByClassId } from './meetSessions';
 import { notifyClassStarted, notifyClassEnded } from './notifications';
 
+// Importar sistema de horarios recurrentes e instancias
+import {
+  createRecurringSchedule,
+  updateRecurringSchedule,
+  deleteRecurringSchedule,
+  getRecurringSchedule,
+  getTeacherSchedules,
+  enrollStudentToSchedule,
+  unenrollStudentFromSchedule,
+  generateInstancesForSchedule,
+  getScheduleInstances,
+  pauseSchedule,
+  resumeSchedule
+} from './recurringSchedules';
+
+import {
+  getClassInstance,
+  getTeacherInstances,
+  getStudentInstances,
+  startClassInstance,
+  endClassInstance,
+  cancelClassInstance,
+  recordAttendance,
+  getUpcomingInstances,
+  getLiveInstances
+} from './classInstances';
+
 /**
  * Sistema Unificado de Sesiones de Clase
  * Integra: LiveKit + Pizarras (Canvas/Excalidraw) + Programación (single/recurring)
+ *
+ * NUEVA ARQUITECTURA:
+ * - Sesiones ÚNICAS (single) → Se crean como class_instances directamente
+ * - Sesiones RECURRENTES (recurring) → Se crean como recurring_schedules + genera class_instances
+ * - class_sessions (legacy) → Mantiene compatibilidad con sesiones antiguas
  */
 
 /**
  * Crear una nueva sesión de clase
+ * NUEVO: Rutea a recurring_schedules o class_instances según el tipo
+ *
  * @param {Object} sessionData - Datos de la sesión
- * @returns {Promise<Object>} - {success: boolean, sessionId?: string, roomName?: string, error?: string}
+ * @returns {Promise<Object>} - {success: boolean, sessionId?: string, scheduleId?: string, roomName?: string, error?: string}
  */
 export async function createClassSession(sessionData) {
   try {
+    const {
+      type = 'single', // 'single' | 'recurring' | 'instant'
+      scheduledStart = null,
+      schedules = [],
+      recurringStartDate = null,
+      recurringWeeks = 4,
+      assignedStudents = [],
+    } = sessionData;
+
+    // CASO 1: Sesión RECURRENTE → Crear recurring_schedule
+    if (type === 'recurring') {
+      logger.info('🔄 Creando horario recurrente...');
+
+      const result = await createRecurringSchedule({
+        ...sessionData,
+        schedules,
+        startDate: recurringStartDate,
+        endDate: null // Por ahora sin fecha de fin (indefinido)
+      });
+
+      if (!result.success) {
+        return result;
+      }
+
+      // Si hay estudiantes pre-asignados, inscribirlos
+      if (assignedStudents && assignedStudents.length > 0) {
+        for (const studentId of assignedStudents) {
+          await enrollStudentToSchedule(result.scheduleId, studentId, '');
+        }
+      }
+
+      return {
+        success: true,
+        scheduleId: result.scheduleId,
+        sessionId: result.scheduleId, // Por compatibilidad
+        type: 'recurring'
+      };
+    }
+
+    // CASO 2: Sesión ÚNICA o INSTANTÁNEA → Crear class_instance
+    logger.info('📅 Creando sesión única/instantánea...');
+
     const {
       name,
       description = '',
@@ -37,31 +113,12 @@ export async function createClassSession(sessionData) {
       courseName = '',
       teacherId,
       teacherName,
-
-      // Modalidad
-      mode = 'async', // 'live' | 'async'
-      whiteboardType = 'none', // 'none' | 'canvas' | 'excalidraw'
-
-      // Programación
-      type = 'single', // 'single' | 'recurring' | 'instant'
-      scheduledStart = null, // Timestamp para single
-      schedules = [], // [{ day, startTime, endTime }] para recurring
-      recurringStartDate = null, // Timestamp - cuándo empiezan las sesiones recurrentes
-      recurringWeeks = 4, // Número de semanas que duran las sesiones recurrentes
-      duration = 60, // minutos
-
-      // LiveKit (si mode='live')
+      mode = 'async',
+      whiteboardType = 'none',
+      duration = 60,
       maxParticipants = 30,
       recordingEnabled = false,
-
-      // Asignación
-      assignedGroups = [],
-      assignedStudents = [],
-      contentIds = [],
-
-      // Meta
       creditCost = 1,
-      meetingLink = '', // deprecated
       meetLink = '',
       zoomLink = '',
       imageUrl = ''
@@ -76,83 +133,76 @@ export async function createClassSession(sessionData) {
       return { success: false, error: 'Fecha de inicio es requerida para sesiones únicas' };
     }
 
-    if (type === 'recurring') {
-      if (schedules.length === 0) {
-        return { success: false, error: 'Debe definir al menos un horario para sesiones recurrentes' };
-      }
-      if (!recurringStartDate) {
-        return { success: false, error: 'Fecha de inicio es requerida para sesiones recurrentes' };
-      }
-      if (!recurringWeeks || recurringWeeks < 1) {
-        return { success: false, error: 'Duración en semanas es requerida para sesiones recurrentes' };
-      }
-    }
-
     // Generar roomName único si es live
     const roomName = mode === 'live'
       ? `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       : null;
 
-    const newSession = {
-      name,
-      description,
-      courseId,
-      courseName,
+    // Calcular scheduledEnd
+    const startTimestamp = type === 'instant'
+      ? Timestamp.now()
+      : (scheduledStart instanceof Timestamp ? scheduledStart : Timestamp.fromDate(scheduledStart));
+
+    const scheduledEndDate = new Date(startTimestamp.toMillis() + duration * 60 * 1000);
+    const scheduledEnd = Timestamp.fromDate(scheduledEndDate);
+
+    // Crear instancia directamente
+    const instanceData = {
+      scheduleId: null, // No pertenece a ningún horario
+      scheduleName: name,
+      scheduleType: 'single',
+
+      // Fecha/hora
+      scheduledStart: startTimestamp,
+      scheduledEnd,
+
+      // Info del profesor y curso
       teacherId,
       teacherName,
+      courseId,
+      courseName,
 
       // Modalidad
       mode,
       whiteboardType,
-
-      // Programación
-      type,
-      scheduledStart: type === 'single' && scheduledStart
-        ? (scheduledStart instanceof Timestamp ? scheduledStart : Timestamp.fromDate(scheduledStart))
-        : null,
-      schedules: type === 'recurring' ? schedules : [],
-      recurringStartDate: type === 'recurring' && recurringStartDate
-        ? (recurringStartDate instanceof Timestamp ? recurringStartDate : Timestamp.fromDate(recurringStartDate))
-        : null,
-      recurringWeeks: type === 'recurring' ? recurringWeeks : null,
-      duration,
-
-      // LiveKit
       roomName,
-      maxParticipants: mode === 'live' ? maxParticipants : null,
-      recordingEnabled: mode === 'live' ? recordingEnabled : false,
-      recordingUrl: null,
 
-      // Pizarra (se asignará al crear/abrir la sesión)
-      canvasSessionId: null,
-      excalidrawSessionId: null,
-
-      // Asignación
-      assignedGroups,
-      assignedStudents,
-      contentIds,
+      // Estudiantes
+      eligibleStudentIds: assignedStudents || [],
+      attendedStudentIds: [],
 
       // Estado
-      status: 'scheduled', // 'scheduled' | 'live' | 'ended' | 'cancelled'
+      status: 'scheduled',
       startedAt: null,
       endedAt: null,
-      participants: [],
 
       // Meta
+      duration,
       creditCost,
-      meetingLink, // deprecated
       meetLink,
       zoomLink,
       imageUrl,
-      active: true,
+      description,
+
+      // LiveKit
+      maxParticipants: mode === 'live' ? maxParticipants : null,
+      recordingEnabled: mode === 'live' ? recordingEnabled : false,
+      meetSessionId: null,
+
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
 
-    const docRef = await addDoc(collection(db, 'class_sessions'), newSession);
+    const docRef = await addDoc(collection(db, 'class_instances'), instanceData);
 
-    logger.info('✅ Sesión de clase creada:', docRef.id);
-    return { success: true, sessionId: docRef.id, roomName };
+    logger.info('✅ Instancia de clase creada:', docRef.id);
+    return {
+      success: true,
+      sessionId: docRef.id,
+      instanceId: docRef.id,
+      roomName,
+      type: 'single'
+    };
   } catch (error) {
     logger.error('❌ Error creando sesión de clase:', error);
     return { success: false, error: error.message };
@@ -223,26 +273,51 @@ export async function getClassSession(sessionId) {
 
 /**
  * Obtener todas las sesiones de un profesor
+ * NUEVO: Combina recurring_schedules + class_instances + legacy class_sessions
+ *
  * @param {string} teacherId - ID del profesor
  * @returns {Promise<Array>} - Array de sesiones
  */
 export async function getTeacherSessions(teacherId) {
   try {
-    // Query sin orderBy para evitar requisito de índice compuesto
-    const q = query(
+    // 1. Obtener horarios recurrentes (recurring_schedules)
+    const schedules = await getTeacherSchedules(teacherId);
+
+    // 2. Obtener instancias únicas que NO pertenecen a un horario (class_instances con scheduleId=null)
+    const instancesQuery = query(
+      collection(db, 'class_instances'),
+      where('teacherId', '==', teacherId),
+      where('scheduleId', '==', null) // Solo las que no son parte de un horario
+    );
+    const instancesSnapshot = await getDocs(instancesQuery);
+    const singleInstances = instancesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      type: 'single' // Marcar como single para el UI
+    }));
+
+    // 3. Obtener sesiones legacy (class_sessions) si existen
+    const legacyQuery = query(
       collection(db, 'class_sessions'),
       where('teacherId', '==', teacherId),
       where('active', '==', true)
     );
-
-    const snapshot = await getDocs(q);
-    const sessions = snapshot.docs.map(doc => ({
+    const legacySnapshot = await getDocs(legacyQuery);
+    const legacySessions = legacySnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
+      type: doc.data().type || 'legacy'
     }));
 
-    // Ordenar en el cliente por createdAt (desc)
-    return sessions.sort((a, b) => {
+    // Combinar todo
+    const allSessions = [
+      ...schedules.map(s => ({ ...s, type: 'recurring' })),
+      ...singleInstances,
+      ...legacySessions
+    ];
+
+    // Ordenar por createdAt (desc)
+    return allSessions.sort((a, b) => {
       const timeA = a.createdAt?.toMillis?.() || 0;
       const timeB = b.createdAt?.toMillis?.() || 0;
       return timeB - timeA;
@@ -314,22 +389,41 @@ export async function getLiveSessions(teacherId = null) {
 
 /**
  * Iniciar una sesión (cambiar status a 'live')
- * Crea automáticamente una meet session y notifica a los estudiantes asignados
- * @param {string} sessionId - ID de la sesión
+ * NUEVO: Detecta si es instancia o sesión legacy y actúa apropiadamente
+ *
+ * @param {string} sessionId - ID de la sesión o instancia
  * @returns {Promise<Object>} - {success: boolean, meetSessionId?: string, error?: string}
  */
 export async function startClassSession(sessionId) {
   try {
-    // 1. Obtener datos de la sesión
+    // Intentar obtener como instancia primero
+    const instanceDoc = await getDoc(doc(db, 'class_instances', sessionId));
+
+    if (instanceDoc.exists()) {
+      // Es una instancia → usar función de instancias
+      logger.info('🎯 Iniciando instancia de clase...');
+      return await startClassInstance(sessionId);
+    }
+
+    // Si no es instancia, buscar en class_sessions (legacy)
     const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
 
     if (!sessionDoc.exists()) {
       return { success: false, error: 'Sesión no encontrada' };
     }
 
+    logger.info('🔄 Iniciando sesión legacy...');
     const sessionData = sessionDoc.data();
 
-    // 2. Actualizar status a 'live'
+    // Si es un horario recurrente (legacy), no se puede iniciar directamente
+    if (sessionData.type === 'recurring') {
+      return {
+        success: false,
+        error: 'No se puede iniciar un horario recurrente directamente. Debe iniciar una clase específica.'
+      };
+    }
+
+    // Actualizar status a 'live'
     const docRef = doc(db, 'class_sessions', sessionId);
     await updateDoc(docRef, {
       status: 'live',
@@ -339,7 +433,7 @@ export async function startClassSession(sessionId) {
 
     let meetSessionId = null;
 
-    // 3. Crear meet_session automáticamente si es modo 'live'
+    // Crear meet_session automáticamente si es modo 'live'
     if (sessionData.mode === 'live') {
       try {
         meetSessionId = await createMeetSession({
@@ -352,7 +446,6 @@ export async function startClassSession(sessionId) {
           courseName: sessionData.courseName
         });
 
-        // Guardar referencia al meet_session en class_session
         await updateDoc(docRef, {
           meetSessionId: meetSessionId
         });
@@ -360,11 +453,10 @@ export async function startClassSession(sessionId) {
         logger.info('✅ Meet session creada automáticamente:', meetSessionId);
       } catch (meetError) {
         logger.error('⚠️ Error creando meet session (no crítico):', meetError);
-        // No detenemos el flujo si falla la creación de meet_session
       }
     }
 
-    // 4. Notificar a estudiantes asignados
+    // Notificar a estudiantes asignados
     const assignedStudents = sessionData.assignedStudents || [];
 
     if (assignedStudents.length > 0) {
@@ -383,11 +475,10 @@ export async function startClassSession(sessionId) {
         logger.info(`✅ ${assignedStudents.length} estudiantes notificados`);
       } catch (notifyError) {
         logger.error('⚠️ Error enviando notificaciones (no crítico):', notifyError);
-        // No detenemos el flujo si fallan las notificaciones
       }
     }
 
-    logger.info('✅ Sesión iniciada:', sessionId);
+    logger.info('✅ Sesión legacy iniciada:', sessionId);
     return { success: true, meetSessionId };
   } catch (error) {
     logger.error('❌ Error iniciando sesión:', error);
@@ -397,22 +488,41 @@ export async function startClassSession(sessionId) {
 
 /**
  * Finalizar una sesión (cambiar status a 'ended')
- * Finaliza automáticamente la meet session y notifica a los estudiantes
- * @param {string} sessionId - ID de la sesión
+ * NUEVO: Detecta si es instancia o sesión legacy
+ *
+ * @param {string} sessionId - ID de la sesión o instancia
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function endClassSession(sessionId) {
   try {
-    // 1. Obtener datos de la sesión
+    // Intentar obtener como instancia primero
+    const instanceDoc = await getDoc(doc(db, 'class_instances', sessionId));
+
+    if (instanceDoc.exists()) {
+      // Es una instancia → usar función de instancias
+      logger.info('🎯 Finalizando instancia de clase...');
+      return await endClassInstance(sessionId);
+    }
+
+    // Si no es instancia, buscar en class_sessions (legacy)
     const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
 
     if (!sessionDoc.exists()) {
       return { success: false, error: 'Sesión no encontrada' };
     }
 
+    logger.info('🔄 Finalizando sesión legacy...');
     const sessionData = sessionDoc.data();
 
-    // 2. Actualizar status a 'ended'
+    // Si es un horario recurrente (legacy), no se puede finalizar directamente
+    if (sessionData.type === 'recurring') {
+      return {
+        success: false,
+        error: 'No se puede finalizar un horario recurrente. Debe finalizar clases individuales.'
+      };
+    }
+
+    // Actualizar status a 'ended'
     const docRef = doc(db, 'class_sessions', sessionId);
     await updateDoc(docRef, {
       status: 'ended',
@@ -420,18 +530,17 @@ export async function endClassSession(sessionId) {
       updatedAt: serverTimestamp()
     });
 
-    // 3. Finalizar meet_session si existe
+    // Finalizar meet_session si existe
     if (sessionData.mode === 'live') {
       try {
         await endMeetSessionByClassId(sessionId);
         logger.info('✅ Meet session finalizada automáticamente');
       } catch (meetError) {
         logger.error('⚠️ Error finalizando meet session (no crítico):', meetError);
-        // No detenemos el flujo si falla la finalización de meet_session
       }
     }
 
-    // 4. Notificar a estudiantes que participaron
+    // Notificar a estudiantes que participaron
     const assignedStudents = sessionData.assignedStudents || [];
 
     if (assignedStudents.length > 0) {
@@ -447,11 +556,10 @@ export async function endClassSession(sessionId) {
         logger.info(`✅ ${assignedStudents.length} estudiantes notificados del fin de clase`);
       } catch (notifyError) {
         logger.error('⚠️ Error enviando notificaciones (no crítico):', notifyError);
-        // No detenemos el flujo si fallan las notificaciones
       }
     }
 
-    logger.info('✅ Sesión finalizada:', sessionId);
+    logger.info('✅ Sesión legacy finalizada:', sessionId);
     return { success: true };
   } catch (error) {
     logger.error('❌ Error finalizando sesión:', error);
@@ -856,3 +964,37 @@ export async function createInstantMeetSession(config) {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * ============================================================================
+ * RE-EXPORTAR FUNCIONES DEL NUEVO SISTEMA
+ * ============================================================================
+ */
+
+// Horarios Recurrentes
+export {
+  createRecurringSchedule,
+  updateRecurringSchedule,
+  deleteRecurringSchedule,
+  getRecurringSchedule,
+  getTeacherSchedules,
+  enrollStudentToSchedule,
+  unenrollStudentFromSchedule,
+  generateInstancesForSchedule,
+  getScheduleInstances,
+  pauseSchedule,
+  resumeSchedule
+};
+
+// Instancias de Clase
+export {
+  getClassInstance,
+  getTeacherInstances,
+  getStudentInstances,
+  startClassInstance,
+  endClassInstance,
+  cancelClassInstance,
+  recordAttendance,
+  getUpcomingInstances,
+  getLiveInstances
+};
