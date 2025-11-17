@@ -593,10 +593,11 @@
     opacity: 0.8;
   }
 
-  /* Cards - Diseño Minimalista */
+  /* Cards - Diseño Minimalista con Sticky Footer */
   .card {
     @apply rounded-lg p-6;
     @apply shadow-none transition-none;
+    @apply flex flex-col; /* Flex column para sticky footer */
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
   }
@@ -623,7 +624,13 @@
   }
 
   .card-body {
+    @apply flex-1; /* Ocupa espacio disponible empujando footer abajo */
     color: var(--color-text-secondary);
+  }
+
+  /* Footer sticky para cards con clase .card */
+  .card-footer {
+    @apply mt-auto; /* Pegado al fondo */
   }
 
   /* Stats Cards */

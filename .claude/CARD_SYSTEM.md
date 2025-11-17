@@ -788,13 +788,17 @@ No necesitas hacer nada. Dark mode funciona out-of-the-box.
 
 ### Versión 1.2 (2025-11-17)
 
-#### 1. **Footer Sticky - FIX CRÍTICO**
+#### 1. **Footer Sticky - FIX GLOBAL CRÍTICO**
 
-**Problema identificado:** El footer no se pegaba correctamente a la base de las tarjetas en layouts verticales.
+**Problema identificado:** El footer no se pegaba correctamente a la base en NINGUNA tarjeta (ni UniversalCard, ni BaseCard, ni .card).
 
-**Causa:** El footer con `mt-auto` estaba fuera del contenedor `flex-1`, impidiendo que el flex layout funcionara correctamente.
+**Causas identificadas:**
+1. **UniversalCard**: El footer con `mt-auto` estaba fuera del contenedor `flex-1`
+2. **Clase .card**: No tenía estructura flex, solo padding y border
 
-**Solución implementada:**
+**Soluciones implementadas:**
+
+**1. UniversalCard (src/components/cards/UniversalCard.jsx):**
 ```jsx
 // ❌ ANTES (Incorrecto)
 <div className={classes.content}>
@@ -808,19 +812,52 @@ No necesitas hacer nada. Dark mode funciona out-of-the-box.
 // ✅ AHORA (Correcto)
 <div className={classes.content}>
   <div className="flex-1 flex flex-col">
-    {/* Contenido */}
-    <div className="flex-1">...</div>
-
-    {/* Footer dentro del flex container */}
-    <div className="mt-auto">...</div>
+    <div className="flex-1">{/* Contenido */}</div>
+    <div className="mt-auto">{/* Footer dentro */}</div>
   </div>
 </div>
 ```
 
+**2. Clase .card (src/globals.css):**
+```css
+/* ❌ ANTES (sin flex) */
+.card {
+  @apply rounded-lg p-6;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* ✅ AHORA (con flex column) */
+.card {
+  @apply rounded-lg p-6;
+  @apply flex flex-col; /* ← NUEVO */
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* Clases helper añadidas */
+.card-body {
+  @apply flex-1; /* Ocupa espacio disponible */
+}
+
+.card-footer {
+  @apply mt-auto; /* Pegado al fondo */
+}
+```
+
+**Cómo usar con clase .card:**
+```jsx
+<div className="card">
+  <div className="card-body">{/* Contenido */}</div>
+  <div className="card-footer">{/* Footer sticky */}</div>
+</div>
+```
+
 **Resultado:**
-- ✅ Footer siempre alineado a la base de la tarjeta
-- ✅ Grids con tarjetas de diferentes alturas ahora tienen footers alineados
-- ✅ Diseño visual más consistente y profesional
+- ✅ Footer siempre alineado a la base en TODAS las tarjetas
+- ✅ Funciona con UniversalCard, BaseCard Y clase .card
+- ✅ Grids con tarjetas de diferentes alturas tienen footers alineados
+- ✅ Diseño visual consistente en toda la app
 
 #### 2. **Simplificación de Indicadores de Estado**
 
