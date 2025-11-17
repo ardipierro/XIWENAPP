@@ -450,16 +450,18 @@ function CategorySection({
       }}
     >
       {/* Header */}
-      <button
-        onClick={onToggle}
-        className="w-full px-4 py-3 flex items-center justify-between hover:opacity-80 transition-opacity"
+      <div
+        className="px-4 py-3 flex items-center justify-between"
         style={{ background: 'var(--color-bg-tertiary)' }}
       >
-        <div className="flex items-center gap-3">
+        <button
+          onClick={onToggle}
+          className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity text-left"
+        >
           <span className="text-xl" role="img" aria-label={categoryInfo.label}>
             {categoryInfo.icon}
           </span>
-          <div className="text-left">
+          <div>
             <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               {categoryInfo.label}
             </h3>
@@ -467,7 +469,7 @@ function CategorySection({
               {categoryInfo.description} • {badgeCount} badge{badgeCount !== 1 ? 's' : ''}
             </p>
           </div>
-        </div>
+        </button>
 
         <div className="flex items-center gap-2">
           {categoryInfo.allowCustom && (
@@ -475,17 +477,20 @@ function CategorySection({
               variant="ghost"
               size="sm"
               icon={Plus}
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddBadge();
-              }}
+              onClick={onAddBadge}
             >
               Agregar
             </BaseButton>
           )}
-          {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+          <button
+            onClick={onToggle}
+            className="p-1 hover:opacity-70 transition-opacity"
+            aria-label={isExpanded ? 'Contraer' : 'Expandir'}
+          >
+            {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+          </button>
         </div>
-      </button>
+      </div>
 
       {/* Content */}
       {isExpanded && (
