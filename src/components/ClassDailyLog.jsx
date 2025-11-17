@@ -32,7 +32,7 @@ import {
   updateLog,
   endLog
 } from '../firebase/classDailyLogs';
-import { getContentById } from '../firebase/content';
+import { getContentById, updateContent } from '../firebase/content';
 import { saveStudentExerciseResult } from '../firebase/exerciseProgress';
 import {
   BaseButton,
@@ -46,13 +46,9 @@ import {
 import ContentSelectorModal from './ContentSelectorModal';
 import {
   UnifiedExerciseRenderer,
+  EnhancedTextEditor,
   InSituContentEditor
 } from './diary';
-
-// Lazy load para componentes pesados (Tiptap: 100 KB)
-const EditableTextBlock = lazy(() =>
-  import('./diary/EditableTextBlock').then(module => ({ default: module.EditableTextBlock }))
-);
 
 // ============================================
 // CONTENT TYPE ICONS
@@ -318,25 +314,29 @@ function ClassDailyLog({ logId, user, onBack }) {
   // Actualizar bloque de texto
   const handleUpdateTextBlock = async (data) => {
     try {
-      const updatedEntries = log.entries.map(entry =>
-        entry.id === data.blockId
+      const updatedEntries = log.entries.map(entry => {
+        // Buscar por contentData.id O por entry.id (compatibilidad)
+        const matches = entry.contentData?.id === data.blockId || entry.id === data.blockId;
+
+        return matches
           ? {
               ...entry,
               contentData: {
                 ...entry.contentData,
-                html: data.content
+                html: data.content,
+                drawings: data.drawings // Guardar trazos de lápiz
               },
               updatedAt: data.updatedAt
             }
-          : entry
-      );
+          : entry;
+      });
 
       await updateLog(logId, {
         entries: updatedEntries,
         updatedAt: Date.now()
       });
 
-      logger.info('✏️ Bloque de texto actualizado');
+      logger.info('✏️ Bloque de texto actualizado (con dibujos)');
       setHasUnsavedChanges(true);
     } catch (err) {
       logger.error('Error actualizando bloque de texto:', err);
@@ -347,6 +347,16 @@ function ClassDailyLog({ logId, user, onBack }) {
   // Actualizar contenido existente (ejercicios, lecciones, etc.)
   const handleUpdateContent = async (data) => {
     try {
+      // 1. Guardar en la colección contents (si no es un text-block temporal)
+      if (data.contentId && !data.contentId.startsWith('text-block-')) {
+        await updateContent(data.contentId, {
+          ...data.updatedData,
+          updatedAt: Date.now()
+        });
+        logger.info('✅ Contenido actualizado en colección contents');
+      }
+
+      // 2. Actualizar la copia local en el log
       const updatedEntries = log.entries.map(entry =>
         entry.contentId === data.contentId
           ? {
@@ -362,7 +372,7 @@ function ClassDailyLog({ logId, user, onBack }) {
         updatedAt: Date.now()
       });
 
-      logger.info('✏️ Contenido actualizado');
+      logger.info('✏️ Contenido actualizado en log');
       setHasUnsavedChanges(true);
     } catch (err) {
       logger.error('Error actualizando contenido:', err);
@@ -466,16 +476,15 @@ function ClassDailyLog({ logId, user, onBack }) {
   const renderContentBody = (content) => {
     switch (content.type) {
       case 'text-block':
-        // Nuevo: Bloque de texto editable
+        // Nuevo: Bloque de texto editable con características avanzadas
         return (
-          <Suspense fallback={<BaseLoading message="Cargando editor..." />}>
-            <EditableTextBlock
-              blockId={content.id}
-              initialContent={content.html || '<p>Escribe aquí...</p>'}
-              isTeacher={isTeacher}
-              onSave={handleUpdateTextBlock}
-            />
-          </Suspense>
+          <EnhancedTextEditor
+            blockId={content.id}
+            initialContent={content.html || '<p>Escribe aquí...</p>'}
+            initialDrawings={content.drawings || '[]'}
+            isTeacher={isTeacher}
+            onSave={handleUpdateTextBlock}
+          />
         );
 
       case 'lesson':

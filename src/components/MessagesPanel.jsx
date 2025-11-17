@@ -12,6 +12,7 @@ import {
 import MessageThread from './MessageThread';
 import NewMessageModal from './NewMessageModal';
 import { BaseButton, BaseEmptyState, BaseLoading } from './common';
+import { useIsMobile } from '../hooks';
 import logger from '../utils/logger';
 
 /**
@@ -25,6 +26,10 @@ function MessagesPanel({ user }) {
   const [showNewMessage, setShowNewMessage] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+
+  // Mobile detection
+  const isMobile = useIsMobile();
+  const [showChatView, setShowChatView] = useState(false);
 
   // Subscribe to conversations in real-time
   useEffect(() => {
@@ -44,6 +49,20 @@ function MessagesPanel({ user }) {
   const handleSelectConversation = (conversation) => {
     logger.info(`Selecting conversation with ${conversation.otherUser.name}`, 'MessagesPanel');
     setSelectedConversation(conversation);
+
+    // En móvil, cambiar a vista de chat
+    if (isMobile) {
+      setShowChatView(true);
+    }
+  };
+
+  /**
+   * Handle back to conversations list (mobile)
+   */
+  const handleBackToList = () => {
+    logger.info('Returning to conversations list', 'MessagesPanel');
+    setShowChatView(false);
+    setSelectedConversation(null);
   };
 
   /**
@@ -70,106 +89,201 @@ function MessagesPanel({ user }) {
 
   return (
     <div className="messages-panel">
-      {/* Sidebar - Conversations List */}
-      <div className="messages-sidebar">
-        <div className="messages-sidebar-header">
-          <div className="header-title">
-            <MessageCircle size={24} />
-            <h2>Mensajes</h2>
-            {totalUnread > 0 && (
-              <span className="unread-badge">{totalUnread}</span>
-            )}
-          </div>
-          <BaseButton
-            variant="primary"
-            icon={Plus}
-            onClick={() => setShowNewMessage(true)}
-            title="Nuevo mensaje"
-            className="btn-new-message"
-          />
-        </div>
-
-        <div className="messages-search">
-          <div className="search-input-container">
-            <Search size={16} />
-            <input
-              type="text"
-              placeholder="Buscar conversaciones..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {searchTerm && (
-              <BaseButton
-                variant="ghost"
-                icon={X}
-                onClick={() => setSearchTerm('')}
-                className="clear-search"
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="conversations-list">
-          {loading ? (
-            <div className="p-6">
-              <BaseLoading variant="spinner" size="md" text="Cargando mensajes..." />
-            </div>
-          ) : filteredConversations.length === 0 ? (
-            <BaseEmptyState
-              icon={MessageCircle}
-              title={searchTerm ? 'No se encontraron conversaciones' : 'No tienes conversaciones aún'}
-              description={searchTerm ? 'Intenta con otro término de búsqueda' : 'Inicia una conversación para comenzar'}
-              size="md"
-              action={
-                <BaseButton
-                  variant="primary"
-                  onClick={() => setShowNewMessage(true)}
-                >
-                  Iniciar conversación
-                </BaseButton>
-              }
-            />
-          ) : (
-            filteredConversations.map(conversation => (
-              <ConversationItem
-                key={conversation.id}
-                conversation={conversation}
-                isSelected={selectedConversation?.id === conversation.id}
-                onClick={() => handleSelectConversation(conversation)}
-              />
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Main - Message Thread */}
-      <div className="messages-main">
-        {selectedConversation ? (
-          <MessageThread
-            conversation={selectedConversation}
-            currentUser={user}
-            onClose={() => setSelectedConversation(null)}
-          />
-        ) : (
-          <div className="p-8">
-            <BaseEmptyState
-              icon={MessageCircle}
-              title="Selecciona una conversación"
-              description="Elige una conversación de la lista o inicia una nueva"
-              size="lg"
-              action={
+      {/* MOBILE: Vista alternada entre lista y chat */}
+      {isMobile ? (
+        <>
+          {/* Lista de conversaciones - Solo visible cuando NO hay chat activo */}
+          {!showChatView && (
+            <div className="messages-sidebar messages-sidebar-mobile">
+              <div className="messages-sidebar-header">
+                <div className="header-title">
+                  <MessageCircle size={24} />
+                  <h2>Mensajes</h2>
+                  {totalUnread > 0 && (
+                    <span className="unread-badge">{totalUnread}</span>
+                  )}
+                </div>
                 <BaseButton
                   variant="primary"
                   icon={Plus}
                   onClick={() => setShowNewMessage(true)}
-                >
-                  Nuevo mensaje
-                </BaseButton>
-              }
-            />
+                  title="Nuevo mensaje"
+                  className="btn-new-message"
+                />
+              </div>
+
+              <div className="messages-search">
+                <div className="search-input-container">
+                  <Search size={16} />
+                  <input
+                    type="text"
+                    placeholder="Buscar conversaciones..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <BaseButton
+                      variant="ghost"
+                      icon={X}
+                      onClick={() => setSearchTerm('')}
+                      className="clear-search"
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="conversations-list">
+                {loading ? (
+                  <div className="p-6">
+                    <BaseLoading variant="spinner" size="md" text="Cargando mensajes..." />
+                  </div>
+                ) : filteredConversations.length === 0 ? (
+                  <BaseEmptyState
+                    icon={MessageCircle}
+                    title={searchTerm ? 'No se encontraron conversaciones' : 'No tienes conversaciones aún'}
+                    description={searchTerm ? 'Intenta con otro término de búsqueda' : 'Inicia una conversación para comenzar'}
+                    size="md"
+                    action={
+                      <BaseButton
+                        variant="primary"
+                        onClick={() => setShowNewMessage(true)}
+                      >
+                        Iniciar conversación
+                      </BaseButton>
+                    }
+                  />
+                ) : (
+                  filteredConversations.map(conversation => (
+                    <ConversationItem
+                      key={conversation.id}
+                      conversation={conversation}
+                      isSelected={selectedConversation?.id === conversation.id}
+                      onClick={() => handleSelectConversation(conversation)}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Chat - Solo visible cuando hay conversación seleccionada */}
+          {showChatView && selectedConversation && (
+            <div className="messages-main messages-main-mobile">
+              <MessageThread
+                conversation={selectedConversation}
+                currentUser={user}
+                onClose={handleBackToList}
+                isMobile={isMobile}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+        /* DESKTOP: Ambas vistas simultáneas */
+        <>
+          {/* Sidebar - Conversations List */}
+          <div className="messages-sidebar">
+            <div className="messages-sidebar-header">
+              <div className="header-title">
+                <MessageCircle size={24} />
+                <h2>Mensajes</h2>
+                {totalUnread > 0 && (
+                  <span className="unread-badge">{totalUnread}</span>
+                )}
+              </div>
+              <BaseButton
+                variant="primary"
+                icon={Plus}
+                onClick={() => setShowNewMessage(true)}
+                title="Nuevo mensaje"
+                className="btn-new-message"
+              />
+            </div>
+
+            <div className="messages-search">
+              <div className="search-input-container">
+                <Search size={16} />
+                <input
+                  type="text"
+                  placeholder="Buscar conversaciones..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <BaseButton
+                    variant="ghost"
+                    icon={X}
+                    onClick={() => setSearchTerm('')}
+                    className="clear-search"
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="conversations-list">
+              {loading ? (
+                <div className="p-6">
+                  <BaseLoading variant="spinner" size="md" text="Cargando mensajes..." />
+                </div>
+              ) : filteredConversations.length === 0 ? (
+                <BaseEmptyState
+                  icon={MessageCircle}
+                  title={searchTerm ? 'No se encontraron conversaciones' : 'No tienes conversaciones aún'}
+                  description={searchTerm ? 'Intenta con otro término de búsqueda' : 'Inicia una conversación para comenzar'}
+                  size="md"
+                  action={
+                    <BaseButton
+                      variant="primary"
+                      onClick={() => setShowNewMessage(true)}
+                    >
+                      Iniciar conversación
+                    </BaseButton>
+                  }
+                />
+              ) : (
+                filteredConversations.map(conversation => (
+                  <ConversationItem
+                    key={conversation.id}
+                    conversation={conversation}
+                    isSelected={selectedConversation?.id === conversation.id}
+                    onClick={() => handleSelectConversation(conversation)}
+                  />
+                ))
+              )}
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Main - Message Thread */}
+          <div className="messages-main">
+            {selectedConversation ? (
+              <MessageThread
+                conversation={selectedConversation}
+                currentUser={user}
+                onClose={() => setSelectedConversation(null)}
+                isMobile={false}
+              />
+            ) : (
+              <div className="p-8">
+                <BaseEmptyState
+                  icon={MessageCircle}
+                  title="Selecciona una conversación"
+                  description="Elige una conversación de la lista o inicia una nueva"
+                  size="lg"
+                  action={
+                    <BaseButton
+                      variant="primary"
+                      icon={Plus}
+                      onClick={() => setShowNewMessage(true)}
+                    >
+                      Nuevo mensaje
+                    </BaseButton>
+                  }
+                />
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
       {/* New Message Modal */}
       {showNewMessage && (

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText, ArrowLeft } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -58,8 +58,9 @@ const safeAsync = async (fn, options = {}) => {
  * @param {Object} props.conversation - Conversation data
  * @param {Object} props.currentUser - Current user
  * @param {Function} props.onClose - Close handler (mobile)
+ * @param {boolean} props.isMobile - Mobile mode flag
  */
-function MessageThread({ conversation, currentUser, onClose }) {
+function MessageThread({ conversation, currentUser, onClose, isMobile = false }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -910,6 +911,17 @@ function MessageThread({ conversation, currentUser, onClose }) {
 
       {/* Thread Header */}
       <div className="thread-header">
+        {/* Mobile Back Button */}
+        {isMobile && onClose && (
+          <button
+            className="thread-back-btn"
+            onClick={onClose}
+            title="Volver a conversaciones"
+          >
+            <ArrowLeft size={24} />
+          </button>
+        )}
+
         <div className="thread-user-info">
           <div className="thread-avatar">
             {conversation.otherUser.name?.charAt(0).toUpperCase() || '?'}
@@ -921,45 +933,51 @@ function MessageThread({ conversation, currentUser, onClose }) {
         </div>
 
         <div className="thread-actions">
-          <button
-            className="thread-action-btn"
-            onClick={() => setShowSearch(!showSearch)}
-            title="Buscar mensajes"
-          >
-            <Search size={20} />
-          </button>
+          {/* Desktop: Mostrar todos los botones */}
+          {!isMobile && (
+            <>
+              <button
+                className="thread-action-btn"
+                onClick={() => setShowSearch(!showSearch)}
+                title="Buscar mensajes"
+              >
+                <Search size={20} />
+              </button>
 
-          <button
-            className="thread-action-btn"
-            onClick={() => setShowMediaGallery(true)}
-            title="Ver multimedia compartido"
-          >
-            <ImageIcon size={20} />
-          </button>
+              <button
+                className="thread-action-btn"
+                onClick={() => setShowMediaGallery(true)}
+                title="Ver multimedia compartido"
+              >
+                <ImageIcon size={20} />
+              </button>
 
-          <div style={{ position: 'relative' }}>
-            <button
-              className="thread-action-btn"
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              title="Exportar conversación"
-            >
-              <FileText size={20} />
-            </button>
-
-            {showExportMenu && (
-              <div className="thread-menu">
-                <button onClick={() => handleExport('txt')}>
-                  <FileText size={16} />
-                  Exportar como TXT
+              <div style={{ position: 'relative' }}>
+                <button
+                  className="thread-action-btn"
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  title="Exportar conversación"
+                >
+                  <FileText size={20} />
                 </button>
-                <button onClick={() => handleExport('json')}>
-                  <FileText size={16} />
-                  Exportar como JSON
-                </button>
+
+                {showExportMenu && (
+                  <div className="thread-menu">
+                    <button onClick={() => handleExport('txt')}>
+                      <FileText size={16} />
+                      Exportar como TXT
+                    </button>
+                    <button onClick={() => handleExport('json')}>
+                      <FileText size={16} />
+                      Exportar como JSON
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
 
+          {/* Menu button (desktop y mobile) */}
           <button
             className="thread-menu-btn"
             onClick={() => setShowMenu(!showMenu)}
@@ -967,14 +985,38 @@ function MessageThread({ conversation, currentUser, onClose }) {
             <MoreVertical size={20} />
           </button>
 
-          {onClose && (
+          {/* Desktop: Close button */}
+          {!isMobile && onClose && (
             <button className="thread-close-btn" onClick={onClose}>
               <X size={20} />
             </button>
           )}
 
+          {/* Dropdown Menu */}
           {showMenu && (
             <div className="thread-menu">
+              {/* Mobile: Incluir todas las acciones en el menú */}
+              {isMobile && (
+                <>
+                  <button onClick={() => { setShowSearch(!showSearch); setShowMenu(false); }}>
+                    <Search size={16} />
+                    Buscar mensajes
+                  </button>
+                  <button onClick={() => { setShowMediaGallery(true); setShowMenu(false); }}>
+                    <ImageIcon size={16} />
+                    Ver multimedia
+                  </button>
+                  <button onClick={() => { handleExport('txt'); setShowMenu(false); }}>
+                    <FileText size={16} />
+                    Exportar como TXT
+                  </button>
+                  <button onClick={() => { handleExport('json'); setShowMenu(false); }}>
+                    <FileText size={16} />
+                    Exportar como JSON
+                  </button>
+                  <div className="menu-divider"></div>
+                </>
+              )}
               <button onClick={handleArchive}>
                 <Archive size={16} />
                 Archivar conversación
@@ -1192,8 +1234,8 @@ function MessageThread({ conversation, currentUser, onClose }) {
           </div>
         )}
 
-        {/* Input Row */}
-        <div className="input-row">
+        {/* Input Area - 1 fila simplificada */}
+        <div className={`input-area ${isMobile ? 'input-area-mobile' : ''}`}>
           <input
             ref={fileInputRef}
             type="file"
@@ -1202,75 +1244,107 @@ function MessageThread({ conversation, currentUser, onClose }) {
             style={{ display: 'none' }}
           />
 
-          <button
-            type="button"
-            className="attach-button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={sending || uploading}
-            title="Adjuntar archivo"
-          >
-            <Paperclip size={20} />
-          </button>
+          {/* Una sola fila: Emoji + Textarea + Send */}
+          <div className="input-row">
+            {/* Mobile: Solo emoji a la izquierda */}
+            {isMobile && (
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  className="input-action-btn"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  disabled={sending || uploading || showVoiceRecorder}
+                  title="Emojis"
+                >
+                  <Smile size={22} />
+                </button>
 
-          <div style={{ position: 'relative' }}>
+                {showEmojiPicker && (
+                  <EmojiPicker
+                    onSelect={handleEmojiSelect}
+                    onClose={() => setShowEmojiPicker(false)}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Desktop: Botones a la izquierda */}
+            {!isMobile && (
+              <>
+                <button
+                  type="button"
+                  className="attach-button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending || uploading}
+                  title="Adjuntar archivo"
+                >
+                  <Paperclip size={20} />
+                </button>
+
+                <div style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    className="emoji-button"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    disabled={sending || uploading || showVoiceRecorder}
+                    title="Emojis"
+                  >
+                    <Smile size={20} />
+                  </button>
+
+                  {showEmojiPicker && (
+                    <EmojiPicker
+                      onSelect={handleEmojiSelect}
+                      onClose={() => setShowEmojiPicker(false)}
+                    />
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  className="voice-button"
+                  onClick={() => setShowVoiceRecorder(true)}
+                  disabled={sending || uploading || showVoiceRecorder}
+                  title="Mensaje de voz"
+                >
+                  <Mic size={20} />
+                </button>
+              </>
+            )}
+
+            {/* Textarea */}
+            <textarea
+              ref={inputRef}
+              className="message-input"
+              placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
+              value={editingMessage ? editingContent : newMessage}
+              onChange={(e) => {
+                if (editingMessage) {
+                  setEditingContent(e.target.value);
+                } else {
+                  setNewMessage(e.target.value);
+                }
+              }}
+              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
+              rows={isMobile ? 1 : 3}
+              disabled={sending || uploading}
+            />
+
+            {/* Send Button */}
             <button
-              type="button"
-              className="emoji-button"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              disabled={sending || uploading || showVoiceRecorder}
-              title="Emojis"
+              type="submit"
+              className="send-button"
+              disabled={(!newMessage.trim() && !selectedFile) || sending || uploading}
+              title={uploading ? 'Subiendo...' : 'Enviar'}
             >
-              <Smile size={20} />
+              {uploading ? (
+                <div className="spinner-small"></div>
+              ) : (
+                <Send size={22} />
+              )}
             </button>
-
-            {showEmojiPicker && (
-              <EmojiPicker
-                onSelect={handleEmojiSelect}
-                onClose={() => setShowEmojiPicker(false)}
-              />
-            )}
           </div>
-
-          <button
-            type="button"
-            className="voice-button"
-            onClick={() => setShowVoiceRecorder(true)}
-            disabled={sending || uploading || showVoiceRecorder}
-            title="Mensaje de voz"
-          >
-            <Mic size={20} />
-          </button>
-
-          <textarea
-            ref={inputRef}
-            className="message-input"
-            placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
-            value={editingMessage ? editingContent : newMessage}
-            onChange={(e) => {
-              if (editingMessage) {
-                setEditingContent(e.target.value);
-              } else {
-                setNewMessage(e.target.value);
-              }
-            }}
-            onKeyPress={handleKeyPress}
-            onKeyDown={handleKeyDown}
-            rows={3}
-            disabled={sending || uploading}
-          />
-
-          <button
-            type="submit"
-            className="send-button"
-            disabled={(!newMessage.trim() && !selectedFile) || sending || uploading}
-            title={uploading ? 'Subiendo...' : 'Enviar'}
-          >
-            {uploading ? (
-              <div className="spinner-small"></div>
-            ) : (
-              <Send size={20} />
-            )}
-          </button>
         </div>
       </form>
 

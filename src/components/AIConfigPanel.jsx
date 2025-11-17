@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers } from 'lucide-react';
+import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers, Sparkles } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import { getCorrectionProfilesByTeacher } from '../firebase/correctionProfiles';
 import logger from '../utils/logger';
@@ -25,6 +25,7 @@ import SelectionSpeakerConfig from './SelectionSpeakerConfig';
 import ProfileEditor from './homework/ProfileEditor';
 import ImageTaskModal from './ImageTaskModal';
 import TranslatorConfigCard from './settings/TranslatorConfigCard';
+import { ExerciseBuilderModal } from './exercisebuilder/ExerciseBuilderModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
 import { IMAGE_GENERATION_TASKS } from '../utils/imageGenerationTasks';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,6 +54,9 @@ function AIConfigPanel() {
   // Estado para configuración del traductor
   const [translatorConfig, setTranslatorConfig] = useState(null);
   const [showTranslatorModal, setShowTranslatorModal] = useState(false);
+
+  // Estado para Exercise Builder
+  const [showExerciseBuilder, setShowExerciseBuilder] = useState(false);
 
   // Get current user and role
   const { user, userRole } = useAuth();
@@ -200,6 +204,13 @@ function AIConfigPanel() {
   };
 
   /**
+   * Abrir modal de Exercise Builder
+   */
+  const handleConfigureExerciseBuilder = () => {
+    setShowExerciseBuilder(true);
+  };
+
+  /**
    * Guardar configuración de función
    */
   const handleSaveFunction = async (functionId, functionConfig) => {
@@ -289,7 +300,7 @@ function AIConfigPanel() {
   });
 
   /**
-   * Obtener todas las funciones (AI + Perfiles + Tareas + Traductor)
+   * Obtener todas las funciones (AI + Perfiles + Tareas + Traductor + Exercise Builder)
    */
   const getAllFunctions = () => {
     const aiFunctions = [...AI_FUNCTIONS];
@@ -311,7 +322,22 @@ function AIConfigPanel() {
       }
     };
 
-    return [...aiFunctions, ...profileFunctions, ...taskFunctions, translatorFunction];
+    // Agregar función del Exercise Builder
+    const exerciseBuilderFunction = {
+      id: 'exercise_builder',
+      name: 'Generador de Ejercicios',
+      description: 'Crea ejercicios con IA a partir de texto. 19 tipos disponibles',
+      icon: Sparkles,
+      category: 'content',
+      isExerciseBuilder: true,
+      defaultConfig: {
+        enabled: true,
+        provider: 'exercise-builder',
+        model: 'ai-generator'
+      }
+    };
+
+    return [...aiFunctions, ...profileFunctions, ...taskFunctions, translatorFunction, exerciseBuilderFunction];
   };
 
   /**
@@ -510,6 +536,19 @@ function AIConfigPanel() {
               );
             }
 
+            // Si es el Exercise Builder
+            if (func.isExerciseBuilder) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={handleConfigureExerciseBuilder}
+                  viewMode="grid"
+                />
+              );
+            }
+
             // Función de IA normal
             return (
               <AIFunctionCard
@@ -560,6 +599,19 @@ function AIConfigPanel() {
                   aiFunction={func}
                   config={func.defaultConfig}
                   onConfigure={handleConfigureTranslator}
+                  viewMode="list"
+                />
+              );
+            }
+
+            // Si es el Exercise Builder
+            if (func.isExerciseBuilder) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={handleConfigureExerciseBuilder}
                   viewMode="list"
                 />
               );
@@ -659,6 +711,14 @@ function AIConfigPanel() {
             }}
           />
         </BaseModal>
+      )}
+
+      {/* Exercise Builder Modal */}
+      {showExerciseBuilder && (
+        <ExerciseBuilderModal
+          isOpen={showExerciseBuilder}
+          onClose={() => setShowExerciseBuilder(false)}
+        />
       )}
     </div>
   );
