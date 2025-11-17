@@ -423,6 +423,8 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
         onClose={() => setShowProfilePanel(false)}
         user={user}
         userRole={userRole}
+        currentUserRole={userRole}
+        isAdmin={isAdmin}
         onUpdate={loadUserAvatar}
       />
 
