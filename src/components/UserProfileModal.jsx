@@ -338,7 +338,7 @@ function UserProfileModal({
           )}
 
           {/* Overlay degradé para legibilidad del texto */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none"></div>
 
           {/* Botón cerrar - Siempre visible */}
           <button
@@ -354,7 +354,7 @@ function UserProfileModal({
 
           {/* Overlay con ícono - Solo visible al hover si puede editar */}
           {(isOwnProfile || isAdmin) && (
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200">
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-200">
               <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <button
                   onClick={() => setShowBannerMenu(!showBannerMenu)}
@@ -436,7 +436,7 @@ function UserProfileModal({
 
               {/* Avatar Edit Overlay - Solo visible al hover */}
               {(isOwnProfile || isAdmin) && (
-                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-all duration-200">
+                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/20 transition-all duration-200">
                   <button
                     onClick={() => setShowAvatarOptions(!showAvatarOptions)}
                     className="absolute bottom-0 right-0 w-8 h-8 md:w-10 md:h-10 rounded-full
