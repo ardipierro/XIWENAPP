@@ -34,7 +34,7 @@ function ClassSessionModal({
     name: '',
     description: '',
     courseId: '',
-    mode: 'async', // 'live' | 'async'
+    videoProvider: 'livekit', // 'livekit' | 'meet' | 'zoom' | 'voov'
     whiteboardType: 'none', // 'none' | 'canvas' | 'excalidraw'
     type: 'single', // 'single' | 'recurring' | 'instant'
     scheduledDate: '',
@@ -42,10 +42,10 @@ function ClassSessionModal({
     duration: 60,
     maxParticipants: 30,
     creditCost: 1,
-    meetLink: '',
-    zoomLink: '',
-    meetingLink: '', // deprecated, mantener para compatibilidad
     startImmediately: true, // Para tipo 'instant'
+    // Estudiantes pre-asignados (para creación)
+    pendingStudents: [],
+    pendingContents: [],
     // Recurring fields
     selectedDays: [],
     recurringStartTime: '10:00',
@@ -72,7 +72,7 @@ function ClassSessionModal({
         name: session.name || '',
         description: session.description || '',
         courseId: session.courseId || '',
-        mode: session.mode || 'async',
+        videoProvider: session.videoProvider || 'livekit',
         whiteboardType: session.whiteboardType || 'none',
         type: session.type || 'single',
         scheduledDate: scheduledStart ? scheduledStart.toISOString().split('T')[0] : '',
@@ -80,9 +80,8 @@ function ClassSessionModal({
         duration: session.duration || 60,
         maxParticipants: session.maxParticipants || 30,
         creditCost: session.creditCost || 1,
-        meetLink: session.meetLink || '',
-        zoomLink: session.zoomLink || '',
-        meetingLink: session.meetingLink || '',
+        pendingStudents: [],
+        pendingContents: [],
         selectedDays: session.schedules?.map(s => s.day) || [],
         recurringStartTime: session.schedules?.[0]?.startTime || '10:00',
         recurringEndTime: session.schedules?.[0]?.endTime || '11:00',
@@ -95,7 +94,7 @@ function ClassSessionModal({
         name: '',
         description: '',
         courseId: '',
-        mode: 'async',
+        videoProvider: 'livekit',
         whiteboardType: 'none',
         type: 'single',
         scheduledDate: '',
@@ -103,10 +102,9 @@ function ClassSessionModal({
         duration: 60,
         maxParticipants: 30,
         creditCost: 1,
-        meetLink: '',
-        zoomLink: '',
-        meetingLink: '',
         startImmediately: true,
+        pendingStudents: [],
+        pendingContents: [],
         selectedDays: [],
         recurringStartTime: '10:00',
         recurringEndTime: '11:00',
@@ -190,21 +188,17 @@ function ClassSessionModal({
         description: formData.description.trim(),
         courseId: formData.courseId || null,
         courseName: courses.find(c => c.id === formData.courseId)?.name || null,
-        mode: formData.mode,
+        videoProvider: formData.videoProvider,
         whiteboardType: formData.whiteboardType,
         type: formData.type,
         duration: parseInt(formData.duration),
         creditCost: parseInt(formData.creditCost),
-        meetLink: formData.meetLink.trim(),
-        zoomLink: formData.zoomLink.trim(),
-        meetingLink: formData.meetingLink.trim() // deprecated, mantener para compatibilidad
+        maxParticipants: parseInt(formData.maxParticipants),
+        recordingEnabled: false,
+        // Incluir estudiantes y contenidos pre-asignados si es nueva sesión
+        assignedStudents: isEditing ? undefined : formData.pendingStudents,
+        contentIds: isEditing ? undefined : formData.pendingContents
       };
-
-      // LiveKit específico
-      if (formData.mode === 'live') {
-        sessionData.maxParticipants = parseInt(formData.maxParticipants);
-        sessionData.recordingEnabled = false;
-      }
 
       // Single session
       if (formData.type === 'single') {
@@ -441,75 +435,93 @@ function ClassSessionModal({
                 />
               </div>
 
-              {/* Modalidad */}
+              {/* Proveedor de Video */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <Video size={20} strokeWidth={2} />
-                  Modalidad
+                  Plataforma de Videoconferencia
                 </h3>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <button
                     type="button"
-                    onClick={() => handleChange('mode', 'async')}
+                    onClick={() => handleChange('videoProvider', 'livekit')}
                     className={`
                       p-4 rounded-lg border-2 transition-all
-                      ${formData.mode === 'async'
-                        ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
+                      ${formData.videoProvider === 'livekit'
+                        ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }
                     `}
                   >
-                    <Calendar size={24} strokeWidth={2} className="mx-auto mb-2 text-gray-700 dark:text-gray-300" />
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">Asíncrona</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Sin video en vivo</div>
+                    <Video size={24} strokeWidth={2} className={`mx-auto mb-2 ${formData.videoProvider === 'livekit' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`} />
+                    <div className={`text-sm font-medium ${formData.videoProvider === 'livekit' ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'}`}>LiveKit</div>
+                    <div className={`text-xs mt-1 ${formData.videoProvider === 'livekit' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'}`}>Integrado</div>
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => handleChange('mode', 'live')}
+                    onClick={() => handleChange('videoProvider', 'meet')}
                     className={`
                       p-4 rounded-lg border-2 transition-all
-                      ${formData.mode === 'live'
-                        ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
+                      ${formData.videoProvider === 'meet'
+                        ? 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }
                     `}
                   >
-                    <Video size={24} strokeWidth={2} className="mx-auto mb-2 text-gray-700 dark:text-gray-300" />
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">En Vivo</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Con LiveKit</div>
+                    <Video size={24} strokeWidth={2} className={`mx-auto mb-2 ${formData.videoProvider === 'meet' ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'}`} />
+                    <div className={`text-sm font-medium ${formData.videoProvider === 'meet' ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-white'}`}>Google Meet</div>
+                    <div className={`text-xs mt-1 ${formData.videoProvider === 'meet' ? 'text-green-700 dark:text-green-300' : 'text-gray-600 dark:text-gray-400'}`}>Automático</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleChange('videoProvider', 'zoom')}
+                    className={`
+                      p-4 rounded-lg border-2 transition-all
+                      ${formData.videoProvider === 'zoom'
+                        ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }
+                    `}
+                  >
+                    <Video size={24} strokeWidth={2} className={`mx-auto mb-2 ${formData.videoProvider === 'zoom' ? 'text-purple-600 dark:text-purple-400' : 'text-gray-700 dark:text-gray-300'}`} />
+                    <div className={`text-sm font-medium ${formData.videoProvider === 'zoom' ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-white'}`}>Zoom</div>
+                    <div className={`text-xs mt-1 ${formData.videoProvider === 'zoom' ? 'text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400'}`}>Automático</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleChange('videoProvider', 'voov')}
+                    className={`
+                      p-4 rounded-lg border-2 transition-all
+                      ${formData.videoProvider === 'voov'
+                        ? 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }
+                    `}
+                  >
+                    <Video size={24} strokeWidth={2} className={`mx-auto mb-2 ${formData.videoProvider === 'voov' ? 'text-orange-600 dark:text-orange-400' : 'text-gray-700 dark:text-gray-300'}`} />
+                    <div className={`text-sm font-medium ${formData.videoProvider === 'voov' ? 'text-orange-900 dark:text-orange-100' : 'text-gray-900 dark:text-white'}`}>Voov Meeting</div>
+                    <div className={`text-xs mt-1 ${formData.videoProvider === 'voov' ? 'text-orange-700 dark:text-orange-300' : 'text-gray-600 dark:text-gray-400'}`}>China</div>
                   </button>
                 </div>
 
-                {formData.mode === 'live' && (
-                  <div className="space-y-4 mt-4">
-                    <BaseInput
-                      label="Máximo de participantes"
-                      type="number"
-                      value={formData.maxParticipants}
-                      onChange={(e) => handleChange('maxParticipants', e.target.value)}
-                      min="1"
-                      max="100"
-                    />
-                    <div className="grid grid-cols-2 gap-4">
-                      <BaseInput
-                        label="Link de Google Meet (opcional)"
-                        type="url"
-                        value={formData.meetLink}
-                        onChange={(e) => handleChange('meetLink', e.target.value)}
-                        placeholder="https://meet.google.com/..."
-                      />
-                      <BaseInput
-                        label="Link de Zoom (opcional)"
-                        type="url"
-                        value={formData.zoomLink}
-                        onChange={(e) => handleChange('zoomLink', e.target.value)}
-                        placeholder="https://zoom.us/j/..."
-                      />
-                    </div>
-                  </div>
-                )}
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    💡 La reunión se creará automáticamente al iniciar la clase. Los estudiantes recibirán un link directo.
+                  </p>
+                </div>
+
+                <BaseInput
+                  label="Máximo de participantes"
+                  type="number"
+                  value={formData.maxParticipants}
+                  onChange={(e) => handleChange('maxParticipants', e.target.value)}
+                  min="1"
+                  max="100"
+                />
               </div>
 
               {/* Tipo de Pizarra */}
@@ -656,44 +668,8 @@ function ClassSessionModal({
                         <h4 className="font-semibold text-green-900 dark:text-green-100">Clase Instantánea</h4>
                       </div>
                       <p className="text-sm text-green-700 dark:text-green-300">
-                        La clase se creará con la fecha y hora actual. Puedes iniciarla inmediatamente después de crearla.
+                        La clase se creará con la fecha y hora actual. La reunión de {formData.videoProvider === 'livekit' ? 'LiveKit' : formData.videoProvider === 'meet' ? 'Google Meet' : formData.videoProvider === 'zoom' ? 'Zoom' : 'Voov Meeting'} se generará automáticamente al iniciarla.
                       </p>
-                    </div>
-
-                    {/* Google Meet Link */}
-                    <div className="space-y-3 border-2 border-primary-200 dark:border-primary-800 rounded-lg p-4 bg-primary-50/50 dark:bg-primary-900/10">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Video className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                        <h4 className="font-semibold text-primary-900 dark:text-primary-100">Link de Google Meet</h4>
-                      </div>
-
-                      <BaseButton
-                        type="button"
-                        variant="primary"
-                        size="sm"
-                        icon={ExternalLink}
-                        onClick={() => window.open('https://meet.google.com/new', '_blank')}
-                        fullWidth
-                      >
-                        🎥 Crear link de Google Meet (abre nueva pestaña)
-                      </BaseButton>
-
-                      <BaseInput
-                        label="Pega el link de Meet aquí"
-                        type="url"
-                        value={formData.meetLink}
-                        onChange={(e) => handleChange('meetLink', e.target.value)}
-                        placeholder="https://meet.google.com/abc-defg-hij"
-                        helperText={formData.meetLink ? "✅ Link de Meet detectado" : "⚠️ Recuerda copiar y pegar el link de Meet"}
-                      />
-
-                      <BaseInput
-                        label="Link de Zoom (opcional)"
-                        type="url"
-                        value={formData.zoomLink}
-                        onChange={(e) => handleChange('zoomLink', e.target.value)}
-                        placeholder="https://zoom.us/j/..."
-                      />
                     </div>
 
                     {/* Start Immediately Checkbox */}
@@ -718,7 +694,7 @@ function ClassSessionModal({
                     {/* Info Alert */}
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                       <p className="text-sm text-blue-800 dark:text-blue-200">
-                        💡 <strong>Tip:</strong> Asegúrate de asignar estudiantes en el tab "Estudiantes" para que reciban la notificación instantánea.
+                        💡 <strong>Tip:</strong> Puedes asignar estudiantes ahora o después de crear la clase. Recibirán notificación automáticamente.
                       </p>
                     </div>
                   </div>
@@ -830,14 +806,72 @@ function ClassSessionModal({
           {activeTab === 'estudiantes' && (
             <div className="space-y-6">
               {!isEditing ? (
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <Users className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Primero crea la sesión para poder asignar estudiantes
+                /* MODO CREACIÓN - Asignar estudiantes a pendingStudents */
+                <>
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Users size={20} strokeWidth={2} />
+                      Estudiantes Pre-asignados
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Puedes asignar estudiantes ahora. Recibirán notificación cuando la clase esté lista.
                     </p>
+                    {formData.pendingStudents.length === 0 ? (
+                      <p className="text-sm text-gray-500 dark:text-gray-500 italic">
+                        No hay estudiantes asignados aún
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {students.filter(s => formData.pendingStudents.includes(s.id)).map(student => (
+                          <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">{student.name}</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
+                            </div>
+                            <BaseButton
+                              variant="danger"
+                              size="sm"
+                              icon={Trash2}
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  pendingStudents: prev.pendingStudents.filter(id => id !== student.id)
+                                }));
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
+
+                  {/* Asignar Nuevo Estudiante */}
+                  {students.filter(s => !formData.pendingStudents.includes(s.id)).length > 0 && (
+                    <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Plus size={18} strokeWidth={2} />
+                        Asignar Estudiante
+                      </h4>
+                      <BaseSelect
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            setFormData(prev => ({
+                              ...prev,
+                              pendingStudents: [...prev.pendingStudents, e.target.value]
+                            }));
+                          }
+                        }}
+                        options={[
+                          { value: '', label: 'Selecciona un estudiante...' },
+                          ...students
+                            .filter(s => !formData.pendingStudents.includes(s.id))
+                            .map(s => ({ value: s.id, label: `${s.name} (${s.email})` }))
+                        ]}
+                      />
+                    </div>
+                  )}
+                </>
               ) : (
                 <>
                   {/* CLASE RECURRENTE - Mostrar enrollments */}
@@ -973,14 +1007,84 @@ function ClassSessionModal({
           {activeTab === 'contenidos' && (
             <div className="space-y-6">
               {!isEditing ? (
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Primero crea la sesión para poder asignar contenidos
+                /* MODO CREACIÓN - Asignar contenidos a pendingContents */
+                <>
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <FileText size={20} strokeWidth={2} />
+                      Contenidos Pre-asignados
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Puedes asignar contenidos (lecciones, ejercicios, videos) a esta clase.
                     </p>
+                    {formData.pendingContents.length === 0 ? (
+                      <p className="text-sm text-gray-500 dark:text-gray-500 italic">
+                        No hay contenidos asignados aún
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {contents.filter(c => formData.pendingContents.includes(c.id)).map(content => (
+                          <div key={content.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium text-gray-900 dark:text-white">{content.title}</div>
+                                {content.type && (
+                                  <span className="px-2 py-1 text-xs rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                    {content.type}
+                                  </span>
+                                )}
+                              </div>
+                              {content.description && (
+                                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{content.description}</div>
+                              )}
+                            </div>
+                            <BaseButton
+                              variant="danger"
+                              size="sm"
+                              icon={Trash2}
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  pendingContents: prev.pendingContents.filter(id => id !== content.id)
+                                }));
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
+
+                  {/* Asignar Nuevo Contenido */}
+                  {contents.filter(c => !formData.pendingContents.includes(c.id)).length > 0 && (
+                    <div className="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <h4 className="text-md font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Plus size={18} strokeWidth={2} />
+                        Asignar Contenido
+                      </h4>
+                      <BaseSelect
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            setFormData(prev => ({
+                              ...prev,
+                              pendingContents: [...prev.pendingContents, e.target.value]
+                            }));
+                          }
+                        }}
+                        options={[
+                          { value: '', label: 'Selecciona un contenido...' },
+                          ...contents
+                            .filter(c => !formData.pendingContents.includes(c.id))
+                            .map(c => ({ value: c.id, label: `${c.title} ${c.type ? `(${c.type})` : ''}` }))
+                        ]}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Puedes asignar lecciones, ejercicios, videos y otros contenidos a esta clase
+                      </p>
+                    </div>
+                  )}
+                </>
               ) : (
                 <>
                   {/* Contenidos Asignados */}

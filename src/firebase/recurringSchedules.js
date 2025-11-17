@@ -43,8 +43,8 @@ export async function createRecurringSchedule(scheduleData) {
       teacherId,
       teacherName,
 
-      // Modalidad
-      mode = 'async', // 'live' | 'async'
+      // Video provider
+      videoProvider = 'livekit', // 'livekit' | 'meet' | 'zoom' | 'voov'
       whiteboardType = 'none',
 
       // Horarios - array de {day, startTime, endTime}
@@ -54,15 +54,13 @@ export async function createRecurringSchedule(scheduleData) {
       startDate = null, // Timestamp - cuándo empieza el horario
       endDate = null, // Timestamp - cuándo termina (null = indefinido)
 
-      // LiveKit
+      // Video config
       maxParticipants = 30,
       recordingEnabled = false,
 
       // Meta
       creditCost = 1,
       duration = 60,
-      meetLink = '',
-      zoomLink = '',
       imageUrl = ''
     } = scheduleData;
 
@@ -89,7 +87,7 @@ export async function createRecurringSchedule(scheduleData) {
 
       // Tipo
       type: 'recurring_schedule',
-      mode,
+      videoProvider,
       whiteboardType,
 
       // Horarios
@@ -101,17 +99,15 @@ export async function createRecurringSchedule(scheduleData) {
       // Estudiantes - array vacío al crear
       studentEnrollments: [],
 
-      // LiveKit
-      maxParticipants: mode === 'live' ? maxParticipants : null,
-      recordingEnabled: mode === 'live' ? recordingEnabled : false,
+      // Video config
+      maxParticipants,
+      recordingEnabled,
 
       // Estado
       status: 'active', // 'active' | 'paused' | 'ended'
 
       // Meta
       creditCost,
-      meetLink,
-      zoomLink,
       imageUrl,
       active: true,
       createdAt: serverTimestamp(),
@@ -428,10 +424,8 @@ export async function generateInstancesForSchedule(scheduleId, weeksAhead = 4) {
               scheduledStart
             );
 
-            // Generar roomName único
-            const roomName = schedule.mode === 'live'
-              ? `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-              : null;
+            // Generar roomName único (todas las clases son live ahora)
+            const roomName = `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
             // Crear instancia
             const instanceData = {
@@ -449,8 +443,8 @@ export async function generateInstancesForSchedule(scheduleId, weeksAhead = 4) {
               courseId: schedule.courseId,
               courseName: schedule.courseName,
 
-              // Modalidad
-              mode: schedule.mode,
+              // Modalidad (todas las clases son live ahora)
+              videoProvider: schedule.videoProvider,
               whiteboardType: schedule.whiteboardType,
               roomName,
 
@@ -466,13 +460,12 @@ export async function generateInstancesForSchedule(scheduleId, weeksAhead = 4) {
               // Meta
               duration: schedule.duration,
               creditCost: schedule.creditCost,
-              meetLink: schedule.meetLink,
-              zoomLink: schedule.zoomLink,
 
-              // LiveKit
+              // Video config
               maxParticipants: schedule.maxParticipants,
               recordingEnabled: schedule.recordingEnabled,
               meetSessionId: null,
+              videoMeetingUrl: null, // Se genera al iniciar la clase
 
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp()

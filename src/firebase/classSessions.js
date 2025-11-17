@@ -113,14 +113,12 @@ export async function createClassSession(sessionData) {
       courseName = '',
       teacherId,
       teacherName,
-      mode = 'async',
+      videoProvider = 'livekit', // 'livekit' | 'meet' | 'zoom' | 'voov'
       whiteboardType = 'none',
       duration = 60,
       maxParticipants = 30,
       recordingEnabled = false,
       creditCost = 1,
-      meetLink = '',
-      zoomLink = '',
       imageUrl = ''
     } = sessionData;
 
@@ -133,10 +131,8 @@ export async function createClassSession(sessionData) {
       return { success: false, error: 'Fecha de inicio es requerida para sesiones únicas' };
     }
 
-    // Generar roomName único si es live
-    const roomName = mode === 'live'
-      ? `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      : null;
+    // Generar roomName único (todas las clases son live ahora)
+    const roomName = `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Calcular scheduledEnd
     const startTimestamp = type === 'instant'
@@ -162,8 +158,8 @@ export async function createClassSession(sessionData) {
       courseId,
       courseName,
 
-      // Modalidad
-      mode,
+      // Modalidad (todas las clases son live ahora)
+      videoProvider,
       whiteboardType,
       roomName,
 
@@ -179,15 +175,14 @@ export async function createClassSession(sessionData) {
       // Meta
       duration,
       creditCost,
-      meetLink,
-      zoomLink,
       imageUrl,
       description,
 
-      // LiveKit
-      maxParticipants: mode === 'live' ? maxParticipants : null,
-      recordingEnabled: mode === 'live' ? recordingEnabled : false,
+      // Video config
+      maxParticipants,
+      recordingEnabled,
       meetSessionId: null,
+      videoMeetingUrl: null, // Se genera al iniciar la clase
 
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
@@ -433,27 +428,25 @@ export async function startClassSession(sessionId) {
 
     let meetSessionId = null;
 
-    // Crear meet_session automáticamente si es modo 'live'
-    if (sessionData.mode === 'live') {
-      try {
-        meetSessionId = await createMeetSession({
-          classSessionId: sessionId,
-          ownerId: sessionData.teacherId,
-          ownerName: sessionData.teacherName,
-          roomName: sessionData.roomName,
-          sessionName: sessionData.name,
-          courseId: sessionData.courseId,
-          courseName: sessionData.courseName
-        });
+    // Crear meet_session automáticamente (todas las clases son live ahora)
+    try {
+      meetSessionId = await createMeetSession({
+        classSessionId: sessionId,
+        ownerId: sessionData.teacherId,
+        ownerName: sessionData.teacherName,
+        roomName: sessionData.roomName,
+        sessionName: sessionData.name,
+        courseId: sessionData.courseId,
+        courseName: sessionData.courseName
+      });
 
-        await updateDoc(docRef, {
-          meetSessionId: meetSessionId
-        });
+      await updateDoc(docRef, {
+        meetSessionId: meetSessionId
+      });
 
-        logger.info('✅ Meet session creada automáticamente:', meetSessionId);
-      } catch (meetError) {
-        logger.error('⚠️ Error creando meet session (no crítico):', meetError);
-      }
+      logger.info('✅ Meet session creada automáticamente:', meetSessionId);
+    } catch (meetError) {
+      logger.error('⚠️ Error creando meet session (no crítico):', meetError);
     }
 
     // Notificar a estudiantes asignados
@@ -530,14 +523,12 @@ export async function endClassSession(sessionId) {
       updatedAt: serverTimestamp()
     });
 
-    // Finalizar meet_session si existe
-    if (sessionData.mode === 'live') {
-      try {
-        await endMeetSessionByClassId(sessionId);
-        logger.info('✅ Meet session finalizada automáticamente');
-      } catch (meetError) {
-        logger.error('⚠️ Error finalizando meet session (no crítico):', meetError);
-      }
+    // Finalizar meet_session si existe (todas las clases son live ahora)
+    try {
+      await endMeetSessionByClassId(sessionId);
+      logger.info('✅ Meet session finalizada automáticamente');
+    } catch (meetError) {
+      logger.error('⚠️ Error finalizando meet session (no crítico):', meetError);
     }
 
     // Notificar a estudiantes que participaron
