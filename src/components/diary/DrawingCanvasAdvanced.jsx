@@ -170,25 +170,15 @@ export function DrawingCanvasAdvanced({
     }
   }, [enabled, eraserMode, strokes, getRelativeCoordinates, addToHistory]);
 
-  // Continuar trazo (con sampling para mejor performance)
+  // Continuar trazo (SIN límite de sampling - permite trazos largos continuos)
   const handlePointerMove = useCallback((e) => {
     if (!isDrawing || !enabled || eraserMode) return;
 
     e.preventDefault();
     const { x, y, pressure } = getRelativeCoordinates(e);
 
-    // Sampling: Solo agregar cada N puntos para reducir carga
-    setCurrentStroke(prev => {
-      // Si hay menos de 100 puntos, agregar todos
-      if (prev.length < 100) {
-        return [...prev, [x, y, pressure]];
-      }
-      // Si hay más, solo agregar 1 de cada 2 puntos
-      if (prev.length % 2 === 0) {
-        return [...prev, [x, y, pressure]];
-      }
-      return prev;
-    });
+    // ✅ FIX: Agregar TODOS los puntos sin límite para permitir trazos largos
+    setCurrentStroke(prev => [...prev, [x, y, pressure]]);
   }, [isDrawing, enabled, eraserMode, getRelativeCoordinates]);
 
   // Finalizar trazo (optimizado con refs)

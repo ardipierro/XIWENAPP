@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { ColorPicker } from './ColorPicker';
 import { HighlightPicker } from './HighlightPicker';
-import { PencilPresetsExtended } from './PencilPresetsExtended';
+import { SimplePencilPresets } from './SimplePencilPresets';
 import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
 import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { ZoomControls } from './ZoomControls';
@@ -67,6 +67,11 @@ export function EnhancedTextEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [showAdvancedTools, setShowAdvancedTools] = useState(false);
+  const [editorUpdateKey, setEditorUpdateKey] = useState(0); // ← FIX: Forzar re-render de toolbar
+
+  // Highlighter states (modo activo)
+  const [highlighterMode, setHighlighterMode] = useState(false);
+  const [highlighterColor, setHighlighterColor] = useState('#FEF08A'); // Amarillo por defecto
 
   // Drawing states
   const [drawingMode, setDrawingMode] = useState(false);
@@ -84,7 +89,6 @@ export function EnhancedTextEditor({
   // NEW: Advanced drawing states
   const [zoom, setZoom] = useState(1);
   const [drawingLayer, setDrawingLayer] = useState('over'); // 'over' | 'under'
-  const [showPencilPresets, setShowPencilPresets] = useState(false); // ← NUEVO: Toggle para presets
 
   const editorContainerRef = useRef(null);
 
@@ -132,6 +136,18 @@ export function EnhancedTextEditor({
     editorProps: {
       attributes: {
         class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[120px] px-4 py-3'
+      }
+    },
+    // ← FIX: Forzar re-render cuando cambia el contenido/selección
+    onUpdate: () => {
+      setEditorUpdateKey(prev => prev + 1);
+    },
+    onSelectionUpdate: ({ editor }) => {
+      setEditorUpdateKey(prev => prev + 1);
+
+      // ✅ FIX: Auto-resaltar cuando está en modo highlighter
+      if (highlighterMode && !editor.state.selection.empty) {
+        editor.chain().focus().setHighlight({ color: highlighterColor }).run();
       }
     }
   });
@@ -340,8 +356,17 @@ export function EnhancedTextEditor({
                 label="Color de texto"
               />
               <HighlightPicker
-                onSelect={(color) => editor.chain().focus().setHighlight({ color }).run()}
+                onSelect={(color) => {
+                  setHighlighterColor(color);
+                  // Si NO está en modo activo, aplicar inmediatamente (comportamiento viejo)
+                  if (!highlighterMode) {
+                    editor.chain().focus().setHighlight({ color }).run();
+                  }
+                }}
                 onClear={() => editor.chain().focus().unsetHighlight().run()}
+                activeMode={highlighterMode}
+                onToggleMode={(active) => setHighlighterMode(active)}
+                currentColor={highlighterColor}
               />
             </div>
 
@@ -467,36 +492,18 @@ export function EnhancedTextEditor({
           {drawingMode && (
             <div className="pencil-toolbar p-3 bg-purple-50 dark:bg-purple-900/20
                            border-b border-purple-200 dark:border-purple-800">
-              <div className="flex items-center gap-3 mb-3">
-                <Pen size={16} className="text-purple-600 dark:text-purple-400" />
-                <div className="flex flex-col flex-1">
-                  <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
-                    Modo Lápiz Activo
-                  </span>
-                  <span className="text-xs text-purple-700 dark:text-purple-300 italic">
-                    💡 Click en el botón 🖊️ arriba para cerrar el modo lápiz
-                  </span>
-                </div>
+              {/* Selector simple de lápiz (grosor + color) */}
+              <SimplePencilPresets
+                onSelect={handlePencilPresetSelect}
+                current={{ color: pencilColor, size: pencilSize }}
+              />
 
-                {/* Toggle mostrar presets */}
-                <button
-                  onClick={() => setShowPencilPresets(!showPencilPresets)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg
-                           bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700
-                           hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
-                  title={showPencilPresets ? "Ocultar presets" : "Mostrar presets"}
-                >
-                  <Pen size={14} className="text-purple-600 dark:text-purple-400" />
-                  <span className="text-xs font-semibold text-purple-900 dark:text-purple-100">
-                    Presets
-                  </span>
-                  {showPencilPresets ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-
+              {/* Controles adicionales en segunda línea */}
+              <div className="flex items-center gap-3 mt-3">
                 {/* Toggle de capa */}
                 <button
                   onClick={() => setDrawingLayer(drawingLayer === 'over' ? 'under' : 'over')}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg
                            bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700
                            hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
                   title="Cambiar capa de dibujo"
@@ -506,31 +513,16 @@ export function EnhancedTextEditor({
                     Capa: {drawingLayer === 'over' ? 'Superior' : 'Inferior'}
                   </span>
                 </button>
-              </div>
-
-              {/* Presets de lápiz (colapsable) */}
-              {showPencilPresets && (
-                <div className="mb-3">
-                  <PencilPresetsExtended
-                    onSelect={handlePencilPresetSelect}
-                    current={{ color: pencilColor, opacity: pencilOpacity, size: pencilSize }}
-                  />
-                </div>
-              )}
-
-              {/* Controles adicionales */}
-              <div className="flex gap-3 mt-3">
-                {/* Selector de grosor */}
-                <StrokeWidthSelector
-                  value={pencilSize}
-                  onChange={setPencilSize}
-                />
 
                 {/* Controles de zoom */}
                 <ZoomControls
                   zoom={zoom}
                   onZoomChange={setZoom}
                 />
+
+                <div className="ml-auto text-xs text-purple-700 dark:text-purple-300 italic">
+                  💡 Click en el botón 🖊️ arriba para cerrar el modo lápiz
+                </div>
               </div>
             </div>
           )}
@@ -563,19 +555,17 @@ export function EnhancedTextEditor({
           <EditorContent editor={editor} />
         </div>
 
-        {/* Canvas de dibujo avanzado con todas las características */}
-        {isEditing && (
-          <DrawingCanvasAdvanced
-            enabled={drawingMode}
-            color={pencilColor}
-            opacity={pencilOpacity}
-            size={pencilSize}
-            zoom={zoom}
-            layer={drawingLayer}
-            onStrokesChange={setDrawingStrokes}
-            initialStrokes={drawingStrokes}
-          />
-        )}
+        {/* Canvas de dibujo avanzado - SIEMPRE visible para mostrar trazos guardados */}
+        <DrawingCanvasAdvanced
+          enabled={isEditing && drawingMode}
+          color={pencilColor}
+          opacity={pencilOpacity}
+          size={pencilSize}
+          zoom={zoom}
+          layer={drawingLayer}
+          onStrokesChange={setDrawingStrokes}
+          initialStrokes={drawingStrokes}
+        />
       </div>
 
       {/* Footer info (solo en modo no-edición) */}
