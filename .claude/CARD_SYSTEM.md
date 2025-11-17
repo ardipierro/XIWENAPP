@@ -1,7 +1,7 @@
 # 🃏 Sistema de Cards Unificado
 
-**Fecha:** 2025-11-15
-**Versión:** 1.1 - Footer Sticky + Mejoras de Color
+**Fecha:** 2025-11-17
+**Versión:** 1.2 - Footer Sticky Fix + UI Simplification
 **Estado:** ✅ Funcional
 
 ---
@@ -784,6 +784,130 @@ No necesitas hacer nada. Dark mode funciona out-of-the-box.
 
 ---
 
+## 🆕 Novedades
+
+### Versión 1.2 (2025-11-17)
+
+#### 1. **Footer Sticky - FIX GLOBAL CRÍTICO**
+
+**Problema identificado:** El footer no se pegaba correctamente a la base en NINGUNA tarjeta (ni UniversalCard, ni BaseCard, ni .card).
+
+**Causas identificadas:**
+1. **UniversalCard**: El footer con `mt-auto` estaba fuera del contenedor `flex-1`
+2. **Clase .card**: No tenía estructura flex, solo padding y border
+
+**Soluciones implementadas:**
+
+**1. UniversalCard (src/components/cards/UniversalCard.jsx):**
+```jsx
+// ❌ ANTES (Incorrecto)
+<div className={classes.content}>
+  <div className="flex-1 flex flex-col">
+    {/* Contenido */}
+  </div>
+  {/* Footer fuera del flex container */}
+  <div className="mt-auto">...</div>
+</div>
+
+// ✅ AHORA (Correcto)
+<div className={classes.content}>
+  <div className="flex-1 flex flex-col">
+    <div className="flex-1">{/* Contenido */}</div>
+    <div className="mt-auto">{/* Footer dentro */}</div>
+  </div>
+</div>
+```
+
+**2. Clase .card (src/globals.css):**
+```css
+/* ❌ ANTES (sin flex) */
+.card {
+  @apply rounded-lg p-6;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* ✅ AHORA (con flex column) */
+.card {
+  @apply rounded-lg p-6;
+  @apply flex flex-col; /* ← NUEVO */
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* Clases helper añadidas */
+.card-body {
+  @apply flex-1; /* Ocupa espacio disponible */
+}
+
+.card-footer {
+  @apply mt-auto; /* Pegado al fondo */
+}
+```
+
+**Cómo usar con clase .card:**
+```jsx
+<div className="card">
+  <div className="card-body">{/* Contenido */}</div>
+  <div className="card-footer">{/* Footer sticky */}</div>
+</div>
+```
+
+**Resultado:**
+- ✅ Footer siempre alineado a la base en TODAS las tarjetas
+- ✅ Funciona con UniversalCard, BaseCard Y clase .card
+- ✅ Grids con tarjetas de diferentes alturas tienen footers alineados
+- ✅ Diseño visual consistente en toda la app
+
+#### 2. **Simplificación de Indicadores de Estado**
+
+**Problema:** En las tarjetas de corrección de tareas había **4 indicadores redundantes** del estado "LISTO":
+1. Badge en esquina superior derecha `[🟢 LISTO]`
+2. CheckCircle verde al lado del nombre del usuario
+3. Mensaje "✅ Análisis completado"
+4. Badge de calificación con fondo verde
+
+**Solución implementada:**
+- ✅ **MANTENER**: Badge principal en esquina superior derecha (único indicador de estado)
+- ❌ **ELIMINAR**: CheckCircle verde al lado del usuario → Cambiado a icono `<User>` neutral
+- ❌ **SIMPLIFICAR**: Eliminado mensaje redundante "✅ Análisis completado"
+- ✅ **MANTENER**: Badge de calificación con color semántico (información útil, no redundante)
+
+**Antes:**
+```
+┌─────────────────────────────────────┐
+│                    [🟢 LISTO]  ← #1 │
+│                                     │
+│  [✅]  Juan Pérez           ← #2    │
+│                                     │
+│  ┌─────────────────────────┐        │
+│  │ ✅ Análisis completado  │ ← #3   │
+│  │ [85/100] • 3 errores    │        │
+│  └─────────────────────────┘        │
+└─────────────────────────────────────┘
+```
+
+**Ahora:**
+```
+┌─────────────────────────────────────┐
+│                    [🟢 LISTO]  ← Único indicador claro │
+│                                     │
+│  [👤]  Juan Pérez           ← Neutral    │
+│                                     │
+│  ┌─────────────────────────┐        │
+│  │ [85/100] • 3 errores    │ ← Info útil
+│  └─────────────────────────┘        │
+└─────────────────────────────────────┘
+```
+
+**Beneficios:**
+- ✅ Reducción de ruido visual (de 4 a 2 elementos)
+- ✅ Jerarquía de información clara
+- ✅ Consistente con las directivas de diseño minimalista
+- ✅ Mejor experiencia de usuario
+
+---
+
 ## 🆕 Novedades Versión 1.1 (2025-11-15)
 
 ### 1. **Footer Sticky**
@@ -893,5 +1017,5 @@ Antes de usar el sistema, verifica:
 ---
 
 **Autor:** Claude Code
-**Última actualización:** 2025-11-14
-**Estado:** ✅ FASE 1 Completada
+**Última actualización:** 2025-11-17
+**Estado:** ✅ Producción (v1.2)
