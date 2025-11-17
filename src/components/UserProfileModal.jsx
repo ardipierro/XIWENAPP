@@ -321,8 +321,8 @@ function UserProfileModal({
       className="!overflow-hidden !h-[90vh] !max-h-[90vh]"
     >
       <div className="flex flex-col h-full overflow-hidden">
-        {/* Banner Section - Más alto para incluir espacio del header */}
-        <div className="relative h-48 md:h-56 overflow-hidden flex-shrink-0 group">
+        {/* Banner Section - Con avatar y nombre superpuestos */}
+        <div className="relative h-64 md:h-72 overflow-hidden flex-shrink-0 group">
           {/* Banner Image o Gradient */}
           {userBanner ? (
             <img
@@ -338,7 +338,7 @@ function UserProfileModal({
           )}
 
           {/* Overlay degradé para legibilidad del texto */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 pointer-events-none"></div>
 
           {/* Botón cerrar - Siempre visible */}
           <button
@@ -403,15 +403,14 @@ function UserProfileModal({
               </div>
             </div>
           )}
-        </div>
 
-        {/* Profile Header - Avatar + Info - Superpuesto al final del banner */}
-        <div className="relative px-4 md:px-6 flex-shrink-0 bg-transparent" style={{ marginTop: '-80px', background: 'transparent' }}>
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+          {/* Profile Header - Avatar + Info - ABSOLUTAMENTE dentro del banner */}
+          <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
               <div
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden transition-all border-4 border-white shadow-2xl"
+                className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden transition-all shadow-2xl"
                 style={{
                   background: 'var(--color-bg-secondary)'
                 }}
@@ -467,7 +466,11 @@ function UserProfileModal({
               </div>
             </div>
           </div>
+          </div>
         </div>
+
+        {/* Separador después del banner */}
+        <div className="flex-shrink-0 border-b border-zinc-200 dark:border-zinc-800"></div>
 
         {/* Mensajes de feedback - FIJO */}
         {(error || success) && (
