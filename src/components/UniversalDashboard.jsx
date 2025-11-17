@@ -73,7 +73,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Crear Contenido',
       description: 'Gestiona contenidos, ejercicios y configura IA',
       icon: Layers,
-      gradient: 'from-blue-500 to-indigo-600',
       path: '/dashboard/unified-content',
       permission: 'create-content'
     },
@@ -81,7 +80,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Diario de Clases',
       description: 'Crea y administra diarios de clase',
       icon: BookOpen,
-      gradient: 'from-amber-500 to-orange-600',
       path: '/dashboard/daily-logs',
       permission: 'manage-classes'
     },
@@ -89,7 +87,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Mensajería',
       description: 'Comunícate con estudiantes y profesores',
       icon: MessageCircle,
-      gradient: 'from-green-500 to-emerald-600',
       path: '/dashboard/messages',
       permission: 'send-messages'
     },
@@ -97,7 +94,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Configuración',
       description: 'Ajustes del sistema y credenciales',
       icon: Settings,
-      gradient: 'from-gray-500 to-zinc-600',
       path: '/dashboard/system-settings',
       permission: 'manage-system-settings'
     },
@@ -105,7 +101,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Clases',
       description: 'Gestiona sesiones de clase en vivo',
       icon: Users,
-      gradient: 'from-teal-500 to-cyan-600',
       path: '/dashboard/classes',
       permission: 'manage-classes'
     },
@@ -113,7 +108,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Revisar Tareas',
       description: 'Corrección de tareas con IA',
       icon: ClipboardCheck,
-      gradient: 'from-pink-500 to-rose-600',
       path: '/dashboard/homework-review',
       permission: 'grade-assignments'
     },
@@ -121,7 +115,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Juegos en Vivo',
       description: 'Juegos en tiempo real con estudiantes',
       icon: Gamepad2,
-      gradient: 'from-purple-500 to-indigo-600',
       path: '/dashboard/games',
       permission: 'play-live-games'
     },
@@ -129,7 +122,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Juego por Turnos',
       description: 'Juego clásico de preguntas',
       icon: Target,
-      gradient: 'from-red-500 to-rose-600',
       path: '/dashboard/turn-game',
       permission: null // Disponible para todos
     },
@@ -137,7 +129,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Calendario',
       description: 'Eventos y clases programadas',
       icon: Calendar,
-      gradient: 'from-cyan-500 to-blue-600',
       path: '/dashboard/calendar',
       permission: null // Disponible para todos
     },
@@ -145,7 +136,6 @@ function HomeView({ user, onNavigate }) {
       title: 'Analíticas',
       description: 'Estadísticas y reportes',
       icon: BarChart3,
-      gradient: 'from-violet-500 to-purple-600',
       path: '/dashboard/analytics',
       permission: 'view-own-analytics'
     }
@@ -177,52 +167,18 @@ function HomeView({ user, onNavigate }) {
       </div>
 
       {/* Tarjetas de acceso */}
-      <div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {visibleCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <div
-                key={card.path}
-                onClick={() => onNavigate && onNavigate(card.path)}
-                className="group cursor-pointer"
-              >
-                <div
-                  className="flex flex-col rounded-xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-1 h-full"
-                  style={{
-                    background: 'var(--color-bg-secondary)',
-                    border: '1px solid var(--color-border)',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
-                    e.currentTarget.style.borderColor = 'var(--color-border-focus)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.06)';
-                    e.currentTarget.style.borderColor = 'var(--color-border)';
-                  }}
-                >
-                  {/* Icon header con gradient */}
-                  <div className={`p-5 bg-gradient-to-br ${card.gradient}`}>
-                    <Icon size={32} className="text-white" strokeWidth={2} />
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      {card.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 flex-1">
-                      {card.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {visibleCards.map((card) => (
+          <UniversalCard
+            key={card.path}
+            variant="default"
+            size="md"
+            icon={card.icon}
+            title={card.title}
+            description={card.description}
+            onClick={() => onNavigate && onNavigate(card.path)}
+          />
+        ))}
       </div>
 
       {/* Acceso rápido a contenido ADE1 (temporal) */}
