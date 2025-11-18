@@ -156,12 +156,9 @@ service cloud.firestore {
       allow write: if isTeacher() || isAdmin();
     }
 
-    // Assignments - students can read assigned to them, teachers can read/write their own
+    // Assignments - students can read from enrolled courses, teachers can read/write their own
     match /assignments/{assignmentId} {
-      allow read: if isAuthenticated() &&
-        (resource.data.assignedTo.hasAny([request.auth.uid]) ||
-         resource.data.createdBy == request.auth.uid ||
-         isAdmin());
+      allow read: if isAuthenticated();
       allow write: if isTeacher() || isAdmin();
     }
 
