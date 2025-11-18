@@ -20,7 +20,7 @@ export function scanCardUsage() {
   return {
     default: {
       variant: 'default',
-      totalUsages: 5,
+      // totalUsages se calcula dinámicamente desde usedIn.length en CardSystemTab
       usedIn: [
         {
           file: 'src/components/CredentialsTab.jsx',
@@ -45,7 +45,6 @@ export function scanCardUsage() {
 
     user: {
       variant: 'user',
-      totalUsages: 2,
       usedIn: [
         {
           file: 'src/components/UniversalUserManager.jsx',
@@ -58,7 +57,6 @@ export function scanCardUsage() {
 
     class: {
       variant: 'class',
-      totalUsages: 3,
       usedIn: [
         {
           file: 'src/components/ClassSessionManager.jsx',
@@ -77,7 +75,6 @@ export function scanCardUsage() {
 
     content: {
       variant: 'content',
-      totalUsages: 5,
       usedIn: [
         {
           file: 'src/components/UnifiedContentManager.jsx',
@@ -108,7 +105,6 @@ export function scanCardUsage() {
 
     stats: {
       variant: 'stats',
-      totalUsages: 11,
       usedIn: [
         {
           file: 'src/components/AnalyticsDashboard.jsx',
@@ -127,7 +123,6 @@ export function scanCardUsage() {
 
     compact: {
       variant: 'compact',
-      totalUsages: 0,
       usedIn: []
     }
   };

@@ -178,15 +178,20 @@ Los cambios se aplican instantáneamente en toda la app.`);
   };
 
   const variantLabels = {
-    default: 'Default (Acceso Rápido)',
-    user: 'User (Estudiantes/Usuarios)',
-    class: 'Class (Clases en Vivo)',
-    content: 'Content (Cursos/Lecciones)',
-    stats: 'Stats (Estadísticas)',
-    compact: 'Compact (Listas Densas)'
+    default: { name: 'Default', description: 'Acceso rápido y widgets generales' },
+    user: { name: 'User', description: 'Tarjetas de estudiantes y usuarios' },
+    class: { name: 'Class', description: 'Clases en vivo y sesiones' },
+    content: { name: 'Content', description: 'Cursos, lecciones y materiales' },
+    stats: { name: 'Stats', description: 'Métricas y estadísticas' },
+    compact: { name: 'Compact', description: 'Listas densas y compactas' }
   };
 
-  const currentUsage = usageData[selectedVariant] || { totalUsages: 0, usedIn: [] };
+  // FIX: Calcular totalUsages dinámicamente desde usedIn.length para evitar inconsistencias
+  const rawUsage = usageData[selectedVariant] || { usedIn: [] };
+  const currentUsage = {
+    ...rawUsage,
+    totalUsages: rawUsage.usedIn.length // ← Siempre consistente con la lista
+  };
   const severityColors = {
     low: 'text-green-600 dark:text-green-400',
     medium: 'text-yellow-600 dark:text-yellow-400',
@@ -435,7 +440,8 @@ Los cambios se aplican instantáneamente en toda la app.`);
           </h3>
 
           {Object.keys(variantLabels).map(key => {
-            const usage = usageData[key] || { totalUsages: 0 };
+            const usage = usageData[key] || { usedIn: [] };
+            const usageCount = usage.usedIn.length; // ← Consistente con la lista real
             const isSelected = selectedVariant === key;
 
             return (
@@ -455,11 +461,14 @@ Los cambios se aplican instantáneamente en toda la app.`);
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                      {variantLabels[key]}
+                    <div className="font-semibold text-sm mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                      {variantLabels[key].name}
                     </div>
-                    <div className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
-                      {usage.totalUsages} uso{usage.totalUsages !== 1 ? 's' : ''}
+                    <div className="text-xs mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                      {variantLabels[key].description}
+                    </div>
+                    <div className="text-xs font-medium" style={{ color: usageCount > 0 ? 'var(--color-primary)' : 'var(--color-text-tertiary)' }}>
+                      {usageCount} {usageCount === 1 ? 'componente' : 'componentes'}
                     </div>
                   </div>
                   {isSelected && (
@@ -481,7 +490,7 @@ Los cambios se aplican instantáneamente en toda la app.`);
                   Configuración del Variant
                 </h3>
                 <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  Ajusta los parámetros visuales de <span className="font-mono font-semibold">{variantLabels[selectedVariant]}</span>
+                  Ajusta los parámetros visuales de <span className="font-mono font-semibold">{variantLabels[selectedVariant].name}</span>
                 </p>
               </div>
               <div className="flex gap-2">
