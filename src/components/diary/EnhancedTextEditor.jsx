@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
@@ -32,7 +32,12 @@ import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { exportToPDF } from '../../utils/pdfExport';
 
 /**
- * EnhancedTextEditor V4 - PULIDO FINAL
+ * EnhancedTextEditor V4.1 - FIX: Duplicate Extensions Warning
+ *
+ * MEJORAS V4.1:
+ * ✅ Fixed: Duplicate 'underline' extension warning
+ * ✅ Memoized extensions array to prevent recreation on every render
+ * ✅ Improved performance by avoiding unnecessary editor reinitialization
  *
  * MEJORAS V4 (últimas):
  * ✅ SimpleColorButton: Solo cuadrado de color, sin icono Palette
@@ -100,25 +105,28 @@ export function EnhancedTextEditor({
     { label: 'Roboto Mono', value: 'Roboto Mono, monospace' },
   ];
 
+  // Memoize extensions array to prevent recreation on every render
+  const extensions = useMemo(() => [
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3] }
+    }),
+    Underline,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+    TextStyle,
+    FontFamily.configure({
+      types: ['textStyle'],
+    }),
+    FontSize,
+    Color,
+    Highlight.configure({
+      multicolor: true
+    }),
+  ], []);
+
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] }
-      }),
-      Underline,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      TextStyle,
-      FontFamily.configure({
-        types: ['textStyle'],
-      }),
-      FontSize,
-      Color,
-      Highlight.configure({
-        multicolor: true
-      }),
-    ],
+    extensions,
     content: initialContent,
     editable: false,
     editorProps: {
