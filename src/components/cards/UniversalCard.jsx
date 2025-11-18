@@ -564,9 +564,9 @@ export function UniversalCard({
           </>
         ) : (
           <>
-            {/* Vertical Layout - MEJORADO: Footer sticky corregido */}
+            {/* Vertical Layout - FIX DEFINITIVO: Children DENTRO de flex-1 */}
             <div className="flex-1 flex flex-col">
-              {/* Contenido principal (flex-1) */}
+              {/* Contenido principal + Children (flex-1) */}
               <div className="flex-1">
                 <div className="card-text">
                   {title && (
@@ -599,14 +599,14 @@ export function UniversalCard({
 
                 {/* Big Number (variant='stats') */}
                 {renderBigNumber()}
-              </div>
 
-              {/* Custom Children - FUERA de flex-1 para no empujar footer */}
-              {children && (
-                <div className="flex-shrink-0">
-                  {children}
-                </div>
-              )}
+                {/* Custom Children - DENTRO de flex-1 para permitir sticky footer */}
+                {children && (
+                  <div className="mt-3">
+                    {children}
+                  </div>
+                )}
+              </div>
 
               {/* Footer sticky (mt-auto dentro del flex container) */}
               {(badges?.length > 0 || stats?.length > 0 || actions) && variantConfig.footerSticky && (
