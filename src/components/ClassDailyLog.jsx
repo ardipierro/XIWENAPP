@@ -238,15 +238,17 @@ function ClassDailyLog({ logId, user, onBack }) {
       onBack: onBack,
       actions: actions
     });
-
-    // Reset TopBar al desmontar
-    return () => {
-      resetTopBar();
-    };
     // updateTopBar and resetTopBar are stable context functions, safe to omit
     // contentSelectorModal.open is stable from useMemo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logMeta, isTeacher, saving, sidebarOpen, onBack, handleSave, handleEndLog]);
+
+  // Reset TopBar SOLO al desmontar (no en cada re-render)
+  useEffect(() => {
+    return () => {
+      resetTopBar();
+    };
+  }, [resetTopBar]);
 
   // Guardar scroll position periódicamente
   useEffect(() => {
