@@ -86,6 +86,11 @@ function ClassDailyLog({ logId, user, onBack }) {
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
   const isStudent = user?.role === 'student' || user?.role === 'trial';
 
+  // Toggle sidebar memoizado para evitar re-renders infinitos
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
+
   // Ocultar sidebar global al montar, restaurar al desmontar
   useEffect(() => {
     hideSidebar();
@@ -223,7 +228,7 @@ function ClassDailyLog({ logId, user, onBack }) {
       key: 'toggle-sidebar',
       label: sidebarOpen ? 'Cerrar Índice' : 'Índice',
       icon: <Menu size={16} />,
-      onClick: () => setSidebarOpen(!sidebarOpen)
+      onClick: toggleSidebar
     });
 
     updateTopBar({
