@@ -60,8 +60,8 @@ export async function getOrCreateConversation(userId1, userId2) {
       lastMessageAt: serverTimestamp(),
       createdAt: serverTimestamp(),
       unreadCount: {
-        [userId1]: 0,
-        [userId2]: 0
+        [userId1]: [],
+        [userId2]: []
       }
     };
 
@@ -196,7 +196,9 @@ export async function getUserConversations(userId) {
           email: userData.email || '',
           role: userData.role || 'student'
         },
-        unreadCount: data.unreadCount?.[userId] || 0
+        unreadCount: Array.isArray(data.unreadCount?.[userId])
+          ? data.unreadCount[userId].length
+          : 0
       });
     }
 
@@ -267,7 +269,7 @@ export async function markMessagesAsRead(conversationId, userId) {
     // Reset unread count
     const conversationRef = doc(db, 'conversations', conversationId);
     batch.update(conversationRef, {
-      [`unreadCount.${userId}`]: 0
+      [`unreadCount.${userId}`]: []
     });
 
     await batch.commit();
