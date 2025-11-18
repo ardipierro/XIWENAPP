@@ -12,9 +12,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Camera, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Pencil, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound, Coins, Eye } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
+import { useViewAs } from '../contexts/ViewAsContext';
 import ProfileTabs from './profile/ProfileTabs';
 import InfoTab from './profile/tabs/InfoTab';
 import ClassesTab from './profile/tabs/ClassesTab';
@@ -36,6 +38,8 @@ import {
   deleteBannerImage,
   validateImageFile
 } from '../firebase/storage';
+import { getUserGamification } from '../firebase/gamification';
+import { getUserCredits } from '../firebase/credits';
 import logger from '../utils/logger';
 
 /**
@@ -60,14 +64,19 @@ function UserProfileModal({
   isAdmin = false,
   onUpdate
 }) {
+  // Hooks
+  const navigate = useNavigate();
+  const { startViewingAs } = useViewAs();
+
   // Estados del perfil
   const [userAvatar, setUserAvatar] = useState('default');
   const [userBanner, setUserBanner] = useState(null);
+  const [gamification, setGamification] = useState(null);
+  const [credits, setCredits] = useState(null);
 
   // Estados de edición y navegación
   const [uploading, setUploading] = useState(false);
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
-  const [showBannerMenu, setShowBannerMenu] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [isEditing, setIsEditing] = useState(false);
 
@@ -100,6 +109,14 @@ function UserProfileModal({
             setUserBanner(banner);
             setUploadedBannerUrl(banner);
           }
+
+          // Cargar gamificación
+          const gamData = await getUserGamification(user.uid);
+          setGamification(gamData);
+
+          // Cargar créditos
+          const creditsData = await getUserCredits(user.uid);
+          setCredits(creditsData);
         } catch (err) {
           logger.error('Error loading profile:', err);
         }
@@ -134,7 +151,7 @@ function UserProfileModal({
 
     setUploading(true);
     setError('');
-    setShowBannerMenu(false);
+    setShowAvatarOptions(false);
 
     try {
       const imageUrl = await uploadBannerImage(user.uid, file);
@@ -155,7 +172,7 @@ function UserProfileModal({
 
   const handleRemoveBanner = async () => {
     try {
-      setShowBannerMenu(false);
+      setShowAvatarOptions(false);
       if (uploadedBannerUrl) {
         await deleteBannerImage(user.uid);
       }
@@ -220,6 +237,21 @@ function UserProfileModal({
       logger.error('Error updating avatar:', err);
       setError('Error al actualizar el avatar');
     }
+  };
+
+  // Handler para modo "Ver como"
+  const handleViewAs = () => {
+    // Guardar userId para reabrir el perfil al volver
+    sessionStorage.setItem('viewAsReturnUserId', user.uid || user.id);
+
+    // Activar modo "Ver como"
+    startViewingAs(currentUser, user);
+
+    // Cerrar modal
+    onClose();
+
+    // Navegar directamente al home del dashboard
+    navigate('/dashboard', { replace: true });
   };
 
   // Generar gradiente aleatorio para banner por defecto
@@ -366,7 +398,7 @@ function UserProfileModal({
           )}
 
           {/* Overlay degradé para legibilidad del texto */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none"></div>
 
           {/* Botón cerrar - Siempre visible */}
           <button
@@ -379,58 +411,6 @@ function UserProfileModal({
           >
             <X size={18} strokeWidth={2} />
           </button>
-
-          {/* Overlay con ícono - Solo visible al hover si puede editar */}
-          {(isOwnProfile || isAdmin) && (
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200">
-              <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button
-                  onClick={() => setShowBannerMenu(!showBannerMenu)}
-                  className="w-10 h-10 rounded-full bg-white/90 dark:bg-zinc-900/90
-                             backdrop-blur-sm hover:bg-white dark:hover:bg-zinc-800
-                             flex items-center justify-center shadow-lg transition-all"
-                  aria-label="Editar banner"
-                >
-                  <Camera size={20} strokeWidth={2} className="text-zinc-900 dark:text-white" />
-                </button>
-
-                {/* Menú de opciones de banner */}
-                {showBannerMenu && (
-                  <div className="absolute bottom-12 right-0 min-w-[180px] bg-white dark:bg-zinc-900
-                                  rounded-lg shadow-xl border border-zinc-200 dark:border-zinc-800
-                                  overflow-hidden z-20">
-                    <label
-                      htmlFor="banner-upload"
-                      className="flex items-center gap-2 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800
-                                 cursor-pointer transition-colors text-sm font-medium text-zinc-900 dark:text-white"
-                    >
-                      <Upload size={16} strokeWidth={2} />
-                      {userBanner ? 'Cambiar banner' : 'Subir banner'}
-                    </label>
-                    <input
-                      id="banner-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleBannerUpload}
-                      disabled={uploading}
-                      className="hidden"
-                    />
-
-                    {userBanner && (
-                      <button
-                        onClick={handleRemoveBanner}
-                        className="flex items-center gap-2 px-4 py-3 w-full hover:bg-red-50 dark:hover:bg-red-900/20
-                                   transition-colors text-sm font-medium text-red-600 dark:text-red-400"
-                      >
-                        <Trash2 size={16} strokeWidth={2} />
-                        Eliminar banner
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Profile Header - Avatar + Info - ABSOLUTAMENTE dentro del banner */}
           <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4">
@@ -464,7 +444,7 @@ function UserProfileModal({
 
               {/* Avatar Edit Overlay - Solo visible al hover */}
               {(isOwnProfile || isAdmin) && (
-                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-all duration-200">
+                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/10 transition-all duration-200">
                   <button
                     onClick={() => setShowAvatarOptions(!showAvatarOptions)}
                     className="absolute bottom-0 right-0 w-8 h-8 md:w-10 md:h-10 rounded-full
@@ -473,7 +453,7 @@ function UserProfileModal({
                                opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                     aria-label="Cambiar avatar"
                   >
-                    <Camera size={16} strokeWidth={2} className="text-zinc-900 dark:text-white" />
+                    <Pencil size={16} strokeWidth={2} className="text-zinc-900 dark:text-white" />
                   </button>
                 </div>
               )}
@@ -487,8 +467,48 @@ function UserProfileModal({
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {/* Badge de Rol */}
                 {(isAdmin || userRole) && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600 shadow-lg">
                     {isAdmin ? 'admin' : userRole}
+                  </span>
+                )}
+
+                {/* Badge de Créditos */}
+                {credits && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/90 text-white shadow-lg backdrop-blur-sm">
+                    <Coins size={14} strokeWidth={2} />
+                    {credits.availableCredits || 0} créditos
+                  </span>
+                )}
+
+                {/* Badges de Gamificación */}
+                {gamification && (
+                  <>
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/90 text-white shadow-lg backdrop-blur-sm">
+                      ⭐ Nivel {gamification.level || 1}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/90 text-white shadow-lg backdrop-blur-sm">
+                      ⚡ {gamification.xp || 0} XP
+                    </span>
+                    {gamification.streakDays > 0 && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/90 text-white shadow-lg backdrop-blur-sm">
+                        🔥 {gamification.streakDays} días
+                      </span>
+                    )}
+                  </>
+                )}
+
+                {/* Badge Ver como (clickeable) - Solo para admins */}
+                {isAdmin && currentUser?.uid !== user?.uid && (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewAs();
+                    }}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-orange-500 text-white shadow-lg cursor-pointer hover:bg-orange-600 transition-colors"
+                    title="Cambiar a la vista de este usuario"
+                  >
+                    <Eye size={14} strokeWidth={2} />
+                    Ver como
                   </span>
                 )}
               </div>
@@ -532,7 +552,7 @@ function UserProfileModal({
                 </button>
               </div>
 
-              {/* Upload Option */}
+              {/* Upload Avatar Option */}
               <div className="mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
                 <label
                   htmlFor="avatar-upload"
@@ -542,7 +562,7 @@ function UserProfileModal({
                              cursor-pointer transition-all text-sm font-semibold"
                 >
                   <Upload size={18} strokeWidth={2} />
-                  Subir imagen personalizada
+                  Subir avatar personalizado
                 </label>
                 <input
                   id="avatar-upload"
@@ -555,6 +575,40 @@ function UserProfileModal({
                 <p className="mt-2 text-xs text-center text-zinc-500 dark:text-zinc-400">
                   JPG, PNG o GIF (máx 5MB)
                 </p>
+              </div>
+
+              {/* Upload Banner Option */}
+              <div className="mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                <label
+                  htmlFor="banner-upload-2"
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg
+                             bg-white dark:bg-zinc-800 border-2 border-zinc-300 dark:border-zinc-700
+                             hover:border-purple-500 dark:hover:border-purple-500
+                             cursor-pointer transition-all text-sm font-semibold"
+                >
+                  <Upload size={18} strokeWidth={2} />
+                  {userBanner ? 'Cambiar banner' : 'Subir banner'}
+                </label>
+                <input
+                  id="banner-upload-2"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBannerUpload}
+                  disabled={uploading}
+                  className="hidden"
+                />
+                {userBanner && (
+                  <button
+                    onClick={handleRemoveBanner}
+                    className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+                               bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800
+                               hover:bg-red-100 dark:hover:bg-red-900/30
+                               transition-all text-sm font-semibold text-red-600 dark:text-red-400"
+                  >
+                    <Trash2 size={16} strokeWidth={2} />
+                    Eliminar banner
+                  </button>
+                )}
               </div>
 
               {/* Icon Avatars */}

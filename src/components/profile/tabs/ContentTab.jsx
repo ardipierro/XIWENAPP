@@ -23,14 +23,21 @@ function ContentTab({ user }) {
   }, [user?.uid]);
 
   const loadAssignments = async () => {
-    if (!user?.uid) return;
+    if (!user?.uid) {
+      logger.warn('ContentTab: No user UID provided');
+      setLoading(false);
+      return;
+    }
 
+    logger.debug('ContentTab: Loading assignments', { userId: user.uid });
     setLoading(true);
     try {
       const data = await getAssignmentsForStudent(user.uid);
-      setAssignments(data);
+      logger.debug('ContentTab: Assignments loaded successfully', { count: data?.length || 0 });
+      setAssignments(data || []);
     } catch (err) {
-      logger.error('Error loading assignments:', err);
+      logger.error('ContentTab: Error loading assignments', err);
+      setAssignments([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
