@@ -1004,7 +1004,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   const gridImage = hasImage ? content.videoData.thumbnailUrl : undefined;
   const gridIcon = !hasImage ? IconComponent : undefined;
 
-  // Preparar badges (type, status, difficulty)
+  // Preparar badges (type, status, difficulty) - AHORA SE PASAN COMO PROP
   const contentBadges = [];
 
   // Badge de tipo de contenido
@@ -1034,12 +1034,13 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   // Badge de dificultad
   if (content.metadata?.difficulty) {
     contentBadges.push(
-      <span
+      <BaseBadge
         key="difficulty"
-        className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}
+        variant="warning"
+        size="sm"
       >
         {content.metadata.difficulty}
-      </span>
+      </BaseBadge>
     );
   }
 
@@ -1078,8 +1079,8 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     <BaseButton key="delete" variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
   ];
 
-  // Solo pasar children si hay badges o tags
-  const hasChildren = contentBadges.length > 0 || (content.metadata?.tags?.length > 0);
+  // Tags van en children (no son badges del sistema)
+  const hasTags = content.metadata?.tags?.length > 0;
 
   return (
     <UniversalCard
@@ -1091,30 +1092,19 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       icon={gridIcon}
       title={content.title}
       description={content.description || config.description}
+      badges={contentBadges}
       meta={contentMeta}
       actions={contentActions}
     >
-      {/* Badges y Tags - Solo renderizar si hay contenido */}
-      {hasChildren && (
-        <div className="space-y-2">
-          {/* Badges - máximo 2 */}
-          {contentBadges.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              {contentBadges.slice(0, 2)}
-            </div>
-          )}
-
-          {/* Tags - máximo 2 */}
-          {content.metadata?.tags?.length > 0 && (
-            <div className="flex items-center gap-1 flex-wrap">
-              <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-              {content.metadata.tags.slice(0, 2).map((tag, idx) => (
-                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+      {/* Tags - Solo renderizar si hay contenido */}
+      {hasTags && (
+        <div className="flex items-center gap-1 flex-wrap mt-2">
+          <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+          {content.metadata.tags.slice(0, 2).map((tag, idx) => (
+            <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+              {tag}
+            </span>
+          ))}
         </div>
       )}
     </UniversalCard>
