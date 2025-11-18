@@ -99,7 +99,9 @@ function ClassDailyLog({ logId, user, onBack }) {
     return () => {
       showSidebar();
     };
-  }, [hideSidebar, showSidebar]);
+    // hideSidebar and showSidebar are stable context functions
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Extract specific log properties to avoid infinite loops from object reference changes
   const logMeta = useMemo(() => ({
