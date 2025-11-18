@@ -945,41 +945,38 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     </div>
   );
 
+  // Agregar tags como badges adicionales para que estén en el footer
+  const allFooterContent = [...contentBadges];
+
+  // Agregar tags como chips en el footer
+  if (content.metadata?.tags?.length > 0) {
+    content.metadata.tags.slice(0, 3).forEach((tag, idx) => {
+      allFooterContent.push(
+        <span
+          key={`tag-${idx}`}
+          className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800 flex items-center gap-1"
+        >
+          <Tag className="w-3 h-3" strokeWidth={2} />
+          {tag}
+        </span>
+      );
+    });
+  }
+
   return (
     <UniversalCard
       variant={gridVariant}
       size="md"
       id={`content-${content.id}`}
-      className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
+      className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
       image={gridImage}
       icon={gridIcon}
       title={content.title}
       description={content.description || config.description}
       meta={contentMeta}
+      badges={allFooterContent}
       actions={contentActions}
-    >
-      {/* Badges y Tags - Ahora no afectan sticky footer */}
-      <div className="space-y-2">
-        {/* Badges */}
-        {contentBadges.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            {contentBadges}
-          </div>
-        )}
-
-        {/* Tags */}
-        {content.metadata?.tags?.length > 0 && (
-          <div className="flex items-center gap-1 flex-wrap">
-            <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-            {content.metadata.tags.slice(0, 3).map((tag, idx) => (
-              <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </UniversalCard>
+    />
   );
 }
 
