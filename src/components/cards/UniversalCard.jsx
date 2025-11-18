@@ -8,7 +8,7 @@
  * @module components/cards/UniversalCard
  */
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { BaseBadge } from '../common';
 import { useCardConfig } from '../../contexts/CardConfigContext';
 import {
@@ -486,16 +486,8 @@ export function UniversalCard({
     }),
   };
 
-  // FORZAR altura con !important directo en el DOM (sobrescribe TODO CSS)
-  useEffect(() => {
-    if (cardRef.current && forceHeight) {
-      cardRef.current.style.setProperty('height', forceHeight, 'important');
-      cardRef.current.style.setProperty('min-height', 'unset', 'important');
-      cardRef.current.style.setProperty('max-height', forceHeight, 'important');
-      cardRef.current.style.setProperty('display', 'flex', 'important');
-      cardRef.current.style.setProperty('flex-direction', 'column', 'important');
-    }
-  }, [forceHeight, title]);
+  // Nota: La altura fija se aplica en finalStyle (líneas 476-487)
+  // No necesitamos useEffect porque el inline style tiene suficiente especificidad
 
   return (
     <article
@@ -669,9 +661,9 @@ export function UniversalCard({
                 )}
               </div>
 
-              {/* Footer sticky (mt-auto lo empuja al fondo) - ROJO PARA DEBUG */}
+              {/* Footer sticky (mt-auto lo empuja al fondo) */}
               {(badges?.length > 0 || stats?.length > 0 || actions) && variantConfig.footerSticky && (
-                <div className={`mt-auto pt-4 flex flex-col ${variantConfig.footerSpacing}`} style={{ backgroundColor: 'red', border: '3px solid yellow' }}>
+                <div className={`mt-auto pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                   {/* Badges */}
                   {renderBadges()}
 
@@ -683,9 +675,9 @@ export function UniversalCard({
                 </div>
               )}
 
-              {/* Footer NO sticky (para stats cards y otros que no necesitan) - AZUL PARA DEBUG */}
+              {/* Footer NO sticky (para stats cards y otros que no necesitan) */}
               {(badges?.length > 0 || stats?.length > 0 || actions) && !variantConfig.footerSticky && (
-                <div className={`pt-4 flex flex-col ${variantConfig.footerSpacing}`} style={{ backgroundColor: 'blue', border: '3px solid green' }}>
+                <div className={`pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                   {/* Badges */}
                   {renderBadges()}
 

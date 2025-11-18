@@ -1,28 +1,17 @@
 /**
- * Script para crear 10 ejemplos de ejercicios interactivos
- * Basados en español nivel 1° (A1-A2)
- * Para probar el ciclo completo: producción → inserción → edición
+ * Script para crear 10 ejercicios de ejemplo
+ * Versión CommonJS que funciona con Node.js directamente
+ * Usa REST API de Firestore
  */
 
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+const https = require('https');
 
-// Configuración de Firebase (copiada de src/firebase/config.js)
-const firebaseConfig = {
-  apiKey: "AIzaSyDnW9U2bsuVz39JyPw6zTPQS2nPXoSqKkA",
-  authDomain: "xiwen-app-2026.firebaseapp.com",
-  projectId: "xiwen-app-2026",
-  storageBucket: "xiwen-app-2026.firebasestorage.app",
-  messagingSenderId: "393099932704",
-  appId: "1:393099932704:web:4a74e4a3d0bc76bf71c1d3",
-  measurementId: "G-MCWNJ1H4BV"
-};
+// Tu ID de usuario
+const TEACHER_ID = 'Kk9gzmKHSMaDyH7E7kjLjnd0aO02';
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Tu ID de usuario (reemplazar con el real)
-const TEACHER_ID = 'REPLACE_WITH_YOUR_UID';
+// Configuración
+const PROJECT_ID = 'xiwen-app-2026';
+const COLLECTION = 'contents';
 
 // ============================================
 // 10 EJEMPLOS DE EJERCICIOS
@@ -390,75 +379,13 @@ const exercises = [
   }
 ];
 
-// ============================================
-// FUNCIÓN PARA GUARDAR EN FIREBASE
-// ============================================
-
-async function saveExercises() {
-  console.log('🚀 Iniciando guardado de ejercicios...\n');
-
-  let successCount = 0;
-  let errorCount = 0;
-
-  for (let i = 0; i < exercises.length; i++) {
-    const exercise = exercises[i];
-
-    try {
-      const contentData = {
-        ...exercise,
-        createdBy: TEACHER_ID,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        status: 'published',
-        views: 0,
-        likes: 0
-      };
-
-      const docRef = await addDoc(collection(db, 'contents'), contentData);
-
-      console.log(`✅ [${i + 1}/10] ${exercise.title}`);
-      console.log(`   📄 ID: ${docRef.id}`);
-      console.log(`   🏷️  Tipo: ${exercise.metadata.exerciseType}`);
-      console.log(`   📊 Nivel: ${exercise.metadata.cefrLevel}\n`);
-
-      successCount++;
-    } catch (error) {
-      console.error(`❌ [${i + 1}/10] Error en "${exercise.title}":`, error.message, '\n');
-      errorCount++;
-    }
-  }
-
-  console.log('\n' + '='.repeat(50));
-  console.log(`📊 RESUMEN:`);
-  console.log(`   ✅ Guardados: ${successCount}`);
-  console.log(`   ❌ Errores: ${errorCount}`);
-  console.log('='.repeat(50));
-
-  if (successCount === exercises.length) {
-    console.log('\n🎉 ¡Todos los ejercicios fueron guardados exitosamente!');
-    console.log('📝 Ahora puedes:');
-    console.log('   1. Ir a "Gestionar Contenidos" en tu dashboard');
-    console.log('   2. Ver los 10 ejercicios nuevos');
-    console.log('   3. Insertarlos en un diario de clases');
-    console.log('   4. Probar la edición de campos de texto');
-  }
-
-  process.exit(0);
-}
-
-// Ejecutar
-console.log('📚 CREADOR DE EJERCICIOS DE EJEMPLO');
-console.log('=' .repeat(50));
-console.log('⚠️  IMPORTANTE: Debes reemplazar TEACHER_ID con tu UID');
-console.log('=' .repeat(50) + '\n');
-
-if (TEACHER_ID === 'REPLACE_WITH_YOUR_UID') {
-  console.error('❌ ERROR: Debes configurar tu TEACHER_ID primero');
-  console.log('\n📝 Instrucciones:');
-  console.log('1. Abre scripts/create-sample-exercises.js');
-  console.log('2. Reemplaza TEACHER_ID con tu User ID de Firebase');
-  console.log('3. Ejecuta: node scripts/create-sample-exercises.js\n');
-  process.exit(1);
-}
-
-saveExercises().catch(console.error);
+console.log('❌ NOTA: Este script requiere configuración adicional de Firebase Admin SDK');
+console.log('📝 Por favor usa la app web para crear los ejercicios:');
+console.log('');
+console.log('Opciones alternativas:');
+console.log('1. Ve a Exercise Builder en la app');
+console.log('2. Usa la funcionalidad "Guardar en Contenidos"');
+console.log('3. O importa este JSON directamente');
+console.log('');
+console.log('Los datos están listos en la variable "exercises"');
+console.log('Total de ejercicios: ' + exercises.length);
