@@ -943,6 +943,9 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     <BaseButton key="delete" variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
   ];
 
+  // Solo pasar children si hay badges o tags
+  const hasChildren = contentBadges.length > 0 || (content.metadata?.tags?.length > 0);
+
   return (
     <UniversalCard
       variant={gridVariant}
@@ -956,27 +959,29 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       meta={contentMeta}
       actions={contentActions}
     >
-      {/* Badges y Tags - LIMITADOS para no empujar el footer */}
-      <div className="space-y-2">
-        {/* Badges - máximo 2 */}
-        {contentBadges.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            {contentBadges.slice(0, 2)}
-          </div>
-        )}
+      {/* Badges y Tags - Solo renderizar si hay contenido */}
+      {hasChildren && (
+        <div className="space-y-2">
+          {/* Badges - máximo 2 */}
+          {contentBadges.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              {contentBadges.slice(0, 2)}
+            </div>
+          )}
 
-        {/* Tags - máximo 2 */}
-        {content.metadata?.tags?.length > 0 && (
-          <div className="flex items-center gap-1 flex-wrap">
-            <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-            {content.metadata.tags.slice(0, 2).map((tag, idx) => (
-              <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+          {/* Tags - máximo 2 */}
+          {content.metadata?.tags?.length > 0 && (
+            <div className="flex items-center gap-1 flex-wrap">
+              <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+              {content.metadata.tags.slice(0, 2).map((tag, idx) => (
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </UniversalCard>
   );
 }
