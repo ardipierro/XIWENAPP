@@ -1,107 +1,84 @@
 /**
- * @fileoverview Pestaña de clases/cursos asignados
+ * @fileoverview Pestaña de clases/sesiones asignadas
  * @module components/profile/tabs/ClassesTab
  */
 
 import { useState, useEffect } from 'react';
-import { BookOpen, Calendar, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../../firebase/config';
+import { BookOpen, Calendar, Clock, Users, Video, CheckCircle, AlertCircle } from 'lucide-react';
+import { getStudentInstances, getTeacherInstances } from '../../../firebase/classInstances';
+import { getTeacherSchedules } from '../../../firebase/recurringSchedules';
 import logger from '../../../utils/logger';
 
 /**
- * ClassesTab - Cursos asignados al usuario
+ * ClassesTab - Sesiones de clase asignadas al usuario
  *
  * @param {Object} user - Usuario actual
  * @param {string} userRole - Rol del usuario
  */
 function ClassesTab({ user, userRole }) {
-  const [courses, setCourses] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, active, completed
+  const [filter, setFilter] = useState('all'); // all, scheduled, live, ended
 
   useEffect(() => {
-    loadCourses();
+    loadSessions();
   }, [user?.uid, userRole]);
 
-  const loadCourses = async () => {
+  const loadSessions = async () => {
     if (!user?.uid) {
       logger.warn('ClassesTab: No user UID provided');
       setLoading(false);
       return;
     }
 
-    logger.debug('ClassesTab: Loading courses', { userId: user.uid, userRole });
+    logger.debug('ClassesTab: Loading class sessions', { userId: user.uid, userRole });
     setLoading(true);
     try {
-      let coursesData = [];
+      let sessionsData = [];
 
       if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
-        // Obtener enrollments del estudiante
-        const enrollmentsRef = collection(db, 'enrollments');
-        const enrollmentsQuery = query(enrollmentsRef, where('studentId', '==', user.uid));
-        const enrollmentsSnap = await getDocs(enrollmentsQuery);
-
-        const courseIds = enrollmentsSnap.docs.map(doc => doc.data().courseId);
-
-        // Obtener datos de los cursos
-        if (courseIds.length > 0) {
-          const coursesRef = collection(db, 'courses');
-          const coursesSnap = await getDocs(coursesRef);
-
-          coursesData = coursesSnap.docs
-            .filter(doc => courseIds.includes(doc.id))
-            .map(doc => {
-              const enrollment = enrollmentsSnap.docs.find(e => e.data().courseId === doc.id);
-              return {
-                id: doc.id,
-                ...doc.data(),
-                enrollmentId: enrollment?.id,
-                enrolledAt: enrollment?.data()?.enrolledAt,
-                progress: enrollment?.data()?.progress || 0,
-                status: enrollment?.data()?.status || 'active'
-              };
-            });
-        }
+        // Obtener instancias de clase del estudiante
+        const instances = await getStudentInstances(user.uid);
+        sessionsData = instances;
       } else if (userRole === 'teacher' || userRole === 'trial_teacher') {
-        // Obtener cursos creados por el profesor
-        const coursesRef = collection(db, 'courses');
-        const coursesQuery = query(coursesRef, where('teacherId', '==', user.uid));
-        const coursesSnap = await getDocs(coursesQuery);
+        // Obtener instancias del profesor
+        const instances = await getTeacherInstances(user.uid);
 
-        coursesData = coursesSnap.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          isTeacher: true
-        }));
+        // Obtener horarios recurrentes del profesor
+        const schedules = await getTeacherSchedules(user.uid);
 
-        // Contar estudiantes en cada curso
-        for (const course of coursesData) {
-          const enrollmentsRef = collection(db, 'enrollments');
-          const enrollmentsQuery = query(enrollmentsRef, where('courseId', '==', course.id));
-          const enrollmentsSnap = await getDocs(enrollmentsQuery);
-          course.studentCount = enrollmentsSnap.docs.length;
-        }
+        // Combinar instancias y horarios
+        sessionsData = [
+          ...instances,
+          ...schedules.map(s => ({ ...s, isSchedule: true, type: 'recurring' }))
+        ];
       }
 
-      logger.debug('ClassesTab: Courses loaded successfully', { count: coursesData.length });
-      setCourses(coursesData);
+      logger.debug('ClassesTab: Sessions loaded successfully', { count: sessionsData.length });
+      setSessions(sessionsData);
     } catch (err) {
-      logger.error('ClassesTab: Error loading courses', err);
-      setCourses([]); // Set empty array on error
+      logger.error('ClassesTab: Error loading sessions', err);
+      setSessions([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
   };
 
-  const getFilteredCourses = () => {
-    if (filter === 'all') return courses;
-    if (filter === 'active') return courses.filter(c => c.status === 'active' || c.isTeacher);
-    if (filter === 'completed') return courses.filter(c => c.status === 'completed');
-    return courses;
+  const getFilteredSessions = () => {
+    if (filter === 'all') return sessions;
+    if (filter === 'scheduled') return sessions.filter(s => !s.isSchedule && s.status === 'scheduled');
+    if (filter === 'live') return sessions.filter(s => !s.isSchedule && s.status === 'live');
+    if (filter === 'ended') return sessions.filter(s => !s.isSchedule && s.status === 'ended');
+    return sessions;
   };
 
-  const filteredCourses = getFilteredCourses();
+  const filteredSessions = getFilteredSessions();
+
+  // Contar por estado
+  const scheduledCount = sessions.filter(s => !s.isSchedule && s.status === 'scheduled').length;
+  const liveCount = sessions.filter(s => !s.isSchedule && s.status === 'live').length;
+  const endedCount = sessions.filter(s => !s.isSchedule && s.status === 'ended').length;
+  const schedulesCount = sessions.filter(s => s.isSchedule).length;
 
   if (loading) {
     return (
@@ -123,40 +100,54 @@ function ClassesTab({ user, userRole }) {
               : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
           }`}
         >
-          Todos ({courses.length})
+          Todas ({sessions.length})
         </button>
-        <button
-          onClick={() => setFilter('active')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            filter === 'active'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-          }`}
-        >
-          Activos ({courses.filter(c => c.status === 'active' || c.isTeacher).length})
-        </button>
-        {userRole === 'student' && (
+        {scheduledCount > 0 && (
           <button
-            onClick={() => setFilter('completed')}
+            onClick={() => setFilter('scheduled')}
             className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              filter === 'completed'
+              filter === 'scheduled'
                 ? 'bg-indigo-600 text-white'
                 : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
             }`}
           >
-            Completados ({courses.filter(c => c.status === 'completed').length})
+            Programadas ({scheduledCount})
+          </button>
+        )}
+        {liveCount > 0 && (
+          <button
+            onClick={() => setFilter('live')}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              filter === 'live'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+            }`}
+          >
+            En vivo ({liveCount})
+          </button>
+        )}
+        {endedCount > 0 && (
+          <button
+            onClick={() => setFilter('ended')}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              filter === 'ended'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+            }`}
+          >
+            Finalizadas ({endedCount})
           </button>
         )}
       </div>
 
-      {/* Lista de cursos */}
-      {filteredCourses.length > 0 ? (
+      {/* Lista de sesiones */}
+      {filteredSessions.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              isTeacher={course.isTeacher}
+          {filteredSessions.map((session) => (
+            <SessionCard
+              key={session.id}
+              session={session}
+              isTeacher={userRole === 'teacher' || userRole === 'trial_teacher'}
               userRole={userRole}
             />
           ))}
@@ -165,12 +156,12 @@ function ClassesTab({ user, userRole }) {
         <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
           <BookOpen size={48} strokeWidth={2} className="mx-auto text-zinc-300 dark:text-zinc-700 mb-4" />
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-            No hay cursos {filter !== 'all' ? filter + 's' : ''}
+            No hay clases {filter !== 'all' ? getFilterLabel(filter) : ''}
           </h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             {userRole === 'student'
-              ? 'Aún no estás inscrito en ningún curso'
-              : 'Aún no has creado ningún curso'}
+              ? 'Aún no estás asignado a ninguna clase'
+              : 'Aún no has creado ninguna clase'}
           </p>
         </div>
       )}
@@ -179,27 +170,81 @@ function ClassesTab({ user, userRole }) {
 }
 
 /**
- * CourseCard - Card individual de curso
+ * Obtener etiqueta de filtro
  */
-function CourseCard({ course, isTeacher, userRole }) {
+function getFilterLabel(filter) {
+  const labels = {
+    scheduled: 'programadas',
+    live: 'en vivo',
+    ended: 'finalizadas'
+  };
+  return labels[filter] || filter;
+}
+
+/**
+ * SessionCard - Card individual de sesión
+ */
+function SessionCard({ session, isTeacher, userRole }) {
+  const isSchedule = session.isSchedule;
+
   const getStatusBadge = () => {
-    if (course.status === 'completed') {
+    if (isSchedule) {
       return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-semibold">
-          <CheckCircle size={14} strokeWidth={2} />
-          Completado
+        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-xs font-semibold">
+          <BookOpen size={14} strokeWidth={2} />
+          Recurrente
         </div>
       );
     }
-    if (course.status === 'active' || isTeacher) {
+
+    if (session.status === 'live') {
+      return (
+        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-semibold animate-pulse">
+          <div className="w-2 h-2 rounded-full bg-red-600"></div>
+          En vivo
+        </div>
+      );
+    }
+
+    if (session.status === 'ended') {
+      return (
+        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900/20 text-zinc-700 dark:text-zinc-400 text-xs font-semibold">
+          <CheckCircle size={14} strokeWidth={2} />
+          Finalizada
+        </div>
+      );
+    }
+
+    if (session.status === 'scheduled') {
       return (
         <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-semibold">
-          <AlertCircle size={14} strokeWidth={2} />
-          Activo
+          <Clock size={14} strokeWidth={2} />
+          Programada
         </div>
       );
     }
+
     return null;
+  };
+
+  const getProviderBadge = () => {
+    if (!session.videoProvider) return null;
+
+    const providers = {
+      livekit: { label: 'LiveKit', color: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400' },
+      meet: { label: 'Google Meet', color: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' },
+      zoom: { label: 'Zoom', color: 'bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400' },
+      voov: { label: 'VooV', color: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400' }
+    };
+
+    const provider = providers[session.videoProvider] || { label: session.videoProvider, color: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-400' };
+
+    return (
+      <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${provider.color}`}>
+        <Video size={14} strokeWidth={2} />
+        {provider.label}
+      </div>
+    );
   };
 
   return (
@@ -208,11 +253,11 @@ function CourseCard({ course, isTeacher, userRole }) {
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-            {course.name || course.title || 'Curso sin título'}
+            {session.scheduleName || session.name || 'Clase sin título'}
           </h3>
-          {course.description && (
+          {session.description && (
             <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
-              {course.description}
+              {session.description}
             </p>
           )}
         </div>
@@ -220,47 +265,52 @@ function CourseCard({ course, isTeacher, userRole }) {
       </div>
 
       {/* Stats */}
-      <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
-        {isTeacher && (
+      <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400 mb-3">
+        {isTeacher && !isSchedule && session.eligibleStudentIds && (
           <div className="flex items-center gap-1">
             <Users size={16} strokeWidth={2} />
-            <span>{course.studentCount || 0} estudiantes</span>
+            <span>{session.eligibleStudentIds.length} estudiantes</span>
           </div>
         )}
 
-        {!isTeacher && course.progress !== undefined && (
-          <div className="flex items-center gap-1">
-            <CheckCircle size={16} strokeWidth={2} />
-            <span>{course.progress}% completado</span>
-          </div>
-        )}
-
-        {course.enrolledAt && (
+        {session.scheduledStart && !isSchedule && (
           <div className="flex items-center gap-1">
             <Calendar size={16} strokeWidth={2} />
-            <span>Desde {new Date(course.enrolledAt?.toDate()).toLocaleDateString()}</span>
+            <span>{new Date(session.scheduledStart?.toDate()).toLocaleDateString()}</span>
           </div>
         )}
 
-        {course.createdAt && isTeacher && (
+        {session.scheduledStart && !isSchedule && (
           <div className="flex items-center gap-1">
             <Clock size={16} strokeWidth={2} />
-            <span>Creado {new Date(course.createdAt?.toDate()).toLocaleDateString()}</span>
+            <span>{new Date(session.scheduledStart?.toDate()).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        )}
+
+        {session.duration && (
+          <div className="flex items-center gap-1">
+            <Clock size={16} strokeWidth={2} />
+            <span>{session.duration} min</span>
           </div>
         )}
       </div>
 
-      {/* Progress bar - Solo para estudiantes */}
-      {!isTeacher && course.progress !== undefined && (
-        <div className="mt-4">
-          <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500"
-              style={{ width: `${course.progress}%` }}
-            />
+      {/* Badges */}
+      <div className="flex flex-wrap items-center gap-2">
+        {getProviderBadge()}
+
+        {session.courseName && (
+          <div className="px-2 py-1 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+            {session.courseName}
           </div>
-        </div>
-      )}
+        )}
+
+        {isSchedule && session.schedules && (
+          <div className="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400">
+            {session.schedules.length} horarios/semana
+          </div>
+        )}
+      </div>
     </div>
   );
 }
