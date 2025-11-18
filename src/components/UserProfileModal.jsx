@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Camera, Pencil, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound, Coins } from 'lucide-react';
+import { Pencil, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound, Coins } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
 import ProfileTabs from './profile/ProfileTabs';
@@ -71,7 +71,6 @@ function UserProfileModal({
   // Estados de edición y navegación
   const [uploading, setUploading] = useState(false);
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
-  const [showBannerMenu, setShowBannerMenu] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [isEditing, setIsEditing] = useState(false);
 
@@ -146,7 +145,7 @@ function UserProfileModal({
 
     setUploading(true);
     setError('');
-    setShowBannerMenu(false);
+    setShowAvatarOptions(false);
 
     try {
       const imageUrl = await uploadBannerImage(user.uid, file);
@@ -167,7 +166,7 @@ function UserProfileModal({
 
   const handleRemoveBanner = async () => {
     try {
-      setShowBannerMenu(false);
+      setShowAvatarOptions(false);
       if (uploadedBannerUrl) {
         await deleteBannerImage(user.uid);
       }
@@ -391,58 +390,6 @@ function UserProfileModal({
           >
             <X size={18} strokeWidth={2} />
           </button>
-
-          {/* Overlay con ícono - Solo visible al hover si puede editar */}
-          {(isOwnProfile || isAdmin) && (
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-200">
-              <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button
-                  onClick={() => setShowBannerMenu(!showBannerMenu)}
-                  className="w-10 h-10 rounded-full bg-white/90 dark:bg-zinc-900/90
-                             backdrop-blur-sm hover:bg-white dark:hover:bg-zinc-800
-                             flex items-center justify-center shadow-lg transition-all"
-                  aria-label="Editar banner"
-                >
-                  <Camera size={20} strokeWidth={2} className="text-zinc-900 dark:text-white" />
-                </button>
-
-                {/* Menú de opciones de banner */}
-                {showBannerMenu && (
-                  <div className="absolute bottom-12 right-0 min-w-[180px] bg-white dark:bg-zinc-900
-                                  rounded-lg shadow-xl border border-zinc-200 dark:border-zinc-800
-                                  overflow-hidden z-20">
-                    <label
-                      htmlFor="banner-upload"
-                      className="flex items-center gap-2 px-4 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-800
-                                 cursor-pointer transition-colors text-sm font-medium text-zinc-900 dark:text-white"
-                    >
-                      <Upload size={16} strokeWidth={2} />
-                      {userBanner ? 'Cambiar banner' : 'Subir banner'}
-                    </label>
-                    <input
-                      id="banner-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleBannerUpload}
-                      disabled={uploading}
-                      className="hidden"
-                    />
-
-                    {userBanner && (
-                      <button
-                        onClick={handleRemoveBanner}
-                        className="flex items-center gap-2 px-4 py-3 w-full hover:bg-red-50 dark:hover:bg-red-900/20
-                                   transition-colors text-sm font-medium text-red-600 dark:text-red-400"
-                      >
-                        <Trash2 size={16} strokeWidth={2} />
-                        Eliminar banner
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Profile Header - Avatar + Info - ABSOLUTAMENTE dentro del banner */}
           <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4">
