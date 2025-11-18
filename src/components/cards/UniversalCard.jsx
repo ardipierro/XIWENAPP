@@ -148,8 +148,10 @@ export function UniversalCard({
       backgroundColor: 'var(--color-bg-secondary)',
       border: `1px solid ${variantConfig.normalBorderColor}`,
       boxShadow: variantConfig.normalShadow,
+      display: 'flex',
+      flexDirection: 'column',
       ...(variantConfig.cardHeight
-        ? { height: variantConfig.cardHeight, minHeight: 'unset' }
+        ? { height: variantConfig.cardHeight, minHeight: 'unset', overflow: 'hidden' }
         : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
       ),
       transitionDuration: variantConfig.transitionDuration,
@@ -470,34 +472,13 @@ export function UniversalCard({
     );
   };
 
-  // FORZAR altura fija basada en variant (sin depender de config que puede estar corrupto en localStorage)
-  const forceHeight = variant === 'content' ? '420px' : variant === 'default' ? '380px' : null;
-
-  const finalStyle = {
-    ...styles.container,
-    ...style,
-    // FORZAR altura fija + flexbox para sticky footer (sobrescribe TODO)
-    ...(forceHeight && {
-      height: forceHeight,
-      minHeight: 'unset',
-      maxHeight: forceHeight,  // Asegurar que no puede crecer más
-      display: 'flex',
-      flexDirection: 'column',
-    }),
-  };
-
-  // Nota: La altura fija se aplica en finalStyle (líneas 476-487)
-  // No necesitamos useEffect porque el inline style tiene suficiente especificidad
-
   return (
     <article
       ref={cardRef}
       className={`${classes.container} ${className} ${
         selected ? 'ring-2 ring-primary-500' : ''
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${
-        forceHeight ? 'overflow-hidden' : ''
-      }`}
-      style={finalStyle}
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      style={{ ...styles.container, ...style }}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
