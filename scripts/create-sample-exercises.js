@@ -31,8 +31,8 @@ const TEACHER_ID = 'REPLACE_WITH_YOUR_UID';
 const exercises = [
   // 1. MCQ - Artículos
   {
-    title: 'Artículos Definidos: el/la',
-    description: 'Practica el uso de artículos definidos en español',
+    title: '🎯 Artículos Definidos: el/la',
+    description: '✨ Ejercicio Demo (2025-11-18) | Practica el uso de artículos definidos en español',
     type: 'exercise',
     body: JSON.stringify({
       type: 'mcq',
@@ -53,14 +53,16 @@ const exercises = [
       cefrLevel: 'A1',
       points: 100,
       source: 'ExerciseBuilder',
-      tags: ['gramática', 'artículos', 'género']
+      tags: ['gramática', 'artículos', 'género', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 2. BLANK - Verbos ser/estar
   {
-    title: 'Verbos SER y ESTAR',
-    description: 'Completa con la forma correcta de ser o estar',
+    title: '🎯 Verbos SER y ESTAR',
+    description: '✨ Ejercicio Demo (2025-11-18) | Completa con la forma correcta de ser o estar',
     type: 'exercise',
     body: JSON.stringify({
       type: 'blank',
@@ -75,14 +77,16 @@ const exercises = [
       cefrLevel: 'A1',
       points: 150,
       source: 'ExerciseBuilder',
-      tags: ['gramática', 'verbos', 'ser-estar']
+      tags: ['gramática', 'verbos', 'ser-estar', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 3. MATCH - Números
   {
-    title: 'Números del 1 al 10',
-    description: 'Empareja los números con sus palabras en español',
+    title: '🎯 Números del 1 al 10',
+    description: '✨ Ejercicio Demo (2025-11-18) | Empareja los números con sus palabras en español',
     type: 'exercise',
     body: JSON.stringify({
       type: 'match',
@@ -103,14 +107,16 @@ const exercises = [
       cefrLevel: 'A1',
       points: 100,
       source: 'ExerciseBuilder',
-      tags: ['vocabulario', 'números']
+      tags: ['vocabulario', 'números', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 4. TRUE/FALSE - Género
   {
-    title: 'Género Gramatical',
-    description: 'Determina si la afirmación es verdadera o falsa',
+    title: '🎯 Género Gramatical',
+    description: '✨ Ejercicio Demo (2025-11-18) | Determina si la afirmación es verdadera o falsa',
     type: 'exercise',
     body: JSON.stringify({
       type: 'truefalse',
@@ -126,14 +132,16 @@ const exercises = [
       cefrLevel: 'A1',
       points: 50,
       source: 'ExerciseBuilder',
-      tags: ['gramática', 'género']
+      tags: ['gramática', 'género', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 5. FREE DRAG DROP - Categorizar sustantivos
   {
-    title: 'Clasificar Sustantivos por Género',
-    description: 'Arrastra cada sustantivo a su categoría correcta',
+    title: '🎯 Clasificar Sustantivos por Género',
+    description: '✨ Ejercicio Demo (2025-11-18) | Arrastra cada sustantivo a su categoría correcta',
     type: 'exercise',
     body: JSON.stringify({
       type: 'free-dragdrop',
@@ -159,14 +167,16 @@ const exercises = [
       cefrLevel: 'A1',
       points: 120,
       source: 'ExerciseBuilder',
-      tags: ['gramática', 'género', 'vocabulario']
+      tags: ['gramática', 'género', 'vocabulario', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 6. DRAG DROP ORDER - Ordenar oración
   {
-    title: 'Ordenar Palabras',
-    description: 'Forma una oración correcta arrastrando las palabras',
+    title: '🎯 Ordenar Palabras',
+    description: '✨ Ejercicio Demo (2025-11-18) | Forma una oración correcta arrastrando las palabras',
     type: 'exercise',
     body: JSON.stringify({
       type: 'dragdrop-order',
@@ -182,14 +192,16 @@ const exercises = [
       cefrLevel: 'A1',
       points: 100,
       source: 'ExerciseBuilder',
-      tags: ['gramática', 'sintaxis', 'orden']
+      tags: ['gramática', 'sintaxis', 'orden', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 7. DIALOGUE ROLEPLAY - En el restaurante
   {
-    title: 'Conversación en el Restaurante',
-    description: 'Practica un diálogo común en un restaurante',
+    title: '🎯 Conversación en el Restaurante',
+    description: '✨ Ejercicio Demo (2025-11-18) | Practica un diálogo común en un restaurante',
     type: 'exercise',
     body: JSON.stringify({
       type: 'dialogue-roleplay',
@@ -214,14 +226,16 @@ const exercises = [
       cefrLevel: 'A2',
       points: 150,
       source: 'ExerciseBuilder',
-      tags: ['conversación', 'vocabulario', 'restaurante']
+      tags: ['conversación', 'vocabulario', 'restaurante', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 8. TEXT SELECTION - Seleccionar palabra
   {
-    title: 'Selecciona el Sustantivo',
-    description: 'Identifica y selecciona el sustantivo en la oración',
+    title: '🎯 Selecciona el Sustantivo',
+    description: '✨ Ejercicio Demo (2025-11-18) | Identifica y selecciona el sustantivo en la oración',
     type: 'exercise',
     body: JSON.stringify({
       type: 'text-selection',
@@ -246,14 +260,16 @@ const exercises = [
       cefrLevel: 'A1',
       points: 80,
       source: 'ExerciseBuilder',
-      tags: ['gramática', 'sustantivos', 'sintaxis']
+      tags: ['gramática', 'sustantivos', 'sintaxis', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 9. VERB IDENTIFICATION - Identificar verbos
   {
-    title: 'Identificar Verbos en Presente',
-    description: 'Selecciona todos los verbos conjugados en el texto',
+    title: '🎯 Identificar Verbos en Presente',
+    description: '✨ Ejercicio Demo (2025-11-18) | Selecciona todos los verbos conjugados en el texto',
     type: 'exercise',
     body: JSON.stringify({
       type: 'verb-identification',
@@ -281,14 +297,16 @@ const exercises = [
       cefrLevel: 'A2',
       points: 120,
       source: 'ExerciseBuilder',
-      tags: ['gramática', 'verbos', 'conjugación']
+      tags: ['gramática', 'verbos', 'conjugación', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   },
 
   // 10. INTERACTIVE READING - Lectura con vocabulario
   {
-    title: 'Lectura: Mi Familia',
-    description: 'Lee el texto y explora el vocabulario interactivo',
+    title: '🎯 Lectura: Mi Familia',
+    description: '✨ Ejercicio Demo (2025-11-18) | Lee el texto y explora el vocabulario interactivo',
     type: 'exercise',
     body: JSON.stringify({
       type: 'interactive-reading',
@@ -365,7 +383,9 @@ const exercises = [
       cefrLevel: 'A1',
       points: 150,
       source: 'ExerciseBuilder',
-      tags: ['lectura', 'vocabulario', 'familia']
+      tags: ['lectura', 'vocabulario', 'familia', 'demo-2025-11-18', '🎯-demo'],
+      demoExercise: true,
+      createdDate: '2025-11-18'
     }
   }
 ];
