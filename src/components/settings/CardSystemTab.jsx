@@ -472,13 +472,18 @@ Los cambios se aplican instantáneamente en toda la app.`);
         </div>
 
         {/* COLUMNA 2: Configuración + Dónde se Usa (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Configuración */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                Configuración
-              </h3>
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          {/* Configuración - Card estilo profesional */}
+          <div className="rounded-xl p-6" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                  Configuración del Variant
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  Ajusta los parámetros visuales de <span className="font-mono font-semibold">{variantLabels[selectedVariant]}</span>
+                </p>
+              </div>
               <div className="flex gap-2">
                 <BaseButton
                   variant="ghost"
@@ -502,9 +507,9 @@ Los cambios se aplican instantáneamente en toda la app.`);
             {/* Impact Analysis Alert */}
             {showImpactAnalysis && impactData && (
               <div
-                className="p-4 rounded-lg border-2"
+                className="p-4 rounded-lg border-2 mb-4"
                 style={{
-                  background: 'var(--color-bg-secondary)',
+                  background: 'var(--color-bg-tertiary)',
                   borderColor: impactData.severity === 'high' ? 'var(--color-error)' :
                                 impactData.severity === 'medium' ? 'var(--color-warning)' :
                                 'var(--color-success)'
@@ -522,7 +527,7 @@ Los cambios se aplican instantáneamente en toda la app.`);
                     {impactData.warnings.length > 0 && (
                       <ul className="text-xs space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
                         {impactData.warnings.map((warning, idx) => (
-                          <li key={idx}>{warning}</li>
+                          <li key={idx}>• {warning}</li>
                         ))}
                       </ul>
                     )}
@@ -531,53 +536,67 @@ Los cambios se aplican instantáneamente en toda la app.`);
               </div>
             )}
 
-            {/* Configuration Controls - Campos dinámicos */}
-            <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="max-h-[400px] overflow-y-auto pr-2">
+            {/* Configuration Controls - Campos dinámicos con scroll mejorado */}
+            <div className="rounded-lg p-4" style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+              <div className="max-h-[350px] overflow-y-auto pr-3 custom-scrollbar">
                 {renderAllConfigFields(selectedVariant)}
               </div>
             </div>
           </div>
 
-          {/* Dónde se Usa - AHORA EN COLUMNA DEL MEDIO */}
-          <div>
-            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-              Dónde se Usa
-            </h3>
+          {/* Dónde se Usa - Card estilo profesional separado */}
+          <div className="rounded-xl p-6" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
+            <div className="mb-4">
+              <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                Uso en la Aplicación
+              </h3>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                Componentes que utilizan este variant
+              </p>
+            </div>
 
-            {/* Stats del variant actual */}
-            <div className="p-4 rounded-lg mb-4" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-              <div className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                {currentUsage.totalUsages}
-              </div>
-              <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                Componente(s) usando este variant
+            {/* Stats del variant actual - Mejorado */}
+            <div className="p-5 rounded-lg mb-4" style={{ background: 'var(--color-bg-tertiary)', border: '2px solid var(--color-border)' }}>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'var(--color-bg-secondary)' }}>
+                  <span className="text-2xl font-black" style={{ color: 'var(--color-text-primary)' }}>
+                    {currentUsage.totalUsages}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-base font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                    {currentUsage.totalUsages === 1 ? 'Componente' : 'Componentes'}
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    usando <span className="font-mono font-semibold">{selectedVariant}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Lista de archivos */}
+            {/* Lista de archivos - Mejorada */}
             {currentUsage.usedIn.length > 0 ? (
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+              <div className="space-y-2 max-h-[280px] overflow-y-auto pr-3 custom-scrollbar">
                 {currentUsage.usedIn.map((usage, idx) => (
                   <div
                     key={idx}
-                    className="p-3 rounded-lg hover:bg-opacity-80 transition-all"
+                    className="p-3 rounded-lg hover:scale-[1.01] transition-all cursor-pointer"
                     style={{
-                      background: 'var(--color-bg-secondary)',
+                      background: 'var(--color-bg-tertiary)',
                       border: '1px solid var(--color-border)'
                     }}
                   >
                     <div className="flex items-start gap-2">
-                      <FileCode size={14} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-text-secondary)' }} />
+                      <FileCode size={16} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-primary)' }} />
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-mono truncate mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                        <div className="text-xs font-mono font-semibold truncate mb-1" style={{ color: 'var(--color-text-primary)' }}>
                           {usage.file.replace('src/components/', '')}
                         </div>
-                        <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                        <div className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
                           Línea {usage.line}
                         </div>
                         {usage.context && (
-                          <div className="text-xs mt-1 italic" style={{ color: 'var(--color-text-secondary)' }}>
+                          <div className="text-xs mt-1 italic opacity-75" style={{ color: 'var(--color-text-secondary)' }}>
                             {usage.context}
                           </div>
                         )}
@@ -587,41 +606,41 @@ Los cambios se aplican instantáneamente en toda la app.`);
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-                <Info size={32} className="mx-auto mb-3 text-gray-400" />
-                <div className="text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  No se encontraron usos
+              <div className="p-10 text-center rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px dashed var(--color-border)' }}>
+                <Info size={40} className="mx-auto mb-4 opacity-30" style={{ color: 'var(--color-text-secondary)' }} />
+                <div className="text-base font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                  Sin Usos Registrados
                 </div>
-                <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   Este variant aún no se está usando en la app
                 </div>
               </div>
             )}
 
-            {/* Potenciales migraciones */}
+            {/* Potenciales migraciones - Mejorado */}
             {currentUsage.potentialMigrations && currentUsage.potentialMigrations.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-                  <Search size={14} />
+              <div className="mt-4 p-4 rounded-lg" style={{ background: 'var(--color-warning-bg)', border: '1px solid var(--color-warning-border)' }}>
+                <h4 className="text-sm font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                  <Search size={16} />
                   Candidatos a Migración
                 </h4>
-                <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2">
+                <div className="space-y-2 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
                   {currentUsage.potentialMigrations.map((candidate, idx) => (
                     <div
                       key={idx}
                       className="p-3 rounded-lg"
                       style={{
-                        background: 'var(--color-warning-bg)',
+                        background: 'var(--color-bg-secondary)',
                         border: '1px solid var(--color-warning-border)'
                       }}
                     >
-                      <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                      <div className="text-xs font-mono font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
                         {candidate.file.replace('src/components/', '')}
                       </div>
-                      <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                      <div className="text-xs mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                         {candidate.currentImplementation}
                       </div>
-                      <BaseBadge variant="warning" size="sm" className="mt-2">
+                      <BaseBadge variant="warning" size="sm">
                         Prioridad: {candidate.migrationPriority}
                       </BaseBadge>
                     </div>
@@ -635,23 +654,88 @@ Los cambios se aplican instantáneamente en toda la app.`);
         {/* COLUMNA 3: Preview en Vivo - SIEMPRE VISIBLE A LA DERECHA (4 cols) */}
         <div className="lg:col-span-4">
           <div className="sticky top-6">
-            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-              Preview en Vivo
-            </h3>
-            <div className="space-y-3">
-              {/* Card Normal */}
-              <UniversalCard
-                {...exampleData[selectedVariant]}
-                size="md"
-                customConfig={config[selectedVariant]}
-              />
-              {/* Card con más texto para testing sticky footer */}
-              <UniversalCard
-                {...exampleData[selectedVariant]}
-                size="md"
-                description="Esta card tiene más texto para probar el footer sticky. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                customConfig={config[selectedVariant]}
-              />
+            <div className="rounded-xl p-5" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
+              <div className="mb-4">
+                <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                  Preview en Vivo
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  Visualización en tiempo real de los cambios
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Card 1: NORMAL - Contenido mínimo */}
+                <div>
+                  <div className="text-xs font-semibold mb-2 px-1" style={{ color: 'var(--color-text-secondary)' }}>
+                    📄 Contenido Normal
+                  </div>
+                  <UniversalCard
+                    {...exampleData[selectedVariant]}
+                    size="md"
+                    customConfig={config[selectedVariant]}
+                  />
+                </div>
+
+                {/* Card 2: EXTENDIDA - Mucho contenido para probar sticky footer */}
+                <div>
+                  <div className="text-xs font-semibold mb-2 px-1" style={{ color: 'var(--color-text-secondary)' }}>
+                    📋 Contenido Extendido (Prueba Sticky Footer)
+                  </div>
+                  <UniversalCard
+                    {...exampleData[selectedVariant]}
+                    size="md"
+                    description="Esta card tiene mucho más contenido para demostrar claramente el funcionamiento del sticky footer. El footer (badges y acciones) debe permanecer siempre en la parte inferior de la card, sin importar cuánto contenido haya en el medio. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                    badges={[
+                      ...(exampleData[selectedVariant].badges || []),
+                      { variant: 'warning', children: 'Tag Extra 1' },
+                      { variant: 'info', children: 'Tag Extra 2' },
+                      { variant: 'success', children: 'Tag Extra 3' },
+                    ]}
+                    customConfig={config[selectedVariant]}
+                  >
+                    {/* Contenido adicional dentro de children */}
+                    <div className="space-y-2 mt-2">
+                      <div className="p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+                        <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                          📌 Información Adicional
+                        </div>
+                        <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                          Este bloque de contenido extra demuestra que el footer sticky se mantiene abajo incluso con children personalizados.
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                          #tag1
+                        </span>
+                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                          #tag2
+                        </span>
+                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                          #tag3
+                        </span>
+                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                          #tag4
+                        </span>
+                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                          #tag5
+                        </span>
+                      </div>
+                    </div>
+                  </UniversalCard>
+                </div>
+              </div>
+
+              {/* Nota explicativa */}
+              <div className="mt-4 p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px dashed var(--color-border)' }}>
+                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                  💡 Comparación
+                </div>
+                <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                  La card extendida tiene más descripción, badges extras y contenido custom.
+                  Observa cómo el footer (acciones) permanece pegado al fondo en ambas cards gracias al <span className="font-mono font-semibold">footerSticky</span>.
+                </div>
+              </div>
             </div>
           </div>
         </div>
