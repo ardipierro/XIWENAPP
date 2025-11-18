@@ -377,11 +377,24 @@ export function EnhancedTextEditor({
           {drawingMode && (
             <div className="pencil-toolbar p-3 bg-purple-50 dark:bg-purple-900/20
                            border-b border-purple-200 dark:border-purple-800">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Pen size={16} className="text-purple-600 dark:text-purple-400" />
                 <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
                   Modo Lápiz
                 </span>
+
+                {/* Color del lápiz */}
+                <ColorPicker
+                  value={pencilColor}
+                  onChange={setPencilColor}
+                  label="Color del lápiz"
+                />
+
+                {/* Grosor */}
+                <StrokeWidthSelector
+                  value={pencilSize}
+                  onChange={setPencilSize}
+                />
 
                 {/* Capa */}
                 <UnifiedToolbarButton
@@ -391,17 +404,16 @@ export function EnhancedTextEditor({
                   label={drawingLayer === 'over' ? 'Sobre' : 'Debajo'}
                 />
 
-                {/* Grosor */}
-                <StrokeWidthSelector
-                  value={pencilSize}
-                  onChange={setPencilSize}
-                />
-
-                {/* Zoom */}
-                <ZoomControls
-                  zoom={zoom}
-                  onZoomChange={setZoom}
-                />
+                {/* Zoom del canvas (para ver detalles mientras dibujas) */}
+                <div className="flex items-center gap-2 px-2 py-1 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-700">
+                  <ZoomControls
+                    zoom={zoom}
+                    onZoomChange={setZoom}
+                  />
+                  <span className="text-xs text-purple-700 dark:text-purple-300">
+                    (zoom del canvas)
+                  </span>
+                </div>
               </div>
             </div>
           )}
