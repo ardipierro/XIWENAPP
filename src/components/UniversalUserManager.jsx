@@ -291,8 +291,61 @@ export default function UniversalUserManager({ user, userRole }) {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         viewModes={['table', 'grid', 'list']}
-        className="mb-6"
+        className="mb-4"
       />
+
+      {/* Sort buttons for grid/list views */}
+      {(viewMode === 'grid' || viewMode === 'list') && (
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Ordenar:
+          </span>
+          <button
+            className={`view-toggle-btn ${
+              userManagement.sortField === 'name' ? 'active' : ''
+            }`}
+            onClick={() => userManagement.handleSort('name')}
+            title="Ordenar por nombre"
+          >
+            Nombre{' '}
+            {userManagement.sortField === 'name' &&
+              (userManagement.sortDirection === 'asc' ? '↑' : '↓')}
+          </button>
+          <button
+            className={`view-toggle-btn ${
+              userManagement.sortField === 'credits' ? 'active' : ''
+            }`}
+            onClick={() => userManagement.handleSort('credits')}
+            title="Ordenar por créditos"
+          >
+            Créditos{' '}
+            {userManagement.sortField === 'credits' &&
+              (userManagement.sortDirection === 'asc' ? '↑' : '↓')}
+          </button>
+          <button
+            className={`view-toggle-btn ${
+              userManagement.sortField === 'createdAt' ? 'active' : ''
+            }`}
+            onClick={() => userManagement.handleSort('createdAt')}
+            title="Ordenar por fecha de registro"
+          >
+            Fecha{' '}
+            {userManagement.sortField === 'createdAt' &&
+              (userManagement.sortDirection === 'asc' ? '↑' : '↓')}
+          </button>
+          <button
+            className={`view-toggle-btn ${
+              userManagement.sortField === 'role' ? 'active' : ''
+            }`}
+            onClick={() => userManagement.handleSort('role')}
+            title="Ordenar por rol"
+          >
+            Rol{' '}
+            {userManagement.sortField === 'role' &&
+              (userManagement.sortDirection === 'asc' ? '↑' : '↓')}
+          </button>
+        </div>
+      )}
 
       {/* Success/Error Messages */}
       {successMessage && (
@@ -359,35 +412,44 @@ export default function UniversalUserManager({ user, userRole }) {
                       </div>
                     </div>
 
-                    {/* Contenido */}
-                    <div className="flex-1 flex items-center gap-4 px-5 py-4 min-w-0">
-                      {/* Nombre y Email */}
-                      <div className="flex-1 min-w-0">
+                    {/* Contenido redistribuido */}
+                    <div className="flex-1 flex items-center justify-between gap-4 px-5 py-4 min-w-0">
+                      {/* Izquierda: Nombre */}
+                      <div className="flex-1 min-w-0 max-w-[180px]">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                          {userItem.name}
+                          {userItem.name || 'Sin nombre'}
                         </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {userItem.chineseLastName && userItem.chineseFirstName
+                            ? `${userItem.chineseLastName}${userItem.chineseFirstName}`
+                            : userItem.chineseLastName || userItem.chineseFirstName || '-'}
+                        </p>
+                      </div>
+
+                      {/* Centro-izquierda: Email */}
+                      <div className="flex-1 min-w-0 max-w-[200px]">
                         <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                           <Mail size={14} className="inline mr-1" />
                           {userItem.email}
                         </p>
                       </div>
 
-                      {/* Badge Rol */}
-                      <div className="flex-shrink-0">
+                      {/* Centro-derecha: Rol y Fecha */}
+                      <div className="flex flex-col gap-1 flex-shrink-0">
                         <CategoryBadge type="role" value={userItem.role} size="sm" />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {userItem.createdAt
+                            ? new Date(userItem.createdAt.seconds * 1000).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })
+                            : 'N/A'}
+                        </span>
                       </div>
 
-                      {/* Stats */}
-                      <div className="flex gap-6 flex-shrink-0">
-                        <div className="flex items-center gap-2">
-                          <BookOpen size={16} className="text-gray-500" />
-                          <div className="flex flex-col">
-                            <span className="text-lg font-extrabold text-gray-900 dark:text-white">
-                              {enrollmentCounts[userItem.id] || 0}
-                            </span>
-                            <span className="text-xs text-gray-500">Cursos</span>
-                          </div>
-                        </div>
+                      {/* Derecha: Créditos y Acción */}
+                      <div className="flex items-center gap-4 flex-shrink-0">
                         <div className="flex items-center gap-2">
                           <DollarSign size={16} className="text-gray-500" />
                           <div className="flex flex-col">
@@ -397,21 +459,6 @@ export default function UniversalUserManager({ user, userRole }) {
                             <span className="text-xs text-gray-500">Créditos</span>
                           </div>
                         </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex gap-2 flex-shrink-0">
-                        <BaseButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewUserProfile(userItem);
-                          }}
-                          variant="ghost"
-                          size="sm"
-                          icon={Eye}
-                        >
-                          Ver
-                        </BaseButton>
                         {can('delete-users') && (
                           <BaseButton
                             onClick={(e) => {
@@ -422,6 +469,7 @@ export default function UniversalUserManager({ user, userRole }) {
                             variant="danger"
                             size="sm"
                             icon={Trash2}
+                            title="Eliminar usuario"
                           />
                         )}
                       </div>
@@ -438,6 +486,10 @@ export default function UniversalUserManager({ user, userRole }) {
               const initial = userItem.name?.charAt(0).toUpperCase() || '?';
               const avatarColor = getAvatarColor(userItem.role);
 
+              const chineseName = userItem.chineseLastName && userItem.chineseFirstName
+                ? `${userItem.chineseLastName}${userItem.chineseFirstName}`
+                : userItem.chineseLastName || userItem.chineseFirstName || null;
+
               return (
                 <UniversalCard
                   key={userItem.id}
@@ -446,27 +498,15 @@ export default function UniversalUserManager({ user, userRole }) {
                   layout="vertical"
                   avatar={initial}
                   avatarColor={avatarColor}
-                  title={userItem.name}
-                  subtitle={userItem.email}
+                  title={userItem.name || 'Sin nombre'}
+                  subtitle={chineseName ? `${chineseName} • ${userItem.email}` : userItem.email}
                   badges={[<CategoryBadge key="role" type="role" value={userItem.role} size="sm" />]}
                   stats={[
-                    { label: 'Cursos', value: enrollmentCounts[userItem.id] || 0, icon: BookOpen },
                     { label: 'Créditos', value: userItem.credits || 0, icon: DollarSign }
                   ]}
                   onClick={() => handleViewUserProfile(userItem)}
                   actions={
                     <>
-                      <BaseButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewUserProfile(userItem);
-                        }}
-                        variant="ghost"
-                        size="sm"
-                        icon={Eye}
-                      >
-                        Ver
-                      </BaseButton>
                       {can('delete-users') && (
                         <BaseButton
                           onClick={(e) => {
@@ -477,6 +517,7 @@ export default function UniversalUserManager({ user, userRole }) {
                           variant="danger"
                           size="sm"
                           icon={Trash2}
+                          title="Eliminar usuario"
                         />
                       )}
                     </>
