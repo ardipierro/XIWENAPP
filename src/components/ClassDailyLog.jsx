@@ -190,9 +190,9 @@ function ClassDailyLog({ logId, user, onBack }) {
     };
   }, [isTeacher, log, hasUnsavedChanges, handleSave]);
 
-  // Configurar TopBar del app con botones dinámicos
-  useEffect(() => {
-    if (!logMeta.name) return;
+  // Configurar TopBar del app con botones dinámicos usando useMemo para evitar recrear actions
+  const topBarActions = useMemo(() => {
+    if (!logMeta.name) return [];
 
     const actions = [];
 
@@ -233,17 +233,21 @@ function ClassDailyLog({ logId, user, onBack }) {
       onClick: toggleSidebar
     });
 
+    return actions;
+  }, [logMeta.status, isTeacher, saving, sidebarOpen, contentSelectorModal.open, handleSave, handleEndLog, toggleSidebar]);
+
+  // Aplicar configuración a TopBar cuando cambien los actions o metadata
+  useEffect(() => {
+    if (!logMeta.name) return;
+
     updateTopBar({
       title: logMeta.name,
       subtitle: `${logMeta.courseName ? '📚 ' + logMeta.courseName : ''} ${logMeta.groupName ? '👥 ' + logMeta.groupName : ''}`.trim(),
       showBackButton: true,
       onBack: onBack,
-      actions: actions
+      actions: topBarActions
     });
-    // updateTopBar and resetTopBar are stable context functions, safe to omit
-    // contentSelectorModal.open is stable from useMemo
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logMeta, isTeacher, saving, sidebarOpen, onBack, handleSave, handleEndLog]);
+  }, [logMeta.name, logMeta.courseName, logMeta.groupName, onBack, topBarActions, updateTopBar]);
 
   // Reset TopBar SOLO al desmontar (no en cada re-render)
   useEffect(() => {
