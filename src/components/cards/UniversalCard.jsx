@@ -131,9 +131,9 @@ export function UniversalCard({
   const sizeConfig = getSizeConfig(size);
   const layoutConfig = getLayoutConfig(layout);
 
-  // Generate classes and styles
-  const classes = generateCardClasses(variant, size, layout);
-  const styles = generateCardStyles(variant, size, layout);
+  // Generate classes and styles - PASS RESOLVED variantConfig object (BUG FIX)
+  const classes = generateCardClasses(variantConfig, size, layout);
+  const styles = generateCardStyles(variantConfig, size, layout);
 
   /**
    * Handle mouse enter
@@ -142,7 +142,7 @@ export function UniversalCard({
     if (!variantConfig.hoverEnabled || disabled) return;
     setIsHovered(true);
 
-    const hoverStyles = getHoverStyles(variant);
+    const hoverStyles = getHoverStyles(variantConfig);
     if (hoverStyles) {
       Object.assign(e.currentTarget.style, hoverStyles);
     }
@@ -155,7 +155,7 @@ export function UniversalCard({
     if (!variantConfig.hoverEnabled) return;
     setIsHovered(false);
 
-    const normalStyles = getNormalStyles(variant);
+    const normalStyles = getNormalStyles(variantConfig);
     Object.assign(e.currentTarget.style, normalStyles);
   };
 

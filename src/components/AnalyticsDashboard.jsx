@@ -23,6 +23,7 @@ import {
   getCourseStats,
   getPopularExercises
 } from '../firebase/analytics';
+import { UniversalCard } from './cards';
 
 const COLORS = ['#52525b', '#71717a', '#a1a1aa', '#f59e0b', '#10b981', '#d4d4d8', '#ef4444', '#3f3f46'];
 
@@ -65,10 +66,13 @@ function AnalyticsDashboard({ user }) {
   return (
     <div className="analytics-dashboard">
       {/* Activity by Day */}
-      <div className="card mb-6">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-          <BarChart3 size={20} strokeWidth={2} /> Actividad de Juegos (Últimos 7 Días)
-        </h3>
+      <UniversalCard
+        variant="stats"
+        size="lg"
+        title="Actividad de Juegos (Últimos 7 Días)"
+        icon={BarChart3}
+        className="mb-6"
+      >
         {activityData.length === 0 ? (
           <p className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
             No hay datos de actividad reciente
@@ -103,15 +107,17 @@ function AnalyticsDashboard({ user }) {
             </LineChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </UniversalCard>
 
       {/* Top Students and Course Stats Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Top Students */}
-        <div className="card">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-            <Trophy size={20} strokeWidth={2} /> Top 10 Estudiantes
-          </h3>
+        <UniversalCard
+          variant="stats"
+          size="lg"
+          title="Top 10 Estudiantes"
+          icon={Trophy}
+        >
           {topStudents.length === 0 ? (
             <p className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
               No hay datos de estudiantes
@@ -139,13 +145,15 @@ function AnalyticsDashboard({ user }) {
               </BarChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </UniversalCard>
 
         {/* Course Stats */}
-        <div className="card">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-            <BookOpen size={20} strokeWidth={2} /> Rendimiento por Curso
-          </h3>
+        <UniversalCard
+          variant="stats"
+          size="lg"
+          title="Rendimiento por Curso"
+          icon={BookOpen}
+        >
           {courseStats.length === 0 ? (
             <p className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
               No hay estadísticas de cursos
@@ -178,14 +186,17 @@ function AnalyticsDashboard({ user }) {
               </PieChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </UniversalCard>
       </div>
 
       {/* Popular Exercises */}
-      <div className="card">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-          <Gamepad2 size={20} strokeWidth={2} /> Ejercicios Más Jugados
-        </h3>
+      <UniversalCard
+        variant="stats"
+        size="lg"
+        title="Ejercicios Más Jugados"
+        icon={Gamepad2}
+        className="mb-6"
+      >
         {popularExercises.length === 0 ? (
           <p className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
             No hay datos de ejercicios
@@ -215,37 +226,31 @@ function AnalyticsDashboard({ user }) {
             </BarChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </UniversalCard>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <div className="card text-center">
-          <div className="text-4xl mb-2 flex justify-center">
-            <Target size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
-          </div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {activityData.reduce((sum, d) => sum + d.games, 0)}
-          </div>
-          <div style={{ color: 'var(--color-text-secondary)' }}>Juegos Totales (7 días)</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-4xl mb-2 flex justify-center">
-            <Users size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
-          </div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {topStudents.length}
-          </div>
-          <div style={{ color: 'var(--color-text-secondary)' }}>Estudiantes Activos</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-4xl mb-2 flex justify-center">
-            <BookOpen size={40} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
-          </div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            {courseStats.length}
-          </div>
-          <div style={{ color: 'var(--color-text-secondary)' }}>Cursos con Actividad</div>
-        </div>
+        <UniversalCard
+          variant="stats"
+          size="sm"
+          icon={Target}
+          bigNumber={activityData.reduce((sum, d) => sum + d.games, 0)}
+          description="Juegos Totales (7 días)"
+        />
+        <UniversalCard
+          variant="stats"
+          size="sm"
+          icon={Users}
+          bigNumber={topStudents.length}
+          description="Estudiantes Activos"
+        />
+        <UniversalCard
+          variant="stats"
+          size="sm"
+          icon={BookOpen}
+          bigNumber={courseStats.length}
+          description="Cursos con Actividad"
+        />
       </div>
     </div>
   );
