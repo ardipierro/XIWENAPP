@@ -12,9 +12,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Pencil, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound, Coins } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Pencil, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound, Coins, Eye } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
+import { useViewAs } from '../contexts/ViewAsContext';
 import ProfileTabs from './profile/ProfileTabs';
 import InfoTab from './profile/tabs/InfoTab';
 import ClassesTab from './profile/tabs/ClassesTab';
@@ -62,6 +64,10 @@ function UserProfileModal({
   isAdmin = false,
   onUpdate
 }) {
+  // Hooks
+  const navigate = useNavigate();
+  const { startViewingAs } = useViewAs();
+
   // Estados del perfil
   const [userAvatar, setUserAvatar] = useState('default');
   const [userBanner, setUserBanner] = useState(null);
@@ -231,6 +237,21 @@ function UserProfileModal({
       logger.error('Error updating avatar:', err);
       setError('Error al actualizar el avatar');
     }
+  };
+
+  // Handler para modo "Ver como"
+  const handleViewAs = () => {
+    // Guardar userId para reabrir el perfil al volver
+    sessionStorage.setItem('viewAsReturnUserId', user.uid || user.id);
+
+    // Activar modo "Ver como"
+    startViewingAs(currentUser, user);
+
+    // Cerrar modal
+    onClose();
+
+    // Navegar directamente al home del dashboard
+    navigate('/dashboard', { replace: true });
   };
 
   // Generar gradiente aleatorio para banner por defecto
@@ -474,6 +495,21 @@ function UserProfileModal({
                       </span>
                     )}
                   </>
+                )}
+
+                {/* Badge Ver como (clickeable) - Solo para admins */}
+                {isAdmin && currentUser?.uid !== user?.uid && (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewAs();
+                    }}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-orange-500 text-white shadow-lg cursor-pointer hover:bg-orange-600 transition-colors"
+                    title="Cambiar a la vista de este usuario"
+                  >
+                    <Eye size={14} strokeWidth={2} />
+                    Ver como
+                  </span>
                 )}
               </div>
             </div>
