@@ -90,7 +90,7 @@ function UserProfileModal({
   const [success, setSuccess] = useState('');
 
   // Determinar si está viendo su propio perfil
-  const isOwnProfile = user?.uid === user?.uid; // TODO: Comparar con currentUser.uid
+  const isOwnProfile = currentUser?.uid === user?.uid;
 
   // Cargar datos del perfil
   useEffect(() => {
@@ -286,6 +286,15 @@ function UserProfileModal({
   const getTabs = () => {
     const tabs = [];
 
+    // Normalizar y validar el rol
+    const normalizedRole = (userRole || '').toLowerCase();
+
+    // Definir grupos de roles para facilitar validaciones
+    const isStudent = ['student', 'listener', 'trial'].includes(normalizedRole);
+    const isTeacher = ['teacher', 'trial_teacher'].includes(normalizedRole);
+    const isGuardian = normalizedRole === 'guardian';
+    const isAdminRole = normalizedRole === 'admin';
+
     // Tab de Info - Todos los usuarios
     tabs.push({
       id: 'info',
@@ -303,8 +312,8 @@ function UserProfileModal({
       )
     });
 
-    // Tab de Clases - Estudiantes y Profesores
-    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial' || userRole === 'teacher' || userRole === 'trial_teacher') {
+    // Tab de Clases - Estudiantes y Profesores (NO para admins puros ni guardians)
+    if (isStudent || isTeacher) {
       tabs.push({
         id: 'classes',
         label: 'Clases',
@@ -328,7 +337,7 @@ function UserProfileModal({
     });
 
     // Tab de Contenidos - Solo Estudiantes
-    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
+    if (isStudent) {
       tabs.push({
         id: 'content',
         label: 'Contenidos',
@@ -338,7 +347,7 @@ function UserProfileModal({
     }
 
     // Tab de Tareas - Solo Estudiantes
-    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
+    if (isStudent) {
       tabs.push({
         id: 'tasks',
         label: 'Tareas',
@@ -347,8 +356,9 @@ function UserProfileModal({
       });
     }
 
-    // Tab de Estudiantes - Solo Profesores
-    if (userRole === 'teacher' || userRole === 'trial_teacher' || userRole === 'admin') {
+    // Tab de Estudiantes - Solo Profesores Y Admins
+    // IMPORTANTE: Validar que NO sea estudiante aunque tenga rol 'admin' corrupto
+    if ((isTeacher || isAdminRole) && !isStudent) {
       tabs.push({
         id: 'students',
         label: 'Estudiantes',
@@ -358,7 +368,7 @@ function UserProfileModal({
     }
 
     // Tab de Estudiantes Supervisados - Solo para Tutores
-    if (userRole === 'guardian') {
+    if (isGuardian) {
       tabs.push({
         id: 'guardians',
         label: 'Estudiantes Supervisados',
