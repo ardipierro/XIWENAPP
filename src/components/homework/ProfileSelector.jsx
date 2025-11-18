@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, User, Check, Plus } from 'lucide-react';
-import { BaseButton, BaseBadge } from '../common';
+import { RefreshCw, User, Plus } from 'lucide-react';
+import { BaseButton } from '../common';
 import { UniversalCard } from '../cards';
 import {
   getCorrectionProfilesByTeacher,
@@ -152,109 +152,47 @@ export default function ProfileSelector({
   const isProfileChanged = selectedProfileId !== currentProfile?.id;
 
   return (
-    <UniversalCard variant="default" size="md" className="mb-4">
-      <div className="space-y-3">
-        {/* Current Profile Info */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <User size={18} className="text-gray-500 dark:text-gray-400" />
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Perfil de Corrección
-            </span>
-          </div>
-
-          {currentProfile && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {currentProfile.id === defaultProfile?.id ? 'Por defecto' : 'Individual'}
-              </span>
-              <BaseBadge variant="blue" size="sm">
-                {currentProfile.icon} {currentProfile.name}
-              </BaseBadge>
-            </div>
-          )}
+    <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+      <div className="flex items-center gap-3">
+        {/* Current Profile Info - Compact */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <User size={16} className="text-gray-500 dark:text-gray-400" />
+          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+            Perfil:
+          </span>
         </div>
 
-        {/* Profile Selector */}
-        <div>
-          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-2">
-            Seleccionar perfil:
-          </label>
+        {/* Profile Selector - Inline */}
+        <div className="flex-1">
           <select
             value={selectedProfileId || ''}
             onChange={(e) => setSelectedProfileId(e.target.value)}
-            className="input text-sm w-full"
+            className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             <option value="">Selecciona un perfil...</option>
             {profiles.map(profile => (
               <option key={profile.id} value={profile.id}>
                 {profile.icon} {profile.name}
                 {profile.id === defaultProfile?.id ? ' (Por defecto)' : ''}
-                {profile.id === currentProfile?.id ? ' (Actual)' : ''}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Reanalyze Button */}
+        {/* Reanalyze Button - Only when changed */}
         {isProfileChanged && (
-          <div className="flex items-center gap-3 pt-2 border-t border-gray-200 dark:border-gray-700">
-            <BaseButton
-              variant="primary"
-              size="sm"
-              onClick={handleReanalyze}
-              disabled={reanalyzing}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw size={14} className={reanalyzing ? 'animate-spin' : ''} />
-              {reanalyzing ? 'Re-analizando...' : 'Re-analizar con nuevo perfil'}
-            </BaseButton>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              Se reemplazarán las correcciones actuales
-            </span>
-          </div>
-        )}
-
-        {/* Profile Details */}
-        {selectedProfileId && (
-          <div className="text-xs text-gray-600 dark:text-gray-400 pt-2 border-t border-gray-200 dark:border-gray-700">
-            {(() => {
-              const selected = profiles.find(p => p.id === selectedProfileId);
-              if (!selected) return null;
-
-              const settings = selected.settings || {};
-              const strictness = settings.strictness || 'moderate';
-              const checks = settings.checks || [];
-
-              return (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <strong>Severidad:</strong>
-                    <BaseBadge
-                      variant={
-                        strictness === 'lenient' ? 'success' :
-                        strictness === 'strict' ? 'danger' : 'warning'
-                      }
-                      size="sm"
-                    >
-                      {strictness === 'lenient' ? '🟢 Leniente' :
-                       strictness === 'strict' ? '🔴 Estricto' : '🟡 Moderado'}
-                    </BaseBadge>
-                  </div>
-                  <div>
-                    <strong>Revisa:</strong> {checks.join(', ')}
-                  </div>
-                  {selected.description && (
-                    <div>
-                      <strong>Descripción:</strong> {selected.description}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
+          <BaseButton
+            variant="primary"
+            size="sm"
+            onClick={handleReanalyze}
+            disabled={reanalyzing}
+            className="flex items-center gap-1.5 flex-shrink-0"
+          >
+            <RefreshCw size={12} className={reanalyzing ? 'animate-spin' : ''} />
+            {reanalyzing ? 'Re-analizando...' : 'Re-analizar'}
+          </BaseButton>
         )}
       </div>
-    </UniversalCard>
+    </div>
   );
 }

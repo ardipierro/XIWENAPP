@@ -20,8 +20,6 @@ import {
   TrendingUp,
   TrendingDown,
   Lightbulb,
-  ChevronDown,
-  ChevronUp,
   Upload,
   Loader,
   RefreshCw,
@@ -318,10 +316,12 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
   const performanceIcon = grade >= 90 ? Award : grade >= 70 ? TrendingUp : TrendingDown;
   const PerformanceIcon = performanceIcon;
 
-  // Check if task is being processed
+  // Check task status
   const isProcessing = review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing';
   const isFailed = review.status === REVIEW_STATUS.FAILED || review.status === 'failed';
   const isPendingReview = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
+  const isApproved = review.status === REVIEW_STATUS.APPROVED || review.status === 'approved';
+  const isReviewed = review.teacherReviewed === true;
 
   // List view (horizontal layout)
   if (viewMode === 'list') {
@@ -332,6 +332,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
         className={`cursor-pointer relative ${
           isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
           isFailed ? 'border-2 border-red-400 dark:border-red-500' :
+          isApproved ? 'border-2 border-blue-400 dark:border-blue-500' :
           isPendingReview ? 'border-2 border-green-400 dark:border-green-500' :
           ''
         }`}
@@ -346,6 +347,10 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
             ) : isFailed ? (
               <BaseBadge variant="danger" icon={AlertCircle} size="sm">
                 ERROR
+              </BaseBadge>
+            ) : isApproved ? (
+              <BaseBadge variant="blue" icon={CheckCircle} size="sm">
+                APROBADO
               </BaseBadge>
             ) : isPendingReview ? (
               <BaseBadge variant="success" icon={CheckCircle} size="sm">
@@ -416,6 +421,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
       className={`cursor-pointer relative ${
         isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
         isFailed ? 'border-2 border-red-400 dark:border-red-500' :
+        isApproved ? 'border-2 border-blue-400 dark:border-blue-500' :
         isPendingReview ? 'border-2 border-green-400 dark:border-green-500' :
         ''
       }`}
@@ -432,6 +438,11 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
             <div className="bg-red-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
               <AlertCircle size={14} />
               <span className="text-xs font-bold">ERROR</span>
+            </div>
+          ) : isApproved ? (
+            <div className="bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+              <CheckCircle size={14} />
+              <span className="text-xs font-bold">APROBADO</span>
             </div>
           ) : isPendingReview ? (
             <div className="bg-green-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
@@ -459,6 +470,14 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
                   minute: '2-digit'
                 })}
               </p>
+              {isApproved && review.teacherReviewedAt && (
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
+                  ✓ Aprobado {review.teacherReviewedAt?.toDate?.().toLocaleDateString('es-ES', {
+                    day: 'numeric',
+                    month: 'short'
+                  })}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -565,12 +584,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
   const [updatedCorrections, setUpdatedCorrections] = useState(review.aiSuggestions || review.detailedCorrections || []);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [expandedSections, setExpandedSections] = useState({
-    errors: true,
-    corrections: true
-  });
   const [showImageLightbox, setShowImageLightbox] = useState(false);
-  const [showErrorOverlay, setShowErrorOverlay] = useState(true);
   const [assignedStudentId, setAssignedStudentId] = useState(review.studentId);
   const [assignedStudentName, setAssignedStudentName] = useState(review.studentName);
 
@@ -629,13 +643,6 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
     } finally {
       setIsApproving(false);
     }
-  };
-
-  const toggleSection = (section) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
   };
 
   const handleStudentAssignment = async (studentId, studentName) => {
@@ -759,25 +766,14 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
           </div>
         </div>
 
-        {/* Student Assignment Section */}
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <User size={18} strokeWidth={2} />
-            Asignación de Estudiante
-            {review.needsStudentAssignment && (
-              <BaseBadge variant="warning" size="sm">
-                Requiere asignación
-              </BaseBadge>
-            )}
-          </h3>
-          <StudentAssigner
-            teacherId={review.teacherId || parentTeacherId || currentUser?.uid}
-            currentStudentId={assignedStudentId}
-            currentStudentName={assignedStudentName}
-            onAssign={handleStudentAssignment}
-            allowUnassigned={true}
-          />
-        </div>
+        {/* Student Assignment - Compact */}
+        <StudentAssigner
+          teacherId={review.teacherId || parentTeacherId || currentUser?.uid}
+          currentStudentId={assignedStudentId}
+          currentStudentName={assignedStudentName}
+          onAssign={handleStudentAssignment}
+          allowUnassigned={true}
+        />
 
         {/* Image with Error Overlay */}
         <div>
@@ -792,15 +788,13 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
           </h3>
 
           {/* Visualization Controls */}
-          {review.words && review.words.length > 0 && showErrorOverlay && (
+          {review.words && review.words.length > 0 && (
             <div className="mb-3">
               <ImageOverlayControls
                 visibleErrorTypes={visibleErrorTypes}
                 onVisibleErrorTypesChange={setVisibleErrorTypes}
                 highlightOpacity={highlightOpacity}
                 onOpacityChange={setHighlightOpacity}
-                zoom={zoom}
-                onZoomChange={setZoom}
                 useWavyUnderline={useWavyUnderline}
                 onWavyUnderlineChange={setUseWavyUnderline}
                 errorCounts={review.errorSummary || {}}
@@ -809,31 +803,18 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
           )}
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                {review.words && review.words.length > 0 && (
-                  <BaseButton
-                    variant={showErrorOverlay ? 'primary' : 'outline'}
-                    size="sm"
-                    onClick={() => setShowErrorOverlay(!showErrorOverlay)}
-                  >
-                    {showErrorOverlay ? '👁️ Ocultar' : '👁️ Mostrar'} Controles
-                  </BaseButton>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <BaseBadge variant="secondary" size="sm" className="cursor-help" title="Arrastra la imagen para moverla. Usa la rueda del mouse para zoom.">
-                  🖱️ Arrastra y zoom
-                </BaseBadge>
-                <BaseButton
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowImageLightbox(true)}
-                >
-                  <Maximize2 size={14} />
-                  Pantalla completa
-                </BaseButton>
-              </div>
+            <div className="flex items-center justify-end gap-2">
+              <BaseBadge variant="secondary" size="sm" className="cursor-help" title="Arrastra la imagen para moverla. Usa la rueda del mouse para zoom.">
+                🖱️ Arrastra y zoom
+              </BaseBadge>
+              <BaseButton
+                variant="outline"
+                size="sm"
+                onClick={() => setShowImageLightbox(true)}
+              >
+                <Maximize2 size={14} />
+                Pantalla completa
+              </BaseButton>
             </div>
 
             <InteractiveImageContainer
@@ -846,7 +827,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                 imageUrl={review.imageUrl}
                 words={review.words || []}
                 errors={updatedCorrections}
-                showOverlay={showErrorOverlay}
+                showOverlay={review.words && review.words.length > 0}
                 visibleErrorTypes={visibleErrorTypes}
                 highlightOpacity={highlightOpacity}
                 zoom={zoom}
@@ -917,41 +898,37 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
           </div>
         )}
 
-        {/* Error Summary */}
-        <div>
-          <button
-            onClick={() => toggleSection('errors')}
-            className="w-full flex items-center justify-between text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3"
-          >
-            <span className="flex items-center gap-2">
-              <Target size={18} strokeWidth={2} />
-              Resumen de Errores ({review.errorSummary?.total || 0})
+        {/* Error Summary - Compact */}
+        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Target size={16} strokeWidth={2} className="text-gray-500 dark:text-gray-400" />
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              Errores:
             </span>
-            {expandedSections.errors ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-          </button>
-          {expandedSections.errors && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {Object.entries(errorTypeLabels).map(([type, label]) => (
+            {Object.entries(errorTypeLabels).map(([type, label]) => {
+              const count = review.errorSummary?.[type] || 0;
+              if (count === 0) return null;
+
+              return (
                 <div
                   key={type}
-                  className={`p-4 rounded-lg ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                     errorTypeColors[type] === 'red' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300' :
                     errorTypeColors[type] === 'orange' ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300' :
                     errorTypeColors[type] === 'yellow' ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300' :
                     'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                   }`}
                 >
-                  <div className="text-3xl font-bold">
-                    {review.errorSummary?.[type] || 0}
-                  </div>
-                  <div className="text-xs font-medium mt-1 flex items-center gap-1">
-                    <span>{errorTypeIcons[type]}</span>
-                    {label}
-                  </div>
+                  <span>{errorTypeIcons[type]}</span>
+                  <span>{label}</span>
+                  <span className="font-bold">({count})</span>
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            })}
+            {(review.errorSummary?.total || 0) === 0 && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">Sin errores detectados</span>
+            )}
+          </div>
         </div>
 
         {/* ✨ NEW: Correction Review Panel - Individual approval/rejection */}
@@ -1057,7 +1034,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         alt="Tarea del estudiante"
         words={review.words || []}
         errors={updatedCorrections}
-        showOverlay={showErrorOverlay}
+        showOverlay={review.words && review.words.length > 0}
         visibleErrorTypes={visibleErrorTypes}
         highlightOpacity={highlightOpacity}
         useWavyUnderline={useWavyUnderline}
