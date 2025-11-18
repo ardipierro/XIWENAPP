@@ -54,6 +54,7 @@ import ConfirmModal from './ConfirmModal';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { BaseAlert, BaseTabs, CategoryBadge } from './common';
 import BaseButton from './common/BaseButton';
+import UniversalCard from './cards/UniversalCard';
 
 // Icon mapping for role icons from roleConfig
 const ICON_MAP = {
@@ -1013,26 +1014,17 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
             ) : (
               <div className="space-y-3">
                 {guardians.map((guardian) => (
-                  <div key={guardian.id} className="card p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                          <User size={20} className="text-zinc-600 dark:text-zinc-400" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">
-                            {guardian.guardianName}
-                          </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {guardian.guardianEmail}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                            Relación: {guardian.relationshipType || 'No especificada'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <UniversalCard
+                    key={guardian.id}
+                    variant="user"
+                    icon={User}
+                    title={guardian.guardianName}
+                    subtitle={guardian.guardianEmail}
+                  >
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                      Relación: {guardian.relationshipType || 'No especificada'}
+                    </p>
+                  </UniversalCard>
                 ))}
               </div>
             )}
