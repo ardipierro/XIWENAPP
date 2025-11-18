@@ -134,7 +134,7 @@ export function EnhancedTextEditor({
         class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[120px] px-4 py-3'
       }
     }
-  });
+  }, [extensions]);
 
   useEffect(() => {
     if (editor) {
