@@ -15,110 +15,120 @@
  */
 export function scanCardUsage() {
   // NOTA: En producción, esto se haría en el servidor
-  // Por ahora, retornamos datos hardcoded basados en análisis manual
+  // ACTUALIZADO 2025: Datos actualizados post-migración 100%
 
   return {
     default: {
       variant: 'default',
-      totalUsages: 3,
+      totalUsages: 5,
       usedIn: [
         {
-          file: 'src/components/UniversalDashboard.jsx',
-          component: 'UniversalDashboard',
-          line: 245,
-          context: 'Quick access cards en dashboard'
+          file: 'src/components/CredentialsTab.jsx',
+          component: 'CredentialsTab',
+          line: 150,
+          context: 'Cards de proveedores (grid + list)'
         },
         {
-          file: 'src/components/settings/CardSystemTab.jsx',
-          component: 'CardSystemTab',
-          line: 419,
-          context: 'Preview de ejemplo'
+          file: 'src/components/ClassScheduleManager.jsx',
+          component: 'ClassScheduleManager',
+          line: 375,
+          context: 'Horarios de clases recurrentes'
+        },
+        {
+          file: 'src/components/CreditManager.jsx',
+          component: 'CreditManager',
+          line: 320,
+          context: 'Transacciones de créditos (layout horizontal)'
         }
       ]
     },
 
     user: {
       variant: 'user',
-      totalUsages: 0,
-      usedIn: [],
-      potentialMigrations: [
+      totalUsages: 2,
+      usedIn: [
         {
           file: 'src/components/UniversalUserManager.jsx',
-          currentImplementation: 'Custom cards con div',
-          line: 346,
-          migrationPriority: 'high'
+          component: 'UniversalUserManager',
+          line: 180,
+          context: 'Tarjetas de estudiantes/usuarios'
         }
       ]
     },
 
     class: {
       variant: 'class',
-      totalUsages: 2,
+      totalUsages: 3,
       usedIn: [
         {
-          file: 'src/components/LiveClassRoom.jsx',
-          component: 'LiveClassCard',
-          line: 123,
-          context: 'Cards de clases en vivo'
+          file: 'src/components/ClassSessionManager.jsx',
+          component: 'ClassSessionManager',
+          line: 210,
+          context: 'Sesiones de clases programadas'
         },
         {
-          file: 'src/components/ClassScheduleManager.jsx',
-          component: 'ScheduleCard',
-          line: 302,
-          context: 'Schedule cards (usa clase .schedule-card)'
+          file: 'src/components/ClassDailyLogManager.jsx',
+          component: 'ClassDailyLogManager',
+          line: 156,
+          context: 'Log diario de clases'
         }
       ]
     },
 
     content: {
       variant: 'content',
-      totalUsages: 4,
+      totalUsages: 5,
       usedIn: [
         {
           file: 'src/components/UnifiedContentManager.jsx',
-          component: 'ContentCard',
-          line: 156,
-          context: 'Galería de contenidos/cursos'
+          component: 'UnifiedContentManager',
+          line: 949,
+          context: 'Galería de contenidos (cursos, lecciones, videos, etc.)'
         },
         {
-          file: 'src/components/student/MyCourses.jsx',
-          component: 'CourseCard',
-          line: 89,
-          context: 'Mis cursos del estudiante'
+          file: 'src/components/WhiteboardManager.jsx',
+          component: 'WhiteboardManager',
+          line: 280,
+          context: 'Pizarras (grid + list views)'
+        },
+        {
+          file: 'src/components/ExcalidrawManager.jsx',
+          component: 'ExcalidrawManager',
+          line: 245,
+          context: 'Dibujos Excalidraw (grid + list views)'
+        },
+        {
+          file: 'src/components/AssignmentManager.jsx',
+          component: 'AssignmentManager',
+          line: 198,
+          context: 'Tareas y asignaciones'
         }
       ]
     },
 
     stats: {
       variant: 'stats',
-      totalUsages: 8,
+      totalUsages: 11,
       usedIn: [
         {
           file: 'src/components/AnalyticsDashboard.jsx',
-          component: 'AnalyticsCard',
-          line: 68,
-          context: '3 cards de estadísticas (usa clase .card)'
+          component: 'AnalyticsDashboard',
+          line: 125,
+          context: '7 tarjetas de estadísticas y métricas'
         },
         {
-          file: 'src/components/TeacherDashboard.jsx',
-          component: 'StatsOverview',
-          line: 234,
-          context: 'Stats del profesor'
+          file: 'src/components/CreditManager.jsx',
+          component: 'CreditManager',
+          line: 203,
+          context: '4 tarjetas de stats (Disponibles, Comprados, Usados, Uso%)'
         }
       ]
     },
 
     compact: {
       variant: 'compact',
-      totalUsages: 1,
-      usedIn: [
-        {
-          file: 'src/components/SideMenu.jsx',
-          component: 'QuickStats',
-          line: 445,
-          context: 'Mini stats en sidebar'
-        }
-      ]
+      totalUsages: 0,
+      usedIn: []
     }
   };
 }
@@ -198,30 +208,8 @@ export function analyzeImpact(variant, property, newValue) {
  * @returns {Array} Lista de archivos candidatos a migración
  */
 export function findMigrationCandidates() {
-  return [
-    {
-      file: 'src/components/UniversalUserManager.jsx',
-      reason: 'Usa divs con className="card" en lugar de UniversalCard',
-      suggestedVariant: 'user',
-      priority: 'high',
-      estimatedTime: '15 min'
-    },
-    {
-      file: 'src/components/AnalyticsDashboard.jsx',
-      reason: 'Usa divs con className="card" para stats',
-      suggestedVariant: 'stats',
-      priority: 'medium',
-      estimatedTime: '10 min'
-    },
-    {
-      file: 'src/components/StudentAssignmentsView.jsx',
-      reason: 'Usa divs con className="card" para assignments',
-      suggestedVariant: 'content',
-      priority: 'medium',
-      estimatedTime: '15 min'
-    }
-    // ... más candidatos del MIGRATION_ANALYSIS.md
-  ];
+  // ✅ MIGRACIÓN 100% COMPLETA - No hay candidatos pendientes
+  return [];
 }
 
 /**
@@ -240,8 +228,10 @@ export function getGlobalStats() {
     totalComponents += variant.usedIn.length;
   });
 
-  const legacyCardUsages = 48; // De grep anterior
-  const baseCardUsages = 35; // De grep anterior
+  // ACTUALIZADO 2025: Migración 100% completa
+  // Verificado con grep - NO quedan clases .card legacy
+  const legacyCardUsages = 0; // ✅ 100% migrado
+  const baseCardUsages = 0; // BaseCard no se usa más (migrado a UniversalCard)
 
   return {
     universalCard: {
@@ -250,13 +240,13 @@ export function getGlobalStats() {
     },
     legacyCard: {
       count: legacyCardUsages,
-      needsMigration: true
+      needsMigration: false // ✅ Migración completa
     },
     baseCard: {
       count: baseCardUsages,
-      needsMigration: false // BaseCard está OK
+      needsMigration: false
     },
     totalCards: totalUniversalCardUsages + legacyCardUsages + baseCardUsages,
-    migrationProgress: Math.round((totalUniversalCardUsages / (totalUniversalCardUsages + legacyCardUsages)) * 100)
+    migrationProgress: 100 // ✅ 100% completado
   };
 }

@@ -564,10 +564,10 @@ export function UniversalCard({
           </>
         ) : (
           <>
-            {/* Vertical Layout - FIX DEFINITIVO: Children DENTRO de flex-1 */}
+            {/* Vertical Layout - FIX: Un solo flex-1 en el contenedor padre */}
             <div className="flex-1 flex flex-col">
-              {/* Contenido principal + Children (flex-1) */}
-              <div className="flex-1">
+              {/* Contenido principal + Children - SIN flex-1 para no competir con mt-auto del footer */}
+              <div>
                 <div className="card-text">
                   {title && (
                     <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
@@ -600,7 +600,7 @@ export function UniversalCard({
                 {/* Big Number (variant='stats') */}
                 {renderBigNumber()}
 
-                {/* Custom Children - DENTRO de flex-1 para permitir sticky footer */}
+                {/* Custom Children - Ahora el footer sticky funcionará correctamente */}
                 {children && (
                   <div className="mt-3">
                     {children}
@@ -608,7 +608,7 @@ export function UniversalCard({
                 )}
               </div>
 
-              {/* Footer sticky (mt-auto dentro del flex container) */}
+              {/* Footer sticky (mt-auto empuja al fondo sin competir con flex-1) */}
               {(badges?.length > 0 || stats?.length > 0 || actions) && variantConfig.footerSticky && (
                 <div className={`mt-auto pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                   {/* Badges */}
