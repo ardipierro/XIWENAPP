@@ -24,6 +24,8 @@ import ImageOverlay from '../homework/ImageOverlay';
  * @param {Object} visibleErrorTypes - Tipos de errores visibles
  * @param {number} highlightOpacity - Opacidad de highlights
  * @param {boolean} useWavyUnderline - Usar subrayado ondulado
+ * @param {boolean} showCorrectionText - Mostrar texto de corrección de IA
+ * @param {string} correctionTextFont - Fuente para el texto de corrección
  */
 export default function ImageLightbox({
   isOpen,
@@ -35,7 +37,9 @@ export default function ImageLightbox({
   showOverlay = false,
   visibleErrorTypes = {},
   highlightOpacity = 0.25,
-  useWavyUnderline = true
+  useWavyUnderline = true,
+  showCorrectionText = true,
+  correctionTextFont = 'Caveat'
 }) {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -233,6 +237,8 @@ export default function ImageLightbox({
             zoom={1}
             pan={{ x: 0, y: 0 }}
             useWavyUnderline={useWavyUnderline}
+            showCorrectionText={showCorrectionText}
+            correctionTextFont={correctionTextFont}
             className="w-full h-full"
           />
         </div>

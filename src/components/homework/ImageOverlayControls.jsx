@@ -56,6 +56,10 @@ const ERROR_TYPE_CONFIG = {
  * @param {function} props.onZoomChange - Callback when zoom changes
  * @param {boolean} props.useWavyUnderline - Use wavy underlines
  * @param {function} props.onWavyUnderlineChange - Callback when wavy toggle changes
+ * @param {boolean} props.showCorrectionText - Show AI correction text below errors
+ * @param {function} props.onShowCorrectionTextChange - Callback when correction text toggle changes
+ * @param {string} props.correctionTextFont - Font family for correction text
+ * @param {function} props.onCorrectionTextFontChange - Callback when font changes
  * @param {Object} props.errorCounts - Count of each error type {spelling: 5, grammar: 3, ...}
  * @param {boolean} props.compact - Compact mode (no labels)
  */
@@ -68,6 +72,10 @@ export default function ImageOverlayControls({
   onZoomChange,
   useWavyUnderline,
   onWavyUnderlineChange,
+  showCorrectionText = true,
+  onShowCorrectionTextChange,
+  correctionTextFont = 'Caveat',
+  onCorrectionTextFontChange,
   errorCounts = {},
   compact = false
 }) {
@@ -268,6 +276,67 @@ export default function ImageOverlayControls({
               : 'Subrayado recto activado'
             }
           </p>
+
+          {/* Correction Text Toggle */}
+          <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                Mostrar Correcciones Escritas
+              </span>
+              <button
+                onClick={() => onShowCorrectionTextChange(!showCorrectionText)}
+                className={`
+                  relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                  ${showCorrectionText ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'}
+                `}
+              >
+                <span
+                  className={`
+                    inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                    ${showCorrectionText ? 'translate-x-6' : 'translate-x-1'}
+                  `}
+                />
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {showCorrectionText
+                ? '✍️ La IA escribe correcciones debajo de errores'
+                : 'Correcciones escritas ocultas'
+              }
+            </p>
+          </div>
+
+          {/* Font Selector - Only shown when correction text is enabled */}
+          {showCorrectionText && (
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                Fuente de Escritura
+              </label>
+              <select
+                value={correctionTextFont}
+                onChange={(e) => onCorrectionTextFontChange(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                style={{ fontFamily: correctionTextFont }}
+              >
+                <option value="Caveat" style={{ fontFamily: 'Caveat' }}>
+                  Caveat (Semicursiva profesional)
+                </option>
+                <option value="Shadows Into Light" style={{ fontFamily: 'Shadows Into Light' }}>
+                  Shadows Into Light (Cursiva clara)
+                </option>
+                <option value="Indie Flower" style={{ fontFamily: 'Indie Flower' }}>
+                  Indie Flower (Natural manuscrita)
+                </option>
+                <option value="Patrick Hand" style={{ fontFamily: 'Patrick Hand' }}>
+                  Patrick Hand (Handwriting casual)
+                </option>
+              </select>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                La fuente se ajusta automáticamente al tamaño del error
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -295,6 +364,10 @@ ImageOverlayControls.propTypes = {
   onZoomChange: PropTypes.func.isRequired,
   useWavyUnderline: PropTypes.bool.isRequired,
   onWavyUnderlineChange: PropTypes.func.isRequired,
+  showCorrectionText: PropTypes.bool,
+  onShowCorrectionTextChange: PropTypes.func,
+  correctionTextFont: PropTypes.string,
+  onCorrectionTextFontChange: PropTypes.func,
   errorCounts: PropTypes.object,
   compact: PropTypes.bool
 };

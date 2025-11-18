@@ -52,6 +52,34 @@ function generateWavyPath(x1, y, x2, amplitude = 2, frequency = 4) {
 }
 
 /**
+ * Calculate optimal font size for correction text based on available width
+ * @param {string} text - The correction text to display
+ * @param {number} availableWidth - The width of the error highlight box
+ * @param {number} minSize - Minimum font size (default 12)
+ * @param {number} maxSize - Maximum font size (default 20)
+ * @returns {number} Optimal font size in pixels
+ */
+function calculateOptimalFontSize(text, availableWidth, minSize = 12, maxSize = 20) {
+  if (!text || availableWidth <= 0) return minSize;
+
+  // Limit text to 30 characters as per requirement
+  const displayText = text.length > 30 ? text.substring(0, 30) : text;
+
+  // Estimate character width (handwriting fonts are ~0.55 of font size)
+  // Caveat font has approximately 0.55 aspect ratio
+  const estimatedCharWidth = 0.55;
+
+  // Calculate required width for text
+  const requiredWidth = displayText.length * estimatedCharWidth;
+
+  // Calculate optimal size based on available width
+  const optimalSize = availableWidth / requiredWidth;
+
+  // Clamp between min and max
+  return Math.max(minSize, Math.min(maxSize, Math.round(optimalSize)));
+}
+
+/**
  * Normalize text for matching (remove punctuation, accents, lowercase)
  */
 function normalizeText(text) {
@@ -102,6 +130,8 @@ export default function ImageOverlay({
   zoom = 1,
   pan = { x: 0, y: 0 },
   useWavyUnderline = true,
+  showCorrectionText = true,
+  correctionTextFont = 'Caveat',
   className = ''
 }) {
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
@@ -387,53 +417,81 @@ export default function ImageOverlay({
               pointerEvents: 'none'
             }}
           >
-            {highlights.map((highlight) => (
-              <g key={highlight.id}>
-                {/* Highlight rectangle with semi-transparent fill */}
-                <rect
-                  x={highlight.x}
-                  y={highlight.y}
-                  width={highlight.width}
-                  height={highlight.height}
-                  fill={highlight.color}
-                  fillOpacity={highlightOpacity}
-                  stroke={highlight.color}
-                  strokeWidth="2"
-                  strokeOpacity="0.8"
-                  rx="2"
-                />
+            {highlights.map((highlight) => {
+              // Calculate optimal font size for correction text
+              const correctionText = highlight.suggestion || '';
+              const fontSize = calculateOptimalFontSize(correctionText, highlight.width, 12, 20);
+              // Limit text to 30 characters
+              const displayText = correctionText.length > 30 ? correctionText.substring(0, 27) + '...' : correctionText;
 
-                {/* Underline for error - wavy or straight */}
-                {useWavyUnderline ? (
-                  <path
-                    d={generateWavyPath(
-                      highlight.x,
-                      highlight.y + highlight.height + 1,
-                      highlight.x + highlight.width,
-                      2,
-                      8
-                    )}
+              return (
+                <g key={highlight.id}>
+                  {/* Highlight rectangle with semi-transparent fill */}
+                  <rect
+                    x={highlight.x}
+                    y={highlight.y}
+                    width={highlight.width}
+                    height={highlight.height}
+                    fill={highlight.color}
+                    fillOpacity={highlightOpacity}
                     stroke={highlight.color}
                     strokeWidth="2"
-                    fill="none"
-                    strokeOpacity="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeOpacity="0.8"
+                    rx="2"
                   />
-                ) : (
-                  <line
-                    x1={highlight.x}
-                    y1={highlight.y + highlight.height}
-                    x2={highlight.x + highlight.width}
-                    y2={highlight.y + highlight.height}
-                    stroke={highlight.color}
-                    strokeWidth="3"
-                    strokeOpacity="1"
-                    strokeLinecap="round"
-                  />
-                )}
-              </g>
-            ))}
+
+                  {/* Underline for error - wavy or straight */}
+                  {useWavyUnderline ? (
+                    <path
+                      d={generateWavyPath(
+                        highlight.x,
+                        highlight.y + highlight.height + 1,
+                        highlight.x + highlight.width,
+                        2,
+                        8
+                      )}
+                      stroke={highlight.color}
+                      strokeWidth="2"
+                      fill="none"
+                      strokeOpacity="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  ) : (
+                    <line
+                      x1={highlight.x}
+                      y1={highlight.y + highlight.height}
+                      x2={highlight.x + highlight.width}
+                      y2={highlight.y + highlight.height}
+                      stroke={highlight.color}
+                      strokeWidth="3"
+                      strokeOpacity="1"
+                      strokeLinecap="round"
+                    />
+                  )}
+
+                  {/* Correction text in handwriting font - Positioned below the error */}
+                  {showCorrectionText && displayText && (
+                    <text
+                      x={highlight.x + highlight.width / 2}
+                      y={highlight.y + highlight.height + fontSize + 8}
+                      fontSize={fontSize}
+                      fontFamily={correctionTextFont}
+                      fontWeight="700"
+                      fill={highlight.color}
+                      textAnchor="middle"
+                      dominantBaseline="hanging"
+                      style={{
+                        pointerEvents: 'none',
+                        userSelect: 'none'
+                      }}
+                    >
+                      {displayText}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
           </svg>
         )}
       </div>
@@ -531,5 +589,7 @@ ImageOverlay.propTypes = {
     y: PropTypes.number
   }),
   useWavyUnderline: PropTypes.bool,
+  showCorrectionText: PropTypes.bool,
+  correctionTextFont: PropTypes.string,
   className: PropTypes.string
 };

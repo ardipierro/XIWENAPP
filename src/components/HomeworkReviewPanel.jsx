@@ -585,6 +585,8 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [useWavyUnderline, setUseWavyUnderline] = useState(true);
+  const [showCorrectionText, setShowCorrectionText] = useState(true);
+  const [correctionTextFont, setCorrectionTextFont] = useState('Caveat');
 
   const handleApprove = async () => {
     try {
@@ -803,6 +805,10 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                 onZoomChange={setZoom}
                 useWavyUnderline={useWavyUnderline}
                 onWavyUnderlineChange={setUseWavyUnderline}
+                showCorrectionText={showCorrectionText}
+                onShowCorrectionTextChange={setShowCorrectionText}
+                correctionTextFont={correctionTextFont}
+                onCorrectionTextFontChange={setCorrectionTextFont}
                 errorCounts={review.errorSummary || {}}
               />
             </div>
@@ -852,6 +858,8 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                 zoom={zoom}
                 pan={pan}
                 useWavyUnderline={useWavyUnderline}
+                showCorrectionText={showCorrectionText}
+                correctionTextFont={correctionTextFont}
                 className="max-w-full max-h-96"
               />
             </InteractiveImageContainer>
@@ -1061,6 +1069,8 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         visibleErrorTypes={visibleErrorTypes}
         highlightOpacity={highlightOpacity}
         useWavyUnderline={useWavyUnderline}
+        showCorrectionText={showCorrectionText}
+        correctionTextFont={correctionTextFont}
       />
     </BaseModal>
   );
