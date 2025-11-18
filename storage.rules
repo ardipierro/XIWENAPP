@@ -88,6 +88,24 @@ service firebase.storage {
                    && isValidSize();
     }
 
+    // 🆕 Carpeta de mensajes - Audios y archivos adjuntos en conversaciones
+    // Permite archivos de audio, imágenes y documentos en conversaciones
+    match /messages/{conversationId}/{fileName} {
+      // Lectura permitida para usuarios autenticados
+      allow read: if isAuthenticated();
+
+      // Escritura permitida para usuarios autenticados
+      // Soporta audios (mensajes de voz), imágenes y documentos
+      allow write: if isAuthenticated()
+                   && (
+                     request.resource.contentType.matches('audio/.*')     // Mensajes de voz
+                     || request.resource.contentType.matches('image/.*')   // Imágenes
+                     || request.resource.contentType.matches('application/.*') // PDFs, docs
+                     || request.resource.contentType.matches('text/.*')    // Archivos de texto
+                   )
+                   && request.resource.size < 10 * 1024 * 1024; // Máximo 10MB
+    }
+
     // Bloquear todo lo demás por defecto
     match /{allPaths=**} {
       allow read: if false;
