@@ -90,12 +90,18 @@ export async function getOrCreateConversation(userId1, userId2) {
  */
 export async function sendMessage({ conversationId, senderId, senderName, receiverId, content, attachment, replyTo, forwarded, forwardedFrom }) {
   try {
-    const batch = writeBatch(db);
+    // First, read the conversation to check unreadCount type
+    const conversationRef = doc(db, 'conversations', conversationId);
+    const conversationSnap = await getDoc(conversationRef);
+
+    if (!conversationSnap.exists()) {
+      throw new Error('Conversation not found');
+    }
+
+    const conversationData = conversationSnap.data();
 
     // Add message
     const messagesRef = collection(db, 'messages');
-    const messageRef = doc(messagesRef);
-
     const messageData = {
       conversationId,
       senderId,
@@ -129,27 +135,44 @@ export async function sendMessage({ conversationId, senderId, senderName, receiv
     // Initialize starredBy array
     messageData.starredBy = [];
 
-    batch.set(messageRef, messageData);
+    // Create message document
+    const messageDocRef = await addDoc(messagesRef, messageData);
 
     // Update conversation with last message preview
     let lastMessagePreview = content || '';
     if (attachment && !content) {
       lastMessagePreview = attachment.type?.startsWith('image/')
         ? '📷 Imagen'
+        : attachment.type?.startsWith('audio/')
+        ? '🎤 Mensaje de voz'
         : `📎 ${attachment.filename}`;
     }
 
-    const conversationRef = doc(db, 'conversations', conversationId);
-    batch.update(conversationRef, {
+    // Prepare conversation update
+    const conversationUpdate = {
       lastMessage: lastMessagePreview.substring(0, 100),
-      lastMessageAt: serverTimestamp(),
-      [`unreadCount.${receiverId}`]: arrayUnion(messageRef.id)
-    });
+      lastMessageAt: serverTimestamp()
+    };
 
-    await batch.commit();
+    // Handle unreadCount - check if it's a number (old format) or array (new format)
+    const currentUnreadCount = conversationData.unreadCount?.[receiverId];
+
+    if (typeof currentUnreadCount === 'number') {
+      // Old format (number) - convert to array
+      conversationUpdate[`unreadCount.${receiverId}`] = [messageDocRef.id];
+    } else if (Array.isArray(currentUnreadCount)) {
+      // New format (array) - use arrayUnion
+      conversationUpdate[`unreadCount.${receiverId}`] = arrayUnion(messageDocRef.id);
+    } else {
+      // Not initialized - start as array
+      conversationUpdate[`unreadCount.${receiverId}`] = [messageDocRef.id];
+    }
+
+    // Update conversation
+    await updateDoc(conversationRef, conversationUpdate);
 
     logger.info(`Message sent successfully to conversation ${conversationId}`, 'Messages');
-    return messageRef.id;
+    return messageDocRef.id;
   } catch (error) {
     logger.error('Error sending message', error, 'Messages');
     throw error;
