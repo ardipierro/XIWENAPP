@@ -25,6 +25,8 @@ import SearchBar from './common/SearchBar';
 import ConfirmModal from './ConfirmModal';
 import WhiteboardAssignmentModal from './WhiteboardAssignmentModal';
 import BaseButton from './common/BaseButton';
+import { UniversalCard } from './cards';
+import { BaseBadge } from './common';
 
 /**
  * Componente para gestión de pizarras guardadas
@@ -202,83 +204,57 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
             const lastModified = formatDate(session.updatedAt);
 
             return (
-              <div
+              <UniversalCard
                 key={session.id}
-                className="card card-grid-item cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300 flex flex-col overflow-hidden"
-                onClick={() => handleOpenSession(session)}
-                style={{ padding: 0 }}
-              >
-                {/* Thumbnail - Mitad superior sin bordes */}
-                {session.slides?.[0]?.thumbnail ? (
-                  <div className="card-image-large overflow-hidden">
-                    <img
-                      src={session.slides[0].thumbnail}
-                      alt={session.title}
-                      className="w-full h-full object-cover"
+                variant="content"
+                size="md"
+                image={session.slides?.[0]?.thumbnail}
+                icon={Presentation}
+                title={session.title}
+                description={`${slideCount} ${slideCount === 1 ? 'diapositiva' : 'diapositivas'}`}
+                badges={[
+                  { variant: 'info', children: 'Pizarra' }
+                ]}
+                meta={[
+                  { icon: <Calendar size={14} />, text: lastModified }
+                ]}
+                actions={
+                  <div className="flex gap-2 w-full">
+                    <BaseButton
+                      variant="secondary"
+                      size="sm"
+                      icon={Download}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(session);
+                      }}
+                      title="Descargar"
+                    />
+                    <BaseButton
+                      variant="secondary"
+                      size="sm"
+                      icon={Edit}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(session);
+                      }}
+                      title="Editar"
+                    />
+                    <BaseButton
+                      variant="danger"
+                      size="sm"
+                      icon={Trash2}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSession(session);
+                        setShowConfirmDelete(true);
+                      }}
+                      title="Eliminar"
                     />
                   </div>
-                ) : (
-                  <div className="card-image-large-placeholder">
-                    <Presentation size={48} strokeWidth={1.5} />
-                  </div>
-                )}
-
-                {/* Info */}
-                <div className="flex-1 flex flex-col" style={{ padding: '12px' }}>
-                  <h3 className="card-title">{session.title}</h3>
-                  <p className="card-description">
-                    {slideCount} {slideCount === 1 ? 'diapositiva' : 'diapositivas'}
-                  </p>
-
-                  {/* Stats */}
-                  <div className="card-stats">
-                    <span className="flex items-center gap-1">
-                      <Calendar size={14} />
-                      {lastModified}
-                    </span>
-                  </div>
-
-                  {/* Badges */}
-                  <div className="card-badges">
-                    <span className="badge badge-info">Pizarra</span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="card-actions">
-                  <BaseButton
-                    variant="ghost"
-                    size="sm"
-                    icon={Download}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownload(session);
-                    }}
-                    title="Descargar"
-                  />
-                  <BaseButton
-                    variant="ghost"
-                    size="sm"
-                    icon={Edit}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(session);
-                    }}
-                    title="Editar y asignar"
-                  />
-                  <BaseButton
-                    variant="danger"
-                    size="sm"
-                    icon={Trash2}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedSession(session);
-                      setShowConfirmDelete(true);
-                    }}
-                    title="Eliminar"
-                  />
-                </div>
-              </div>
+                }
+                onClick={() => handleOpenSession(session)}
+              />
             );
           })}
         </div>
@@ -290,84 +266,58 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
             const lastModified = formatDate(session.updatedAt);
 
             return (
-              <div
+              <UniversalCard
                 key={session.id}
-                className="card card-list cursor-pointer hover:border-zinc-500 dark:hover:border-zinc-400 transition-all duration-300"
-                onClick={() => handleOpenSession(session)}
-              >
-                {/* Thumbnail pequeño */}
-                <div className="card-image-placeholder-sm">
-                  {session.slides?.[0]?.thumbnail ? (
-                    <img
-                      src={session.slides[0].thumbnail}
-                      alt={session.title}
-                      className="w-full h-full object-cover"
+                variant="content"
+                size="sm"
+                layout="horizontal"
+                image={session.slides?.[0]?.thumbnail}
+                icon={Presentation}
+                title={session.title}
+                description={`${slideCount} ${slideCount === 1 ? 'diapositiva' : 'diapositivas'}`}
+                badges={[
+                  { variant: 'info', children: 'Pizarra' }
+                ]}
+                stats={[
+                  { icon: Calendar, label: lastModified }
+                ]}
+                actions={
+                  <div className="flex gap-2">
+                    <BaseButton
+                      variant="ghost"
+                      size="sm"
+                      icon={Download}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(session);
+                      }}
+                      title="Descargar"
                     />
-                  ) : (
-                    <Presentation size={24} strokeWidth={1.5} />
-                  )}
-                </div>
-
-                {/* Contenido */}
-                <div className="flex-1 min-w-0 p-4">
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-1">
-                      <h3 className="card-title">{session.title}</h3>
-                      <p className="card-description">
-                        {slideCount} {slideCount === 1 ? 'diapositiva' : 'diapositivas'}
-                      </p>
-
-                      {/* Stats */}
-                      <div className="card-stats">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          {lastModified}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Badges y Acciones */}
-                    <div className="card-badges-list">
-                      <span className="badge badge-info">Pizarra</span>
-                    </div>
+                    <BaseButton
+                      variant="ghost"
+                      size="sm"
+                      icon={Edit}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(session);
+                      }}
+                      title="Editar"
+                    />
+                    <BaseButton
+                      variant="danger"
+                      size="sm"
+                      icon={Trash2}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSession(session);
+                        setShowConfirmDelete(true);
+                      }}
+                      title="Eliminar"
+                    />
                   </div>
-                </div>
-
-                {/* Actions */}
-                <div className="card-actions-inline">
-                  <BaseButton
-                    variant="ghost"
-                    size="sm"
-                    icon={Download}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownload(session);
-                    }}
-                    title="Descargar"
-                  />
-                  <BaseButton
-                    variant="ghost"
-                    size="sm"
-                    icon={Edit}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(session);
-                    }}
-                    title="Editar"
-                  />
-                  <BaseButton
-                    variant="danger"
-                    size="sm"
-                    icon={Trash2}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedSession(session);
-                      setShowConfirmDelete(true);
-                    }}
-                    title="Eliminar"
-                  />
-                </div>
-              </div>
+                }
+                onClick={() => handleOpenSession(session)}
+              />
             );
           })}
         </div>

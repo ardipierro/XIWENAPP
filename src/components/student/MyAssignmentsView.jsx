@@ -35,13 +35,28 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
   const [filter, setFilter] = useState('all'); // 'all', 'pending', 'submitted', 'graded'
 
   useEffect(() => {
-    loadAssignments();
+    // Solo cargar si user y user.uid existen
+    if (user?.uid) {
+      loadAssignments();
+    } else {
+      setLoading(true);
+      setAssignments([]);
+    }
   }, [user]);
 
   const loadAssignments = async () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Validar que user y user.uid existan
+      if (!user || !user.uid) {
+        logger.warn('⚠️ No hay usuario autenticado o user.uid es undefined');
+        setError('No se pudo identificar al usuario');
+        setAssignments([]);
+        setLoading(false);
+        return;
+      }
 
       // Obtener perfil del estudiante
       logger.debug('🔍 Buscando perfil de estudiante para user.uid:', user.uid);

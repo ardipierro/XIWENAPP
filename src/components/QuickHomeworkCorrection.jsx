@@ -20,6 +20,7 @@ import { createHomeworkReview, getReviewsByStudent, subscribeToReview, REVIEW_ST
 import { getUserById } from '../firebase/users';
 import BaseButton from './common/BaseButton';
 import { BaseLoading } from './common';
+import UniversalCard from './cards/UniversalCard';
 import logger from '../utils/logger';
 
 export default function QuickHomeworkCorrection({ studentId, studentName }) {
@@ -178,20 +179,12 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
   return (
     <div className="space-y-6">
       {/* Upload Section */}
-      <div className="card">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-primary-100 dark:bg-primary-900 rounded-lg">
-            <Upload className="text-primary-600 dark:text-primary-400" size={24} />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Enviar Tareas
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Subí fotos de tus tareas completadas para su revisión.
-            </p>
-          </div>
-        </div>
+      <UniversalCard
+        variant="default"
+        icon={Upload}
+        title="Enviar Tareas"
+        subtitle="Subí fotos de tus tareas completadas para su revisión."
+      >
 
         {/* Image Previews */}
         {imagePreviews.length > 0 && (
@@ -291,14 +284,13 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
             )}
           </div>
         </div>
-      </div>
+      </UniversalCard>
 
       {/* Recent Corrections */}
-      <div className="card">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-          Mis Correcciones Recientes
-        </h3>
-
+      <UniversalCard
+        variant="default"
+        title="Mis Correcciones Recientes"
+      >
         {loadingReviews ? (
           <div className="flex justify-center py-8">
             <BaseLoading variant="spinner" size="md" text="Cargando correcciones..." />
@@ -321,7 +313,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
             ))}
           </div>
         )}
-      </div>
+      </UniversalCard>
 
       {/* Review Detail Modal */}
       {selectedReview && (

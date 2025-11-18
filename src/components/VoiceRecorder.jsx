@@ -28,11 +28,20 @@ function VoiceRecorder({ onSend, onCancel }) {
   const audioPlayerRef = useRef(null);
   const startTimeRef = useRef(0);
   const pausedTimeRef = useRef(0);
+  const streamRef = useRef(null);
 
   useEffect(() => {
     startRecording();
     return () => {
       stopTimer();
+      // Stop all media tracks to release microphone
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+          logger.info('Stopped media track on cleanup', 'VoiceRecorder');
+        });
+        streamRef.current = null;
+      }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
       }
@@ -48,6 +57,8 @@ function VoiceRecorder({ onSend, onCancel }) {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream; // Save stream reference
+
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm'
       });
@@ -67,8 +78,14 @@ function VoiceRecorder({ onSend, onCancel }) {
         setAudioBlob(blob);
         setAudioUrl(url);
 
-        // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
+        // Stop all tracks to release microphone immediately
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => {
+            track.stop();
+            logger.info('Stopped media track after recording', 'VoiceRecorder');
+          });
+          streamRef.current = null;
+        }
       };
 
       mediaRecorder.start();
@@ -77,7 +94,7 @@ function VoiceRecorder({ onSend, onCancel }) {
     } catch (error) {
       logger.error('Error starting recording:', error);
       alert('No se pudo acceder al micrófono. Por favor, verifica los permisos.');
-      onCancel();
+      handleCancel();
     }
   };
 
@@ -175,8 +192,31 @@ function VoiceRecorder({ onSend, onCancel }) {
    */
   const handleSend = () => {
     if (audioBlob) {
+      // Ensure stream is fully released before sending
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+          logger.info('Stopped media track before send', 'VoiceRecorder');
+        });
+        streamRef.current = null;
+      }
       onSend(audioBlob, recordingTime);
     }
+  };
+
+  /**
+   * Handle cancel with cleanup
+   */
+  const handleCancel = () => {
+    // Ensure stream is fully released when canceling
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+        logger.info('Stopped media track on cancel', 'VoiceRecorder');
+      });
+      streamRef.current = null;
+    }
+    onCancel();
   };
 
   return (
@@ -257,7 +297,7 @@ function VoiceRecorder({ onSend, onCancel }) {
           ) : null}
 
           <BaseButton
-            onClick={onCancel}
+            onClick={handleCancel}
             variant="danger"
             size="sm"
             icon={X}

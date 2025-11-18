@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
@@ -13,7 +13,6 @@ import {
   Italic,
   Underline as UnderlineIcon,
   List,
-  ListOrdered,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -22,27 +21,43 @@ import {
   Save,
   X,
   Edit2,
-  ChevronDown,
-  ChevronUp,
   Download,
-  Layers,
-  Palette,
-  Highlighter
+  Layers
 } from 'lucide-react';
 import { UnifiedToolbarButton } from './UnifiedToolbarButton';
-import { ColorPicker } from './ColorPicker';
-import { HighlightPicker } from './HighlightPicker';
-import { SimplePencilPresets } from './SimplePencilPresets';
+import { SimpleColorButton } from './SimpleColorButton';
 import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
 import { DrawingViewer } from './DrawingViewer';
 import { StrokeWidthSelector } from './StrokeWidthSelector';
-import { ZoomControls } from './ZoomControls';
 import { exportToPDF } from '../../utils/pdfExport';
 
 /**
- * EnhancedTextEditor V3 - COMPLETAMENTE REFACTORIZADO
+ * EnhancedTextEditor V5.0 - FIX: Loop Infinito y Renders Multiplicados
  *
- * MEJORAS:
+ * MEJORAS V5.0 (CRÍTICAS):
+ * ✅ FIX: Loop infinito resuelto - onStrokesChange memoizada
+ * ✅ FIX: TipTap duplicado - Key estable y cleanup correcto
+ * ✅ FIX: Undo/Redo funcionan correctamente con keyboard shortcuts
+ * ✅ FIX: Resaltador con modo "seleccionar color primero"
+ * ✅ FIX: Barra de herramientas reorganizada (1 sola fila compacta)
+ * ✅ FIX: Selector de color unificado para todas las herramientas
+ *
+ * MEJORAS V4.1:
+ * ✅ Fixed: Duplicate 'underline' extension warning
+ * ✅ Memoized extensions array to prevent recreation on every render
+ * ✅ Improved performance by avoiding unnecessary editor reinitialization
+ *
+ * MEJORAS V4 (últimas):
+ * ✅ SimpleColorButton: Solo cuadrado de color, sin icono Palette
+ * ✅ Smart color memory: Cada herramienta recuerda su último color independientemente
+ * ✅ Zoom eliminado: No tiene sentido en este contexto
+ * ✅ Selector de tamaño simplificado: Solo valores px (12px, 14px, 16px...)
+ * ✅ Listas numeradas removidas: Solo listas con viñetas
+ * ✅ Menú de lápiz rediseñado: Consistente con resto de la UI (sin banner morado)
+ * ✅ Goma de borrar arreglada: Detecta trazos correctamente
+ * ✅ Undo/Redo funcionan: Toolbar flotante en canvas
+ *
+ * MEJORAS V3:
  * ✅ DrawingViewer: Los trazos ahora se VEN después de guardar
  * ✅ UnifiedToolbarButton: TODOS los botones consistentes
  * ✅ Selector de tamaño unificado (reemplaza H1/H2/H3)
@@ -62,16 +77,17 @@ export function EnhancedTextEditor({
   const [isEditing, setIsEditing] = useState(autoEdit);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const [showTools, setShowTools] = useState({
-    font: false,
-    color: false,
-    highlight: false,
-    pencil: false
-  });
+
+  // Smart color memory - cada herramienta recuerda su último color
+  const [textColor, setTextColor] = useState('#000000');
+  const [highlightColor, setHighlightColor] = useState('#FEF08A'); // Amarillo por defecto
+  const [pencilColor, setPencilColor] = useState('#000000');
+
+  // FIX: Modo resaltador - permitir seleccionar color primero
+  const [highlightMode, setHighlightMode] = useState(false);
 
   // Drawing states
   const [drawingMode, setDrawingMode] = useState(false);
-  const [pencilColor, setPencilColor] = useState('#000000');
   const [pencilOpacity, setPencilOpacity] = useState(1);
   const [pencilSize, setPencilSize] = useState(4);
   const [drawingStrokes, setDrawingStrokes] = useState(() => {
@@ -81,23 +97,15 @@ export function EnhancedTextEditor({
       return [];
     }
   });
-  const [zoom, setZoom] = useState(1);
   const [drawingLayer, setDrawingLayer] = useState('over');
 
   const editorContainerRef = useRef(null);
 
-  // Tamaños disponibles (reemplaza H1, H2, H3)
-  const fontSizes = [
-    { label: 'Muy pequeño', value: '12px' },
-    { label: 'Pequeño', value: '14px' },
-    { label: 'Normal', value: '16px' },
-    { label: 'Mediano', value: '20px' },
-    { label: 'Grande', value: '24px' },
-    { label: 'Título 3', value: '28px' },
-    { label: 'Título 2', value: '32px' },
-    { label: 'Título 1', value: '36px' },
-    { label: 'Muy grande', value: '48px' },
-  ];
+  // FIX: Key estable para evitar recreaciones de TipTap
+  const editorKeyRef = useRef(`editor-${blockId || Date.now()}`);
+
+  // Tamaños disponibles (solo valores en px)
+  const fontSizes = ['12px', '14px', '16px', '20px', '24px', '28px', '32px', '36px', '48px'];
 
   // Fuentes disponibles
   const fontFamilies = [
@@ -111,25 +119,33 @@ export function EnhancedTextEditor({
     { label: 'Roboto Mono', value: 'Roboto Mono, monospace' },
   ];
 
+  // Memoize extensions array to prevent recreation on every render
+  const extensions = useMemo(() => [
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3] }
+    }),
+    Underline,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+    TextStyle,
+    FontFamily.configure({
+      types: ['textStyle'],
+    }),
+    FontSize,
+    Color,
+    Highlight.configure({
+      multicolor: true
+    }),
+  ], []);
+
+  // FIX: Memoizar callback de strokes para evitar re-renders infinitos
+  const handleStrokesChange = useCallback((newStrokes) => {
+    setDrawingStrokes(newStrokes);
+  }, []);
+
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] }
-      }),
-      Underline,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      TextStyle,
-      FontFamily.configure({
-        types: ['textStyle'],
-      }),
-      FontSize,
-      Color,
-      Highlight.configure({
-        multicolor: true
-      }),
-    ],
+    extensions,
     content: initialContent,
     editable: false,
     editorProps: {
@@ -137,7 +153,16 @@ export function EnhancedTextEditor({
         class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[120px] px-4 py-3'
       }
     }
-  });
+  }, [extensions]);
+
+  // FIX: Cleanup correcto del editor al desmontar
+  useEffect(() => {
+    return () => {
+      if (editor) {
+        editor.destroy();
+      }
+    };
+  }, [editor]);
 
   useEffect(() => {
     if (editor) {
@@ -150,6 +175,27 @@ export function EnhancedTextEditor({
       editor.commands.setContent(initialContent);
     }
   }, [initialContent, editor, isEditing]);
+
+  // FIX: Keyboard shortcuts para texto (Ctrl+B, Ctrl+I, etc.)
+  useEffect(() => {
+    if (!editor || !isEditing) return;
+
+    const handleKeyDown = (e) => {
+      // Undo/Redo
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault();
+          editor.chain().focus().undo().run();
+        } else if ((e.key === 'z' && e.shiftKey) || e.key === 'y') {
+          e.preventDefault();
+          editor.chain().focus().redo().run();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [editor, isEditing]);
 
   const handleSave = async () => {
     if (!editor) return;
@@ -188,7 +234,6 @@ export function EnhancedTextEditor({
     setIsEditing(false);
     setDrawingMode(false);
     setSaveError(null);
-    setZoom(1);
   };
 
   const handleExportPDF = async () => {
@@ -261,12 +306,6 @@ export function EnhancedTextEditor({
                 title="Lista con viñetas"
                 icon={List}
               />
-              <UnifiedToolbarButton
-                onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                active={editor.isActive('orderedList')}
-                title="Lista numerada"
-                icon={ListOrdered}
-              />
             </div>
 
             {/* Alineación */}
@@ -293,18 +332,60 @@ export function EnhancedTextEditor({
 
             {/* Color y Resaltador */}
             <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
-              <ColorPicker
-                value={editor.getAttributes('textStyle').color || '#000000'}
-                onChange={(color) => editor.chain().focus().setColor(color).run()}
+              <SimpleColorButton
+                value={textColor}
+                onChange={(color) => {
+                  setTextColor(color);
+                  editor.chain().focus().setColor(color).run();
+                }}
                 label="Color de texto"
+                title="Color de texto"
               />
-              <HighlightPicker
-                onSelect={(color) => editor.chain().focus().setHighlight({ color }).run()}
-                onClear={() => editor.chain().focus().unsetHighlight().run()}
-              />
+
+              {/* FIX: Resaltador con toggle mode - seleccionar color primero */}
+              <div className="relative">
+                <UnifiedToolbarButton
+                  onClick={() => {
+                    if (highlightMode) {
+                      // Desactivar modo resaltador
+                      setHighlightMode(false);
+                      editor.chain().focus().unsetHighlight().run();
+                    } else {
+                      // Activar modo resaltador
+                      setHighlightMode(true);
+                      editor.chain().focus().setHighlight({ color: highlightColor }).run();
+                    }
+                  }}
+                  active={highlightMode}
+                  title={highlightMode ? 'Desactivar resaltador' : 'Activar resaltador'}
+                  icon={() => (
+                    <div
+                      className="w-4 h-4 rounded border border-gray-400"
+                      style={{ backgroundColor: highlightColor }}
+                    />
+                  )}
+                />
+
+                {/* Selector de color del resaltador (aparece al lado) */}
+                {highlightMode && (
+                  <div className="absolute left-full ml-1 top-0">
+                    <SimpleColorButton
+                      value={highlightColor}
+                      onChange={(color) => {
+                        setHighlightColor(color);
+                        if (highlightMode) {
+                          editor.chain().focus().setHighlight({ color }).run();
+                        }
+                      }}
+                      label="Color de resaltado"
+                      title="Cambiar color de resaltado"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Tamaño (reemplaza H1/H2/H3) */}
+            {/* Tamaño */}
             <div className="flex items-center gap-2 pr-2 border-r border-gray-300 dark:border-gray-600">
               <Type size={16} className="text-gray-600 dark:text-gray-400" />
               <select
@@ -315,7 +396,7 @@ export function EnhancedTextEditor({
                 defaultValue="16px"
               >
                 {fontSizes.map(size => (
-                  <option key={size.value} value={size.value}>{size.label}</option>
+                  <option key={size} value={size}>{size}</option>
                 ))}
               </select>
             </div>
@@ -335,14 +416,36 @@ export function EnhancedTextEditor({
               </select>
             </div>
 
-            {/* Lápiz */}
-            <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+            {/* FIX: Lápiz con menú expandible inline (no segunda fila) */}
+            <div className="relative flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
               <UnifiedToolbarButton
                 onClick={() => setDrawingMode(!drawingMode)}
                 active={drawingMode}
                 title="Modo lápiz / dibujar"
                 icon={Pen}
               />
+
+              {/* Controles del lápiz (aparecen inline cuando está activo) */}
+              {drawingMode && (
+                <div className="flex items-center gap-2 pl-2 border-l border-gray-300 dark:border-gray-600">
+                  <SimpleColorButton
+                    value={pencilColor}
+                    onChange={setPencilColor}
+                    label="Color del lápiz"
+                    title="Color del lápiz"
+                  />
+                  <StrokeWidthSelector
+                    value={pencilSize}
+                    onChange={setPencilSize}
+                  />
+                  <UnifiedToolbarButton
+                    onClick={() => setDrawingLayer(drawingLayer === 'over' ? 'under' : 'over')}
+                    title={`Dibujar ${drawingLayer === 'over' ? 'sobre' : 'debajo del'} texto`}
+                    icon={Layers}
+                    active={drawingLayer === 'under'}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Exportar PDF */}
@@ -372,51 +475,6 @@ export function EnhancedTextEditor({
               />
             </div>
           </div>
-
-          {/* FILA 2: Toolbar de lápiz (solo si drawingMode activo) */}
-          {drawingMode && (
-            <div className="pencil-toolbar p-3 bg-purple-50 dark:bg-purple-900/20
-                           border-b border-purple-200 dark:border-purple-800">
-              <div className="flex items-center gap-3 flex-wrap">
-                <Pen size={16} className="text-purple-600 dark:text-purple-400" />
-                <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
-                  Modo Lápiz
-                </span>
-
-                {/* Color del lápiz */}
-                <ColorPicker
-                  value={pencilColor}
-                  onChange={setPencilColor}
-                  label="Color del lápiz"
-                />
-
-                {/* Grosor */}
-                <StrokeWidthSelector
-                  value={pencilSize}
-                  onChange={setPencilSize}
-                />
-
-                {/* Capa */}
-                <UnifiedToolbarButton
-                  onClick={() => setDrawingLayer(drawingLayer === 'over' ? 'under' : 'over')}
-                  title={`Dibujar ${drawingLayer === 'over' ? 'sobre' : 'debajo del'} texto`}
-                  icon={Layers}
-                  label={drawingLayer === 'over' ? 'Sobre' : 'Debajo'}
-                />
-
-                {/* Zoom del canvas (para ver detalles mientras dibujas) */}
-                <div className="flex items-center gap-2 px-2 py-1 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-700">
-                  <ZoomControls
-                    zoom={zoom}
-                    onZoomChange={setZoom}
-                  />
-                  <span className="text-xs text-purple-700 dark:text-purple-300">
-                    (zoom del canvas)
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -449,13 +507,14 @@ export function EnhancedTextEditor({
         {/* Canvas de dibujo (modo edición) */}
         {isEditing && (
           <DrawingCanvasAdvanced
+            key={editorKeyRef.current}
             enabled={drawingMode}
             color={pencilColor}
             opacity={pencilOpacity}
             size={pencilSize}
-            zoom={zoom}
+            zoom={1}
             layer={drawingLayer}
-            onStrokesChange={setDrawingStrokes}
+            onStrokesChange={handleStrokesChange}
             initialStrokes={drawingStrokes}
           />
         )}

@@ -542,6 +542,12 @@ export const registerStudentProfile = async (studentId) => {
  */
 export const getStudentProfile = async (studentId) => {
   try {
+    // Validar que studentId existe
+    if (!studentId) {
+      logger.warn('⚠️ getStudentProfile llamado sin studentId');
+      return null;
+    }
+
     const studentRef = doc(db, 'students', studentId);
     const studentSnap = await getDoc(studentRef);
 
@@ -564,6 +570,12 @@ export const getStudentProfile = async (studentId) => {
  */
 export const ensureStudentProfile = async (userId) => {
   try {
+    // Validar que userId existe
+    if (!userId) {
+      logger.warn('⚠️ ensureStudentProfile llamado sin userId');
+      return null;
+    }
+
     logger.debug('🔍 ensureStudentProfile - Verificando perfil para:', userId);
 
     // Verificar si ya existe

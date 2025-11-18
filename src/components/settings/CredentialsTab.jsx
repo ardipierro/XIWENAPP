@@ -5,6 +5,7 @@ import { BaseAlert, BaseLoading } from '../common';
 import SearchBar from '../common/SearchBar';
 import CredentialConfigModal from './CredentialConfigModal';
 import logger from '../../utils/logger';
+import { UniversalCard } from '../cards';
 
 // ============================================================================
 // CACHE EN MEMORIA
@@ -506,25 +507,21 @@ function CredentialsTab() {
       {viewMode === 'grid' ? (
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredProviders.map((provider) => {
-            const colors = PROVIDER_COLORS[provider.color];
             const isConfigured = isProviderConfigured(provider);
             return (
-              <div key={provider.id} className="card transition-all hover:shadow-lg" style={{ padding: 0 }}>
-                <div className={`p-6 ${colors.bg} ${colors.border} border-b flex flex-col items-center text-center`}>
-                  <div className="text-5xl mb-3">{provider.icon}</div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{provider.name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{provider.description}</p>
-                  {isConfigured ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold rounded-full">
-                      <CheckCircle size={14} />Configurado
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-full">
-                      <XCircle size={14} />Sin Configurar
-                    </span>
-                  )}
-                </div>
-                <div className="p-4">
+              <UniversalCard
+                key={provider.id}
+                variant="default"
+                size="sm"
+                icon={() => <div className="text-5xl">{provider.icon}</div>}
+                title={provider.name}
+                description={provider.description}
+                badges={[
+                  isConfigured
+                    ? { variant: 'success', children: <><CheckCircle size={14} className="inline" /> Configurado</> }
+                    : { variant: 'warning', children: <><XCircle size={14} className="inline" /> Sin Configurar</> }
+                ]}
+                actions={
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -535,43 +532,35 @@ function CredentialsTab() {
                   >
                     {isConfigured ? 'Editar' : 'Configurar'}
                   </button>
-                </div>
-              </div>
+                }
+              />
             );
           })}
         </div>
       ) : (
         <div className="w-full flex flex-col gap-3">
           {filteredProviders.map((provider) => {
-            const colors = PROVIDER_COLORS[provider.color];
             const isConfigured = isProviderConfigured(provider);
             return (
-              <div
+              <UniversalCard
                 key={provider.id}
-                className="card cursor-pointer transition-all hover:shadow-lg"
+                variant="default"
+                size="sm"
+                layout="horizontal"
+                icon={() => <div className="text-4xl">{provider.icon}</div>}
+                title={provider.name}
+                description={provider.description}
+                badges={[
+                  isConfigured
+                    ? { variant: 'success', children: <><CheckCircle size={16} className="inline" /> Configurado</> }
+                    : { variant: 'warning', children: <><XCircle size={16} className="inline" /> Sin Configurar</> }
+                ]}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   setSelectedProvider(provider);
                 }}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="text-4xl">{provider.icon}</div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{provider.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{provider.description}</p>
-                  </div>
-                  {isConfigured ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full">
-                      <CheckCircle size={16} />Configurado
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 text-sm font-semibold rounded-full">
-                      <XCircle size={16} />Sin Configurar
-                    </span>
-                  )}
-                </div>
-              </div>
+              />
             );
           })}
         </div>

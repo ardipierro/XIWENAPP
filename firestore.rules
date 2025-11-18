@@ -107,6 +107,14 @@ service cloud.firestore {
       allow write: if isTeacher() || isAdmin();
     }
 
+    // Content assignments - teachers can assign, students can read their own
+    match /content_assignments/{assignmentId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.studentId == request.auth.uid || isTeacher() || isAdmin());
+      allow create, update: if isTeacher() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // Exercises - authenticated users can read, teachers/admins can write
     match /exercises/{exerciseId} {
       allow read: if isAuthenticated();
@@ -170,10 +178,10 @@ service cloud.firestore {
     // Messages - users can read/write their own conversations
     match /messages/{messageId} {
       allow read: if isAuthenticated() &&
-        (resource.data.senderId == request.auth.uid ||
-         resource.data.recipientId == request.auth.uid ||
-         isAdmin());
-      allow write: if isAuthenticated() &&
+        (resource.data.senderId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() &&
+        request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isAuthenticated() &&
         (resource.data.senderId == request.auth.uid || isAdmin());
     }
 
@@ -181,8 +189,11 @@ service cloud.firestore {
     match /conversations/{conversationId} {
       allow read: if isAuthenticated() &&
         (resource.data.participants.hasAny([request.auth.uid]) || isAdmin());
-      allow write: if isAuthenticated() &&
+      allow create: if isAuthenticated() &&
+        request.resource.data.participants.hasAny([request.auth.uid]);
+      allow update: if isAuthenticated() &&
         (resource.data.participants.hasAny([request.auth.uid]) || isAdmin());
+      allow delete: if isAdmin();
     }
 
     // Guardian links - guardians and students can read their own links
@@ -208,6 +219,12 @@ service cloud.firestore {
 
     // Classes - recurring class schedules
     match /classes/{classId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
+    // Recurring schedules - recurring class schedules
+    match /recurring_schedules/{scheduleId} {
       allow read: if isAuthenticated();
       allow write: if isTeacher() || isAdmin();
     }
@@ -549,6 +566,29 @@ service cloud.firestore {
       allow delete: if isAuthenticated() &&
         (isAdmin() ||
          resource.data.teacherId == request.auth.uid);
+    }
+
+    // ============================================
+    // NOTIFICATIONS
+    // ============================================
+
+    // Notifications - users can read their own, admins can read/write all
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isAdmin();
+      allow update, delete: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // ============================================
+    // SYSTEM CONFIGURATION
+    // ============================================
+
+    // System configuration - all users can read, only admins can write
+    match /system/{document} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
     // Default deny all other collections

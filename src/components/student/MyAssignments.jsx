@@ -34,6 +34,15 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
       setLoading(true);
       setError(null);
 
+      // Validar que user y user.uid existan
+      if (!user || !user.uid) {
+        logger.warn('⚠️ MyAssignments: No hay usuario autenticado o user.uid es undefined');
+        setError('No se pudo identificar al usuario');
+        setAssignments([]);
+        setLoading(false);
+        return;
+      }
+
       // Obtener perfil del estudiante
       logger.debug('🔍 Buscando perfil de estudiante para user.uid:', user.uid);
       const studentProfile = await ensureStudentProfile(user.uid);

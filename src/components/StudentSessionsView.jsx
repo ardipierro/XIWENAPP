@@ -1,6 +1,6 @@
 /**
  * @fileoverview Student Sessions View - Vista de clases para estudiantes
- * Sistema NUEVO que usa class_sessions (no class_instances)
+ * Sistema NUEVO que usa class_instances (nuevo sistema multi-provider)
  * @module components/StudentSessionsView
  */
 
@@ -18,7 +18,7 @@ import {
   Play,
   Users
 } from 'lucide-react';
-import { getStudentSessions, getLiveSessions } from '../firebase/classSessions';
+import { getStudentInstances, getLiveInstances } from '../firebase/classInstances';
 import { getUserCredits } from '../firebase/credits';
 import { BaseEmptyState, BaseLoading, BaseButton, BaseBadge, BaseAlert } from './common';
 import { UniversalCard } from './cards';
@@ -49,11 +49,11 @@ function StudentSessionsView({ student }) {
       const creditsData = await getUserCredits(student.uid || student.id);
       setCredits(creditsData);
 
-      // Obtener sesiones del estudiante (asignadas)
-      const studentSessions = await getStudentSessions(student.uid || student.id);
+      // Obtener sesiones del estudiante (asignadas) - NUEVO SISTEMA
+      const studentSessions = await getStudentInstances(student.uid || student.id);
 
-      // Obtener sesiones en vivo (para ver si puede unirse)
-      const currentLiveSessions = await getLiveSessions();
+      // Obtener sesiones en vivo (para ver si puede unirse) - NUEVO SISTEMA
+      const currentLiveSessions = await getLiveInstances();
 
       logger.debug('📊 Sesiones del estudiante:', {
         studentId: student.uid || student.id,
@@ -350,6 +350,18 @@ function StudentSessionsView({ student }) {
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <BookOpen size={16} />
                         <span>{session.courseName}</span>
+                      </div>
+                    )}
+
+                    {/* Video Provider */}
+                    {session.videoProvider && (
+                      <div className="flex items-center gap-2">
+                        <BaseBadge variant="default" icon={Video}>
+                          {session.videoProvider === 'livekit' && 'LiveKit'}
+                          {session.videoProvider === 'meet' && 'Google Meet'}
+                          {session.videoProvider === 'zoom' && 'Zoom'}
+                          {session.videoProvider === 'voov' && 'VooV Meeting'}
+                        </BaseBadge>
                       </div>
                     )}
 

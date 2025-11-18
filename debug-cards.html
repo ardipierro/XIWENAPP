@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Card Debug Inspector</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #0f0;
+    }
+    .card-info {
+      border: 1px solid #0f0;
+      padding: 10px;
+      margin: 10px 0;
+      background: #000;
+    }
+    .error { color: #f00; }
+    .warning { color: #ff0; }
+    .ok { color: #0f0; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Card Debug Inspector</h1>
+  <p>Abre las DevTools (F12) y pega este código en la consola:</p>
+  <pre style="background: #222; padding: 15px; border: 1px solid #0f0;">
+// Inspeccionar todas las tarjetas en el panel de contenidos
+const cards = document.querySelectorAll('[id^="content-"]');
+
+console.log(`📊 Total de tarjetas encontradas: ${cards.length}\n`);
+
+cards.forEach((card, index) => {
+  const title = card.querySelector('h3')?.textContent || 'Sin título';
+  const computedHeight = window.getComputedStyle(card).height;
+  const actualHeight = card.offsetHeight;
+  const hasFooter = card.querySelector('[style*="backgroundColor: red"]') !== null;
+  const footerVisible = hasFooter ? card.querySelector('[style*="backgroundColor: red"]').getBoundingClientRect().bottom <= card.getBoundingClientRect().bottom : false;
+
+  const info = {
+    index: index + 1,
+    id: card.id,
+    title: title.substring(0, 50),
+    computedHeight,
+    actualHeight,
+    hasFooter,
+    footerVisible,
+    variant: card.classList.contains('overflow-hidden') ? 'con forceHeight' : 'sin forceHeight',
+    overflow: window.getComputedStyle(card).overflow
+  };
+
+  console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  console.log(`Tarjeta #${info.index}: ${info.title}`);
+  console.log(`ID: ${info.id}`);
+  console.log(`Altura computada: ${info.computedHeight}`);
+  console.log(`Altura real: ${info.actualHeight}px`);
+  console.log(`Tiene footer: ${info.hasFooter ? '✅ SÍ' : '❌ NO'}`);
+  console.log(`Footer visible: ${info.footerVisible ? '✅ SÍ' : '❌ NO'}`);
+  console.log(`Variant: ${info.variant}`);
+  console.log(`Overflow: ${info.overflow}`);
+
+  if (info.hasFooter && !info.footerVisible) {
+    console.log(`⚠️ PROBLEMA: Footer oculto en esta tarjeta`);
+  }
+});
+
+// Encontrar la tarjeta problemática específica
+const problemCard = Array.from(cards).find(card => {
+  const title = card.querySelector('h3')?.textContent || '';
+  return title.includes('2.5') || title.includes('restaurante');
+});
+
+if (problemCard) {
+  console.log(`\n\n🎯 TARJETA PROBLEMÁTICA ENCONTRADA:`);
+  console.log(problemCard);
+  console.log(`\nEstilos aplicados:`);
+  console.log(window.getComputedStyle(problemCard));
+}
+  </pre>
+
+  <p>Este script te mostrará:</p>
+  <ul>
+    <li>✅ Cuántas tarjetas hay en total</li>
+    <li>✅ La altura de cada tarjeta (computada vs real)</li>
+    <li>✅ Si el footer existe y si es visible</li>
+    <li>✅ Qué tarjetas tienen el problema</li>
+  </ul>
+
+  <h2>Instrucciones:</h2>
+  <ol>
+    <li>Abre tu aplicación en <code>http://localhost:5173</code></li>
+    <li>Ve al panel de "Gestionar Contenidos"</li>
+    <li>Presiona F12 para abrir DevTools</li>
+    <li>Ve a la pestaña "Console"</li>
+    <li>Copia y pega el código de arriba</li>
+    <li>Presiona Enter</li>
+    <li>Comparte la salida conmigo</li>
+  </ol>
+</body>
+</html>

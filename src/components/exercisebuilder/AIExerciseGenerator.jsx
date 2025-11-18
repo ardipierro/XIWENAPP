@@ -7,11 +7,17 @@ import { useState } from 'react';
 import { Sparkles, Download, Eye, Edit3, Save, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { BaseButton, BaseBadge, CategoryBadge, BaseAlert } from '../common';
 import { UniversalCard } from '../cards';
-import { generateExercisesFromText } from '../../services/AIService';
+// FIXME: generateExercisesFromText function not found in AIService
+// import { generateExercisesFromText } from '../../services/AIService';
 import { ExerciseEditorModal } from './ExerciseEditorModal';
 import { useContentExport } from '../../hooks/useContentExport';
 import { useAuth } from '../../contexts/AuthContext';
 import logger from '../../utils/logger';
+
+// TEMPORARY STUB: Replace with actual implementation
+const generateExercisesFromText = async () => {
+  throw new Error('AI Exercise generation is temporarily unavailable');
+};
 
 /**
  * Generador de Ejercicios con IA

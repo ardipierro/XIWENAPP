@@ -375,8 +375,8 @@ function SlidePackageGenerator() {
   }
 
   return (
-    <div className="app-container min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="content-container p-6 space-y-6">
+    <div className="w-full">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

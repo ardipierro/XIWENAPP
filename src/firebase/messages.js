@@ -31,6 +31,12 @@ import logger from '../utils/logger';
  */
 export async function getOrCreateConversation(userId1, userId2) {
   try {
+    // Validar que ambos userIds existan
+    if (!userId1 || !userId2) {
+      logger.warn('⚠️ getOrCreateConversation llamado sin userIds válidos', 'Messages');
+      throw new Error('User IDs are required');
+    }
+
     // Sort IDs to ensure consistent conversation lookup
     const participants = [userId1, userId2].sort();
 
@@ -54,8 +60,8 @@ export async function getOrCreateConversation(userId1, userId2) {
       lastMessageAt: serverTimestamp(),
       createdAt: serverTimestamp(),
       unreadCount: {
-        [userId1]: 0,
-        [userId2]: 0
+        [userId1]: [],
+        [userId2]: []
       }
     };
 
@@ -157,6 +163,12 @@ export async function sendMessage({ conversationId, senderId, senderName, receiv
  */
 export async function getUserConversations(userId) {
   try {
+    // Validar que userId exista
+    if (!userId) {
+      logger.warn('⚠️ getUserConversations llamado sin userId', 'Messages');
+      return [];
+    }
+
     const conversationsRef = collection(db, 'conversations');
     const q = query(
       conversationsRef,
@@ -184,7 +196,9 @@ export async function getUserConversations(userId) {
           email: userData.email || '',
           role: userData.role || 'student'
         },
-        unreadCount: data.unreadCount?.[userId] || 0
+        unreadCount: Array.isArray(data.unreadCount?.[userId])
+          ? data.unreadCount[userId].length
+          : 0
       });
     }
 
@@ -255,7 +269,7 @@ export async function markMessagesAsRead(conversationId, userId) {
     // Reset unread count
     const conversationRef = doc(db, 'conversations', conversationId);
     batch.update(conversationRef, {
-      [`unreadCount.${userId}`]: 0
+      [`unreadCount.${userId}`]: []
     });
 
     await batch.commit();
@@ -378,6 +392,13 @@ export async function loadOlderMessages(conversationId, oldestMessage, limitCoun
  * @returns {Function} Unsubscribe function
  */
 export function subscribeToConversations(userId, callback) {
+  // Validar que userId exista
+  if (!userId) {
+    logger.warn('⚠️ subscribeToConversations llamado sin userId', 'Messages');
+    callback([]);
+    return () => {}; // Return empty unsubscribe function
+  }
+
   const conversationsRef = collection(db, 'conversations');
   // Query sin orderBy para evitar índice compuesto (ordenamos en memoria)
   const q = query(
@@ -387,9 +408,10 @@ export function subscribeToConversations(userId, callback) {
 
   return onSnapshot(q, async (snapshot) => {
     try {
-      const conversations = [];
+      logger.debug(`[subscribeToConversations] Processing ${snapshot.docs.length} conversations`, 'Messages');
 
-      for (const docSnap of snapshot.docs) {
+      // Cargar todos los usuarios en paralelo para mejor rendimiento
+      const conversationPromises = snapshot.docs.map(async (docSnap) => {
         try {
           const data = docSnap.data();
 
@@ -397,31 +419,40 @@ export function subscribeToConversations(userId, callback) {
           const otherUserId = data.participants.find(id => id !== userId);
 
           if (!otherUserId) {
-            logger.warn('No other participant found in conversation', 'Messages');
-            continue;
+            logger.warn(`[subscribeToConversations] No other participant found in conversation ${docSnap.id}`, 'Messages');
+            return null;
           }
 
           const userDoc = await getDoc(doc(db, 'users', otherUserId));
+
+          if (!userDoc.exists()) {
+            logger.warn(`[subscribeToConversations] User ${otherUserId} not found in users collection`, 'Messages');
+          }
+
           const userData = userDoc.exists() ? userDoc.data() : {};
 
-          conversations.push({
+          return {
             id: docSnap.id,
             ...data,
             otherUser: {
               id: otherUserId,
-              name: userData.name || 'Usuario',
+              name: userData.name || 'Usuario Desconocido',
               email: userData.email || '',
               role: userData.role || 'student'
             },
             unreadCount: Array.isArray(data.unreadCount?.[userId])
               ? data.unreadCount[userId].length
               : 0
-          });
+          };
         } catch (convError) {
-          logger.error('Error processing conversation', convError, 'Messages');
-          // Continue with other conversations even if one fails
+          logger.error(`[subscribeToConversations] Error processing conversation ${docSnap.id}:`, convError, 'Messages');
+          return null;
         }
-      }
+      });
+
+      // Esperar todas las conversaciones y filtrar nulls
+      const conversationsRaw = await Promise.all(conversationPromises);
+      const conversations = conversationsRaw.filter(conv => conv !== null);
 
       // Ordenar en memoria por lastMessageAt descendente
       conversations.sort((a, b) => {
@@ -430,14 +461,15 @@ export function subscribeToConversations(userId, callback) {
         return bTime - aTime;
       });
 
+      logger.debug(`[subscribeToConversations] Returning ${conversations.length} conversations`, 'Messages');
       callback(conversations);
     } catch (error) {
-      logger.error('Error processing conversations snapshot', error, 'Messages');
+      logger.error('[subscribeToConversations] Error processing conversations snapshot:', error, 'Messages');
       // Call callback with empty array to stop loading state
       callback([]);
     }
   }, (error) => {
-    logger.error('Error in conversations subscription', error, 'Messages');
+    logger.error('[subscribeToConversations] Error in conversations subscription:', error, 'Messages');
     // Call callback with empty array to stop loading state
     callback([]);
   });
@@ -526,6 +558,12 @@ export async function clearTyping(conversationId, userId) {
  */
 export async function searchUsers(searchTerm, currentUserId) {
   try {
+    // Validar que currentUserId exista
+    if (!currentUserId) {
+      logger.warn('⚠️ searchUsers llamado sin currentUserId', 'Messages');
+      return [];
+    }
+
     const usersRef = collection(db, 'users');
     const snapshot = await getDocs(usersRef);
 

@@ -26,6 +26,10 @@ export const cardVariants = {
     // Content
     contentPadding: '20px',        // p-5 en Tailwind
 
+    // Card Height (para grid mode con sticky footer)
+    cardHeight: '380px',           // Altura fija para sticky footer consistente
+    contentOverflow: 'auto',       // Scroll si el contenido es muy largo
+
     // Hover Effects
     hoverEnabled: true,
     hoverTransform: '-4px',        // translateY
@@ -158,6 +162,10 @@ export const cardVariants = {
 
     // Content
     contentPadding: '20px',
+
+    // Card Height (para grid mode con sticky footer)
+    cardHeight: '420px',           // Altura fija para sticky footer consistente
+    contentOverflow: 'auto',       // Scroll si el contenido es muy largo
 
     // Thumbnail
     showThumbnail: true,
@@ -387,9 +395,13 @@ export function getGridColumnsClass(columnsType = 'default') {
 
 /**
  * Helper: Generate card classes
+ * @param {string|object} variant - Variant name or pre-resolved config object
+ * @param {string} size - Size name
+ * @param {string} layout - Layout name
  */
 export function generateCardClasses(variant, size, layout) {
-  const variantConfig = getVariantConfig(variant);
+  // Accept pre-resolved config object OR variant string
+  const variantConfig = typeof variant === 'object' ? variant : getVariantConfig(variant);
   const sizeConfig = getSizeConfig(size);
   const layoutConfig = getLayoutConfig(layout);
 
@@ -436,9 +448,13 @@ export function generateCardClasses(variant, size, layout) {
 
 /**
  * Helper: Generate card styles (inline styles)
+ * @param {string|object} variant - Variant name or pre-resolved config object
+ * @param {string} size - Size name
+ * @param {string} layout - Layout name
  */
 export function generateCardStyles(variant, size, layout = 'vertical') {
-  const variantConfig = getVariantConfig(variant);
+  // Accept pre-resolved config object OR variant string
+  const variantConfig = typeof variant === 'object' ? variant : getVariantConfig(variant);
   const sizeConfig = getSizeConfig(size);
   const layoutConfig = getLayoutConfig(layout);
 
@@ -447,7 +463,11 @@ export function generateCardStyles(variant, size, layout = 'vertical') {
       backgroundColor: 'var(--color-bg-secondary)',
       border: `1px solid ${variantConfig.normalBorderColor}`,
       boxShadow: variantConfig.normalShadow,
-      minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight,
+      // Altura: si tiene cardHeight usar fija, sino usar minHeight
+      ...(variantConfig.cardHeight
+        ? { height: variantConfig.cardHeight, minHeight: 'unset' }
+        : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
+      ),
       transitionDuration: variantConfig.transitionDuration,
       transitionTimingFunction: variantConfig.transitionTiming,
     },
@@ -467,9 +487,11 @@ export function generateCardStyles(variant, size, layout = 'vertical') {
 
 /**
  * Helper: Get hover styles
+ * @param {string|object} variant - Variant name or pre-resolved config object
  */
 export function getHoverStyles(variant) {
-  const config = getVariantConfig(variant);
+  // Accept pre-resolved config object OR variant string
+  const config = typeof variant === 'object' ? variant : getVariantConfig(variant);
 
   if (!config.hoverEnabled) {
     return null;
@@ -484,9 +506,11 @@ export function getHoverStyles(variant) {
 
 /**
  * Helper: Get normal styles (para onMouseLeave)
+ * @param {string|object} variant - Variant name or pre-resolved config object
  */
 export function getNormalStyles(variant) {
-  const config = getVariantConfig(variant);
+  // Accept pre-resolved config object OR variant string
+  const config = typeof variant === 'object' ? variant : getVariantConfig(variant);
 
   return {
     transform: 'translateY(0)',

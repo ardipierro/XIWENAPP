@@ -4,6 +4,8 @@
  */
 
 import { createContext, useContext, useState, useEffect } from 'react';
+import { loadLogoConfig, saveLogoConfig } from '../firebase/logoConfig';
+import logger from '../utils/logger';
 
 const FontContext = createContext();
 
@@ -27,6 +29,8 @@ export const AVAILABLE_FONTS = [
 ];
 
 export function FontProvider({ children }) {
+  const [isLoading, setIsLoading] = useState(true);
+
   // Estado: fuente seleccionada (por defecto Microsoft YaHei)
   const [selectedFont, setSelectedFont] = useState(() => {
     const saved = localStorage.getItem('appLogoFont');
@@ -45,18 +49,96 @@ export function FontProvider({ children }) {
     return saved ? parseFloat(saved) : 1.25; // 1.25rem = text-xl por defecto
   });
 
-  // Guardar en localStorage cuando cambia
+  // Cargar configuración desde Firebase al iniciar
   useEffect(() => {
-    localStorage.setItem('appLogoFont', selectedFont);
+    async function loadConfig() {
+      try {
+        const config = await loadLogoConfig();
+
+        if (config) {
+          // Si hay configuración en Firebase, usarla
+          setSelectedFont(config.font);
+          setFontWeight(config.weight);
+          setFontSize(config.size);
+
+          // Actualizar también localStorage para carga rápida
+          localStorage.setItem('appLogoFont', config.font);
+          localStorage.setItem('appLogoFontWeight', config.weight);
+          localStorage.setItem('appLogoFontSize', config.size.toString());
+
+          logger.info('[FontContext] Configuración cargada desde Firebase');
+        } else {
+          // Si no hay en Firebase, intentar guardar la actual (localStorage) en Firebase
+          // Esto puede fallar si el usuario no tiene permisos (no admin), ignorar error
+          try {
+            await saveLogoConfig({
+              font: selectedFont,
+              weight: fontWeight,
+              size: fontSize
+            });
+            logger.info('[FontContext] Configuración inicial guardada en Firebase');
+          } catch (saveError) {
+            // Silenciar error - solo admins pueden guardar configuración global
+            logger.debug('[FontContext] No se pudo guardar en Firebase (requiere permisos admin)');
+          }
+        }
+      } catch (error) {
+        logger.error('[FontContext] Error al cargar configuración:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadConfig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Guardar en localStorage Y Firebase cuando cambia la fuente
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem('appLogoFont', selectedFont);
+      saveLogoConfig({ font: selectedFont, weight: fontWeight, size: fontSize });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFont]);
 
+  // Guardar en localStorage Y Firebase cuando cambia el peso
   useEffect(() => {
-    localStorage.setItem('appLogoFontWeight', fontWeight);
+    if (!isLoading) {
+      localStorage.setItem('appLogoFontWeight', fontWeight);
+      saveLogoConfig({ font: selectedFont, weight: fontWeight, size: fontSize });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fontWeight]);
 
+  // Guardar en localStorage Y Firebase cuando cambia el tamaño
   useEffect(() => {
-    localStorage.setItem('appLogoFontSize', fontSize.toString());
+    if (!isLoading) {
+      localStorage.setItem('appLogoFontSize', fontSize.toString());
+      saveLogoConfig({ font: selectedFont, weight: fontWeight, size: fontSize });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fontSize]);
+
+  // Función para resetear a defaults
+  const resetToDefaults = async () => {
+    const defaults = {
+      font: "'Microsoft YaHei', sans-serif",
+      weight: 'bold',
+      size: 1.25
+    };
+
+    setSelectedFont(defaults.font);
+    setFontWeight(defaults.weight);
+    setFontSize(defaults.size);
+
+    localStorage.setItem('appLogoFont', defaults.font);
+    localStorage.setItem('appLogoFontWeight', defaults.weight);
+    localStorage.setItem('appLogoFontSize', defaults.size.toString());
+
+    await saveLogoConfig(defaults);
+    logger.info('[FontContext] Configuración reseteada a defaults');
+  };
 
   const value = {
     selectedFont,
@@ -65,6 +147,8 @@ export function FontProvider({ children }) {
     setFontWeight,
     fontSize,
     setFontSize,
+    isLoading,
+    resetToDefaults,
     availableFonts: AVAILABLE_FONTS
   };
 

@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { User, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, CheckCircle } from 'lucide-react';
 import { BaseButton, BaseAlert, BaseLoading } from '../common';
 import { getStudentsByTeacher } from '../../firebase/users';
 import logger from '../../utils/logger';
@@ -99,40 +99,31 @@ export default function StudentAssigner({
     );
   }
 
-  // Full mode - card with controls
+  // Full mode - compact card with controls
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {error && (
         <BaseAlert variant="danger" onClose={() => setError(null)}>
           {error}
         </BaseAlert>
       )}
 
-      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <div className="space-y-3">
-          {/* Current Assignment Status */}
-          <div className="flex items-center gap-2 text-sm">
-            <User size={16} strokeWidth={2} className="text-gray-500" />
-            <span className="text-gray-600 dark:text-gray-400">
-              Asignado a:
+      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+        <div className="flex items-center gap-3">
+          {/* Label */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <User size={16} strokeWidth={2} className="text-gray-500 dark:text-gray-400" />
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              Estudiante:
             </span>
-            <span className="font-medium text-gray-900 dark:text-white">
-              {currentStudentName}
-            </span>
-            {!currentStudentId && (
-              <AlertCircle size={16} strokeWidth={2} className="text-orange-500" />
-            )}
           </div>
 
-          {/* Student Selector */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {currentStudentId ? 'Reasignar a:' : 'Asignar a:'}
-            </label>
+          {/* Student Selector - Inline */}
+          <div className="flex-1">
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="input w-full"
+              className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               {allowUnassigned && (
                 <option value="">Sin asignar</option>
@@ -149,39 +140,17 @@ export default function StudentAssigner({
             </select>
           </div>
 
-          {/* Actions */}
+          {/* Assign Button - Only when changed */}
           {hasChanges && (
-            <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-              <BaseButton
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-              >
-                Cancelar
-              </BaseButton>
-              <BaseButton
-                variant="primary"
-                size="sm"
-                onClick={handleAssign}
-                fullWidth
-              >
-                <CheckCircle size={16} strokeWidth={2} />
-                {selectedStudentId ? 'Asignar Estudiante' : 'Marcar como Sin Asignar'}
-              </BaseButton>
-            </div>
-          )}
-
-          {!hasChanges && currentStudentId && (
-            <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-              <CheckCircle size={14} strokeWidth={2} />
-              Estudiante asignado correctamente
-            </div>
-          )}
-
-          {!hasChanges && !currentStudentId && (
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              Selecciona un estudiante para asignar esta tarea
-            </div>
+            <BaseButton
+              variant="primary"
+              size="sm"
+              onClick={handleAssign}
+              className="flex items-center gap-1.5 flex-shrink-0"
+            >
+              <CheckCircle size={12} strokeWidth={2} />
+              Asignar
+            </BaseButton>
           )}
         </div>
       </div>

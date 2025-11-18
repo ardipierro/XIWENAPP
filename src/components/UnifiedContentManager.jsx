@@ -26,7 +26,8 @@ import {
   Target,
   Tag,
   Play,
-  BarChart3
+  BarChart3,
+  Sparkles
 } from 'lucide-react';
 import {
   getAllContent,
@@ -156,6 +157,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [successMessage, setSuccessMessage] = useState(null);
   const [newlyCreatedId, setNewlyCreatedId] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showSampleExercisesInfo, setShowSampleExercisesInfo] = useState(false);
 
   // Cargar contenidos
   useEffect(() => {
@@ -311,7 +313,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   }
 
   return (
-    <div className="p-6 min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
@@ -322,6 +324,13 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               onClick={() => setShowAnalytics(true)}
             >
               Ver Analytics
+            </BaseButton>
+            <BaseButton
+              variant="secondary"
+              icon={Sparkles}
+              onClick={() => setShowSampleExercisesInfo(true)}
+            >
+              Generar Ejercicios de Ejemplo
             </BaseButton>
             <BaseButton
               variant="primary"
@@ -497,6 +506,132 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
             />
           </Suspense>
         )}
+      </BaseModal>
+
+      {/* Sample Exercises Info Modal */}
+      <BaseModal
+        isOpen={showSampleExercisesInfo}
+        onClose={() => setShowSampleExercisesInfo(false)}
+        title="✨ Generar Ejercicios de Ejemplo"
+        icon={Sparkles}
+        size="lg"
+      >
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-900 dark:text-blue-100">
+              Este script genera <strong>10 ejercicios interactivos de ejemplo</strong> en español nivel A1-A2
+              directamente en Firebase. Los ejercicios estarán listos para usar en tus clases.
+            </p>
+          </div>
+
+          {/* Tipos de ejercicios */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              📚 Tipos de Ejercicios Incluidos
+            </h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Multiple Choice (MCQ)
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Fill in the Blank
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Matching
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> True/False
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Free Drag & Drop
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Drag Drop Order
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Dialogue Roleplay
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Text Selection
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Verb Identification
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <span className="text-green-500">✓</span> Interactive Reading
+              </div>
+            </div>
+          </div>
+
+          {/* Instrucciones */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              🚀 Cómo Ejecutar
+            </h3>
+            <div className="space-y-3">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Paso 1: Configurar tu User ID
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Abre <code className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">scripts/create-sample-exercises.js</code>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Busca la línea <code className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">const TEACHER_ID = 'TU_USER_ID';</code>
+                  y reemplaza con tu User ID de Firebase
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Paso 2: Ejecutar el script
+                </p>
+                <div className="p-3 bg-gray-900 dark:bg-black rounded text-green-400 font-mono text-sm">
+                  npm run create-sample-exercises
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Paso 3: Verificar
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Los 10 ejercicios aparecerán aquí en "Gestionar Contenidos" listos para usar
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Documentación */}
+          <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+            <p className="text-sm text-yellow-900 dark:text-yellow-100">
+              📖 <strong>Documentación completa:</strong> Consulta <code>GUIA-CICLO-COMPLETO.md</code> y
+              <code className="ml-1">scripts/README-EJERCICIOS.md</code> para más detalles
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <BaseButton
+              variant="secondary"
+              onClick={() => setShowSampleExercisesInfo(false)}
+            >
+              Cerrar
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              icon={BookOpen}
+              onClick={() => {
+                setShowSampleExercisesInfo(false);
+                // Recargar contenidos para mostrar los nuevos ejercicios
+                loadContents();
+              }}
+            >
+              Entendido
+            </BaseButton>
+          </div>
+        </div>
       </BaseModal>
 
       {/* View Content Modal - Simple working viewer with fullscreen */}
@@ -932,18 +1067,19 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     });
   }
 
-  // Preparar actions
-  const contentActions = (
-    <div className="flex gap-2 w-full">
-      <BaseButton variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
-        Ver
-      </BaseButton>
-      <BaseButton variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
-        Editar
-      </BaseButton>
-      <BaseButton variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
-    </div>
-  );
+  // Preparar actions (SOLO botones)
+  const contentActions = [
+    <BaseButton key="view" variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
+      Ver
+    </BaseButton>,
+    <BaseButton key="edit" variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
+      Editar
+    </BaseButton>,
+    <BaseButton key="delete" variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
+  ];
+
+  // Solo pasar children si hay badges o tags
+  const hasChildren = contentBadges.length > 0 || (content.metadata?.tags?.length > 0);
 
   return (
     <UniversalCard
@@ -958,27 +1094,29 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       meta={contentMeta}
       actions={contentActions}
     >
-      {/* Badges y Tags - Ahora no afectan sticky footer */}
-      <div className="space-y-2">
-        {/* Badges */}
-        {contentBadges.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            {contentBadges}
-          </div>
-        )}
+      {/* Badges y Tags - Solo renderizar si hay contenido */}
+      {hasChildren && (
+        <div className="space-y-2">
+          {/* Badges - máximo 2 */}
+          {contentBadges.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              {contentBadges.slice(0, 2)}
+            </div>
+          )}
 
-        {/* Tags */}
-        {content.metadata?.tags?.length > 0 && (
-          <div className="flex items-center gap-1 flex-wrap">
-            <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-            {content.metadata.tags.slice(0, 3).map((tag, idx) => (
-              <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+          {/* Tags - máximo 2 */}
+          {content.metadata?.tags?.length > 0 && (
+            <div className="flex items-center gap-1 flex-wrap">
+              <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+              {content.metadata.tags.slice(0, 2).map((tag, idx) => (
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </UniversalCard>
   );
 }
