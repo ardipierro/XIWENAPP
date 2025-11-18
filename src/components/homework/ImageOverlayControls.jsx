@@ -46,6 +46,10 @@ const ERROR_TYPE_CONFIG = {
  * @param {function} props.onOpacityChange - Callback when opacity changes
  * @param {boolean} props.useWavyUnderline - Use wavy underlines
  * @param {function} props.onWavyUnderlineChange - Callback when wavy toggle changes
+ * @param {boolean} props.showCorrectionText - Show AI correction text below errors
+ * @param {function} props.onShowCorrectionTextChange - Callback when correction text toggle changes
+ * @param {string} props.correctionTextFont - Font family for correction text
+ * @param {function} props.onCorrectionTextFontChange - Callback when font changes
  * @param {Object} props.errorCounts - Count of each error type {spelling: 5, grammar: 3, ...}
  */
 export default function ImageOverlayControls({
@@ -55,6 +59,10 @@ export default function ImageOverlayControls({
   onOpacityChange,
   useWavyUnderline,
   onWavyUnderlineChange,
+  showCorrectionText = true,
+  onShowCorrectionTextChange,
+  correctionTextFont = 'Caveat',
+  onCorrectionTextFontChange,
   errorCounts = {}
 }) {
   const handleToggleErrorType = (type) => {
@@ -129,32 +137,67 @@ export default function ImageOverlayControls({
           Estilo de resaltado
         </span>
 
-        <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {/* Intensity Selector */}
-          <div className="flex-1">
-            <select
-              value={highlightOpacity}
-              onChange={(e) => onOpacityChange(parseFloat(e.target.value))}
-              className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            >
-              <option value={0.15}>Intensidad: Baja</option>
-              <option value={0.25}>Intensidad: Media</option>
-              <option value={0.40}>Intensidad: Alta</option>
-            </select>
-          </div>
+          <select
+            value={highlightOpacity}
+            onChange={(e) => onOpacityChange(parseFloat(e.target.value))}
+            className="px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          >
+            <option value={0.15}>Intensidad: Baja</option>
+            <option value={0.25}>Intensidad: Media</option>
+            <option value={0.40}>Intensidad: Alta</option>
+          </select>
 
           {/* Wavy Toggle */}
-          <div className="flex-1">
-            <select
-              value={useWavyUnderline ? 'wavy' : 'straight'}
-              onChange={(e) => onWavyUnderlineChange(e.target.value === 'wavy')}
-              className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            >
-              <option value="straight">Subrayado: Recto</option>
-              <option value="wavy">Subrayado: Ondulado</option>
-            </select>
-          </div>
+          <select
+            value={useWavyUnderline ? 'wavy' : 'straight'}
+            onChange={(e) => onWavyUnderlineChange(e.target.value === 'wavy')}
+            className="px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          >
+            <option value="straight">Subrayado: Recto</option>
+            <option value="wavy">Subrayado: Ondulado</option>
+          </select>
         </div>
+      </div>
+
+      {/* AI Correction Text Controls */}
+      <div className="space-y-2">
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+          Correcciones escritas por IA
+        </span>
+
+        <div className="grid grid-cols-2 gap-2">
+          {/* Show Correction Text Toggle */}
+          <select
+            value={showCorrectionText ? 'show' : 'hide'}
+            onChange={(e) => onShowCorrectionTextChange(e.target.value === 'show')}
+            className="px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          >
+            <option value="show">✍️ Mostrar texto</option>
+            <option value="hide">👁️ Ocultar texto</option>
+          </select>
+
+          {/* Font Selector - Only enabled when correction text is shown */}
+          <select
+            value={correctionTextFont}
+            onChange={(e) => onCorrectionTextFontChange(e.target.value)}
+            disabled={!showCorrectionText}
+            className="px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontFamily: showCorrectionText ? correctionTextFont : undefined }}
+          >
+            <option value="Caveat" style={{ fontFamily: 'Caveat' }}>Fuente: Caveat</option>
+            <option value="Shadows Into Light" style={{ fontFamily: 'Shadows Into Light' }}>Fuente: Shadows</option>
+            <option value="Indie Flower" style={{ fontFamily: 'Indie Flower' }}>Fuente: Indie</option>
+            <option value="Patrick Hand" style={{ fontFamily: 'Patrick Hand' }}>Fuente: Patrick</option>
+          </select>
+        </div>
+
+        {showCorrectionText && (
+          <p className="text-[10px] text-gray-500 dark:text-gray-400">
+            💡 La IA escribe la corrección debajo de cada error con fuente manuscrita
+          </p>
+        )}
       </div>
     </div>
   );
@@ -167,5 +210,9 @@ ImageOverlayControls.propTypes = {
   onOpacityChange: PropTypes.func.isRequired,
   useWavyUnderline: PropTypes.bool.isRequired,
   onWavyUnderlineChange: PropTypes.func.isRequired,
+  showCorrectionText: PropTypes.bool,
+  onShowCorrectionTextChange: PropTypes.func,
+  correctionTextFont: PropTypes.string,
+  onCorrectionTextFontChange: PropTypes.func,
   errorCounts: PropTypes.object
 };
