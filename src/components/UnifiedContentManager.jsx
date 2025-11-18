@@ -945,27 +945,6 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     </div>
   );
 
-  // Crear un subtitle que incluya los badges
-  const subtitleWithBadges = (
-    <div className="space-y-2">
-      {/* Badges */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {contentBadges}
-      </div>
-      {/* Tags si existen */}
-      {content.metadata?.tags?.length > 0 && (
-        <div className="flex items-center gap-1 flex-wrap">
-          <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-          {content.metadata.tags.slice(0, 3).map((tag, idx) => (
-            <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <UniversalCard
       variant={gridVariant}
@@ -975,11 +954,32 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       image={gridImage}
       icon={gridIcon}
       title={content.title}
-      subtitle={subtitleWithBadges}
       description={content.description || config.description}
       meta={contentMeta}
       actions={contentActions}
-    />
+    >
+      {/* Badges y Tags - Ahora no afectan sticky footer */}
+      <div className="space-y-2">
+        {/* Badges */}
+        {contentBadges.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {contentBadges}
+          </div>
+        )}
+
+        {/* Tags */}
+        {content.metadata?.tags?.length > 0 && (
+          <div className="flex items-center gap-1 flex-wrap">
+            <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
+            {content.metadata.tags.slice(0, 3).map((tag, idx) => (
+              <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </UniversalCard>
   );
 }
 
