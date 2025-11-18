@@ -173,7 +173,7 @@ export function DrawingCanvasAdvanced({
     } else {
       setCurrentStroke([[x, y, pressure]]);
     }
-  }, [enabled, eraserMode, strokes, getRelativeCoordinates, addToHistory]);
+  }, [enabled, eraserMode, strokes, getRelativeCoordinates, addToHistory, isPointNearStroke]);
 
   // Continuar trazo (SIN límite de puntos - el usuario necesita trazos largos continuos)
   const handlePointerMove = useCallback((e) => {
@@ -213,12 +213,31 @@ export function DrawingCanvasAdvanced({
     setCurrentStroke([]);
   }, [isDrawing, eraserMode, currentStroke, strokes, strokeOptions, getSvgPathFromStroke, addToHistory]);
 
-  // Verificar si un punto está cerca de un trazo (simplificado)
-  const isPointNearStroke = (x, y, stroke) => {
-    // Implementación simplificada
-    // En producción, usar algoritmo más preciso
+  // Verificar si un punto está cerca de un trazo
+  const isPointNearStroke = useCallback((x, y, stroke) => {
+    // Parseamos el pathData para obtener puntos aproximados
+    const pathData = stroke.pathData;
+    if (!pathData) return false;
+
+    // Extraer coordenadas del path SVG (simple parser)
+    const coords = pathData.match(/[\d.]+/g);
+    if (!coords || coords.length < 2) return false;
+
+    // Verificar proximidad con threshold de 20px (ajustable según tamaño del trazo)
+    const threshold = Math.max(20, stroke.size * 3);
+
+    for (let i = 0; i < coords.length - 1; i += 2) {
+      const px = parseFloat(coords[i]);
+      const py = parseFloat(coords[i + 1]);
+      const distance = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
+
+      if (distance < threshold) {
+        return true;
+      }
+    }
+
     return false;
-  };
+  }, []);
 
   // Limpiar todos los trazos
   const clearAll = useCallback(() => {

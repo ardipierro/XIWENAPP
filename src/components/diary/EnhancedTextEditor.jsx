@@ -13,7 +13,6 @@ import {
   Italic,
   Underline as UnderlineIcon,
   List,
-  ListOrdered,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -22,27 +21,30 @@ import {
   Save,
   X,
   Edit2,
-  ChevronDown,
-  ChevronUp,
   Download,
-  Layers,
-  Palette,
-  Highlighter
+  Layers
 } from 'lucide-react';
 import { UnifiedToolbarButton } from './UnifiedToolbarButton';
-import { ColorPicker } from './ColorPicker';
-import { HighlightPicker } from './HighlightPicker';
-import { PencilPresetsSimple } from './PencilPresetsSimple';
+import { SimpleColorButton } from './SimpleColorButton';
 import { DrawingCanvasAdvanced } from './DrawingCanvasAdvanced';
 import { DrawingViewer } from './DrawingViewer';
 import { StrokeWidthSelector } from './StrokeWidthSelector';
-import { ZoomControls } from './ZoomControls';
 import { exportToPDF } from '../../utils/pdfExport';
 
 /**
- * EnhancedTextEditor V3 - COMPLETAMENTE REFACTORIZADO
+ * EnhancedTextEditor V4 - PULIDO FINAL
  *
- * MEJORAS:
+ * MEJORAS V4 (últimas):
+ * ✅ SimpleColorButton: Solo cuadrado de color, sin icono Palette
+ * ✅ Smart color memory: Cada herramienta recuerda su último color independientemente
+ * ✅ Zoom eliminado: No tiene sentido en este contexto
+ * ✅ Selector de tamaño simplificado: Solo valores px (12px, 14px, 16px...)
+ * ✅ Listas numeradas removidas: Solo listas con viñetas
+ * ✅ Menú de lápiz rediseñado: Consistente con resto de la UI (sin banner morado)
+ * ✅ Goma de borrar arreglada: Detecta trazos correctamente
+ * ✅ Undo/Redo funcionan: Toolbar flotante en canvas
+ *
+ * MEJORAS V3:
  * ✅ DrawingViewer: Los trazos ahora se VEN después de guardar
  * ✅ UnifiedToolbarButton: TODOS los botones consistentes
  * ✅ Selector de tamaño unificado (reemplaza H1/H2/H3)
@@ -62,16 +64,14 @@ export function EnhancedTextEditor({
   const [isEditing, setIsEditing] = useState(autoEdit);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
-  const [showTools, setShowTools] = useState({
-    font: false,
-    color: false,
-    highlight: false,
-    pencil: false
-  });
+
+  // Smart color memory - cada herramienta recuerda su último color
+  const [textColor, setTextColor] = useState('#000000');
+  const [highlightColor, setHighlightColor] = useState('#FEF08A'); // Amarillo por defecto
+  const [pencilColor, setPencilColor] = useState('#000000');
 
   // Drawing states
   const [drawingMode, setDrawingMode] = useState(false);
-  const [pencilColor, setPencilColor] = useState('#000000');
   const [pencilOpacity, setPencilOpacity] = useState(1);
   const [pencilSize, setPencilSize] = useState(4);
   const [drawingStrokes, setDrawingStrokes] = useState(() => {
@@ -81,23 +81,12 @@ export function EnhancedTextEditor({
       return [];
     }
   });
-  const [zoom, setZoom] = useState(1);
   const [drawingLayer, setDrawingLayer] = useState('over');
 
   const editorContainerRef = useRef(null);
 
-  // Tamaños disponibles (reemplaza H1, H2, H3)
-  const fontSizes = [
-    { label: 'Muy pequeño', value: '12px' },
-    { label: 'Pequeño', value: '14px' },
-    { label: 'Normal', value: '16px' },
-    { label: 'Mediano', value: '20px' },
-    { label: 'Grande', value: '24px' },
-    { label: 'Título 3', value: '28px' },
-    { label: 'Título 2', value: '32px' },
-    { label: 'Título 1', value: '36px' },
-    { label: 'Muy grande', value: '48px' },
-  ];
+  // Tamaños disponibles (solo valores en px)
+  const fontSizes = ['12px', '14px', '16px', '20px', '24px', '28px', '32px', '36px', '48px'];
 
   // Fuentes disponibles
   const fontFamilies = [
@@ -188,7 +177,6 @@ export function EnhancedTextEditor({
     setIsEditing(false);
     setDrawingMode(false);
     setSaveError(null);
-    setZoom(1);
   };
 
   const handleExportPDF = async () => {
@@ -261,12 +249,6 @@ export function EnhancedTextEditor({
                 title="Lista con viñetas"
                 icon={List}
               />
-              <UnifiedToolbarButton
-                onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                active={editor.isActive('orderedList')}
-                title="Lista numerada"
-                icon={ListOrdered}
-              />
             </div>
 
             {/* Alineación */}
@@ -293,18 +275,27 @@ export function EnhancedTextEditor({
 
             {/* Color y Resaltador */}
             <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
-              <ColorPicker
-                value={editor.getAttributes('textStyle').color || '#000000'}
-                onChange={(color) => editor.chain().focus().setColor(color).run()}
+              <SimpleColorButton
+                value={textColor}
+                onChange={(color) => {
+                  setTextColor(color);
+                  editor.chain().focus().setColor(color).run();
+                }}
                 label="Color de texto"
+                title="Color de texto"
               />
-              <HighlightPicker
-                onSelect={(color) => editor.chain().focus().setHighlight({ color }).run()}
-                onClear={() => editor.chain().focus().unsetHighlight().run()}
+              <SimpleColorButton
+                value={highlightColor}
+                onChange={(color) => {
+                  setHighlightColor(color);
+                  editor.chain().focus().setHighlight({ color }).run();
+                }}
+                label="Resaltado"
+                title="Color de resaltado"
               />
             </div>
 
-            {/* Tamaño (reemplaza H1/H2/H3) */}
+            {/* Tamaño */}
             <div className="flex items-center gap-2 pr-2 border-r border-gray-300 dark:border-gray-600">
               <Type size={16} className="text-gray-600 dark:text-gray-400" />
               <select
@@ -315,7 +306,7 @@ export function EnhancedTextEditor({
                 defaultValue="16px"
               >
                 {fontSizes.map(size => (
-                  <option key={size.value} value={size.value}>{size.label}</option>
+                  <option key={size} value={size}>{size}</option>
                 ))}
               </select>
             </div>
@@ -375,19 +366,22 @@ export function EnhancedTextEditor({
 
           {/* FILA 2: Toolbar de lápiz (solo si drawingMode activo) */}
           {drawingMode && (
-            <div className="pencil-toolbar p-3 bg-purple-50 dark:bg-purple-900/20
-                           border-b border-purple-200 dark:border-purple-800">
+            <div className="pencil-toolbar p-3 bg-white dark:bg-gray-900
+                           border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3 flex-wrap">
-                <Pen size={16} className="text-purple-600 dark:text-purple-400" />
-                <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">
-                  Modo Lápiz
-                </span>
+                <div className="flex items-center gap-2">
+                  <Pen size={16} className="text-gray-600 dark:text-gray-400" />
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    Modo Lápiz
+                  </span>
+                </div>
 
                 {/* Color del lápiz */}
-                <ColorPicker
+                <SimpleColorButton
                   value={pencilColor}
                   onChange={setPencilColor}
                   label="Color del lápiz"
+                  title="Color del lápiz"
                 />
 
                 {/* Grosor */}
@@ -403,17 +397,6 @@ export function EnhancedTextEditor({
                   icon={Layers}
                   label={drawingLayer === 'over' ? 'Sobre' : 'Debajo'}
                 />
-
-                {/* Zoom del canvas (para ver detalles mientras dibujas) */}
-                <div className="flex items-center gap-2 px-2 py-1 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-700">
-                  <ZoomControls
-                    zoom={zoom}
-                    onZoomChange={setZoom}
-                  />
-                  <span className="text-xs text-purple-700 dark:text-purple-300">
-                    (zoom del canvas)
-                  </span>
-                </div>
               </div>
             </div>
           )}
@@ -453,7 +436,7 @@ export function EnhancedTextEditor({
             color={pencilColor}
             opacity={pencilOpacity}
             size={pencilSize}
-            zoom={zoom}
+            zoom={1}
             layer={drawingLayer}
             onStrokesChange={setDrawingStrokes}
             initialStrokes={drawingStrokes}
