@@ -7,6 +7,7 @@ import {
   MapPin, Loader, X, Info
 } from 'lucide-react';
 import BaseButton from './common/BaseButton';
+import { UniversalCard } from './cards';
 import {
   createScheduledClass,
   createScheduledClassMultipleDays,
@@ -291,149 +292,107 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
           </p>
         </div>
       ) : (
-        <div className="schedules-list">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {schedules.map(schedule => {
             const stats = scheduleStats[schedule.id] || {};
             const nextSession = stats.nextSession;
-            const isLowSessions = (stats.upcoming || 0) < 3; // Advertencia si quedan menos de 3 sesiones
+            const isLowSessions = (stats.upcoming || 0) < 3;
             const hasNoSessions = stats.upcoming === 0;
 
+            // Build badges array
+            const badges = [
+              { variant: 'info', children: getDayName(schedule.dayOfWeek) }
+            ];
+            if (schedule.autoRenew) {
+              badges.push({
+                variant: 'default',
+                children: <><Repeat size={14} strokeWidth={2} /> Auto-renew</>
+              });
+            }
+            if (hasNoSessions) {
+              badges.push({
+                variant: 'danger',
+                children: <><AlertTriangle size={14} strokeWidth={2} /> Sin sesiones</>
+              });
+            } else if (isLowSessions) {
+              badges.push({
+                variant: 'warning',
+                children: <><AlarmClock size={14} strokeWidth={2} /> Pocas sesiones</>
+              });
+            }
+
+            // Build meta array
+            const meta = [
+              { icon: <Clock size={14} />, text: `${schedule.startTime} - ${schedule.endTime}` },
+              { icon: <CreditCard size={14} />, text: `${schedule.creditCost} crédito${schedule.creditCost !== 1 ? 's' : ''}` }
+            ];
+            if (stats.total > 0) {
+              meta.push({
+                icon: <BarChart3 size={14} />,
+                text: `${stats.completed || 0} realizadas | ${stats.upcoming || 0} pendientes`
+              });
+            }
+            if (nextSession?.date) {
+              meta.push({
+                icon: <MapPin size={14} />,
+                text: `Próxima: ${nextSession.date.toDate().toLocaleDateString('es-ES', {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}`
+              });
+            } else if (!nextSession) {
+              meta.push({
+                icon: <AlertTriangle size={14} />,
+                text: 'No hay sesiones programadas'
+              });
+            }
+
+            // Build actions
+            const actions = (
+              <>
+                <BaseButton
+                  variant={isLowSessions || hasNoSessions ? 'primary' : 'outline'}
+                  size="sm"
+                  icon={RefreshCw}
+                  onClick={() => handleGenerateMoreSessions(schedule)}
+                  title={isLowSessions || hasNoSessions ? '¡Generar más sesiones!' : 'Generar más sesiones'}
+                >
+                  Generar
+                </BaseButton>
+                <BaseButton
+                  variant="danger"
+                  size="sm"
+                  icon={Trash2}
+                  onClick={() => handleDelete(schedule.id)}
+                  title="Eliminar horario"
+                />
+              </>
+            );
+
             return (
-              <div key={schedule.id} className={`schedule-card ${hasNoSessions ? 'no-sessions' : isLowSessions ? 'low-sessions' : ''} ${schedule.autoRenew ? 'auto-renew' : ''}`}>
-                <div className="schedule-card-header">
-                  <div className="schedule-badges">
-                    <div className="schedule-day-badge">
-                      {getDayName(schedule.dayOfWeek)}
-                    </div>
-                    {schedule.autoRenew && (
-                      <div className="auto-renew-badge" title="Auto-renovación activa">
-                        <Repeat size={14} strokeWidth={2} />
-                      </div>
-                    )}
-                  </div>
-                  <div className="schedule-actions">
-                    {(isLowSessions || hasNoSessions) && (
-                      <button
-                        onClick={() => handleGenerateMoreSessions(schedule)}
-                        className="btn-icon btn-primary-action"
-                        title="¡Generar más sesiones!"
-                      >
-                        <RefreshCw size={16} strokeWidth={2} />
-                      </button>
-                    )}
-                    {!isLowSessions && !hasNoSessions && (
-                      <button
-                        onClick={() => handleGenerateMoreSessions(schedule)}
-                        className="btn-icon"
-                        title="Generar más sesiones"
-                      >
-                        <RefreshCw size={16} strokeWidth={2} />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleDelete(schedule.id)}
-                      className="btn-icon btn-danger"
-                      title="Eliminar horario"
-                    >
-                      <Trash2 size={16} strokeWidth={2} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="schedule-card-body">
-                  <div className="schedule-time">
-                    <span className="time-icon">
-                      <Clock size={16} strokeWidth={2} />
-                    </span>
-                    <span className="time-text">
-                      {schedule.startTime} - {schedule.endTime}
-                    </span>
-                  </div>
-
-                  {schedule.meetingLink && (
-                    <div className="schedule-link">
-                      <span className="link-icon">
-                        <Video size={16} strokeWidth={2} />
-                      </span>
-                      <a
-                        href={schedule.meetingLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="link-text"
-                      >
-                        Abrir videollamada
-                      </a>
-                    </div>
-                  )}
-
-                  <div className="schedule-cost">
-                    <span className="cost-icon">
-                      <CreditCard size={16} strokeWidth={2} />
-                    </span>
-                    <span className="cost-text">
-                      {schedule.creditCost} crédito{schedule.creditCost !== 1 ? 's' : ''} por clase
-                    </span>
-                  </div>
-
-                  {/* Estadísticas de sesiones */}
-                  {stats.total > 0 && (
-                    <div className="schedule-stats">
-                      <div className="stats-row">
-                        <span className="stats-label">
-                          <BarChart3 size={16} strokeWidth={2} className="inline-icon" /> Sesiones:
-                        </span>
-                        <span className="stats-value">
-                          {stats.completed || 0} realizadas | {stats.upcoming || 0} pendientes
-                        </span>
-                      </div>
-                      {hasNoSessions && (
-                        <div className="stats-warning critical">
-                          <span className="warning-icon">
-                            <AlertTriangle size={16} strokeWidth={2} />
-                          </span>
-                          <span className="warning-text">No hay sesiones programadas</span>
-                        </div>
-                      )}
-                      {!hasNoSessions && isLowSessions && (
-                        <div className="stats-warning">
-                          <span className="warning-icon">
-                            <AlarmClock size={16} strokeWidth={2} />
-                          </span>
-                          <span className="warning-text">Quedan pocas sesiones</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Próxima sesión */}
-                  {nextSession ? (
-                    <div className="schedule-next">
-                      <span className="next-icon">
-                        <MapPin size={16} strokeWidth={2} />
-                      </span>
-                      <span className="next-text">
-                        Próxima: {nextSession.date?.toDate ?
-                          nextSession.date.toDate().toLocaleDateString('es-ES', {
-                            weekday: 'short',
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
-                          : 'Por determinar'
-                        }
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="schedule-next">
-                      <span className="next-icon">
-                        <AlertTriangle size={16} strokeWidth={2} />
-                      </span>
-                      <span className="next-text">No hay sesiones programadas</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <UniversalCard
+                key={schedule.id}
+                variant="default"
+                size="md"
+                icon={Calendar}
+                title={schedule.courseName || 'Clase'}
+                description={schedule.meetingLink ? (
+                  <a
+                    href={schedule.meetingLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary hover:underline"
+                  >
+                    <Video size={16} /> Abrir videollamada
+                  </a>
+                ) : null}
+                badges={badges}
+                meta={meta}
+                actions={actions}
+              />
             );
           })}
         </div>

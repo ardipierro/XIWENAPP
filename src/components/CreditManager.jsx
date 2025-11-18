@@ -14,6 +14,7 @@ import {
   updateCreditNotes
 } from '../firebase/credits';
 import BaseButton from './common/BaseButton';
+import { UniversalCard } from './cards';
 
 function CreditManager({ userId, currentUser, onUpdate }) {
   const [loading, setLoading] = useState(true);
@@ -199,38 +200,38 @@ function CreditManager({ userId, currentUser, onUpdate }) {
       )}
 
       {/* Stats Cards */}
-      <div className="credit-stats-grid">
-        <div className="credit-stat-card">
-          <div className="stat-icon">
-            <CreditCard size={20} strokeWidth={2} />
-          </div>
-          <div className="stat-value">{stats.availableCredits}</div>
-          <div className="stat-label">Disponibles</div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <UniversalCard
+          variant="stats"
+          size="sm"
+          icon={CreditCard}
+          bigNumber={stats.availableCredits}
+          description="Disponibles"
+        />
 
-        <div className="credit-stat-card">
-          <div className="stat-icon">
-            <ShoppingCart size={20} strokeWidth={2} />
-          </div>
-          <div className="stat-value">{stats.totalPurchased}</div>
-          <div className="stat-label">Comprados</div>
-        </div>
+        <UniversalCard
+          variant="stats"
+          size="sm"
+          icon={ShoppingCart}
+          bigNumber={stats.totalPurchased}
+          description="Comprados"
+        />
 
-        <div className="credit-stat-card">
-          <div className="stat-icon">
-            <BarChart3 size={20} strokeWidth={2} />
-          </div>
-          <div className="stat-value">{stats.totalUsed}</div>
-          <div className="stat-label">Usados</div>
-        </div>
+        <UniversalCard
+          variant="stats"
+          size="sm"
+          icon={BarChart3}
+          bigNumber={stats.totalUsed}
+          description="Usados"
+        />
 
-        <div className="credit-stat-card">
-          <div className="stat-icon">
-            <TrendingUp size={20} strokeWidth={2} />
-          </div>
-          <div className="stat-value">{stats.usagePercentage}%</div>
-          <div className="stat-label">Uso</div>
-        </div>
+        <UniversalCard
+          variant="stats"
+          size="sm"
+          icon={TrendingUp}
+          bigNumber={`${stats.usagePercentage}%`}
+          description="Uso"
+        />
       </div>
 
       {/* Actions */}
@@ -315,34 +316,27 @@ function CreditManager({ userId, currentUser, onUpdate }) {
             <p>No hay transacciones registradas</p>
           </div>
         ) : (
-          <div className="transactions-list">
+          <div className="space-y-3">
             {transactions.map(transaction => (
-              <div key={transaction.id} className={`transaction-item ${transaction.type}`}>
-                <div className="transaction-icon">
-                  {getTransactionIcon(transaction.type)}
-                </div>
-                <div className="transaction-content">
-                  <div className="transaction-header">
-                    <span className="transaction-type">
-                      {getTransactionLabel(transaction.type)}
-                    </span>
-                    <span className={`transaction-amount ${transaction.type === 'purchase' ? 'positive' : 'negative'}`}>
-                      {transaction.type === 'purchase' ? '+' : '-'}{transaction.amount}
-                    </span>
-                  </div>
-                  <div className="transaction-reason">
-                    {transaction.reason}
-                  </div>
-                  <div className="transaction-footer">
-                    <span className="transaction-date">
-                      {formatDate(transaction.createdAt)}
-                    </span>
-                    <span className="transaction-balance">
-                      Saldo: {transaction.balanceAfter}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <UniversalCard
+                key={transaction.id}
+                variant="default"
+                size="sm"
+                layout="horizontal"
+                icon={() => getTransactionIcon(transaction.type)}
+                title={getTransactionLabel(transaction.type)}
+                description={transaction.reason}
+                badges={[
+                  {
+                    variant: transaction.type === 'purchase' ? 'success' : 'warning',
+                    children: `${transaction.type === 'purchase' ? '+' : '-'}${transaction.amount} créditos`
+                  }
+                ]}
+                meta={[
+                  { text: formatDate(transaction.createdAt) },
+                  { text: `Saldo: ${transaction.balanceAfter}` }
+                ]}
+              />
             ))}
           </div>
         )}
