@@ -530,36 +530,13 @@ Los cambios se aplican instantáneamente en toda la app.`);
           )}
 
           {/* Configuration Controls - Campos dinámicos */}
-          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <div className="max-h-[600px] overflow-y-auto pr-2">
+          <div className="p-4 rounded-lg mb-4" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
+            <div className="max-h-[400px] overflow-y-auto pr-2">
               {renderAllConfigFields(selectedVariant)}
             </div>
           </div>
-        </div>
 
-        {/* COLUMNA 3: Preview + Usage Map (4 cols) */}
-        <div className="lg:col-span-4 space-y-4">
-          {/* Preview en Vivo - ARRIBA */}
-          <div>
-            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-              Preview en Vivo
-            </h3>
-            <div className="space-y-3">
-              <UniversalCard
-                {...exampleData[selectedVariant]}
-                size="md"
-                customConfig={config[selectedVariant]}
-              />
-              <UniversalCard
-                {...exampleData[selectedVariant]}
-                size="md"
-                description="Esta card tiene más texto para probar el footer sticky. Lorem ipsum dolor sit amet."
-                customConfig={config[selectedVariant]}
-              />
-            </div>
-          </div>
-
-          {/* Dónde se Usa - DEBAJO */}
+          {/* Dónde se Usa - DEBAJO de configuración */}
           <div>
             <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
               Dónde se Usa
@@ -651,6 +628,27 @@ Los cambios se aplican instantáneamente en toda la app.`);
           )}
           </div>
           {/* Fin de "Dónde se Usa" */}
+        </div>
+        {/* Fin de Columna 2 */}
+
+        {/* COLUMNA 3: Solo Preview (4 cols) */}
+        <div className="lg:col-span-4">
+          <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+            Preview en Vivo
+          </h3>
+          <div className="space-y-3 sticky top-6">
+            <UniversalCard
+              {...exampleData[selectedVariant]}
+              size="md"
+              customConfig={config[selectedVariant]}
+            />
+            <UniversalCard
+              {...exampleData[selectedVariant]}
+              size="md"
+              description="Esta card tiene más texto para probar el footer sticky. Lorem ipsum dolor sit amet."
+              customConfig={config[selectedVariant]}
+            />
+          </div>
         </div>
         {/* Fin de Columna 3 */}
       </div>
