@@ -218,6 +218,7 @@ export async function getReviewsByStudent(studentId, includeUnreviewed = false) 
 
 /**
  * Get pending reviews (not yet reviewed by teacher)
+ * Includes both PROCESSING (being analyzed) and PENDING_REVIEW (ready to review) status
  * @param {string} teacherId - Teacher ID (optional, for filtering by teacher's assignments)
  * @returns {Promise<Array>} Array of pending reviews
  */
@@ -225,37 +226,70 @@ export async function getPendingReviews(teacherId = null) {
   try {
     console.log(`[getPendingReviews] Fetching reviews (teacherId: ${teacherId || 'ALL'})`);
     const reviewsRef = collection(db, 'homework_reviews');
-    let q;
 
-    // For now, always fetch all pending reviews regardless of teacher
-    // Free corrections don't have a specific teacher assigned
-    q = query(
+    // Fetch BOTH processing and pending_review status
+    // This ensures tasks appear immediately after upload, even while AI is processing
+    const processingQuery = query(
+      reviewsRef,
+      where('teacherReviewed', '==', false),
+      where('status', '==', REVIEW_STATUS.PROCESSING),
+      orderBy('createdAt', 'desc')
+    );
+
+    const pendingQuery = query(
       reviewsRef,
       where('teacherReviewed', '==', false),
       where('status', '==', REVIEW_STATUS.PENDING_REVIEW),
       orderBy('createdAt', 'desc')
     );
 
-    console.log('[getPendingReviews] Executing query...');
-    const snapshot = await getDocs(q);
-    console.log(`[getPendingReviews] Query returned ${snapshot.docs.length} documents`);
+    console.log('[getPendingReviews] Executing queries...');
+    const [processingSnapshot, pendingSnapshot] = await Promise.all([
+      getDocs(processingQuery),
+      getDocs(pendingQuery)
+    ]);
 
-    const reviews = snapshot.docs.map(doc => {
-      const data = doc.data();
-      console.log(`[getPendingReviews] Review ${doc.id}:`, {
-        status: data.status,
-        teacherReviewed: data.teacherReviewed,
-        studentId: data.studentId,
-        createdAt: data.createdAt
-      });
-      return {
-        id: doc.id,
-        ...data
-      };
+    console.log(`[getPendingReviews] Query returned ${processingSnapshot.docs.length} processing + ${pendingSnapshot.docs.length} pending_review documents`);
+
+    // Combine both results
+    const allReviews = [
+      ...processingSnapshot.docs.map(doc => {
+        const data = doc.data();
+        console.log(`[getPendingReviews] PROCESSING Review ${doc.id}:`, {
+          status: data.status,
+          teacherReviewed: data.teacherReviewed,
+          studentId: data.studentId,
+          createdAt: data.createdAt
+        });
+        return {
+          id: doc.id,
+          ...data
+        };
+      }),
+      ...pendingSnapshot.docs.map(doc => {
+        const data = doc.data();
+        console.log(`[getPendingReviews] PENDING Review ${doc.id}:`, {
+          status: data.status,
+          teacherReviewed: data.teacherReviewed,
+          studentId: data.studentId,
+          createdAt: data.createdAt
+        });
+        return {
+          id: doc.id,
+          ...data
+        };
+      })
+    ];
+
+    // Sort by createdAt (most recent first)
+    allReviews.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis?.() || 0;
+      const bTime = b.createdAt?.toMillis?.() || 0;
+      return bTime - aTime;
     });
 
-    console.log(`[getPendingReviews] ✅ Returning ${reviews.length} reviews`);
-    return reviews;
+    console.log(`[getPendingReviews] ✅ Returning ${allReviews.length} reviews total`);
+    return allReviews;
   } catch (error) {
     console.error('[getPendingReviews] ❌ Error:', error);
     logger.error('Error getting pending reviews', 'HomeworkReviews', error);
@@ -343,26 +377,66 @@ export function subscribeToReview(reviewId, callback) {
 
 /**
  * Subscribe to pending reviews (real-time)
+ * Includes both PROCESSING and PENDING_REVIEW status for immediate feedback
  * @param {Function} callback - Callback function
  * @returns {Function} Unsubscribe function
  */
 export function subscribeToPendingReviews(callback) {
   try {
     const reviewsRef = collection(db, 'homework_reviews');
-    const q = query(
+
+    // Subscribe to PROCESSING reviews
+    const processingQuery = query(
+      reviewsRef,
+      where('teacherReviewed', '==', false),
+      where('status', '==', REVIEW_STATUS.PROCESSING),
+      orderBy('createdAt', 'desc')
+    );
+
+    // Subscribe to PENDING_REVIEW reviews
+    const pendingQuery = query(
       reviewsRef,
       where('teacherReviewed', '==', false),
       where('status', '==', REVIEW_STATUS.PENDING_REVIEW),
       orderBy('createdAt', 'desc')
     );
 
-    return onSnapshot(q, (snapshot) => {
-      const reviews = snapshot.docs.map(doc => ({
+    let processingReviews = [];
+    let pendingReviews = [];
+
+    const combineAndCallback = () => {
+      // Combine both arrays and sort by createdAt
+      const allReviews = [...processingReviews, ...pendingReviews];
+      allReviews.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis?.() || 0;
+        const bTime = b.createdAt?.toMillis?.() || 0;
+        return bTime - aTime;
+      });
+      callback(allReviews);
+    };
+
+    // Subscribe to both queries
+    const unsubscribeProcessing = onSnapshot(processingQuery, (snapshot) => {
+      processingReviews = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      callback(reviews);
+      combineAndCallback();
     });
+
+    const unsubscribePending = onSnapshot(pendingQuery, (snapshot) => {
+      pendingReviews = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      combineAndCallback();
+    });
+
+    // Return combined unsubscribe function
+    return () => {
+      unsubscribeProcessing();
+      unsubscribePending();
+    };
   } catch (error) {
     logger.error('Error subscribing to pending reviews', 'HomeworkReviews', error);
     return () => {};
