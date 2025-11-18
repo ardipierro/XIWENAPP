@@ -26,6 +26,10 @@ export const cardVariants = {
     // Content
     contentPadding: '20px',        // p-5 en Tailwind
 
+    // Card Height (para grid mode con sticky footer)
+    cardHeight: '380px',           // Altura fija para sticky footer consistente
+    contentOverflow: 'auto',       // Scroll si el contenido es muy largo
+
     // Hover Effects
     hoverEnabled: true,
     hoverTransform: '-4px',        // translateY
@@ -158,6 +162,10 @@ export const cardVariants = {
 
     // Content
     contentPadding: '20px',
+
+    // Card Height (para grid mode con sticky footer)
+    cardHeight: '420px',           // Altura fija para sticky footer consistente
+    contentOverflow: 'auto',       // Scroll si el contenido es muy largo
 
     // Thumbnail
     showThumbnail: true,
@@ -447,7 +455,11 @@ export function generateCardStyles(variant, size, layout = 'vertical') {
       backgroundColor: 'var(--color-bg-secondary)',
       border: `1px solid ${variantConfig.normalBorderColor}`,
       boxShadow: variantConfig.normalShadow,
-      minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight,
+      // Altura: si tiene cardHeight usar fija, sino usar minHeight
+      ...(variantConfig.cardHeight
+        ? { height: variantConfig.cardHeight, minHeight: 'unset' }
+        : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
+      ),
       transitionDuration: variantConfig.transitionDuration,
       transitionTimingFunction: variantConfig.transitionTiming,
     },

@@ -68,13 +68,19 @@ export function FontProvider({ children }) {
 
           logger.info('[FontContext] Configuración cargada desde Firebase');
         } else {
-          // Si no hay en Firebase, guardar la actual (localStorage) en Firebase
-          await saveLogoConfig({
-            font: selectedFont,
-            weight: fontWeight,
-            size: fontSize
-          });
-          logger.info('[FontContext] Configuración inicial guardada en Firebase');
+          // Si no hay en Firebase, intentar guardar la actual (localStorage) en Firebase
+          // Esto puede fallar si el usuario no tiene permisos (no admin), ignorar error
+          try {
+            await saveLogoConfig({
+              font: selectedFont,
+              weight: fontWeight,
+              size: fontSize
+            });
+            logger.info('[FontContext] Configuración inicial guardada en Firebase');
+          } catch (saveError) {
+            // Silenciar error - solo admins pueden guardar configuración global
+            logger.debug('[FontContext] No se pudo guardar en Firebase (requiere permisos admin)');
+          }
         }
       } catch (error) {
         logger.error('[FontContext] Error al cargar configuración:', error);

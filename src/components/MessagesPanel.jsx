@@ -33,14 +33,26 @@ function MessagesPanel({ user }) {
 
   // Subscribe to conversations in real-time
   useEffect(() => {
-    if (!user?.uid) return;
+    if (!user?.uid) {
+      // Si no hay user, dejar de cargar y mostrar estado vacío
+      setLoading(false);
+      setConversations([]);
+      return;
+    }
+
+    setLoading(true);
+    logger.debug('[MessagesPanel] Subscribing to conversations for user:', user.uid);
 
     const unsubscribe = subscribeToConversations(user.uid, (updatedConversations) => {
+      logger.debug('[MessagesPanel] Conversations updated:', updatedConversations.length);
       setConversations(updatedConversations);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      logger.debug('[MessagesPanel] Unsubscribing from conversations');
+      unsubscribe();
+    };
   }, [user?.uid]);
 
   /**

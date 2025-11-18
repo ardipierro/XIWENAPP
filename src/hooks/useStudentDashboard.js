@@ -73,6 +73,13 @@ export function useStudentDashboard(user, studentProp) {
 
         // If no student prop, fetch/create profile
         if (!studentProp && user) {
+          // Validar que user.uid exista
+          if (!user.uid) {
+            logger.warn('⚠️ useStudentDashboard: user.uid es undefined');
+            setLoading(false);
+            return;
+          }
+
           logger.debug('Cargando perfil de estudiante para:', user.uid);
           profileData = await ensureStudentProfile(user.uid);
 

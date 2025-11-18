@@ -29,6 +29,14 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
       setLoading(true);
       setError(null);
 
+      // Validar que user y user.uid existan
+      if (!user || !user.uid) {
+        logger.warn('⚠️ ContentPlayer: No hay usuario autenticado o user.uid es undefined');
+        setError('No se pudo identificar al usuario');
+        setLoading(false);
+        return;
+      }
+
       // Obtener perfil del estudiante
       const profile = await ensureStudentProfile(user.uid);
       if (!profile) {

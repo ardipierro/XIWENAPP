@@ -932,18 +932,16 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     });
   }
 
-  // Preparar actions
-  const contentActions = (
-    <div className="flex gap-2 w-full">
-      <BaseButton variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
-        Ver
-      </BaseButton>
-      <BaseButton variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
-        Editar
-      </BaseButton>
-      <BaseButton variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
-    </div>
-  );
+  // Preparar actions (SOLO botones)
+  const contentActions = [
+    <BaseButton key="view" variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
+      Ver
+    </BaseButton>,
+    <BaseButton key="edit" variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
+      Editar
+    </BaseButton>,
+    <BaseButton key="delete" variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
+  ];
 
   return (
     <UniversalCard
@@ -958,20 +956,20 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       meta={contentMeta}
       actions={contentActions}
     >
-      {/* Badges y Tags - Ahora no afectan sticky footer */}
+      {/* Badges y Tags - LIMITADOS para no empujar el footer */}
       <div className="space-y-2">
-        {/* Badges */}
+        {/* Badges - máximo 2 */}
         {contentBadges.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-            {contentBadges}
+            {contentBadges.slice(0, 2)}
           </div>
         )}
 
-        {/* Tags */}
+        {/* Tags - máximo 2 */}
         {content.metadata?.tags?.length > 0 && (
           <div className="flex items-center gap-1 flex-wrap">
             <Tag className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
-            {content.metadata.tags.slice(0, 3).map((tag, idx) => (
+            {content.metadata.tags.slice(0, 2).map((tag, idx) => (
               <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
                 {tag}
               </span>

@@ -22,12 +22,24 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
   const [nextContent, setNextContent] = useState(null);
 
   useEffect(() => {
-    loadCourseData();
+    // Solo cargar si user y user.uid existen
+    if (user?.uid) {
+      loadCourseData();
+    } else {
+      setLoading(true);
+    }
   }, [courseId, user]);
 
   const loadCourseData = async () => {
     try {
       setLoading(true);
+
+      // Validar que user y user.uid existan
+      if (!user || !user.uid) {
+        logger.warn('⚠️ CourseViewer: No hay usuario autenticado o user.uid es undefined');
+        setLoading(false);
+        return;
+      }
 
       // Obtener perfil del estudiante
       const profile = await ensureStudentProfile(user.uid);
