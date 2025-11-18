@@ -30,28 +30,49 @@ function MyCourses({ user, onSelectCourse }) {
       setLoading(true);
       setError(null);
 
+      // Validar que tenemos user.uid
+      if (!user?.uid) {
+        logger.error('❌ MyCourses: user.uid es undefined!', { user });
+        setError('Error: No se pudo identificar al usuario');
+        setCourses([]);
+        setLoading(false);
+        return;
+      }
+
+      logger.info('📚 MyCourses - Cargando cursos:', {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role
+      });
+
       // Primero asegurar que el estudiante tenga un perfil
       logger.debug('🔍 Buscando perfil de estudiante para user.uid:', user.uid);
       const studentProfile = await ensureStudentProfile(user.uid);
 
       if (!studentProfile) {
         logger.error('❌ No se pudo obtener/crear perfil de estudiante');
-        setError('No se pudo cargar tu perfil de estudiante');
+        setError('No se pudo cargar tu perfil de estudiante. Por favor contacta al administrador.');
         setCourses([]);
         setLoading(false);
         return;
       }
 
-      logger.debug('✅ Perfil de estudiante obtenido:', studentProfile.id);
+      logger.debug('✅ Perfil de estudiante obtenido:', {
+        id: studentProfile.id,
+        name: studentProfile.name,
+        email: studentProfile.email
+      });
 
       // Ahora buscar enrollments usando el studentId
+      logger.debug('📥 Obteniendo enrollments para studentProfile.id:', studentProfile.id);
       const data = await getStudentEnrollments(studentProfile.id);
 
       if (!data || data.length === 0) {
-        logger.debug('📚 No hay cursos asignados para este estudiante');
+        logger.info('📚 No hay cursos asignados para este estudiante');
         setCourses([]);
       } else {
-        logger.debug('✅ Cursos encontrados:', data.length);
+        logger.info(`✅ ${data.length} cursos encontrados`);
         setCourses(data);
       }
     } catch (err) {

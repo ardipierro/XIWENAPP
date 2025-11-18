@@ -43,34 +43,55 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
       setLoading(true);
       setError(null);
 
+      // Validar que tenemos user.uid
+      if (!user?.uid) {
+        logger.error('❌ MyAssignmentsView: user.uid es undefined!', { user });
+        setError('Error: No se pudo identificar al usuario');
+        setAssignments([]);
+        setLoading(false);
+        return;
+      }
+
+      logger.info('📋 MyAssignmentsView - Cargando tareas:', {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role
+      });
+
       // Obtener perfil del estudiante
       logger.debug('🔍 Buscando perfil de estudiante para user.uid:', user.uid);
       const studentProfile = await ensureStudentProfile(user.uid);
 
       if (!studentProfile) {
         logger.error('❌ No se pudo obtener/crear perfil de estudiante');
-        setError('No se pudo cargar tu perfil de estudiante');
+        setError('No se pudo cargar tu perfil de estudiante. Por favor contacta al administrador.');
         setAssignments([]);
         setLoading(false);
         return;
       }
 
-      logger.debug('✅ Perfil de estudiante obtenido:', studentProfile.id);
+      logger.debug('✅ Perfil de estudiante obtenido:', {
+        id: studentProfile.id,
+        name: studentProfile.name,
+        email: studentProfile.email
+      });
 
       // Cargar tareas del estudiante
+      logger.debug('📥 Obteniendo tareas para studentProfile.id:', studentProfile.id);
       const data = await getAssignmentsForStudent(studentProfile.id);
 
       if (!data || data.length === 0) {
-        logger.debug('📝 No hay tareas asignadas');
+        logger.info('📝 No hay tareas asignadas para este estudiante');
         setAssignments([]);
       } else {
-        logger.debug(`📝 ${data.length} tareas cargadas`);
+        logger.info(`✅ ${data.length} tareas cargadas exitosamente`);
         setAssignments(data);
       }
 
       setLoading(false);
     } catch (err) {
-      logger.error('Error cargando tareas:', err);
+      logger.error('❌ Error cargando tareas:', err);
       setError(err.message || 'Error al cargar tareas');
       setAssignments([]);
       setLoading(false);

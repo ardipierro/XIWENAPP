@@ -45,21 +45,50 @@ function StudentSessionsView({ student }) {
     try {
       setLoading(true);
 
+      // Validar que tenemos student
+      if (!student) {
+        logger.error('❌ StudentSessionsView: student es undefined!');
+        showMessage('error', 'Error: No se pudo identificar al estudiante');
+        setLoading(false);
+        return;
+      }
+
+      const studentId = student.uid || student.id;
+
+      if (!studentId) {
+        logger.error('❌ StudentSessionsView: student no tiene uid ni id!', { student });
+        showMessage('error', 'Error: No se pudo identificar al estudiante');
+        setLoading(false);
+        return;
+      }
+
+      logger.info('🎓 StudentSessionsView - Cargando clases:', {
+        studentId,
+        studentEmail: student.email,
+        studentName: student.name,
+        studentRole: student.role
+      });
+
       // Cargar créditos del estudiante
-      const creditsData = await getUserCredits(student.uid || student.id);
+      logger.debug('💳 Obteniendo créditos para:', studentId);
+      const creditsData = await getUserCredits(studentId);
       setCredits(creditsData);
+      logger.debug('✅ Créditos obtenidos:', creditsData);
 
       // Obtener sesiones del estudiante (asignadas)
-      const studentSessions = await getStudentSessions(student.uid || student.id);
+      logger.debug('📅 Obteniendo sesiones asignadas para:', studentId);
+      const studentSessions = await getStudentSessions(studentId);
 
       // Obtener sesiones en vivo (para ver si puede unirse)
+      logger.debug('🔴 Obteniendo sesiones en vivo...');
       const currentLiveSessions = await getLiveSessions();
 
-      logger.debug('📊 Sesiones del estudiante:', {
-        studentId: student.uid || student.id,
+      logger.info('📊 Sesiones del estudiante:', {
+        studentId,
         studentName: student.name,
         totalSessions: studentSessions.length,
-        liveSessions: currentLiveSessions.length
+        liveSessions: currentLiveSessions.length,
+        credits: creditsData?.availableCredits || 0
       });
 
       // Filtrar sesiones futuras y ordenar por fecha

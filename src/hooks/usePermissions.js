@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
 import permissionService from '../services/permissionService';
+import logger from '../utils/logger';
 
 /**
  * Hook para acceder al sistema de permisos
@@ -22,10 +23,27 @@ export function usePermissions() {
   const effectiveUser = getEffectiveUser(user);
   const effectiveRole = effectiveUser?.role || userRole;
 
+  logger.debug('🔐 usePermissions hook:', {
+    userEmail: user?.email,
+    userRole,
+    effectiveUserEmail: effectiveUser?.email || effectiveUser?.displayName,
+    effectiveUserRole: effectiveUser?.role,
+    effectiveRole,
+    initialized
+  });
+
   useEffect(() => {
     if (effectiveRole) {
+      logger.info('🔐 Configurando permisos para rol:', effectiveRole);
       permissionService.setRole(effectiveRole);
       setInitialized(true);
+    } else {
+      logger.warn('⚠️ effectiveRole es undefined o null!', {
+        user,
+        userRole,
+        effectiveUser,
+        effectiveUserRole: effectiveUser?.role
+      });
     }
   }, [effectiveRole]);
 

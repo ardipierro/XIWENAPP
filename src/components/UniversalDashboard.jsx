@@ -196,6 +196,16 @@ function UniversalDashboardInner() {
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
   const effectiveUser = getEffectiveUser(user);
 
+  logger.debug('🏠 UniversalDashboard render:', {
+    userEmail: user?.email,
+    userRole: user?.role,
+    effectiveUserEmail: effectiveUser?.email || effectiveUser?.displayName,
+    effectiveUserRole: effectiveUser?.role,
+    effectiveUserUid: effectiveUser?.uid,
+    isViewingAs,
+    currentPath
+  });
+
   // Registrar funciones de control del sidebar en el contexto
   useEffect(() => {
     registerSidebarControl({
@@ -299,6 +309,11 @@ function UniversalDashboardInner() {
 
             case '/student':
               // Student default view -> My Courses
+              logger.info('📚 Renderizando MyCourses para estudiante:', {
+                uid: effectiveUser?.uid,
+                email: effectiveUser?.email,
+                role: effectiveUser?.role
+              });
               return <MyCourses user={effectiveUser} onSelectCourse={handleSelectCourse} />;
 
             case '/teacher':
@@ -398,6 +413,11 @@ function UniversalDashboardInner() {
             // MIS TAREAS (Students)
             case '/dashboard/my-assignments':
               if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
+              logger.info('📝 Renderizando MyAssignmentsView:', {
+                uid: effectiveUser?.uid,
+                email: effectiveUser?.email,
+                role: effectiveUser?.role
+              });
               return (
                 <MyAssignmentsView
                   user={effectiveUser}
@@ -412,6 +432,11 @@ function UniversalDashboardInner() {
             // MIS CLASES (Students)
             case '/dashboard/my-classes':
               if (!can('view-all-content')) return <PlaceholderView title="Sin acceso" />;
+              logger.info('🎓 Renderizando StudentSessionsView:', {
+                uid: effectiveUser?.uid,
+                email: effectiveUser?.email,
+                role: effectiveUser?.role
+              });
               return <StudentSessionsView student={effectiveUser} />;
 
             // JUEGOS EN VIVO

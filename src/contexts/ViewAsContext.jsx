@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import logger from '../utils/logger';
 
 /**
  * Contexto para el modo "Ver como" (impersonación)
@@ -18,6 +19,19 @@ export function ViewAsProvider({ children }) {
    * @param {Object} targetUser - Usuario objetivo a impersonar
    */
   const startViewingAs = (currentUser, targetUser) => {
+    logger.info('🎭 Activando modo Ver como:', {
+      adminUser: currentUser?.email || currentUser?.displayName,
+      adminRole: currentUser?.role,
+      targetUser: targetUser?.email || targetUser?.name,
+      targetRole: targetUser?.role,
+      targetId: targetUser?.id || targetUser?.uid,
+      hasRole: !!targetUser?.role
+    });
+
+    if (!targetUser?.role) {
+      logger.error('❌ ERROR: targetUser NO tiene campo role!', targetUser);
+    }
+
     setOriginalUser(currentUser);
     setViewAsUser(targetUser);
     // Guardar el ID del usuario para volver al UserProfile correcto
@@ -28,6 +42,7 @@ export function ViewAsProvider({ children }) {
    * Desactivar modo "Ver como" y volver al usuario original
    */
   const stopViewingAs = () => {
+    logger.info('🔙 Desactivando modo Ver como');
     setViewAsUser(null);
     setOriginalUser(null);
     // NO limpiar returnToUserId aquí - se usa en ViewAsBanner
@@ -46,7 +61,17 @@ export function ViewAsProvider({ children }) {
    * Obtener el usuario efectivo (el que se está viendo)
    */
   const getEffectiveUser = (currentUser) => {
-    return viewAsUser || currentUser;
+    const effective = viewAsUser || currentUser;
+    logger.debug('👁️ getEffectiveUser llamado:', {
+      isViewingAs: !!viewAsUser,
+      viewAsUserEmail: viewAsUser?.email || viewAsUser?.name,
+      viewAsUserRole: viewAsUser?.role,
+      currentUserEmail: currentUser?.email,
+      currentUserRole: currentUser?.role,
+      effectiveEmail: effective?.email || effective?.displayName,
+      effectiveRole: effective?.role
+    });
+    return effective;
   };
 
   // Calcular isViewingAs como valor derivado del estado

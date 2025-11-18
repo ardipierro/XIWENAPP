@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import useAuth from './hooks/useAuth.js';
 import { useViewAs } from './contexts/ViewAsContext.jsx';
 import { ADMIN_ROLES, TEACHER_ROLES, STUDENT_ROLES, GUARDIAN_ROLES } from './constants/auth.js';
+import logger from './utils/logger.js';
 
 // Static imports for public routes (always needed)
 import LandingPage from './LandingPage';
@@ -72,12 +73,26 @@ function App() {
       const syntheticUser = {
         uid: viewAsUser.id,
         email: viewAsUser.email,
-        displayName: viewAsUser.name
+        displayName: viewAsUser.name,
+        role: viewAsUser.role  // ✅ CRÍTICO: Incluir rol para que los componentes lo detecten
       };
+
+      logger.debug('🔄 ViewAs activado - Usuario efectivo:', {
+        originalUser: user?.email,
+        originalRole: userRole,
+        viewAsUser: viewAsUser.email,
+        viewAsRole: viewAsUser.role,
+        syntheticUser
+      });
+
       setEffectiveUser(syntheticUser);
       setEffectiveRole(viewAsUser.role);
     } else {
       // Usar el usuario real
+      logger.debug('👤 Usando usuario real:', {
+        email: user?.email,
+        role: userRole
+      });
       setEffectiveUser(user);
       setEffectiveRole(userRole);
     }
