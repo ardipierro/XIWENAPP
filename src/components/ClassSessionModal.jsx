@@ -89,7 +89,8 @@ function ClassSessionModal({
         recurringStartDate: session.recurringStartDate || ''
       });
     } else {
-      // Reset para crear nueva
+      // Reset para crear nueva (con fecha actual por default)
+      const today = new Date().toISOString().split('T')[0];
       setFormData({
         name: '',
         description: '',
@@ -97,7 +98,7 @@ function ClassSessionModal({
         videoProvider: 'livekit',
         whiteboardType: 'none',
         type: 'single',
-        scheduledDate: '',
+        scheduledDate: today,
         scheduledTime: '',
         duration: 60,
         maxParticipants: 30,
@@ -109,7 +110,7 @@ function ClassSessionModal({
         recurringStartTime: '10:00',
         recurringEndTime: '11:00',
         recurringWeeks: 4,
-        recurringStartDate: ''
+        recurringStartDate: today
       });
     }
     setErrors({});
@@ -420,19 +421,6 @@ function ClassSessionModal({
                   rows={3}
                   placeholder="Describe el contenido de la sesión..."
                 />
-
-                <BaseSelect
-                  label="Curso (opcional)"
-                  value={formData.courseId}
-                  onChange={(e) => handleChange('courseId', e.target.value)}
-                  options={[
-                    { value: '', label: 'Sin curso asignado' },
-                    ...courses.map(course => ({
-                      value: course.id,
-                      label: course.name
-                    }))
-                  ]}
-                />
               </div>
 
               {/* Proveedor de Video */}
@@ -523,60 +511,6 @@ function ClassSessionModal({
                   max="100"
                 />
               </div>
-
-              {/* Tipo de Pizarra */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <PenTool size={20} strokeWidth={2} />
-                  Pizarra
-                </h3>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => handleChange('whiteboardType', 'none')}
-                    className={`
-                      p-4 rounded-lg border-2 transition-all
-                      ${formData.whiteboardType === 'none'
-                        ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                      }
-                    `}
-                  >
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">Sin Pizarra</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleChange('whiteboardType', 'canvas')}
-                    className={`
-                      p-4 rounded-lg border-2 transition-all
-                      ${formData.whiteboardType === 'canvas'
-                        ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                      }
-                    `}
-                  >
-                    <Presentation size={24} strokeWidth={2} className="mx-auto mb-2 text-gray-700 dark:text-gray-300" />
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">Canvas</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleChange('whiteboardType', 'excalidraw')}
-                    className={`
-                      p-4 rounded-lg border-2 transition-all
-                      ${formData.whiteboardType === 'excalidraw'
-                        ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                      }
-                    `}
-                  >
-                    <PenTool size={24} strokeWidth={2} className="mx-auto mb-2 text-gray-700 dark:text-gray-300" />
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">Excalidraw</div>
-                  </button>
-                </div>
-              </div>
             </div>
           )}
 
@@ -590,7 +524,7 @@ function ClassSessionModal({
                   Programación
                 </h3>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
                     onClick={() => handleChange('type', 'single')}
@@ -622,22 +556,6 @@ function ClassSessionModal({
                     <div className="text-sm font-medium text-gray-900 dark:text-white">Recurrente</div>
                     <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Varios días/semanas</div>
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleChange('type', 'instant')}
-                    className={`
-                      p-4 rounded-lg border-2 transition-all
-                      ${formData.type === 'instant'
-                        ? 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                      }
-                    `}
-                  >
-                    <Zap size={24} strokeWidth={2} className={`mx-auto mb-2 ${formData.type === 'instant' ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'}`} />
-                    <div className={`text-sm font-medium ${formData.type === 'instant' ? 'text-green-900 dark:text-green-100' : 'text-gray-900 dark:text-white'}`}>Clase Ahora</div>
-                    <div className={`text-xs mt-1 ${formData.type === 'instant' ? 'text-green-700 dark:text-green-300' : 'text-gray-600 dark:text-gray-400'}`}>Instantánea</div>
-                  </button>
                 </div>
 
                 {formData.type === 'single' ? (
@@ -658,45 +576,6 @@ function ClassSessionModal({
                       error={errors.scheduledTime}
                       required
                     />
-                  </div>
-                ) : formData.type === 'instant' ? (
-                  <div className="space-y-4">
-                    {/* Instant Session Fields */}
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Zap className="w-5 h-5 text-green-600 dark:text-green-400" />
-                        <h4 className="font-semibold text-green-900 dark:text-green-100">Clase Instantánea</h4>
-                      </div>
-                      <p className="text-sm text-green-700 dark:text-green-300">
-                        La clase se creará con la fecha y hora actual. La reunión de {formData.videoProvider === 'livekit' ? 'LiveKit' : formData.videoProvider === 'meet' ? 'Google Meet' : formData.videoProvider === 'zoom' ? 'Zoom' : 'Voov Meeting'} se generará automáticamente al iniciarla.
-                      </p>
-                    </div>
-
-                    {/* Start Immediately Checkbox */}
-                    <div className="flex items-start gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                      <input
-                        type="checkbox"
-                        id="startImmediately"
-                        checked={formData.startImmediately}
-                        onChange={(e) => handleChange('startImmediately', e.target.checked)}
-                        className="w-5 h-5 text-green-600 rounded border-gray-300 dark:border-gray-600 focus:ring-green-500 mt-0.5"
-                      />
-                      <label htmlFor="startImmediately" className="flex-1 cursor-pointer">
-                        <div className="text-sm font-medium text-orange-900 dark:text-orange-100">
-                          ☑️ Iniciar clase inmediatamente
-                        </div>
-                        <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                          La clase se iniciará automáticamente al crearla y se te redirigirá a la sala
-                        </p>
-                      </label>
-                    </div>
-
-                    {/* Info Alert */}
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                      <p className="text-sm text-blue-800 dark:text-blue-200">
-                        💡 <strong>Tip:</strong> Puedes asignar estudiantes ahora o después de crear la clase. Recibirán notificación automáticamente.
-                      </p>
-                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">

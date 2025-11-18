@@ -556,30 +556,18 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
               // Acciones para clase recurrente
               actions.push(
                 <BaseButton
-                  key="manage"
-                  variant="primary"
-                  size="sm"
-                  icon={Users}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openEditModal(session);
-                  }}
-                  fullWidth
-                >
-                  Gestionar
-                </BaseButton>
-              );
-              actions.push(
-                <BaseButton
                   key="edit"
-                  variant="ghost"
+                  variant="primary"
                   size="sm"
                   icon={Edit}
                   onClick={(e) => {
                     e.stopPropagation();
                     openEditModal(session);
                   }}
-                />
+                  fullWidth
+                >
+                  Editar Clase
+                </BaseButton>
               );
               actions.push(
                 <BaseButton
