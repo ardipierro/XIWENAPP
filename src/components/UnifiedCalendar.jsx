@@ -161,10 +161,40 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
   const handleEventClick = (event) => {
     // Si es una sesión de clase, abrir modal de edición completo
     if (event.type === 'session') {
-      // El evento del calendario contiene toda la información de la sesión
-      setEditingSession(event);
+      // Extraer los datos de la sesión original y combinarlos con datos del evento
+      const sessionData = event.sessionData || {};
+
+      // Crear objeto de sesión con la estructura que espera el modal
+      const sessionForModal = {
+        id: event.sessionId || event.id,
+        name: sessionData.name || event.title,
+        description: sessionData.description || event.description || '',
+        courseId: sessionData.courseId || '',
+        courseName: sessionData.courseName || '',
+        videoProvider: sessionData.videoProvider || 'livekit',
+        whiteboardType: sessionData.whiteboardType || event.whiteboardType || 'none',
+        type: sessionData.type || 'single',
+        scheduledStart: event.startDate || sessionData.scheduledStart,
+        duration: sessionData.duration || 60,
+        maxParticipants: sessionData.maxParticipants || 30,
+        creditCost: sessionData.creditCost || 1,
+        status: sessionData.status || event.status || 'scheduled',
+        mode: sessionData.mode || event.mode || 'live',
+        assignedStudents: sessionData.assignedStudents || sessionData.eligibleStudentIds || [],
+        contentIds: sessionData.contentIds || [],
+        studentEnrollments: sessionData.studentEnrollments || [],
+        schedules: sessionData.schedules || [],
+        recurringWeeks: sessionData.recurringWeeks || 4,
+        recurringStartDate: sessionData.recurringStartDate || event.recurringStartDate,
+        roomName: sessionData.roomName || event.roomName || '',
+        participants: sessionData.participants || event.participants || [],
+        teacherId: sessionData.teacherId || '',
+        active: sessionData.active !== undefined ? sessionData.active : true
+      };
+
+      setEditingSession(sessionForModal);
       setShowEditModal(true);
-      logger.info('Opening edit modal for session:', event.sessionId || event.id);
+      logger.info('Opening edit modal for session:', sessionForModal.id);
     } else {
       // Para otros tipos de eventos (assignments, events), mostrar modal de detalles
       setSelectedEvent(event);
