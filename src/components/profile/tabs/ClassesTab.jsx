@@ -25,13 +25,18 @@ function ClassesTab({ user, userRole }) {
   }, [user?.uid, userRole]);
 
   const loadCourses = async () => {
-    if (!user?.uid) return;
+    if (!user?.uid) {
+      logger.warn('ClassesTab: No user UID provided');
+      setLoading(false);
+      return;
+    }
 
+    logger.debug('ClassesTab: Loading courses', { userId: user.uid, userRole });
     setLoading(true);
     try {
       let coursesData = [];
 
-      if (userRole === 'student') {
+      if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
         // Obtener enrollments del estudiante
         const enrollmentsRef = collection(db, 'enrollments');
         const enrollmentsQuery = query(enrollmentsRef, where('studentId', '==', user.uid));
@@ -79,9 +84,11 @@ function ClassesTab({ user, userRole }) {
         }
       }
 
+      logger.debug('ClassesTab: Courses loaded successfully', { count: coursesData.length });
       setCourses(coursesData);
     } catch (err) {
-      logger.error('Error loading courses:', err);
+      logger.error('ClassesTab: Error loading courses', err);
+      setCourses([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
