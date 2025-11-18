@@ -311,6 +311,324 @@ function EditableExerciseFields({ data, onChange }) {
           ))}
         </div>
       )}
+
+      {/* Statement (para True/False) */}
+      {exerciseData.statement && (
+        <div>
+          <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+            Afirmación:
+          </label>
+          <textarea
+            value={exerciseData.statement}
+            onChange={(e) => handleFieldChange('statement', e.target.value)}
+            className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                     focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+            rows={2}
+          />
+        </div>
+      )}
+
+      {/* Pairs (para Matching) */}
+      {exerciseData.pairs && Array.isArray(exerciseData.pairs) && (
+        <div>
+          <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+            Pares a Emparejar:
+          </label>
+          {exerciseData.pairs.map((pair, i) => (
+            <div key={i} className="flex items-center gap-2 mb-2">
+              <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center
+                             bg-blue-200 dark:bg-blue-700 rounded text-xs font-bold">
+                {i + 1}
+              </span>
+              <input
+                value={pair.left}
+                onChange={(e) => {
+                  const newPairs = [...exerciseData.pairs];
+                  newPairs[i] = { ...newPairs[i], left: e.target.value };
+                  handleFieldChange('pairs', newPairs);
+                }}
+                className="flex-1 p-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                         bg-white dark:bg-gray-800"
+                placeholder="Izquierda"
+              />
+              <span className="text-gray-500">↔</span>
+              <input
+                value={pair.right}
+                onChange={(e) => {
+                  const newPairs = [...exerciseData.pairs];
+                  newPairs[i] = { ...newPairs[i], right: e.target.value };
+                  handleFieldChange('pairs', newPairs);
+                }}
+                className="flex-1 p-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                         bg-white dark:bg-gray-800"
+                placeholder="Derecha"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Items para Free Drag Drop */}
+      {exerciseData.items && Array.isArray(exerciseData.items) && exerciseData.categories && (
+        <div>
+          <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+            Elementos a Categorizar:
+          </label>
+          {exerciseData.items.map((item, i) => (
+            <div key={i} className="flex items-center gap-2 mb-2">
+              <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center
+                             bg-indigo-200 dark:bg-indigo-700 rounded text-xs font-bold">
+                {i + 1}
+              </span>
+              <input
+                value={item.text || item}
+                onChange={(e) => {
+                  const newItems = [...exerciseData.items];
+                  newItems[i] = typeof item === 'string'
+                    ? e.target.value
+                    : { ...item, text: e.target.value };
+                  handleFieldChange('items', newItems);
+                }}
+                className="flex-1 p-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                         bg-white dark:bg-gray-800"
+                placeholder={`Elemento ${i + 1}`}
+              />
+              {item.correctCategory && (
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  → {item.correctCategory}
+                </span>
+              )}
+            </div>
+          ))}
+
+          {/* Categorías */}
+          <label className="block font-semibold mt-4 mb-2 text-gray-900 dark:text-gray-100">
+            Categorías:
+          </label>
+          {exerciseData.categories.map((cat, i) => (
+            <div key={i} className="flex items-center gap-2 mb-2">
+              <div
+                className="w-6 h-6 rounded flex-shrink-0"
+                style={{ backgroundColor: cat.color }}
+              />
+              <input
+                value={cat.name}
+                onChange={(e) => {
+                  const newCategories = [...exerciseData.categories];
+                  newCategories[i] = { ...newCategories[i], name: e.target.value };
+                  handleFieldChange('categories', newCategories);
+                }}
+                className="flex-1 p-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                         bg-white dark:bg-gray-800"
+                placeholder={`Categoría ${i + 1}`}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Context (para Dialogue Roleplay) */}
+      {exerciseData.context && (
+        <div>
+          <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+            Contexto del Diálogo:
+          </label>
+          <textarea
+            value={exerciseData.context}
+            onChange={(e) => handleFieldChange('context', e.target.value)}
+            className="w-full p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                     focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+            rows={2}
+          />
+        </div>
+      )}
+
+      {/* Roles (para Dialogue Roleplay) */}
+      {(exerciseData.roleA || exerciseData.roleB) && (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+              Rol A:
+            </label>
+            <input
+              value={exerciseData.roleA || ''}
+              onChange={(e) => handleFieldChange('roleA', e.target.value)}
+              className="w-full p-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-800"
+              placeholder="Ej: Mesero"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+              Rol B:
+            </label>
+            <input
+              value={exerciseData.roleB || ''}
+              onChange={(e) => handleFieldChange('roleB', e.target.value)}
+              className="w-full p-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-800"
+              placeholder="Ej: Cliente"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Dialogue Lines (para Dialogue Roleplay) */}
+      {exerciseData.dialogue && Array.isArray(exerciseData.dialogue) && (
+        <div>
+          <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+            Líneas del Diálogo:
+          </label>
+          {exerciseData.dialogue.map((line, i) => (
+            <div key={i} className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-bold text-sm text-blue-600 dark:text-blue-400">
+                  {line.speaker}:
+                </span>
+                {line.userInput && (
+                  <span className="text-xs bg-yellow-200 dark:bg-yellow-700 px-2 py-1 rounded">
+                    Input del Usuario
+                  </span>
+                )}
+              </div>
+              {!line.userInput && line.text && (
+                <textarea
+                  value={line.text}
+                  onChange={(e) => {
+                    const newDialogue = [...exerciseData.dialogue];
+                    newDialogue[i] = { ...newDialogue[i], text: e.target.value };
+                    handleFieldChange('dialogue', newDialogue);
+                  }}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded
+                           bg-white dark:bg-gray-700 text-sm"
+                  rows={2}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Vocabulary (para Interactive Reading) */}
+      {exerciseData.vocabulary && Array.isArray(exerciseData.vocabulary) && (
+        <div>
+          <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+            Vocabulario Interactivo:
+          </label>
+          {exerciseData.vocabulary.map((vocab, i) => (
+            <div key={i} className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Español:</label>
+                  <input
+                    value={vocab.spanish}
+                    onChange={(e) => {
+                      const newVocab = [...exerciseData.vocabulary];
+                      newVocab[i] = { ...newVocab[i], spanish: e.target.value };
+                      handleFieldChange('vocabulary', newVocab);
+                    }}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-sm
+                             bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">English:</label>
+                  <input
+                    value={vocab.english}
+                    onChange={(e) => {
+                      const newVocab = [...exerciseData.vocabulary];
+                      newVocab[i] = { ...newVocab[i], english: e.target.value };
+                      handleFieldChange('vocabulary', newVocab);
+                    }}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-sm
+                             bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">中文:</label>
+                  <input
+                    value={vocab.chinese}
+                    onChange={(e) => {
+                      const newVocab = [...exerciseData.vocabulary];
+                      newVocab[i] = { ...newVocab[i], chinese: e.target.value };
+                      handleFieldChange('vocabulary', newVocab);
+                    }}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-sm
+                             bg-white dark:bg-gray-800"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Contexto:</label>
+                <textarea
+                  value={vocab.context}
+                  onChange={(e) => {
+                    const newVocab = [...exerciseData.vocabulary];
+                    newVocab[i] = { ...newVocab[i], context: e.target.value };
+                    handleFieldChange('vocabulary', newVocab);
+                  }}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-sm
+                           bg-white dark:bg-gray-800"
+                  rows={2}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Questions (para Interactive Reading y Audio Listening) */}
+      {exerciseData.questions && Array.isArray(exerciseData.questions) && exerciseData.questions.length > 0 && (
+        <div>
+          <label className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">
+            Preguntas de Comprensión:
+          </label>
+          {exerciseData.questions.map((q, i) => (
+            <div key={i} className="mb-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="mb-2">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Pregunta {i + 1}:
+                </label>
+                <textarea
+                  value={q.question}
+                  onChange={(e) => {
+                    const newQuestions = [...exerciseData.questions];
+                    newQuestions[i] = { ...newQuestions[i], question: e.target.value };
+                    handleFieldChange('questions', newQuestions);
+                  }}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-sm
+                           bg-white dark:bg-gray-800"
+                  rows={2}
+                />
+              </div>
+              {q.options && (
+                <div>
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Opciones:</label>
+                  {q.options.map((opt, j) => (
+                    <div key={j} className="flex items-center gap-2 mt-1">
+                      <span className="text-xs font-bold">{String.fromCharCode(65 + j)}:</span>
+                      <input
+                        value={opt.label || opt}
+                        onChange={(e) => {
+                          const newQuestions = [...exerciseData.questions];
+                          const newOptions = [...newQuestions[i].options];
+                          newOptions[j] = typeof opt === 'string' ? e.target.value : { ...opt, label: e.target.value };
+                          newQuestions[i] = { ...newQuestions[i], options: newOptions };
+                          handleFieldChange('questions', newQuestions);
+                        }}
+                        className="flex-1 p-1 border border-gray-300 dark:border-gray-600 rounded text-sm
+                                 bg-white dark:bg-gray-800"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
