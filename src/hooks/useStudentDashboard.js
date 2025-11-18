@@ -10,7 +10,7 @@ import {
   ensureStudentProfile,
   getStudentEnrollments
 } from '../firebase/firestore';
-import { getStudentSessions } from '../firebase/classSessions';
+import { getStudentInstances } from '../firebase/classInstances';
 import { subscribeToLiveWhiteboards } from '../firebase/whiteboard';
 
 /**
@@ -101,7 +101,7 @@ export function useStudentDashboard(user, studentProp) {
           const [history, enrollments, sessions] = await Promise.all([
             getStudentGameHistory(profileData.id),
             getStudentEnrollments(profileData.id),
-            getStudentSessions(profileData.id)
+            getStudentInstances(profileData.id) // NUEVO SISTEMA: class_instances
           ]);
 
           logger.debug(`⏱️ [useStudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
