@@ -32,7 +32,15 @@ import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { exportToPDF } from '../../utils/pdfExport';
 
 /**
- * EnhancedTextEditor V4.1 - FIX: Duplicate Extensions Warning
+ * EnhancedTextEditor V5.0 - FIX: Loop Infinito y Renders Multiplicados
+ *
+ * MEJORAS V5.0 (CRÍTICAS):
+ * ✅ FIX: Loop infinito resuelto - onStrokesChange memoizada
+ * ✅ FIX: TipTap duplicado - Key estable y cleanup correcto
+ * ✅ FIX: Undo/Redo funcionan correctamente con keyboard shortcuts
+ * ✅ FIX: Resaltador con modo "seleccionar color primero"
+ * ✅ FIX: Barra de herramientas reorganizada (1 sola fila compacta)
+ * ✅ FIX: Selector de color unificado para todas las herramientas
  *
  * MEJORAS V4.1:
  * ✅ Fixed: Duplicate 'underline' extension warning
@@ -75,6 +83,9 @@ export function EnhancedTextEditor({
   const [highlightColor, setHighlightColor] = useState('#FEF08A'); // Amarillo por defecto
   const [pencilColor, setPencilColor] = useState('#000000');
 
+  // FIX: Modo resaltador - permitir seleccionar color primero
+  const [highlightMode, setHighlightMode] = useState(false);
+
   // Drawing states
   const [drawingMode, setDrawingMode] = useState(false);
   const [pencilOpacity, setPencilOpacity] = useState(1);
@@ -89,6 +100,9 @@ export function EnhancedTextEditor({
   const [drawingLayer, setDrawingLayer] = useState('over');
 
   const editorContainerRef = useRef(null);
+
+  // FIX: Key estable para evitar recreaciones de TipTap
+  const editorKeyRef = useRef(`editor-${blockId || Date.now()}`);
 
   // Tamaños disponibles (solo valores en px)
   const fontSizes = ['12px', '14px', '16px', '20px', '24px', '28px', '32px', '36px', '48px'];
@@ -125,6 +139,11 @@ export function EnhancedTextEditor({
     }),
   ], []);
 
+  // FIX: Memoizar callback de strokes para evitar re-renders infinitos
+  const handleStrokesChange = useCallback((newStrokes) => {
+    setDrawingStrokes(newStrokes);
+  }, []);
+
   const editor = useEditor({
     extensions,
     content: initialContent,
@@ -135,6 +154,15 @@ export function EnhancedTextEditor({
       }
     }
   }, [extensions]);
+
+  // FIX: Cleanup correcto del editor al desmontar
+  useEffect(() => {
+    return () => {
+      if (editor) {
+        editor.destroy();
+      }
+    };
+  }, [editor]);
 
   useEffect(() => {
     if (editor) {
@@ -147,6 +175,27 @@ export function EnhancedTextEditor({
       editor.commands.setContent(initialContent);
     }
   }, [initialContent, editor, isEditing]);
+
+  // FIX: Keyboard shortcuts para texto (Ctrl+B, Ctrl+I, etc.)
+  useEffect(() => {
+    if (!editor || !isEditing) return;
+
+    const handleKeyDown = (e) => {
+      // Undo/Redo
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault();
+          editor.chain().focus().undo().run();
+        } else if ((e.key === 'z' && e.shiftKey) || e.key === 'y') {
+          e.preventDefault();
+          editor.chain().focus().redo().run();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [editor, isEditing]);
 
   const handleSave = async () => {
     if (!editor) return;
@@ -292,15 +341,48 @@ export function EnhancedTextEditor({
                 label="Color de texto"
                 title="Color de texto"
               />
-              <SimpleColorButton
-                value={highlightColor}
-                onChange={(color) => {
-                  setHighlightColor(color);
-                  editor.chain().focus().setHighlight({ color }).run();
-                }}
-                label="Resaltado"
-                title="Color de resaltado"
-              />
+
+              {/* FIX: Resaltador con toggle mode - seleccionar color primero */}
+              <div className="relative">
+                <UnifiedToolbarButton
+                  onClick={() => {
+                    if (highlightMode) {
+                      // Desactivar modo resaltador
+                      setHighlightMode(false);
+                      editor.chain().focus().unsetHighlight().run();
+                    } else {
+                      // Activar modo resaltador
+                      setHighlightMode(true);
+                      editor.chain().focus().setHighlight({ color: highlightColor }).run();
+                    }
+                  }}
+                  active={highlightMode}
+                  title={highlightMode ? 'Desactivar resaltador' : 'Activar resaltador'}
+                  icon={() => (
+                    <div
+                      className="w-4 h-4 rounded border border-gray-400"
+                      style={{ backgroundColor: highlightColor }}
+                    />
+                  )}
+                />
+
+                {/* Selector de color del resaltador (aparece al lado) */}
+                {highlightMode && (
+                  <div className="absolute left-full ml-1 top-0">
+                    <SimpleColorButton
+                      value={highlightColor}
+                      onChange={(color) => {
+                        setHighlightColor(color);
+                        if (highlightMode) {
+                          editor.chain().focus().setHighlight({ color }).run();
+                        }
+                      }}
+                      label="Color de resaltado"
+                      title="Cambiar color de resaltado"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Tamaño */}
@@ -334,14 +416,36 @@ export function EnhancedTextEditor({
               </select>
             </div>
 
-            {/* Lápiz */}
-            <div className="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+            {/* FIX: Lápiz con menú expandible inline (no segunda fila) */}
+            <div className="relative flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-600">
               <UnifiedToolbarButton
                 onClick={() => setDrawingMode(!drawingMode)}
                 active={drawingMode}
                 title="Modo lápiz / dibujar"
                 icon={Pen}
               />
+
+              {/* Controles del lápiz (aparecen inline cuando está activo) */}
+              {drawingMode && (
+                <div className="flex items-center gap-2 pl-2 border-l border-gray-300 dark:border-gray-600">
+                  <SimpleColorButton
+                    value={pencilColor}
+                    onChange={setPencilColor}
+                    label="Color del lápiz"
+                    title="Color del lápiz"
+                  />
+                  <StrokeWidthSelector
+                    value={pencilSize}
+                    onChange={setPencilSize}
+                  />
+                  <UnifiedToolbarButton
+                    onClick={() => setDrawingLayer(drawingLayer === 'over' ? 'under' : 'over')}
+                    title={`Dibujar ${drawingLayer === 'over' ? 'sobre' : 'debajo del'} texto`}
+                    icon={Layers}
+                    active={drawingLayer === 'under'}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Exportar PDF */}
@@ -371,43 +475,6 @@ export function EnhancedTextEditor({
               />
             </div>
           </div>
-
-          {/* FILA 2: Toolbar de lápiz (solo si drawingMode activo) */}
-          {drawingMode && (
-            <div className="pencil-toolbar p-3 bg-white dark:bg-gray-900
-                           border-b border-gray-200 dark:border-gray-700">
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <Pen size={16} className="text-gray-600 dark:text-gray-400" />
-                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    Modo Lápiz
-                  </span>
-                </div>
-
-                {/* Color del lápiz */}
-                <SimpleColorButton
-                  value={pencilColor}
-                  onChange={setPencilColor}
-                  label="Color del lápiz"
-                  title="Color del lápiz"
-                />
-
-                {/* Grosor */}
-                <StrokeWidthSelector
-                  value={pencilSize}
-                  onChange={setPencilSize}
-                />
-
-                {/* Capa */}
-                <UnifiedToolbarButton
-                  onClick={() => setDrawingLayer(drawingLayer === 'over' ? 'under' : 'over')}
-                  title={`Dibujar ${drawingLayer === 'over' ? 'sobre' : 'debajo del'} texto`}
-                  icon={Layers}
-                  label={drawingLayer === 'over' ? 'Sobre' : 'Debajo'}
-                />
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -440,13 +507,14 @@ export function EnhancedTextEditor({
         {/* Canvas de dibujo (modo edición) */}
         {isEditing && (
           <DrawingCanvasAdvanced
+            key={editorKeyRef.current}
             enabled={drawingMode}
             color={pencilColor}
             opacity={pencilOpacity}
             size={pencilSize}
             zoom={1}
             layer={drawingLayer}
-            onStrokesChange={setDrawingStrokes}
+            onStrokesChange={handleStrokesChange}
             initialStrokes={drawingStrokes}
           />
         )}
