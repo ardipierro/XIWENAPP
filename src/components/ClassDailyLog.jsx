@@ -192,7 +192,13 @@ function ClassDailyLog({ logId, user, onBack }) {
     };
   }, [isTeacher, log, hasUnsavedChanges, handleSave]);
 
-  // Configurar TopBar del app con botones dinámicos usando useMemo para evitar recrear actions
+  // FIX: Memoizar la función open del modal para evitar recreaciones
+  const handleOpenModal = useCallback(() => {
+    contentSelectorModal.open();
+  }, [contentSelectorModal]);
+
+  // Configurar TopBar del app con botones dinámicos
+  // FIX: NO incluir JSX inline (crea nuevas referencias), solo iconName strings
   const topBarActions = useMemo(() => {
     if (!logMeta.name) return [];
 
@@ -203,15 +209,15 @@ function ClassDailyLog({ logId, user, onBack }) {
       actions.push({
         key: 'add-content',
         label: 'Agregar Contenido',
-        icon: <Plus size={16} />,
-        onClick: contentSelectorModal.open,
+        iconName: 'Plus',
+        onClick: handleOpenModal,
         variant: 'primary'
       });
 
       actions.push({
         key: 'save',
         label: saving ? 'Guardando...' : 'Guardar',
-        icon: <Save size={16} />,
+        iconName: 'Save',
         onClick: handleSave,
         disabled: saving,
         variant: 'secondary'
@@ -231,24 +237,37 @@ function ClassDailyLog({ logId, user, onBack }) {
     actions.push({
       key: 'toggle-sidebar',
       label: sidebarOpen ? 'Cerrar Índice' : 'Índice',
-      icon: <Menu size={16} />,
+      iconName: 'Menu',
       onClick: toggleSidebar
     });
 
     return actions;
-  }, [logMeta.status, isTeacher, saving, sidebarOpen, contentSelectorModal.open, handleSave, handleEndLog, toggleSidebar]);
+  }, [logMeta.status, logMeta.name, isTeacher, saving, sidebarOpen, handleOpenModal, handleSave, handleEndLog, toggleSidebar]);
 
   // Aplicar configuración a TopBar cuando cambien los actions o metadata
+  // FIX: Usar ref para evitar actualizar si el contenido no cambió realmente
+  const lastConfigRef = useRef(null);
+
   useEffect(() => {
     if (!logMeta.name) return;
 
-    updateTopBar({
+    const newConfig = {
       title: logMeta.name,
       subtitle: `${logMeta.courseName ? '📚 ' + logMeta.courseName : ''} ${logMeta.groupName ? '👥 ' + logMeta.groupName : ''}`.trim(),
       showBackButton: true,
       onBack: onBack,
       actions: topBarActions
-    });
+    };
+
+    // Solo actualizar si realmente cambió (comparación simple por serialización)
+    const newConfigStr = JSON.stringify(newConfig, (key, value) =>
+      typeof value === 'function' ? value.toString() : value
+    );
+
+    if (lastConfigRef.current !== newConfigStr) {
+      lastConfigRef.current = newConfigStr;
+      updateTopBar(newConfig);
+    }
   }, [logMeta.name, logMeta.courseName, logMeta.groupName, onBack, topBarActions, updateTopBar]);
 
   // Reset TopBar SOLO al desmontar (no en cada re-render)
