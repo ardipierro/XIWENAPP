@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { BaseLoading } from './common';
 import BaseButton from './common/BaseButton';
+import UniversalCard from './cards/UniversalCard';
 import StudentFeedbackView from './StudentFeedbackView';
 import { uploadMessageAttachment } from '../firebase/storage';
 import { triggerHomeworkAnalysis } from '../firebase/submissions';
@@ -132,43 +133,18 @@ function AssignmentCard({ assignment, onClick }) {
   const isSubmitted = assignment.isSubmitted;
   const isGraded = assignment.isGraded;
 
+  // Determine icon based on status
+  const icon = isGraded ? CheckCircle : isOverdue ? AlertCircle : FileText;
+
   return (
-    <div
-      onClick={onClick}
-      className="card cursor-pointer"
-    >
-      <div className="flex items-start gap-3">
-        <div className={`p-3 rounded-lg ${
-          isOverdue ? 'bg-red-100 dark:bg-red-900' :
-          isGraded ? 'bg-green-100 dark:bg-green-900' :
-          isSubmitted ? 'bg-gray-100 dark:bg-gray-800' :
-          'bg-orange-100 dark:bg-orange-900'
-        }`}>
-          {isGraded ? (
-            <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
-          ) : isOverdue ? (
-            <AlertCircle className="text-red-600 dark:text-red-400" size={24} />
-          ) : (
-            <FileText className={`${
-              isSubmitted
-                ? 'text-primary dark:text-primary'
-                : 'text-orange-600 dark:text-orange-400'
-            }`} size={24} />
-          )}
-        </div>
-
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {assignment.title}
-          </h3>
-
-          {assignment.description && (
-            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 line-clamp-2">
-              {assignment.description}
-            </p>
-          )}
-
-          <div className="flex flex-wrap items-center gap-4 mt-3">
+    <div onClick={onClick} style={{ cursor: 'pointer' }}>
+      <UniversalCard
+        variant="content"
+        icon={icon}
+        title={assignment.title}
+        subtitle={assignment.description}
+      >
+        <div className="flex flex-wrap items-center gap-4 mt-3">
             {deadline && (
               <div className="flex items-center gap-1 text-sm">
                 <Calendar size={16} className="text-gray-500" />
@@ -201,9 +177,8 @@ function AssignmentCard({ assignment, onClick }) {
                 Vencida
               </div>
             )}
-          </div>
         </div>
-      </div>
+      </UniversalCard>
     </div>
   );
 }

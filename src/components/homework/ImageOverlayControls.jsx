@@ -3,19 +3,11 @@
  * @module components/homework/ImageOverlayControls
  */
 
-import { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
   Eye,
-  EyeOff,
-  Settings,
-  ChevronDown,
-  ChevronUp
+  EyeOff
 } from 'lucide-react';
-import { BaseButton } from '../common';
 
 /**
  * Error type configuration
@@ -45,34 +37,26 @@ const ERROR_TYPE_CONFIG = {
 
 /**
  * Image Overlay Controls Component
- * Control panel for adjusting error visualization
+ * Simplified control panel for error visualization
  *
  * @param {Object} props
  * @param {Object} props.visibleErrorTypes - Current visible error types
  * @param {function} props.onVisibleErrorTypesChange - Callback when types change
  * @param {number} props.highlightOpacity - Current opacity (0-1)
  * @param {function} props.onOpacityChange - Callback when opacity changes
- * @param {number} props.zoom - Current zoom level
- * @param {function} props.onZoomChange - Callback when zoom changes
  * @param {boolean} props.useWavyUnderline - Use wavy underlines
  * @param {function} props.onWavyUnderlineChange - Callback when wavy toggle changes
  * @param {Object} props.errorCounts - Count of each error type {spelling: 5, grammar: 3, ...}
- * @param {boolean} props.compact - Compact mode (no labels)
  */
 export default function ImageOverlayControls({
   visibleErrorTypes,
   onVisibleErrorTypesChange,
   highlightOpacity,
   onOpacityChange,
-  zoom,
-  onZoomChange,
   useWavyUnderline,
   onWavyUnderlineChange,
-  errorCounts = {},
-  compact = false
+  errorCounts = {}
 }) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
   const handleToggleErrorType = (type) => {
     onVisibleErrorTypesChange({
       ...visibleErrorTypes,
@@ -89,20 +73,7 @@ export default function ImageOverlayControls({
     onVisibleErrorTypesChange(newState);
   };
 
-  const handleZoomIn = () => {
-    onZoomChange(Math.min(zoom + 0.25, 3));
-  };
-
-  const handleZoomOut = () => {
-    onZoomChange(Math.max(zoom - 0.25, 0.5));
-  };
-
-  const handleResetZoom = () => {
-    onZoomChange(1);
-  };
-
   const allVisible = Object.values(visibleErrorTypes).every(v => v);
-  const someVisible = Object.values(visibleErrorTypes).some(v => v);
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-3">
@@ -110,7 +81,7 @@ export default function ImageOverlayControls({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-            Tipos de Error
+            Filtrar errores
           </span>
           <button
             onClick={handleToggleAll}
@@ -152,134 +123,37 @@ export default function ImageOverlayControls({
         </div>
       </div>
 
-      {/* Zoom Controls */}
+      {/* Simplified Style Controls */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-            Zoom
-          </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {(zoom * 100).toFixed(0)}%
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <BaseButton
-            variant="outline"
-            size="sm"
-            onClick={handleZoomOut}
-            disabled={zoom <= 0.5}
-          >
-            <ZoomOut size={16} />
-          </BaseButton>
-
-          <input
-            type="range"
-            min="50"
-            max="300"
-            step="25"
-            value={zoom * 100}
-            onChange={(e) => onZoomChange(e.target.value / 100)}
-            className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-          />
-
-          <BaseButton
-            variant="outline"
-            size="sm"
-            onClick={handleZoomIn}
-            disabled={zoom >= 3}
-          >
-            <ZoomIn size={16} />
-          </BaseButton>
-
-          {zoom !== 1 && (
-            <BaseButton
-              variant="ghost"
-              size="sm"
-              onClick={handleResetZoom}
-            >
-              <Maximize2 size={16} />
-            </BaseButton>
-          )}
-        </div>
-      </div>
-
-      {/* Advanced Settings Toggle */}
-      <button
-        onClick={() => setShowAdvanced(!showAdvanced)}
-        className="flex items-center justify-between w-full px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-      >
-        <span className="flex items-center gap-1">
-          <Settings size={14} />
-          Configuración Avanzada
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+          Estilo de resaltado
         </span>
-        {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-      </button>
 
-      {/* Advanced Settings */}
-      {showAdvanced && (
-        <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
-          {/* Opacity Control */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                Intensidad del Resaltado
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {(highlightOpacity * 100).toFixed(0)}%
-              </span>
-            </div>
-
-            <input
-              type="range"
-              min="10"
-              max="60"
-              step="5"
-              value={highlightOpacity * 100}
-              onChange={(e) => onOpacityChange(e.target.value / 100)}
-              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-            />
-          </div>
-
-          {/* Wavy Underline Toggle */}
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-              Subrayado Ondulado
-            </span>
-            <button
-              onClick={() => onWavyUnderlineChange(!useWavyUnderline)}
-              className={`
-                relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-                ${useWavyUnderline ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}
-              `}
+        <div className="flex items-center gap-3">
+          {/* Intensity Selector */}
+          <div className="flex-1">
+            <select
+              value={highlightOpacity}
+              onChange={(e) => onOpacityChange(parseFloat(e.target.value))}
+              className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
-              <span
-                className={`
-                  inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                  ${useWavyUnderline ? 'translate-x-6' : 'translate-x-1'}
-                `}
-              />
-            </button>
+              <option value={0.15}>Intensidad: Baja</option>
+              <option value={0.25}>Intensidad: Media</option>
+              <option value={0.40}>Intensidad: Alta</option>
+            </select>
           </div>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {useWavyUnderline
-              ? '✨ Subrayado estilo Word activado'
-              : 'Subrayado recto activado'
-            }
-          </p>
-        </div>
-      )}
-
-      {/* Summary */}
-      <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-          <span>
-            {Object.values(visibleErrorTypes).filter(v => v).length} de {Object.keys(visibleErrorTypes).length} tipos visibles
-          </span>
-          <span>
-            {Object.values(errorCounts).reduce((sum, count) => sum + count, 0)} errores totales
-          </span>
+          {/* Wavy Toggle */}
+          <div className="flex-1">
+            <select
+              value={useWavyUnderline ? 'wavy' : 'straight'}
+              onChange={(e) => onWavyUnderlineChange(e.target.value === 'wavy')}
+              className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            >
+              <option value="straight">Subrayado: Recto</option>
+              <option value="wavy">Subrayado: Ondulado</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -291,10 +165,7 @@ ImageOverlayControls.propTypes = {
   onVisibleErrorTypesChange: PropTypes.func.isRequired,
   highlightOpacity: PropTypes.number.isRequired,
   onOpacityChange: PropTypes.func.isRequired,
-  zoom: PropTypes.number.isRequired,
-  onZoomChange: PropTypes.func.isRequired,
   useWavyUnderline: PropTypes.bool.isRequired,
   onWavyUnderlineChange: PropTypes.func.isRequired,
-  errorCounts: PropTypes.object,
-  compact: PropTypes.bool
+  errorCounts: PropTypes.object
 };

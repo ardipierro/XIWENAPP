@@ -36,6 +36,7 @@ export { EnhancedTextEditor } from './EnhancedTextEditor';
 export { InSituContentEditor } from './InSituContentEditor';
 export { UnifiedToolbarButton } from './UnifiedToolbarButton';
 export { ColorPicker } from './ColorPicker';
+export { SimpleColorButton } from './SimpleColorButton';
 export { ColorFavorites } from './ColorFavorites';
 export { HighlightPicker } from './HighlightPicker';
 export { PencilPresets } from './PencilPresets';

@@ -88,13 +88,20 @@ function ClassDailyLog({ logId, user, onBack }) {
   const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
   const isStudent = user?.role === 'student' || user?.role === 'trial';
 
+  // Toggle sidebar memoizado para evitar re-renders infinitos
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
+
   // Ocultar sidebar global al montar, restaurar al desmontar
   useEffect(() => {
     hideSidebar();
     return () => {
       showSidebar();
     };
-  }, [hideSidebar, showSidebar]);
+    // hideSidebar and showSidebar are stable context functions
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Extract specific log properties to avoid infinite loops from object reference changes
   const logMeta = useMemo(() => ({
@@ -185,9 +192,15 @@ function ClassDailyLog({ logId, user, onBack }) {
     };
   }, [isTeacher, log, hasUnsavedChanges, handleSave]);
 
+  // FIX: Memoizar la función open del modal para evitar recreaciones
+  const handleOpenModal = useCallback(() => {
+    contentSelectorModal.open();
+  }, [contentSelectorModal]);
+
   // Configurar TopBar del app con botones dinámicos
-  useEffect(() => {
-    if (!logMeta.name) return;
+  // FIX: NO incluir JSX inline (crea nuevas referencias), solo iconName strings
+  const topBarActions = useMemo(() => {
+    if (!logMeta.name) return [];
 
     const actions = [];
 
@@ -196,15 +209,15 @@ function ClassDailyLog({ logId, user, onBack }) {
       actions.push({
         key: 'add-content',
         label: 'Agregar Contenido',
-        icon: <Plus size={16} />,
-        onClick: contentSelectorModal.open,
+        iconName: 'Plus',
+        onClick: handleOpenModal,
         variant: 'primary'
       });
 
       actions.push({
         key: 'save',
         label: saving ? 'Guardando...' : 'Guardar',
-        icon: <Save size={16} />,
+        iconName: 'Save',
         onClick: handleSave,
         disabled: saving,
         variant: 'secondary'
@@ -224,26 +237,45 @@ function ClassDailyLog({ logId, user, onBack }) {
     actions.push({
       key: 'toggle-sidebar',
       label: sidebarOpen ? 'Cerrar Índice' : 'Índice',
-      icon: <Menu size={16} />,
-      onClick: () => setSidebarOpen(!sidebarOpen)
+      iconName: 'Menu',
+      onClick: toggleSidebar
     });
 
-    updateTopBar({
+    return actions;
+  }, [logMeta.status, logMeta.name, isTeacher, saving, sidebarOpen, handleOpenModal, handleSave, handleEndLog, toggleSidebar]);
+
+  // Aplicar configuración a TopBar cuando cambien los actions o metadata
+  // FIX: Usar ref para evitar actualizar si el contenido no cambió realmente
+  const lastConfigRef = useRef(null);
+
+  useEffect(() => {
+    if (!logMeta.name) return;
+
+    const newConfig = {
       title: logMeta.name,
       subtitle: `${logMeta.courseName ? '📚 ' + logMeta.courseName : ''} ${logMeta.groupName ? '👥 ' + logMeta.groupName : ''}`.trim(),
       showBackButton: true,
       onBack: onBack,
-      actions: actions
-    });
+      actions: topBarActions
+    };
 
-    // Reset TopBar al desmontar
+    // Solo actualizar si realmente cambió (comparación simple por serialización)
+    const newConfigStr = JSON.stringify(newConfig, (key, value) =>
+      typeof value === 'function' ? value.toString() : value
+    );
+
+    if (lastConfigRef.current !== newConfigStr) {
+      lastConfigRef.current = newConfigStr;
+      updateTopBar(newConfig);
+    }
+  }, [logMeta.name, logMeta.courseName, logMeta.groupName, onBack, topBarActions, updateTopBar]);
+
+  // Reset TopBar SOLO al desmontar (no en cada re-render)
+  useEffect(() => {
     return () => {
       resetTopBar();
     };
-    // updateTopBar and resetTopBar are stable context functions, safe to omit
-    // contentSelectorModal.open is stable from useMemo
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logMeta, isTeacher, saving, sidebarOpen, onBack, handleSave, handleEndLog]);
+  }, [resetTopBar]);
 
   // Guardar scroll position periódicamente
   useEffect(() => {

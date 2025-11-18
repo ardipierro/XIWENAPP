@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Palette, Type, Tag, LayoutGrid } from 'lucide-react';
+import { Palette, Type, Tag, LayoutGrid, RotateCcw, Database } from 'lucide-react';
 import BaseTabs from '../common/BaseTabs';
 import ThemeCustomizer from '../ThemeCustomizer';
 import BadgeCustomizerTab from './BadgeCustomizerTab';
@@ -14,8 +14,25 @@ import { useAuth } from '../../contexts/AuthContext';
 
 function DesignTab() {
   const [activeSubTab, setActiveSubTab] = useState('theme');
-  const { selectedFont, setSelectedFont, fontWeight, setFontWeight, fontSize, setFontSize, availableFonts } = useFont();
+  const { selectedFont, setSelectedFont, fontWeight, setFontWeight, fontSize, setFontSize, availableFonts, resetToDefaults, isLoading } = useFont();
   const { user } = useAuth();
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleReset = async () => {
+    if (!confirm('¿Resetear la configuración del logo a los valores por defecto?\n\nFuente: Microsoft YaHei\nPeso: Negrita\nTamaño: 1.25rem')) {
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      await resetToDefaults();
+      alert('✅ Configuración reseteada correctamente');
+    } catch (error) {
+      alert('❌ Error al resetear configuración');
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const subTabs = [
     { id: 'theme', label: 'Temas', icon: Palette },
@@ -49,10 +66,41 @@ function DesignTab() {
           <div className="w-full space-y-6">
             {/* Título y descripción */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Probador de Fuentes Chinas</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Visualiza cómo se ve el nombre de la aplicación "西文教室" (Aula de Español) con diferentes fuentes chinas
-              </p>
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Configuración del Logo
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Visualiza cómo se ve el nombre de la aplicación "西文教室" (Aula de Español) con diferentes fuentes chinas
+                  </p>
+                </div>
+                <button
+                  onClick={handleReset}
+                  disabled={isResetting || isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700
+                           hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300
+                           rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                           text-sm font-medium whitespace-nowrap"
+                  title="Resetear a configuración por defecto"
+                >
+                  <RotateCcw size={16} className={isResetting ? 'animate-spin' : ''} />
+                  Resetear
+                </button>
+              </div>
+
+              {/* Info de persistencia */}
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                <div className="flex items-start gap-2">
+                  <Database size={16} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-blue-800 dark:text-blue-200">
+                    <strong>Guardado en Firebase:</strong> La configuración se guarda automáticamente en la nube.
+                    Se mantendrá aunque cambies de navegador o servidor.
+                    <br />
+                    <strong className="mt-1 inline-block">Default actual:</strong> Microsoft YaHei, Negrita, 1.25rem
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Selector de fuente */}
@@ -194,7 +242,9 @@ function DesignTab() {
             {/* Nota informativa */}
             <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
               <p className="text-sm text-green-800 dark:text-green-200">
-                <strong>✨ Nota:</strong> Los cambios se aplican automáticamente al logo "西文教室" en la barra superior y se guardan en tu navegador.
+                <strong>✨ Nota:</strong> Los cambios se aplican automáticamente al logo "西文教室" en la barra superior
+                y se guardan tanto en tu navegador (carga rápida) como en Firebase (persistencia global).
+                La configuración se sincronizará automáticamente en todos tus dispositivos y sesiones.
               </p>
             </div>
           </div>

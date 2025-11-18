@@ -157,7 +157,10 @@
       "Bash(powershell -Command \"Get-Content ''C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\globals.css'' | Measure-Object -Line\")",
       "Bash(powershell -Command:*)",
       "Bash(\"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\globals.css\")",
-      "Bash(git clean:*)"
+      "Bash(git clean:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/rules\")",
+      "Bash(start \"https://console.firebase.google.com/v1/r/project/xiwen-app-2026/firestore/indexes?create_composite=ClZwcm9qZWN0cy94aXdlbi1hcHAtMjAyNi9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvY2xhc3NfaW5zdGFuY2VzL2luZGV4ZXMvXxABGg4KCnNjaGVkdWxlSWQQARoKCgZzdGF0dXMQARoSCg5zY2hlZHVsZWRTdGFydBABGgwKCF9fbmFtZV9fEAE\")"
     ],
     "deny": [],
     "ask": []

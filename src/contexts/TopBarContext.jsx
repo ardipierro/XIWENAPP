@@ -4,7 +4,7 @@
  * @module contexts/TopBarContext
  */
 
-import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
 
 const TopBarContext = createContext();
 
@@ -25,7 +25,7 @@ const DEFAULT_CONFIG = {
  */
 export function TopBarProvider({ children }) {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
-  const [sidebarControl, setSidebarControl] = useState(null);
+  const sidebarControlRef = useRef(null);
 
   /**
    * Actualizar configuración de la TopBar
@@ -68,35 +68,35 @@ export function TopBarProvider({ children }) {
    * Registrar funciones de control del sidebar desde DashboardLayout
    */
   const registerSidebarControl = useCallback((control) => {
-    setSidebarControl(control);
+    sidebarControlRef.current = control;
   }, []);
 
   /**
    * Ocultar sidebar
    */
   const hideSidebar = useCallback(() => {
-    if (sidebarControl?.hide) {
-      sidebarControl.hide();
+    if (sidebarControlRef.current?.hide) {
+      sidebarControlRef.current.hide();
     }
-  }, [sidebarControl]);
+  }, []);
 
   /**
    * Mostrar sidebar
    */
   const showSidebar = useCallback(() => {
-    if (sidebarControl?.show) {
-      sidebarControl.show();
+    if (sidebarControlRef.current?.show) {
+      sidebarControlRef.current.show();
     }
-  }, [sidebarControl]);
+  }, []);
 
   /**
    * Toggle sidebar
    */
   const toggleSidebar = useCallback(() => {
-    if (sidebarControl?.toggle) {
-      sidebarControl.toggle();
+    if (sidebarControlRef.current?.toggle) {
+      sidebarControlRef.current.toggle();
     }
-  }, [sidebarControl]);
+  }, []);
 
   const value = useMemo(() => ({
     config,

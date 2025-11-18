@@ -24,7 +24,11 @@ import {
   Info,
   ExternalLink,
   Search,
-  FileCode
+  FileCode,
+  HelpCircle,
+  RefreshCw,
+  Target,
+  Layers
 } from 'lucide-react';
 import { UniversalCard } from '../cards';
 import { BaseButton, BaseBadge } from '../common';
@@ -40,6 +44,7 @@ function CardSystemTab() {
   const [selectedVariant, setSelectedVariant] = useState('default');
   const [showImpactAnalysis, setShowImpactAnalysis] = useState(false);
   const [impactData, setImpactData] = useState(null);
+  const [previewMode, setPreviewMode] = useState('basic'); // 'basic' | 'real-examples'
 
   // Hook para recargar config global después de guardar
   const { reloadConfig } = useCardConfig();
@@ -186,6 +191,164 @@ Los cambios se aplican instantáneamente en toda la app.`);
     compact: 'Compact (Listas Densas)'
   };
 
+  // Ejemplos REALES basados en tarjetas que existen en la app
+  const realExamples = {
+    default: [
+      {
+        variant: 'default',
+        icon: Users,
+        title: 'Gestionar Estudiantes',
+        description: 'Ver y administrar todos tus estudiantes',
+        stats: [{ label: 'Estudiantes', value: 150 }],
+        badges: [{ variant: 'primary', children: 'Dashboard' }],
+        actions: [
+          <BaseButton key="view" variant="primary" size="sm" fullWidth>Ir a Estudiantes</BaseButton>
+        ]
+      },
+      {
+        variant: 'default',
+        icon: BookOpen,
+        title: 'Contenidos Educativos',
+        description: 'Biblioteca de cursos y lecciones',
+        stats: [{ label: 'Contenidos', value: 48 }],
+        badges: [{ variant: 'success', children: 'Activo' }],
+        actions: [
+          <BaseButton key="view" variant="primary" size="sm" fullWidth>Ver Contenidos</BaseButton>
+        ]
+      }
+    ],
+    user: [
+      {
+        variant: 'user',
+        avatar: 'MP',
+        avatarColor: '#8b5cf6',
+        title: 'María Pérez',
+        subtitle: 'maria.perez@example.com',
+        badges: [
+          { variant: 'success', children: 'Estudiante' },
+          { variant: 'info', children: 'Activo' }
+        ],
+        stats: [
+          { label: 'Cursos', value: 8, icon: BookOpen },
+          { label: 'Créditos', value: 350 }
+        ],
+        actions: [
+          <BaseButton key="edit" variant="ghost" size="sm" icon={Edit2}>Editar</BaseButton>
+        ]
+      },
+      {
+        variant: 'user',
+        avatar: 'JG',
+        avatarColor: '#3b82f6',
+        title: 'Juan García',
+        subtitle: 'Profesor de Matemáticas',
+        badges: [
+          { variant: 'primary', children: 'Profesor' },
+          { variant: 'success', children: 'Verificado' }
+        ],
+        stats: [
+          { label: 'Clases', value: 24 },
+          { label: 'Estudiantes', value: 180 }
+        ],
+        actions: [
+          <BaseButton key="view" variant="primary" size="sm">Ver Perfil</BaseButton>
+        ]
+      }
+    ],
+    class: [
+      {
+        variant: 'class',
+        title: 'Clase de Español Intermedio',
+        subtitle: 'Prof. Ana López',
+        showLiveIndicator: true,
+        meta: [
+          { icon: '👥', text: '22/30 estudiantes conectados' },
+          { icon: '⏱️', text: 'Comenzó hace 15 min' }
+        ],
+        actions: [
+          <BaseButton key="join" variant="primary" size="sm" fullWidth>Unirse Ahora</BaseButton>
+        ]
+      },
+      {
+        variant: 'class',
+        title: 'Taller de Conversación Avanzada',
+        subtitle: 'Prof. Carlos Ruiz',
+        meta: [
+          { icon: '📅', text: 'Programada para 14:00' },
+          { icon: '⏱️', text: '1 hora de duración' }
+        ],
+        badges: [{ variant: 'warning', children: 'Próximamente' }],
+        actions: [
+          <BaseButton key="reminder" variant="ghost" size="sm">Recordarme</BaseButton>
+        ]
+      }
+    ],
+    content: [
+      {
+        variant: 'content',
+        image: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=400&h=300&fit=crop',
+        title: 'Español para Principiantes',
+        subtitle: '20 lecciones • Nivel Básico',
+        description: 'Aprende los fundamentos del español con ejercicios interactivos y diálogos prácticos.',
+        badges: [
+          { variant: 'success', children: 'Activo' },
+          { variant: 'info', children: 'Popular' }
+        ],
+        actions: [
+          <BaseButton key="start" variant="primary" size="sm" fullWidth>Comenzar Curso</BaseButton>
+        ]
+      },
+      {
+        variant: 'content',
+        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=300&fit=crop',
+        title: 'Gramática Avanzada',
+        subtitle: '35 lecciones • Nivel Avanzado',
+        description: 'Domina estructuras complejas del español: subjuntivo, condicional, tiempos perfectos y más.',
+        badges: [
+          { variant: 'primary', children: 'Premium' },
+          { variant: 'warning', children: 'Nuevo' }
+        ],
+        actions: [
+          <BaseButton key="view" variant="primary" size="sm" fullWidth>Ver Detalles</BaseButton>
+        ]
+      }
+    ],
+    stats: [
+      {
+        variant: 'stats',
+        icon: Users,
+        title: 'Total Estudiantes',
+        bigNumber: '1,542',
+        trend: 'up',
+        trendText: '+12% vs. mes anterior'
+      },
+      {
+        variant: 'stats',
+        icon: BookOpen,
+        title: 'Clases Completadas',
+        bigNumber: '3,280',
+        trend: 'up',
+        trendText: '+8% vs. semana pasada'
+      }
+    ],
+    compact: [
+      {
+        variant: 'compact',
+        icon: Calendar,
+        title: 'Clases Programadas',
+        badges: [{ variant: 'success', children: '12 activas' }],
+        stats: [{ label: 'Hoy', value: 8 }]
+      },
+      {
+        variant: 'compact',
+        icon: TrendingUp,
+        title: 'Progreso Mensual',
+        badges: [{ variant: 'primary', children: '+15%' }],
+        stats: [{ label: 'Completado', value: 85 }]
+      }
+    ]
+  };
+
   const currentUsage = usageData[selectedVariant] || { totalUsages: 0, usedIn: [] };
   const severityColors = {
     low: 'text-green-600 dark:text-green-400',
@@ -197,40 +360,228 @@ Los cambios se aplican instantáneamente en toda la app.`);
    * Renderiza un campo de configuración dinámicamente según el tipo de propiedad
    */
   const renderConfigField = (property, value, variant) => {
-    const labels = {
-      headerHeight: 'Altura del Header',
-      headerBg: 'Fondo del Header',
-      headerGradient: 'Gradiente del Header',
-      contentPadding: 'Padding del Contenido',
-      hoverEnabled: 'Hover Habilitado',
-      hoverTransform: 'Transform en Hover (translateY)',
-      hoverShadow: 'Sombra en Hover',
-      hoverBorderColor: 'Color de Borde en Hover',
-      normalShadow: 'Sombra Normal',
-      normalBorderColor: 'Color de Borde Normal',
-      transitionDuration: 'Duración de Transición',
-      transitionTiming: 'Timing de Transición',
-      showIcon: 'Mostrar Icono',
-      iconSize: 'Tamaño del Icono',
-      showAvatar: 'Mostrar Avatar',
-      avatarSize: 'Tamaño del Avatar',
-      showBadges: 'Mostrar Badges',
-      showStats: 'Mostrar Estadísticas',
-      statsLayout: 'Layout de Stats',
-      footerSticky: 'Footer Sticky',
-      footerSpacing: 'Espaciado del Footer',
-      footerAlignment: 'Alineación del Footer',
-      showLiveIndicator: 'Mostrar Indicador Live',
-      showMeta: 'Mostrar Meta Info',
-      showBigNumber: 'Mostrar Número Grande'
+    const fieldInfo = {
+      // Header
+      headerHeight: {
+        label: 'Altura del Header',
+        tooltip: 'Altura del área superior de la tarjeta (header). Afecta el espacio disponible para íconos, avatares o imágenes.'
+      },
+      headerBg: {
+        label: 'Fondo del Header',
+        tooltip: 'Tipo de fondo del header: gradient (degradado), solid (color sólido), image (imagen), transparent (sin fondo).'
+      },
+      headerGradient: {
+        label: 'Gradiente del Header',
+        tooltip: 'Clases CSS de Tailwind para el degradado del header. Ejemplo: from-blue-500 to-purple-600'
+      },
+      headerColor: {
+        label: 'Color del Header',
+        tooltip: 'Color de fondo sólido cuando headerBg es "solid".'
+      },
+      headerImageFit: {
+        label: 'Ajuste de Imagen',
+        tooltip: 'Cómo se ajusta la imagen del header: cover (cubrir), contain (contener), fill (rellenar).'
+      },
+
+      // Content
+      contentPadding: {
+        label: 'Padding del Contenido',
+        tooltip: 'Espacio interno (padding) alrededor del contenido de la tarjeta. Valores más altos = más espacio.'
+      },
+      cardHeight: {
+        label: 'Altura Fija',
+        tooltip: 'Altura fija de la tarjeta. Útil para grids uniformes. Si no se define, la altura será automática.'
+      },
+      contentOverflow: {
+        label: 'Overflow del Contenido',
+        tooltip: 'Qué hacer cuando el contenido es muy largo: auto (scroll), hidden (ocultar), visible (mostrar todo).'
+      },
+
+      // Hover
+      hoverEnabled: {
+        label: 'Hover Habilitado',
+        tooltip: 'Activa/desactiva efectos visuales al pasar el mouse sobre la tarjeta.'
+      },
+      hoverTransform: {
+        label: 'Transform en Hover',
+        tooltip: 'Desplazamiento vertical al hacer hover. Valores negativos mueven hacia arriba, positivos hacia abajo.'
+      },
+      hoverShadow: {
+        label: 'Sombra en Hover',
+        tooltip: 'Sombra CSS que se aplica al hacer hover. Formato: "0 12px 24px rgba(0,0,0,0.15)"'
+      },
+      hoverBorderColor: {
+        label: 'Color de Borde en Hover',
+        tooltip: 'Color del borde de la tarjeta al hacer hover. Puede usar variables CSS como var(--color-primary).'
+      },
+
+      // Normal State
+      normalShadow: {
+        label: 'Sombra Normal',
+        tooltip: 'Sombra CSS de la tarjeta en estado normal (sin hover).'
+      },
+      normalBorderColor: {
+        label: 'Color de Borde Normal',
+        tooltip: 'Color del borde de la tarjeta en estado normal.'
+      },
+
+      // Transitions
+      transitionDuration: {
+        label: 'Duración de Transición',
+        tooltip: 'Duración de las animaciones de la tarjeta (ej: 300ms). Valores más altos = animaciones más lentas.'
+      },
+      transitionTiming: {
+        label: 'Timing de Transición',
+        tooltip: 'Curva de animación CSS. Ejemplos: ease-in-out, cubic-bezier(0.4, 0, 0.2, 1)'
+      },
+
+      // Icons & Avatars
+      showIcon: {
+        label: 'Mostrar Ícono',
+        tooltip: 'Muestra u oculta el ícono en el header de la tarjeta (variant default/compact).'
+      },
+      iconSize: {
+        label: 'Tamaño del Ícono',
+        tooltip: 'Tamaño del ícono en píxeles.'
+      },
+      showAvatar: {
+        label: 'Mostrar Avatar',
+        tooltip: 'Muestra u oculta el avatar circular en el header (variant user).'
+      },
+      avatarSize: {
+        label: 'Tamaño del Avatar',
+        tooltip: 'Tamaño del avatar circular en píxeles.'
+      },
+      avatarFontSize: {
+        label: 'Tamaño de Texto Avatar',
+        tooltip: 'Tamaño de las iniciales dentro del avatar.'
+      },
+
+      // Badges & Stats
+      showBadges: {
+        label: 'Mostrar Badges',
+        tooltip: 'Muestra u oculta los badges/etiquetas de la tarjeta.'
+      },
+      showRoleBadge: {
+        label: 'Mostrar Badge de Rol',
+        tooltip: 'Muestra el badge con el rol del usuario (variant user).'
+      },
+      showStatusBadge: {
+        label: 'Mostrar Badge de Estado',
+        tooltip: 'Muestra el badge con el estado del usuario (activo/inactivo).'
+      },
+      maxBadges: {
+        label: 'Máximo de Badges',
+        tooltip: 'Número máximo de badges a mostrar. El resto se oculta.'
+      },
+      showStats: {
+        label: 'Mostrar Estadísticas',
+        tooltip: 'Muestra u oculta las estadísticas numéricas en la tarjeta.'
+      },
+      statsLayout: {
+        label: 'Layout de Stats',
+        tooltip: 'Orientación de las estadísticas: horizontal (en fila) o vertical (en columna).'
+      },
+
+      // Footer
+      footerSticky: {
+        label: 'Footer Sticky',
+        tooltip: 'Mantiene badges y botones siempre al fondo de la tarjeta, incluso si el contenido es corto.'
+      },
+      footerSpacing: {
+        label: 'Espaciado del Footer',
+        tooltip: 'Espacio entre elementos del footer (badges, stats, botones). gap-2 = 8px, gap-4 = 16px'
+      },
+      footerAlignment: {
+        label: 'Alineación del Footer',
+        tooltip: 'Alineación horizontal del contenido del footer: start (izquierda), center (centro), end (derecha).'
+      },
+
+      // Live Indicator
+      showLiveIndicator: {
+        label: 'Mostrar Indicador Live',
+        tooltip: 'Muestra el badge "EN VIVO" con animación pulsante (variant class).'
+      },
+      liveIndicatorPosition: {
+        label: 'Posición Indicador Live',
+        tooltip: 'Dónde colocar el indicador EN VIVO: top-left o top-right.'
+      },
+      liveIndicatorPulse: {
+        label: 'Animación Pulse',
+        tooltip: 'Activa la animación pulsante del punto rojo del indicador EN VIVO.'
+      },
+
+      // Meta & Special
+      showMeta: {
+        label: 'Mostrar Meta Info',
+        tooltip: 'Muestra información adicional con íconos (participantes, duración, etc) en variant class.'
+      },
+      metaIcons: {
+        label: 'Íconos en Meta',
+        tooltip: 'Muestra íconos junto a la meta información.'
+      },
+      showParticipants: {
+        label: 'Mostrar Participantes',
+        tooltip: 'Muestra contador de participantes en clases en vivo.'
+      },
+      showDuration: {
+        label: 'Mostrar Duración',
+        tooltip: 'Muestra la duración de la clase/sesión.'
+      },
+
+      // Big Number (Stats variant)
+      showBigNumber: {
+        label: 'Mostrar Número Grande',
+        tooltip: 'Muestra un número destacado grande (variant stats).'
+      },
+      bigNumberSize: {
+        label: 'Tamaño Número Grande',
+        tooltip: 'Tamaño de fuente del número grande en estadísticas.'
+      },
+      bigNumberWeight: {
+        label: 'Peso Número Grande',
+        tooltip: 'Grosor de fuente: normal, bold, extrabold, black.'
+      },
+      showTrend: {
+        label: 'Mostrar Tendencia',
+        tooltip: 'Muestra flecha de tendencia (↑/↓) en tarjetas de estadísticas.'
+      },
+      showComparisonText: {
+        label: 'Texto de Comparación',
+        tooltip: 'Muestra texto comparativo como "vs. mes anterior".'
+      },
+
+      // Content variant specific
+      showThumbnail: {
+        label: 'Mostrar Miniatura',
+        tooltip: 'Muestra imagen miniatura del contenido.'
+      },
+      imageScaleOnHover: {
+        label: 'Zoom en Hover',
+        tooltip: 'Aplica efecto zoom a la imagen al hacer hover.'
+      },
+      imageScale: {
+        label: 'Escala de Zoom',
+        tooltip: 'Factor de escala para el zoom de imagen. 1.05 = 5% más grande.'
+      },
+      showProgress: {
+        label: 'Mostrar Progreso',
+        tooltip: 'Muestra barra de progreso del curso/contenido.'
+      },
+      showAuthor: {
+        label: 'Mostrar Autor',
+        tooltip: 'Muestra el nombre del autor/instructor del contenido.'
+      },
     };
 
-    const label = labels[property] || property;
+    const info = fieldInfo[property] || { label: property, tooltip: 'Sin descripción disponible' };
+    const label = info.label;
+    const tooltip = info.tooltip;
 
     // Boolean fields
     if (typeof value === 'boolean') {
       return (
-        <div key={property} className="flex items-center gap-3">
+        <div key={property} className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={value}
@@ -238,8 +589,15 @@ Los cambios se aplican instantáneamente en toda la app.`);
             className="w-5 h-5"
             id={`${variant}-${property}`}
           />
-          <label htmlFor={`${variant}-${property}`} className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+          <label htmlFor={`${variant}-${property}`} className="text-sm font-medium flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             {label}
+            <div className="group relative">
+              <HelpCircle size={14} className="text-gray-400 cursor-help" />
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-64 z-50">
+                {tooltip}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+              </div>
+            </div>
           </label>
         </div>
       );
@@ -249,8 +607,15 @@ Los cambios se aplican instantáneamente en toda la app.`);
     if (typeof value === 'number') {
       return (
         <div key={property}>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
             {label}: {value}px
+            <div className="group relative">
+              <HelpCircle size={14} className="text-gray-400 cursor-help" />
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-64 z-50">
+                {tooltip}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+              </div>
+            </div>
           </label>
           <input
             type="range"
@@ -266,36 +631,42 @@ Los cambios se aplican instantáneamente en toda la app.`);
     }
 
     // Select fields
-    if (property === 'footerSpacing') {
-      return (
-        <div key={property}>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            {label}:
-          </label>
-          <select
-            value={value}
-            onChange={(e) => updateConfig(variant, property, e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border"
-            style={{
-              background: 'var(--color-bg-tertiary)',
-              borderColor: 'var(--color-border)',
-              color: 'var(--color-text-primary)'
-            }}
-          >
-            <option value="gap-1">gap-1 (4px)</option>
-            <option value="gap-2">gap-2 (8px)</option>
-            <option value="gap-3">gap-3 (12px)</option>
-            <option value="gap-4">gap-4 (16px)</option>
-          </select>
-        </div>
-      );
-    }
+    if (property === 'footerSpacing' || property === 'footerAlignment' || property === 'statsLayout' || property === 'liveIndicatorPosition') {
+      const options = {
+        footerSpacing: [
+          { value: 'gap-1', label: 'gap-1 (4px)' },
+          { value: 'gap-2', label: 'gap-2 (8px)' },
+          { value: 'gap-3', label: 'gap-3 (12px)' },
+          { value: 'gap-4', label: 'gap-4 (16px)' }
+        ],
+        footerAlignment: [
+          { value: 'start', label: 'Inicio' },
+          { value: 'center', label: 'Centro' },
+          { value: 'end', label: 'Final' }
+        ],
+        statsLayout: [
+          { value: 'horizontal', label: 'Horizontal' },
+          { value: 'vertical', label: 'Vertical' }
+        ],
+        liveIndicatorPosition: [
+          { value: 'top-left', label: 'Arriba Izquierda' },
+          { value: 'top-right', label: 'Arriba Derecha' }
+        ]
+      };
 
-    if (property === 'footerAlignment') {
+      const selectOptions = options[property] || [];
+
       return (
         <div key={property}>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
             {label}:
+            <div className="group relative">
+              <HelpCircle size={14} className="text-gray-400 cursor-help" />
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-64 z-50">
+                {tooltip}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+              </div>
+            </div>
           </label>
           <select
             value={value}
@@ -307,9 +678,9 @@ Los cambios se aplican instantáneamente en toda la app.`);
               color: 'var(--color-text-primary)'
             }}
           >
-            <option value="start">Inicio</option>
-            <option value="center">Centro</option>
-            <option value="end">Final</option>
+            {selectOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
           </select>
         </div>
       );
@@ -318,8 +689,15 @@ Los cambios se aplican instantáneamente en toda la app.`);
     // Text fields (default)
     return (
       <div key={property}>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+        <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
           {label}:
+          <div className="group relative">
+            <HelpCircle size={14} className="text-gray-400 cursor-help" />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none w-64 z-50">
+              {tooltip}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+            </div>
+          </div>
         </label>
         <input
           type="text"
@@ -345,16 +723,17 @@ Los cambios se aplican instantáneamente en toda la app.`);
     if (!variantConfig) return null;
 
     const categories = {
-      '🎨 Header': ['headerHeight', 'headerBg', 'headerGradient'],
-      '📦 Contenido': ['contentPadding'],
-      '✨ Hover': ['hoverEnabled', 'hoverTransform', 'hoverShadow', 'hoverBorderColor'],
+      '🎨 Header': ['headerHeight', 'headerBg', 'headerGradient', 'headerColor', 'headerImageFit'],
+      '📦 Contenido': ['contentPadding', 'cardHeight', 'contentOverflow'],
+      '✨ Hover': ['hoverEnabled', 'hoverTransform', 'hoverShadow', 'hoverBorderColor', 'imageScaleOnHover', 'imageScale'],
       '🔲 Normal': ['normalShadow', 'normalBorderColor'],
       '⏱️ Transiciones': ['transitionDuration', 'transitionTiming'],
-      '🎯 Iconos': ['showIcon', 'iconSize', 'showAvatar', 'avatarSize'],
-      '🏷️ Badges': ['showBadges'],
-      '📊 Stats': ['showStats', 'statsLayout', 'showBigNumber'],
+      '🎯 Iconos & Avatares': ['showIcon', 'iconSize', 'showAvatar', 'avatarSize', 'avatarFontSize', 'showThumbnail'],
+      '🏷️ Badges': ['showBadges', 'showRoleBadge', 'showStatusBadge', 'maxBadges'],
+      '📊 Stats': ['showStats', 'statsLayout', 'showBigNumber', 'bigNumberSize', 'bigNumberWeight', 'showTrend', 'showComparisonText'],
       '📍 Footer': ['footerSticky', 'footerSpacing', 'footerAlignment'],
-      '🔧 Extras': ['showLiveIndicator', 'showMeta']
+      '🎥 Live (Class)': ['showLiveIndicator', 'liveIndicatorPosition', 'liveIndicatorPulse', 'showMeta', 'metaIcons', 'showParticipants', 'showDuration'],
+      '📚 Content': ['showProgress', 'showAuthor']
     };
 
     return (
@@ -389,38 +768,73 @@ Los cambios se aplican instantáneamente en toda la app.`);
           Configura cada variant, visualiza el impacto en tiempo real, y descubre dónde se usan en la app.
         </p>
 
-        {/* Global Stats */}
+        {/* Global Stats - Mejoradas */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-              {globalStats.universalCard.count}
+          <div className="p-5 rounded-xl hover:scale-105 transition-transform cursor-pointer" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-500/10">
+                <CheckCircle size={20} className="text-green-500" />
+              </div>
+              <div className="text-3xl font-black" style={{ color: 'var(--color-text-primary)' }}>
+                {globalStats.universalCard.count}
+              </div>
             </div>
-            <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-              UniversalCard usados
+            <div className="text-sm font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              UniversalCard Activos
             </div>
-          </div>
-          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <div className="text-2xl font-bold text-yellow-600">
-              {globalStats.legacyCard.count}
-            </div>
-            <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-              Clase .card (legacy)
-            </div>
-          </div>
-          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <div className="text-2xl font-bold text-blue-600">
-              {globalStats.baseCard.count}
-            </div>
-            <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-              BaseCard (OK)
+            <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+              Tarjetas usando el nuevo sistema universal. Estas son configurables desde aquí.
             </div>
           </div>
-          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-            <div className="text-2xl font-bold text-green-600">
-              {globalStats.migrationProgress}%
+
+          <div className="p-5 rounded-xl hover:scale-105 transition-transform cursor-pointer" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-warning-border)' }}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-yellow-500/10">
+                <AlertTriangle size={20} className="text-yellow-600" />
+              </div>
+              <div className="text-3xl font-black text-yellow-600">
+                {globalStats.legacyCard.count}
+              </div>
             </div>
-            <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-              Progreso migración
+            <div className="text-sm font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              Cards Legacy (.card)
+            </div>
+            <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+              Tarjetas antiguas con className="card". Deben migrarse a UniversalCard.
+            </div>
+          </div>
+
+          <div className="p-5 rounded-xl hover:scale-105 transition-transform cursor-pointer" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/10">
+                <Layers size={20} className="text-blue-600" />
+              </div>
+              <div className="text-3xl font-black text-blue-600">
+                {globalStats.baseCard.count}
+              </div>
+            </div>
+            <div className="text-sm font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              BaseCard Components
+            </div>
+            <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+              Componentes BaseCard (OK). No necesitan migración, son parte del design system.
+            </div>
+          </div>
+
+          <div className="p-5 rounded-xl hover:scale-105 transition-transform cursor-pointer" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-success-border)' }}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-500/10">
+                <Target size={20} className="text-green-600" />
+              </div>
+              <div className="text-3xl font-black text-green-600">
+                {globalStats.migrationProgress}%
+              </div>
+            </div>
+            <div className="text-sm font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              Progreso de Migración
+            </div>
+            <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+              Porcentaje de tarjetas legacy ya migradas al sistema UniversalCard.
             </div>
           </div>
         </div>
@@ -547,11 +961,14 @@ Los cambios se aplican instantáneamente en toda la app.`);
           {/* Dónde se Usa - Card estilo profesional separado */}
           <div className="rounded-xl p-6" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
             <div className="mb-4">
-              <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+              <h3 className="text-xl font-bold mb-2 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                <Search size={20} />
                 Uso en la Aplicación
               </h3>
-              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                Componentes que utilizan este variant
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                <strong>Ubicación y contexto:</strong> Esta sección muestra dónde se está usando actualmente el variant <span className="font-mono font-semibold">{selectedVariant}</span> en toda la aplicación.
+                Cada entrada indica el archivo, la línea de código y el contexto de uso (ej: "Dashboard principal", "Lista de estudiantes", etc).
+                Los cambios que hagas aquí afectarán <strong>todas estas ubicaciones</strong> instantáneamente.
               </p>
             </div>
 
@@ -656,86 +1073,110 @@ Los cambios se aplican instantáneamente en toda la app.`);
           <div className="sticky top-6">
             <div className="rounded-xl p-5" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
               <div className="mb-4">
-                <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
-                  Preview en Vivo
-                </h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                    <Eye size={20} />
+                    Preview en Vivo
+                  </h3>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setPreviewMode('basic')}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                        previewMode === 'basic' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      Básico
+                    </button>
+                    <button
+                      onClick={() => setPreviewMode('real-examples')}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                        previewMode === 'real-examples' ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      Ejemplos Reales
+                    </button>
+                  </div>
+                </div>
                 <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  Visualización en tiempo real de los cambios
+                  {previewMode === 'basic'
+                    ? 'Visualización de prueba con datos de ejemplo'
+                    : 'Ejemplos basados en tarjetas reales que existen en la app'}
                 </p>
               </div>
 
-              <div className="space-y-4">
-                {/* Card 1: NORMAL - Contenido mínimo */}
-                <div>
-                  <div className="text-xs font-semibold mb-2 px-1" style={{ color: 'var(--color-text-secondary)' }}>
-                    📄 Contenido Normal
-                  </div>
-                  <UniversalCard
-                    {...exampleData[selectedVariant]}
-                    size="md"
-                    customConfig={config[selectedVariant]}
-                  />
-                </div>
-
-                {/* Card 2: EXTENDIDA - Mucho contenido para probar sticky footer */}
-                <div>
-                  <div className="text-xs font-semibold mb-2 px-1" style={{ color: 'var(--color-text-secondary)' }}>
-                    📋 Contenido Extendido (Prueba Sticky Footer)
-                  </div>
-                  <UniversalCard
-                    {...exampleData[selectedVariant]}
-                    size="md"
-                    description="Esta card tiene mucho más contenido para demostrar claramente el funcionamiento del sticky footer. El footer (badges y acciones) debe permanecer siempre en la parte inferior de la card, sin importar cuánto contenido haya en el medio. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                    badges={[
-                      ...(exampleData[selectedVariant].badges || []),
-                      { variant: 'warning', children: 'Tag Extra 1' },
-                      { variant: 'info', children: 'Tag Extra 2' },
-                      { variant: 'success', children: 'Tag Extra 3' },
-                    ]}
-                    customConfig={config[selectedVariant]}
-                  >
-                    {/* Contenido adicional dentro de children */}
-                    <div className="space-y-2 mt-2">
-                      <div className="p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
-                        <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
-                          📌 Información Adicional
-                        </div>
-                        <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                          Este bloque de contenido extra demuestra que el footer sticky se mantiene abajo incluso con children personalizados.
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                          #tag1
-                        </span>
-                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                          #tag2
-                        </span>
-                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                          #tag3
-                        </span>
-                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                          #tag4
-                        </span>
-                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                          #tag5
-                        </span>
-                      </div>
+              {/* Preview Mode: BASIC */}
+              {previewMode === 'basic' && (
+                <div className="space-y-4">
+                  {/* Card 1: NORMAL - Contenido mínimo */}
+                  <div>
+                    <div className="text-xs font-semibold mb-2 px-1" style={{ color: 'var(--color-text-secondary)' }}>
+                      📄 Contenido Normal
                     </div>
-                  </UniversalCard>
-                </div>
-              </div>
+                    <UniversalCard
+                      {...exampleData[selectedVariant]}
+                      size="md"
+                      customConfig={config[selectedVariant]}
+                    />
+                  </div>
 
-              {/* Nota explicativa */}
-              <div className="mt-4 p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px dashed var(--color-border)' }}>
-                <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
-                  💡 Comparación
+                  {/* Card 2: EXTENDIDA - Mucho contenido para probar sticky footer */}
+                  <div>
+                    <div className="text-xs font-semibold mb-2 px-1" style={{ color: 'var(--color-text-secondary)' }}>
+                      📋 Contenido Extendido
+                    </div>
+                    <UniversalCard
+                      {...exampleData[selectedVariant]}
+                      size="md"
+                      description="Esta card tiene mucho más contenido para demostrar el sticky footer. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                      badges={[
+                        ...(exampleData[selectedVariant].badges || []),
+                        { variant: 'warning', children: 'Extra' },
+                      ]}
+                      customConfig={config[selectedVariant]}
+                    />
+                  </div>
+
+                  {/* Nota explicativa */}
+                  <div className="mt-4 p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px dashed var(--color-border)' }}>
+                    <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                      💡 Vista Básica
+                    </div>
+                    <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                      Ejemplos de prueba con datos genéricos. Cambia a "Ejemplos Reales" para ver tarjetas basadas en casos reales de la app.
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                  La card extendida tiene más descripción, badges extras y contenido custom.
-                  Observa cómo el footer (acciones) permanece pegado al fondo en ambas cards gracias al <span className="font-mono font-semibold">footerSticky</span>.
+              )}
+
+              {/* Preview Mode: REAL EXAMPLES */}
+              {previewMode === 'real-examples' && (
+                <div className="space-y-4">
+                  {realExamples[selectedVariant]?.map((example, idx) => (
+                    <div key={idx}>
+                      <div className="text-xs font-semibold mb-2 px-1 flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
+                        <Sparkles size={12} />
+                        Ejemplo Real #{idx + 1}
+                      </div>
+                      <UniversalCard
+                        {...example}
+                        size="md"
+                        customConfig={config[selectedVariant]}
+                      />
+                    </div>
+                  ))}
+
+                  {/* Nota explicativa */}
+                  <div className="mt-4 p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px dashed var(--color-border)' }}>
+                    <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                      ✨ Ejemplos Reales
+                    </div>
+                    <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                      Estos ejemplos están basados en tarjetas que realmente existen en la aplicación.
+                      Los cambios que hagas se aplicarán a tarjetas similares en toda la app.
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

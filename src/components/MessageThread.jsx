@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText, ArrowLeft } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText, ArrowLeft, Play, Pause } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -532,7 +532,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
    * Handle voice message send
    */
   const handleVoiceSend = async (audioBlob, duration) => {
-    setShowVoiceRecorder(false);
+    // Important: Don't close VoiceRecorder yet to ensure proper cleanup
     setSending(true);
     setUploading(true);
 
@@ -552,6 +552,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
 
     if (!uploadResult || !uploadResult.success) {
       setSending(false);
+      setShowVoiceRecorder(false); // Close on error
       return;
     }
 
@@ -582,6 +583,12 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
     );
 
     setSending(false);
+
+    // Close VoiceRecorder AFTER everything is done
+    // This gives time for cleanup to execute properly
+    setTimeout(() => {
+      setShowVoiceRecorder(false);
+    }, 100);
 
     if (result) {
       inputRef.current?.focus();
@@ -1449,6 +1456,12 @@ const MessageBubble = forwardRef(({
 }, ref) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [audioCurrentTime, setAudioCurrentTime] = useState(0);
+  const audioRef = useRef(null);
+  const animationFrameRef = useRef(null);
   const formatTime = (date) => {
     if (!date) return '';
     try {
@@ -1509,6 +1522,91 @@ const MessageBubble = forwardRef(({
     onAddReaction(message.id, emoji);
     setShowReactionPicker(false);
   };
+
+  /**
+   * Handle audio playback
+   */
+  const toggleAudioPlayback = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlayingAudio) {
+      audio.pause();
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    } else {
+      audio.play();
+      updateAudioProgress(); // Start RAF loop
+    }
+    setIsPlayingAudio(!isPlayingAudio);
+  };
+
+  // Use requestAnimationFrame for smooth progress updates
+  const updateAudioProgress = () => {
+    const audio = audioRef.current;
+    if (!audio || audio.paused || audio.ended) return;
+
+    setAudioCurrentTime(audio.currentTime);
+    setAudioProgress((audio.currentTime / audio.duration) * 100 || 0);
+
+    animationFrameRef.current = requestAnimationFrame(updateAudioProgress);
+  };
+
+  const handleAudioTimeUpdate = () => {
+    // Fallback for browsers that don't support RAF properly
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    setAudioCurrentTime(audio.currentTime);
+    setAudioProgress((audio.currentTime / audio.duration) * 100 || 0);
+  };
+
+  const handleAudioLoadedMetadata = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    setAudioDuration(audio.duration);
+  };
+
+  const handleAudioEnded = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    setIsPlayingAudio(false);
+    setAudioProgress(0);
+    setAudioCurrentTime(0);
+  };
+
+  const handleAudioSeek = (e) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    const newTime = percentage * audio.duration;
+
+    audio.currentTime = newTime;
+    setAudioCurrentTime(newTime);
+    setAudioProgress(percentage * 100);
+  };
+
+  const formatAudioTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Cleanup animation frame on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   /**
    * Check if message can be edited (within 15 minutes)
@@ -1627,12 +1725,39 @@ const MessageBubble = forwardRef(({
                 />
               </div>
             ) : isAudio(message.attachment.type) ? (
-              <div className="attachment-audio">
-                <Mic size={20} className="audio-icon" />
-                <audio controls className="audio-player">
-                  <source src={message.attachment.url} type={message.attachment.type} />
-                  Tu navegador no soporta el elemento de audio.
-                </audio>
+              <div className="attachment-audio-custom">
+                <button
+                  className="audio-play-btn"
+                  onClick={toggleAudioPlayback}
+                  title={isPlayingAudio ? 'Pausar' : 'Reproducir'}
+                >
+                  {isPlayingAudio ? <Pause size={20} /> : <Play size={20} />}
+                </button>
+
+                <div className="audio-info">
+                  <div
+                    className="audio-progress-bar"
+                    onClick={handleAudioSeek}
+                  >
+                    <div
+                      className="audio-progress-fill"
+                      style={{ width: `${audioProgress}%` }}
+                    />
+                  </div>
+                  <div className="audio-time">
+                    <span>{formatAudioTime(audioCurrentTime)}</span>
+                    <span className="audio-duration-text">{formatAudioTime(audioDuration || message.attachment.duration)}</span>
+                  </div>
+                </div>
+
+                <audio
+                  ref={audioRef}
+                  src={message.attachment.url}
+                  onTimeUpdate={handleAudioTimeUpdate}
+                  onLoadedMetadata={handleAudioLoadedMetadata}
+                  onEnded={handleAudioEnded}
+                  style={{ display: 'none' }}
+                />
               </div>
             ) : (
               <a

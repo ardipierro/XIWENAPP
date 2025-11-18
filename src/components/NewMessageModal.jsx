@@ -36,6 +36,13 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
         return;
       }
 
+      // Validar que currentUser.uid exista
+      if (!currentUser || !currentUser.uid) {
+        logger.warn('⚠️ NewMessageModal: No hay usuario autenticado para buscar');
+        setSearchResults([]);
+        return;
+      }
+
       setSearching(true);
 
       try {
@@ -51,7 +58,7 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
     }, 300); // Debounce
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, currentUser.uid]);
+  }, [searchTerm, currentUser]);
 
   /**
    * Handle user selection
@@ -69,6 +76,13 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
     e.preventDefault();
 
     if (!selectedUser || !message.trim() || sending) return;
+
+    // Validar que currentUser.uid exista
+    if (!currentUser || !currentUser.uid) {
+      logger.warn('⚠️ NewMessageModal: No hay usuario autenticado o user.uid es undefined');
+      alert('No se pudo identificar al usuario');
+      return;
+    }
 
     setSending(true);
 

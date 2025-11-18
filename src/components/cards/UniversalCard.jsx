@@ -8,7 +8,7 @@
  * @module components/cards/UniversalCard
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { BaseBadge } from '../common';
 import { useCardConfig } from '../../contexts/CardConfigContext';
 import {
@@ -122,18 +122,49 @@ export function UniversalCard({
   customConfig,            // Custom config override (para preview/testing)
 }) {
   const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef(null);
 
   // Get global saved config (si existe)
   const { config: globalConfig } = useCardConfig();
 
-  // Get configurations (prioridad: customConfig > globalConfig > default)
-  const variantConfig = customConfig || (globalConfig && globalConfig[variant]) || getVariantConfig(variant);
+  // Get configurations con merge correcto (memoizado para evitar loops)
+  const variantConfig = useMemo(() => {
+    if (customConfig) return customConfig;
+
+    const defaultVariantConfig = getVariantConfig(variant);
+    return {
+      ...defaultVariantConfig,
+      ...(globalConfig && globalConfig[variant])
+    };
+  }, [variant, customConfig, globalConfig]);
+
   const sizeConfig = getSizeConfig(size);
   const layoutConfig = getLayoutConfig(layout);
 
-  // Generate classes and styles
-  const classes = generateCardClasses(variant, size, layout);
-  const styles = generateCardStyles(variant, size, layout);
+  // Generate classes and styles - PASS RESOLVED variantConfig object (BUG FIX)
+  const classes = generateCardClasses(variantConfig, size, layout);
+  const styles = useMemo(() => ({
+    container: {
+      backgroundColor: 'var(--color-bg-secondary)',
+      border: `1px solid ${variantConfig.normalBorderColor}`,
+      boxShadow: variantConfig.normalShadow,
+      ...(variantConfig.cardHeight
+        ? { height: variantConfig.cardHeight, minHeight: 'unset' }
+        : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
+      ),
+      transitionDuration: variantConfig.transitionDuration,
+      transitionTimingFunction: variantConfig.transitionTiming,
+    },
+    header: {
+      height: layout === 'horizontal' ? '100%' : variantConfig.headerHeight,
+      width: layout === 'horizontal' ? layoutConfig.headerWidth : 'auto',
+    },
+    content: {
+      padding: layout === 'horizontal' && layoutConfig.contentPadding
+        ? layoutConfig.contentPadding
+        : variantConfig.contentPadding,
+    },
+  }), [variantConfig, layout, sizeConfig, layoutConfig]);
 
   /**
    * Handle mouse enter
@@ -142,7 +173,7 @@ export function UniversalCard({
     if (!variantConfig.hoverEnabled || disabled) return;
     setIsHovered(true);
 
-    const hoverStyles = getHoverStyles(variant);
+    const hoverStyles = getHoverStyles(variantConfig);
     if (hoverStyles) {
       Object.assign(e.currentTarget.style, hoverStyles);
     }
@@ -155,7 +186,7 @@ export function UniversalCard({
     if (!variantConfig.hoverEnabled) return;
     setIsHovered(false);
 
-    const normalStyles = getNormalStyles(variant);
+    const normalStyles = getNormalStyles(variantConfig);
     Object.assign(e.currentTarget.style, normalStyles);
   };
 
@@ -439,15 +470,42 @@ export function UniversalCard({
     );
   };
 
+  // FORZAR altura fija basada en variant (sin depender de config que puede estar corrupto en localStorage)
+  const forceHeight = variant === 'content' ? '420px' : variant === 'default' ? '380px' : null;
+
+  const finalStyle = {
+    ...styles.container,
+    ...style,
+    // FORZAR altura fija + flexbox para sticky footer (sobrescribe TODO)
+    ...(forceHeight && {
+      height: forceHeight,
+      minHeight: 'unset',
+      maxHeight: forceHeight,  // Asegurar que no puede crecer más
+      display: 'flex',
+      flexDirection: 'column',
+    }),
+  };
+
+  // FORZAR altura con !important directo en el DOM (sobrescribe TODO CSS)
+  useEffect(() => {
+    if (cardRef.current && forceHeight) {
+      cardRef.current.style.setProperty('height', forceHeight, 'important');
+      cardRef.current.style.setProperty('min-height', 'unset', 'important');
+      cardRef.current.style.setProperty('max-height', forceHeight, 'important');
+      cardRef.current.style.setProperty('display', 'flex', 'important');
+      cardRef.current.style.setProperty('flex-direction', 'column', 'important');
+    }
+  }, [forceHeight, title]);
+
   return (
     <article
+      ref={cardRef}
       className={`${classes.container} ${className} ${
         selected ? 'ring-2 ring-primary-500' : ''
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-      style={{
-        ...styles.container,
-        ...style,
-      }}
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${
+        forceHeight ? 'overflow-hidden' : ''
+      }`}
+      style={finalStyle}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -461,8 +519,11 @@ export function UniversalCard({
       {/* Header - Solo en modo vertical */}
       {layout !== 'horizontal' && renderHeader()}
 
-      {/* Content */}
-      <div className={classes.content} style={styles.content}>
+      {/* Content - FORZAR flex-1 para que use todo el espacio restante */}
+      <div
+        className={`${classes.content} flex-1 flex flex-col`}
+        style={styles.content}
+      >
         {layout === 'horizontal' ? (
           <>
             {/* Horizontal Layout - Avatar/Icono pequeño a la izquierda */}
@@ -564,10 +625,10 @@ export function UniversalCard({
           </>
         ) : (
           <>
-            {/* Vertical Layout - FIX DEFINITIVO: Children DENTRO de flex-1 */}
-            <div className="flex-1 flex flex-col">
-              {/* Contenido principal + Children (flex-1) */}
-              <div className="flex-1">
+            {/* Vertical Layout - STICKY FOOTER FIX */}
+            <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
+              {/* Contenido principal + Children - Con scroll si es muy largo */}
+              <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
                 <div className="card-text">
                   {title && (
                     <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
@@ -586,7 +647,7 @@ export function UniversalCard({
 
                   {description && (
                     <p
-                      className={`${classes.description} mt-2`}
+                      className={`${classes.description} mt-2 line-clamp-3`}
                       style={{ color: 'var(--color-text-secondary)' }}
                     >
                       {description}
@@ -600,7 +661,7 @@ export function UniversalCard({
                 {/* Big Number (variant='stats') */}
                 {renderBigNumber()}
 
-                {/* Custom Children - DENTRO de flex-1 para permitir sticky footer */}
+                {/* Custom Children */}
                 {children && (
                   <div className="mt-3">
                     {children}
@@ -608,9 +669,9 @@ export function UniversalCard({
                 )}
               </div>
 
-              {/* Footer sticky (mt-auto dentro del flex container) */}
+              {/* Footer sticky (mt-auto lo empuja al fondo) - ROJO PARA DEBUG */}
               {(badges?.length > 0 || stats?.length > 0 || actions) && variantConfig.footerSticky && (
-                <div className={`mt-auto pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
+                <div className={`mt-auto pt-4 flex flex-col ${variantConfig.footerSpacing}`} style={{ backgroundColor: 'red', border: '3px solid yellow' }}>
                   {/* Badges */}
                   {renderBadges()}
 
@@ -622,9 +683,9 @@ export function UniversalCard({
                 </div>
               )}
 
-              {/* Footer NO sticky (para stats cards y otros que no necesitan) */}
+              {/* Footer NO sticky (para stats cards y otros que no necesitan) - AZUL PARA DEBUG */}
               {(badges?.length > 0 || stats?.length > 0 || actions) && !variantConfig.footerSticky && (
-                <div className={`pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
+                <div className={`pt-4 flex flex-col ${variantConfig.footerSpacing}`} style={{ backgroundColor: 'blue', border: '3px solid green' }}>
                   {/* Badges */}
                   {renderBadges()}
 
