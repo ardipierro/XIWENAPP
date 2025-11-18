@@ -21,6 +21,7 @@ import ProfileTabs from './profile/ProfileTabs';
 import InfoTab from './profile/tabs/InfoTab';
 import ClassesTab from './profile/tabs/ClassesTab';
 import ContentTab from './profile/tabs/ContentTab';
+import TasksTab from './profile/tabs/TasksTab';
 import StudentsTab from './profile/tabs/StudentsTab';
 import CreditsTab from './profile/tabs/CreditsTab';
 import GuardiansTab from './profile/tabs/GuardiansTab';
@@ -336,6 +337,16 @@ function UserProfileModal({
       });
     }
 
+    // Tab de Tareas - Solo Estudiantes
+    if (userRole === 'student' || userRole === 'listener' || userRole === 'trial') {
+      tabs.push({
+        id: 'tasks',
+        label: 'Tareas',
+        icon: FileText,
+        component: <TasksTab user={user} />
+      });
+    }
+
     // Tab de Estudiantes - Solo Profesores
     if (userRole === 'teacher' || userRole === 'trial_teacher' || userRole === 'admin') {
       tabs.push({
@@ -647,7 +658,7 @@ function UserProfileModal({
           className="flex items-center justify-end gap-3 px-6 py-5 shrink-0"
           style={{ borderTop: '1px solid var(--color-border)' }}
         >
-            {activeTab === 'info' ? (
+            {activeTab === 'info' && (
               <>
                 {isEditing ? (
                   <>
@@ -678,14 +689,6 @@ function UserProfileModal({
                   </BaseButton>
                 )}
               </>
-            ) : (
-              <BaseButton
-                onClick={onClose}
-                variant="ghost"
-                size="md"
-              >
-                Cerrar
-              </BaseButton>
             )}
         </div>
       </div>
