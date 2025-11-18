@@ -532,7 +532,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
    * Handle voice message send
    */
   const handleVoiceSend = async (audioBlob, duration) => {
-    setShowVoiceRecorder(false);
+    // Important: Don't close VoiceRecorder yet to ensure proper cleanup
     setSending(true);
     setUploading(true);
 
@@ -552,6 +552,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
 
     if (!uploadResult || !uploadResult.success) {
       setSending(false);
+      setShowVoiceRecorder(false); // Close on error
       return;
     }
 
@@ -582,6 +583,12 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
     );
 
     setSending(false);
+
+    // Close VoiceRecorder AFTER everything is done
+    // This gives time for cleanup to execute properly
+    setTimeout(() => {
+      setShowVoiceRecorder(false);
+    }, 100);
 
     if (result) {
       inputRef.current?.focus();
@@ -1454,6 +1461,7 @@ const MessageBubble = forwardRef(({
   const [audioDuration, setAudioDuration] = useState(0);
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const audioRef = useRef(null);
+  const animationFrameRef = useRef(null);
   const formatTime = (date) => {
     if (!date) return '';
     try {
@@ -1524,13 +1532,29 @@ const MessageBubble = forwardRef(({
 
     if (isPlayingAudio) {
       audio.pause();
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     } else {
       audio.play();
+      updateAudioProgress(); // Start RAF loop
     }
     setIsPlayingAudio(!isPlayingAudio);
   };
 
+  // Use requestAnimationFrame for smooth progress updates
+  const updateAudioProgress = () => {
+    const audio = audioRef.current;
+    if (!audio || audio.paused || audio.ended) return;
+
+    setAudioCurrentTime(audio.currentTime);
+    setAudioProgress((audio.currentTime / audio.duration) * 100 || 0);
+
+    animationFrameRef.current = requestAnimationFrame(updateAudioProgress);
+  };
+
   const handleAudioTimeUpdate = () => {
+    // Fallback for browsers that don't support RAF properly
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -1546,6 +1570,9 @@ const MessageBubble = forwardRef(({
   };
 
   const handleAudioEnded = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
     setIsPlayingAudio(false);
     setAudioProgress(0);
     setAudioCurrentTime(0);
@@ -1571,6 +1598,15 @@ const MessageBubble = forwardRef(({
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Cleanup animation frame on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   /**
    * Check if message can be edited (within 15 minutes)

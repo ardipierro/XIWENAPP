@@ -2726,7 +2726,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-bubble {
   max-width: 60%;
   min-width: 80px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 16px;
   position: relative;
   display: inline-block;
@@ -2748,13 +2748,13 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-sender {
   font-size: 12px;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   opacity: 0.8;
 }
 
 .message-content {
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.35;
   word-wrap: break-word;
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -2766,7 +2766,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-time {
   font-size: 11px;
   opacity: 0.7;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 @keyframes messageSlideIn {
@@ -4098,19 +4098,19 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .attachment-audio-custom {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 12px 16px;
   background: var(--color-bg-tertiary);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
-  min-width: 200px;
-  max-width: 300px;
+  border-radius: 12px;
+  min-width: 280px;
+  max-width: 450px;
 }
 
 .audio-play-btn {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   border: none;
   background: var(--color-primary, #6366f1);
@@ -4135,7 +4135,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   min-width: 0;
 }
 
@@ -4152,7 +4152,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   height: 100%;
   background: var(--color-primary, #6366f1);
   border-radius: 3px;
-  transition: width 0.1s linear;
+  transition: none; /* Remove transition for smoother RAF updates */
 }
 
 .audio-time {
