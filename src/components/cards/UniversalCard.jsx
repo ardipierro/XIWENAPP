@@ -329,11 +329,18 @@ export function UniversalCard({
 
     return (
       <div className="flex flex-wrap gap-2">
-        {badges.map((badgeProps, index) => {
-          const { key, ...restProps } = badgeProps;
-          return (
-            <BaseBadge key={index} size={layout === 'horizontal' ? 'sm' : 'md'} {...restProps} />
-          );
+        {badges.map((badge, index) => {
+          // Soportar tanto componentes JSX como objetos de props
+          if (typeof badge === 'object' && badge.type) {
+            // Es un componente JSX (ej: <CategoryBadge />)
+            return <div key={index}>{badge}</div>;
+          } else {
+            // Es un objeto de props para BaseBadge
+            const { key, ...restProps } = badge;
+            return (
+              <BaseBadge key={index} size={layout === 'horizontal' ? 'sm' : 'md'} {...restProps} />
+            );
+          }
         })}
       </div>
     );
@@ -495,7 +502,11 @@ export function UniversalCard({
       {/* Content - FORZAR flex-1 para que use todo el espacio restante */}
       <div
         className={`${classes.content} flex-1 flex flex-col`}
-        style={styles.content}
+        style={{
+          ...styles.content,
+          minHeight: 0, // Importante para que el overflow funcione con flex
+          overflow: 'hidden' // Evitar que el contenido empuje fuera del contenedor
+        }}
       >
         {layout === 'horizontal' ? (
           <>
@@ -599,77 +610,82 @@ export function UniversalCard({
         ) : (
           <>
             {/* Vertical Layout - STICKY FOOTER FIX */}
-            <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
-              {/* Contenido principal + Children - Con scroll si es muy largo */}
-              <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
-                <div className="card-text">
-                  {title && (
-                    <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
-                      {title}
-                    </h3>
-                  )}
 
-                  {subtitle && (
-                    <div
-                      className={classes.subtitle}
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      {subtitle}
-                    </div>
-                  )}
+            {/* Contenido principal + Children - Con scroll si es muy largo */}
+            <div
+              className="flex-1"
+              style={{
+                minHeight: 0,
+                overflowY: variantConfig.contentOverflow || 'auto'
+              }}
+            >
+              <div className="card-text">
+                {title && (
+                  <h3 className={classes.title} style={{ color: 'var(--color-text-primary)' }}>
+                    {title}
+                  </h3>
+                )}
 
-                  {description && (
-                    <p
-                      className={`${classes.description} mt-2 line-clamp-3`}
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      {description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Meta Info (variant='class') */}
-                {renderMeta()}
-
-                {/* Big Number (variant='stats') */}
-                {renderBigNumber()}
-
-                {/* Custom Children */}
-                {children && (
-                  <div className="mt-3">
-                    {children}
+                {subtitle && (
+                  <div
+                    className={classes.subtitle}
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {subtitle}
                   </div>
+                )}
+
+                {description && (
+                  <p
+                    className={`${classes.description} mt-2 line-clamp-3`}
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {description}
+                  </p>
                 )}
               </div>
 
-              {/* Footer sticky (mt-auto lo empuja al fondo) */}
-              {(badges?.length > 0 || stats?.length > 0 || actions) && variantConfig.footerSticky && (
-                <div className={`mt-auto pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
-                  {/* Badges */}
-                  {renderBadges()}
+              {/* Meta Info (variant='class') */}
+              {renderMeta()}
 
-                  {/* Stats */}
-                  {renderStats()}
+              {/* Big Number (variant='stats') */}
+              {renderBigNumber()}
 
-                  {/* Actions */}
-                  {renderActions()}
-                </div>
-              )}
-
-              {/* Footer NO sticky (para stats cards y otros que no necesitan) */}
-              {(badges?.length > 0 || stats?.length > 0 || actions) && !variantConfig.footerSticky && (
-                <div className={`pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
-                  {/* Badges */}
-                  {renderBadges()}
-
-                  {/* Stats */}
-                  {renderStats()}
-
-                  {/* Actions */}
-                  {renderActions()}
+              {/* Custom Children */}
+              {children && (
+                <div className="mt-3">
+                  {children}
                 </div>
               )}
             </div>
+
+            {/* Footer sticky - FUERA del área scrolleable */}
+            {(badges?.length > 0 || stats?.length > 0 || actions) && variantConfig.footerSticky && (
+              <div className={`flex-shrink-0 pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
+                {/* Badges */}
+                {renderBadges()}
+
+                {/* Stats */}
+                {renderStats()}
+
+                {/* Actions */}
+                {renderActions()}
+              </div>
+            )}
+
+            {/* Footer NO sticky (para stats cards y otros que no necesitan) */}
+            {(badges?.length > 0 || stats?.length > 0 || actions) && !variantConfig.footerSticky && (
+              <div className={`flex-shrink-0 pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
+                {/* Badges */}
+                {renderBadges()}
+
+                {/* Stats */}
+                {renderStats()}
+
+                {/* Actions */}
+                {renderActions()}
+              </div>
+            )}
           </>
         )}
       </div>
