@@ -38,7 +38,7 @@ import {
   getTeacherAnalytics,
   getAnalyticsByDateRange
 } from '../firebase/contentAnalytics';
-import { formatTimeSpent } from '../firebase/courseProgress';
+import { formatTimeSpent } from '../utils/formatters';
 import { getAllContent } from '../firebase/content';
 import logger from '../utils/logger';
 

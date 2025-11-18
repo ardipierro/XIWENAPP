@@ -212,6 +212,24 @@ export function formatStatus(status) {
 }
 
 /**
+ * Formatea segundos a formato de tiempo (HH:MM:SS o MM:SS)
+ * @param {number} seconds - Segundos
+ * @returns {string} Tiempo formateado
+ */
+export function formatTimeSpent(seconds) {
+  if (!seconds || seconds === 0) return '0:00';
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+/**
  * Formatea una dificultad para mostrar
  * @param {string} difficulty - Dificultad (ej: 'beginner', 'intermediate')
  * @returns {string}
@@ -273,6 +291,7 @@ export default {
   formatPercentage,
   formatFileSize,
   formatDuration,
+  formatTimeSpent,
   truncateText,
   capitalize,
   capitalizeWords,

@@ -8,7 +8,7 @@ export { default as useAuth } from './useAuth.js';
 export { default as useFirestore } from './useFirestore.js';
 
 // Hooks de recursos
-export { default as useCourses } from './useCourses.js';
+export { default as useCourses } from './useCourses.js'; // DEPRECATED: Solo usado por AssignmentManager legacy
 export { default as useStudents } from './useStudents.js';
 export { useUsers } from './useUsers.js';
 export { default as useClasses } from './useClasses.js';
@@ -27,7 +27,6 @@ export { useDebounce, default as useDebounceDefault } from './useDebounce.js';
 export { useLocalStorage, default as useLocalStorageDefault } from './useLocalStorage.js';
 export { usePagination, default as usePaginationDefault } from './usePagination.js';
 export { useProfileEditor } from './useProfileEditor.js';
-export { useEnrollments } from './useEnrollments.js';
 
 // Card system hooks
 export { useViewMode, default as useViewModeDefault } from './useViewMode.js';

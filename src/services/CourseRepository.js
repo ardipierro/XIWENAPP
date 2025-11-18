@@ -1,6 +1,7 @@
 /**
  * @fileoverview Repository para gestión de cursos
  * @module services/CourseRepository
+ * @deprecated LEGACY - Solo usado por useCourses hook. Usar Content Manager para nuevo contenido.
  */
 
 import BaseRepository from './BaseRepository.js';

@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import logger from '../utils/logger';
 import {
-  getAllEnrollments,
   getAllMonthlyFees,
   getAllPayments,
   getPaymentStatistics,
@@ -52,13 +51,12 @@ function AdminPaymentsPanel() {
   const [success, setSuccess] = useState(null);
 
   const [stats, setStats] = useState(null);
-  const [enrollments, setEnrollments] = useState([]);
   const [monthlyFees, setMonthlyFees] = useState([]);
   const [payments, setPayments] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [activeTab, setActiveTab] = useState('overview'); // overview, fees, payments, enrollments
+  const [activeTab, setActiveTab] = useState('overview'); // overview, fees, payments
 
   const [showFeeModal, setShowFeeModal] = useState(false);
   const [selectedFee, setSelectedFee] = useState(null);
@@ -74,19 +72,14 @@ function AdminPaymentsPanel() {
 
       logger.info('Loading admin payment data');
 
-      const [statsResult, enrollmentsResult, feesResult, paymentsResult] = await Promise.all([
+      const [statsResult, feesResult, paymentsResult] = await Promise.all([
         getPaymentStatistics(),
-        getAllEnrollments({ status: 'active' }),
         getAllMonthlyFees({ limit: 100 }),
         getAllPayments({ limit: 50 })
       ]);
 
       if (statsResult.success) {
         setStats(statsResult.stats);
-      }
-
-      if (enrollmentsResult.success) {
-        setEnrollments(enrollmentsResult.enrollments);
       }
 
       if (feesResult.success) {
@@ -230,7 +223,6 @@ function AdminPaymentsPanel() {
           { id: 'overview', label: 'Resumen', icon: TrendingUp },
           { id: 'fees', label: 'Cuotas Mensuales', icon: Calendar },
           { id: 'payments', label: 'Pagos', icon: CreditCard },
-          { id: 'enrollments', label: 'Inscripciones', icon: Users },
         ]}
         activeTab={activeTab}
         onChange={setActiveTab}
@@ -408,70 +400,6 @@ function AdminPaymentsPanel() {
                       <p className="text-xs style={{ color: 'var(--color-text-secondary)' }}">
                         {payment.paymentMethod}
                       </p>
-                    </div>
-                  </div>
-                </UniversalCard>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Enrollments Tab */}
-      {activeTab === 'enrollments' && (
-        <div>
-          {enrollments.length === 0 ? (
-            <BaseEmptyState
-              icon={Users}
-              title="Sin inscripciones activas"
-              description="No hay estudiantes inscritos actualmente"
-            />
-          ) : (
-            <div className="space-y-3">
-              {enrollments.map((enrollment) => (
-                <UniversalCard
-                  key={enrollment.id}
-                  variant="compact"
-                  size="md"
-                  title={enrollment.studentName}
-                  subtitle={enrollment.studentEmail}
-                  description={`Año: ${enrollment.academicYear}`}
-                  badges={[
-                    { variant: getStatusVariant(enrollment.status), children: getStatusLabel(enrollment.status) }
-                  ]}
-                >
-                  <div className="mt-2 space-y-2">
-                    {enrollment.discount > 0 && (
-                      <p className="text-sm text-green-600 dark:text-green-400">
-                        Descuento: {enrollment.discount}% - {enrollment.discountReason}
-                      </p>
-                    )}
-
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">
-                          Matrícula
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium style={{ color: 'var(--color-text-primary)' }}">
-                            {formatCurrency(enrollment.matriculaAmount)}
-                          </p>
-                          {enrollment.matriculaPaid ? (
-                            <CheckCircle size={16} className="text-green-500" strokeWidth={2} />
-                          ) : (
-                            <AlertCircle size={16} className="text-amber-500" strokeWidth={2} />
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-sm style={{ color: 'var(--color-text-secondary)' }}">
-                          Cuota
-                        </p>
-                        <p className="font-medium style={{ color: 'var(--color-text-primary)' }}">
-                          {formatCurrency(enrollment.cuotaAmount)}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </UniversalCard>

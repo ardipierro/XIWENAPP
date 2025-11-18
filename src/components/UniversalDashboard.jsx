@@ -41,8 +41,6 @@ const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const UniversalUserManager = lazy(() => import('./UniversalUserManager'));
 
 // Student views
-const MyCourses = lazy(() => import('./student/MyCourses'));
-const CourseViewer = lazy(() => import('./student/CourseViewer'));
 const ContentPlayer = lazy(() => import('./student/ContentPlayer'));
 const MyAssignmentsView = lazy(() => import('./student/MyAssignmentsView'));
 const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
@@ -227,8 +225,7 @@ function UniversalDashboardInner() {
     return () => window.removeEventListener('resize', handleResize);
   }, [menuOpen]);
 
-  // Student course navigation states
-  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  // Student navigation states
   const [selectedContentId, setSelectedContentId] = useState(null);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState(null);
 
@@ -262,22 +259,9 @@ function UniversalDashboardInner() {
     setMenuOpen(!menuOpen);
   };
 
-  // Student course navigation handlers
-  const handleSelectCourse = (courseId) => {
-    setSelectedCourseId(courseId);
-  };
-
+  // Student navigation handlers
   const handleSelectContent = (contentId) => {
     setSelectedContentId(contentId);
-  };
-
-  const handleBackToCourses = () => {
-    setSelectedCourseId(null);
-    setSelectedContentId(null);
-  };
-
-  const handleBackToCourseViewer = () => {
-    setSelectedContentId(null);
   };
 
   /**
@@ -298,8 +282,12 @@ function UniversalDashboardInner() {
               return <UniversalUserManager user={effectiveUser} userRole={effectiveUser.role} />;
 
             case '/student':
-              // Student default view -> My Courses
-              return <MyCourses user={effectiveUser} onSelectCourse={handleSelectCourse} />;
+              // Student default view -> My Assignments
+              if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
+              return <MyAssignmentsView user={effectiveUser} onSelectAssignment={(assignmentId) => {
+                setSelectedAssignmentId(assignmentId);
+                logger.debug('Assignment seleccionado:', assignmentId);
+              }} />;
 
             case '/teacher':
               // Teacher default view -> Class Management
@@ -366,34 +354,14 @@ function UniversalDashboardInner() {
               if (!can('grade-assignments')) return <PlaceholderView title="Sin acceso" />;
               return <HomeworkReviewPanel user={effectiveUser} />;
 
-            // MIS CURSOS (Students)
+            // MIS CURSOS (Students) - DEPRECATED - Redirigir a tareas
             case '/dashboard/my-courses':
-              // Si hay contenido seleccionado, mostrar ContentPlayer
-              if (selectedContentId && selectedCourseId) {
-                return (
-                  <ContentPlayer
-                    user={effectiveUser}
-                    courseId={selectedCourseId}
-                    contentId={selectedContentId}
-                    onBack={handleBackToCourseViewer}
-                  />
-                );
-              }
-
-              // Si hay curso seleccionado, mostrar CourseViewer
-              if (selectedCourseId) {
-                return (
-                  <CourseViewer
-                    user={effectiveUser}
-                    courseId={selectedCourseId}
-                    onSelectContent={handleSelectContent}
-                    onBack={handleBackToCourses}
-                  />
-                );
-              }
-
-              // Por defecto, mostrar lista de cursos
-              return <MyCourses user={effectiveUser} onSelectCourse={handleSelectCourse} />;
+              // Sistema legacy de cursos eliminado - redirigir a tareas
+              if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
+              return <MyAssignmentsView user={effectiveUser} onSelectAssignment={(assignmentId) => {
+                setSelectedAssignmentId(assignmentId);
+                logger.debug('Assignment seleccionado:', assignmentId);
+              }} />;
 
             // MIS TAREAS (Students)
             case '/dashboard/my-assignments':

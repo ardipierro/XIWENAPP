@@ -9,7 +9,6 @@ import {
   Eye,
   AlertTriangle,
   BarChart3,
-  BookOpen,
   CreditCard,
   Calendar,
   Edit,
@@ -29,9 +28,6 @@ import {
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { updateUser, deleteUser } from '../firebase/users';
 import {
-  getStudentEnrollments,
-  enrollStudentInCourse,
-  unenrollStudentFromCourse,
   getStudentContentAssignments,
   assignContentToStudent,
   unassignContentFromStudent,
@@ -40,7 +36,6 @@ import {
   unassignStudentFromTeacher,
   getAvailableStudents
 } from '../firebase/firestore';
-import { loadCourses } from '../firebase/firestore';
 import { getAllContent } from '../firebase/content';
 import { getUserCredits } from '../firebase/credits';
 import {
@@ -83,12 +78,6 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
   });
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  // Estados para cursos
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [availableCourses, setAvailableCourses] = useState([]);
-  const [loadingCourses, setLoadingCourses] = useState(false);
-  const [selectedCourseToAdd, setSelectedCourseToAdd] = useState('');
-
   // Estados para contenidos
   const [assignedContents, setAssignedContents] = useState([]);
   const [availableContents, setAvailableContents] = useState([]);
@@ -124,9 +113,7 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
   }, [selectedUser, editing]);
 
   useEffect(() => {
-    if (activeTab === 'courses') {
-      loadCoursesData();
-    } else if (activeTab === 'contents') {
+    if (activeTab === 'contents') {
       loadContentsData();
     } else if (activeTab === 'students') {
       loadStudentsData();
@@ -151,25 +138,6 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
     };
     loadUserCredits();
   }, [selectedUser?.id]);
-
-  const loadCoursesData = async () => {
-    setLoadingCourses(true);
-    try {
-      // Cargar cursos matriculados
-      const enrollments = await getStudentEnrollments(selectedUser.id);
-      setEnrolledCourses(enrollments);
-
-      // Cargar todos los cursos disponibles
-      const allCourses = await loadCourses();
-      const activeCourses = allCourses.filter(c => c.active !== false);
-      setAvailableCourses(activeCourses);
-    } catch (error) {
-      logger.error('Error al cargar cursos:', error);
-      showMessage('error', 'Error al cargar cursos');
-    } finally {
-      setLoadingCourses(false);
-    }
-  };
 
   const loadContentsData = async () => {
     setLoadingContents(true);
@@ -314,32 +282,6 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
     }
   };
 
-  const handleEnrollCourse = async (courseId) => {
-    try {
-      const enrollmentId = await enrollStudentInCourse(selectedUser.id, courseId);
-      if (enrollmentId) {
-        showMessage('success', 'Curso asignado exitosamente');
-        await loadCoursesData();
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showMessage('error', 'Error al asignar curso');
-    }
-  };
-
-  const handleUnenrollCourse = async (courseId) => {
-    try {
-      const success = await unenrollStudentFromCourse(selectedUser.id, courseId);
-      if (success) {
-        showMessage('success', 'Curso desasignado exitosamente');
-        await loadCoursesData();
-      }
-    } catch (error) {
-      logger.error('Error:', error);
-      showMessage('error', 'Error al desasignar curso');
-    }
-  };
-
   const handleAssignContent = async (contentId) => {
     try {
       const assignmentId = await assignContentToStudent(selectedUser.id, contentId);
@@ -401,10 +343,6 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
 
     // Navegar directamente al home del dashboard
     navigate('/dashboard', { replace: true });
-  };
-
-  const isCourseEnrolled = (courseId) => {
-    return enrolledCourses.some(e => e.courseId === courseId);
   };
 
   const isContentAssigned = (contentId) => {
@@ -535,7 +473,6 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
       <BaseTabs
         tabs={[
           { id: 'info', label: 'Información', icon: BarChart3 },
-          { id: 'courses', label: 'Cursos', icon: BookOpen },
           { id: 'credits', label: 'Créditos', icon: CreditCard },
           { id: 'contents', label: 'Contenidos', icon: FileText },
           // Conditional tab for teachers
@@ -693,91 +630,6 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
                 )}
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Tab: Cursos */}
-        {activeTab === 'courses' && (
-          <div>
-            {loadingCourses ? (
-              <div className="loading-state">
-                <div className="spinner"></div>
-                <p>Cargando cursos...</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Cursos matriculados */}
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                    Cursos Asignados
-                  </h4>
-                  {enrolledCourses.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">No hay cursos asignados</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {enrolledCourses.map(enrollment => (
-                        <div key={enrollment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
-                          <div className="flex-1">
-                            <span className="font-medium text-gray-900 dark:text-gray-100">{enrollment.courseName}</span>
-                            <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                              (Asignado: {formatDate(enrollment.enrolledAt)})
-                            </span>
-                          </div>
-                          <BaseButton
-                            variant="danger"
-                            size="sm"
-                            onClick={() => handleUnenrollCourse(enrollment.courseId)}
-                          >
-                            Eliminar
-                          </BaseButton>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Agregar curso */}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Plus size={18} strokeWidth={2} className="text-gray-700 dark:text-gray-300" />
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Asignar Curso</h4>
-                  </div>
-                  {availableCourses.filter(c => !isCourseEnrolled(c.id)).length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Todos los cursos ya están asignados</p>
-                  ) : (
-                    <div className="flex gap-3">
-                      <select
-                        className="select flex-1"
-                        value={selectedCourseToAdd}
-                        onChange={(e) => setSelectedCourseToAdd(e.target.value)}
-                      >
-                        <option value="">Selecciona un curso...</option>
-                        {availableCourses
-                          .filter(c => !isCourseEnrolled(c.id))
-                          .map(course => (
-                            <option key={course.id} value={course.id}>
-                              {course.name}
-                            </option>
-                          ))}
-                      </select>
-                      <BaseButton
-                        variant="success"
-                        icon={Plus}
-                        onClick={() => {
-                          if (selectedCourseToAdd) {
-                            handleEnrollCourse(selectedCourseToAdd);
-                            setSelectedCourseToAdd('');
-                          }
-                        }}
-                        disabled={!selectedCourseToAdd}
-                      >
-                        Agregar
-                      </BaseButton>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         )}
 

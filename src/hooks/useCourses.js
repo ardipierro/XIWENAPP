@@ -1,6 +1,7 @@
 /**
  * @fileoverview Hook para gestión de cursos
  * @module hooks/useCourses
+ * @deprecated LEGACY - Solo usado por AssignmentManager. Usar Content Manager para nuevo contenido.
  */
 
 import { useState } from 'react';
