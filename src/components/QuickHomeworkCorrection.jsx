@@ -16,7 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { uploadMessageAttachment } from '../firebase/storage';
-import { createHomeworkReview, getReviewsByStudent, subscribeToReview, REVIEW_STATUS } from '../firebase/homework_reviews';
+import { createHomeworkReview, getReviewsByStudent, subscribeToReview, subscribeToPendingReviews, REVIEW_STATUS } from '../firebase/homework_reviews';
 import { getUserById } from '../firebase/users';
 import BaseButton from './common/BaseButton';
 import { BaseLoading } from './common';
@@ -48,9 +48,22 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
     loadTeacherId();
   }, [studentId]);
 
-  // Load recent reviews
+  // Load recent reviews with real-time updates
   useEffect(() => {
     loadRecentReviews();
+
+    // Subscribe to real-time updates for this student's free corrections
+    // This will automatically update when status changes from PROCESSING to PENDING_REVIEW
+    const unsubscribe = subscribeToPendingReviews((allReviews) => {
+      // Filter only free corrections for this student
+      const studentFreeCorrections = allReviews.filter(
+        r => r.studentId === studentId && !r.assignmentId && r.isFreeCorrection
+      );
+      setRecentReviews(studentFreeCorrections);
+      setLoadingReviews(false);
+    });
+
+    return () => unsubscribe();
   }, [studentId]);
 
   const loadRecentReviews = async () => {
@@ -165,8 +178,7 @@ export default function QuickHomeworkCorrection({ studentId, studentName }) {
       setImagePreviews([]);
       setUploadProgress(0);
 
-      // Reload reviews
-      setTimeout(() => loadRecentReviews(), 2000);
+      // No need to reload - real-time subscription will update automatically!
 
     } catch (error) {
       logger.error('Error uploading quick correction', error);
