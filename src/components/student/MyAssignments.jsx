@@ -215,7 +215,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
               size="lg"
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div className="grid-responsive-cards gap-6">
               {contentAssignments.map(assignment => {
                 const ContentIcon = getContentIconComponent(assignment.itemDetails?.type);
                 return (
@@ -274,7 +274,7 @@ function MyAssignments({ user, onPlayContent, onPlayExercise }) {
               size="lg"
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div className="grid-responsive-cards gap-6">
               {exerciseAssignments.map(assignment => {
                 const ExerciseIcon = getExerciseIconComponent(assignment.itemDetails?.type);
                 return (

@@ -344,7 +344,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
           />
         )
       ) : (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4' : 'flex flex-col gap-4'}>
+        <div className={viewMode === 'grid' ? 'grid-responsive-cards gap-4' : 'flex flex-col gap-4'}>
           {filteredReviews.map(review => (
             <ReviewCard
               key={review.id}

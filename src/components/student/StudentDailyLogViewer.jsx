@@ -128,9 +128,7 @@ function StudentDailyLogViewer({ user }) {
       {/* Logs Grid */}
       {!loading && !error && filteredLogs.length > 0 && (
         <div className={`
-          grid gap-4
-          ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5' : ''}
-          ${viewMode === 'list' ? 'grid-cols-1' : ''}
+          ${viewMode === 'grid' ? 'grid-responsive-cards gap-4' : 'grid grid-cols-1 gap-4'}
         `}>
           {filteredLogs.map((log) => (
             <LogCard

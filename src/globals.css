@@ -6528,3 +6528,51 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-bubble-container.own .audio-time-modern {
   color: white;
 }
+
+/* ============================================
+   RESPONSIVE CARD GRID - Auto-fit Layout
+   ============================================
+
+   Solución responsive para grids de tarjetas:
+   - Las tarjetas automáticamente "caen" a la siguiente fila cuando no hay espacio
+   - Nunca se aplastan por debajo del ancho mínimo definido
+   - No requiere breakpoints manuales
+
+   Uso:
+   <div className="grid-responsive-cards gap-4">
+     <Card />
+     <Card />
+   </div>
+*/
+
+@layer utilities {
+  /* Tamaño estándar para tarjetas medianas (280px min) */
+  .grid-responsive-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  /* Tarjetas pequeñas (200px min) - Para cards compactas */
+  .grid-responsive-cards-sm {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  /* Tarjetas grandes (320px min) - Para cards con más contenido */
+  .grid-responsive-cards-lg {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+
+  /* Tarjetas extra grandes (400px min) - Para dashboard cards */
+  .grid-responsive-cards-xl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+
+  /* Tarjetas extra pequeñas (150px min) - Para iconos o mini cards */
+  .grid-responsive-cards-xs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}

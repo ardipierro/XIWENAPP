@@ -151,7 +151,7 @@ function BadgesTab({ user, isAdmin }) {
         </div>
 
         {earnedBadges.length > 0 ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+          <div className="grid-responsive-cards-xs gap-4">
             {earnedBadges.map((badge) => (
               <BadgeCard key={badge.id} badge={badge} earned={true} />
             ))}
@@ -178,7 +178,7 @@ function BadgesTab({ user, isAdmin }) {
           </button>
 
           {showAllBadges && (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+            <div className="grid-responsive-cards-xs gap-4">
               {lockedBadges.map((badge) => (
                 <BadgeCard key={badge.id} badge={badge} earned={false} />
               ))}

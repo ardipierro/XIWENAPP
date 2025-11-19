@@ -84,7 +84,7 @@ export function FlashCardStatsPanel({ user, collectionId = null }) {
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid-responsive-cards-xl gap-4">
         {/* Due Today */}
         <BaseCard className="p-6 hover:shadow-md transition-shadow">
           <div className="flex items-start gap-4">
