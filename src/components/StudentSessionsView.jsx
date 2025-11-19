@@ -65,18 +65,18 @@ function StudentSessionsView({ student }) {
       // Filtrar sesiones futuras y ordenar por fecha
       const now = new Date();
       const futureSessions = studentSessions.filter(session => {
-        if (session.type === 'instant' || session.status === 'live') {
+        if (session.scheduleType === 'instant' || session.status === 'live') {
           return true; // Mostrar sesiones en vivo
         }
 
-        if (session.type === 'single' && session.scheduledStart) {
+        if (session.scheduleType === 'single' && session.scheduledStart) {
           const sessionDate = session.scheduledStart.toDate ?
             session.scheduledStart.toDate() :
             new Date(session.scheduledStart);
           return sessionDate >= now;
         }
 
-        if (session.type === 'recurring') {
+        if (session.scheduleType === 'recurring') {
           return true; // Mostrar recurrentes (tienen múltiples ocurrencias)
         }
 
@@ -178,11 +178,11 @@ function StudentSessionsView({ student }) {
       return <BaseBadge variant="danger" icon={Play}>EN VIVO</BaseBadge>;
     }
 
-    if (session.type === 'instant') {
+    if (session.scheduleType === 'instant') {
       return <BaseBadge variant="warning" icon={Clock}>Instantánea</BaseBadge>;
     }
 
-    if (session.type === 'recurring') {
+    if (session.scheduleType === 'recurring') {
       return <BaseBadge variant="info" icon={Calendar}>Recurrente</BaseBadge>;
     }
 
@@ -335,7 +335,7 @@ function StudentSessionsView({ student }) {
                     )}
 
                     {/* Recurring Schedule */}
-                    {session.type === 'recurring' && session.schedules && (
+                    {session.scheduleType === 'recurring' && session.schedules && (
                       <div className="text-xs text-gray-500 dark:text-gray-400">
                         {session.schedules.map((schedule, idx) => (
                           <div key={idx}>
