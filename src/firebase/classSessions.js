@@ -213,11 +213,19 @@ export async function createClassSession(sessionData) {
  */
 export async function updateClassSession(sessionId, updates) {
   try {
-    const docRef = doc(db, 'class_instances', sessionId);
-    await updateDoc(docRef, {
+    // Normalizar campos: convertir 'name' a 'scheduleName' para class_instances
+    const normalizedUpdates = {
       ...updates,
       updatedAt: serverTimestamp()
-    });
+    };
+
+    // Si se está actualizando 'name', también actualizar 'scheduleName'
+    if (updates.name !== undefined) {
+      normalizedUpdates.scheduleName = updates.name;
+    }
+
+    const docRef = doc(db, 'class_instances', sessionId);
+    await updateDoc(docRef, normalizedUpdates);
 
     logger.info('✅ Sesión actualizada:', sessionId);
     return { success: true };
@@ -274,11 +282,17 @@ export async function getTeacherSessions(teacherId) {
       where('scheduleId', '==', null) // Solo las que no son parte de un horario
     );
     const instancesSnapshot = await getDocs(instancesQuery);
-    const singleInstances = instancesSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      type: 'single' // Marcar como single para el UI
-    }));
+    const singleInstances = instancesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        // Normalizar campos para consistencia con recurring_schedules
+        name: data.scheduleName || data.name || '',
+        type: 'single', // Marcar como single para el UI
+        assignedStudents: data.eligibleStudentIds || data.assignedStudents || []
+      };
+    });
 
     // Combinar todo
     const allSessions = [

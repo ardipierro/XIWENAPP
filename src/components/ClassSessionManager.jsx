@@ -21,6 +21,7 @@ import {
   getTeacherSessions,
   createClassSession,
   updateClassSession,
+  updateRecurringSchedule,
   deleteClassSession,
   startClassSession,
   endClassSession,
@@ -179,10 +180,23 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
     try {
       setActionLoading('edit');
 
-      const result = await updateClassSession(editingSession.id, sessionData);
+      // Detectar si es sesión recurrente o única
+      const isRecurring = editingSession.type === 'recurring';
+
+      let result;
+      if (isRecurring) {
+        // Actualizar horario recurrente
+        result = await updateRecurringSchedule(editingSession.id, sessionData);
+      } else {
+        // Actualizar sesión única
+        result = await updateClassSession(editingSession.id, sessionData);
+      }
 
       if (result.success) {
-        setMessage({ type: 'success', text: 'Sesión actualizada exitosamente' });
+        setMessage({
+          type: 'success',
+          text: isRecurring ? 'Clase actualizada exitosamente' : 'Sesión actualizada exitosamente'
+        });
         setShowModal(false);
         setEditingSession(null);
         await loadData();
