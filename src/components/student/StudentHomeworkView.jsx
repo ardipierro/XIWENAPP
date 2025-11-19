@@ -343,21 +343,6 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
               )}
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 flex-shrink-0">
-            <BaseButton
-              variant={isApproved ? "primary" : "outline"}
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect();
-              }}
-            >
-              <Eye size={16} strokeWidth={2.5} />
-              {isApproved ? 'Ver Corrección' : 'Ver Tarea'}
-            </BaseButton>
-          </div>
         </div>
       </BaseCard>
     );
@@ -464,20 +449,6 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
             </div>
           </div>
         ) : null}
-
-        {/* View Button */}
-        <BaseButton
-          variant={isApproved ? "primary" : "outline"}
-          size="sm"
-          fullWidth
-          className={
-            isApproved ? 'bg-green-600 hover:bg-green-700 text-white font-semibold' :
-            ''
-          }
-        >
-          <Eye size={18} strokeWidth={2.5} />
-          {isApproved ? 'Ver Corrección' : 'Ver Tarea'}
-        </BaseButton>
       </div>
     </BaseCard>
   );
