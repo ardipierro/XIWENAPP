@@ -14,6 +14,7 @@ import { Loader2 } from 'lucide-react';
  *   - 'warning': Ámbar advertencia
  *   - 'ghost': Transparente con hover
  *   - 'outline': Borde sin fondo
+ *   - 'white': Botón blanco (para fondos oscuros/de color)
  * @param {string} size - Tamaño: 'sm', 'md', 'lg', 'xl'
  * @param {boolean} loading - Estado de carga (muestra spinner)
  * @param {boolean} disabled - Botón deshabilitado
@@ -87,6 +88,15 @@ function BaseButton({
         hover: {
           backgroundColor: 'var(--color-bg-tertiary)',
           border: '2px solid var(--color-border-focus)'
+        }
+      },
+      white: {
+        backgroundColor: 'white',
+        color: '#18181b',
+        border: '2px solid white',
+        hover: {
+          backgroundColor: '#f4f4f5',
+          border: '2px solid #f4f4f5'
         }
       }
     };
