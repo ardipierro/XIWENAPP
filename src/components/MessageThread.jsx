@@ -2144,42 +2144,27 @@ const MessageBubble = forwardRef(({
           </div>
         )}
 
-        {/* Text Content + Footer inline (estilo WhatsApp) */}
-        {message.content ? (
+        {/* Text Content - Separado del footer */}
+        {message.content && (
           <div className="message-content">
             {highlightText(message.content, searchTerm)}
-            {/* Footer inline con el texto */}
-            <span className="message-footer">
-              <span className="message-time">
-                {formatTime(message.createdAt)}
-                {message.edited && <span className="edited-indicator"> (editado)</span>}
-              </span>
-              {isOwn && !message.deleted && (
-                <span className="message-status">
-                  {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
-                  {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
-                  {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
-                </span>
-              )}
-            </span>
-          </div>
-        ) : message.attachment && !isAudio(message.attachment.type) ? (
-          /* Footer separado SOLO para attachments NO-audio (imágenes, archivos, etc) */
-          /* Los audios ya tienen su propio footer dentro de .attachment-audio-modern */
-          <div className="message-footer">
-            <div className="message-time">
-              {formatTime(message.createdAt)}
-              {message.edited && <span className="edited-indicator"> (editado)</span>}
-            </div>
-            {isOwn && !message.deleted && (
-              <div className="message-status">
-                {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
-                {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
-                {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
-              </div>
-            )}
           </div>
         ) : null}
+
+        {/* Footer - Siempre separado del contenido */}
+        <div className="message-footer">
+          <span className="message-time">
+            {formatTime(message.createdAt)}
+            {message.edited && <span className="edited-indicator"> (editado)</span>}
+          </span>
+          {isOwn && !message.deleted && (
+            <span className="message-status">
+              {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
+              {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
+              {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+            </span>
+          )}
+        </div>
 
         {/* Reactions Display */}
         {message.reactions && Object.keys(message.reactions).length > 0 && (
