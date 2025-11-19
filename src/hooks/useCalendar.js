@@ -6,7 +6,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   getUnifiedCalendar,
-  subscribeToUnifiedCalendar,
   getTodayEvents,
   getUpcomingEvents,
   createCalendarEvent,
@@ -33,44 +32,68 @@ export function useCalendar(userId, userRole, startDate = null, endDate = null) 
   const endTime = endDate?.getTime() || null;
 
   useEffect(() => {
-    if (!userId || !userRole) {
-      setLoading(false);
-      return;
-    }
+    let isMounted = true;
+    let refreshInterval;
 
-    setLoading(true);
-    setError(null);
-
-    // Reconstruct dates from timestamps
-    const now = new Date();
-    const start = startTime ? new Date(startTime) : new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = endTime ? new Date(endTime) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    logger.info(`🔔 useCalendar: Setting up real-time subscription`, 'useCalendar');
-
-    // Set up real-time listener
-    const unsubscribe = subscribeToUnifiedCalendar(
-      userId,
-      userRole,
-      start,
-      end,
-      (updatedEvents) => {
-        logger.info(`📅 useCalendar: Received ${updatedEvents.length} events from real-time listener`, 'useCalendar');
-        setEvents(updatedEvents);
+    const fetchEvents = async () => {
+      if (!userId || !userRole) {
         setLoading(false);
+        return;
       }
-    );
 
-    // Cleanup listener on unmount or when dependencies change
+      // Don't show loading on auto-refresh
+      const isInitialLoad = events.length === 0;
+      if (isInitialLoad) {
+        setLoading(true);
+      }
+      setError(null);
+
+      try {
+        // Reconstruct dates from timestamps
+        const now = new Date();
+        const start = startTime ? new Date(startTime) : new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = endTime ? new Date(endTime) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+        const data = await getUnifiedCalendar(userId, userRole, start, end);
+
+        if (isMounted) {
+          logger.info(`📅 useCalendar received ${data.length} events from getUnifiedCalendar`, 'useCalendar');
+          setEvents(data);
+        }
+      } catch (err) {
+        logger.error('Error fetching calendar events', 'useCalendar', err);
+        if (isMounted) {
+          setError(err.message);
+        }
+      } finally {
+        if (isMounted && isInitialLoad) {
+          setLoading(false);
+        }
+      }
+    };
+
+    // Initial fetch
+    fetchEvents();
+
+    // Auto-refresh every 15 seconds (fast enough for good UX, not too heavy)
+    refreshInterval = setInterval(() => {
+      logger.info('🔄 Auto-refreshing calendar...', 'useCalendar');
+      fetchEvents();
+    }, 15000);
+
     return () => {
-      logger.info('🔕 useCalendar: Cleaning up real-time subscription', 'useCalendar');
-      unsubscribe();
+      isMounted = false;
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
     };
   }, [userId, userRole, startTime, endTime]);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
       setError(null);
 
       const now = new Date();
@@ -79,11 +102,14 @@ export function useCalendar(userId, userRole, startDate = null, endDate = null) 
 
       const data = await getUnifiedCalendar(userId, userRole, start, end);
       setEvents(data);
+      logger.info('✅ Calendar manually refreshed', 'useCalendar');
     } catch (err) {
       logger.error('Error refreshing calendar events', 'useCalendar', err);
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [userId, userRole, startTime, endTime]);
 
