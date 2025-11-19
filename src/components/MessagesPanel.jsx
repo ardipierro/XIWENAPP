@@ -13,6 +13,7 @@ import MessageThread from './MessageThread';
 import NewMessageModal from './NewMessageModal';
 import { BaseButton, BaseEmptyState, BaseLoading } from './common';
 import { useIsMobile } from '../hooks';
+import UserAvatar from './UserAvatar';
 import logger from '../utils/logger';
 
 /**
@@ -350,9 +351,13 @@ function ConversationItem({ conversation, isSelected, onClick }) {
       className={`conversation-item ${isSelected ? 'selected' : ''} ${unreadCount > 0 ? 'unread' : ''}`}
       onClick={onClick}
     >
-      <div className="conversation-avatar" style={{ borderColor: getRoleColor(otherUser.role) }}>
-        {otherUser.name?.charAt(0).toUpperCase() || '?'}
-      </div>
+      <UserAvatar
+        userId={otherUser.id}
+        name={otherUser.name}
+        email={otherUser.email}
+        size="md"
+        className="conversation-avatar"
+      />
 
       <div className="conversation-content">
         <div className="conversation-header">

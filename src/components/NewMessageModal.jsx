@@ -10,6 +10,7 @@ import {
   getOrCreateConversation,
   sendMessage
 } from '../firebase/messages';
+import UserAvatar from './UserAvatar';
 import logger from '../utils/logger';
 import { BaseModal, BaseButton, BaseInput, BaseTextarea } from './common';
 
@@ -175,9 +176,12 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
           <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold">
-                  {selectedUser.name?.charAt(0).toUpperCase() || '?'}
-                </div>
+                <UserAvatar
+                  userId={selectedUser.id}
+                  name={selectedUser.name}
+                  email={selectedUser.email}
+                  size="md"
+                />
                 <div>
                   <div className="font-medium text-gray-900 dark:text-gray-100">
                     {selectedUser.name || 'Usuario'}
@@ -224,9 +228,12 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
                     className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors"
                     onClick={() => handleSelectUser(user)}
                   >
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold">
-                      {user.name?.charAt(0).toUpperCase() || '?'}
-                    </div>
+                    <UserAvatar
+                      userId={user.id}
+                      name={user.name}
+                      email={user.email}
+                      size="md"
+                    />
                     <div className="flex-1">
                       <div className="font-medium text-gray-900 dark:text-gray-100">
                         {user.name || 'Usuario'}

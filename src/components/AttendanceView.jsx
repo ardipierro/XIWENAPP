@@ -9,6 +9,7 @@ import { getTeacherSessions, getClassSession } from '../firebase/classSessions';
 import { getSessionAttendance, markBulkAttendance, updateAttendanceStatus } from '../firebase/attendance';
 import { getUserProfile } from '../firebase/firestore';
 import BaseButton from './common/BaseButton';
+import UserAvatar from './UserAvatar';
 
 /**
  * Vista de asistencia para profesores
@@ -340,9 +341,12 @@ function AttendanceView({ teacher }) {
                     return (
                       <div key={member.id} className="student-item">
                         <div className="student-info">
-                          <div className="student-avatar">
-                            <User size={24} strokeWidth={2} />
-                          </div>
+                          <UserAvatar
+                            userId={member.studentId || member.id}
+                            name={member.studentName}
+                            size="md"
+                            className="student-avatar"
+                          />
                           <div className="student-details">
                             <div className="student-name">{member.studentName}</div>
                             {attStatus && attStatus.linkClicked && (

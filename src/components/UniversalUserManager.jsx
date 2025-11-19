@@ -30,6 +30,7 @@ import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge, CategoryBadge, Base
 import { UniversalCard, CardGrid } from './cards';
 import AddUserModal from './AddUserModal';
 import UserProfileModal from './UserProfileModal';
+import UserAvatar from './UserAvatar';
 import ConfirmModal from './ConfirmModal';
 import logger from '../utils/logger';
 
@@ -300,9 +301,6 @@ export default function UniversalUserManager({ user, userRole }) {
           /* Vista List - Estilo filas como Contenidos */
           <div className="flex flex-col gap-3">
             {userManagement.filteredUsers.map((userItem) => {
-              const initial = userItem.name?.charAt(0).toUpperCase() || '?';
-              const avatarColor = getAvatarColor(userItem.role);
-
               return (
                 <div
                   key={userItem.id}
@@ -310,14 +308,14 @@ export default function UniversalUserManager({ user, userRole }) {
                   onClick={() => handleViewUserProfile(userItem)}
                 >
                   <div className="flex items-stretch min-h-[96px]">
-                    {/* Avatar - Redondo centrado con fondo idéntico a Grid */}
+                    {/* Avatar - Componente Universal */}
                     <div className="w-[96px] flex-shrink-0 bg-[var(--color-bg-secondary)] flex items-center justify-center">
-                      <div
-                        className="w-16 h-16 rounded-full flex items-center justify-center text-white font-extrabold text-2xl"
-                        style={{ backgroundColor: avatarColor }}
-                      >
-                        {initial}
-                      </div>
+                      <UserAvatar
+                        userId={userItem.id}
+                        name={userItem.name}
+                        email={userItem.email}
+                        size="lg"
+                      />
                     </div>
 
                     {/* Contenido */}
@@ -373,29 +371,50 @@ export default function UniversalUserManager({ user, userRole }) {
             })}
           </div>
         ) : viewMode === 'grid' ? (
-          /* Vista Grid con UniversalCard */
+          /* Vista Grid con UniversalCard - Con UserAvatar */
           <CardGrid columnsType="default" gap="gap-4 md:gap-6">
             {userManagement.filteredUsers.map((userItem) => {
-              const initial = userItem.name?.charAt(0).toUpperCase() || '?';
-              const avatarColor = getAvatarColor(userItem.role);
-
               return (
-                <UniversalCard
+                <div
                   key={userItem.id}
-                  variant="user"
-                  size="md"
-                  layout="vertical"
-                  avatar={initial}
-                  avatarColor={avatarColor}
-                  title={userItem.name}
-                  subtitle={userItem.email}
-                  badges={[<CategoryBadge key="role" type="role" value={userItem.role} size="sm" />]}
-                  stats={[
-                    { label: 'Créditos', value: userItem.credits || 0, icon: DollarSign }
-                  ]}
+                  className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 hover:shadow-lg transition-all cursor-pointer group"
                   onClick={() => handleViewUserProfile(userItem)}
-                  actions={
-                    can('delete-users') && (
+                >
+                  {/* Avatar */}
+                  <div className="flex justify-center mb-4">
+                    <UserAvatar
+                      userId={userItem.id}
+                      name={userItem.name}
+                      email={userItem.email}
+                      size="xl"
+                    />
+                  </div>
+
+                  {/* Nombre y Email */}
+                  <div className="text-center mb-3">
+                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {userItem.name || 'Sin nombre'}
+                    </h3>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 truncate">
+                      {userItem.email}
+                    </p>
+                  </div>
+
+                  {/* Badge de Rol */}
+                  <div className="flex justify-center mb-3">
+                    <CategoryBadge type="role" value={userItem.role} size="sm" />
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    <DollarSign size={16} className="text-zinc-500" />
+                    <span className="font-bold text-zinc-900 dark:text-white">{userItem.credits || 0}</span>
+                    <span className="text-zinc-500">créditos</span>
+                  </div>
+
+                  {/* Actions */}
+                  {can('delete-users') && (
+                    <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                       <BaseButton
                         onClick={(e) => {
                           e.stopPropagation();
@@ -537,9 +556,12 @@ export default function UniversalUserManager({ user, userRole }) {
                           }
                         }}
                       >
-                        <div className="user-avatar">
-                          {userItem.name?.charAt(0).toUpperCase() || '?'}
-                        </div>
+                        <UserAvatar
+                          userId={userItem.id}
+                          name={userItem.name}
+                          email={userItem.email}
+                          size="sm"
+                        />
                         <span className="font-semibold">{userItem.name || 'Sin nombre'}</span>
                       </div>
                     </td>

@@ -120,18 +120,15 @@ function GuardianView({ user, onViewStudentDetails }) {
             const averageGrade = student.averageGrade || 0;
             const streak = student.streak || 0;
 
-            // Avatar inicial
-            const initial = student.name?.charAt(0).toUpperCase() || '?';
-            const avatarColor = '#3b82f6'; // blue
-
             return (
               <UniversalCard
                 key={student.id}
                 variant="user"
                 size="md"
                 layout={viewMode === 'list' ? 'horizontal' : 'vertical'}
-                avatar={initial}
-                avatarColor={avatarColor}
+                userId={student.id}
+                userName={student.name}
+                userEmail={student.email}
                 title={student.name}
                 subtitle={student.email}
                 badges={[
