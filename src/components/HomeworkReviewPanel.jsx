@@ -355,6 +355,10 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
   const isApproved = review.status === REVIEW_STATUS.APPROVED || review.status === 'approved';
   const isReviewed = review.teacherReviewed === true;
 
+  // ✨ NEW: Distinguish between AI-ready and teacher-approved
+  const isAIReady = isPendingReview && !isReviewed; // IA terminó, esperando revisión del profesor
+  const isTeacherApproved = isApproved && isReviewed; // Profesor revisó y aprobó
+
   // Check if processing is stuck (more than 2 minutes)
   const isStuck = isProcessing && review.createdAt?.toDate &&
     (Date.now() - review.createdAt.toDate().getTime()) > 2 * 60 * 1000;
@@ -407,13 +411,13 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
               <BaseBadge variant="danger" icon={AlertCircle} size="sm">
                 ERROR
               </BaseBadge>
-            ) : isApproved ? (
-              <BaseBadge variant="blue" icon={CheckCircle} size="sm">
-                APROBADO
-              </BaseBadge>
-            ) : isPendingReview ? (
+            ) : isTeacherApproved ? (
               <BaseBadge variant="success" icon={CheckCircle} size="sm">
-                LISTO
+                ✓ APROBADO
+              </BaseBadge>
+            ) : isAIReady ? (
+              <BaseBadge variant="warning" icon={Clock} size="sm">
+                PENDIENTE REVISIÓN
               </BaseBadge>
             ) : null}
           </div>
@@ -479,8 +483,8 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
         isStuck ? 'border-2 border-red-500 dark:border-red-600 shadow-lg' :
         isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
         isFailed ? 'border-2 border-red-400 dark:border-red-500' :
-        isApproved ? 'border-2 border-blue-400 dark:border-blue-500' :
-        isPendingReview ? 'border-2 border-green-400 dark:border-green-500' :
+        isTeacherApproved ? 'border-2 border-green-400 dark:border-green-500' :
+        isAIReady ? 'border-2 border-yellow-400 dark:border-yellow-500' :
         ''
       }`}
     >
@@ -566,7 +570,17 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
               </p>
             )}
           </div>
-        ) : isPendingReview ? (
+        ) : isAIReady ? (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-600 rounded-lg p-3.5">
+            <div className="flex items-center gap-2.5 text-sm text-yellow-800 dark:text-yellow-200">
+              <Clock size={18} className="flex-shrink-0" strokeWidth={2.5} />
+              <span className="font-bold">Pendiente revisión</span>
+            </div>
+            <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 ml-6 font-medium">
+              ✨ IA terminó. Revisa y aprueba
+            </p>
+          </div>
+        ) : isTeacherApproved ? (
           <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-2">
@@ -608,15 +622,15 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
               <AlertCircle size={14} />
               <span className="text-xs font-bold">ERROR</span>
             </div>
-          ) : isApproved ? (
-            <div className="bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+          ) : isTeacherApproved ? (
+            <div className="bg-green-600 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
               <CheckCircle size={14} />
-              <span className="text-xs font-bold">APROBADO</span>
+              <span className="text-xs font-bold">✓ APROBADO</span>
             </div>
-          ) : isPendingReview ? (
-            <div className="bg-green-500 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
-              <CheckCircle size={14} />
-              <span className="text-xs font-bold">LISTO</span>
+          ) : isAIReady ? (
+            <div className="bg-yellow-500 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+              <Clock size={14} />
+              <span className="text-xs font-bold">PENDIENTE REVISIÓN</span>
             </div>
           ) : null}
         </div>
