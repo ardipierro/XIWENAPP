@@ -45,6 +45,9 @@ export { default as BaseTabs } from './BaseTabs';
 // Empty States
 export { default as BaseEmptyState } from './BaseEmptyState';
 
+// Search & Filters
+export { default as SearchBar } from './SearchBar';
+
 // Legacy components (mantener por compatibilidad)
 export { default as EmptyState } from './EmptyState';
 export { default as PageHeader } from './PageHeader';
