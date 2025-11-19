@@ -1795,53 +1795,32 @@ const MessageBubble = forwardRef(({
               </div>
             ) : isAudio(message.attachment.type) ? (
               <div className="attachment-audio-modern">
-                {/* Icono de micrófono decorativo */}
-                <div className="audio-mic-icon">
-                  <div className={`mic-circle ${isPlayingAudio ? 'playing' : ''}`}>
-                    <Mic size={16} />
-                  </div>
-                </div>
+                {/* Botón play/pause */}
+                <button
+                  className={`audio-play-btn-modern ${isPlayingAudio ? 'playing' : ''}`}
+                  onClick={toggleAudioPlayback}
+                  title={isPlayingAudio ? 'Pausar' : 'Reproducir'}
+                >
+                  {isPlayingAudio ? <Pause size={18} /> : <Play size={18} />}
+                </button>
 
-                {/* Visualización de forma de onda */}
-                <div className="audio-waveform">
-                  {[...Array(20)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`waveform-bar ${i < (audioProgress / 100) * 20 ? 'active' : ''}`}
-                      style={{
-                        height: `${30 + Math.sin(i) * 20}%`,
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {/* Controles y tiempo */}
-                <div className="audio-controls-section">
-                  <button
-                    className={`audio-play-btn-modern ${isPlayingAudio ? 'playing' : ''}`}
-                    onClick={toggleAudioPlayback}
-                    title={isPlayingAudio ? 'Pausar' : 'Reproducir'}
+                {/* Barra de progreso */}
+                <div className="audio-progress-container">
+                  <div
+                    className="audio-progress-modern"
+                    onClick={handleAudioSeek}
                   >
-                    {isPlayingAudio ? <Pause size={16} /> : <Play size={16} />}
-                  </button>
+                    <div
+                      className="progress-fill-modern"
+                      style={{ width: `${audioProgress}%` }}
+                    />
+                  </div>
 
+                  {/* Tiempo */}
                   <div className="audio-time-modern">
                     <span className="current-time">{formatAudioTime(audioCurrentTime)}</span>
                     <span className="time-separator">/</span>
                     <span className="total-time">{formatAudioTime(audioDuration || message.attachment.duration)}</span>
-                  </div>
-                </div>
-
-                {/* Barra de progreso interactiva */}
-                <div
-                  className="audio-progress-modern"
-                  onClick={handleAudioSeek}
-                >
-                  <div
-                    className="progress-fill-modern"
-                    style={{ width: `${audioProgress}%` }}
-                  >
-                    <div className="progress-thumb"></div>
                   </div>
                 </div>
 
