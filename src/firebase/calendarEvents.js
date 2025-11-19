@@ -137,8 +137,9 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         events.push({
           id: doc.id,
+          sessionId: doc.id, // Add sessionId for modal
           title: data.scheduleName || data.name || 'Clase',
-          type: 'class_instance',
+          type: 'session', // Changed from 'class_instance' to 'session'
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
           description: data.description || '',
@@ -147,6 +148,7 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
           teacherId: data.teacherId,
           teacherName: data.teacherName,
           status: data.status,
+          mode: data.mode || 'live',
           location: data.videoProvider || 'Online',
           color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
           sessionData: data
@@ -168,8 +170,9 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         events.push({
           id: doc.id,
+          sessionId: doc.id, // Add sessionId for modal
           title: data.scheduleName || data.name || 'Clase',
-          type: 'class_instance',
+          type: 'session', // Changed from 'class_instance' to 'session'
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
           description: data.description || '',
@@ -178,6 +181,7 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
           teacherId: data.teacherId,
           teacherName: data.teacherName,
           status: data.status,
+          mode: data.mode || 'live',
           location: data.videoProvider || 'Online',
           color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
           sessionData: data
@@ -199,8 +203,9 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         events.push({
           id: doc.id,
+          sessionId: doc.id, // Add sessionId for modal
           title: data.scheduleName || data.name || 'Clase',
-          type: 'class_instance',
+          type: 'session', // Changed from 'class_instance' to 'session'
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
           description: data.description || '',
@@ -209,6 +214,7 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
           teacherId: data.teacherId,
           teacherName: data.teacherName,
           status: data.status,
+          mode: data.mode || 'live',
           location: data.videoProvider || 'Online',
           color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
           sessionData: data
@@ -394,16 +400,17 @@ export function subscribeToUnifiedCalendar(userId, userRole, startDate, endDate,
     (snapshot) => {
       logger.info(`🔄 Real-time update: ${snapshot.docs.length} class instances for ${userRole}`, 'Calendar');
 
-      // Remove old class instances from allEvents
-      allEvents = allEvents.filter(e => e.type !== 'class_instance');
+      // Remove old class sessions from allEvents
+      allEvents = allEvents.filter(e => e.type !== 'session');
 
-      // Add new class instances
+      // Add new class sessions
       snapshot.docs.forEach(doc => {
         const data = doc.data();
         allEvents.push({
           id: doc.id,
+          sessionId: doc.id, // Add sessionId for modal
           title: data.scheduleName || data.name || 'Clase',
-          type: 'class_instance',
+          type: 'session', // Changed from 'class_instance' to 'session'
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
           description: data.description || '',
@@ -412,6 +419,7 @@ export function subscribeToUnifiedCalendar(userId, userRole, startDate, endDate,
           teacherId: data.teacherId,
           teacherName: data.teacherName,
           status: data.status,
+          mode: data.mode || 'live',
           location: data.videoProvider || 'Online',
           color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
           sessionData: data
