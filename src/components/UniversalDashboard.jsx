@@ -136,6 +136,7 @@ function HomeView({ user, onNavigate }) {
   // Filtrar tarjetas según permisos y rol
   const visibleCards = quickAccessCards.filter(card => {
     // Ocultar tarjetas marcadas para estudiantes
+    // ✅ user es effectiveUser (pasado como prop desde UniversalDashboardInner)
     if (card.hideForStudents && user.role === 'student') {
       return false;
     }
@@ -165,6 +166,7 @@ function HomeView({ user, onNavigate }) {
       </div>
 
       {/* Banner de Próximas Clases - Solo para estudiantes */}
+      {/* ✅ user es effectiveUser (pasado como prop desde UniversalDashboardInner) */}
       {user.role === 'student' && (
         <Suspense fallback={<BaseLoading size="small" text="Cargando próximas clases..." />}>
           <UpcomingClassesBanner student={user} />
