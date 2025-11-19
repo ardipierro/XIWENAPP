@@ -863,10 +863,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return colorMap[type] || 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white';
   };
 
-  // Determinar si tiene imagen (thumbnail de video u otra imagen)
-  const hasImage = content.type === CONTENT_TYPES.VIDEO && content.videoData?.thumbnailUrl;
-
-  // Renderizar zona de imagen/ícono
+  // Renderizar zona de imagen/ícono (usa hasImage de línea 808)
   const renderImageOrIcon = () => {
     if (hasImage) {
       return (
