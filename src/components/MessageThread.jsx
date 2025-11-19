@@ -1837,26 +1837,41 @@ const MessageBubble = forwardRef(({
           </div>
         )}
 
-        {/* Text Content */}
-        {message.content && (
+        {/* Text Content + Footer inline (estilo WhatsApp) */}
+        {message.content ? (
           <div className="message-content">
             {highlightText(message.content, searchTerm)}
+            {/* Footer inline con el texto */}
+            <span className="message-footer">
+              <span className="message-time">
+                {formatTime(message.createdAt)}
+                {message.edited && <span className="edited-indicator"> (editado)</span>}
+              </span>
+              {isOwn && !message.deleted && (
+                <span className="message-status">
+                  {message.status === 'sent' && <Check size={12} className="status-icon sent" />}
+                  {message.status === 'delivered' && <CheckCheck size={12} className="status-icon delivered" />}
+                  {message.status === 'read' && <CheckCheck size={12} className="status-icon read" />}
+                </span>
+              )}
+            </span>
+          </div>
+        ) : (
+          /* Footer separado cuando solo hay attachment */
+          <div className="message-footer">
+            <div className="message-time">
+              {formatTime(message.createdAt)}
+              {message.edited && <span className="edited-indicator"> (editado)</span>}
+            </div>
+            {isOwn && !message.deleted && (
+              <div className="message-status">
+                {message.status === 'sent' && <Check size={12} className="status-icon sent" />}
+                {message.status === 'delivered' && <CheckCheck size={12} className="status-icon delivered" />}
+                {message.status === 'read' && <CheckCheck size={12} className="status-icon read" />}
+              </div>
+            )}
           </div>
         )}
-
-        <div className="message-footer">
-          <div className="message-time">
-            {formatTime(message.createdAt)}
-            {message.edited && <span className="edited-indicator"> (editado)</span>}
-          </div>
-          {isOwn && !message.deleted && (
-            <div className="message-status">
-              {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
-              {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
-              {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
-            </div>
-          )}
-        </div>
 
         {/* Reactions Display */}
         {message.reactions && Object.keys(message.reactions).length > 0 && (
