@@ -56,36 +56,21 @@ function VoiceRecorder({ onSend, onCancel }) {
    */
   const startRecording = async () => {
     try {
-      // Request high-quality audio with specific constraints
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: 48000, // Higher sample rate for better quality
-          channelCount: 1 // Mono is fine for voice
+          autoGainControl: true
         }
       });
       streamRef.current = stream; // Save stream reference
 
-      // Determine the best available audio codec with high bitrate
-      let options = { audioBitsPerSecond: 128000 }; // 128kbps for good quality
-
-      // Try different codecs in order of preference
+      // Try to use Opus codec with higher bitrate for better quality
+      let options = { audioBitsPerSecond: 128000 };
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
         options.mimeType = 'audio/webm;codecs=opus';
-        logger.info('Using Opus codec for audio recording', 'VoiceRecorder');
-      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-        options.mimeType = 'audio/webm';
-        logger.info('Using WebM for audio recording', 'VoiceRecorder');
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        options.mimeType = 'audio/mp4';
-        logger.info('Using MP4 for audio recording', 'VoiceRecorder');
-      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
-        options.mimeType = 'audio/ogg;codecs=opus';
-        logger.info('Using OGG Opus for audio recording', 'VoiceRecorder');
       } else {
-        logger.warn('No preferred audio format supported, using default', 'VoiceRecorder');
+        options.mimeType = 'audio/webm';
       }
 
       const mediaRecorder = new MediaRecorder(stream, options);

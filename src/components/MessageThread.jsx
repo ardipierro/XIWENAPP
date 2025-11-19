@@ -612,7 +612,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
     // This gives time for cleanup to execute properly
     setTimeout(() => {
       setShowVoiceRecorder(false);
-    }, 100);
+    }, 300);
 
     if (result) {
       inputRef.current?.focus();
