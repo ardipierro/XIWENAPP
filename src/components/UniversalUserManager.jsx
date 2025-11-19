@@ -377,7 +377,7 @@ export default function UniversalUserManager({ user, userRole }) {
               return (
                 <div
                   key={userItem.id}
-                  className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 hover:shadow-lg transition-all cursor-pointer group"
+                  className="bg-white dark:bg-gray-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-5 hover:shadow-lg transition-all cursor-pointer group"
                   onClick={() => handleViewUserProfile(userItem)}
                 >
                   {/* Avatar */}
