@@ -445,7 +445,7 @@ export const cardLayouts = {
     headerPosition: 'left',
     headerWidth: '80px',         // Más compacto para horizontal
     avatarSize: '48px',          // Avatar más pequeño en horizontal
-    contentPadding: '12px 16px', // Padding reducido vertical (más compacto)
+    contentPadding: '8px 12px',  // Padding MUY reducido vertical (extra compacto)
     statsLayout: 'inline',       // Stats en línea horizontal
   },
 };

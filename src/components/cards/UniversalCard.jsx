@@ -150,23 +150,38 @@ export function UniversalCard({
 
   // Generate classes and styles - PASS RESOLVED variantConfig object (BUG FIX)
   const classes = generateCardClasses(variantConfig, size, layout);
-  const styles = useMemo(() => {
-    const baseStyles = generateCardStyles(variantConfig, size, layout);
-    return {
-      container: {
-        ...baseStyles.container,
-        display: 'flex',
-        flexDirection: 'column',
-        // Mantener overflow si cardHeight es fijo
-        ...(variantConfig.cardHeight && variantConfig.cardHeight !== 'auto'
-          ? { overflow: 'hidden' }
-          : {}
-        ),
-      },
-      header: baseStyles.header,
-      content: baseStyles.content,
-    };
-  }, [variantConfig, size, layout]);
+  const styles = useMemo(() => ({
+    container: {
+      backgroundColor: 'var(--color-bg-secondary)',
+      border: `1px solid ${variantConfig.normalBorderColor}`,
+      boxShadow: variantConfig.normalShadow,
+      display: 'flex',
+      flexDirection: 'column',
+      ...(variantConfig.cardHeight
+        ? { height: variantConfig.cardHeight, minHeight: 'unset', overflow: 'hidden' }
+        : layout === 'horizontal'
+        ? {
+            height: '72px',
+            minHeight: '72px',
+            maxHeight: '72px',
+            overflow: 'hidden',      // CRÍTICO: prevenir expansión vertical
+            overflowY: 'hidden'      // CRÍTICO: prevenir scroll vertical
+          }
+        : { minHeight: sizeConfig.minHeight }
+      ),
+      transitionDuration: variantConfig.transitionDuration,
+      transitionTimingFunction: variantConfig.transitionTiming,
+    },
+    header: {
+      height: layout === 'horizontal' ? '100%' : variantConfig.headerHeight,
+      width: layout === 'horizontal' ? layoutConfig.headerWidth : 'auto',
+    },
+    content: {
+      padding: layout === 'horizontal' && layoutConfig.contentPadding
+        ? layoutConfig.contentPadding
+        : variantConfig.contentPadding,
+    },
+  }), [variantConfig, layout, sizeConfig, layoutConfig]);
 
   /**
    * Handle mouse enter
@@ -341,7 +356,7 @@ export function UniversalCard({
     if (!badges || badges.length === 0 || !variantConfig.showBadges) return null;
 
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className={`flex flex-wrap ${layout === 'horizontal' ? 'gap-1' : 'gap-2'}`}>
         {badges.map((badge, index) => {
           // Soportar tanto componentes JSX como objetos de props
           if (typeof badge === 'object' && badge.type) {
@@ -351,7 +366,7 @@ export function UniversalCard({
             // Es un objeto de props para BaseBadge
             const { key, ...restProps } = badge;
             return (
-              <BaseBadge key={index} size={layout === 'horizontal' ? 'sm' : 'md'} {...restProps} />
+              <BaseBadge key={index} size="sm" {...restProps} />
             );
           }
         })}
@@ -538,7 +553,7 @@ export function UniversalCard({
 
             {/* Avatar/Icono/Imagen a la izquierda (48px) */}
             {(avatar || Icon || image) && (
-              <div className="flex-shrink-0 mr-4">
+              <div className="flex-shrink-0 mr-3">
                 {/* Avatar */}
                 {avatar && (
                   <div
@@ -604,21 +619,21 @@ export function UniversalCard({
 
             {/* Sección 2: Stats (espacio medio si existen) */}
             {stats && stats.length > 0 && (
-              <div className="flex-shrink-0 px-4">
+              <div className="flex-shrink-0 px-2">
                 {renderStats()}
               </div>
             )}
 
             {/* Sección 3: Badges (espacio medio si existen) */}
             {badges && badges.length > 0 && (
-              <div className="flex-shrink-0 px-4">
+              <div className="flex-shrink-0 px-2">
                 {renderBadges()}
               </div>
             )}
 
             {/* Sección 4: Actions (al final) */}
             {actions && (
-              <div className="flex-shrink-0 flex gap-2">
+              <div className={`flex-shrink-0 flex ${layout === 'horizontal' ? 'gap-1.5' : 'gap-2'}`}>
                 {Array.isArray(actions) ? (
                   actions.map((action, index) => (
                     <div key={index} onClick={(e) => e.stopPropagation()}>
