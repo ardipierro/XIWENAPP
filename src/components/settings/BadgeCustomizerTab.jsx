@@ -61,6 +61,7 @@ function BadgeCustomizerTab({ user }) {
     removeBadge,
     getBadgesByCategory,
     updateIconLibrary,
+    updateAllBadgeStyles,
   } = useBadgeConfig();
 
   const [expandedSections, setExpandedSections] = useState({
@@ -138,6 +139,16 @@ function BadgeCustomizerTab({ user }) {
   const handleIconLibraryChange = (library) => {
     updateIconLibrary(library);
     // Ya no se guarda inmediatamente, se marca como cambio pendiente
+  };
+
+  // Cambiar estilo de TODOS los badges
+  const handleGlobalBadgeStyleChange = (badgeStyle) => {
+    updateAllBadgeStyles(badgeStyle);
+    setSaveMessage({
+      type: 'info',
+      text: `🎨 Todos los badges cambiados a estilo: ${badgeStyle === 'outline' ? 'Lightweight (Contorno)' : 'Sólido'}. No olvides guardar.`,
+    });
+    setTimeout(() => setSaveMessage(null), 4000);
   };
 
   return (
@@ -364,6 +375,105 @@ function BadgeCustomizerTab({ user }) {
               </span>
             </div>
           </button>
+        </div>
+      </div>
+
+      {/* Selector Global de Estilo de Badges */}
+      <div
+        className="rounded-lg p-4"
+        style={{
+          border: '1px solid var(--color-border)',
+          background: 'var(--color-bg-secondary)',
+        }}
+      >
+        <h3
+          className="text-base font-semibold mb-3 flex items-center gap-2"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          <Palette size={18} />
+          Estilo Global de Badges
+        </h3>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Cambia el estilo de <strong>TODOS</strong> los badges al mismo tiempo. También puedes cambiar badges individuales en las opciones avanzadas.
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => handleGlobalBadgeStyleChange('solid')}
+            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
+            style={{
+              borderColor: 'var(--color-border)',
+              background: 'var(--color-bg-primary)',
+            }}
+          >
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">●</span>
+                <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  Sólido
+                </span>
+              </div>
+              <div className="flex gap-2 flex-wrap justify-center">
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#3b82f6', color: '#ffffff' }}>
+                  Curso
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#10b981', color: '#ffffff' }}>
+                  Lección
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f59e0b', color: '#ffffff' }}>
+                  Ejercicio
+                </span>
+              </div>
+              <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                Fondo de color, texto blanco
+              </p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleGlobalBadgeStyleChange('outline')}
+            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
+            style={{
+              borderColor: 'var(--color-border)',
+              background: 'var(--color-bg-primary)',
+            }}
+          >
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">○</span>
+                <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  Lightweight (Contorno)
+                </span>
+              </div>
+              <div className="flex gap-2 flex-wrap justify-center">
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #3b82f6', color: '#3b82f6', backgroundColor: 'transparent' }}>
+                  Curso
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #10b981', color: '#10b981', backgroundColor: 'transparent' }}>
+                  Lección
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #f59e0b', color: '#f59e0b', backgroundColor: 'transparent' }}>
+                  Ejercicio
+                </span>
+              </div>
+              <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                Fondo transparente, borde y texto de color
+              </p>
+            </div>
+          </button>
+        </div>
+
+        <div
+          className="mt-4 p-3 rounded-lg flex items-start gap-2"
+          style={{
+            background: 'var(--color-bg-tertiary)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          <Info size={16} style={{ color: 'var(--color-primary)', marginTop: '2px', flexShrink: 0 }} />
+          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+            <strong>Tip:</strong> Este botón cambia TODOS los badges. Si necesitas ajustar badges individuales, usa el botón de información (ℹ️) en cada badge dentro de las categorías.
+          </p>
         </div>
       </div>
 
