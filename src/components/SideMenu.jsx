@@ -90,7 +90,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
             label: 'Herramientas de Enseñanza',
             items: [
               { icon: Sparkles, label: 'Libro Interactivo', path: '/admin', action: 'interactiveBook' },
-              { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
               // Theme Builder y Design Lab desactivados temporalmente
             ]
           }
@@ -112,7 +111,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },
           { icon: Dice3, label: 'Jugar', path: '/teacher', action: 'setup' },
           { icon: Sparkles, label: 'Libro Interactivo', path: '/teacher', action: 'interactiveBook' },
-          { icon: BookMarked, label: 'Lector de Contenidos', path: '/content-reader-demo' },
           // Theme Builder y Design Lab desactivados temporalmente
         ]
       };

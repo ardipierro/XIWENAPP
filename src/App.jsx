@@ -27,8 +27,6 @@ const UniversalDashboard = lazy(() => import('./components/UniversalDashboard'))
 const TestPage = lazy(() => import('./TestPage'));
 const PaymentResult = lazy(() => import('./components/PaymentResult'));
 const DesignLab = lazy(() => import('./components/DesignLab'));
-const ContentReaderPage = lazy(() => import('./pages/ContentReaderPage'));
-const ContentReaderDemo = lazy(() => import('./pages/ContentReaderDemo'));
 
 import BaseButton from './components/common/BaseButton';
 import './App.css';
@@ -157,26 +155,6 @@ function App() {
           <Route
             path="/design-lab"
             element={<DesignLab />}
-          />
-
-          {/* Content Reader Demo - Demostración del lector */}
-          <Route
-            path="/content-reader-demo"
-            element={<ContentReaderDemo />}
-          />
-
-          {/* Content Reader - Lector de contenido con anotaciones */}
-          <Route
-            path="/content-reader/:contentId"
-            element={
-              <ProtectedRoute
-                user={user}
-                userRole={effectiveRole}
-                allowedRoles={[...STUDENT_ROLES, ...TEACHER_ROLES, ...ADMIN_ROLES]}
-              >
-                <ContentReaderPage />
-              </ProtectedRoute>
-            }
           />
 
           {/* Universal Dashboard - Dashboard unificado con permisos y créditos */}
