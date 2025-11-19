@@ -11,6 +11,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { BaseBadge } from '../common';
 import { useCardConfig } from '../../contexts/CardConfigContext';
+import UserAvatar from '../UserAvatar';
 import {
   getVariantConfig,
   getSizeConfig,
@@ -77,8 +78,11 @@ export function UniversalCard({
   // Header
   image,                   // Image URL (para variant='content')
   icon: Icon,              // Lucide icon component (para variant='default')
-  avatar,                  // Avatar text o URL (para variant='user')
-  avatarColor,             // Custom avatar background color
+  avatar,                  // Avatar text o URL (para variant='user') - DEPRECATED: use userId instead
+  avatarColor,             // Custom avatar background color - DEPRECATED when using userId
+  userId,                  // User ID para cargar avatar desde Firebase (recomendado)
+  userName,                // User name para fallback de iniciales
+  userEmail,               // User email para fallback de iniciales
   headerColor,             // Custom header background color
   badge,                   // Badge en top-right del header
   showHeader,              // Control manual del header: true=forzar mostrar, false=forzar ocultar, undefined=auto-detectar
@@ -213,7 +217,7 @@ export function UniversalCard({
 
     // Auto-detectar si el header tiene contenido visual REAL
     // Badge solo NO cuenta como contenido visual
-    const hasVisualContent = image || Icon || avatar;
+    const hasVisualContent = image || Icon || avatar || userId;
 
     // Determinar si mostrar el header:
     // - Si showHeader es explícito (true/false), usarlo
@@ -265,24 +269,37 @@ export function UniversalCard({
         )}
 
         {/* Avatar (variant='user') */}
-        {avatar && variantConfig.showAvatar && (
-          <div
-            className="relative z-10 rounded-full flex items-center justify-center text-white font-extrabold shadow-lg"
-            style={{
-              width: layout === 'horizontal' && layoutConfig.avatarSize
-                ? layoutConfig.avatarSize
-                : variantConfig.avatarSize,
-              height: layout === 'horizontal' && layoutConfig.avatarSize
-                ? layoutConfig.avatarSize
-                : variantConfig.avatarSize,
-              fontSize: layout === 'horizontal' ? '18px' : variantConfig.avatarFontSize,
-              backgroundColor: avatarColor || '#3b82f6',
-            }}
-          >
-            {typeof avatar === 'string' && avatar.length <= 2
-              ? avatar.toUpperCase()
-              : avatar}
-          </div>
+        {(avatar || userId) && variantConfig.showAvatar && (
+          userId ? (
+            // New approach: Use UserAvatar component for consistent user avatars
+            <div className="relative z-10">
+              <UserAvatar
+                userId={userId}
+                name={userName || title}
+                email={userEmail || subtitle}
+                size={layout === 'horizontal' ? 'md' : 'lg'}
+              />
+            </div>
+          ) : (
+            // Legacy approach: Manual avatar for backward compatibility
+            <div
+              className="relative z-10 rounded-full flex items-center justify-center text-white font-extrabold shadow-lg"
+              style={{
+                width: layout === 'horizontal' && layoutConfig.avatarSize
+                  ? layoutConfig.avatarSize
+                  : variantConfig.avatarSize,
+                height: layout === 'horizontal' && layoutConfig.avatarSize
+                  ? layoutConfig.avatarSize
+                  : variantConfig.avatarSize,
+                fontSize: layout === 'horizontal' ? '18px' : variantConfig.avatarFontSize,
+                backgroundColor: avatarColor || '#3b82f6',
+              }}
+            >
+              {typeof avatar === 'string' && avatar.length <= 2
+                ? avatar.toUpperCase()
+                : avatar}
+            </div>
+          )
         )}
 
         {/* Top-right badge */}

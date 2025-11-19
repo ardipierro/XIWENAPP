@@ -36,6 +36,7 @@ import {
   BaseSelect
 } from './common';
 import { UniversalCard } from './cards';
+import UserAvatar from './UserAvatar';
 import {
   createGuardian,
   getGuardianByUserId,
@@ -253,9 +254,12 @@ function GuardianCard({ guardian, onViewDetails, onRefresh, setError, setSuccess
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-lg">
-              {guardian.name?.charAt(0).toUpperCase() || 'T'}
-            </div>
+            <UserAvatar
+              userId={guardian.id || guardian.guardianId}
+              name={guardian.name}
+              email={guardian.email}
+              size="md"
+            />
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {guardian.name}

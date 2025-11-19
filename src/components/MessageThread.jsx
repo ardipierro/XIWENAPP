@@ -27,6 +27,7 @@ import {
   validateMessageFile,
   uploadAudioMessage
 } from '../firebase/storage';
+import UserAvatar from './UserAvatar';
 import logger from '../utils/logger';
 import { showMessageNotification, requestNotificationPermission } from '../utils/notifications';
 import { exportToTXT, exportToJSON } from '../utils/exportConversation';
@@ -971,9 +972,13 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         )}
 
         <div className="thread-user-info">
-          <div className="thread-avatar">
-            {conversation.otherUser.name?.charAt(0).toUpperCase() || '?'}
-          </div>
+          <UserAvatar
+            userId={conversation.otherUser.id}
+            name={conversation.otherUser.name}
+            email={conversation.otherUser.email}
+            size="md"
+            className="thread-avatar"
+          />
           <div className="thread-user-details">
             <h3>{conversation.otherUser.name || 'Usuario'}</h3>
             <span className="thread-user-email">{conversation.otherUser.email}</span>
@@ -1185,9 +1190,13 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         )}
         {isOtherUserTyping && (
           <div className="typing-indicator">
-            <div className="typing-avatar">
-              {conversation.otherUser.name?.charAt(0).toUpperCase() || '?'}
-            </div>
+            <UserAvatar
+              userId={conversation.otherUser.id}
+              name={conversation.otherUser.name}
+              email={conversation.otherUser.email}
+              size="sm"
+              className="typing-avatar"
+            />
             <div className="typing-bubble">
               <span className="typing-dot"></span>
               <span className="typing-dot"></span>
@@ -1447,9 +1456,13 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
                     className="forward-conversation-item"
                     onClick={() => handleSendForward(conv.id)}
                   >
-                    <div className="forward-avatar">
-                      {conv.otherUser.name?.charAt(0).toUpperCase() || '?'}
-                    </div>
+                    <UserAvatar
+                      userId={conv.otherUser.id}
+                      name={conv.otherUser.name}
+                      email={conv.otherUser.email}
+                      size="md"
+                      className="forward-avatar"
+                    />
                     <div className="forward-info">
                       <strong>{conv.otherUser.name || 'Usuario'}</strong>
                       <span>{conv.otherUser.email}</span>
@@ -1692,9 +1705,12 @@ const MessageBubble = forwardRef(({
   return (
     <div className={containerClasses} ref={ref}>
       {!isOwn && showAvatar && (
-        <div className="message-avatar">
-          {message.senderName?.charAt(0).toUpperCase() || '?'}
-        </div>
+        <UserAvatar
+          userId={message.senderId}
+          name={message.senderName}
+          size="sm"
+          className="message-avatar"
+        />
       )}
 
       <div className="message-bubble">
@@ -1935,9 +1951,12 @@ const MessageBubble = forwardRef(({
       </div>
 
       {isOwn && showAvatar && (
-        <div className="message-avatar">
-          {message.senderName?.charAt(0).toUpperCase() || '?'}
-        </div>
+        <UserAvatar
+          userId={message.senderId}
+          name={message.senderName}
+          size="sm"
+          className="message-avatar"
+        />
       )}
     </div>
   );
