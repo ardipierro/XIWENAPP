@@ -102,12 +102,15 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
 
     logger.info(`Subscribing to messages for conversation: ${conversation.id}`, 'MessageThread');
 
+    // IMPORTANT: Clear messages immediately when conversation changes to prevent showing old messages
+    setMessages([]);
+
     // Reset pagination state when changing conversations
     setHasMoreMessages(true);
     setLoadingOlderMessages(false);
 
     const unsubscribe = subscribeToMessages(conversation.id, (updatedMessages) => {
-      logger.info(`Received ${updatedMessages.length} messages`, 'MessageThread');
+      logger.info(`Received ${updatedMessages.length} messages for conversation ${conversation.id}`, 'MessageThread');
 
       // Show notification for new messages
       if (updatedMessages.length > messages.length && messages.length > 0) {
@@ -121,8 +124,14 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         }
       }
 
-      // Deduplicate messages by ID using a Map to preserve order and avoid duplicates
+      // Set messages directly from the subscription (already deduplicated by Firestore)
+      // Only deduplicate if we're merging with existing messages from pagination
       setMessages(prevMessages => {
+        // If no previous messages, just use the new ones
+        if (prevMessages.length === 0) {
+          return updatedMessages;
+        }
+
         // Create a Map with all messages (old + new) indexed by ID
         const messageMap = new Map();
 
