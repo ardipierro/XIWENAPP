@@ -676,30 +676,52 @@ export async function unassignGroupFromSession(sessionId, groupId) {
 
 /**
  * Asignar estudiante a sesión
+ * Busca primero en class_instances (nuevo sistema), luego en class_sessions (legacy)
  * @param {string} sessionId - ID de la sesión
  * @param {string} studentId - ID del estudiante
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function assignStudentToSession(sessionId, studentId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
-    const docSnap = await getDoc(docRef);
+    // Intentar buscar primero en class_instances (nuevo sistema)
+    const instanceRef = doc(db, 'class_instances', sessionId);
+    const instanceSnap = await getDoc(instanceRef);
 
-    if (!docSnap.exists()) {
+    if (instanceSnap.exists()) {
+      // Es una instancia nueva → usar eligibleStudentIds
+      const currentStudents = instanceSnap.data().eligibleStudentIds || [];
+      if (currentStudents.includes(studentId)) {
+        return { success: false, error: 'Estudiante ya asignado' };
+      }
+
+      await updateDoc(instanceRef, {
+        eligibleStudentIds: [...currentStudents, studentId],
+        updatedAt: serverTimestamp()
+      });
+
+      logger.info('✅ Estudiante asignado a instancia:', sessionId, studentId);
+      return { success: true };
+    }
+
+    // Si no está en class_instances, buscar en class_sessions (legacy)
+    const sessionRef = doc(db, 'class_sessions', sessionId);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (!sessionSnap.exists()) {
       return { success: false, error: 'Sesión no encontrada' };
     }
 
-    const currentStudents = docSnap.data().assignedStudents || [];
+    const currentStudents = sessionSnap.data().assignedStudents || [];
     if (currentStudents.includes(studentId)) {
       return { success: false, error: 'Estudiante ya asignado' };
     }
 
-    await updateDoc(docRef, {
+    await updateDoc(sessionRef, {
       assignedStudents: [...currentStudents, studentId],
       updatedAt: serverTimestamp()
     });
 
-    logger.info('✅ Estudiante asignado a sesión:', sessionId, studentId);
+    logger.info('✅ Estudiante asignado a sesión (legacy):', sessionId, studentId);
     return { success: true };
   } catch (error) {
     logger.error('❌ Error asignando estudiante:', error);
@@ -709,28 +731,48 @@ export async function assignStudentToSession(sessionId, studentId) {
 
 /**
  * Desasignar estudiante de sesión
+ * Busca primero en class_instances (nuevo sistema), luego en class_sessions (legacy)
  * @param {string} sessionId - ID de la sesión
  * @param {string} studentId - ID del estudiante
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function unassignStudentFromSession(sessionId, studentId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
-    const docSnap = await getDoc(docRef);
+    // Intentar buscar primero en class_instances (nuevo sistema)
+    const instanceRef = doc(db, 'class_instances', sessionId);
+    const instanceSnap = await getDoc(instanceRef);
 
-    if (!docSnap.exists()) {
+    if (instanceSnap.exists()) {
+      // Es una instancia nueva → usar eligibleStudentIds
+      const currentStudents = instanceSnap.data().eligibleStudentIds || [];
+      const updatedStudents = currentStudents.filter(id => id !== studentId);
+
+      await updateDoc(instanceRef, {
+        eligibleStudentIds: updatedStudents,
+        updatedAt: serverTimestamp()
+      });
+
+      logger.info('✅ Estudiante desasignado de instancia:', sessionId, studentId);
+      return { success: true };
+    }
+
+    // Si no está en class_instances, buscar en class_sessions (legacy)
+    const sessionRef = doc(db, 'class_sessions', sessionId);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (!sessionSnap.exists()) {
       return { success: false, error: 'Sesión no encontrada' };
     }
 
-    const currentStudents = docSnap.data().assignedStudents || [];
+    const currentStudents = sessionSnap.data().assignedStudents || [];
     const updatedStudents = currentStudents.filter(id => id !== studentId);
 
-    await updateDoc(docRef, {
+    await updateDoc(sessionRef, {
       assignedStudents: updatedStudents,
       updatedAt: serverTimestamp()
     });
 
-    logger.info('✅ Estudiante desasignado de sesión:', sessionId, studentId);
+    logger.info('✅ Estudiante desasignado de sesión (legacy):', sessionId, studentId);
     return { success: true };
   } catch (error) {
     logger.error('❌ Error desasignando estudiante:', error);
@@ -815,30 +857,52 @@ export async function removeParticipantFromSession(sessionId, userId) {
 
 /**
  * Asignar contenido a sesión
+ * Busca primero en class_instances (nuevo sistema), luego en class_sessions (legacy)
  * @param {string} sessionId - ID de la sesión
  * @param {string} contentId - ID del contenido
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function assignContentToSession(sessionId, contentId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
-    const docSnap = await getDoc(docRef);
+    // Intentar buscar primero en class_instances (nuevo sistema)
+    const instanceRef = doc(db, 'class_instances', sessionId);
+    const instanceSnap = await getDoc(instanceRef);
 
-    if (!docSnap.exists()) {
+    if (instanceSnap.exists()) {
+      // Es una instancia nueva
+      const currentContents = instanceSnap.data().contentIds || [];
+      if (currentContents.includes(contentId)) {
+        return { success: false, error: 'Contenido ya asignado' };
+      }
+
+      await updateDoc(instanceRef, {
+        contentIds: [...currentContents, contentId],
+        updatedAt: serverTimestamp()
+      });
+
+      logger.info('✅ Contenido asignado a instancia:', sessionId, contentId);
+      return { success: true };
+    }
+
+    // Si no está en class_instances, buscar en class_sessions (legacy)
+    const sessionRef = doc(db, 'class_sessions', sessionId);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (!sessionSnap.exists()) {
       return { success: false, error: 'Sesión no encontrada' };
     }
 
-    const currentContents = docSnap.data().contentIds || [];
+    const currentContents = sessionSnap.data().contentIds || [];
     if (currentContents.includes(contentId)) {
       return { success: false, error: 'Contenido ya asignado' };
     }
 
-    await updateDoc(docRef, {
+    await updateDoc(sessionRef, {
       contentIds: [...currentContents, contentId],
       updatedAt: serverTimestamp()
     });
 
-    logger.info('✅ Contenido asignado a sesión:', sessionId, contentId);
+    logger.info('✅ Contenido asignado a sesión (legacy):', sessionId, contentId);
     return { success: true };
   } catch (error) {
     logger.error('❌ Error asignando contenido:', error);
@@ -848,28 +912,48 @@ export async function assignContentToSession(sessionId, contentId) {
 
 /**
  * Desasignar contenido de sesión
+ * Busca primero en class_instances (nuevo sistema), luego en class_sessions (legacy)
  * @param {string} sessionId - ID de la sesión
  * @param {string} contentId - ID del contenido
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function unassignContentFromSession(sessionId, contentId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
-    const docSnap = await getDoc(docRef);
+    // Intentar buscar primero en class_instances (nuevo sistema)
+    const instanceRef = doc(db, 'class_instances', sessionId);
+    const instanceSnap = await getDoc(instanceRef);
 
-    if (!docSnap.exists()) {
+    if (instanceSnap.exists()) {
+      // Es una instancia nueva
+      const currentContents = instanceSnap.data().contentIds || [];
+      const updatedContents = currentContents.filter(id => id !== contentId);
+
+      await updateDoc(instanceRef, {
+        contentIds: updatedContents,
+        updatedAt: serverTimestamp()
+      });
+
+      logger.info('✅ Contenido desasignado de instancia:', sessionId, contentId);
+      return { success: true };
+    }
+
+    // Si no está en class_instances, buscar en class_sessions (legacy)
+    const sessionRef = doc(db, 'class_sessions', sessionId);
+    const sessionSnap = await getDoc(sessionRef);
+
+    if (!sessionSnap.exists()) {
       return { success: false, error: 'Sesión no encontrada' };
     }
 
-    const currentContents = docSnap.data().contentIds || [];
+    const currentContents = sessionSnap.data().contentIds || [];
     const updatedContents = currentContents.filter(id => id !== contentId);
 
-    await updateDoc(docRef, {
+    await updateDoc(sessionRef, {
       contentIds: updatedContents,
       updatedAt: serverTimestamp()
     });
 
-    logger.info('✅ Contenido desasignado de sesión:', sessionId, contentId);
+    logger.info('✅ Contenido desasignado de sesión (legacy):', sessionId, contentId);
     return { success: true };
   } catch (error) {
     logger.error('❌ Error desasignando contenido:', error);
