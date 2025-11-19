@@ -72,6 +72,24 @@ function useBadgeConfig() {
   }, []);
 
   /**
+   * Cambiar el estilo de TODOS los badges (solid/outline)
+   */
+  const updateAllBadgeStyles = useCallback((badgeStyle) => {
+    setConfig((prev) => {
+      const updated = {};
+      Object.keys(prev).forEach((key) => {
+        updated[key] = {
+          ...prev[key],
+          badgeStyle,
+        };
+      });
+      setHasChanges(true);
+      logger.info(`All badges updated to style: ${badgeStyle}`, 'useBadgeConfig');
+      return updated;
+    });
+  }, []);
+
+  /**
    * Guardar configuración actual (badges + iconos)
    */
   const save = useCallback(() => {
@@ -265,6 +283,7 @@ function useBadgeConfig() {
     addBadge,
     removeBadge,
     updateIconLibrary,
+    updateAllBadgeStyles,
   };
 }
 
