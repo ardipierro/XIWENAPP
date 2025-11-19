@@ -811,14 +811,6 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   // Obtener configuración del variant (con fallback a defaults)
   const variantConfig = cardConfig?.[cardVariant] || { showBadges: true };
 
-  // DEBUG: Log para verificar configuración
-  console.log('🔍 DEBUG ContentCard:', {
-    cardVariant,
-    hasCardConfig: !!cardConfig,
-    variantConfig,
-    showBadges: variantConfig.showBadges
-  });
-
   const getBadgeVariant = (type) => {
     const variants = {
       [CONTENT_TYPES.COURSE]: 'info',
