@@ -6433,55 +6433,46 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 /* ============================================
-   AUDIO PLAYER MODERNO - MENSAJES (MINIMALISTA)
+   AUDIO PLAYER SIMPLE - USA COLORES DE LA BURBUJA
    ============================================ */
 
 .attachment-audio-modern {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 0.75rem;
-  min-width: 240px;
-  max-width: 320px;
+  padding: 0.5rem 0;
+  /* SIN background propio - usa el color de la burbuja */
 }
 
-.dark .attachment-audio-modern {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* Botón play/pause minimalista */
+/* Botón play/pause - adapta a contexto del mensaje */
 .audio-play-btn-modern {
   flex-shrink: 0;
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background: #3b82f6;
   border: none;
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+/* En mensajes de otros, usar el color primario */
+.message-bubble-container.other .audio-play-btn-modern {
+  background: var(--color-primary, #6366f1);
+  color: white;
 }
 
 .audio-play-btn-modern:hover {
-  background: #2563eb;
+  opacity: 0.9;
   transform: scale(1.05);
 }
 
 .audio-play-btn-modern:active {
   transform: scale(0.95);
-}
-
-.audio-play-btn-modern.playing {
-  background: #8b5cf6;
-}
-
-.audio-play-btn-modern.playing:hover {
-  background: #7c3aed;
 }
 
 /* Contenedor de progreso y tiempo */
@@ -6490,44 +6481,50 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 150px;
 }
 
-/* Barra de progreso minimalista */
+/* Barra de progreso VISIBLE */
 .audio-progress-modern {
-  position: relative;
   height: 4px;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 2px;
   cursor: pointer;
   overflow: hidden;
 }
 
-.dark .audio-progress-modern {
-  background: rgba(255, 255, 255, 0.1);
+/* En mensajes propios (fondo azul) */
+.message-bubble-container.own .audio-progress-modern {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* En mensajes de otros */
+.message-bubble-container.other .audio-progress-modern {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .progress-fill-modern {
   height: 100%;
-  background: #3b82f6;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 2px;
   transition: width 0.1s linear;
+}
+
+/* Fill en mensajes de otros */
+.message-bubble-container.other .progress-fill-modern {
+  background: var(--color-primary, #6366f1);
 }
 
 /* Tiempo del audio */
 .audio-time-modern {
   display: flex;
   justify-content: space-between;
-  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
-  font-size: 0.75rem;
-  color: #6b7280;
+  font-size: 10px;
+  color: currentColor;
+  opacity: 0.75;
 }
 
-.dark .audio-time-modern {
-  color: #9ca3af;
-}
-
-.current-time,
-.total-time,
-.time-separator {
-  color: inherit;
+/* En mensajes propios (texto blanco sobre azul) */
+.message-bubble-container.own .audio-time-modern {
+  color: white;
 }

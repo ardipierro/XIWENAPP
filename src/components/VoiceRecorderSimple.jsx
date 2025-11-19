@@ -8,11 +8,11 @@ import { Mic, Square, Send, X, Play, Pause } from 'lucide-react';
 import logger from '../utils/logger';
 import { BaseButton } from './common';
 
-// Componente de preview de audio - diseño consistente con el chat
+// Componente de preview de audio SIMPLE
 function AudioPreview({ audioUrl, duration }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [audioDuration, setAudioDuration] = useState(duration || 0);
+  const [audioDuration, setAudioDuration] = useState(0);
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -20,11 +20,19 @@ function AudioPreview({ audioUrl, duration }) {
     if (!audio) return;
 
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
+      if (audio.currentTime && isFinite(audio.currentTime)) {
+        setCurrentTime(audio.currentTime);
+      }
     };
 
     const handleLoadedMetadata = () => {
-      setAudioDuration(audio.duration);
+      // IMPORTANTE: verificar que duration sea válido antes de usar
+      if (audio.duration && isFinite(audio.duration)) {
+        setAudioDuration(audio.duration);
+      } else if (duration && isFinite(duration)) {
+        // Fallback al duration pasado como prop
+        setAudioDuration(duration);
+      }
     };
 
     const handleEnded = () => {
@@ -36,12 +44,17 @@ function AudioPreview({ audioUrl, duration }) {
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
 
+    // Intentar cargar metadata inmediatamente
+    if (audio.readyState >= 1) {
+      handleLoadedMetadata();
+    }
+
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, []);
+  }, [duration]);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
@@ -57,48 +70,53 @@ function AudioPreview({ audioUrl, duration }) {
 
   const handleProgressClick = (e) => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !audioDuration || !isFinite(audioDuration)) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const pos = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = pos * audioDuration;
+    const newTime = pos * audioDuration;
+
+    if (isFinite(newTime)) {
+      audio.currentTime = newTime;
+    }
   };
 
   const formatTime = (seconds) => {
-    if (!isFinite(seconds)) return '0:00';
+    // ARREGLO DEL NaN: verificar que sea un número válido
+    if (!seconds || !isFinite(seconds) || seconds < 0) {
+      return '0:00';
+    }
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = audioDuration > 0 ? (currentTime / audioDuration) * 100 : 0;
+  const progress = (audioDuration > 0 && isFinite(audioDuration))
+    ? (currentTime / audioDuration) * 100
+    : 0;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2 bg-zinc-100 dark:bg-zinc-700/50 rounded-lg">
-      <audio ref={audioRef} src={audioUrl} />
+    <div className="flex items-center gap-3 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+      <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
       <button
         onClick={togglePlayPause}
-        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-          isPlaying
-            ? 'bg-blue-500 hover:bg-blue-600 text-white'
-            : 'bg-zinc-300 dark:bg-zinc-600 hover:bg-zinc-400 dark:hover:bg-zinc-500 text-zinc-700 dark:text-zinc-200'
-        }`}
+        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-yellow-500 hover:bg-yellow-600 text-white"
       >
         {isPlaying ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
       </button>
 
-      <div className="flex-1 flex flex-col gap-1">
+      <div className="flex-1 flex flex-col gap-1 min-w-[150px]">
         <div
-          className="h-1.5 bg-zinc-300 dark:bg-zinc-600 rounded-full cursor-pointer overflow-hidden"
+          className="h-1 bg-yellow-200 dark:bg-yellow-800 rounded-full cursor-pointer overflow-hidden"
           onClick={handleProgressClick}
         >
           <div
-            className="h-full bg-blue-500 transition-all duration-100"
+            className="h-full bg-yellow-500 transition-all duration-100"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400">
+        <div className="flex justify-between text-[10px] text-yellow-800 dark:text-yellow-300">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(audioDuration)}</span>
         </div>
