@@ -802,11 +802,11 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   const IconComponent = config.icon;
 
   // Obtener configuración global de tarjetas
-  const { config: cardConfig } = useCardConfig();
+  const { config: cardConfig, getComponentVariant } = useCardConfig();
 
-  // TODAS las tarjetas de contenido usan variant "content"
+  // Obtener el variant desde el mapeo de componentes
   const hasImage = content.type === CONTENT_TYPES.VIDEO && content.videoData?.thumbnailUrl;
-  const cardVariant = 'content'; // Siempre usar variant "content" para tarjetas de contenido
+  const cardVariant = getComponentVariant('UnifiedContentManager');
 
   // Obtener configuración del variant (con fallback a defaults)
   const variantConfig = cardConfig?.[cardVariant] || { showBadges: true };
