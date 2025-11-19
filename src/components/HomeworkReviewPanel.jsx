@@ -49,6 +49,7 @@ import {
   getPendingReviews,
   approveReview,
   subscribeToReview,
+  subscribeToPendingReviews,
   requestReanalysis,
   assignStudentToReview,
   REVIEW_STATUS
@@ -151,6 +152,15 @@ export default function HomeworkReviewPanel({ teacherId }) {
 
   useEffect(() => {
     loadPendingReviews();
+
+    // Subscribe to real-time updates for instant feedback
+    const unsubscribe = subscribeToPendingReviews((updatedReviews) => {
+      logger.info(`Received ${updatedReviews.length} reviews from real-time subscription`, 'HomeworkReviewPanel');
+      setReviews(updatedReviews);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [teacherId]);
 
   const loadPendingReviews = async () => {
