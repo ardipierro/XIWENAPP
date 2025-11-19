@@ -804,9 +804,9 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   // Obtener configuración global de tarjetas
   const { config: cardConfig } = useCardConfig();
 
-  // Determinar si usar variant="content" (con imagen) o "default" (con ícono)
+  // TODAS las tarjetas de contenido usan variant "content"
   const hasImage = content.type === CONTENT_TYPES.VIDEO && content.videoData?.thumbnailUrl;
-  const cardVariant = hasImage ? 'content' : 'default';
+  const cardVariant = 'content'; // Siempre usar variant "content" para tarjetas de contenido
 
   // Obtener configuración del variant (con fallback a defaults)
   const variantConfig = cardConfig?.[cardVariant] || { showBadges: true };
