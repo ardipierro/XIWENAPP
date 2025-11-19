@@ -27,7 +27,7 @@ import { useUserManagement } from '../hooks/useUserManagement';
 import { createUser, deleteUser } from '../firebase/users';
 import SearchBar from './common/SearchBar';
 import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge, CategoryBadge, BaseModal } from './common';
-import { UniversalCard, CardGrid } from './cards';
+import { UniversalCard, CardGrid, CardDeleteButton } from './cards';
 import AddUserModal from './AddUserModal';
 import UserProfileModal from './UserProfileModal';
 import UserAvatar from './UserAvatar';
@@ -412,18 +412,18 @@ export default function UniversalUserManager({ user, userRole }) {
                     <span className="text-zinc-500">créditos</span>
                   </div>
 
-                  {/* Actions */}
+                  {/* Delete Button - UNIFICADO (esquina inferior izquierda) */}
                   {can('delete-users') && (
-                    <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                      <BaseButton
-                        onClick={(e) => {
-                          e.stopPropagation();
+                    <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 flex justify-start">
+                      <CardDeleteButton
+                        onDelete={async () => {
                           setUserToDelete(userItem);
                           setShowDeleteConfirm(true);
                         }}
-                        variant="danger"
-                        size="sm"
-                        icon={Trash2}
+                        variant="solid"
+                        size="md"
+                        confirmMessage={`¿Eliminar usuario "${userItem.name}"?`}
+                        requireConfirm={false}  // No preguntar aquí, usamos modal separado
                       />
                     </div>
                   )}
