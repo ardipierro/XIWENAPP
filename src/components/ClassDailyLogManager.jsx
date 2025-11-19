@@ -213,14 +213,14 @@ function ClassDailyLogManager({ user }) {
           />
         )
       ) : (
-        <div className={viewMode === 'grid' ? 'grid-responsive-cards gap-6' : 'flex flex-col gap-4'}>
+        <div className={viewMode === 'grid' ? 'grid-responsive-cards gap-6' : 'flex flex-col gap-3'}>
           {filteredLogs.map((log) => (
             <LogCard
               key={log.id}
               log={log}
               onOpen={handleOpenLog}
               onDelete={handleDeleteLog}
-              viewMode={viewMode}
+              layout={viewMode === 'list' ? 'horizontal' : 'vertical'}
             />
           ))}
         </div>
@@ -238,10 +238,20 @@ function ClassDailyLogManager({ user }) {
 }
 
 // ============================================
-// LOG CARD
+// LOG CARD - MIGRADO AL SISTEMA UNIVERSAL
 // ============================================
 
-function LogCard({ log, onOpen, onDelete, viewMode = 'grid' }) {
+/**
+ * LogCard - Tarjeta de diario de clase
+ * Usa props nativas de UniversalCard para eliminar duplicación
+ *
+ * @param {Object} log - Datos del diario
+ * @param {Function} onOpen - Callback para abrir diario
+ * @param {Function} onDelete - Callback para eliminar diario
+ * @param {string} layout - 'vertical' (grid) o 'horizontal' (list)
+ */
+function LogCard({ log, onOpen, onDelete, layout = 'vertical' }) {
+  // Config de badges según estado
   const statusConfig = {
     active: { variant: 'success', label: 'Activa', icon: Activity },
     ended: { variant: 'default', label: 'Finalizada', icon: CheckCircle },
@@ -250,116 +260,71 @@ function LogCard({ log, onOpen, onDelete, viewMode = 'grid' }) {
 
   const config = statusConfig[log.status] || statusConfig.active;
 
-  if (viewMode === 'list') {
-    // Vista de lista (horizontal)
-    return (
-      <UniversalCard variant="default" size="md" hover>
-        <div className="flex items-center gap-4">
-          {/* Status Badge */}
-          <BaseBadge variant={config.variant} icon={config.icon} size="sm">
-            {config.label}
-          </BaseBadge>
+  // Preparar stats (info del diario)
+  const stats = [
+    {
+      icon: Calendar,
+      label: 'Creado',
+      value: log.createdAt?.toDate?.().toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short'
+      }) || 'Sin fecha'
+    },
+    {
+      icon: Clock,
+      label: 'Contenidos',
+      value: log.entries?.length || 0
+    }
+  ];
 
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-              {log.name}
-            </h3>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              {log.courseName && (
-                <div className="flex items-center gap-1">
-                  <BookOpen size={14} />
-                  <span>{log.courseName}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Calendar size={14} />
-                <span>{log.createdAt?.toDate?.().toLocaleDateString() || 'Sin fecha'}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock size={14} />
-                <span>{log.entries?.length || 0} contenidos</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 flex-shrink-0">
-            <BaseButton
-              variant="primary"
-              icon={Play}
-              onClick={() => onOpen(log.id)}
-            >
-              Abrir
-            </BaseButton>
-            <BaseButton
-              variant="danger"
-              icon={Trash2}
-              onClick={() => onDelete(log.id)}
-            />
-          </div>
-        </div>
-      </UniversalCard>
-    );
+  // Si hay curso, agregarlo como stat adicional
+  if (log.courseName) {
+    stats.unshift({
+      icon: BookOpen,
+      label: 'Curso',
+      value: log.courseName
+    });
   }
 
-  // Vista de grilla (vertical)
+  // ⭐ ÚNICO RENDER - Sin duplicación
   return (
-    <UniversalCard variant="default" size="md" hover>
-      <div className="space-y-4">
-        {/* Header */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <BaseBadge variant={config.variant} icon={config.icon} size="sm">
-              {config.label}
-            </BaseBadge>
-          </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-            {log.name}
-          </h3>
-          {log.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-              {log.description}
-            </p>
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          {log.courseName && (
-            <div className="flex items-center gap-2">
-              <BookOpen size={16} />
-              <span>{log.courseName}</span>
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            <Calendar size={16} />
-            <span>{log.createdAt?.toDate?.().toLocaleDateString() || 'Sin fecha'}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock size={16} />
-            <span>{log.entries?.length || 0} contenidos</span>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <BaseButton
-            variant="primary"
-            icon={Play}
-            onClick={() => onOpen(log.id)}
-            fullWidth
-          >
-            Abrir
-          </BaseButton>
-          <BaseButton
-            variant="danger"
-            icon={Trash2}
-            onClick={() => onDelete(log.id)}
-          />
-        </div>
-      </div>
-    </UniversalCard>
+    <UniversalCard
+      variant="default"
+      size="md"
+      layout={layout}
+      icon={BookOpen}
+      title={log.name}
+      description={layout === 'vertical' ? log.description : undefined}
+      badges={[
+        {
+          variant: config.variant,
+          icon: config.icon,
+          children: config.label,
+          size: 'sm'
+        }
+      ]}
+      stats={stats}
+      actions={[
+        <BaseButton
+          key="open"
+          variant="primary"
+          icon={Play}
+          size={layout === 'horizontal' ? 'sm' : 'md'}
+          onClick={() => onOpen(log.id)}
+          fullWidth={layout === 'vertical'}
+        >
+          Abrir
+        </BaseButton>,
+        <BaseButton
+          key="delete"
+          variant="danger"
+          icon={Trash2}
+          size={layout === 'horizontal' ? 'sm' : 'md'}
+          onClick={() => onDelete(log.id)}
+        />
+      ]}
+      hover
+    />
   );
 }
 
