@@ -213,15 +213,20 @@ export async function createClassSession(sessionData) {
  */
 export async function updateClassSession(sessionId, updates) {
   try {
-    // Normalizar campos: convertir 'name' a 'scheduleName' para class_instances
+    // Normalizar campos para class_instances
     const normalizedUpdates = {
       ...updates,
       updatedAt: serverTimestamp()
     };
 
-    // Si se está actualizando 'name', también actualizar 'scheduleName'
+    // CRITICAL: Normalizar 'name' → 'scheduleName'
     if (updates.name !== undefined) {
       normalizedUpdates.scheduleName = updates.name;
+    }
+
+    // CRITICAL: Normalizar 'assignedStudents' → 'eligibleStudentIds'
+    if (updates.assignedStudents !== undefined) {
+      normalizedUpdates.eligibleStudentIds = updates.assignedStudents;
     }
 
     // Filtrar campos undefined (Firestore no los permite)

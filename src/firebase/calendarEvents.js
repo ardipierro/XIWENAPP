@@ -149,17 +149,20 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
               mode: session.mode || 'live',
               location: session.videoProvider || 'Online',
               color: 'blue',
-              sessionData: session
+              sessionData: { ...session, type: 'recurring' }  // Ensure type is set
             });
           }
         } else {
           // For single sessions, check the scheduled date
           const sessionDate = session.scheduledStart?.toDate?.() || session.createdAt?.toDate?.() || new Date();
           if (sessionDate >= startDate && sessionDate <= endDate) {
+            // CRITICAL: Use the EXACT same name field that ClassSessionManager uses
+            const displayName = session.name;  // getTeacherSessions already normalizes this
+
             events.push({
               id: session.id,
               sessionId: session.id,
-              title: session.name || session.scheduleName || 'Clase',
+              title: displayName || 'Clase',
               type: 'session',
               startDate: session.scheduledStart || session.createdAt,
               endDate: session.scheduledEnd || session.scheduledStart || session.createdAt,
@@ -172,7 +175,7 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
               mode: session.mode || 'live',
               location: session.videoProvider || 'Online',
               color: session.status === 'live' ? 'red' : session.status === 'ended' ? 'gray' : session.status === 'cancelled' ? 'orange' : 'blue',
-              sessionData: session
+              sessionData: { ...session, type: 'single' }  // Ensure type is set
             });
           }
         }
