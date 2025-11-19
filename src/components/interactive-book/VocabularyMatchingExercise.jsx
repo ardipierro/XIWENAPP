@@ -168,7 +168,7 @@ function VocabularyMatchingExercise({ exercise, onComplete }) {
                       ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                       : 'border-red-500 bg-red-50 dark:bg-red-900/20'
                     : matchedChinese
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
                 }`}
               >

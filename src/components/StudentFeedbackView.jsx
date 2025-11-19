@@ -94,8 +94,8 @@ export default function StudentFeedbackView({ submission, studentId }) {
       message: '¡Excelente trabajo!'
     },
     good: {
-      color: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/20',
+      color: 'text-gray-600 dark:text-gray-400',
+      bgColor: 'bg-gray-100 dark:bg-gray-800/20',
       icon: <TrendingUp size={32} strokeWidth={2} />,
       message: '¡Buen trabajo!'
     },
@@ -253,7 +253,7 @@ function ErrorMetric({ label, count, total, color }) {
     red: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300',
     orange: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
     yellow: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300',
-    blue: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+    blue: 'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300'
   };
 
   return (
@@ -356,9 +356,9 @@ function StudentFeedbackDetailModal({ review, onClose }) {
                     </div>
 
                     {/* Explanation */}
-                    <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="mt-3 p-3 bg-gray-50 dark:bg-blue-900/10 rounded-lg border border-gray-200 dark:border-gray-700">
                       <div className="flex items-start gap-2">
-                        <Lightbulb size={16} strokeWidth={2} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                        <Lightbulb size={16} strokeWidth={2} className="text-gray-600 dark:text-gray-400 mt-0.5" />
                         <p className="text-xs text-blue-800 dark:text-blue-200">
                           {correction.explanation}
                         </p>

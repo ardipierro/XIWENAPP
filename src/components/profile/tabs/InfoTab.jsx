@@ -115,7 +115,6 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
     }
   };
 
-
   return (
     <div className="p-6">
       {/* Formulario */}
@@ -132,7 +131,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
                        text-zinc-900 dark:text-zinc-50
                        bg-white dark:bg-zinc-950
                        border border-zinc-200 dark:border-zinc-800
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500
+                       focus:outline-none focus:ring-2 focus:ring-gray-400
                        disabled:opacity-60 disabled:cursor-not-allowed"
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
@@ -153,7 +152,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
                          text-zinc-900 dark:text-zinc-50
                          bg-white dark:bg-zinc-950
                          border border-zinc-200 dark:border-zinc-800
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500
+                         focus:outline-none focus:ring-2 focus:ring-gray-400
                          disabled:opacity-60 disabled:cursor-not-allowed"
               value={formData.chineseLastName}
               onChange={(e) => handleChange('chineseLastName', e.target.value)}
@@ -171,7 +170,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
                          text-zinc-900 dark:text-zinc-50
                          bg-white dark:bg-zinc-950
                          border border-zinc-200 dark:border-zinc-800
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500
+                         focus:outline-none focus:ring-2 focus:ring-gray-400
                          disabled:opacity-60 disabled:cursor-not-allowed"
               value={formData.chineseFirstName}
               onChange={(e) => handleChange('chineseFirstName', e.target.value)}
@@ -214,7 +213,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
                        text-zinc-900 dark:text-zinc-50
                        bg-white dark:bg-zinc-950
                        border border-zinc-200 dark:border-zinc-800
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500
+                       focus:outline-none focus:ring-2 focus:ring-gray-400
                        disabled:opacity-60 disabled:cursor-not-allowed"
             value={formData.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
@@ -235,7 +234,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
                        text-zinc-900 dark:text-zinc-50
                        bg-white dark:bg-zinc-950
                        border border-zinc-200 dark:border-zinc-800
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500
+                       focus:outline-none focus:ring-2 focus:ring-gray-400
                        disabled:opacity-60 disabled:cursor-not-allowed"
             value={formData.address}
             onChange={(e) => handleChange('address', e.target.value)}
@@ -256,7 +255,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
                        text-zinc-900 dark:text-zinc-50
                        bg-white dark:bg-zinc-950
                        border border-zinc-200 dark:border-zinc-800
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500
+                       focus:outline-none focus:ring-2 focus:ring-gray-400
                        disabled:opacity-60 disabled:cursor-not-allowed"
             value={formData.birthDate}
             onChange={(e) => handleChange('birthDate', e.target.value)}
@@ -276,7 +275,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
                          text-zinc-900 dark:text-zinc-50
                          bg-white dark:bg-zinc-950
                          border border-zinc-200 dark:border-zinc-800
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                         focus:outline-none focus:ring-2 focus:ring-gray-400"
               value={formData.role}
               onChange={(e) => handleChange('role', e.target.value)}
             >
@@ -304,7 +303,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
                            text-zinc-900 dark:text-zinc-50
                            bg-white dark:bg-zinc-950
                            border border-zinc-200 dark:border-zinc-800
-                           focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                           focus:outline-none focus:ring-2 focus:ring-gray-400"
                 value={formData.status}
                 onChange={(e) => handleChange('status', e.target.value)}
               >

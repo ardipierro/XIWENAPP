@@ -366,7 +366,7 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
         {/* Status Badge - Top Right */}
         <div className="absolute top-2 right-2 z-10">
           {(isProcessing || isPendingReview) ? (
-            <div className="bg-blue-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+            <div className="bg-gray-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
               <Clock size={14} />
               <span className="text-xs font-bold">EN REVISIÓN</span>
             </div>
@@ -414,12 +414,12 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
 
         {/* Stats or Status Message */}
         {(isProcessing || isPendingReview) ? (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-3.5">
+          <div className="bg-gray-50 dark:bg-gray-800/20 border-2 border-gray-300 dark:border-gray-500 rounded-lg p-3.5">
             <div className="flex items-center gap-2.5 text-sm text-blue-800 dark:text-blue-200">
               <Clock size={18} className="flex-shrink-0" strokeWidth={2.5} />
               <span className="font-bold">En revisión</span>
             </div>
-            <p className="text-xs text-blue-700 dark:text-blue-300 mt-2 ml-6 font-medium">
+            <p className="text-xs text-gray-700 dark:text-gray-300 mt-2 ml-6 font-medium">
               📝 Tu profesor está revisando tu tarea
             </p>
           </div>
@@ -685,8 +685,8 @@ function HomeworkCorrectionView({ review }) {
       message: '¡Excelente trabajo!'
     },
     good: {
-      color: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/20',
+      color: 'text-gray-600 dark:text-gray-400',
+      bgColor: 'bg-gray-100 dark:bg-gray-800/20',
       icon: '📈',
       message: '¡Buen trabajo!'
     },
@@ -847,7 +847,7 @@ function ErrorMetric({ label, count, total, color }) {
     red: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300',
     orange: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
     yellow: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300',
-    blue: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+    blue: 'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300'
   };
 
   return (
@@ -971,9 +971,9 @@ function CorrectionDetailModal({ review, onClose }) {
 
                       {/* Explanation */}
                       {correction.explanation && (
-                        <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="mt-3 p-3 bg-gray-50 dark:bg-blue-900/10 rounded-lg border border-gray-200 dark:border-gray-700">
                           <div className="flex items-start gap-2">
-                            <Sparkles size={16} strokeWidth={2} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                            <Sparkles size={16} strokeWidth={2} className="text-gray-600 dark:text-gray-400 mt-0.5" />
                             <p className="text-xs text-blue-800 dark:text-blue-200">
                               {correction.explanation}
                             </p>

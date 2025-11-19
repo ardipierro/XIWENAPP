@@ -47,7 +47,7 @@ import logger from '../utils/logger';
  */
 function MetricCard({ icon: Icon, label, value, subValue, color = 'blue' }) {
   const colorClasses = {
-    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+    blue: 'bg-gray-50 dark:bg-gray-800/20 text-gray-600 dark:text-gray-400',
     green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
     purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
     orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'
@@ -87,7 +87,7 @@ function TopContentsList({ contents, allContents }) {
 
   const typeColors = {
     course: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-    lesson: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+    lesson: 'bg-gray-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300',
     reading: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
     video: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
     exercise: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
@@ -246,7 +246,7 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
       </div>
     );
   }
@@ -341,7 +341,7 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
         <div className="flex items-center gap-2">
           <button
             onClick={handleExport}
-            className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 flex items-center gap-2"
+            className="px-3 py-2 rounded-lg bg-gray-500 text-white hover:bg-blue-600 flex items-center gap-2"
           >
             <Download size={16} />
             Exportar
@@ -441,7 +441,7 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
                   </span>
                 </div>
                 <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '100%' }}></div>
+                  <div className="bg-gray-500 h-2 rounded-full" style={{ width: '100%' }}></div>
                 </div>
               </div>
 

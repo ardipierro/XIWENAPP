@@ -246,15 +246,15 @@ function CoursePlayer({ courseId, userId, onBack }) {
     // Si es unidad del libro (JSON con unitNumber o dialogue)
     if (parsedBody && (parsedBody.unitNumber || parsedBody.content?.dialogue || content.type === 'unit')) {
       return (
-        <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+        <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 mb-3">
-            <BookOpen size={20} className="text-blue-600 dark:text-blue-400" />
-            <h3 className="font-semibold text-blue-900 dark:text-blue-100">
+            <BookOpen size={20} className="text-gray-600 dark:text-gray-400" />
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
               Unidad {parsedBody.unitNumber || ''}
             </h3>
           </div>
           {parsedBody.content?.introduction?.text && (
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               {parsedBody.content.introduction.text}
             </p>
           )}
@@ -294,7 +294,7 @@ function CoursePlayer({ courseId, userId, onBack }) {
             href={content.body}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 dark:text-blue-400 hover:underline break-all font-medium"
+            className="text-gray-600 dark:text-gray-400 hover:underline break-all font-medium"
           >
             {content.body}
           </a>
@@ -493,7 +493,7 @@ function CoursePlayer({ courseId, userId, onBack }) {
                   className={`
                     w-full p-3 rounded-lg mb-2 text-left transition-all
                     ${isActive
-                      ? 'bg-indigo-50 dark:bg-indigo-900/20 border-2 border-indigo-500'
+                      ? 'bg-indigo-50 dark:bg-indigo-900/20 border-2 border-gray-400'
                       : 'bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
                     }
                   `}
@@ -511,7 +511,7 @@ function CoursePlayer({ courseId, userId, onBack }) {
                         <span className={`
                           text-xs font-semibold px-2 py-0.5 rounded
                           ${isActive
-                            ? 'bg-indigo-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300'
+                            ? 'bg-gray-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300'
                             : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                           }
                         `}>
@@ -564,7 +564,7 @@ function CoursePlayer({ courseId, userId, onBack }) {
                       {currentContent.title || 'Sin título'}
                     </h2>
                     <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                      <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full font-medium">
+                      <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800/30 text-indigo-700 dark:text-indigo-300 rounded-full font-medium">
                         {currentContent.type || 'Contenido'}
                       </span>
                       <span className="flex items-center gap-1">

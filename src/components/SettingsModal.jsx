@@ -458,8 +458,8 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
                     className="p-6 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-500 dark:hover:border-purple-500 transition-all text-left group"
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
-                        <Gauge size={24} className="text-blue-600 dark:text-blue-400" />
+                      <div className="w-12 h-12 bg-gray-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                        <Gauge size={24} className="text-gray-600 dark:text-gray-400" />
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900 dark:text-white">Estándar</h4>
@@ -559,8 +559,8 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
                   </button>
                 </div>
 
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mt-4">
-                  <p className="text-sm text-blue-900 dark:text-blue-100">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg mt-4">
+                  <p className="text-sm text-gray-900 dark:text-gray-100">
                     💡 <strong>Tip:</strong> Los presets aplican la velocidad globalmente. Para configurar cada personaje individualmente, usa la sección "Voces por Personaje" arriba.
                   </p>
                 </div>
@@ -685,7 +685,7 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
                 </div>
 
                 {/* Nota informativa */}
-                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/20 rounded-lg border border-gray-200 dark:border-gray-600">
                   <p className="text-sm text-blue-800 dark:text-blue-200">
                     <strong>💡 Nota:</strong> Esta es una herramienta temporal para probar fuentes. La fuente seleccionada aquí no se aplicará automáticamente al resto de la aplicación.
                   </p>

@@ -174,7 +174,7 @@ function ContentCard({ content }) {
   const getTypeIcon = () => {
     switch (type) {
       case 'lesson':
-        return <BookOpen size={18} strokeWidth={2} className="text-blue-500" />;
+        return <BookOpen size={18} strokeWidth={2} className="text-gray-600" />;
       case 'reading':
         return <FileText size={18} strokeWidth={2} className="text-purple-500" />;
       case 'video':
@@ -190,7 +190,7 @@ function ContentCard({ content }) {
 
   const getTypeBadge = () => {
     const badges = {
-      lesson: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
+      lesson: 'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400',
       reading: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400',
       video: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
       link: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400',

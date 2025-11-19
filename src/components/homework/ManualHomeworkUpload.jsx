@@ -232,7 +232,7 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
           <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
-            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer"
+            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-gray-400 dark:hover:border-gray-400 transition-colors cursor-pointer"
             onClick={() => document.getElementById('file-input').click()}
           >
             <Upload className="mx-auto mb-4 text-gray-400" size={48} />
@@ -282,13 +282,13 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
 
       {/* Upload Summary */}
       {selectedFile && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-          <h4 className="text-sm font-bold text-blue-900 dark:text-blue-100 mb-2">
+        <div className="bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+          <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2">
             📋 Resumen de la tarea a enviar
           </h4>
           <div className="space-y-1.5 text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-blue-700 dark:text-blue-300 font-medium">Estudiante:</span>
+              <span className="text-gray-700 dark:text-gray-300 font-medium">Estudiante:</span>
               <span className={`font-bold ${selectedStudentId ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
                 {selectedStudentId
                   ? `✅ ${students.find(s => s.id === selectedStudentId)?.name || students.find(s => s.id === selectedStudentId)?.email}`
@@ -297,11 +297,11 @@ export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, o
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-blue-700 dark:text-blue-300 font-medium">Archivo:</span>
-              <span className="font-bold text-blue-900 dark:text-blue-100">{selectedFile.name}</span>
+              <span className="text-gray-700 dark:text-gray-300 font-medium">Archivo:</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">{selectedFile.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-blue-700 dark:text-blue-300 font-medium">Procesamiento:</span>
+              <span className="text-gray-700 dark:text-gray-300 font-medium">Procesamiento:</span>
               <span className="font-bold text-orange-700 dark:text-orange-300">🤖 IA automática (10-30s)</span>
             </div>
           </div>

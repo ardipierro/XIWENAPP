@@ -152,14 +152,14 @@ function ComponentMappingPanel() {
         </div>
 
         {/* Info Alert */}
-        <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+        <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700">
           <div className="flex items-start gap-3">
-            <Layers size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <Layers size={20} className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
                 ¿Qué hace esto?
               </p>
-              <p className="text-sm text-blue-700 dark:text-blue-200">
+              <p className="text-sm text-gray-700 dark:text-blue-200">
                 Aquí puedes definir qué <strong>variant de tarjeta</strong> usa cada componente/sección de la app.
                 Por ejemplo, puedes hacer que las tarjetas de "Gestión de Contenidos" usen el variant "content"
                 o cambiarlas a "default" si prefieres otro estilo.

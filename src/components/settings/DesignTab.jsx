@@ -92,9 +92,9 @@ function DesignTab() {
               </div>
 
               {/* Info de persistencia */}
-              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/20 rounded-lg border border-gray-200 dark:border-gray-600">
                 <div className="flex items-start gap-2">
-                  <Database size={16} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <Database size={16} className="text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
                   <div className="text-xs text-blue-800 dark:text-blue-200">
                     <strong>Guardado en Firebase:</strong> La configuración se guarda automáticamente en la nube.
                     Se mantendrá aunque cambies de navegador o servidor.
@@ -113,7 +113,7 @@ function DesignTab() {
               <div className="grid-responsive-cards-sm gap-3 max-h-96 overflow-y-auto pr-2">
                   {availableFonts.map((font) => {
                     const styleColors = {
-                      modern: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+                      modern: 'bg-gray-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300',
                       classic: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
                       artistic: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
                       rounded: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300',
@@ -126,7 +126,7 @@ function DesignTab() {
                         onClick={() => setSelectedFont(font.family)}
                         className={`p-3 border-2 rounded-lg transition-all text-left ${
                           selectedFont === font.family
-                            ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900 shadow-md'
+                            ? 'border-gray-400 bg-gray-50 dark:bg-zinc-900 shadow-md'
                             : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
                         }`}
                       >
@@ -162,7 +162,7 @@ function DesignTab() {
                     onClick={() => setFontWeight('normal')}
                     className={`flex-1 p-3 border-2 rounded-lg transition-all font-medium ${
                       fontWeight === 'normal'
-                        ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900'
+                        ? 'border-gray-400 bg-gray-50 dark:bg-zinc-900'
                         : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
                     }`}
                   >
@@ -172,7 +172,7 @@ function DesignTab() {
                     onClick={() => setFontWeight('bold')}
                     className={`flex-1 p-3 border-2 rounded-lg transition-all font-bold ${
                       fontWeight === 'bold'
-                        ? 'border-indigo-500 bg-gray-50 dark:bg-zinc-900'
+                        ? 'border-gray-400 bg-gray-50 dark:bg-zinc-900'
                         : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-900/50'
                     }`}
                   >

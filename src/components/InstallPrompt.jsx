@@ -114,7 +114,7 @@ function InstallPrompt() {
                 </h3>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
                   Para instalar en iOS, toca el botón de compartir{' '}
-                  <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-500 text-white rounded text-xs">⬆️</span>
+                  <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-500 text-white rounded text-xs">⬆️</span>
                   {' '}y luego "Añadir a la pantalla de inicio"
                 </p>
               </div>

@@ -191,7 +191,7 @@ function HomeworkCard({ review }) {
     }
     if (isUnderReview) {
       return (
-        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-bold">
+        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400 text-xs font-bold">
           <Clock size={14} strokeWidth={2} />
           En Revisión
         </div>
@@ -205,7 +205,7 @@ function HomeworkCard({ review }) {
   return (
     <div className={`bg-white dark:bg-zinc-950 border rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group ${
       isApproved ? 'border-green-300 dark:border-green-800' :
-      isUnderReview ? 'border-blue-300 dark:border-blue-800' :
+      isUnderReview ? 'border-gray-300 dark:border-gray-700' :
       isFailed ? 'border-red-300 dark:border-red-800' :
       'border-zinc-200 dark:border-zinc-800'
     }`}>

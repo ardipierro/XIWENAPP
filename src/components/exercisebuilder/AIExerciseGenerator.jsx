@@ -200,7 +200,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
       <div className="flex items-center gap-2">
         <button
           onClick={() => setShowInfo(!showInfo)}
-          className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+          className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
         >
           <Info size={18} />
           <span className="font-medium">Información sobre generación con IA</span>
@@ -209,7 +209,7 @@ export function AIExerciseGenerator({ onExercisesGenerated = () => {} }) {
       </div>
 
       {showInfo && (
-        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <div className="p-4 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
           <p className="text-sm text-gray-700 dark:text-gray-300">
             El sistema analiza el texto y crea ejercicios adaptados al nivel CEFR seleccionado.
             Si tienes un proveedor de IA configurado (OpenAI, Claude, etc.), lo usará automáticamente.

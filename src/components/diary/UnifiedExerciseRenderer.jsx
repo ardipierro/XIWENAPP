@@ -96,7 +96,7 @@ export function UnifiedExerciseRenderer({
   if (!exerciseData) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader className="animate-spin text-blue-500" size={32} />
+        <Loader className="animate-spin text-gray-600" size={32} />
         <span className="ml-3 text-gray-600 dark:text-gray-400">
           Cargando ejercicio...
         </span>
@@ -136,7 +136,7 @@ export function UnifiedExerciseRenderer({
                 )}
                 {content.metadata.cefrLevel && (
                   <span className="inline-block px-2 py-1 text-xs rounded bg-blue-200
-                                 dark:bg-blue-800 text-blue-900 dark:text-blue-100">
+                                 dark:bg-blue-800 text-gray-900 dark:text-gray-100">
                     Nivel {content.metadata.cefrLevel}
                   </span>
                 )}
@@ -206,7 +206,7 @@ export function UnifiedExerciseRenderer({
               </span>
             )}
             {content.metadata?.cefrLevel && (
-              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100
+              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100
                              dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                 {content.metadata.cefrLevel}
               </span>
@@ -226,7 +226,7 @@ export function UnifiedExerciseRenderer({
         <Suspense
           fallback={
             <div className="flex items-center justify-center py-12">
-              <Loader className="animate-spin text-blue-500 mr-3" size={24} />
+              <Loader className="animate-spin text-gray-600 mr-3" size={24} />
               <span className="text-gray-600 dark:text-gray-400">
                 Cargando componente de ejercicio...
               </span>

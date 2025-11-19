@@ -380,7 +380,7 @@ function SlidePackageGenerator() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Package size={32} className="text-blue-500" />
+            <Package size={32} className="text-gray-600" />
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Generador de Paquetes - ADE1
@@ -418,7 +418,7 @@ function SlidePackageGenerator() {
 
           <UniversalCard variant="default" size="sm">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+              <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
                 {stats.selected}
               </div>
               <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -462,14 +462,14 @@ function SlidePackageGenerator() {
                   placeholder="Buscar por número, título o contenido..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400"
                 />
               </div>
 
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400"
               >
                 <option value="all">Todos los tipos</option>
                 <option value="fill_in_blank">Fill-in-Blank</option>
@@ -539,7 +539,7 @@ function SlidePackageGenerator() {
                 key={slide.slide_number}
                 className={`border-2 rounded-lg bg-white dark:bg-gray-800 transition-colors ${
                   isSelected
-                    ? 'border-blue-500 dark:border-blue-400'
+                    ? 'border-gray-400 dark:border-gray-400'
                     : 'border-gray-200 dark:border-gray-700'
                 }`}
               >
@@ -551,7 +551,7 @@ function SlidePackageGenerator() {
                     className="flex-shrink-0"
                   >
                     {isSelected ? (
-                      <CheckSquare size={24} className="text-blue-600 dark:text-blue-400" />
+                      <CheckSquare size={24} className="text-gray-600 dark:text-gray-400" />
                     ) : (
                       <Square size={24} className="text-gray-400" />
                     )}
@@ -645,7 +645,7 @@ function SlidePreview({ slide, formatSettings, editMode }) {
                     fontWeight: run.bold ? 'bold' : 'normal',
                     fontStyle: run.italic ? 'italic' : 'normal'
                   }}
-                  className={run.text.includes('___') ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}
+                  className={run.text.includes('___') ? 'text-gray-600 dark:text-gray-400 font-semibold' : ''}
                 >
                   {run.text}{' '}
                 </span>

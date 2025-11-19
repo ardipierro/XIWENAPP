@@ -129,7 +129,6 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
     };
     return names[role] || role;
   };
-
   return (
     <BaseModal
       isOpen={true}

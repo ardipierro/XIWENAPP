@@ -187,7 +187,7 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
                 <select
                   value={styles.fontFamily}
                   onChange={(e) => updateStyle('fontFamily', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400"
                 >
                   <option value="sans-serif">Sans Serif</option>
                   <option value="serif">Serif</option>
@@ -203,7 +203,7 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
                 <select
                   value={styles.fontSize}
                   onChange={(e) => updateStyle('fontSize', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400"
                 >
                   <option value="sm">Pequeño</option>
                   <option value="base">Normal</option>
@@ -220,7 +220,7 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
                 <select
                   value={styles.fontWeight}
                   onChange={(e) => updateStyle('fontWeight', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400"
                 >
                   <option value="normal">Normal</option>
                   <option value="medium">Medium</option>
@@ -237,7 +237,7 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
                 <select
                   value={styles.lineHeight}
                   onChange={(e) => updateStyle('lineHeight', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400"
                 >
                   <option value="tight">Ajustado</option>
                   <option value="normal">Normal</option>
@@ -340,7 +340,7 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
                 <select
                   value={styles.paragraphSpacing}
                   onChange={(e) => updateStyle('paragraphSpacing', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400"
                 >
                   <option value="tight">Ajustado</option>
                   <option value="normal">Normal</option>
@@ -356,7 +356,7 @@ function ContentStyleEditor({ initialStyles, onSave, onCancel }) {
                 <select
                   value={styles.sectionSpacing}
                   onChange={(e) => updateStyle('sectionSpacing', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400"
                 >
                   <option value="tight">Ajustado</option>
                   <option value="normal">Normal</option>

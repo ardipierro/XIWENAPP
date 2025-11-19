@@ -458,7 +458,7 @@ function MobileEventCard({ event, onClick }) {
   const typeColors = {
     session: event.status === 'live'
       ? 'bg-red-100 dark:bg-red-900 border-red-500'
-      : 'bg-blue-100 dark:bg-blue-900 border-blue-500',
+      : 'bg-gray-100 dark:bg-blue-900 border-gray-400',
     class: 'bg-zinc-100 dark:bg-zinc-800 border-zinc-400',
     assignment: 'bg-amber-100 dark:bg-amber-900 border-amber-500',
     event: 'bg-green-100 dark:bg-green-900 border-green-500'
@@ -598,13 +598,13 @@ function MonthView({ currentDate, events, onEventClick }) {
               <div
                 key={dayIndex}
                 className={`p-2 border-r border-gray-200 dark:border-gray-700 last:border-r-0 min-h-[100px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors ${
-                  isToday(day) ? 'bg-blue-50 dark:bg-blue-950 border-2 border-blue-400 dark:border-blue-600' : ''
+                  isToday(day) ? 'bg-gray-50 dark:bg-blue-950 border-2 border-gray-400 dark:border-gray-500' : ''
                 }`}
                 onClick={() => setSelectedDate(day)}
               >
                 <div className={`text-sm font-bold mb-1 ${
                   isToday(day)
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md'
+                    ? 'bg-blue-600 dark:bg-gray-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md'
                     : 'text-gray-900 dark:text-white'
                 }`}>
                   {day}
@@ -621,7 +621,7 @@ function MonthView({ currentDate, events, onEventClick }) {
                         event.type === 'session'
                           ? event.status === 'live'
                             ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 font-medium'
-                            : 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                            : 'bg-gray-100 dark:bg-blue-900 text-gray-700 dark:text-gray-300'
                           : event.type === 'class'
                           ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                           : event.type === 'assignment'
@@ -677,11 +677,11 @@ function WeekView({ currentDate, events, onEventClick }) {
 
           return (
             <div key={index} className="bg-white dark:bg-gray-800 min-h-[400px] p-3">
-              <div className={`text-center mb-3 ${isToday ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-900 dark:text-white'}`}>
-                <div className={`text-xs ${isToday ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
+              <div className={`text-center mb-3 ${isToday ? 'text-gray-600 dark:text-gray-400 font-bold' : 'text-gray-900 dark:text-white'}`}>
+                <div className={`text-xs ${isToday ? 'text-gray-600 dark:text-gray-400 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
                   {day.toLocaleDateString('es-ES', { weekday: 'short' })}
                 </div>
-                <div className={`text-lg ${isToday ? 'bg-blue-600 dark:bg-blue-500 text-white w-10 h-10 rounded-full mx-auto flex items-center justify-center shadow-md font-bold' : ''}`}>
+                <div className={`text-lg ${isToday ? 'bg-blue-600 dark:bg-gray-500 text-white w-10 h-10 rounded-full mx-auto flex items-center justify-center shadow-md font-bold' : ''}`}>
                   {day.getDate()}
                 </div>
               </div>
@@ -710,23 +710,23 @@ function DayView({ currentDate, events, onEventClick }) {
     <div className="space-y-4">
       <div className={`rounded-lg p-4 ${
         isToday
-          ? 'bg-blue-50 dark:bg-blue-950 border-2 border-blue-400 dark:border-blue-600'
+          ? 'bg-gray-50 dark:bg-blue-950 border-2 border-gray-400 dark:border-gray-500'
           : 'bg-gray-50 dark:bg-gray-900'
       }`}>
         <div className="flex items-center gap-2">
           {isToday && (
-            <span className="inline-flex items-center justify-center bg-blue-600 dark:bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+            <span className="inline-flex items-center justify-center bg-blue-600 dark:bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
               HOY
             </span>
           )}
           <h3 className={`text-lg font-semibold ${
-            isToday ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
+            isToday ? 'text-gray-900 dark:text-gray-100' : 'text-gray-900 dark:text-white'
           }`}>
             {currentDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </h3>
         </div>
         <p className={`text-sm mt-1 ${
-          isToday ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'
+          isToday ? 'text-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400'
         }`}>
           {dayEvents.length} evento{dayEvents.length !== 1 ? 's' : ''}
         </p>
@@ -752,7 +752,7 @@ function EventCard({ event, compact = false, onClick }) {
   const typeColors = {
     session: event.status === 'live'
       ? 'bg-red-100 dark:bg-red-900 border-red-500 text-red-900 dark:text-red-100'
-      : 'bg-blue-100 dark:bg-blue-900 border-blue-500 text-blue-900 dark:text-blue-100',
+      : 'bg-gray-100 dark:bg-blue-900 border-gray-400 text-gray-900 dark:text-gray-100',
     class: 'bg-gray-100 dark:bg-gray-800 border-gray-400 text-gray-900 dark:text-gray-100',
     assignment: 'bg-orange-100 dark:bg-orange-900 border-orange-500 text-orange-900 dark:text-orange-100',
     event: 'bg-green-100 dark:bg-green-900 border-green-500 text-green-900 dark:text-green-100'

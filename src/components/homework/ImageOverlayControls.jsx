@@ -30,7 +30,7 @@ const ERROR_TYPE_CONFIG = {
   },
   vocabulary: {
     label: 'Vocabulario',
-    color: 'bg-blue-500',
+    color: 'bg-gray-500',
     icon: '🔵'
   }
 };
@@ -93,7 +93,7 @@ export default function ImageOverlayControls({
           </span>
           <button
             onClick={handleToggleAll}
-            className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+            className="text-xs text-gray-600 dark:text-gray-400 hover:underline"
           >
             {allVisible ? 'Ocultar todo' : 'Mostrar todo'}
           </button>

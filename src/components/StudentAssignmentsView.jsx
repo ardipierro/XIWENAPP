@@ -500,7 +500,7 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   rows={8}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-gray-400 resize-none"
                   placeholder="Escribe tu respuesta aquí..."
                 />
               </div>

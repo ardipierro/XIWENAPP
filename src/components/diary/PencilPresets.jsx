@@ -87,7 +87,7 @@ export function PencilPresets({ onSelect, current = {} }) {
               relative flex flex-col items-center justify-center gap-1 p-2 rounded-lg
               transition-all hover:scale-105
               ${isActive(preset)
-                ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-500 shadow-md'
+                ? 'bg-gray-100 dark:bg-blue-900 border-2 border-gray-400 shadow-md'
                 : 'bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400'
               }
             `}
@@ -112,7 +112,7 @@ export function PencilPresets({ onSelect, current = {} }) {
 
             {/* Indicador de activo */}
             {isActive(preset) && (
-              <div className="absolute top-1 right-1 bg-blue-500 rounded-full p-0.5">
+              <div className="absolute top-1 right-1 bg-gray-500 rounded-full p-0.5">
                 <Check size={12} className="text-white" />
               </div>
             )}
@@ -121,8 +121,8 @@ export function PencilPresets({ onSelect, current = {} }) {
       </div>
 
       {/* Leyenda */}
-      <div className="mt-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg
-                     border border-blue-200 dark:border-blue-800">
+      <div className="mt-2 px-3 py-2 bg-gray-50 dark:bg-gray-800/20 rounded-lg
+                     border border-gray-200 dark:border-gray-700">
         <p className="text-xs text-blue-800 dark:text-blue-200">
           💡 <strong>Consejo:</strong> Los marcadores tienen trazo más grueso y son semitransparentes,
           ideales para resaltar sin ocultar el texto.

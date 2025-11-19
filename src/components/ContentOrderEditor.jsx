@@ -55,7 +55,7 @@ function SortableItem({ id, content, index }) {
       className={`
         flex items-center gap-3 p-4 rounded-lg border-2 bg-white dark:bg-gray-800
         ${isDragging
-          ? 'border-indigo-500 shadow-lg opacity-50'
+          ? 'border-gray-400 shadow-lg opacity-50'
           : 'border-gray-200 dark:border-gray-700'
         }
         transition-all
@@ -72,7 +72,7 @@ function SortableItem({ id, content, index }) {
       </button>
 
       {/* Número de orden */}
-      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-semibold text-sm">
+      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 flex items-center justify-center font-semibold text-sm">
         {index + 1}
       </div>
 
@@ -227,8 +227,8 @@ function ContentOrderEditor({ course, contents, isOpen, onClose, onSave }) {
     >
       <div className="space-y-4">
         {/* Instrucciones */}
-        <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-          <p className="text-sm text-blue-700 dark:text-blue-300">
+        <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             <strong>Arrastra</strong> los contenidos para cambiar el orden. Los estudiantes verán los contenidos en este orden.
           </p>
         </div>

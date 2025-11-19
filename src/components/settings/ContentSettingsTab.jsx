@@ -162,8 +162,8 @@ function ContentSettingsTab() {
           description="Configuración de libros y lecturas interactivas"
           badge={{ text: 'Próximamente', variant: 'info' }}
         >
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/20 rounded-lg text-center">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               Esta función estará disponible próximamente
             </p>
           </div>

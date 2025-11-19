@@ -75,7 +75,7 @@ export function SimpleColorButton({ value = '#000000', onChange, label = 'Color'
                   w-full aspect-square rounded-lg border-2 transition-all
                   hover:scale-110 hover:shadow-md
                   ${value === color.value
-                    ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800 scale-110'
+                    ? 'border-gray-500 ring-2 ring-gray-300 dark:ring-gray-600 scale-110'
                     : 'border-gray-300 dark:border-gray-600'
                   }
                 `}

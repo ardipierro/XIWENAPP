@@ -107,7 +107,7 @@ export function HotspotImageExercise({
               className={`
                 absolute border-4 rounded-lg transition-all
                 ${isCorrect === null
-                  ? 'border-blue-400 hover:border-blue-600 hover:bg-blue-500/20 cursor-pointer'
+                  ? 'border-gray-400 hover:border-gray-500 hover:bg-gray-500/20 cursor-pointer'
                   : clickedHotspot?.id === hotspot.id
                     ? hotspot.correct
                       ? 'border-green-500 bg-green-500/20'
@@ -142,9 +142,9 @@ export function HotspotImageExercise({
       {showHint && hint && (
         <BaseCard variant="info" className="mb-4">
           <div className="flex gap-3">
-            <Lightbulb size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <Lightbulb size={20} className="text-gray-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pista:</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">Pista:</p>
               <p className="text-sm text-blue-800 dark:text-blue-200">{hint}</p>
             </div>
           </div>

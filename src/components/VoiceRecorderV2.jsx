@@ -466,9 +466,9 @@ function VoiceRecorderV2({ onSend, onCancel }) {
   // Mostrar "Enviando..." mientras se limpia el stream
   if (state.status === RECORDER_STATES.CLEANING) {
     return (
-      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-200 dark:border-blue-800">
-        <div className="text-blue-600 dark:text-blue-400 text-center flex items-center justify-center gap-3">
-          <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+      <div className="p-4 bg-gray-50 dark:bg-gray-800/20 border-t border-gray-200 dark:border-gray-700">
+        <div className="text-gray-600 dark:text-gray-400 text-center flex items-center justify-center gap-3">
+          <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-500 border-t-transparent"></div>
           <p className="font-semibold">Enviando mensaje de voz...</p>
         </div>
       </div>

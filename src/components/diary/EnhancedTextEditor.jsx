@@ -259,7 +259,7 @@ export function EnhancedTextEditor({
           onClick={() => setIsEditing(true)}
           className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100
                      transition-all duration-200 flex items-center gap-2 px-3 py-2
-                     bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600
+                     bg-gray-500 text-white rounded-lg shadow-lg hover:bg-blue-600
                      hover:shadow-xl transform hover:scale-105"
         >
           <Edit2 size={16} />
@@ -392,7 +392,7 @@ export function EnhancedTextEditor({
                 onChange={(e) => editor.chain().focus().setFontSize(e.target.value).run()}
                 className="px-2 py-1.5 rounded-lg border-2 border-gray-300 dark:border-gray-600
                          bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100
-                         focus:border-blue-500 cursor-pointer"
+                         focus:border-gray-400 cursor-pointer"
                 defaultValue="16px"
               >
                 {fontSizes.map(size => (
@@ -408,7 +408,7 @@ export function EnhancedTextEditor({
                 onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
                 className="px-2 py-1.5 rounded-lg border-2 border-gray-300 dark:border-gray-600
                          bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100
-                         focus:border-blue-500 cursor-pointer"
+                         focus:border-gray-400 cursor-pointer"
               >
                 {fontFamilies.map(font => (
                   <option key={font.value} value={font.value}>{font.label}</option>
@@ -496,7 +496,7 @@ export function EnhancedTextEditor({
           className={`
             bg-white dark:bg-gray-900
             ${isEditing
-              ? 'border-2 border-blue-400 dark:border-blue-500 rounded-b-lg shadow-lg'
+              ? 'border-2 border-gray-400 dark:border-gray-400 rounded-b-lg shadow-lg'
               : 'border border-gray-200 dark:border-gray-700 rounded-lg'
             }
           `}

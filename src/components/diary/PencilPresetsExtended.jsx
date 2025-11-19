@@ -117,7 +117,7 @@ export function PencilPresetsExtended({ onSelect, current = {}, onSaveCustom }) 
                 relative flex flex-col items-center justify-center gap-1 p-2 rounded-lg
                 transition-all hover:scale-105 w-full
                 ${isActive(preset)
-                  ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-500 shadow-md'
+                  ? 'bg-gray-100 dark:bg-blue-900 border-2 border-gray-400 shadow-md'
                   : 'bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400'
                 }
               `}
@@ -142,7 +142,7 @@ export function PencilPresetsExtended({ onSelect, current = {}, onSaveCustom }) 
 
               {/* Indicador de activo */}
               {isActive(preset) && (
-                <div className="absolute top-1 right-1 bg-blue-500 rounded-full p-0.5">
+                <div className="absolute top-1 right-1 bg-gray-500 rounded-full p-0.5">
                   <Check size={10} className="text-white" />
                 </div>
               )}
@@ -171,8 +171,8 @@ export function PencilPresetsExtended({ onSelect, current = {}, onSaveCustom }) 
           onClick={() => setShowCustom(true)}
           className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg
                    border-2 border-dashed border-gray-400 dark:border-gray-600
-                   hover:border-blue-500 dark:hover:border-blue-400
-                   hover:bg-blue-50 dark:hover:bg-blue-900/20
+                   hover:border-gray-400 dark:hover:border-gray-400
+                   hover:bg-gray-50 dark:hover:bg-gray-800/20
                    transition-all"
           title="Guardar configuración actual como preset"
         >
@@ -227,7 +227,7 @@ export function PencilPresetsExtended({ onSelect, current = {}, onSaveCustom }) 
               </button>
               <button
                 onClick={handleSaveCustomPreset}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white
+                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-blue-600 text-white
                          rounded-lg font-semibold transition-colors"
               >
                 Guardar
@@ -238,8 +238,8 @@ export function PencilPresetsExtended({ onSelect, current = {}, onSaveCustom }) 
       )}
 
       {/* Info */}
-      <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border
-                     border-blue-200 dark:border-blue-800">
+      <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-800/20 rounded-lg border
+                     border-gray-200 dark:border-gray-700">
         <p className="text-xs text-blue-800 dark:text-blue-200">
           💡 <strong>{allPresets.length} presets</strong> disponibles.
           Haz click en "Guardar" para crear tus propios presets.

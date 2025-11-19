@@ -50,12 +50,12 @@ export function UnifiedToolbarButton({
   // Variantes de color
   const variantStyles = {
     default: active
-      ? 'bg-blue-500 text-white border-blue-600 shadow-md'
+      ? 'bg-gray-500 text-white border-gray-500 shadow-md'
       : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600',
 
     primary: active
-      ? 'bg-blue-600 text-white border-blue-700 shadow-lg'
-      : 'bg-blue-500 text-white border-blue-600 hover:bg-blue-600 shadow-md',
+      ? 'bg-blue-600 text-white border-gray-600 shadow-lg'
+      : 'bg-gray-500 text-white border-gray-500 hover:bg-blue-600 shadow-md',
 
     danger: active
       ? 'bg-red-600 text-white border-red-700 shadow-lg'

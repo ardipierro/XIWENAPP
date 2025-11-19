@@ -123,7 +123,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
               </span>
             )}
             {(content.metadata?.difficulty || exerciseData.difficulty) && (
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300">
                 {getDifficultyLabel(content.metadata?.difficulty || exerciseData.difficulty)}
               </span>
             )}
@@ -189,8 +189,8 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
 
                 {/* Explicación */}
                 {question.explanation && (
-                  <div className="mt-2 p-2 rounded bg-blue-50 dark:bg-blue-900/20">
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                  <div className="mt-2 p-2 rounded bg-gray-50 dark:bg-gray-800/20">
+                    <p className="text-xs text-gray-700 dark:text-gray-300">
                       💡 {question.explanation}
                     </p>
                   </div>
@@ -231,7 +231,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
         {/* Header de la unidad */}
         <div className="p-5 rounded-xl  border style={{ borderColor: 'var(--color-border)' }}" style={{ background: 'var(--color-bg-tertiary)' }}>
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 dark:bg-blue-900/30 text-gray-600 dark:text-gray-400 flex items-center justify-center">
               <BookOpen size={20} strokeWidth={2} />
             </div>
             <div className="flex-1">
@@ -362,7 +362,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
                 href={content.body}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline break-all text-sm"
+                className="text-gray-600 dark:text-gray-400 hover:underline break-all text-sm"
               >
                 {content.body}
               </a>
@@ -385,7 +385,7 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
         {/* Header */}
         <div className="p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
               <BookOpen size={24} strokeWidth={2} />
             </div>
             <div className="flex-1">

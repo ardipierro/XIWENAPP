@@ -206,7 +206,7 @@ export function DesignLabPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <BaseCard variant="flat" hover>
                   <div className="text-center p-4">
-                    <FileText size={32} className="mx-auto text-blue-500 mb-3" strokeWidth={2} />
+                    <FileText size={32} className="mx-auto text-gray-600 mb-3" strokeWidth={2} />
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
                       Parser de Texto
                     </h3>
@@ -335,7 +335,7 @@ export function DesignLabPage() {
 
               <BaseCard variant="elevated">
                 <div className="text-center p-4">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                  <div className="text-3xl font-bold text-gray-600 dark:text-gray-400 mb-2">
                     {stats.averageScore}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">

@@ -129,7 +129,7 @@ const SelectionSpeakerConfig = ({ config, onSave, onClose }) => {
             className={`
               p-4 rounded-lg border-2 transition-all text-left
               ${localConfig.provider === 'edgetts'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }
             `}
@@ -147,7 +147,7 @@ const SelectionSpeakerConfig = ({ config, onSave, onClose }) => {
                 </p>
               </div>
               {localConfig.provider === 'edgetts' && (
-                <Check size={20} className="text-blue-500 flex-shrink-0" />
+                <Check size={20} className="text-gray-600 flex-shrink-0" />
               )}
             </div>
           </button>
@@ -162,7 +162,7 @@ const SelectionSpeakerConfig = ({ config, onSave, onClose }) => {
             className={`
               p-4 rounded-lg border-2 transition-all text-left
               ${localConfig.provider === 'elevenlabs'
-                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                ? 'border-gray-400 bg-indigo-50 dark:bg-indigo-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }
             `}

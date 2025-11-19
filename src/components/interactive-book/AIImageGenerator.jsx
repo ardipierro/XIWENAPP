@@ -222,7 +222,7 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
               {/* OpenAI DALL-E */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Key size={16} className="text-blue-600 dark:text-blue-400" />
+                  <Key size={16} className="text-gray-600 dark:text-gray-400" />
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
                     OpenAI (DALL-E)
                   </span>
@@ -466,10 +466,10 @@ function AIImageGenerator({ bookContent = null, alwaysOpen = false }) {
           )}
 
           {/* Info */}
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
             <div className="flex items-start gap-2">
-              <Zap size={16} className="text-blue-600 dark:text-blue-400 mt-0.5" />
-              <div className="text-xs text-blue-900 dark:text-blue-100">
+              <Zap size={16} className="text-gray-600 dark:text-gray-400 mt-0.5" />
+              <div className="text-xs text-gray-900 dark:text-gray-100">
                 <p className="font-semibold mb-1">Consejos:</p>
                 <ul className="list-disc list-inside space-y-1">
                   <li>Sé específico en la descripción: colores, estilo, ambiente, personajes</li>

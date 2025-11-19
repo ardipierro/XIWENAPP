@@ -169,7 +169,7 @@ function Login() {
                 bg-white dark:bg-gray-800
                 text-gray-900 dark:text-white
                 placeholder-gray-400 dark:placeholder-gray-500
-                focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+                focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
               aria-invalid={hasFieldError('email')}
@@ -205,7 +205,7 @@ function Login() {
                 bg-white dark:bg-gray-800
                 text-gray-900 dark:text-white
                 placeholder-gray-400 dark:placeholder-gray-500
-                focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+                focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
               aria-invalid={hasFieldError('password')}
@@ -242,7 +242,7 @@ function Login() {
                   bg-white dark:bg-gray-800
                   text-gray-900 dark:text-white
                   placeholder-gray-400 dark:placeholder-gray-500
-                  focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+                  focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
                 aria-invalid={hasFieldError('confirmPassword')}
@@ -266,7 +266,7 @@ function Login() {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
                 disabled={loading}
-                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-gray-600 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
               />
               <label htmlFor="rememberMe" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Recordame
@@ -309,7 +309,7 @@ function Login() {
               type="button"
               onClick={handleResetPassword}
               disabled={loading}
-              className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              className="w-full text-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
               ¿Olvidaste tu contraseña?
             </button>
@@ -324,7 +324,7 @@ function Login() {
                   type="button"
                   onClick={toggleMode}
                   disabled={loading}
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium disabled:opacity-50"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium disabled:opacity-50"
                 >
                   Inicia sesión
                 </button>
@@ -336,7 +336,7 @@ function Login() {
                   type="button"
                   onClick={toggleMode}
                   disabled={loading}
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium disabled:opacity-50"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium disabled:opacity-50"
                 >
                   Crear cuenta
                 </button>

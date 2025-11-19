@@ -109,10 +109,10 @@ export function GrammarTransformationExercise({
       {grammarRule && (
         <BaseCard variant="info" className="mb-6">
           <div className="flex items-start gap-2">
-            <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+            <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">
               📚 Regla:
             </span>
-            <p className="text-sm text-blue-900 dark:text-blue-100">
+            <p className="text-sm text-gray-900 dark:text-gray-100">
               {grammarRule}
             </p>
           </div>
@@ -151,9 +151,9 @@ export function GrammarTransformationExercise({
       {showHint && hint && (
         <BaseCard variant="info" className="mb-4">
           <div className="flex gap-3">
-            <Lightbulb size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <Lightbulb size={20} className="text-gray-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pista:</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">Pista:</p>
               <p className="text-sm text-blue-800 dark:text-blue-200">{hint}</p>
             </div>
           </div>

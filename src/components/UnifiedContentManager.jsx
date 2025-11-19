@@ -519,8 +519,8 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       >
         <div className="space-y-6">
           {/* Header */}
-          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-900 dark:text-blue-100">
+          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700">
+            <p className="text-sm text-gray-900 dark:text-gray-100">
               Este script genera <strong>10 ejercicios interactivos de ejemplo</strong> en español nivel A1-A2
               directamente en Firebase. Los ejercicios estarán listos para usar en tus clases.
             </p>
@@ -682,7 +682,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
                   href={viewingContent.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                  className="text-gray-600 dark:text-gray-400 hover:underline break-all"
                 >
                   {viewingContent.url}
                 </a>
@@ -833,7 +833,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   const getStatusClasses = (status) => {
     const classes = {
       [CONTENT_STATUS.DRAFT]: 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800 border-gray-300 dark:border-gray-600',
-      [CONTENT_STATUS.REVIEW]: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600',
+      [CONTENT_STATUS.REVIEW]: 'text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-800/20 border-gray-300 dark:border-gray-500',
       [CONTENT_STATUS.PUBLISHED]: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20 border-green-300 dark:border-green-600',
       [CONTENT_STATUS.ARCHIVED]: 'text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20 border-orange-300 dark:border-orange-600'
     };

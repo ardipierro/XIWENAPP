@@ -112,7 +112,7 @@ export function ImageUploader({ onImageInsert, userId }) {
       >
         {isUploading ? (
           <>
-            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
             <span className="text-sm font-semibold">{uploadProgress}%</span>
           </>
         ) : (
@@ -157,11 +157,11 @@ export function ImageUploader({ onImageInsert, userId }) {
             placeholder="https://ejemplo.com/imagen.jpg"
             className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                     focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                     focus:border-gray-400 focus:ring-2 focus:ring-gray-300"
           />
           <button
             onClick={handleUrlSubmit}
-            className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg
+            className="px-3 py-2 bg-gray-500 hover:bg-blue-600 text-white rounded-lg
                      font-semibold transition-colors"
           >
             Insertar

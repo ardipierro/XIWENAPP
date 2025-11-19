@@ -178,7 +178,7 @@ export function EnhancedTextEditor({
           onClick={() => setIsEditing(true)}
           className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100
                      transition-all duration-200 flex items-center gap-2 px-3 py-2
-                     bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600
+                     bg-gray-500 text-white rounded-lg shadow-lg hover:bg-blue-600
                      hover:shadow-xl transform hover:scale-105"
         >
           <Edit2 size={16} />
@@ -360,7 +360,7 @@ export function EnhancedTextEditor({
                   onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
                   className="px-3 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                           focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                           focus:border-gray-400 focus:ring-2 focus:ring-gray-300"
                 >
                   <option value="Arial, sans-serif">Arial</option>
                   <option value="Times New Roman, serif">Times New Roman</option>
@@ -379,7 +379,7 @@ export function EnhancedTextEditor({
                   onChange={(e) => editor.chain().focus().setMark('textStyle', { fontSize: e.target.value }).run()}
                   className="px-3 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                           focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                           focus:border-gray-400 focus:ring-2 focus:ring-gray-300"
                 >
                   <option value="12px">Pequeño (12px)</option>
                   <option value="16px" selected>Normal (16px)</option>
@@ -425,7 +425,7 @@ export function EnhancedTextEditor({
           className={`
             bg-white dark:bg-gray-900
             ${isEditing
-              ? 'border-2 border-blue-400 dark:border-blue-500 rounded-b-lg shadow-lg'
+              ? 'border-2 border-gray-400 dark:border-gray-400 rounded-b-lg shadow-lg'
               : 'border border-gray-200 dark:border-gray-700 rounded-lg'
             }
           `}
@@ -467,7 +467,7 @@ function ToolbarButton({ onClick, active, children, title }) {
       className={`
         p-2 rounded transition-all
         ${active
-          ? 'bg-blue-500 text-white shadow-md'
+          ? 'bg-gray-500 text-white shadow-md'
           : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
         }
       `}

@@ -23,40 +23,40 @@ export const theme = {
       950: '#09090b',
     },
 
-    // Colores principales
+    // Colores principales (neutral gris-azulado)
     primary: {
-      50: '#eef2ff',
-      100: '#e0e7ff',
-      200: '#c7d2fe',
-      300: '#a5b4fc',
-      400: '#818cf8',
-      500: '#6366f1', // Principal
-      600: '#4f46e5',
-      700: '#4338ca',
-      800: '#3730a3',
-      900: '#312e81',
+      50: '#f8f9fa',
+      100: '#e9ecef',
+      200: '#dee2e6',
+      300: '#adb5bd',
+      400: '#7a8fa8',
+      500: '#5b6b8f', // Principal - gris azulado neutral
+      600: '#4a5a7a',
+      700: '#3d4a63',
+      800: '#2f3a4f',
+      900: '#1f2937',
     },
 
-    // Colores de estado
+    // Colores de estado (neutrales y apagados)
     success: {
-      light: '#10b981',
-      DEFAULT: '#059669',
-      dark: '#047857',
+      light: '#60b591',
+      DEFAULT: '#4a9f7c',
+      dark: '#3a8063',
     },
     warning: {
-      light: '#f59e0b',
-      DEFAULT: '#d97706',
-      dark: '#b45309',
+      light: '#e0b885',
+      DEFAULT: '#d4a574',
+      dark: '#b8885d',
     },
     error: {
-      light: '#ef4444',
-      DEFAULT: '#dc2626',
-      dark: '#b91c1c',
+      light: '#d67570',
+      DEFAULT: '#c85a54',
+      dark: '#a84843',
     },
     info: {
-      light: '#3b82f6',
-      DEFAULT: '#2563eb',
-      dark: '#1d4ed8',
+      light: '#6f9fb5',
+      DEFAULT: '#5b8fa3',
+      dark: '#4a7486',
     },
   },
 
@@ -188,8 +188,8 @@ export const theme = {
     },
     // Variantes
     primary: {
-      background: '#6366f1',
-      backgroundHover: '#4f46e5',
+      background: '#5b6b8f',
+      backgroundHover: '#4a5a7a',
       color: '#ffffff',
       border: 'none',
     },

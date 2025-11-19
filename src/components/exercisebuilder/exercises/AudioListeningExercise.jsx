@@ -182,7 +182,7 @@ export function AudioListeningExercise({
     >
       <div className="space-y-6">
         {/* Audio Player */}
-        <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+        <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-gray-200 dark:border-gray-700">
           <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
           {/* Waveform visualization (simplified) */}
@@ -280,7 +280,7 @@ export function AudioListeningExercise({
                           w-full p-3 rounded-lg border-2 text-left transition-all
                           ${
                             isSelected
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                              ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20'
                               : 'border-gray-200 dark:border-gray-700 hover:border-gray-400'
                           }
                         `}
@@ -289,7 +289,7 @@ export function AudioListeningExercise({
                           <div
                             className={`
                               w-5 h-5 rounded-full border-2 flex-shrink-0
-                              ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-600'}
+                              ${isSelected ? 'border-gray-400 bg-gray-500' : 'border-gray-300 dark:border-gray-600'}
                             `}
                           >
                             {isSelected && (

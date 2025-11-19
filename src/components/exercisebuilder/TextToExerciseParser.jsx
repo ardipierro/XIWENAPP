@@ -571,7 +571,7 @@ NIVEL: A1`
                           key={key}
                           onClick={() => setInputText(example.text)}
                           className="flex items-center gap-2 p-3 rounded-lg border-2 border-gray-200
-                                   dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400
+                                   dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-400
                                    bg-white dark:bg-gray-800 transition-all hover:shadow-md group"
                         >
                           <span className="text-xl flex-shrink-0 group-hover:scale-110 transition-transform">

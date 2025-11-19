@@ -202,7 +202,7 @@ export function AIAudioPronunciationExercise({
 
             {/* Texto de la frase */}
             <div
-              className="p-8 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800 text-center"
+              className="p-8 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-center"
               style={{
                 backgroundColor: config.customColors?.cardBackground
               }}
@@ -221,13 +221,13 @@ export function AIAudioPronunciationExercise({
               {phrase.phonetic && (
                 <button
                   onClick={() => setShowPhonetic(!showPhonetic)}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:underline"
                 >
                   {showPhonetic ? 'Ocultar' : 'Ver'} fonética
                 </button>
               )}
               {showPhonetic && phrase.phonetic && (
-                <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-700">
+                <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
                   <p className="text-lg font-mono text-gray-700 dark:text-gray-300">
                     [{phrase.phonetic}]
                   </p>
@@ -322,7 +322,7 @@ export function AIAudioPronunciationExercise({
                     onClick={() => setCurrentPhrase(i)}
                     className={`
                       w-3 h-3 rounded-full transition-all
-                      ${i === currentPhrase ? 'bg-blue-500 scale-125' : ''}
+                      ${i === currentPhrase ? 'bg-gray-500 scale-125' : ''}
                       ${completedPhrases.has(i) ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}
                     `}
                   />

@@ -488,7 +488,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
         className={`cursor-pointer relative ${
           isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
           isFailed ? 'border-2 border-red-400 dark:border-red-500' :
-          isApproved ? 'border-2 border-blue-400 dark:border-blue-500' :
+          isApproved ? 'border-2 border-gray-400 dark:border-gray-400' :
           isPendingReview ? 'border-2 border-green-400 dark:border-green-500' :
           ''
         }`}
@@ -634,7 +634,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
                 })}
               </p>
               {isApproved && review.teacherReviewedAt && (
-                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-1">
                   ✓ Aprobado {review.teacherReviewedAt?.toDate?.().toLocaleDateString('es-ES', {
                     day: 'numeric',
                     month: 'short'
@@ -1176,7 +1176,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                     errorTypeColors[type] === 'red' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300' :
                     errorTypeColors[type] === 'orange' ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300' :
                     errorTypeColors[type] === 'yellow' ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300' :
-                    'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                    'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300'
                   }`}
                 >
                   <span>{errorTypeIcons[type]}</span>

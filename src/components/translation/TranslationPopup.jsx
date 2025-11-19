@@ -131,7 +131,7 @@ const TranslationPopup = ({
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <Languages size={18} strokeWidth={2} />
           <span className="font-semibold text-sm">Traducción</span>
         </div>
@@ -149,7 +149,7 @@ const TranslationPopup = ({
         {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-8 gap-3">
-            <Loader2 size={32} className="text-blue-600 dark:text-blue-400 animate-spin" />
+            <Loader2 size={32} className="text-gray-600 dark:text-gray-400 animate-spin" />
             <p className="text-sm text-gray-600 dark:text-gray-400">Traduciendo...</p>
           </div>
         )}
@@ -177,10 +177,10 @@ const TranslationPopup = ({
 
             {/* Chinese Translation */}
             {isSectionEnabled('chinese') && translation.chinese && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+              <div className="bg-gray-50 dark:bg-gray-800/20 rounded-lg p-3">
                 <div className="flex items-baseline gap-2">
                   <span
-                    className="font-bold text-blue-900 dark:text-blue-100"
+                    className="font-bold text-gray-900 dark:text-gray-100"
                     style={{
                       fontFamily: 'serif',
                       fontSize: `${config?.display?.chineseFontSize || 24}px`
@@ -189,7 +189,7 @@ const TranslationPopup = ({
                     {translation.chinese}
                   </span>
                   {isSectionEnabled('pinyin') && translation.pinyin && (
-                    <span className="text-sm text-blue-700 dark:text-blue-300 italic">
+                    <span className="text-sm text-gray-700 dark:text-gray-300 italic">
                       {translation.pinyin}
                     </span>
                   )}
@@ -210,7 +210,7 @@ const TranslationPopup = ({
                       key={index}
                       className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-2"
                     >
-                      <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+                      <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
                       <span>{meaning}</span>
                     </li>
                   ))}

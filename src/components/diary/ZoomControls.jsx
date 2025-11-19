@@ -40,8 +40,8 @@ export function ZoomControls({ zoom = 1, onZoomChange }) {
 
       {/* Porcentaje de zoom */}
       <div className="flex items-center justify-center min-w-[60px] px-3 py-1.5 rounded-lg
-                     bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700">
-        <span className="text-sm font-bold text-blue-900 dark:text-blue-100">
+                     bg-gray-100 dark:bg-blue-900 border border-gray-300 dark:border-gray-600">
+        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
           {zoomPercentage}%
         </span>
       </div>

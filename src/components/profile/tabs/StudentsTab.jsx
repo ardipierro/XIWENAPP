@@ -98,7 +98,7 @@ function StudentsTab({ user }) {
                        bg-white dark:bg-zinc-950
                        border border-zinc-200 dark:border-zinc-800
                        text-zinc-900 dark:text-zinc-50
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                       focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
         </div>
       </div>

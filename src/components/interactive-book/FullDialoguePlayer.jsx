@@ -397,7 +397,7 @@ function FullDialoguePlayer({ dialogue, onComplete }) {
       </div>
 
       {/* Info */}
-      <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
         <p className="text-xs text-blue-800 dark:text-blue-200 flex items-start gap-2">
           <span className="text-base">💡</span>
           <span>

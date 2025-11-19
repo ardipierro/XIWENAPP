@@ -66,7 +66,7 @@ export function ColorFavorites({ onSelectColor, currentColor }) {
               className={`
                 w-full aspect-square rounded-lg transition-all hover:scale-110
                 ${currentColor === color
-                  ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800'
+                  ? 'ring-2 ring-gray-500 ring-offset-2 dark:ring-offset-gray-800'
                   : 'border-2 border-gray-300 dark:border-gray-600'
                 }
               `}
@@ -142,7 +142,7 @@ export function ColorFavorites({ onSelectColor, currentColor }) {
               <button
                 onClick={handleAddFavorite}
                 disabled={favorites.includes(currentColor)}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white
+                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-blue-600 text-white
                          rounded-lg font-semibold transition-colors
                          disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
