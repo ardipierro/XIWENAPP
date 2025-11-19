@@ -57,6 +57,7 @@ import {
 } from './common';
 import { UniversalCard } from './cards';
 import CreateContentModal from './CreateContentModal';
+import { useCardConfig } from '../contexts/CardConfigContext';
 
 // Lazy load para componentes pesados (Recharts: 321 KB)
 const ContentAnalytics = lazy(() => import('./ContentAnalytics'));
@@ -460,7 +461,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         />
       ) : (
         <div className={viewMode === 'grid'
-          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4'
           : 'space-y-4'
         }>
           {filteredContents.map((content) => (
@@ -800,6 +801,16 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   const config = CONTENT_TYPE_CONFIG[content.type] || CONTENT_TYPE_CONFIG[CONTENT_TYPES.LESSON];
   const IconComponent = config.icon;
 
+  // Obtener configuración global de tarjetas
+  const { config: cardConfig, getComponentVariant } = useCardConfig();
+
+  // Obtener el variant desde el mapeo de componentes
+  const hasImage = content.type === CONTENT_TYPES.VIDEO && content.videoData?.thumbnailUrl;
+  const cardVariant = getComponentVariant('UnifiedContentManager');
+
+  // Obtener configuración del variant (con fallback a defaults)
+  const variantConfig = cardConfig?.[cardVariant] || { showBadges: true };
+
   const getBadgeVariant = (type) => {
     const variants = {
       [CONTENT_TYPES.COURSE]: 'info',
@@ -852,10 +863,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return colorMap[type] || 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white';
   };
 
-  // Determinar si tiene imagen (thumbnail de video u otra imagen)
-  const hasImage = content.type === CONTENT_TYPES.VIDEO && content.videoData?.thumbnailUrl;
-
-  // Renderizar zona de imagen/ícono
+  // Renderizar zona de imagen/ícono (usa hasImage de línea 808)
   const renderImageOrIcon = () => {
     if (hasImage) {
       return (
@@ -891,7 +899,8 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return (
       <div
         id={`content-${content.id}`}
-        className={`group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
+        className={`group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 cursor-pointer hover:shadow-lg ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
+        onClick={() => onView(content)}
       >
         <div className="flex items-stretch min-h-[140px]">
           {/* Imagen o Icono - Cuadrado que ocupa toda la altura */}
@@ -924,35 +933,37 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
 
           {/* Badges, Título, Descripción */}
           <div className="flex-1 min-w-0 py-4 px-4">
-            {/* Badges */}
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <CategoryBadge
-                type="content"
-                value={content.type}
-                size="sm"
-              />
-              {/* Status badge */}
-              {content.status && (
+            {/* Badges - Solo mostrar si variantConfig.showBadges es true */}
+            {variantConfig.showBadges && (
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <CategoryBadge
-                  type="status"
-                  value={content.status}
+                  type="content"
+                  value={content.type}
                   size="sm"
                 />
-              )}
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`} style={{ display: 'none' }}>
-                {getStatusLabel(content.status || CONTENT_STATUS.DRAFT)}
-              </span>
-              {content.metadata?.difficulty && (
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
-                  {content.metadata.difficulty}
+                {/* Status badge */}
+                {content.status && (
+                  <CategoryBadge
+                    type="status"
+                    value={content.status}
+                    size="sm"
+                  />
+                )}
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`} style={{ display: 'none' }}>
+                  {getStatusLabel(content.status || CONTENT_STATUS.DRAFT)}
                 </span>
-              )}
-              {content.metadata?.tags?.slice(0, 2).map((tag, idx) => (
-                <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
-                  {tag}
-                </span>
-              ))}
-            </div>
+                {content.metadata?.difficulty && (
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
+                    {content.metadata.difficulty}
+                  </span>
+                )}
+                {content.metadata?.tags?.slice(0, 2).map((tag, idx) => (
+                  <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Título */}
             <h3 className="text-base font-semibold truncate mb-1 text-gray-900 dark:text-white">
@@ -988,8 +999,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           </div>
 
           {/* Footer - Action Buttons */}
-          <div className="flex items-center gap-2 flex-shrink-0 pr-4">
-            <BaseButton variant="ghost" icon={Eye} size="lg" onClick={() => onView(content)} />
+          <div className="flex items-center gap-2 flex-shrink-0 pr-4" onClick={(e) => e.stopPropagation()}>
             <BaseButton variant="ghost" icon={Edit} size="lg" onClick={() => onEdit(content)} />
             <BaseButton variant="ghost" icon={Trash2} size="lg" onClick={() => onDelete(content.id)} />
           </div>
@@ -999,49 +1009,49 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   }
 
   // Grid View
-  // Determinar si usar variant="content" (con imagen) o "default" (con ícono)
-  const gridVariant = hasImage ? 'content' : 'default';
   const gridImage = hasImage ? content.videoData.thumbnailUrl : undefined;
   const gridIcon = !hasImage ? IconComponent : undefined;
 
-  // Preparar badges (type, status, difficulty) - AHORA SE PASAN COMO PROP
+  // Preparar badges (type, status, difficulty) - Solo se agregan si showBadges es true
   const contentBadges = [];
 
-  // Badge de tipo de contenido
-  if (content.type) {
-    contentBadges.push(
-      <CategoryBadge
-        key="type"
-        type="content"
-        value={content.type}
-        size="sm"
-      />
-    );
-  }
+  if (variantConfig.showBadges) {
+    // Badge de tipo de contenido
+    if (content.type) {
+      contentBadges.push(
+        <CategoryBadge
+          key="type"
+          type="content"
+          value={content.type}
+          size="sm"
+        />
+      );
+    }
 
-  // Badge de status
-  if (content.status) {
-    contentBadges.push(
-      <CategoryBadge
-        key="status"
-        type="status"
-        value={content.status}
-        size="sm"
-      />
-    );
-  }
+    // Badge de status
+    if (content.status) {
+      contentBadges.push(
+        <CategoryBadge
+          key="status"
+          type="status"
+          value={content.status}
+          size="sm"
+        />
+      );
+    }
 
-  // Badge de dificultad
-  if (content.metadata?.difficulty) {
-    contentBadges.push(
-      <BaseBadge
-        key="difficulty"
-        variant="warning"
-        size="sm"
-      >
-        {content.metadata.difficulty}
-      </BaseBadge>
-    );
+    // Badge de dificultad
+    if (content.metadata?.difficulty) {
+      contentBadges.push(
+        <BaseBadge
+          key="difficulty"
+          variant="warning"
+          size="sm"
+        >
+          {content.metadata.difficulty}
+        </BaseBadge>
+      );
+    }
   }
 
   // Preparar meta info (fecha, duración, puntos)
@@ -1070,9 +1080,6 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
 
   // Preparar actions (SOLO botones)
   const contentActions = [
-    <BaseButton key="view" variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
-      Ver
-    </BaseButton>,
     <BaseButton key="edit" variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
       Editar
     </BaseButton>,
@@ -1084,7 +1091,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
 
   return (
     <UniversalCard
-      variant={gridVariant}
+      variant={cardVariant}
       size="md"
       id={`content-${content.id}`}
       className={`group transition-all ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
@@ -1095,6 +1102,8 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       badges={contentBadges}
       meta={contentMeta}
       actions={contentActions}
+      onClick={() => onView(content)}
+      customConfig={variantConfig}  // ← PASAR LA CONFIGURACIÓN QUE YA CALCULAMOS
     >
       {/* Tags - Solo renderizar si hay contenido */}
       {hasTags && (

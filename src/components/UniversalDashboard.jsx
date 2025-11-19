@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { TopBarProvider, useTopBar } from '../contexts/TopBarContext';
 import { usePermissions } from '../hooks/usePermissions';
+import { getUserGamification } from '../firebase/gamification';
 import UniversalTopBar from './UniversalTopBar';
 import UniversalSideMenu from './UniversalSideMenu';
 import ViewAsBanner from './ViewAsBanner';
@@ -24,7 +25,8 @@ import {
   Target,
   Calendar,
   Gamepad2,
-  Sparkles
+  TrendingUp,
+  Zap
 } from 'lucide-react';
 
 // Lazy load de componentes pesados
@@ -40,9 +42,7 @@ const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
 const CreditManager = lazy(() => import('./CreditManager'));
 const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const UniversalUserManager = lazy(() => import('./UniversalUserManager'));
-
-// Sample exercises component
-const CreateSampleExercisesButton = lazy(() => import('./CreateSampleExercisesButton'));
+const UpcomingClassesBanner = lazy(() => import('./UpcomingClassesBanner'));
 
 // Student views
 const MyCourses = lazy(() => import('./student/MyCourses'));
@@ -51,6 +51,7 @@ const ContentPlayer = lazy(() => import('./student/ContentPlayer'));
 const StudentHomeworkView = lazy(() => import('./student/StudentHomeworkView'));
 const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
 const StudentSessionsView = lazy(() => import('./StudentSessionsView'));
+const StudentDailyLogViewer = lazy(() => import('./student/StudentDailyLogViewer'));
 
 // Games views
 const LiveGamesHub = lazy(() => import('./LiveGamesHub'));
@@ -67,6 +68,29 @@ const ADE1ContentViewer = lazy(() => import('./ADE1ContentViewer'));
  */
 function HomeView({ user, onNavigate }) {
   const { getRoleLabel, can } = usePermissions();
+  const [gamificationData, setGamificationData] = useState(null);
+  const [loadingGamification, setLoadingGamification] = useState(true);
+
+  // Cargar datos de gamificación si es estudiante
+  useEffect(() => {
+    const loadGamification = async () => {
+      if (user.role === 'student' || user.role === 'trial' || user.role === 'listener') {
+        try {
+          setLoadingGamification(true);
+          const data = await getUserGamification(user.uid);
+          setGamificationData(data);
+        } catch (err) {
+          logger.error('Error cargando datos de progreso:', err, 'HomeView');
+        } finally {
+          setLoadingGamification(false);
+        }
+      } else {
+        setLoadingGamification(false);
+      }
+    };
+
+    loadGamification();
+  }, [user.uid, user.role]);
 
   // Definición de tarjetas de acceso directo
   const quickAccessCards = [
@@ -135,6 +159,7 @@ function HomeView({ user, onNavigate }) {
   // Filtrar tarjetas según permisos y rol
   const visibleCards = quickAccessCards.filter(card => {
     // Ocultar tarjetas marcadas para estudiantes
+    // ✅ user es effectiveUser (pasado como prop desde UniversalDashboardInner)
     if (card.hideForStudents && user.role === 'student') {
       return false;
     }
@@ -163,19 +188,74 @@ function HomeView({ user, onNavigate }) {
         </h1>
       </div>
 
-      {/* Demo: Crear Ejercicios de Ejemplo - Solo para teachers y admins */}
-      {can('create-content') && (
-        <UniversalCard
-          variant="default"
-          size="md"
-          icon={Sparkles}
-          title="🎯 Crear Ejercicios de Demo"
-          subtitle="Crea 10 ejercicios interactivos de ejemplo (A1-A2) con un solo click"
-        >
-          <Suspense fallback={<BaseLoading size="small" text="Cargando..." />}>
-            <CreateSampleExercisesButton />
-          </Suspense>
-        </UniversalCard>
+      {/* Banner de Próximas Clases - Solo para estudiantes */}
+      {/* ✅ user es effectiveUser (pasado como prop desde UniversalDashboardInner) */}
+      {user.role === 'student' && (
+        <Suspense fallback={<BaseLoading size="small" text="Cargando próximas clases..." />}>
+          <UpcomingClassesBanner student={user} />
+        </Suspense>
+      )}
+
+      {/* Sección de Progreso - Solo para estudiantes */}
+      {(user.role === 'student' || user.role === 'trial' || user.role === 'listener') && (
+        <div className="space-y-4">
+          <h2 className="text-base md:text-lg font-bold text-gray-900 dark:text-white">
+            Progreso
+          </h2>
+
+          {loadingGamification ? (
+            <div className="flex items-center justify-center py-8">
+              <BaseLoading size="sm" text="Cargando progreso..." />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Tarjeta de Nivel */}
+              <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg">
+                    <TrendingUp className="text-indigo-600 dark:text-indigo-400" size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Nivel</p>
+                    <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                      {gamificationData?.level || 1}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tarjeta de XP */}
+              <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-amber-100 dark:bg-amber-900/40 rounded-lg">
+                    <Zap className="text-amber-600 dark:text-amber-400" size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Experiencia (XP)</p>
+                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      {gamificationData?.xp || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tarjeta de Racha */}
+              <div className="bg-red-50 dark:bg-red-950/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-red-100 dark:bg-red-900/40 rounded-lg flex items-center justify-center text-2xl">
+                    🔥
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Racha</p>
+                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      {gamificationData?.streakDays || 0} días
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Tarjetas de acceso */}
@@ -437,6 +517,10 @@ function UniversalDashboardInner() {
             case '/dashboard/my-classes':
               if (!can('view-all-content')) return <PlaceholderView title="Sin acceso" />;
               return <StudentSessionsView student={effectiveUser} />;
+
+            // DIARIOS DE CLASE (Students - Solo lectura)
+            case '/dashboard/my-daily-logs':
+              return <StudentDailyLogViewer user={effectiveUser} />;
 
             // EJERCICIO EN VIVO
             case '/dashboard/games':

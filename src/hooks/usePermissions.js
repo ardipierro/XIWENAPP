@@ -15,12 +15,13 @@ import permissionService from '../services/permissionService';
  */
 export function usePermissions() {
   const { user, userRole } = useAuth();
-  const { getEffectiveUser } = useViewAs();
+  const { getEffectiveUser, isViewingAs, viewAsUser } = useViewAs();
   const [initialized, setInitialized] = useState(false);
 
   // Usuario efectivo (puede ser viewAs o user real)
   const effectiveUser = getEffectiveUser(user);
-  const effectiveRole = effectiveUser?.role || userRole;
+  // ✅ CRÍTICO: Si estamos en modo "Ver como", usar el rol del viewAsUser
+  const effectiveRole = isViewingAs && viewAsUser ? viewAsUser.role : (effectiveUser?.role || userRole);
 
   useEffect(() => {
     if (effectiveRole) {
@@ -126,6 +127,7 @@ export function usePermissions() {
 
     // Estado de inicialización
     initialized,
-    role: userRole,
+    // ✅ CRÍTICO: Retornar el rol efectivo, no el rol real
+    role: effectiveRole,
   };
 }

@@ -13,13 +13,35 @@ import { cardVariants } from '../components/cards/cardConfig';
 const CardConfigContext = createContext();
 
 /**
+ * Mapeo por defecto de componentes a variants
+ * Cada key es el nombre de un componente/sección, y el value es el variant a usar
+ */
+const DEFAULT_COMPONENT_MAPPING = {
+  'UnifiedContentManager': 'content',
+  'UniversalUserManager': 'user',
+  'StudentList': 'user',
+  'UniversalDashboard': 'default',
+  'TeacherDashboard': 'default',
+  'StudentDashboard': 'default',
+  'LiveClassRoom': 'class',
+  'ClassScheduleManager': 'class',
+  'UnifiedCalendar': 'class',
+};
+
+/**
  * Hook para acceder a la configuración de cards
  */
 export function useCardConfig() {
   const context = useContext(CardConfigContext);
   if (!context) {
     // Si no hay provider, retornar config por defecto
-    return { config: cardVariants, reloadConfig: () => {} };
+    return {
+      config: cardVariants,
+      reloadConfig: () => {},
+      componentMapping: DEFAULT_COMPONENT_MAPPING,
+      updateComponentMapping: () => {},
+      getComponentVariant: (name) => DEFAULT_COMPONENT_MAPPING[name] || 'default'
+    };
   }
   return context;
 }
@@ -54,6 +76,21 @@ export function CardConfigProvider({ children }) {
     return {...cardVariants};
   });
 
+  // Mapeo de componentes a variants
+  const [componentMapping, setComponentMapping] = useState(() => {
+    const savedMapping = localStorage.getItem('xiwen_card_component_mapping');
+    if (savedMapping) {
+      try {
+        const parsed = JSON.parse(savedMapping);
+        return { ...DEFAULT_COMPONENT_MAPPING, ...parsed };
+      } catch (e) {
+        console.error('❌ Error loading component mapping:', e);
+        return DEFAULT_COMPONENT_MAPPING;
+      }
+    }
+    return DEFAULT_COMPONENT_MAPPING;
+  });
+
   /**
    * Función para recargar la configuración desde localStorage
    * (útil después de guardar cambios en el configurator)
@@ -81,6 +118,23 @@ export function CardConfigProvider({ children }) {
     }
   };
 
+  /**
+   * Función para actualizar el mapeo de un componente
+   */
+  const updateComponentMapping = (componentName, variant) => {
+    const newMapping = { ...componentMapping, [componentName]: variant };
+    setComponentMapping(newMapping);
+    localStorage.setItem('xiwen_card_component_mapping', JSON.stringify(newMapping));
+    console.log(`🔄 Mapeo actualizado: ${componentName} → ${variant}`);
+  };
+
+  /**
+   * Función para obtener el variant de un componente
+   */
+  const getComponentVariant = (componentName) => {
+    return componentMapping[componentName] || 'default';
+  };
+
   // Escuchar cambios en localStorage (para sincronizar entre tabs)
   useEffect(() => {
     const handleStorageChange = (e) => {
@@ -94,7 +148,13 @@ export function CardConfigProvider({ children }) {
   }, []);
 
   return (
-    <CardConfigContext.Provider value={{ config, reloadConfig }}>
+    <CardConfigContext.Provider value={{
+      config,
+      reloadConfig,
+      componentMapping,
+      updateComponentMapping,
+      getComponentVariant
+    }}>
       {children}
     </CardConfigContext.Provider>
   );

@@ -469,6 +469,29 @@ export async function assignStudentToReview(reviewId, studentId, studentName) {
 }
 
 /**
+ * Cancel a stuck processing review
+ * @param {string} reviewId - Review ID
+ * @returns {Promise<Object>} Result
+ */
+export async function cancelProcessingReview(reviewId) {
+  try {
+    const docRef = doc(db, 'homework_reviews', reviewId);
+    await updateDoc(docRef, {
+      status: REVIEW_STATUS.FAILED,
+      errorMessage: 'Procesamiento cancelado manualmente. Puedes reintentar el análisis.',
+      cancelledAt: serverTimestamp(),
+      teacherReviewed: false
+    });
+
+    logger.info(`Cancelled processing review: ${reviewId}`, 'HomeworkReviews');
+    return { success: true };
+  } catch (error) {
+    logger.error(`Error cancelling processing review ${reviewId}`, 'HomeworkReviews', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Delete a homework review
  * @param {string} reviewId - Review ID
  * @returns {Promise<Object>} Result
@@ -499,5 +522,6 @@ export default {
   assignStudentToReview,
   subscribeToReview,
   subscribeToPendingReviews,
+  cancelProcessingReview,
   deleteHomeworkReview
 };

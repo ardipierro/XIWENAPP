@@ -119,6 +119,15 @@ const MENU_ITEMS = [
     hideIf: ['create-content'], // No mostrar a teachers/admins
   },
   {
+    id: 'my-daily-logs',
+    label: 'Diario de Clases',
+    icon: BookOpen,
+    path: '/dashboard/my-daily-logs',
+    permission: 'view-all-content',
+    hideIf: ['create-content'], // No mostrar a teachers/admins
+    description: 'Diarios compartidos por tus profesores',
+  },
+  {
     id: 'my-assignments',
     label: 'Tareas',
     icon: CheckSquare,

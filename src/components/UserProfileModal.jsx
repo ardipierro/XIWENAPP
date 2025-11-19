@@ -69,6 +69,14 @@ function UserProfileModal({
   const navigate = useNavigate();
   const { startViewingAs } = useViewAs();
 
+  // ✅ CRÍTICO: Normalizar usuario para tener tanto id como uid
+  // Los documentos de Firestore tienen 'id' pero las tabs esperan 'uid'
+  const normalizedUser = user ? {
+    ...user,
+    uid: user.uid || user.id, // Asegurar que tenga uid
+    id: user.id || user.uid    // Asegurar que tenga id
+  } : null;
+
   // Estados del perfil
   const [userAvatar, setUserAvatar] = useState('default');
   const [userBanner, setUserBanner] = useState(null);
@@ -90,33 +98,33 @@ function UserProfileModal({
   const [success, setSuccess] = useState('');
 
   // Determinar si está viendo su propio perfil
-  const isOwnProfile = currentUser?.uid === user?.uid;
+  const isOwnProfile = currentUser?.uid === normalizedUser?.uid;
 
   // Cargar datos del perfil
   useEffect(() => {
     const loadProfile = async () => {
-      if (user?.uid) {
+      if (normalizedUser?.uid) {
         try {
           // Cargar avatar
-          const avatar = await getUserAvatar(user.uid);
+          const avatar = await getUserAvatar(normalizedUser.uid);
           setUserAvatar(avatar);
           if (avatar && avatar.startsWith('http')) {
             setUploadedAvatarUrl(avatar);
           }
 
           // Cargar banner
-          const banner = await getUserBanner(user.uid);
+          const banner = await getUserBanner(normalizedUser.uid);
           if (banner) {
             setUserBanner(banner);
             setUploadedBannerUrl(banner);
           }
 
           // Cargar gamificación
-          const gamData = await getUserGamification(user.uid);
+          const gamData = await getUserGamification(normalizedUser.uid);
           setGamification(gamData);
 
           // Cargar créditos
-          const creditsData = await getUserCredits(user.uid);
+          const creditsData = await getUserCredits(normalizedUser.uid);
           setCredits(creditsData);
         } catch (err) {
           logger.error('Error loading profile:', err);
@@ -126,7 +134,7 @@ function UserProfileModal({
     if (isOpen) {
       loadProfile();
     }
-  }, [user?.uid, isOpen]);
+  }, [normalizedUser?.uid, isOpen]);
 
   // Limpiar mensajes después de 3 segundos
   useEffect(() => {
@@ -155,8 +163,8 @@ function UserProfileModal({
     setShowAvatarOptions(false);
 
     try {
-      const imageUrl = await uploadBannerImage(user.uid, file);
-      await updateUserBanner(user.uid, imageUrl);
+      const imageUrl = await uploadBannerImage(normalizedUser.uid, file);
+      await updateUserBanner(normalizedUser.uid, imageUrl);
 
       setUserBanner(imageUrl);
       setUploadedBannerUrl(imageUrl);
@@ -175,9 +183,9 @@ function UserProfileModal({
     try {
       setShowAvatarOptions(false);
       if (uploadedBannerUrl) {
-        await deleteBannerImage(user.uid);
+        await deleteBannerImage(normalizedUser.uid);
       }
-      await updateUserBanner(user.uid, null);
+      await updateUserBanner(normalizedUser.uid, null);
       setUserBanner(null);
       setUploadedBannerUrl(null);
       setSuccess('Banner eliminado correctamente');
@@ -204,8 +212,8 @@ function UserProfileModal({
     setShowAvatarOptions(false);
 
     try {
-      const imageUrl = await uploadAvatarImage(user.uid, file);
-      await updateUserAvatar(user.uid, imageUrl);
+      const imageUrl = await uploadAvatarImage(normalizedUser.uid, file);
+      await updateUserAvatar(normalizedUser.uid, imageUrl);
 
       setUserAvatar(imageUrl);
       setUploadedAvatarUrl(imageUrl);
@@ -224,11 +232,11 @@ function UserProfileModal({
     try {
       // Si había una imagen subida previamente, eliminarla
       if (uploadedAvatarUrl) {
-        await deleteAvatarImage(user.uid);
+        await deleteAvatarImage(normalizedUser.uid);
         setUploadedAvatarUrl(null);
       }
 
-      await updateUserAvatar(user.uid, avatarId);
+      await updateUserAvatar(normalizedUser.uid, avatarId);
       setUserAvatar(avatarId);
       setShowAvatarOptions(false);
       setSuccess('Avatar actualizado correctamente');
@@ -243,9 +251,9 @@ function UserProfileModal({
   // Handler para modo "Ver como"
   const handleViewAs = () => {
     // Guardar userId para reabrir el perfil al volver
-    sessionStorage.setItem('viewAsReturnUserId', user.uid || user.id);
+    sessionStorage.setItem('viewAsReturnUserId', normalizedUser.uid || normalizedUser.id);
 
-    // Activar modo "Ver como"
+    // Activar modo "Ver como" - usar user original, startViewingAs hace su propia normalización
     startViewingAs(currentUser, user);
 
     // Cerrar modal
@@ -265,8 +273,8 @@ function UserProfileModal({
       'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
       'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
     ];
-    const index = user?.email
-      ? user.email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length
+    const index = normalizedUser?.email
+      ? normalizedUser.email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length
       : 0;
     return gradients[index];
   };
@@ -302,7 +310,7 @@ function UserProfileModal({
       icon: UserIcon,
       component: (
         <InfoTab
-          user={user}
+          user={normalizedUser}
           userRole={userRole}
           isAdmin={isAdmin}
           isOwnProfile={isOwnProfile}
@@ -318,7 +326,7 @@ function UserProfileModal({
         id: 'classes',
         label: 'Clases',
         icon: BookOpen,
-        component: <ClassesTab user={user} userRole={userRole} />
+        component: <ClassesTab user={normalizedUser} userRole={userRole} />
       });
     }
 
@@ -329,8 +337,8 @@ function UserProfileModal({
       icon: CreditCard,
       component: (
         <CreditsTab
-          user={user}
-          currentUser={currentUser || user}
+          user={normalizedUser}
+          currentUser={currentUser || normalizedUser}
           onUpdate={onUpdate}
         />
       )
@@ -342,7 +350,7 @@ function UserProfileModal({
         id: 'content',
         label: 'Contenidos',
         icon: FileText,
-        component: <ContentTab user={user} />
+        component: <ContentTab user={normalizedUser} />
       });
     }
 
@@ -352,7 +360,7 @@ function UserProfileModal({
         id: 'tasks',
         label: 'Tareas',
         icon: FileText,
-        component: <TasksTab user={user} />
+        component: <TasksTab user={normalizedUser} />
       });
     }
 
@@ -363,7 +371,7 @@ function UserProfileModal({
         id: 'students',
         label: 'Estudiantes',
         icon: Users,
-        component: <StudentsTab user={user} />
+        component: <StudentsTab user={normalizedUser} />
       });
     }
 
@@ -373,7 +381,7 @@ function UserProfileModal({
         id: 'guardians',
         label: 'Estudiantes Supervisados',
         icon: UsersRound,
-        component: <GuardiansTab user={user} isTutor={true} />
+        component: <GuardiansTab user={normalizedUser} isTutor={true} />
       });
     }
 
@@ -483,13 +491,14 @@ function UserProfileModal({
             {/* User Info */}
             <div className="flex-1 text-center sm:text-left mb-1">
               <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-1">
-                {user?.displayName || user?.name || user?.email || 'Usuario'}
+                {normalizedUser?.displayName || normalizedUser?.name || normalizedUser?.email || 'Usuario'}
               </h2>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {/* Badge de Rol */}
-                {(isAdmin || userRole) && (
+                {/* ✅ CRÍTICO: Mostrar userRole del perfil, no si quien está viendo es admin */}
+                {userRole && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600 shadow-lg">
-                    {isAdmin ? 'admin' : userRole}
+                    {userRole}
                   </span>
                 )}
 
@@ -519,7 +528,7 @@ function UserProfileModal({
                 )}
 
                 {/* Badge Ver como (clickeable) - Solo para admins */}
-                {isAdmin && currentUser?.uid !== user?.uid && (
+                {isAdmin && currentUser?.uid !== normalizedUser?.uid && (
                   <span
                     onClick={(e) => {
                       e.stopPropagation();

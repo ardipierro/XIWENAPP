@@ -29,6 +29,7 @@ import {
   PageHeader,
   SearchBar
 } from '../common';
+import ImageLightbox from '../common/ImageLightbox';
 import StudentFeedbackView from '../StudentFeedbackView';
 import ManualHomeworkUpload from '../homework/ManualHomeworkUpload';
 import { getReviewsByStudent, REVIEW_STATUS } from '../../firebase/homework_reviews';
@@ -342,21 +343,6 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
               )}
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 flex-shrink-0">
-            <BaseButton
-              variant={isApproved ? "primary" : "outline"}
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect();
-              }}
-            >
-              <Eye size={16} strokeWidth={2.5} />
-              {isApproved ? 'Ver Corrección' : 'Ver Tarea'}
-            </BaseButton>
-          </div>
         </div>
       </BaseCard>
     );
@@ -463,20 +449,6 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
             </div>
           </div>
         ) : null}
-
-        {/* View Button */}
-        <BaseButton
-          variant={isApproved ? "primary" : "outline"}
-          size="sm"
-          fullWidth
-          className={
-            isApproved ? 'bg-green-600 hover:bg-green-700 text-white font-semibold' :
-            ''
-          }
-        >
-          <Eye size={18} strokeWidth={2.5} />
-          {isApproved ? 'Ver Corrección' : 'Ver Tarea'}
-        </BaseButton>
       </div>
     </BaseCard>
   );
@@ -490,106 +462,49 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
   const isProcessing = review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing';
   const isPending = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
 
-  // Estado para zoom y pan
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const containerRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  // Estado para ImageLightbox (pantalla completa)
+  const [showImageLightbox, setShowImageLightbox] = useState(false);
 
   // Combinar estados PROCESSING y PENDING_REVIEW como "En revisión" para el alumno
   const isUnderReview = isProcessing || isPending;
 
-  // Handlers para zoom y pan
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleWheel = (e) => {
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      setZoom(prevZoom => {
-        const newZoom = Math.min(Math.max(0.5, prevZoom + delta), 5);
-        if (newZoom === 1) {
-          setPan({ x: 0, y: 0 });
-        }
-        return newZoom;
-      });
-    };
-
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-    };
-  }, []);
-
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - pan.x,
-      y: e.clientY - pan.y
-    });
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDragging) {
-      setPan({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
   return (
-    <BaseModal
-      isOpen={true}
-      onClose={onClose}
-      title="Detalle de Tarea"
-      size={isFullscreen ? "full" : "xl"}
-    >
-      <div className="space-y-6">
-        {/* Status Alert - Solo mostrar "En revisión" si NO está aprobada */}
-        {isUnderReview && (
-          <BaseAlert variant="warning">
-            <div className="flex items-center gap-3">
-              <Clock size={18} />
+    <>
+      <BaseModal
+        isOpen={true}
+        onClose={onClose}
+        title="Detalle de Tarea"
+        size="xl"
+      >
+        <div className="space-y-6">
+          {/* Status Alert - Solo mostrar "En revisión" si NO está aprobada */}
+          {isUnderReview && (
+            <div className="bg-orange-500 text-white px-4 py-3 rounded-lg flex items-center gap-3">
+              <Clock size={20} strokeWidth={2.5} />
               <div>
-                <p className="font-semibold">En revisión</p>
-                <p className="text-sm mt-1">
+                <p className="font-bold">En revisión</p>
+                <p className="text-sm mt-0.5 opacity-90">
                   Tu profesor está revisando tu tarea. Te notificaremos cuando esté lista.
                 </p>
               </div>
             </div>
-          </BaseAlert>
-        )}
+          )}
 
-        {/* Approved Alert */}
-        {isApproved && (
-          <BaseAlert variant="success">
-            <div className="flex items-center gap-3">
-              <CheckCircle size={18} />
+          {/* Approved Alert */}
+          {isApproved && (
+            <div className="bg-green-500 text-white px-4 py-3 rounded-lg flex items-center gap-3">
+              <CheckCircle size={20} strokeWidth={2.5} />
               <div>
-                <p className="font-semibold">✓ Tarea Corregida</p>
-                <p className="text-sm mt-1">
+                <p className="font-bold">Tarea Corregida</p>
+                <p className="text-sm mt-0.5 opacity-90">
                   Tu profesor ha revisado y aprobado tu tarea. Revisa los comentarios abajo.
                 </p>
               </div>
             </div>
-          </BaseAlert>
-        )}
+          )}
 
-        {/* Date & Info */}
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-          <div className="flex items-center justify-between">
+          {/* Date & Info */}
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <Calendar className="text-gray-500" size={20} />
               <div>
@@ -605,91 +520,460 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
                 </p>
               </div>
             </div>
-            {isApproved && review.aiProvider && (
-              <BaseBadge variant="info" size="sm">
-                {review.aiProvider} - {review.aiModel || 'sonnet-4-5'}
-              </BaseBadge>
-            )}
+          </div>
+
+          {/* Image Preview */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <ImageIcon size={18} strokeWidth={2} />
+                Tu Tarea
+              </h3>
+              <BaseButton
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowImageLightbox(true)}
+              >
+                <Maximize2 size={16} />
+                Pantalla completa
+              </BaseButton>
+            </div>
+            <div className="rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <img
+                src={review.imageUrl}
+                alt="Tarea enviada"
+                className="w-full h-auto cursor-pointer"
+                onClick={() => setShowImageLightbox(true)}
+              />
+            </div>
+          </div>
+
+          {/* Approved Feedback */}
+          {isApproved && (
+            <div className="bg-green-50 dark:bg-green-900/10 border-2 border-green-200 dark:border-green-800 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Sparkles size={24} className="text-green-600 dark:text-green-400" />
+                <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
+                  Corrección del Profesor
+                </h3>
+              </div>
+
+              {/* Show correction details directly from review */}
+              <HomeworkCorrectionView review={review} />
+            </div>
+          )}
+
+          {/* Close Button */}
+          <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+            <BaseButton variant="primary" onClick={onClose}>
+              Cerrar
+            </BaseButton>
           </div>
         </div>
+      </BaseModal>
 
-        {/* Image with Zoom */}
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <ImageIcon size={18} strokeWidth={2} />
-            Tu Tarea
-            <BaseBadge variant="secondary" size="sm" className="ml-auto cursor-help" title="Arrastra la imagen para moverla. Usa la rueda del mouse para zoom.">
-              🖱️ Arrastra y zoom
-            </BaseBadge>
+      {/* ImageLightbox para pantalla completa */}
+      <ImageLightbox
+        isOpen={showImageLightbox}
+        onClose={() => setShowImageLightbox(false)}
+        imageUrl={review.imageUrl}
+        alt="Tarea enviada"
+        words={review.words || []}
+        errors={review.detailedCorrections || []}
+        showOverlay={isApproved}
+        visibleErrorTypes={{
+          spelling: true,
+          grammar: true,
+          punctuation: true,
+          vocabulary: true
+        }}
+        highlightOpacity={0.25}
+        useWavyUnderline={true}
+        showCorrectionText={true}
+        correctionTextFont="Caveat"
+      />
+    </>
+  );
+}
+
+/**
+ * Homework Correction View - Muestra la corrección del review directamente
+ */
+function HomeworkCorrectionView({ review }) {
+  const [showDetailModal, setShowDetailModal] = useState(false);
+
+  if (!review) {
+    return (
+      <BaseCard>
+        <BaseEmptyState
+          icon={AlertCircle}
+          title="Sin corrección"
+          description="No hay datos de corrección disponibles"
+        />
+      </BaseCard>
+    );
+  }
+
+  // Calculate performance level
+  const grade = review.suggestedGrade || 0;
+  const performanceLevel = grade >= 90 ? 'excellent' : grade >= 70 ? 'good' : grade >= 50 ? 'fair' : 'needs-improvement';
+
+  const performanceConfig = {
+    excellent: {
+      color: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-green-100 dark:bg-green-900/20',
+      icon: '🏆',
+      message: '¡Excelente trabajo!'
+    },
+    good: {
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/20',
+      icon: '📈',
+      message: '¡Buen trabajo!'
+    },
+    fair: {
+      color: 'text-yellow-600 dark:text-yellow-400',
+      bgColor: 'bg-yellow-100 dark:bg-yellow-900/20',
+      icon: '🎯',
+      message: 'Vas por buen camino'
+    },
+    'needs-improvement': {
+      color: 'text-orange-600 dark:text-orange-400',
+      bgColor: 'bg-orange-100 dark:bg-orange-900/20',
+      icon: '📉',
+      message: 'Sigue practicando'
+    }
+  };
+
+  const performance = performanceConfig[performanceLevel];
+  const errorSummary = review.errorSummary || { total: 0, spelling: 0, grammar: 0, punctuation: 0, vocabulary: 0 };
+
+  return (
+    <div className="space-y-4">
+      {/* Grade Card */}
+      <BaseCard>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-lg ${performance.bgColor}`}>
+              <div className={`text-3xl ${performance.color}`}>
+                {performance.icon}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Tu Calificación
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {performance.message}
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className={`text-5xl font-bold ${performance.color}`}>
+              {grade}
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              de 100
+            </div>
+          </div>
+        </div>
+      </BaseCard>
+
+      {/* Error Summary Card */}
+      <BaseCard>
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+          Áreas de Mejora
+        </h4>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <ErrorMetric
+            label="Ortografía"
+            count={errorSummary.spelling}
+            total={errorSummary.total}
+            color="red"
+          />
+          <ErrorMetric
+            label="Gramática"
+            count={errorSummary.grammar}
+            total={errorSummary.total}
+            color="orange"
+          />
+          <ErrorMetric
+            label="Puntuación"
+            count={errorSummary.punctuation}
+            total={errorSummary.total}
+            color="yellow"
+          />
+          <ErrorMetric
+            label="Vocabulario"
+            count={errorSummary.vocabulary}
+            total={errorSummary.total}
+            color="blue"
+          />
+        </div>
+
+        {errorSummary.total === 0 && (
+          <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+            <div className="flex items-start gap-3 text-green-700 dark:text-green-300">
+              <CheckCircle size={20} strokeWidth={2} />
+              <div>
+                <h5 className="font-semibold">¡Perfecto!</h5>
+                <p className="text-sm mt-1">No se encontraron errores en tu tarea. ¡Sigue así!</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </BaseCard>
+
+      {/* Feedback Card */}
+      {review.overallFeedback && (
+        <BaseCard>
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+              <Sparkles size={20} strokeWidth={2} className="text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Comentarios del Profesor
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                {review.overallFeedback}
+              </p>
+            </div>
+          </div>
+        </BaseCard>
+      )}
+
+      {/* View Details Button */}
+      {review.detailedCorrections && review.detailedCorrections.length > 0 && (
+        <BaseCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Correcciones Detalladas
+              </h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {review.detailedCorrections.length} correcciones encontradas
+              </p>
+            </div>
             <BaseButton
-              variant="ghost"
-              size="sm"
-              onClick={handleFullscreen}
+              variant="outline"
+              onClick={() => setShowDetailModal(true)}
             >
-              <Maximize2 size={14} />
-              {isFullscreen ? 'Normal' : 'Pantalla completa'}
+              <Eye size={16} strokeWidth={2} />
+              Ver Detalles
             </BaseButton>
-          </h3>
-          <div
-            ref={containerRef}
-            className="rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-50 dark:bg-gray-900 select-none"
-            style={{
-              cursor: isDragging ? 'grabbing' : 'grab',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              MozUserSelect: 'none',
-              msUserSelect: 'none',
-              WebkitUserDrag: 'none',
-              height: isFullscreen ? 'calc(100vh - 300px)' : '400px'
-            }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
+          </div>
+        </BaseCard>
+      )}
+
+      {/* Detail Modal */}
+      {showDetailModal && (
+        <CorrectionDetailModal
+          review={review}
+          onClose={() => setShowDetailModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Error Metric Component
+ */
+function ErrorMetric({ label, count, total, color }) {
+  const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+
+  const colorClasses = {
+    red: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300',
+    orange: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
+    yellow: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300',
+    blue: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+  };
+
+  return (
+    <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
+      <div className="text-2xl font-bold">{count}</div>
+      <div className="text-xs font-medium mt-1">{label}</div>
+      {total > 0 && (
+        <div className="text-xs opacity-75 mt-1">{percentage}%</div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Correction Detail Modal
+ */
+function CorrectionDetailModal({ review, onClose }) {
+  const errorTypeLabels = {
+    spelling: 'Ortografía',
+    grammar: 'Gramática',
+    punctuation: 'Puntuación',
+    vocabulary: 'Vocabulario'
+  };
+
+  const errorTypeColors = {
+    spelling: 'red',
+    grammar: 'orange',
+    punctuation: 'yellow',
+    vocabulary: 'blue'
+  };
+
+  const errorTypeIcons = {
+    spelling: '📝',
+    grammar: '📚',
+    punctuation: '❗',
+    vocabulary: '💬'
+  };
+
+  // Group corrections by type
+  const correctionsByType = (review.detailedCorrections || []).reduce((acc, correction) => {
+    if (!acc[correction.type]) {
+      acc[correction.type] = [];
+    }
+    acc[correction.type].push(correction);
+    return acc;
+  }, {});
+
+  const errorSummary = review.errorSummary || { spelling: 0, grammar: 0, punctuation: 0, vocabulary: 0 };
+
+  return (
+    <BaseModal
+      isOpen={true}
+      onClose={onClose}
+      title="Correcciones Detalladas"
+      size="xl"
+    >
+      <div className="space-y-6">
+        {/* Image Preview */}
+        {review.imageUrl && (
+          <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <img
               src={review.imageUrl}
-              alt="Tarea enviada"
-              style={{
-                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                transformOrigin: 'center',
-                transition: isDragging ? 'none' : 'transform 0.1s ease-out',
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain'
-              }}
-              draggable={false}
-            />
-          </div>
-          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            💡 Controles: 🖱️ Arrastra para mover • 🔍 Rueda del mouse para zoom • Zoom: {Math.round(zoom * 100)}%
-          </div>
-        </div>
-
-        {/* Approved Feedback */}
-        {isApproved && (
-          <div className="bg-green-50 dark:bg-green-900/10 border-2 border-green-200 dark:border-green-800 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Sparkles size={24} className="text-green-600 dark:text-green-400" />
-              <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
-                Corrección del Profesor
-              </h3>
-            </div>
-
-            {/* Use StudentFeedbackView to show the detailed correction */}
-            <StudentFeedbackView
-              submission={{ id: review.submissionId || review.id }}
-              studentId={studentId}
+              alt="Tu tarea"
+              className="w-full h-auto"
             />
           </div>
         )}
 
-        {/* Close Button */}
-        <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
-          <BaseButton variant="primary" onClick={onClose}>
-            Cerrar
-          </BaseButton>
-        </div>
+        {/* Transcribed Text */}
+        {review.transcribedText && (
+          <BaseCard>
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+              <FileText size={18} strokeWidth={2} />
+              Texto Transcrito
+            </h4>
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap font-mono">
+                {review.transcribedText}
+              </p>
+            </div>
+          </BaseCard>
+        )}
+
+        {/* Corrections by Type */}
+        {Object.keys(correctionsByType).length > 0 ? (
+          Object.entries(correctionsByType).map(([type, corrections]) => (
+            <div key={type}>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <span className="text-xl">{errorTypeIcons[type]}</span>
+                {errorTypeLabels[type]} ({corrections.length})
+              </h4>
+              <div className="space-y-3">
+                {corrections.map((correction, index) => (
+                  <BaseCard key={index}>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <BaseBadge color={errorTypeColors[type]}>
+                          {correction.line ? `Línea ${correction.line}` : 'Corrección'}
+                        </BaseBadge>
+                      </div>
+
+                      {/* Before and After */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">
+                            Error:
+                          </span>
+                          <span className="text-sm text-red-600 dark:text-red-400 line-through flex-1">
+                            {correction.original}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">
+                            Correcto:
+                          </span>
+                          <span className="text-sm text-green-600 dark:text-green-400 font-medium flex-1">
+                            {correction.correction}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Explanation */}
+                      {correction.explanation && (
+                        <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-start gap-2">
+                            <Sparkles size={16} strokeWidth={2} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                            <p className="text-xs text-blue-800 dark:text-blue-200">
+                              {correction.explanation}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </BaseCard>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <BaseEmptyState
+            icon={CheckCircle}
+            title="¡Sin errores!"
+            description="No se encontraron correcciones en esta tarea"
+          />
+        )}
+
+        {/* Tips Section */}
+        <BaseCard>
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+              <Sparkles size={20} strokeWidth={2} className="text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Recomendaciones para Mejorar
+              </h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+                {errorSummary.spelling > 0 && (
+                  <li className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>Revisa las reglas de ortografía y practica palabras comunes</span>
+                  </li>
+                )}
+                {errorSummary.grammar > 0 && (
+                  <li className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>Repasa las conjugaciones verbales y la concordancia</span>
+                  </li>
+                )}
+                {errorSummary.punctuation > 0 && (
+                  <li className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>Presta atención al uso de comas, puntos y mayúsculas</span>
+                  </li>
+                )}
+                {errorSummary.vocabulary > 0 && (
+                  <li className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>Amplía tu vocabulario leyendo textos en español</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        </BaseCard>
       </div>
     </BaseModal>
   );

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Gamification panel with badges, XP, and leaderboard
+ * @fileoverview Panel de Progreso con insignias, XP y clasificación
  * @module components/GamificationPanel
  */
 
@@ -18,7 +18,7 @@ export default function GamificationPanel({ userId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <BaseLoading variant="spinner" size="lg" text="Cargando gamificación..." />
+        <BaseLoading variant="spinner" size="lg" text="Cargando progreso..." />
       </div>
     );
   }
