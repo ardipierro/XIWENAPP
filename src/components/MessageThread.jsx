@@ -32,7 +32,7 @@ import { showMessageNotification, requestNotificationPermission } from '../utils
 import { exportToTXT, exportToJSON } from '../utils/exportConversation';
 import { compressImage, formatFileSize } from '../utils/imageCompression';
 import EmojiPicker from './EmojiPicker';
-import VoiceRecorder from './VoiceRecorder';
+import VoiceRecorderV2 from './VoiceRecorderV2';
 import ReactionPicker from './ReactionPicker';
 import MediaGallery from './MediaGallery';
 
@@ -563,8 +563,14 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
 
   /**
    * Handle voice message send
+   * NOTA: VoiceRecorderV2 hace el cleanup del stream ANTES de llamar este callback
    */
   const handleVoiceSend = async (audioBlob, duration) => {
+    logger.info('📤 Handling voice message send...', 'MessageThread');
+
+    // Cerrar el recorder inmediatamente (el cleanup ya se hizo)
+    setShowVoiceRecorder(false);
+
     setSending(true);
     setUploading(true);
 
@@ -584,7 +590,6 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
 
     if (!uploadResult || !uploadResult.success) {
       setSending(false);
-      setShowVoiceRecorder(false); // Close on error
       return;
     }
 
@@ -593,7 +598,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
       url: uploadResult.url,
       filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
       size: audioBlob.size,
-      type: audioBlob.type || 'audio/webm', // Use the actual blob type
+      type: audioBlob.type || 'audio/webm',
       duration
     };
 
@@ -616,12 +621,8 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
 
     setSending(false);
 
-    // ARREGLADO: Cerrar inmediatamente después del envío
-    // El VoiceRecorder ya hizo cleanup del stream en handleSend
-    setShowVoiceRecorder(false);
-
     if (result) {
-      logger.info('Voice message sent successfully', 'MessageThread');
+      logger.info('✅ Voice message sent successfully', 'MessageThread');
       inputRef.current?.focus();
     }
   };
@@ -1211,9 +1212,9 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Voice Recorder */}
+      {/* Voice Recorder V2 - Nueva implementación robusta */}
       {showVoiceRecorder && (
-        <VoiceRecorder
+        <VoiceRecorderV2
           onSend={handleVoiceSend}
           onCancel={() => setShowVoiceRecorder(false)}
         />
