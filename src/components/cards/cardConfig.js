@@ -18,6 +18,15 @@ export const cardVariants = {
    * Reemplaza: QuickAccessCard
    */
   default: {
+    // ⭐ Dimensiones (Control total de tamaño)
+    cardWidth: 'auto',             // 'auto' | '280px' | '100%' | etc.
+    cardHeight: '380px',           // Altura fija para sticky footer consistente
+    minWidth: '260px',             // Ancho mínimo
+    maxWidth: 'none',              // 'none' | '400px' | etc.
+    minHeight: '320px',            // Altura mínima (cuando cardHeight es 'auto')
+    maxHeight: 'none',             // 'none' | '500px' | etc.
+    aspectRatio: 'auto',           // 'auto' | '16/9' | '4/3' | '1/1'
+
     // Header
     headerHeight: '128px',         // 32 en Tailwind (h-32)
     headerBg: 'gradient',          // 'gradient' | 'solid' | 'image' | 'transparent'
@@ -25,10 +34,9 @@ export const cardVariants = {
 
     // Content
     contentPadding: '20px',        // p-5 en Tailwind
-
-    // Card Height (para grid mode con sticky footer)
-    cardHeight: '380px',           // Altura fija para sticky footer consistente
     contentOverflow: 'auto',       // Scroll si el contenido es muy largo
+    contentMinHeight: 'auto',      // Altura mínima del contenido
+    contentMaxHeight: 'auto',      // Scroll si excede este valor
 
     // Hover Effects
     hoverEnabled: true,
@@ -62,6 +70,15 @@ export const cardVariants = {
    * Reemplaza: StudentCard, UserCard
    */
   user: {
+    // ⭐ Dimensiones
+    cardWidth: 'auto',
+    cardHeight: 'auto',
+    minWidth: '260px',
+    maxWidth: 'none',
+    minHeight: '280px',
+    maxHeight: 'none',
+    aspectRatio: 'auto',
+
     // Header
     headerHeight: '100px',
     headerBg: 'gradient',
@@ -74,6 +91,8 @@ export const cardVariants = {
 
     // Content
     contentPadding: '20px',
+    contentMinHeight: 'auto',
+    contentMaxHeight: 'auto',
 
     // Badges
     showRoleBadge: true,
@@ -110,12 +129,23 @@ export const cardVariants = {
    * Reemplaza: LiveClassCard
    */
   class: {
+    // ⭐ Dimensiones
+    cardWidth: 'auto',
+    cardHeight: 'auto',
+    minWidth: '280px',
+    maxWidth: 'none',
+    minHeight: '240px',
+    maxHeight: 'none',
+    aspectRatio: 'auto',
+
     // Header
     headerHeight: 'auto',
     headerBg: 'transparent',
 
     // Content
     contentPadding: '24px',
+    contentMinHeight: 'auto',
+    contentMaxHeight: 'auto',
 
     // Live Indicator
     showLiveIndicator: true,
@@ -155,6 +185,15 @@ export const cardVariants = {
    * Usado en: Galería de cursos, biblioteca de contenidos
    */
   content: {
+    // ⭐ Dimensiones
+    cardWidth: 'auto',
+    cardHeight: '420px',           // Altura fija para sticky footer consistente
+    minWidth: '280px',
+    maxWidth: 'none',
+    minHeight: '380px',
+    maxHeight: 'none',
+    aspectRatio: 'auto',
+
     // Header (imagen del curso)
     headerHeight: '192px',         // h-48 (más alto para imágenes)
     headerBg: 'image',
@@ -162,10 +201,9 @@ export const cardVariants = {
 
     // Content
     contentPadding: '20px',
-
-    // Card Height (para grid mode con sticky footer)
-    cardHeight: '420px',           // Altura fija para sticky footer consistente
     contentOverflow: 'auto',       // Scroll si el contenido es muy largo
+    contentMinHeight: 'auto',
+    contentMaxHeight: 'auto',
 
     // Thumbnail
     showThumbnail: true,
@@ -204,6 +242,15 @@ export const cardVariants = {
    * Usado en: Dashboard analytics, widgets de stats
    */
   stats: {
+    // ⭐ Dimensiones
+    cardWidth: 'auto',
+    cardHeight: 'auto',
+    minWidth: '200px',
+    maxWidth: 'none',
+    minHeight: '140px',
+    maxHeight: 'none',
+    aspectRatio: 'auto',
+
     // Header
     headerHeight: '80px',
     headerBg: 'solid',
@@ -211,6 +258,8 @@ export const cardVariants = {
 
     // Content
     contentPadding: '16px',
+    contentMinHeight: 'auto',
+    contentMaxHeight: 'auto',
 
     // Big Number Display
     showBigNumber: true,
@@ -245,6 +294,15 @@ export const cardVariants = {
    * Usado en: Listas compactas, sidebars
    */
   compact: {
+    // ⭐ Dimensiones
+    cardWidth: 'auto',
+    cardHeight: 'auto',
+    minWidth: '200px',
+    maxWidth: 'none',
+    minHeight: '100px',
+    maxHeight: 'none',
+    aspectRatio: 'auto',
+
     // Header
     headerHeight: '60px',
     headerBg: 'gradient',
@@ -252,6 +310,8 @@ export const cardVariants = {
 
     // Content
     contentPadding: '12px',
+    contentMinHeight: 'auto',
+    contentMaxHeight: 'auto',
 
     // Icon
     showIcon: true,
@@ -463,11 +523,28 @@ export function generateCardStyles(variant, size, layout = 'vertical') {
       backgroundColor: 'var(--color-bg-secondary)',
       border: `1px solid ${variantConfig.normalBorderColor}`,
       boxShadow: variantConfig.normalShadow,
-      // Altura: si tiene cardHeight usar fija, sino usar minHeight
-      ...(variantConfig.cardHeight
-        ? { height: variantConfig.cardHeight, minHeight: 'unset' }
-        : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
+
+      // ⭐ Dimensiones configurables
+      // Width
+      width: variantConfig.cardWidth || 'auto',
+      minWidth: variantConfig.minWidth || (layout === 'horizontal' ? '240px' : '260px'),
+      maxWidth: variantConfig.maxWidth !== 'none' ? variantConfig.maxWidth : undefined,
+
+      // Height: si tiene cardHeight específico usar fija, sino usar min/max
+      ...(variantConfig.cardHeight && variantConfig.cardHeight !== 'auto'
+        ? { height: variantConfig.cardHeight }
+        : {
+            minHeight: variantConfig.minHeight || (layout === 'horizontal' ? '96px' : sizeConfig.minHeight),
+            maxHeight: variantConfig.maxHeight !== 'none' ? variantConfig.maxHeight : undefined,
+          }
       ),
+
+      // Aspect Ratio
+      ...(variantConfig.aspectRatio && variantConfig.aspectRatio !== 'auto'
+        ? { aspectRatio: variantConfig.aspectRatio }
+        : {}
+      ),
+
       transitionDuration: variantConfig.transitionDuration,
       transitionTimingFunction: variantConfig.transitionTiming,
     },

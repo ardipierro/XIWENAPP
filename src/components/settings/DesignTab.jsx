@@ -4,11 +4,12 @@
  */
 
 import { useState } from 'react';
-import { Palette, Type, Tag, LayoutGrid, RotateCcw, Database } from 'lucide-react';
+import { Palette, Type, Tag, LayoutGrid, RotateCcw, Database, Layout } from 'lucide-react';
 import BaseTabs from '../common/BaseTabs';
 import ThemeCustomizer from '../ThemeCustomizer';
 import BadgeCustomizerTab from './BadgeCustomizerTab';
 import CardSystemTab from './CardSystemTab';
+import DashboardConfigTab from './DashboardConfigTab';
 import { useFont } from '../../contexts/FontContext';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -38,7 +39,8 @@ function DesignTab() {
     { id: 'theme', label: 'Temas', icon: Palette },
     { id: 'fonts', label: 'Fuentes', icon: Type },
     { id: 'badges', label: 'Badges', icon: Tag },
-    { id: 'cardsystem', label: 'Card System', icon: LayoutGrid }
+    { id: 'cardsystem', label: 'Card System', icon: LayoutGrid },
+    { id: 'dashboard', label: 'Dashboard Config', icon: Layout }
   ];
 
   return (
@@ -259,6 +261,12 @@ function DesignTab() {
         {activeSubTab === 'cardsystem' && (
           <div className="w-full">
             <CardSystemTab />
+          </div>
+        )}
+
+        {activeSubTab === 'dashboard' && (
+          <div className="w-full">
+            <DashboardConfigTab />
           </div>
         )}
       </div>

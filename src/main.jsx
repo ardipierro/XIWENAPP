@@ -14,6 +14,7 @@ import { FontProvider } from './contexts/FontContext.jsx';
 import { ViewAsProvider } from './contexts/ViewAsContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CardConfigProvider } from './contexts/CardConfigContext.jsx';
+import { DashboardConfigProvider } from './contexts/DashboardConfigContext.jsx';
 
 // Error Boundary
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
@@ -27,9 +28,10 @@ import { initBadgeSystem } from './config/badgeSystem.js';
  * 2. AuthProvider - Estado de autenticación global
  * 3. ThemeProvider - Tema (claro/oscuro)
  * 4. CardConfigProvider - Configuración global de cards
- * 5. FontProvider - Fuente del logo de la aplicación
- * 6. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
- * 7. App - Componente principal
+ * 5. DashboardConfigProvider - Configuración global de paneles
+ * 6. FontProvider - Fuente del logo de la aplicación
+ * 7. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
+ * 8. App - Componente principal
  */
 
 // Inicializar sistema de badges (aplicar colores guardados)
@@ -41,11 +43,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <ThemeProvider>
           <CardConfigProvider>
-            <FontProvider>
-              <ViewAsProvider>
-                <App />
-              </ViewAsProvider>
-            </FontProvider>
+            <DashboardConfigProvider>
+              <FontProvider>
+                <ViewAsProvider>
+                  <App />
+                </ViewAsProvider>
+              </FontProvider>
+            </DashboardConfigProvider>
           </CardConfigProvider>
         </ThemeProvider>
       </AuthProvider>
