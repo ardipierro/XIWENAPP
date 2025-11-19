@@ -147,8 +147,13 @@ export async function updateRecurringSchedule(scheduleId, updates) {
       normalizedUpdates.startDate = updates.recurringStartDate;
     }
 
+    // Filtrar campos undefined (Firestore no los permite)
+    const cleanUpdates = Object.fromEntries(
+      Object.entries(normalizedUpdates).filter(([_, value]) => value !== undefined)
+    );
+
     const docRef = doc(db, 'recurring_schedules', scheduleId);
-    await updateDoc(docRef, normalizedUpdates);
+    await updateDoc(docRef, cleanUpdates);
 
     logger.info('✅ Horario actualizado:', scheduleId);
     return { success: true };

@@ -224,8 +224,13 @@ export async function updateClassSession(sessionId, updates) {
       normalizedUpdates.scheduleName = updates.name;
     }
 
+    // Filtrar campos undefined (Firestore no los permite)
+    const cleanUpdates = Object.fromEntries(
+      Object.entries(normalizedUpdates).filter(([_, value]) => value !== undefined)
+    );
+
     const docRef = doc(db, 'class_instances', sessionId);
-    await updateDoc(docRef, normalizedUpdates);
+    await updateDoc(docRef, cleanUpdates);
 
     logger.info('✅ Sesión actualizada:', sessionId);
     return { success: true };
