@@ -19,9 +19,19 @@ export function ViewAsProvider({ children }) {
    */
   const startViewingAs = (currentUser, targetUser) => {
     setOriginalUser(currentUser);
-    setViewAsUser(targetUser);
+
+    // ✅ CRÍTICO: Normalizar targetUser para tener tanto id como uid
+    // Los documentos de Firestore tienen 'id' (ID del documento = UID de Firebase Auth)
+    // pero los componentes esperan 'uid'
+    const normalizedUser = {
+      ...targetUser,
+      uid: targetUser.uid || targetUser.id, // Asegurar que tenga uid
+      id: targetUser.id || targetUser.uid   // Asegurar que tenga id
+    };
+
+    setViewAsUser(normalizedUser);
     // Guardar el ID del usuario para volver al UserProfile correcto
-    setReturnToUserId(targetUser.id || targetUser.uid);
+    setReturnToUserId(normalizedUser.id || normalizedUser.uid);
   };
 
   /**

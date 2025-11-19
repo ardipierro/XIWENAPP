@@ -487,9 +487,10 @@ function UserProfileModal({
               </h2>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {/* Badge de Rol */}
-                {(isAdmin || userRole) && (
+                {/* ✅ CRÍTICO: Mostrar userRole del perfil, no si quien está viendo es admin */}
+                {userRole && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600 shadow-lg">
-                    {isAdmin ? 'admin' : userRole}
+                    {userRole}
                   </span>
                 )}
 
