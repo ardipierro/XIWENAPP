@@ -565,7 +565,6 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
    * Handle voice message send
    */
   const handleVoiceSend = async (audioBlob, duration) => {
-    // Important: Don't close VoiceRecorder yet to ensure proper cleanup
     setSending(true);
     setUploading(true);
 
@@ -617,13 +616,12 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
 
     setSending(false);
 
-    // Close VoiceRecorder AFTER everything is done
-    // This gives time for cleanup to execute properly
-    setTimeout(() => {
-      setShowVoiceRecorder(false);
-    }, 300);
+    // ARREGLADO: Cerrar inmediatamente después del envío
+    // El VoiceRecorder ya hizo cleanup del stream en handleSend
+    setShowVoiceRecorder(false);
 
     if (result) {
+      logger.info('Voice message sent successfully', 'MessageThread');
       inputRef.current?.focus();
     }
   };

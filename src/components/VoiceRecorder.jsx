@@ -34,17 +34,26 @@ function VoiceRecorder({ onSend, onCancel }) {
     startRecording();
     return () => {
       stopTimer();
-      // Stop all media tracks to release microphone
+
+      // Cleanup completo del stream
       if (streamRef.current) {
+        logger.info('Component unmounting - cleaning up stream', 'VoiceRecorder');
         streamRef.current.getTracks().forEach(track => {
-          track.stop();
-          logger.info('Stopped media track on cleanup', 'VoiceRecorder');
+          if (track.readyState !== 'ended') {
+            track.stop();
+            logger.info(`Cleanup: Stopped ${track.kind} track`, 'VoiceRecorder');
+          }
         });
         streamRef.current = null;
       }
+
+      // Detener MediaRecorder si está activo
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        logger.info('Cleanup: Stopping MediaRecorder', 'VoiceRecorder');
         mediaRecorderRef.current.stop();
       }
+
+      // Liberar URL del audio
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
@@ -58,15 +67,18 @@ function VoiceRecorder({ onSend, onCancel }) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
+          // Configuración optimizada para mejor calidad y menos artefactos
+          echoCancellation: false,  // Desactivado para evitar cortes
+          noiseSuppression: false,  // Desactivado para evitar distorsión
+          autoGainControl: false,   // Desactivado para volumen consistente
+          sampleRate: 48000,        // Alta tasa de muestreo para mejor calidad
+          channelCount: 1           // Mono es suficiente para voz
         }
       });
       streamRef.current = stream; // Save stream reference
 
-      // Try to use Opus codec with higher bitrate for better quality
-      let options = { audioBitsPerSecond: 128000 };
+      // Configuración mejorada con bitrate más alto
+      let options = { audioBitsPerSecond: 256000 }; // Aumentado a 256kbps
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
         options.mimeType = 'audio/webm;codecs=opus';
       } else {
@@ -104,7 +116,8 @@ function VoiceRecorder({ onSend, onCancel }) {
         }
       };
 
-      mediaRecorder.start();
+      // Iniciar con timeslice de 100ms para captura continua y suave
+      mediaRecorder.start(100);
       setIsRecording(true);
       startTimer();
     } catch (error) {
@@ -204,18 +217,37 @@ function VoiceRecorder({ onSend, onCancel }) {
   };
 
   /**
+   * Clean up stream completely
+   */
+  const cleanupStream = () => {
+    if (streamRef.current) {
+      logger.info('Cleaning up stream...', 'VoiceRecorder');
+      streamRef.current.getTracks().forEach(track => {
+        // Verificar estado del track antes de detener
+        if (track.readyState !== 'ended') {
+          track.stop();
+          logger.info(`Stopped ${track.kind} track (state: ${track.readyState})`, 'VoiceRecorder');
+        }
+      });
+      streamRef.current = null;
+    }
+
+    // Detener MediaRecorder si aún está activo
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      logger.info('Stopping active MediaRecorder...', 'VoiceRecorder');
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  /**
    * Handle send
    */
   const handleSend = () => {
     if (audioBlob) {
-      // Ensure stream is fully released before sending
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => {
-          track.stop();
-          logger.info('Stopped media track before send', 'VoiceRecorder');
-        });
-        streamRef.current = null;
-      }
+      // CRÍTICO: Limpiar el stream COMPLETAMENTE antes de enviar
+      cleanupStream();
+
+      // Enviar después de asegurar la limpieza
       onSend(audioBlob, recordingTime);
     }
   };
@@ -224,14 +256,8 @@ function VoiceRecorder({ onSend, onCancel }) {
    * Handle cancel with cleanup
    */
   const handleCancel = () => {
-    // Ensure stream is fully released when canceling
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => {
-        track.stop();
-        logger.info('Stopped media track on cancel', 'VoiceRecorder');
-      });
-      streamRef.current = null;
-    }
+    // Limpiar stream completamente al cancelar
+    cleanupStream();
     onCancel();
   };
 
