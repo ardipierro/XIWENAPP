@@ -32,7 +32,7 @@ import { showMessageNotification, requestNotificationPermission } from '../utils
 import { exportToTXT, exportToJSON } from '../utils/exportConversation';
 import { compressImage, formatFileSize } from '../utils/imageCompression';
 import EmojiPicker from './EmojiPicker';
-import VoiceRecorderV2 from './VoiceRecorderV2';
+import VoiceRecorderSimple from './VoiceRecorderSimple';
 import ReactionPicker from './ReactionPicker';
 import MediaGallery from './MediaGallery';
 
@@ -562,67 +562,53 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
   };
 
   /**
-   * Handle voice message send
-   * NOTA: VoiceRecorderV2 hace el cleanup del stream ANTES de llamar este callback
+   * Handle voice message send - SIMPLIFICADO
    */
   const handleVoiceSend = async (audioBlob, duration) => {
-    logger.info('📤 Handling voice message send...', 'MessageThread');
+    logger.info('📤 Enviando audio...', 'MessageThread');
 
-    // Cerrar el recorder inmediatamente (el cleanup ya se hizo)
+    // Cerrar recorder
     setShowVoiceRecorder(false);
 
     setSending(true);
     setUploading(true);
 
-    // Upload audio
-    const uploadResult = await safeAsync(
-      () => uploadAudioMessage(audioBlob, conversation.id, currentUser.uid),
-      {
-        context: 'MessageThread',
-        onError: (error) => {
-          logger.error('Failed to upload audio', error);
-          alert('Error al subir el audio. Por favor, intenta de nuevo.');
-        }
+    try {
+      // Upload
+      const uploadResult = await uploadAudioMessage(audioBlob, conversation.id, currentUser.uid);
+
+      setUploading(false);
+
+      if (!uploadResult || !uploadResult.success) {
+        setSending(false);
+        alert('Error al subir el audio');
+        return;
       }
-    );
 
-    setUploading(false);
-
-    if (!uploadResult || !uploadResult.success) {
-      setSending(false);
-      return;
-    }
-
-    // Send message with audio attachment
-    const audioAttachment = {
-      url: uploadResult.url,
-      filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
-      size: audioBlob.size,
-      type: audioBlob.type || 'audio/webm',
-      duration
-    };
-
-    const result = await safeAsync(
-      () => sendMessage({
+      // Send
+      await sendMessage({
         conversationId: conversation.id,
         senderId: currentUser.uid,
         senderName: currentUser.displayName || currentUser.email,
         receiverId: conversation.otherUser.id,
         content: '',
-        attachment: audioAttachment
-      }),
-      {
-        context: 'MessageThread',
-        onError: (error) => {
-          logger.error('Failed to send voice message', error);
+        attachment: {
+          url: uploadResult.url,
+          filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
+          size: audioBlob.size,
+          type: audioBlob.type || 'audio/webm',
+          duration
         }
-      }
-    );
+      });
 
-    setSending(false);
+      logger.info('✅ Audio enviado', 'MessageThread');
 
-    if (result) {
-      logger.info('✅ Voice message sent successfully', 'MessageThread');
+    } catch (error) {
+      logger.error('Error:', error, 'MessageThread');
+      alert('Error al enviar el audio');
+    } finally {
+      setSending(false);
+      setUploading(false);
       inputRef.current?.focus();
     }
   };
@@ -1212,9 +1198,9 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Voice Recorder V2 - Nueva implementación robusta */}
+      {/* Voice Recorder Simple - BÁSICO que funcione */}
       {showVoiceRecorder && (
-        <VoiceRecorderV2
+        <VoiceRecorderSimple
           onSend={handleVoiceSend}
           onCancel={() => setShowVoiceRecorder(false)}
         />
