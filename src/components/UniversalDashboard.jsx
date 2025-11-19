@@ -17,6 +17,7 @@ import UniversalSideMenu from './UniversalSideMenu';
 import ViewAsBanner from './ViewAsBanner';
 import { BaseLoading } from './common';
 import { UniversalCard } from './cards';
+import { ResponsiveGrid } from './common';
 import {
   Layers,
   BookOpen,
@@ -259,7 +260,7 @@ function HomeView({ user, onNavigate }) {
       )}
 
       {/* Tarjetas de acceso */}
-      <div className="grid-responsive-cards gap-4">
+      <ResponsiveGrid size="md" gap="4">
         {visibleCards.map((card) => (
           <UniversalCard
             key={card.path}
@@ -271,7 +272,7 @@ function HomeView({ user, onNavigate }) {
             onClick={() => onNavigate && onNavigate(card.path)}
           />
         ))}
-      </div>
+      </ResponsiveGrid>
     </div>
   );
 }

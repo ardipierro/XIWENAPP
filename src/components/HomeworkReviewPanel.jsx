@@ -38,7 +38,8 @@ import {
   BaseAlert,
   BaseBadge,
   BaseEmptyState,
-  ImageLightbox
+  ImageLightbox,
+  ResponsiveGrid
 } from './common';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
@@ -343,8 +344,8 @@ export default function HomeworkReviewPanel({ teacherId }) {
             description={`No hay correcciones que coincidan con "${searchTerm}"`}
           />
         )
-      ) : (
-        <div className={viewMode === 'grid' ? 'grid-responsive-cards gap-4' : 'flex flex-col gap-4'}>
+      ) : viewMode === 'grid' ? (
+        <ResponsiveGrid size="md" gap="4">
           {filteredReviews.map(review => (
             <ReviewCard
               key={review.id}
@@ -365,6 +366,35 @@ export default function HomeworkReviewPanel({ teacherId }) {
                 if (result.success) {
                   logger.info(`Deleted homework review ${reviewId}`, 'HomeworkReviewPanel');
                   loadAllReviews(); // Reload to refresh list
+                } else {
+                  alert('Error al eliminar la tarea. Intenta de nuevo.');
+                }
+              }}
+            />
+          ))}
+        </ResponsiveGrid>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {filteredReviews.map(review => (
+            <ReviewCard
+              key={review.id}
+              review={review}
+              onSelect={() => handleSelectReview(review)}
+              viewMode={viewMode}
+              onCancel={async (reviewId) => {
+                const result = await cancelProcessingReview(reviewId);
+                if (result.success) {
+                  logger.info(`Cancelled processing review ${reviewId}`, 'HomeworkReviewPanel');
+                  loadAllReviews();
+                } else {
+                  alert('Error al cancelar el procesamiento. Intenta de nuevo.');
+                }
+              }}
+              onDelete={async (reviewId) => {
+                const result = await deleteHomeworkReview(reviewId);
+                if (result.success) {
+                  logger.info(`Deleted homework review ${reviewId}`, 'HomeworkReviewPanel');
+                  loadAllReviews();
                 } else {
                   alert('Error al eliminar la tarea. Intenta de nuevo.');
                 }
