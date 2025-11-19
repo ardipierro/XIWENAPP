@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { z } from 'zod';
 import { ROLES, ROLE_INFO } from '../firebase/roleConfig';
 import { userSchema, validateData } from '../utils/validationSchemas';
-import { BaseModal, BaseButton, BaseInput, BaseSelect, BaseTextarea } from './common';
+import { BaseModal, BaseButton, BaseInput, BaseSelect, BaseTextarea, BaseAlert } from './common';
 
 function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
   const [formData, setFormData] = useState({
@@ -327,12 +327,9 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
 
         {/* Success message with generated password */}
         {generatedPassword && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div className="text-sm font-semibold text-green-800 dark:text-green-200 mb-3">
-              ✅ Usuario creado exitosamente
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          <BaseAlert variant="success" title="Usuario creado exitosamente">
+            <div className="space-y-2 mt-2">
+              <p className="text-sm font-medium">
                 Contraseña temporal:
               </p>
               <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded p-3">
@@ -354,7 +351,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
                 ⚠️ Guarda esta contraseña. El usuario deberá usarla para su primer inicio de sesión.
               </p>
             </div>
-          </div>
+          </BaseAlert>
         )}
       </form>
     </BaseModal>

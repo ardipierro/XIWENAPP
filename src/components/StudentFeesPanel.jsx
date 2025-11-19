@@ -333,11 +333,9 @@ function StudentFeesPanel() {
             </div>
 
             {enrollment.discount > 0 && (
-              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <p className="text-sm text-green-800 dark:text-green-200">
-                  <strong>Descuento aplicado:</strong> {enrollment.discountReason || `${enrollment.discount}% de descuento`}
-                </p>
-              </div>
+              <BaseAlert variant="success">
+                <strong>Descuento aplicado:</strong> {enrollment.discountReason || `${enrollment.discount}% de descuento`}
+              </BaseAlert>
             )}
 
             {!enrollment.matriculaPaid && (
@@ -446,11 +444,9 @@ function StudentFeesPanel() {
                       </div>
 
                       {isPaid && fee.paidAt && (
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <p className="text-sm text-green-800 dark:text-green-200">
-                            Pagado el {formatDate(fee.paidAt)}
-                          </p>
-                        </div>
+                        <BaseAlert variant="success">
+                          Pagado el {formatDate(fee.paidAt)}
+                        </BaseAlert>
                       )}
 
                       {!isPaid && (

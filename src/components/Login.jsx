@@ -9,6 +9,7 @@ import { LogIn, UserPlus, AlertCircle, CheckCircle, Loader } from 'lucide-react'
 import useAuth from '../hooks/useAuth.js';
 import { PASSWORD_RESET_NOTIFICATION_DURATION } from '../constants/auth.js';
 import BaseButton from './common/BaseButton';
+import BaseAlert from './common/BaseAlert';
 
 /**
  * Componente de Login y Registro
@@ -276,18 +277,16 @@ function Login() {
 
           {/* Mensajes de error */}
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center gap-2 text-red-800 dark:text-red-200" role="alert">
-              <AlertCircle size={16} />
-              <span className="text-sm">{error}</span>
-            </div>
+            <BaseAlert variant="danger">
+              {error}
+            </BaseAlert>
           )}
 
           {/* Mensaje de éxito (reseteo de contraseña) */}
           {resetEmailSent && (
-            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-2 text-green-800 dark:text-green-200" role="status">
-              <CheckCircle size={16} />
-              <span className="text-sm">Email enviado. Revisa tu bandeja de entrada</span>
-            </div>
+            <BaseAlert variant="success">
+              Email enviado. Revisa tu bandeja de entrada
+            </BaseAlert>
           )}
 
           {/* Botón principal */}

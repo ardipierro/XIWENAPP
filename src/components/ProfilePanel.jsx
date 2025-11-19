@@ -6,7 +6,7 @@ import { getUserAvatar, updateUserAvatar } from '../firebase/firestore';
 import { uploadAvatarImage, deleteAvatarImage } from '../firebase/storage';
 import { AVATARS } from './AvatarSelector';
 import UserAvatar from './UserAvatar';
-import { BaseButton, CategoryBadge } from './common';
+import { BaseButton, CategoryBadge, BaseAlert } from './common';
 
 function ProfilePanel({ user, userRole, onClose, onUpdate }) {
   const [avatarKey, setAvatarKey] = useState(0); // Key para forzar recarga del avatar
@@ -112,14 +112,14 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
         <div className="flex-1 overflow-y-auto p-6">
           {/* Mensajes */}
           {error && (
-            <div className="p-3 px-4 rounded-md mb-5 text-sm font-semibold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
+            <BaseAlert variant="danger" className="mb-5">
               {error}
-            </div>
+            </BaseAlert>
           )}
           {success && (
-            <div className="p-3 px-4 rounded-md mb-5 text-sm font-semibold bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">
+            <BaseAlert variant="success" className="mb-5">
               {success}
-            </div>
+            </BaseAlert>
           )}
 
           {/* Avatar Section */}

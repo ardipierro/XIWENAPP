@@ -53,6 +53,9 @@ function CategoryBadge({
     getIconLibraryConfig()
   );
 
+  // Estado para forzar recarga cuando cambia la configuración de badges
+  const [configVersion, setConfigVersion] = useState(0);
+
   // Escuchar cambios en la configuración de iconos
   useEffect(() => {
     const handleIconLibraryChange = (event) => {
@@ -61,6 +64,21 @@ function CategoryBadge({
 
     window.addEventListener('iconLibraryChange', handleIconLibraryChange);
     return () => window.removeEventListener('iconLibraryChange', handleIconLibraryChange);
+  }, []);
+
+  // Escuchar cambios en la configuración de badges (colores, etc.)
+  useEffect(() => {
+    const handleBadgeConfigChange = () => {
+      setConfigVersion(prev => prev + 1);
+    };
+
+    window.addEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
+    window.addEventListener('storage', handleBadgeConfigChange);
+
+    return () => {
+      window.removeEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
+      window.removeEventListener('storage', handleBadgeConfigChange);
+    };
   }, []);
 
   // Obtener configuración del badge
