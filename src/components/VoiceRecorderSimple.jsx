@@ -13,20 +13,24 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [error, setError] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
 
-  // Iniciar al montar
+  // PRIMERO: Verificar que el componente se monta
   useEffect(() => {
-    logger.info('🎙️ VoiceRecorderSimple montado', 'VoiceRecorderSimple');
+    console.log('🎙️🎙️🎙️ VoiceRecorderSimple MONTADO 🎙️🎙️🎙️');
+    console.log('onSend:', typeof onSend);
+    console.log('onCancel:', typeof onCancel);
+
     startRecording();
 
     // Cleanup al desmontar
     return () => {
-      logger.info('🔄 VoiceRecorderSimple desmontando', 'VoiceRecorderSimple');
+      console.log('🔄 VoiceRecorderSimple DESMONTANDO');
 
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -35,7 +39,7 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => {
           track.stop();
-          logger.info('Cleanup: track stopped', 'VoiceRecorderSimple');
+          console.log('Cleanup: track stopped');
         });
       }
 
@@ -47,15 +51,15 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
 
   const startRecording = async () => {
     try {
-      logger.info('Iniciando grabación...', 'VoiceRecorderSimple');
+      console.log('🔴 INICIANDO GRABACIÓN...');
 
-      // Pedir micrófono - configuración MÁS SIMPLE posible
+      // Pedir micrófono
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      logger.info('✅ Micrófono obtenido', 'VoiceRecorderSimple');
+      console.log('✅ MICRÓFONO OBTENIDO');
 
-      // MediaRecorder - configuración MÁS SIMPLE posible
+      // MediaRecorder
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -63,12 +67,12 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           chunksRef.current.push(e.data);
-          logger.info(`Chunk: ${e.data.size} bytes`, 'VoiceRecorderSimple');
+          console.log(`📦 Chunk: ${e.data.size} bytes`);
         }
       };
 
       mediaRecorder.onstop = () => {
-        logger.info('MediaRecorder stopped', 'VoiceRecorderSimple');
+        console.log('⏹️ MediaRecorder STOPPED');
 
         if (chunksRef.current.length > 0) {
           const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
@@ -77,7 +81,7 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
           setAudioBlob(blob);
           setAudioUrl(url);
 
-          logger.info(`✅ Audio creado: ${(blob.size / 1024).toFixed(2)} KB`, 'VoiceRecorderSimple');
+          console.log(`✅ AUDIO CREADO: ${(blob.size / 1024).toFixed(2)} KB`);
         }
       };
 
@@ -85,24 +89,25 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
       mediaRecorder.start(1000);
       setIsRecording(true);
 
-      logger.info('🔴 Grabando...', 'VoiceRecorderSimple');
+      console.log('🔴 GRABANDO...');
 
       // Timer
       let seconds = 0;
       timerRef.current = setInterval(() => {
         seconds++;
         setRecordingTime(seconds);
+        console.log(`⏱️ ${seconds}s`);
       }, 1000);
 
     } catch (error) {
-      logger.error('Error:', error, 'VoiceRecorderSimple');
-      alert('Error al acceder al micrófono');
-      onCancel();
+      console.error('❌ ERROR:', error);
+      setError(error.message);
+      alert('Error al acceder al micrófono: ' + error.message);
     }
   };
 
   const stopRecording = () => {
-    logger.info('Deteniendo grabación...', 'VoiceRecorderSimple');
+    console.log('⏹️ DETENIENDO GRABACIÓN...');
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -116,13 +121,13 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
   };
 
   const handleSend = () => {
-    logger.info('📤 Enviando audio...', 'VoiceRecorderSimple');
+    console.log('📤 ENVIANDO AUDIO...');
 
     // Detener stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
         track.stop();
-        logger.info('Track stopped before send', 'VoiceRecorderSimple');
+        console.log('Track stopped before send');
       });
       streamRef.current = null;
     }
@@ -134,7 +139,7 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
   };
 
   const handleCancel = () => {
-    logger.info('❌ Cancelando...', 'VoiceRecorderSimple');
+    console.log('❌ CANCELANDO...');
 
     // Detener stream
     if (streamRef.current) {
@@ -153,8 +158,25 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Mostrar error si hay
+  if (error) {
+    return (
+      <div className="p-4 bg-red-100 border-t border-red-300">
+        <p className="text-red-800 font-bold">ERROR: {error}</p>
+        <button onClick={handleCancel} className="mt-2 px-4 py-2 bg-red-600 text-white rounded">
+          Cerrar
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800">
+    <div className="p-4 bg-yellow-100 border-t-4 border-yellow-500">
+      <div className="mb-2 text-center">
+        <p className="text-2xl font-bold text-yellow-900">🎙️ GRABADOR DE VOZ 🎙️</p>
+        <p className="text-sm text-yellow-800">VoiceRecorderSimple cargado correctamente</p>
+      </div>
+
       <div className="flex items-center gap-4">
         {/* Indicador */}
         <div className={`w-10 h-10 rounded-full ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-zinc-500'} flex items-center justify-center`}>
@@ -172,40 +194,31 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
         {/* Botones */}
         <div className="flex gap-2">
           {isRecording ? (
-            <BaseButton
+            <button
               onClick={stopRecording}
-              variant="warning"
-              size="sm"
-              icon={Square}
-              title="Detener"
+              className="px-4 py-2 bg-orange-500 text-white rounded font-bold"
             >
-              Detener
-            </BaseButton>
+              ⏹️ DETENER
+            </button>
           ) : audioBlob ? (
             <>
-              <BaseButton
+              <button
                 onClick={handleSend}
-                variant="success"
-                size="sm"
-                icon={Send}
-                title="Enviar"
+                className="px-4 py-2 bg-green-500 text-white rounded font-bold"
               >
-                Enviar
-              </BaseButton>
+                📤 ENVIAR
+              </button>
 
               <audio controls src={audioUrl} className="h-10" />
             </>
           ) : null}
 
-          <BaseButton
+          <button
             onClick={handleCancel}
-            variant="danger"
-            size="sm"
-            icon={X}
-            title="Cancelar"
+            className="px-4 py-2 bg-red-500 text-white rounded font-bold"
           >
-            Cancelar
-          </BaseButton>
+            ❌ CANCELAR
+          </button>
         </div>
       </div>
     </div>
