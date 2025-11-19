@@ -1547,7 +1547,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
    UNIVERSAL DASHBOARD COMPONENTS
    ============================================ */
 
-/* ===== UNIVERSAL TOP BAR ===== */
+/* ===== UNIVERSAL TOP BAR (Minimalista sin bordes) ===== */
 .universal-topbar {
   position: fixed;
   top: 0;
@@ -1555,7 +1555,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   right: 0;
   height: 64px;
   background: var(--color-bg-primary);
-  border-bottom: 1px solid var(--color-border);
+  /* Sin borde, solo sombra sutil */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1825,7 +1826,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   margin: 0.25rem 0;
 }
 
-/* ===== UNIVERSAL SIDE MENU ===== */
+/* ===== UNIVERSAL SIDE MENU (Minimalista sin bordes) ===== */
 .universal-sidemenu {
   position: fixed;
   left: 0;
@@ -1833,7 +1834,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   bottom: 0;
   width: 260px;
   background: var(--color-bg-primary);
-  border-right: 1px solid var(--color-border);
+  /* Sin borde, solo sombra lateral sutil */
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.03);
   transform: translateX(-100%);
   transition: transform 0.3s ease, top 0.3s ease;
   z-index: 90;

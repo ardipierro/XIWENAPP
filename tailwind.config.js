@@ -35,34 +35,34 @@ export default {
           950: '#09090b',          // zinc-950
         },
         secondary: {
-          DEFAULT: '#10b981',
-          dark: '#059669',
-          light: '#34d399',
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
+          DEFAULT: '#4a9f7c',  // Verde apagado (neutral)
+          dark: '#3d8566',
+          light: '#60b591',
+          50: '#e6f4ed',
+          100: '#e6f4ed',
+          200: '#9cd4ba',
+          300: '#9cd4ba',
+          400: '#60b591',
+          500: '#4a9f7c',
+          600: '#3d8566',
+          700: '#347a56',
+          800: '#2b6547',
+          900: '#235038',
         },
         accent: {
-          DEFAULT: '#f59e0b',
-          dark: '#d97706',
-          light: '#fbbf24',
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
+          DEFAULT: '#5b6b8f',  // Gris azulado neutral
+          dark: '#4a5778',
+          light: '#7585a3',
+          50: '#f0f2f7',
+          100: '#e0e4ed',
+          200: '#c1c9db',
+          300: '#a2aec9',
+          400: '#7585a3',
+          500: '#5b6b8f',
+          600: '#4a5778',
+          700: '#3b4661',
+          800: '#2c344a',
+          900: '#1d2333',
         },
         teacher: {
           DEFAULT: '#a1a1aa',      // zinc-400 (gris neutral)
@@ -74,10 +74,10 @@ export default {
           light: '#a1a1aa',        // zinc-400
           dark: '#52525b',         // zinc-600
         },
-        success: '#10b981',        // green-500
-        warning: '#f59e0b',        // amber-500
-        error: '#ef4444',          // red-500
-        info: '#a1a1aa',           // zinc-400 (gris neutral, NO azul)
+        success: '#4a9f7c',        // Verde apagado (neutral)
+        warning: '#d4a574',        // Mostaza (neutral)
+        error: '#c85a54',          // Rojo terracota (neutral)
+        info: '#5b8fa3',           // Azul grisáceo (neutral)
       },
       
       // Espaciado personalizado (Mobile First)
