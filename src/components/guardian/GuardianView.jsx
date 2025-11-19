@@ -110,7 +110,7 @@ function GuardianView({ user, onViewStudentDetails }) {
         /* Student cards */
         <div className={
           viewMode === 'grid'
-            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4'
+            ? 'grid-responsive-cards gap-4'
             : 'flex flex-col gap-3'
         }>
           {students.map((student) => {

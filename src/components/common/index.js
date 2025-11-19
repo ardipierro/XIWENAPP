@@ -20,6 +20,7 @@ export { default as BaseCard } from './BaseCard';
 export { default as BaseModal, useModal } from './BaseModal';
 export { default as ExpandableModal } from './ExpandableModal';
 export { default as ImageLightbox } from './ImageLightbox';
+export { default as ResponsiveGrid } from './ResponsiveGrid';
 
 // Feedback & Status
 export { default as BaseBadge } from './BaseBadge';

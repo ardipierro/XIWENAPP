@@ -40,7 +40,8 @@ import {
   BaseBadge,
   BaseLoading,
   BaseEmptyState,
-  BaseAlert
+  BaseAlert,
+  ResponsiveGrid
 } from './common';
 import { UniversalCard } from './cards';
 
@@ -532,7 +533,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
           }
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <ResponsiveGrid size="md" gap="6">
           {filteredSessions.map(session => {
             // Preparar badges según el estado
             const badges = [
@@ -700,7 +701,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
               />
             );
           })}
-        </div>
+        </ResponsiveGrid>
       )}
 
       {/* Modal */}
