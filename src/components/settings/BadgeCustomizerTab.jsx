@@ -37,6 +37,8 @@ import useBadgeConfig from '../../hooks/useBadgeConfig';
 import {
   getIconLibraryConfig,
   saveIconLibraryConfig,
+  MONOCHROME_PALETTES,
+  COLOR_PALETTES,
 } from '../../config/badgeSystem';
 import IconPickerModal from './IconPickerModal';
 import * as HeroIcons from '@heroicons/react/24/outline';
@@ -49,6 +51,7 @@ function BadgeCustomizerTab({ user }) {
   const {
     config,
     iconConfig,
+    globalConfig,
     hasChanges,
     categories,
     defaults,
@@ -61,6 +64,9 @@ function BadgeCustomizerTab({ user }) {
     removeBadge,
     getBadgesByCategory,
     updateIconLibrary,
+    updateMonochromePalette,
+    updateMonochromeColor,
+    updateGlobalConfig,
     updateAllBadgeStyles,
   } = useBadgeConfig();
 
@@ -138,7 +144,11 @@ function BadgeCustomizerTab({ user }) {
   // Cambiar librería de iconos
   const handleIconLibraryChange = (library) => {
     updateIconLibrary(library);
-    // Ya no se guarda inmediatamente, se marca como cambio pendiente
+  };
+
+  // Cambiar paleta monocromática
+  const handleMonochromePaletteChange = (palette) => {
+    updateMonochromePalette(palette);
   };
 
   // Cambiar estilo de TODOS los badges
@@ -146,7 +156,7 @@ function BadgeCustomizerTab({ user }) {
     updateAllBadgeStyles(badgeStyle);
     setSaveMessage({
       type: 'info',
-      text: `🎨 Todos los badges cambiados a estilo: ${badgeStyle === 'outline' ? 'Lightweight (Contorno)' : 'Sólido'}. No olvides guardar.`,
+      text: `🎨 Todos los badges cambiados a estilo: ${badgeStyle}. No olvides guardar.`,
     });
     setTimeout(() => setSaveMessage(null), 4000);
   };
@@ -224,258 +234,16 @@ function BadgeCustomizerTab({ user }) {
         </div>
       )}
 
-      {/* Selector de Estilo de Iconos */}
-      <div
-        className="rounded-lg p-4"
-        style={{
-          border: '1px solid var(--color-border)',
-          background: 'var(--color-bg-secondary)',
-        }}
-      >
-        <h3
-          className="text-base font-semibold mb-3 flex items-center gap-2"
-          style={{ color: 'var(--color-text-primary)' }}
-        >
-          <Palette size={18} />
-          Estilo de Iconos
-        </h3>
-        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Selecciona cómo quieres que se muestren los iconos en todos los badges
-        </p>
-
-        <div className="flex gap-3">
-          <button
-            onClick={() => handleIconLibraryChange('emoji')}
-            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
-            style={{
-              borderColor:
-                iconConfig.library === 'emoji'
-                  ? 'var(--color-primary)'
-                  : 'var(--color-border)',
-              background:
-                iconConfig.library === 'emoji'
-                  ? 'var(--color-bg-tertiary)'
-                  : 'var(--color-bg-primary)',
-            }}
-          >
-            <div className="flex flex-col items-center gap-2">
-              <Smile
-                size={24}
-                style={{
-                  color:
-                    iconConfig.library === 'emoji'
-                      ? 'var(--color-primary)'
-                      : 'var(--color-text-secondary)',
-                }}
-              />
-              <span
-                className="font-medium"
-                style={{
-                  color:
-                    iconConfig.library === 'emoji'
-                      ? 'var(--color-primary)'
-                      : 'var(--color-text-primary)',
-                }}
-              >
-                Emoji
-              </span>
-              <span
-                className="text-xs text-center"
-                style={{ color: 'var(--color-text-secondary)' }}
-              >
-                Iconos multicolor (actual)
-              </span>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleIconLibraryChange('heroicon')}
-            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
-            style={{
-              borderColor:
-                iconConfig.library === 'heroicon'
-                  ? 'var(--color-primary)'
-                  : 'var(--color-border)',
-              background:
-                iconConfig.library === 'heroicon'
-                  ? 'var(--color-bg-tertiary)'
-                  : 'var(--color-bg-primary)',
-            }}
-          >
-            <div className="flex flex-col items-center gap-2">
-              <Box
-                size={24}
-                style={{
-                  color:
-                    iconConfig.library === 'heroicon'
-                      ? 'var(--color-primary)'
-                      : 'var(--color-text-secondary)',
-                }}
-              />
-              <span
-                className="font-medium"
-                style={{
-                  color:
-                    iconConfig.library === 'heroicon'
-                      ? 'var(--color-primary)'
-                      : 'var(--color-text-primary)',
-                }}
-              >
-                Heroicons
-              </span>
-              <span
-                className="text-xs text-center"
-                style={{ color: 'var(--color-text-secondary)' }}
-              >
-                Iconos monocromáticos
-              </span>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleIconLibraryChange('none')}
-            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
-            style={{
-              borderColor:
-                iconConfig.library === 'none'
-                  ? 'var(--color-primary)'
-                  : 'var(--color-border)',
-              background:
-                iconConfig.library === 'none'
-                  ? 'var(--color-bg-tertiary)'
-                  : 'var(--color-bg-primary)',
-            }}
-          >
-            <div className="flex flex-col items-center gap-2">
-              <EyeOff
-                size={24}
-                style={{
-                  color:
-                    iconConfig.library === 'none'
-                      ? 'var(--color-primary)'
-                      : 'var(--color-text-secondary)',
-                }}
-              />
-              <span
-                className="font-medium"
-                style={{
-                  color:
-                    iconConfig.library === 'none'
-                      ? 'var(--color-primary)'
-                      : 'var(--color-text-primary)',
-                }}
-              >
-                Sin Iconos
-              </span>
-              <span
-                className="text-xs text-center"
-                style={{ color: 'var(--color-text-secondary)' }}
-              >
-                Solo texto
-              </span>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Selector Global de Estilo de Badges */}
-      <div
-        className="rounded-lg p-4"
-        style={{
-          border: '1px solid var(--color-border)',
-          background: 'var(--color-bg-secondary)',
-        }}
-      >
-        <h3
-          className="text-base font-semibold mb-3 flex items-center gap-2"
-          style={{ color: 'var(--color-text-primary)' }}
-        >
-          <Palette size={18} />
-          Estilo Global de Badges
-        </h3>
-        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Cambia el estilo de <strong>TODOS</strong> los badges al mismo tiempo. También puedes cambiar badges individuales en las opciones avanzadas.
-        </p>
-
-        <div className="flex gap-3">
-          <button
-            onClick={() => handleGlobalBadgeStyleChange('solid')}
-            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
-            style={{
-              borderColor: 'var(--color-border)',
-              background: 'var(--color-bg-primary)',
-            }}
-          >
-            <div className="flex flex-col items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">●</span>
-                <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                  Sólido
-                </span>
-              </div>
-              <div className="flex gap-2 flex-wrap justify-center">
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#3b82f6', color: '#ffffff' }}>
-                  Curso
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#10b981', color: '#ffffff' }}>
-                  Lección
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f59e0b', color: '#ffffff' }}>
-                  Ejercicio
-                </span>
-              </div>
-              <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                Fondo de color, texto blanco
-              </p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleGlobalBadgeStyleChange('outline')}
-            className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
-            style={{
-              borderColor: 'var(--color-border)',
-              background: 'var(--color-bg-primary)',
-            }}
-          >
-            <div className="flex flex-col items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">○</span>
-                <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                  Lightweight (Contorno)
-                </span>
-              </div>
-              <div className="flex gap-2 flex-wrap justify-center">
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #3b82f6', color: '#3b82f6', backgroundColor: 'transparent' }}>
-                  Curso
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #10b981', color: '#10b981', backgroundColor: 'transparent' }}>
-                  Lección
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #f59e0b', color: '#f59e0b', backgroundColor: 'transparent' }}>
-                  Ejercicio
-                </span>
-              </div>
-              <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                Fondo transparente, borde y texto de color
-              </p>
-            </div>
-          </button>
-        </div>
-
-        <div
-          className="mt-4 p-3 rounded-lg flex items-start gap-2"
-          style={{
-            background: 'var(--color-bg-tertiary)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <Info size={16} style={{ color: 'var(--color-primary)', marginTop: '2px', flexShrink: 0 }} />
-          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            <strong>Tip:</strong> Este botón cambia TODOS los badges. Si necesitas ajustar badges individuales, usa el botón de información (ℹ️) en cada badge dentro de las categorías.
-          </p>
-        </div>
-      </div>
+      {/* Configuración Global Compacta */}
+      <GlobalConfigPanel
+        iconConfig={iconConfig}
+        globalConfig={globalConfig}
+        onIconLibraryChange={handleIconLibraryChange}
+        onMonochromePaletteChange={handleMonochromePaletteChange}
+        onMonochromeColorChange={(color) => updateMonochromeColor(color)}
+        onBadgeStyleChange={handleGlobalBadgeStyleChange}
+        onGlobalConfigChange={updateGlobalConfig}
+      />
 
       {/* Categorías de Badges */}
       <div className="space-y-4">
@@ -996,6 +764,316 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
             onClose={() => setShowIconPicker(false)}
           />
         )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// COMPONENTE: GlobalConfigPanel (Compacto)
+// ============================================
+
+function GlobalConfigPanel({
+  iconConfig,
+  globalConfig,
+  onIconLibraryChange,
+  onMonochromePaletteChange,
+  onMonochromeColorChange,
+  onBadgeStyleChange,
+  onGlobalConfigChange,
+}) {
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  const iconLibraries = [
+    { value: 'emoji', label: 'Emoji', icon: '😀', desc: 'Multicolor' },
+    { value: 'heroicon', label: 'Heroicons', icon: '○', desc: 'Outline' },
+    { value: 'heroicon-filled', label: 'Filled', icon: '●', desc: 'Solid' },
+    { value: 'none', label: 'Sin iconos', icon: '—', desc: 'Solo texto' },
+  ];
+
+  const badgeStyles = [
+    { value: 'solid', label: 'Sólido', preview: '●' },
+    { value: 'outline', label: 'Contorno', preview: '○' },
+    { value: 'soft', label: 'Soft', preview: '◐' },
+    { value: 'glass', label: 'Glass', preview: '◇' },
+    { value: 'gradient', label: 'Gradient', preview: '◆' },
+  ];
+
+  const showMonochromePalette = iconConfig.library === 'heroicon' || iconConfig.library === 'heroicon-filled';
+
+  return (
+    <div
+      className="rounded-lg p-5"
+      style={{
+        border: '1px solid var(--color-border)',
+        background: 'var(--color-bg-secondary)',
+      }}
+    >
+      <h3
+        className="text-base font-semibold mb-4 flex items-center gap-2"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
+        <Palette size={18} />
+        Configuración Global de Badges
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Estilo de Iconos */}
+        <div>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            Estilo de Iconos
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {iconLibraries.map((lib) => (
+              <button
+                key={lib.value}
+                onClick={() => onIconLibraryChange(lib.value)}
+                className="p-2.5 rounded-lg border transition-all text-left hover:scale-[1.02]"
+                style={{
+                  borderColor: iconConfig.library === lib.value ? 'var(--color-primary)' : 'var(--color-border)',
+                  background: iconConfig.library === lib.value ? 'var(--color-bg-tertiary)' : 'var(--color-bg-primary)',
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{lib.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {lib.label}
+                    </div>
+                    <div className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      {lib.desc}
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Paleta Monocromática (solo para heroicons) */}
+        {showMonochromePalette && (
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Paleta Monocromática
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(MONOCHROME_PALETTES).map(([key, palette]) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    onMonochromePaletteChange(key);
+                    if (key === 'custom') {
+                      setShowColorPicker(true);
+                    }
+                  }}
+                  className="p-2.5 rounded-lg border transition-all text-left hover:scale-[1.02]"
+                  style={{
+                    borderColor: iconConfig.monochromePalette === key ? 'var(--color-primary)' : 'var(--color-border)',
+                    background: iconConfig.monochromePalette === key ? 'var(--color-bg-tertiary)' : 'var(--color-bg-primary)',
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{palette.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {palette.label}
+                      </div>
+                      <div className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                        {palette.description}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Color picker para paleta custom */}
+            {iconConfig.monochromePalette === 'custom' && showColorPicker && (
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="color"
+                  value={iconConfig.monochromeColor || '#000000'}
+                  onChange={(e) => onMonochromeColorChange(e.target.value)}
+                  className="w-12 h-8 rounded cursor-pointer"
+                  style={{ border: '1px solid var(--color-border)' }}
+                />
+                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  Color personalizado
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Estilo Global de Badges */}
+        <div>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            Estilo Global de Badges
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {badgeStyles.map((style) => (
+              <button
+                key={style.value}
+                onClick={() => onBadgeStyleChange(style.value)}
+                className="p-2.5 rounded-lg border transition-all hover:scale-[1.02]"
+                style={{
+                  borderColor: 'var(--color-border)',
+                  background: 'var(--color-bg-primary)',
+                }}
+              >
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl">{style.preview}</span>
+                  <span className="text-xs font-medium text-center" style={{ color: 'var(--color-text-primary)' }}>
+                    {style.label}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Paleta de Colores Global */}
+        <div>
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            Paleta de Colores Global
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(COLOR_PALETTES).map(([key, palette]) => (
+              <button
+                key={key}
+                onClick={() => onGlobalConfigChange('colorPalette', key)}
+                className="p-2.5 rounded-lg border transition-all text-left hover:scale-[1.02]"
+                style={{
+                  borderColor: globalConfig.colorPalette === key ? 'var(--color-primary)' : 'var(--color-border)',
+                  background: globalConfig.colorPalette === key ? 'var(--color-bg-tertiary)' : 'var(--color-bg-primary)',
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{palette.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {palette.label}
+                    </div>
+                    <div className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      {palette.description}
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Opciones Adicionales */}
+      <div className="mt-5 pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+        <details>
+          <summary className="text-sm font-medium cursor-pointer mb-3" style={{ color: 'var(--color-text-primary)' }}>
+            Opciones Avanzadas
+          </summary>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+            {/* Tamaño */}
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                Tamaño
+              </label>
+              <select
+                value={globalConfig.size}
+                onChange={(e) => onGlobalConfigChange('size', e.target.value)}
+                className="w-full px-2 py-1.5 rounded text-sm"
+                style={{
+                  background: 'var(--color-bg-primary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                }}
+              >
+                <option value="xs">XS</option>
+                <option value="sm">SM</option>
+                <option value="md">MD</option>
+                <option value="lg">LG</option>
+                <option value="xl">XL</option>
+              </select>
+            </div>
+
+            {/* Border Radius */}
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                Bordes
+              </label>
+              <select
+                value={globalConfig.borderRadius}
+                onChange={(e) => onGlobalConfigChange('borderRadius', e.target.value)}
+                className="w-full px-2 py-1.5 rounded text-sm"
+                style={{
+                  background: 'var(--color-bg-primary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                }}
+              >
+                <option value="sharp">Sharp</option>
+                <option value="rounded">Rounded</option>
+                <option value="pill">Pill</option>
+              </select>
+            </div>
+
+            {/* Font Weight */}
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                Peso Fuente
+              </label>
+              <select
+                value={globalConfig.fontWeight}
+                onChange={(e) => onGlobalConfigChange('fontWeight', e.target.value)}
+                className="w-full px-2 py-1.5 rounded text-sm"
+                style={{
+                  background: 'var(--color-bg-primary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                }}
+              >
+                <option value="normal">Normal</option>
+                <option value="medium">Medium</option>
+                <option value="semibold">Semibold</option>
+                <option value="bold">Bold</option>
+              </select>
+            </div>
+
+            {/* Spacing */}
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                Espaciado
+              </label>
+              <select
+                value={globalConfig.spacing}
+                onChange={(e) => onGlobalConfigChange('spacing', e.target.value)}
+                className="w-full px-2 py-1.5 rounded text-sm"
+                style={{
+                  background: 'var(--color-bg-primary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                }}
+              >
+                <option value="compact">Compact</option>
+                <option value="normal">Normal</option>
+                <option value="relaxed">Relaxed</option>
+              </select>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      {/* Tip */}
+      <div
+        className="mt-4 p-3 rounded-lg flex items-start gap-2"
+        style={{
+          background: 'var(--color-bg-tertiary)',
+          border: '1px solid var(--color-border)',
+        }}
+      >
+        <Info size={14} style={{ color: 'var(--color-primary)', marginTop: '2px', flexShrink: 0 }} />
+        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+          <strong>Tip:</strong> Los cambios globales afectan a TODOS los badges. Puedes ajustar badges individuales en las secciones de abajo.
+        </p>
       </div>
     </div>
   );

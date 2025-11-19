@@ -22,8 +22,10 @@ import {
   getBadgeForRole,
   getBadgeByKey,
   getIconLibraryConfig,
+  MONOCHROME_PALETTES,
 } from '../../config/badgeSystem';
 import * as HeroIcons from '@heroicons/react/24/outline';
+import * as HeroIconsSolid from '@heroicons/react/24/solid';
 
 /**
  * Badge inteligente con mapeo automático de categorías
@@ -107,6 +109,16 @@ function CategoryBadge({
     );
   }
 
+  // Obtener color del icono según paleta monocromática
+  const getIconColor = () => {
+    const palette = iconLibraryConfig.monochromePalette || 'vibrant';
+    const paletteConfig = MONOCHROME_PALETTES[palette];
+
+    if (!paletteConfig) return badgeConfig.color;
+
+    return paletteConfig.getValue(badgeConfig.color, iconLibraryConfig.monochromeColor);
+  };
+
   // Renderizar icono según configuración
   const renderIcon = () => {
     if (!showIcon) return null;
@@ -116,7 +128,7 @@ function CategoryBadge({
     // Sin iconos
     if (iconLibrary === 'none') return null;
 
-    // Heroicons
+    // Heroicons (outline)
     if (iconLibrary === 'heroicon') {
       const iconName = badgeConfig.heroicon;
       if (!iconName) return null;
@@ -124,12 +136,37 @@ function CategoryBadge({
       const IconComponent = HeroIcons[iconName];
       if (!IconComponent) return null;
 
+      const iconColor = getIconColor();
+
       return (
         <IconComponent
           className="mr-1"
           style={{
-            width: size === 'sm' ? '14px' : size === 'lg' ? '20px' : '16px',
-            height: size === 'sm' ? '14px' : size === 'lg' ? '20px' : '16px',
+            width: size === 'xs' ? '12px' : size === 'sm' ? '14px' : size === 'lg' ? '20px' : size === 'xl' ? '22px' : '16px',
+            height: size === 'xs' ? '12px' : size === 'sm' ? '14px' : size === 'lg' ? '20px' : size === 'xl' ? '22px' : '16px',
+            color: iconColor,
+          }}
+        />
+      );
+    }
+
+    // Heroicons (filled)
+    if (iconLibrary === 'heroicon-filled') {
+      const iconName = badgeConfig.heroicon;
+      if (!iconName) return null;
+
+      const IconComponent = HeroIconsSolid[iconName];
+      if (!IconComponent) return null;
+
+      const iconColor = getIconColor();
+
+      return (
+        <IconComponent
+          className="mr-1"
+          style={{
+            width: size === 'xs' ? '12px' : size === 'sm' ? '14px' : size === 'lg' ? '20px' : size === 'xl' ? '22px' : '16px',
+            height: size === 'xs' ? '12px' : size === 'sm' ? '14px' : size === 'lg' ? '20px' : size === 'xl' ? '22px' : '16px',
+            color: iconColor,
           }}
         />
       );

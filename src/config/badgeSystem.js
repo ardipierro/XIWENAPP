@@ -625,12 +625,156 @@ export const AVAILABLE_HEROICONS = {
 export const ICON_LIBRARY_STORAGE_KEY = 'xiwen_icon_library_config';
 
 /**
+ * Paletas monocromáticas disponibles
+ */
+export const MONOCHROME_PALETTES = {
+  vibrant: {
+    label: 'Vibrante',
+    description: 'Usa el color del badge',
+    icon: '🔥',
+    getValue: (badgeColor) => badgeColor,
+  },
+  neutral: {
+    label: 'Neutra',
+    description: 'Escala de grises',
+    icon: '🌫️',
+    getValue: () => '#71717a',
+  },
+  dark: {
+    label: 'Oscura',
+    description: 'Tonos oscuros',
+    icon: '🌙',
+    getValue: () => '#27272a',
+  },
+  light: {
+    label: 'Clara',
+    description: 'Tonos claros',
+    icon: '☀️',
+    getValue: () => '#e4e4e7',
+  },
+  custom: {
+    label: 'Personalizada',
+    description: 'Color personalizado',
+    icon: '🎨',
+    getValue: (badgeColor, customColor) => customColor || badgeColor,
+  },
+};
+
+/**
+ * Paletas globales de colores para badges
+ */
+export const COLOR_PALETTES = {
+  default: {
+    label: 'Por Defecto',
+    description: 'Colores originales del sistema',
+    icon: '🎨',
+  },
+  material: {
+    label: 'Material Design',
+    description: 'Paleta Google Material',
+    icon: '📱',
+    colors: {
+      primary: '#2196F3',
+      success: '#4CAF50',
+      warning: '#FF9800',
+      danger: '#F44336',
+      info: '#9C27B0',
+      default: '#9E9E9E',
+    },
+  },
+  pastel: {
+    label: 'Pastel',
+    description: 'Tonos suaves y claros',
+    icon: '🧁',
+    colors: {
+      primary: '#93C5FD',
+      success: '#86EFAC',
+      warning: '#FDE68A',
+      danger: '#FCA5A5',
+      info: '#C4B5FD',
+      default: '#D4D4D8',
+    },
+  },
+  neon: {
+    label: 'Neón',
+    description: 'Colores brillantes intensos',
+    icon: '⚡',
+    colors: {
+      primary: '#00F0FF',
+      success: '#39FF14',
+      warning: '#FFD700',
+      danger: '#FF073A',
+      info: '#BF00FF',
+      default: '#808080',
+    },
+  },
+  flat: {
+    label: 'Flat UI',
+    description: 'Paleta Flat Design',
+    icon: '📦',
+    colors: {
+      primary: '#3498db',
+      success: '#2ecc71',
+      warning: '#f39c12',
+      danger: '#e74c3c',
+      info: '#9b59b6',
+      default: '#95a5a6',
+    },
+  },
+};
+
+/**
  * Configuración por defecto de librería de iconos
  */
 export const DEFAULT_ICON_LIBRARY_CONFIG = {
-  library: 'emoji', // 'emoji' | 'heroicon' | 'none'
-  monochromeColor: null, // null = usar color del badge, o '#000000', '#ffffff', etc.
+  library: 'emoji', // 'emoji' | 'heroicon' | 'heroicon-filled' | 'lucide' | 'none'
+  monochromePalette: 'vibrant', // 'vibrant' | 'neutral' | 'dark' | 'light' | 'custom'
+  monochromeColor: null, // Color custom para paleta 'custom'
 };
+
+/**
+ * Configuración global de badges (tamaño, bordes, etc.)
+ */
+export const GLOBAL_BADGE_STORAGE_KEY = 'xiwen_global_badge_config';
+
+export const DEFAULT_GLOBAL_BADGE_CONFIG = {
+  size: 'md', // 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  borderRadius: 'rounded', // 'sharp' | 'rounded' | 'pill'
+  fontWeight: 'medium', // 'normal' | 'medium' | 'semibold' | 'bold'
+  spacing: 'normal', // 'compact' | 'normal' | 'relaxed'
+  defaultBadgeStyle: 'solid', // 'solid' | 'outline' | 'soft' | 'glass' | 'gradient'
+  colorPalette: 'default', // 'default' | 'material' | 'pastel' | 'neon' | 'flat'
+};
+
+/**
+ * Obtiene la configuración global de badges
+ */
+export function getGlobalBadgeConfig() {
+  const saved = localStorage.getItem(GLOBAL_BADGE_STORAGE_KEY);
+  if (saved) {
+    try {
+      return { ...DEFAULT_GLOBAL_BADGE_CONFIG, ...JSON.parse(saved) };
+    } catch (err) {
+      console.error('Error loading global badge config:', err);
+      return DEFAULT_GLOBAL_BADGE_CONFIG;
+    }
+  }
+  return DEFAULT_GLOBAL_BADGE_CONFIG;
+}
+
+/**
+ * Guarda la configuración global de badges
+ */
+export function saveGlobalBadgeConfig(config) {
+  try {
+    localStorage.setItem(GLOBAL_BADGE_STORAGE_KEY, JSON.stringify(config));
+    window.dispatchEvent(new CustomEvent('globalBadgeConfigChange', { detail: config }));
+    return true;
+  } catch (err) {
+    console.error('Error saving global badge config:', err);
+    return false;
+  }
+}
 
 /**
  * Obtiene la configuración actual de librería de iconos
@@ -639,7 +783,7 @@ export function getIconLibraryConfig() {
   const saved = localStorage.getItem(ICON_LIBRARY_STORAGE_KEY);
   if (saved) {
     try {
-      return JSON.parse(saved);
+      return { ...DEFAULT_ICON_LIBRARY_CONFIG, ...JSON.parse(saved) };
     } catch (err) {
       console.error('Error loading icon library config:', err);
       return DEFAULT_ICON_LIBRARY_CONFIG;
