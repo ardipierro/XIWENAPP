@@ -48,7 +48,7 @@ const CreateSampleExercisesButton = lazy(() => import('./CreateSampleExercisesBu
 const MyCourses = lazy(() => import('./student/MyCourses'));
 const CourseViewer = lazy(() => import('./student/CourseViewer'));
 const ContentPlayer = lazy(() => import('./student/ContentPlayer'));
-const MyAssignmentsView = lazy(() => import('./student/MyAssignmentsView'));
+const StudentHomeworkView = lazy(() => import('./student/StudentHomeworkView'));
 const StudentFeesPanel = lazy(() => import('./StudentFeesPanel'));
 const StudentSessionsView = lazy(() => import('./StudentSessionsView'));
 
@@ -414,17 +414,12 @@ function UniversalDashboardInner() {
               // Por defecto, mostrar lista de cursos
               return <MyCourses user={effectiveUser} onSelectCourse={handleSelectCourse} />;
 
-            // MIS TAREAS (Students)
+            // MIS TAREAS (Students) - Sistema de Homework Reviews
             case '/dashboard/my-assignments':
               if (!can('view-own-assignments')) return <PlaceholderView title="Sin acceso" />;
               return (
-                <MyAssignmentsView
+                <StudentHomeworkView
                   user={effectiveUser}
-                  onSelectAssignment={(assignmentId) => {
-                    setSelectedAssignmentId(assignmentId);
-                    // TODO: Navegar a vista de hacer/ver tarea
-                    logger.debug('Assignment seleccionado:', assignmentId);
-                  }}
                 />
               );
 
