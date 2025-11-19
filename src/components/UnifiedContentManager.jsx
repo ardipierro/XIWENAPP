@@ -1012,44 +1012,46 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   const gridImage = hasImage ? content.videoData.thumbnailUrl : undefined;
   const gridIcon = !hasImage ? IconComponent : undefined;
 
-  // Preparar badges (type, status, difficulty) - Solo se pasan si showBadges es true
+  // Preparar badges (type, status, difficulty) - Solo se agregan si showBadges es true
   const contentBadges = [];
 
-  // Badge de tipo de contenido
-  if (content.type) {
-    contentBadges.push(
-      <CategoryBadge
-        key="type"
-        type="content"
-        value={content.type}
-        size="sm"
-      />
-    );
-  }
+  if (variantConfig.showBadges) {
+    // Badge de tipo de contenido
+    if (content.type) {
+      contentBadges.push(
+        <CategoryBadge
+          key="type"
+          type="content"
+          value={content.type}
+          size="sm"
+        />
+      );
+    }
 
-  // Badge de status
-  if (content.status) {
-    contentBadges.push(
-      <CategoryBadge
-        key="status"
-        type="status"
-        value={content.status}
-        size="sm"
-      />
-    );
-  }
+    // Badge de status
+    if (content.status) {
+      contentBadges.push(
+        <CategoryBadge
+          key="status"
+          type="status"
+          value={content.status}
+          size="sm"
+        />
+      );
+    }
 
-  // Badge de dificultad
-  if (content.metadata?.difficulty) {
-    contentBadges.push(
-      <BaseBadge
-        key="difficulty"
-        variant="warning"
-        size="sm"
-      >
-        {content.metadata.difficulty}
-      </BaseBadge>
-    );
+    // Badge de dificultad
+    if (content.metadata?.difficulty) {
+      contentBadges.push(
+        <BaseBadge
+          key="difficulty"
+          variant="warning"
+          size="sm"
+        >
+          {content.metadata.difficulty}
+        </BaseBadge>
+      );
+    }
   }
 
   // Preparar meta info (fecha, duración, puntos)
