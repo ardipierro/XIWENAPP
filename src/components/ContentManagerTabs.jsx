@@ -84,7 +84,7 @@ export function ContentManagerTabs({ user, userRole }) {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'content':
-        return <UnifiedContentManager user={user} userRole={userRole} />;
+        return <UnifiedContentManager user={user} />;
       case 'ai-config':
         return <AIConfigPanel />;
       case 'flashcards':
