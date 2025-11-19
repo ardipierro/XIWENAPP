@@ -64,6 +64,12 @@ import {
   useWhiteboardToolbar
 } from '../hooks/whiteboard';
 
+// ✅ IMPORTAR COMPONENTES UI EXTRAÍDOS
+import WhiteboardToolbar from './whiteboard/components/WhiteboardToolbar';
+import SaveSessionModal from './whiteboard/components/SaveSessionModal';
+import LoadSessionModal from './whiteboard/components/LoadSessionModal';
+import ShareContentModal from './whiteboard/components/ShareContentModal';
+
 /**
  * Componente Whiteboard refactorizado con hooks personalizados
  * Reducido de 53 useState a 8 hooks modulares
@@ -1452,351 +1458,56 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
           />
 
           {/* Floating Toolbar */}
-          <div
-            ref={toolbarRef}
-            className={`floating-toolbar ${isDraggingToolbar ? 'dragging' : ''} ${isVertical ? 'vertical' : ''} ${isVertical && verticalSide === 'left' ? 'left' : ''}`}
-            style={{
-              left: toolbarPos.x ? `${toolbarPos.x}px` : '50%',
-              transform: toolbarPos.x ? 'none' : 'translateX(-50%)',
-              bottom: toolbarPos.y ? 'auto' : '20px',
-              top: toolbarPos.y ? `${toolbarPos.y}px` : 'auto'
-            }}
-            onMouseDown={handleToolbarMouseDown}
-          >
-            {/* Selection Tool */}
-            <div className="toolbar-group">
-              <button
-                className={`tool-btn ${tool === 'select' ? 'active' : ''}`}
-                onClick={() => setTool('select')}
-                title="Seleccionar"
-              >
-                <MousePointer2 size={20} />
-              </button>
-            </div>
+          <WhiteboardToolbar
+            tool={tool}
+            setTool={tools.setTool}
+            color={color}
+            setColor={tools.setColor}
+            showColorPicker={showColorPicker}
+            setShowColorPicker={tools.setShowColorPicker}
+            presetColors={presetColors}
+            lineWidth={lineWidth}
+            setLineWidth={tools.setLineWidth}
+            textBold={textBold}
+            setTextBold={tools.toggleTextBold}
+            textItalic={textItalic}
+            setTextItalic={tools.toggleTextItalic}
+            textUnderline={textUnderline}
+            setTextUnderline={tools.toggleTextUnderline}
+            fontSize={fontSize}
+            setFontSize={tools.setFontSize}
+            handleUndo={undo}
+            handleRedo={redo}
+            handleClear={clearCanvas}
+            historyStep={historyStep}
+            historyLength={historyArr.length}
+            currentSlide={currentSlide}
+            totalSlides={slides.length}
+            onPrevSlide={() => goToSlide(Math.max(0, currentSlide - 1))}
+            onNextSlide={() => goToSlide(Math.min(slides.length - 1, currentSlide + 1))}
+            onAddSlide={addSlide}
+            onDeleteSlide={deleteSlide}
+            onSaveSession={() => setShowSaveModal(true)}
+            onLoadSession={handleLoadSessions}
+            isLoadingSessions={isLoadingSessions}
+            isCollaborative={isCollaborative}
+            isHost={isHost}
+            onShareContent={() => setShowShareModal(true)}
+            toolbarPos={toolbarPos}
+            onToolbarMouseDown={handleToolbarMouseDown}
+            isDraggingToolbar={isDraggingToolbar}
+            isVertical={isVertical}
+            verticalSide={verticalSide}
+            expandedGroup={expandedGroup}
+            setExpandedGroup={setExpandedGroup}
+            colorPickerPos={colorPickerPos}
+            toolbarRef={toolbarRef}
+            colorButtonRef={colorButtonRef}
+          />
+        </div>
+      </div>
 
-            {/* Separator */}
-            <div className="toolbar-separator"></div>
-
-            {/* Objects Group (Collapsible) */}
-            <div className="toolbar-group tool-group-collapsible">
-              <button
-                className={`tool-btn ${['stickyNote', 'textBox'].includes(tool) ? 'active' : ''}`}
-                onClick={() => setExpandedGroup(expandedGroup === 'objects' ? null : 'objects')}
-                title="Objetos"
-              >
-                <StickyNote size={20} />
-              </button>
-              {expandedGroup === 'objects' && (
-                <div className="tool-submenu">
-                  <button
-                    className={`tool-btn ${tool === 'stickyNote' ? 'active' : ''}`}
-                    onClick={() => { setTool('stickyNote'); setExpandedGroup(null); }}
-                    title="Nota Adhesiva"
-                  >
-                    <StickyNote size={18} />
-                  </button>
-                  <button
-                    className={`tool-btn ${tool === 'textBox' ? 'active' : ''}`}
-                    onClick={() => { setTool('textBox'); setExpandedGroup(null); }}
-                    title="Cuadro de Texto"
-                  >
-                    <FileText size={18} />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Separator */}
-            <div className="toolbar-separator"></div>
-
-            {/* Drawing Tools Group (Collapsible) */}
-            <div className="toolbar-group tool-group-collapsible">
-              <button
-                className={`tool-btn ${['pencil', 'pen', 'marker', 'highlighter'].includes(tool) ? 'active' : ''}`}
-                onClick={() => setExpandedGroup(expandedGroup === 'draw' ? null : 'draw')}
-                title="Dibujo"
-              >
-                <Pencil size={20} />
-              </button>
-              {expandedGroup === 'draw' && (
-                <div className="tool-submenu">
-                  <button
-                    className={`tool-btn ${tool === 'pencil' ? 'active' : ''}`}
-                    onClick={() => { setTool('pencil'); setExpandedGroup(null); }}
-                    title="Lápiz"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                  <button
-                    className={`tool-btn ${tool === 'pen' ? 'active' : ''}`}
-                    onClick={() => { setTool('pen'); setExpandedGroup(null); }}
-                    title="Bolígrafo"
-                  >
-                    <Pen size={18} />
-                  </button>
-                  <button
-                    className={`tool-btn ${tool === 'marker' ? 'active' : ''}`}
-                    onClick={() => { setTool('marker'); setExpandedGroup(null); }}
-                    title="Marcador"
-                  >
-                    <Pencil size={18} strokeWidth={3} />
-                  </button>
-                  <button
-                    className={`tool-btn ${tool === 'highlighter' ? 'active' : ''}`}
-                    onClick={() => { setTool('highlighter'); setExpandedGroup(null); }}
-                    title="Resaltador"
-                  >
-                    <Highlighter size={18} />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Separator */}
-            <div className="toolbar-separator"></div>
-
-            {/* Shapes Group (Collapsible) */}
-            <div className="toolbar-group tool-group-collapsible">
-              <button
-                className={`tool-btn ${['line', 'arrow', 'rectangle', 'circle', 'text'].includes(tool) ? 'active' : ''}`}
-                onClick={() => setExpandedGroup(expandedGroup === 'shapes' ? null : 'shapes')}
-                title="Formas"
-              >
-                <Square size={20} />
-              </button>
-              {expandedGroup === 'shapes' && (
-                <div className="tool-submenu">
-                  <button
-                    className={`tool-btn ${tool === 'line' ? 'active' : ''}`}
-                    onClick={() => { setTool('line'); setExpandedGroup(null); }}
-                    title="Línea"
-                  >
-                    <Minus size={18} />
-                  </button>
-                  <button
-                    className={`tool-btn ${tool === 'arrow' ? 'active' : ''}`}
-                    onClick={() => { setTool('arrow'); setExpandedGroup(null); }}
-                    title="Flecha"
-                  >
-                    <ArrowRight size={18} />
-                  </button>
-                  <button
-                    className={`tool-btn ${tool === 'rectangle' ? 'active' : ''}`}
-                    onClick={() => { setTool('rectangle'); setExpandedGroup(null); }}
-                    title="Rectángulo"
-                  >
-                    <Square size={18} />
-                  </button>
-                  <button
-                    className={`tool-btn ${tool === 'circle' ? 'active' : ''}`}
-                    onClick={() => { setTool('circle'); setExpandedGroup(null); }}
-                    title="Círculo"
-                  >
-                    <Circle size={18} />
-                  </button>
-                  <button
-                    className={`tool-btn ${tool === 'text' ? 'active' : ''}`}
-                    onClick={() => { setTool('text'); setExpandedGroup(null); }}
-                    title="Texto"
-                  >
-                    <Type size={18} />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Separator */}
-            <div className="toolbar-separator"></div>
-
-            {/* Eraser */}
-            <div className="toolbar-group">
-              <button
-                className={`tool-btn ${tool === 'eraser' ? 'active' : ''}`}
-                onClick={() => setTool('eraser')}
-                title="Borrador"
-              >
-                <Eraser size={20} />
-              </button>
-            </div>
-
-            {/* Separator */}
-            <div className="toolbar-separator"></div>
-
-            {/* Color Picker */}
-            <div className="toolbar-group">
-              <div className="color-picker-wrapper">
-                <button
-                  className="tool-btn color-btn"
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                  title="Color"
-                >
-                  <div className="color-indicator" style={{ backgroundColor: color }}></div>
-                </button>
-                {showColorPicker && (
-                  <div className="floating-color-picker">
-                    <div className="color-grid">
-                      {presetColors.map((c) => (
-                        <button
-                          key={c}
-                          className={`color-swatch ${color === c ? 'active' : ''}`}
-                          style={{ backgroundColor: c }}
-                          onClick={() => { setColor(c); setShowColorPicker(false); }}
-                          title={c}
-                        />
-                      ))}
-                    </div>
-                    <input
-                      type="color"
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      className="color-input-custom"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Line Width */}
-              <div className="line-width-control">
-                <input
-                  type="range"
-                  min="1"
-                  max="20"
-                  value={lineWidth}
-                  onChange={(e) => setLineWidth(parseInt(e.target.value))}
-                  className="line-width-slider-floating"
-                  title={`Grosor: ${lineWidth}px`}
-                />
-                <span className="line-width-value">{lineWidth}</span>
-              </div>
-            </div>
-
-            {/* Separator */}
-            <div className="toolbar-separator"></div>
-
-            {/* Text Formatting - Solo visible cuando tool === 'text' */}
-            {tool === 'text' && (
-              <>
-                <div className="toolbar-group">
-                  <button
-                    className={`tool-btn ${textBold ? 'active' : ''}`}
-                    onClick={() => setTextBold(!textBold)}
-                    title="Negrita"
-                  >
-                    <Bold size={20} />
-                  </button>
-                  <button
-                    className={`tool-btn ${textItalic ? 'active' : ''}`}
-                    onClick={() => setTextItalic(!textItalic)}
-                    title="Cursiva"
-                  >
-                    <Italic size={20} />
-                  </button>
-                  <button
-                    className={`tool-btn ${textUnderline ? 'active' : ''}`}
-                    onClick={() => setTextUnderline(!textUnderline)}
-                    title="Subrayado"
-                  >
-                    <Underline size={20} />
-                  </button>
-
-                  {/* Font Size */}
-                  <div className="line-width-control">
-                    <input
-                      type="range"
-                      min="12"
-                      max="72"
-                      value={fontSize}
-                      onChange={(e) => setFontSize(parseInt(e.target.value))}
-                      className="line-width-slider-floating"
-                      title={`Tamaño: ${fontSize}px`}
-                    />
-                    <span className="line-width-value">{fontSize}</span>
-                  </div>
-                </div>
-
-                {/* Separator */}
-                <div className="toolbar-separator"></div>
-              </>
-            )}
-
-            {/* Actions */}
-            <div className="toolbar-group">
-              <button onClick={undo} className="tool-btn" disabled={historyStep <= 0} title="Deshacer">
-                <Undo2 size={20} />
-              </button>
-              <button onClick={redo} className="tool-btn" disabled={historyStep >= history.length - 1} title="Rehacer">
-                <Redo2 size={20} />
-              </button>
-              <button onClick={clearCanvas} className="tool-btn" title="Limpiar todo">
-                <Trash2 size={20} />
-              </button>
-            </div>
-
-            {/* Separator */}
-            <div className="toolbar-separator"></div>
-
-            {/* Slide Navigation */}
-            <div className="toolbar-group">
-              <button
-                onClick={() => goToSlide(Math.max(0, currentSlide - 1))}
-                className="tool-btn"
-                disabled={currentSlide === 0}
-                title="Diapositiva anterior"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <div className="slide-counter-compact">
-                {currentSlide + 1}/{slides.length}
-              </div>
-              <button
-                onClick={() => goToSlide(Math.min(slides.length - 1, currentSlide + 1))}
-                className="tool-btn"
-                disabled={currentSlide === slides.length - 1}
-                title="Diapositiva siguiente"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
-
-            {/* Separator */}
-            <div className="toolbar-separator"></div>
-
-            {/* Slide Management */}
-            <div className="toolbar-group">
-              <button onClick={addSlide} className="tool-btn" title="Nueva diapositiva">
-                <Plus size={20} />
-              </button>
-              <button onClick={deleteSlide} className="tool-btn" disabled={slides.length === 1} title="Eliminar diapositiva">
-                <Minus size={20} />
-              </button>
-              <button onClick={() => setShowSaveModal(true)} className="tool-btn" title="Guardar sesión">
-                <Save size={20} />
-              </button>
-              <button onClick={handleLoadSessions} className="tool-btn" title="Cargar sesión" disabled={isLoadingSessions}>
-                <FolderOpen size={20} />
-              </button>
-            </div>
-
-            {/* Share Content (only in collaborative mode and only for host) */}
-            {(() => {
-              logger.debug('🔍 Share button render check:', { isCollaborative, isHost, shouldShow: isCollaborative && isHost });
-              return null;
-            })()}
-            {isCollaborative && isHost && (
-              <>
-                <div className="toolbar-separator"></div>
-                <div className="toolbar-group">
-                  <button
-                    onClick={() => setShowShareModal(true)}
-                    className="tool-btn share-btn"
-                    title="Compartir contenido"
-                  >
-                    <Monitor size={20} />
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+      {/* Text Input Overlay */}          </div>
         </div>
       </div>
 
@@ -2218,127 +1929,33 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
       })}
 
       {/* Save Session Modal */}
-      {showSaveModal && (
-        <div className="whiteboard-modal-overlay" onClick={() => setShowSaveModal(false)}>
-          <div className="whiteboard-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="whiteboard-modal-title">Guardar Sesión</h3>
-            <input
-              type="text"
-              value={sessionTitle}
-              onChange={(e) => setSessionTitle(e.target.value)}
-              placeholder={`Pizarra ${new Date().toLocaleDateString()}`}
-              className="whiteboard-modal-input"
-              autoFocus
-            />
-            <div className="whiteboard-modal-actions">
-              <BaseButton onClick={() => setShowSaveModal(false)} variant="secondary">
-                Cancelar
-              </BaseButton>
-              <BaseButton onClick={handleSaveSession} variant="primary">
-                {currentSessionId ? 'Actualizar' : 'Guardar'}
-              </BaseButton>
-            </div>
-          </div>
-        </div>
-      )}
+      <SaveSessionModal
+        show={showSaveModal}
+        onClose={() => session.setShowSaveModal(false)}
+        onSave={handleSaveSession}
+        sessionTitle={sessionTitle}
+        setSessionTitle={session.setSessionTitle}
+        currentSessionId={currentSessionId}
+      />
 
       {/* Load Session Modal */}
-      {showLoadModal && (
-        <div className="whiteboard-modal-overlay" onClick={() => setShowLoadModal(false)}>
-          <div className="whiteboard-modal large" onClick={(e) => e.stopPropagation()}>
-            <h3 className="whiteboard-modal-title">Cargar Sesión</h3>
-            {savedSessions.length === 0 ? (
-              <p className="whiteboard-modal-empty">No hay sesiones guardadas</p>
-            ) : (
-              <div className="whiteboard-sessions-list">
-                {savedSessions.map((session) => (
-                  <div key={session.id} className="whiteboard-session-item">
-                    <div className="whiteboard-session-info">
-                      <h4 className="whiteboard-session-title">{session.title}</h4>
-                      <p className="whiteboard-session-meta">
-                        {session.slides?.length || 0} diapositivas •
-                        {session.updatedAt ? new Date(session.updatedAt.seconds * 1000).toLocaleDateString() : 'Sin fecha'}
-                      </p>
-                    </div>
-                    <BaseButton
-                      onClick={() => loadSession(session)}
-                      variant="primary"
-                    >
-                      Cargar
-                    </BaseButton>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="whiteboard-modal-actions">
-              <BaseButton onClick={() => setShowLoadModal(false)} variant="secondary">
-                Cerrar
-              </BaseButton>
-            </div>
-          </div>
-        </div>
-      )}
+      <LoadSessionModal
+        show={showLoadModal}
+        onClose={() => session.setShowLoadModal(false)}
+        onLoadSession={loadSession}
+        savedSessions={savedSessions}
+      />
 
       {/* Share Content Modal */}
-      {showShareModal && (
-        <div className="whiteboard-modal-overlay" onClick={() => setShowShareModal(false)}>
-          <div className="whiteboard-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="whiteboard-modal-title">Compartir Contenido</h3>
-
-            <div className="share-content-type-selector">
-              <BaseButton
-                variant={shareContentType === 'video' ? 'primary' : 'outline'}
-                onClick={() => setShareContentType('video')}
-                icon={Film}
-              >
-                Video
-              </BaseButton>
-              <BaseButton
-                variant={shareContentType === 'pdf' ? 'primary' : 'outline'}
-                onClick={() => setShareContentType('pdf')}
-                icon={FileText}
-              >
-                PDF
-              </BaseButton>
-              <BaseButton
-                variant={shareContentType === 'image' ? 'primary' : 'outline'}
-                onClick={() => setShareContentType('image')}
-                icon={FileImage}
-              >
-                Imagen
-              </BaseButton>
-            </div>
-
-            <input
-              type="url"
-              value={shareContentUrl}
-              onChange={(e) => setShareContentUrl(e.target.value)}
-              placeholder={`URL del ${shareContentType === 'video' ? 'video (YouTube, Vimeo, MP4)' : shareContentType === 'pdf' ? 'PDF' : 'imagen'}`}
-              className="whiteboard-modal-input"
-              autoFocus
-            />
-
-            <div className="share-content-info">
-              <p>💡 El contenido se sincronizará en tiempo real con todos los participantes</p>
-              {shareContentType === 'video' && (
-                <p>📹 Solo el presentador puede controlar la reproducción</p>
-              )}
-              {shareContentType === 'pdf' && (
-                <p>📄 Solo el presentador puede cambiar de página</p>
-              )}
-            </div>
-
-            <div className="whiteboard-modal-actions">
-              <BaseButton onClick={() => setShowShareModal(false)} variant="secondary">
-                Cancelar
-              </BaseButton>
-              <BaseButton onClick={handleShareContent} variant="primary">
-                Compartir
-              </BaseButton>
-            </div>
-          </div>
-        </div>
-      )}
+      <ShareContentModal
+        show={showShareModal}
+        onClose={() => collaboration.setShowShareModal(false)}
+        onShare={handleShareContent}
+        shareContentUrl={shareContentUrl}
+        setShareContentUrl={collaboration.setShareContentUrl}
+        shareContentType={shareContentType}
+        setShareContentType={collaboration.setShareContentType}
+      />
 
       {/* Shared Content Viewer (for collaborative sessions) */}
       {isCollaborative && sharedContent && (
