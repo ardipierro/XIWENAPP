@@ -1637,10 +1637,22 @@ const MessageBubble = forwardRef(({
     const audio = audioRef.current;
     if (!audio) return;
 
+    // Validar que audio.duration sea válido
+    if (!audio.duration || !isFinite(audio.duration)) {
+      logger.warn('Audio duration is not valid, cannot seek', 'MessageBubble');
+      return;
+    }
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = x / rect.width;
     const newTime = percentage * audio.duration;
+
+    // Validar que newTime sea finito
+    if (!isFinite(newTime)) {
+      logger.warn('Calculated time is not finite, cannot seek', 'MessageBubble');
+      return;
+    }
 
     audio.currentTime = newTime;
     setAudioCurrentTime(newTime);

@@ -22,6 +22,7 @@ const RECORDER_STATES = {
   PAUSED: 'paused',
   STOPPING: 'stopping',
   STOPPED: 'stopped',
+  CLEANING: 'cleaning',  // NUEVO: limpiando antes de cerrar
   ERROR: 'error'
 };
 
@@ -53,6 +54,9 @@ function recorderReducer(state, action) {
         audioBlob: action.blob,
         audioUrl: action.url
       };
+
+    case 'START_CLEANING':
+      return { ...state, status: RECORDER_STATES.CLEANING };
 
     case 'UPDATE_TIME':
       return { ...state, recordingTime: action.time };
@@ -177,31 +181,29 @@ function VoiceRecorderV2({ onSend, onCancel }) {
       dispatch({ type: 'INIT_START' });
       logger.info('🎙️ Requesting microphone access...', 'VoiceRecorderV2');
 
-      // Configuración CONSERVADORA que funciona en todos los navegadores
+      // Configuración ULTRA SIMPLE - dejar que el navegador use sus defaults óptimos
+      // Muchos problemas vienen de constraints que el navegador no soporta bien
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          // Configuración minimalista - dejar que el navegador use defaults
-          echoCancellation: true,   // Activado para mejor calidad en llamadas
-          noiseSuppression: true,   // Activado para reducir ruido de fondo
-          autoGainControl: true,    // Activado para volumen consistente
-          // NO especificar sampleRate - el navegador lo ignora de todos modos
-        }
+        audio: true  // Sin constraints - defaults del navegador
       });
 
       streamRef.current = stream;
       logger.info('✅ Microphone access granted', 'VoiceRecorderV2');
 
-      // Configuración del MediaRecorder
-      // Chrome limita a 128kbps, así que no tiene sentido pedir más
-      const options = {
-        mimeType: 'audio/webm;codecs=opus',
-        audioBitsPerSecond: 128000  // 128kbps es el máximo efectivo en Chrome
-      };
+      // Configuración del MediaRecorder - CONSERVADORA
+      const options = {};  // Empezar vacío
 
-      // Verificar soporte
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        logger.warn('audio/webm;codecs=opus not supported, falling back to audio/webm', 'VoiceRecorderV2');
+      // Solo agregar mimeType si está soportado
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        options.mimeType = 'audio/webm;codecs=opus';
+        options.audioBitsPerSecond = 128000;  // Chrome limita a 128kbps
+        logger.info('Using audio/webm;codecs=opus @ 128kbps', 'VoiceRecorderV2');
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
         options.mimeType = 'audio/webm';
+        options.audioBitsPerSecond = 128000;
+        logger.info('Using audio/webm @ 128kbps', 'VoiceRecorderV2');
+      } else {
+        logger.warn('No specific codec supported, using browser defaults', 'VoiceRecorderV2');
       }
 
       const mediaRecorder = new MediaRecorder(stream, options);
@@ -357,16 +359,26 @@ function VoiceRecorderV2({ onSend, onCancel }) {
 
   /**
    * Enviar audio
+   * CRÍTICO: No cerrar el componente hasta que el cleanup termine
    */
   const handleSend = useCallback(async () => {
     if (!state.audioBlob) return;
 
-    logger.info('📤 Sending audio...', 'VoiceRecorderV2');
+    logger.info('📤 Starting send process...', 'VoiceRecorderV2');
 
-    // CRÍTICO: Esperar cleanup ANTES de enviar
+    // 1. Entrar en estado CLEANING (previene que el componente se desmonte)
+    dispatch({ type: 'START_CLEANING' });
+
+    // 2. Esperar cleanup COMPLETO
+    logger.info('🧹 Cleaning up before send...', 'VoiceRecorderV2');
     await cleanupMediaStream();
 
-    // Ahora sí enviar
+    // 3. Pequeño delay adicional para asegurar que el navegador libere el mic
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    logger.info('✅ Cleanup complete, sending audio...', 'VoiceRecorderV2');
+
+    // 4. AHORA SÍ enviar (el stream ya está limpio)
     onSend(state.audioBlob, state.recordingTime);
   }, [state.audioBlob, state.recordingTime, cleanupMediaStream, onSend]);
 
@@ -376,14 +388,21 @@ function VoiceRecorderV2({ onSend, onCancel }) {
   const handleCancel = useCallback(async () => {
     logger.info('❌ Cancelling recording...', 'VoiceRecorderV2');
 
-    // CRÍTICO: Esperar cleanup ANTES de cancelar
+    // Entrar en estado CLEANING
+    dispatch({ type: 'START_CLEANING' });
+
+    // Esperar cleanup COMPLETO
     await cleanupMediaStream();
+
+    // Delay adicional
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Revocar URL si existe
     if (state.audioUrl) {
       URL.revokeObjectURL(state.audioUrl);
     }
 
+    logger.info('✅ Cleanup complete, closing...', 'VoiceRecorderV2');
     onCancel();
   }, [cleanupMediaStream, onCancel, state.audioUrl]);
 
@@ -439,6 +458,18 @@ function VoiceRecorderV2({ onSend, onCancel }) {
           >
             Cerrar
           </BaseButton>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar "Enviando..." mientras se limpia el stream
+  if (state.status === RECORDER_STATES.CLEANING) {
+    return (
+      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-200 dark:border-blue-800">
+        <div className="text-blue-600 dark:text-blue-400 text-center flex items-center justify-center gap-3">
+          <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+          <p className="font-semibold">Enviando mensaje de voz...</p>
         </div>
       </div>
     );
