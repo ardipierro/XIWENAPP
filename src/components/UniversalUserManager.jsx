@@ -311,10 +311,10 @@ export default function UniversalUserManager({ user, userRole }) {
                   onClick={() => handleViewUserProfile(userItem)}
                 >
                   <div className="flex items-stretch min-h-[96px]">
-                    {/* Avatar - Cuadrado que ocupa toda la altura */}
-                    <div className="w-[96px] flex-shrink-0 overflow-hidden">
+                    {/* Avatar - Redondo centrado con fondo gris/zinc como grid */}
+                    <div className="w-[96px] flex-shrink-0 bg-gray-100 dark:bg-zinc-800 flex items-center justify-center">
                       <div
-                        className="w-full h-full flex items-center justify-center text-white font-extrabold text-2xl"
+                        className="w-16 h-16 rounded-full flex items-center justify-center text-white font-extrabold text-2xl"
                         style={{ backgroundColor: avatarColor }}
                       >
                         {initial}
