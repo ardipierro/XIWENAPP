@@ -234,10 +234,14 @@ function BadgeCustomizerTab({ user }) {
         </div>
       )}
 
-      {/* Configuración Global Compacta */}
+      {/* Vista Previa (ARRIBA DE TODO) */}
+      <PreviewSection badges={config} iconConfig={iconConfig} />
+
+      {/* Configuración Global ULTRA Compacta */}
       <GlobalConfigPanel
         iconConfig={iconConfig}
         globalConfig={globalConfig}
+        config={config}
         onIconLibraryChange={handleIconLibraryChange}
         onMonochromePaletteChange={handleMonochromePaletteChange}
         onMonochromeColorChange={(color) => updateMonochromeColor(color)}
@@ -269,9 +273,6 @@ function BadgeCustomizerTab({ user }) {
           );
         })}
       </div>
-
-      {/* Vista Previa General */}
-      <PreviewSection badges={config} />
 
       {/* Modal para agregar badge */}
       {showAddModal && (
@@ -524,36 +525,48 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
 }
 
 // ============================================
-// COMPONENTE: PreviewSection
+// COMPONENTE: PreviewSection (ARRIBA DE TODO)
 // ============================================
 
-function PreviewSection({ badges }) {
-  // Seleccionar algunos badges para preview
+function PreviewSection({ badges, iconConfig }) {
+  const [, forceUpdate] = useState({});
+
+  // Forzar actualización cuando cambie iconConfig
+  useEffect(() => {
+    forceUpdate({});
+  }, [iconConfig]);
+
+  // Seleccionar badges variados para preview
   const previewBadges = useMemo(() => {
     const keys = Object.keys(badges);
-    return keys.slice(0, 12); // Primeros 12 badges
+    return keys.slice(0, 16); // Primeros 16 badges
   }, [badges]);
 
   return (
     <div
-      className="rounded-lg p-4"
+      className="rounded-lg p-3"
       style={{
-        border: '1px solid var(--color-border)',
+        border: '2px solid var(--color-primary)',
         background: 'var(--color-bg-secondary)',
       }}
     >
-      <h3 className="text-base font-semibold mb-3 flex items-center gap-2"
+      <h3 className="text-sm font-semibold mb-2 flex items-center gap-2"
         style={{ color: 'var(--color-text-primary)' }}
       >
-        <Palette size={18} />
-        Vista Previa
+        <Palette size={16} />
+        Vista Previa en Tiempo Real
+        <span className="text-xs font-normal ml-auto" style={{ color: 'var(--color-text-secondary)' }}>
+          {iconConfig.library === 'heroicon' || iconConfig.library === 'heroicon-filled'
+            ? `Paleta: ${MONOCHROME_PALETTES[iconConfig.monochromePalette]?.label || 'Vibrante'}`
+            : 'Emojis activos'}
+        </span>
       </h3>
 
       <div className="flex flex-wrap gap-2">
         {previewBadges.map((badgeKey) => {
           return (
             <CategoryBadge
-              key={badgeKey}
+              key={`${badgeKey}-${iconConfig.library}-${iconConfig.monochromePalette}-${iconConfig.monochromeColor}`}
               badgeKey={badgeKey}
               size="md"
             />
@@ -770,12 +783,13 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
 }
 
 // ============================================
-// COMPONENTE: GlobalConfigPanel (Compacto)
+// COMPONENTE: GlobalConfigPanel (ULTRA COMPACTO)
 // ============================================
 
 function GlobalConfigPanel({
   iconConfig,
   globalConfig,
+  config,
   onIconLibraryChange,
   onMonochromePaletteChange,
   onMonochromeColorChange,
@@ -784,296 +798,267 @@ function GlobalConfigPanel({
 }) {
   const [showColorPicker, setShowColorPicker] = useState(false);
 
-  const iconLibraries = [
-    { value: 'emoji', label: 'Emoji', icon: '😀', desc: 'Multicolor' },
-    { value: 'heroicon', label: 'Heroicons', icon: '○', desc: 'Outline' },
-    { value: 'heroicon-filled', label: 'Filled', icon: '●', desc: 'Solid' },
-    { value: 'none', label: 'Sin iconos', icon: '—', desc: 'Solo texto' },
-  ];
-
-  const badgeStyles = [
-    { value: 'solid', label: 'Sólido', preview: '●' },
-    { value: 'outline', label: 'Contorno', preview: '○' },
-    { value: 'soft', label: 'Soft', preview: '◐' },
-    { value: 'glass', label: 'Glass', preview: '◇' },
-    { value: 'gradient', label: 'Gradient', preview: '◆' },
-  ];
-
   const showMonochromePalette = iconConfig.library === 'heroicon' || iconConfig.library === 'heroicon-filled';
+
+  // Detectar estilo más común en badges
+  const getCurrentBadgeStyle = () => {
+    const styles = Object.values(config).map(b => b.badgeStyle || 'solid');
+    const counts = styles.reduce((acc, s) => ({ ...acc, [s]: (acc[s] || 0) + 1 }), {});
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'solid';
+  };
+
+  const currentStyle = getCurrentBadgeStyle();
 
   return (
     <div
-      className="rounded-lg p-5"
+      className="rounded-lg p-3"
       style={{
         border: '1px solid var(--color-border)',
         background: 'var(--color-bg-secondary)',
       }}
     >
-      <h3
-        className="text-base font-semibold mb-4 flex items-center gap-2"
-        style={{ color: 'var(--color-text-primary)' }}
-      >
-        <Palette size={18} />
-        Configuración Global de Badges
+      <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+        <Palette size={16} />
+        Configuración Global
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Estilo de Iconos */}
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            Estilo de Iconos
+      <div className="grid grid-cols-5 gap-2">
+        {/* FILA 1: Estilo de Iconos */}
+        <div className="col-span-5">
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            Iconos
           </label>
-          <div className="grid grid-cols-2 gap-2">
-            {iconLibraries.map((lib) => (
-              <button
-                key={lib.value}
-                onClick={() => onIconLibraryChange(lib.value)}
-                className="p-2.5 rounded-lg border transition-all text-left hover:scale-[1.02]"
-                style={{
-                  borderColor: iconConfig.library === lib.value ? 'var(--color-primary)' : 'var(--color-border)',
-                  background: iconConfig.library === lib.value ? 'var(--color-bg-tertiary)' : 'var(--color-bg-primary)',
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{lib.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                      {lib.label}
-                    </div>
-                    <div className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {lib.desc}
-                    </div>
-                  </div>
-                </div>
-              </button>
-            ))}
+          <div className="grid grid-cols-4 gap-1.5">
+            <button
+              onClick={() => onIconLibraryChange('emoji')}
+              className="px-2 py-1.5 rounded text-xs font-medium transition-all border"
+              style={{
+                borderColor: iconConfig.library === 'emoji' ? 'var(--color-primary)' : 'var(--color-border)',
+                background: iconConfig.library === 'emoji' ? 'var(--color-primary)' : 'var(--color-bg-primary)',
+                color: iconConfig.library === 'emoji' ? '#fff' : 'var(--color-text-primary)',
+              }}
+            >
+              😀 Emoji
+            </button>
+            <button
+              onClick={() => onIconLibraryChange('heroicon')}
+              className="px-2 py-1.5 rounded text-xs font-medium transition-all border"
+              style={{
+                borderColor: iconConfig.library === 'heroicon' ? 'var(--color-primary)' : 'var(--color-border)',
+                background: iconConfig.library === 'heroicon' ? 'var(--color-primary)' : 'var(--color-bg-primary)',
+                color: iconConfig.library === 'heroicon' ? '#fff' : 'var(--color-text-primary)',
+              }}
+            >
+              ○ Outline
+            </button>
+            <button
+              onClick={() => onIconLibraryChange('heroicon-filled')}
+              className="px-2 py-1.5 rounded text-xs font-medium transition-all border"
+              style={{
+                borderColor: iconConfig.library === 'heroicon-filled' ? 'var(--color-primary)' : 'var(--color-border)',
+                background: iconConfig.library === 'heroicon-filled' ? 'var(--color-primary)' : 'var(--color-bg-primary)',
+                color: iconConfig.library === 'heroicon-filled' ? '#fff' : 'var(--color-text-primary)',
+              }}
+            >
+              ● Filled
+            </button>
+            <button
+              onClick={() => onIconLibraryChange('none')}
+              className="px-2 py-1.5 rounded text-xs font-medium transition-all border"
+              style={{
+                borderColor: iconConfig.library === 'none' ? 'var(--color-primary)' : 'var(--color-border)',
+                background: iconConfig.library === 'none' ? 'var(--color-primary)' : 'var(--color-bg-primary)',
+                color: iconConfig.library === 'none' ? '#fff' : 'var(--color-text-primary)',
+              }}
+            >
+              — Sin iconos
+            </button>
           </div>
         </div>
 
-        {/* Paleta Monocromática (solo para heroicons) */}
+        {/* FILA 2: Paleta Monocromática (solo si heroicons) */}
         {showMonochromePalette && (
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          <div className="col-span-5">
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
               Paleta Monocromática
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-5 gap-1.5">
               {Object.entries(MONOCHROME_PALETTES).map(([key, palette]) => (
                 <button
                   key={key}
                   onClick={() => {
                     onMonochromePaletteChange(key);
-                    if (key === 'custom') {
-                      setShowColorPicker(true);
-                    }
+                    if (key === 'custom') setShowColorPicker(true);
                   }}
-                  className="p-2.5 rounded-lg border transition-all text-left hover:scale-[1.02]"
+                  className="px-2 py-1.5 rounded text-xs font-medium transition-all border"
                   style={{
                     borderColor: iconConfig.monochromePalette === key ? 'var(--color-primary)' : 'var(--color-border)',
-                    background: iconConfig.monochromePalette === key ? 'var(--color-bg-tertiary)' : 'var(--color-bg-primary)',
+                    background: iconConfig.monochromePalette === key ? 'var(--color-primary)' : 'var(--color-bg-primary)',
+                    color: iconConfig.monochromePalette === key ? '#fff' : 'var(--color-text-primary)',
                   }}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{palette.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                        {palette.label}
-                      </div>
-                      <div className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                        {palette.description}
-                      </div>
-                    </div>
-                  </div>
+                  {palette.icon} {palette.label}
                 </button>
               ))}
             </div>
-
-            {/* Color picker para paleta custom */}
             {iconConfig.monochromePalette === 'custom' && showColorPicker && (
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-1.5 flex items-center gap-2">
                 <input
                   type="color"
                   value={iconConfig.monochromeColor || '#000000'}
                   onChange={(e) => onMonochromeColorChange(e.target.value)}
-                  className="w-12 h-8 rounded cursor-pointer"
+                  className="w-8 h-6 rounded cursor-pointer"
                   style={{ border: '1px solid var(--color-border)' }}
                 />
-                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  Color personalizado
+                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                  Color custom: {iconConfig.monochromeColor || '#000000'}
                 </span>
               </div>
             )}
           </div>
         )}
 
-        {/* Estilo Global de Badges */}
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            Estilo Global de Badges
+        {/* FILA 3: Estilo Global de Badges */}
+        <div className="col-span-5">
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            Estilo de Badges
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            {badgeStyles.map((style) => (
+          <div className="grid grid-cols-5 gap-1.5">
+            {[
+              { value: 'solid', label: 'Sólido', icon: '●' },
+              { value: 'outline', label: 'Contorno', icon: '○' },
+              { value: 'soft', label: 'Soft', icon: '◐' },
+              { value: 'glass', label: 'Glass', icon: '◇' },
+              { value: 'gradient', label: 'Gradient', icon: '◆' },
+            ].map((style) => (
               <button
                 key={style.value}
                 onClick={() => onBadgeStyleChange(style.value)}
-                className="p-2.5 rounded-lg border transition-all hover:scale-[1.02]"
+                className="px-2 py-1.5 rounded text-xs font-medium transition-all border"
                 style={{
-                  borderColor: 'var(--color-border)',
-                  background: 'var(--color-bg-primary)',
+                  borderColor: currentStyle === style.value ? 'var(--color-primary)' : 'var(--color-border)',
+                  background: currentStyle === style.value ? 'var(--color-primary)' : 'var(--color-bg-primary)',
+                  color: currentStyle === style.value ? '#fff' : 'var(--color-text-primary)',
                 }}
               >
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-2xl">{style.preview}</span>
-                  <span className="text-xs font-medium text-center" style={{ color: 'var(--color-text-primary)' }}>
-                    {style.label}
-                  </span>
-                </div>
+                {style.icon} {style.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Paleta de Colores Global */}
-        <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            Paleta de Colores Global
+        {/* FILA 4: Paleta de Colores + Opciones */}
+        <div className="col-span-3">
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            Paleta de Colores
           </label>
-          <div className="grid grid-cols-2 gap-2">
-            {Object.entries(COLOR_PALETTES).map(([key, palette]) => (
+          <div className="grid grid-cols-3 gap-1.5">
+            {Object.entries(COLOR_PALETTES).slice(0, 3).map(([key, palette]) => (
               <button
                 key={key}
                 onClick={() => onGlobalConfigChange('colorPalette', key)}
-                className="p-2.5 rounded-lg border transition-all text-left hover:scale-[1.02]"
+                className="px-2 py-1.5 rounded text-xs font-medium transition-all border"
                 style={{
                   borderColor: globalConfig.colorPalette === key ? 'var(--color-primary)' : 'var(--color-border)',
-                  background: globalConfig.colorPalette === key ? 'var(--color-bg-tertiary)' : 'var(--color-bg-primary)',
+                  background: globalConfig.colorPalette === key ? 'var(--color-primary)' : 'var(--color-bg-primary)',
+                  color: globalConfig.colorPalette === key ? '#fff' : 'var(--color-text-primary)',
                 }}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{palette.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                      {palette.label}
-                    </div>
-                    <div className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {palette.description}
-                    </div>
-                  </div>
-                </div>
+                {palette.icon} {palette.label}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+            {Object.entries(COLOR_PALETTES).slice(3).map(([key, palette]) => (
+              <button
+                key={key}
+                onClick={() => onGlobalConfigChange('colorPalette', key)}
+                className="px-2 py-1.5 rounded text-xs font-medium transition-all border"
+                style={{
+                  borderColor: globalConfig.colorPalette === key ? 'var(--color-primary)' : 'var(--color-border)',
+                  background: globalConfig.colorPalette === key ? 'var(--color-primary)' : 'var(--color-bg-primary)',
+                  color: globalConfig.colorPalette === key ? '#fff' : 'var(--color-text-primary)',
+                }}
+              >
+                {palette.icon} {palette.label}
               </button>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Opciones Adicionales */}
-      <div className="mt-5 pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
-        <details>
-          <summary className="text-sm font-medium cursor-pointer mb-3" style={{ color: 'var(--color-text-primary)' }}>
-            Opciones Avanzadas
-          </summary>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-            {/* Tamaño */}
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Tamaño
-              </label>
-              <select
-                value={globalConfig.size}
-                onChange={(e) => onGlobalConfigChange('size', e.target.value)}
-                className="w-full px-2 py-1.5 rounded text-sm"
-                style={{
-                  background: 'var(--color-bg-primary)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-primary)',
-                }}
-              >
-                <option value="xs">XS</option>
-                <option value="sm">SM</option>
-                <option value="md">MD</option>
-                <option value="lg">LG</option>
-                <option value="xl">XL</option>
-              </select>
-            </div>
-
-            {/* Border Radius */}
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Bordes
-              </label>
-              <select
-                value={globalConfig.borderRadius}
-                onChange={(e) => onGlobalConfigChange('borderRadius', e.target.value)}
-                className="w-full px-2 py-1.5 rounded text-sm"
-                style={{
-                  background: 'var(--color-bg-primary)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-primary)',
-                }}
-              >
-                <option value="sharp">Sharp</option>
-                <option value="rounded">Rounded</option>
-                <option value="pill">Pill</option>
-              </select>
-            </div>
-
-            {/* Font Weight */}
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Peso Fuente
-              </label>
-              <select
-                value={globalConfig.fontWeight}
-                onChange={(e) => onGlobalConfigChange('fontWeight', e.target.value)}
-                className="w-full px-2 py-1.5 rounded text-sm"
-                style={{
-                  background: 'var(--color-bg-primary)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-primary)',
-                }}
-              >
-                <option value="normal">Normal</option>
-                <option value="medium">Medium</option>
-                <option value="semibold">Semibold</option>
-                <option value="bold">Bold</option>
-              </select>
-            </div>
-
-            {/* Spacing */}
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Espaciado
-              </label>
-              <select
-                value={globalConfig.spacing}
-                onChange={(e) => onGlobalConfigChange('spacing', e.target.value)}
-                className="w-full px-2 py-1.5 rounded text-sm"
-                style={{
-                  background: 'var(--color-bg-primary)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-primary)',
-                }}
-              >
-                <option value="compact">Compact</option>
-                <option value="normal">Normal</option>
-                <option value="relaxed">Relaxed</option>
-              </select>
-            </div>
+        <div className="col-span-2 grid grid-cols-2 gap-1.5">
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Tamaño</label>
+            <select
+              value={globalConfig.size}
+              onChange={(e) => onGlobalConfigChange('size', e.target.value)}
+              className="w-full px-1.5 py-1 rounded text-xs"
+              style={{
+                background: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+              }}
+            >
+              <option value="xs">XS</option>
+              <option value="sm">SM</option>
+              <option value="md">MD</option>
+              <option value="lg">LG</option>
+              <option value="xl">XL</option>
+            </select>
           </div>
-        </details>
-      </div>
-
-      {/* Tip */}
-      <div
-        className="mt-4 p-3 rounded-lg flex items-start gap-2"
-        style={{
-          background: 'var(--color-bg-tertiary)',
-          border: '1px solid var(--color-border)',
-        }}
-      >
-        <Info size={14} style={{ color: 'var(--color-primary)', marginTop: '2px', flexShrink: 0 }} />
-        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-          <strong>Tip:</strong> Los cambios globales afectan a TODOS los badges. Puedes ajustar badges individuales en las secciones de abajo.
-        </p>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Bordes</label>
+            <select
+              value={globalConfig.borderRadius}
+              onChange={(e) => onGlobalConfigChange('borderRadius', e.target.value)}
+              className="w-full px-1.5 py-1 rounded text-xs"
+              style={{
+                background: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+              }}
+            >
+              <option value="sharp">Sharp</option>
+              <option value="rounded">Round</option>
+              <option value="pill">Pill</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Peso</label>
+            <select
+              value={globalConfig.fontWeight}
+              onChange={(e) => onGlobalConfigChange('fontWeight', e.target.value)}
+              className="w-full px-1.5 py-1 rounded text-xs"
+              style={{
+                background: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+              }}
+            >
+              <option value="normal">Normal</option>
+              <option value="medium">Medium</option>
+              <option value="semibold">Semi</option>
+              <option value="bold">Bold</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Espacio</label>
+            <select
+              value={globalConfig.spacing}
+              onChange={(e) => onGlobalConfigChange('spacing', e.target.value)}
+              className="w-full px-1.5 py-1 rounded text-xs"
+              style={{
+                background: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+              }}
+            >
+              <option value="compact">Comp</option>
+              <option value="normal">Norm</option>
+              <option value="relaxed">Relax</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   );

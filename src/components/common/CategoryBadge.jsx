@@ -26,6 +26,7 @@ import {
 } from '../../config/badgeSystem';
 import * as HeroIcons from '@heroicons/react/24/outline';
 import * as HeroIconsSolid from '@heroicons/react/24/solid';
+import logger from '../../utils/logger';
 
 /**
  * Badge inteligente con mapeo automático de categorías
@@ -55,14 +56,30 @@ function CategoryBadge({
     getIconLibraryConfig()
   );
 
-  // Escuchar cambios en la configuración de iconos
+  // Escuchar cambios en la configuración de iconos (MEJORADO)
   useEffect(() => {
     const handleIconLibraryChange = (event) => {
-      setIconLibraryConfig(event.detail || getIconLibraryConfig());
+      const newConfig = event.detail || getIconLibraryConfig();
+      logger.info('Icon library config changed:', newConfig, 'CategoryBadge');
+      setIconLibraryConfig(newConfig);
+    };
+
+    const handleStorageChange = () => {
+      const newConfig = getIconLibraryConfig();
+      logger.info('Storage changed, reloading icon config:', newConfig, 'CategoryBadge');
+      setIconLibraryConfig(newConfig);
     };
 
     window.addEventListener('iconLibraryChange', handleIconLibraryChange);
-    return () => window.removeEventListener('iconLibraryChange', handleIconLibraryChange);
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cargar config inicial
+    setIconLibraryConfig(getIconLibraryConfig());
+
+    return () => {
+      window.removeEventListener('iconLibraryChange', handleIconLibraryChange);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Obtener configuración del badge
