@@ -811,6 +811,14 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   // Obtener configuración del variant (con fallback a defaults)
   const variantConfig = cardConfig?.[cardVariant] || { showBadges: true };
 
+  // DEBUG: Log para verificar configuración
+  console.log('🔍 DEBUG ContentCard:', {
+    cardVariant,
+    hasCardConfig: !!cardConfig,
+    variantConfig,
+    showBadges: variantConfig.showBadges
+  });
+
   const getBadgeVariant = (type) => {
     const variants = {
       [CONTENT_TYPES.COURSE]: 'info',
@@ -1103,6 +1111,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       meta={contentMeta}
       actions={contentActions}
       onClick={() => onView(content)}
+      customConfig={variantConfig}  // ← PASAR LA CONFIGURACIÓN QUE YA CALCULAMOS
     >
       {/* Tags - Solo renderizar si hay contenido */}
       {hasTags && (
