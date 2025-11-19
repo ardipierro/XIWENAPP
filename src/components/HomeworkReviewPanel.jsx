@@ -437,32 +437,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
       }`}
     >
       <div className="space-y-3">
-        {/* Large Status Badge - Top Right Corner */}
-        <div className="absolute top-2 right-2 z-10">
-          {isProcessing ? (
-            <div className="bg-orange-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-              <RefreshCw size={14} className="animate-spin" />
-              <span className="text-xs font-bold">PROCESANDO</span>
-            </div>
-          ) : isFailed ? (
-            <div className="bg-red-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-              <AlertCircle size={14} />
-              <span className="text-xs font-bold">ERROR</span>
-            </div>
-          ) : isApproved ? (
-            <div className="bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-              <CheckCircle size={14} />
-              <span className="text-xs font-bold">APROBADO</span>
-            </div>
-          ) : isPendingReview ? (
-            <div className="bg-green-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-              <CheckCircle size={14} />
-              <span className="text-xs font-bold">LISTO</span>
-            </div>
-          ) : null}
-        </div>
-
-        {/* Student Info - Indicador neutral, el estado ya está en badge superior */}
+        {/* Student Info */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-gray-800">
@@ -553,6 +528,31 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
             </div>
           </div>
         )}
+
+        {/* Status Badge - Below grade container */}
+        <div className="flex justify-center">
+          {isProcessing ? (
+            <div className="bg-orange-500 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+              <RefreshCw size={14} className="animate-spin" />
+              <span className="text-xs font-bold">PROCESANDO</span>
+            </div>
+          ) : isFailed ? (
+            <div className="bg-red-500 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+              <AlertCircle size={14} />
+              <span className="text-xs font-bold">ERROR</span>
+            </div>
+          ) : isApproved ? (
+            <div className="bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+              <CheckCircle size={14} />
+              <span className="text-xs font-bold">APROBADO</span>
+            </div>
+          ) : isPendingReview ? (
+            <div className="bg-green-500 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+              <CheckCircle size={14} />
+              <span className="text-xs font-bold">LISTO</span>
+            </div>
+          ) : null}
+        </div>
 
         {/* View Button */}
         <BaseButton
