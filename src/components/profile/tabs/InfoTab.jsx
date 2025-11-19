@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Calendar, Shield, Save } from 'lucide-react';
-import { BaseButton } from '../../common';
+import { BaseButton, CategoryBadge } from '../../common';
 import { updateUser } from '../../../firebase/users';
 import logger from '../../../utils/logger';
 
@@ -115,19 +115,6 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
     }
   };
 
-  const getRoleBadge = () => {
-    const badges = {
-      admin: { text: 'Administrador', color: 'bg-red-500' },
-      teacher: { text: 'Profesor', color: 'bg-green-500' },
-      trial_teacher: { text: 'Profesor (Prueba)', color: 'bg-amber-500' },
-      student: { text: 'Estudiante', color: 'bg-blue-500' },
-      listener: { text: 'Oyente', color: 'bg-gray-500' },
-      trial: { text: 'Prueba', color: 'bg-amber-500' },
-    };
-    return badges[formData.role] || { text: formData.role, color: 'bg-gray-500' };
-  };
-
-  const roleBadge = getRoleBadge();
 
   return (
     <div className="p-6">
@@ -301,9 +288,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
               <option value="trial">Prueba</option>
             </select>
           ) : (
-            <div className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-semibold text-white w-fit ${roleBadge.color}`}>
-              {roleBadge.text}
-            </div>
+            <CategoryBadge type="role" value={formData.role} size="md" />
           )}
         </div>
 
