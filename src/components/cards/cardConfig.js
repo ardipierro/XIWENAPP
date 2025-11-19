@@ -346,7 +346,7 @@ export const gridColumns = {
     sm: 'sm:grid-cols-2',        // 640px+: 2 columnas
     md: 'md:grid-cols-2',        // 768px+: 2 columnas
     lg: 'lg:grid-cols-3',        // 1024px+: 3 columnas
-    xl: 'xl:grid-cols-4',        // 1280px+: 4 columnas
+    xl: 'xl:grid-cols-5',        // 1280px+: 5 columnas ✨
   },
   compact: {
     base: 'grid-cols-1',
