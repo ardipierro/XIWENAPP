@@ -12,7 +12,7 @@ import {
 } from '../firebase/messages';
 import UserAvatar from './UserAvatar';
 import logger from '../utils/logger';
-import { BaseModal, BaseButton, BaseInput, BaseTextarea } from './common';
+import { BaseModal, BaseButton, BaseInput, BaseTextarea, CategoryBadge } from './common';
 
 /**
  * New Message Modal Component
@@ -130,21 +130,6 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
     return names[role] || role;
   };
 
-  /**
-   * Get role badge variant
-   */
-  const getRoleBadgeVariant = (role) => {
-    const variants = {
-      admin: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
-      teacher: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
-      trial_teacher: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
-      student: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-      listener: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
-      trial: 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300'
-    };
-    return variants[role] || variants.student;
-  };
-
   return (
     <BaseModal
       isOpen={true}
@@ -190,9 +175,7 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
                     {selectedUser.email}
                   </div>
                 </div>
-                <span className={`px-2 py-1 text-xs font-medium rounded ${getRoleBadgeVariant(selectedUser.role)}`}>
-                  {getRoleDisplayName(selectedUser.role)}
-                </span>
+                <CategoryBadge type="role" value={selectedUser.role} size="sm" />
               </div>
               <BaseButton
                 variant="ghost"
@@ -242,9 +225,7 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
                         {user.email}
                       </div>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded ${getRoleBadgeVariant(user.role)}`}>
-                      {getRoleDisplayName(user.role)}
-                    </span>
+                    <CategoryBadge type="role" value={user.role} size="sm" />
                   </div>
                 ))
               ) : searchTerm.trim().length >= 2 ? (

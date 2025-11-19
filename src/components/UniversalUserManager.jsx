@@ -34,19 +34,6 @@ import UserAvatar from './UserAvatar';
 import ConfirmModal from './ConfirmModal';
 import logger from '../utils/logger';
 
-// Helper functions for user cards
-const getAvatarColor = (role) => {
-  const colors = {
-    admin: '#f59e0b', // amber/orange
-    teacher: '#8b5cf6', // purple
-    trial_teacher: '#a78bfa', // light purple
-    student: '#3b82f6', // blue
-    listener: '#10b981', // green
-    trial: '#06b6d4', // cyan
-  };
-  return colors[role] || '#6b7280'; // gray fallback
-};
-
 /**
  * UniversalUserManager - Componente universal para gestión de usuarios
  * Adapta UI y funcionalidad según rol del usuario actual
