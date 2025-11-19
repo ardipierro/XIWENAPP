@@ -23,8 +23,7 @@ import {
   ClipboardCheck,
   Target,
   Calendar,
-  Gamepad2,
-  Sparkles
+  Gamepad2
 } from 'lucide-react';
 
 // Lazy load de componentes pesados
@@ -41,9 +40,6 @@ const CreditManager = lazy(() => import('./CreditManager'));
 const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const UniversalUserManager = lazy(() => import('./UniversalUserManager'));
 const UpcomingClassesBanner = lazy(() => import('./UpcomingClassesBanner'));
-
-// Sample exercises component
-const CreateSampleExercisesButton = lazy(() => import('./CreateSampleExercisesButton'));
 
 // Student views
 const MyCourses = lazy(() => import('./student/MyCourses'));
@@ -171,21 +167,6 @@ function HomeView({ user, onNavigate }) {
         <Suspense fallback={<BaseLoading size="small" text="Cargando próximas clases..." />}>
           <UpcomingClassesBanner student={user} />
         </Suspense>
-      )}
-
-      {/* Demo: Crear Ejercicios de Ejemplo - Solo para teachers y admins */}
-      {can('create-content') && (
-        <UniversalCard
-          variant="default"
-          size="md"
-          icon={Sparkles}
-          title="🎯 Crear Ejercicios de Demo"
-          subtitle="Crea 10 ejercicios interactivos de ejemplo (A1-A2) con un solo click"
-        >
-          <Suspense fallback={<BaseLoading size="small" text="Cargando..." />}>
-            <CreateSampleExercisesButton />
-          </Suspense>
-        </UniversalCard>
       )}
 
       {/* Tarjetas de acceso */}
