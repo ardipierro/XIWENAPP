@@ -126,35 +126,35 @@
     --color-border: #e5e7eb;            /* gray-200 - Borde por defecto */
     --color-border-focus: #d1d5db;      /* gray-300 - Hover/focus/active */
 
-    /* === COLORES SEMÁNTICOS === */
-    --color-success: #10b981;           /* green-500 */
-    --color-success-light: #34d399;     /* green-400 */
-    --color-success-dark: #059669;      /* green-600 */
-    --color-success-bg: #d1fae5;        /* green-100 */
-    --color-success-border: #6ee7b7;    /* green-300 */
+    /* === COLORES SEMÁNTICOS (apagados y sobrios) === */
+    --color-success: #4a9f7c;           /* Verde apagado */
+    --color-success-light: #60b591;     /* Verde claro */
+    --color-success-dark: #3d8566;      /* Verde oscuro */
+    --color-success-bg: #e6f4ed;        /* Verde muy claro */
+    --color-success-border: #9cd4ba;    /* Verde borde */
 
-    --color-error: #ef4444;             /* red-500 */
-    --color-error-light: #f87171;       /* red-400 */
-    --color-error-dark: #dc2626;        /* red-600 */
-    --color-error-bg: #fee2e2;          /* red-100 */
-    --color-error-border: #fca5a5;      /* red-300 */
+    --color-error: #c85a54;             /* Rojo terracota */
+    --color-error-light: #d47570;       /* Rojo claro */
+    --color-error-dark: #a84842;        /* Rojo oscuro */
+    --color-error-bg: #f5e6e5;          /* Rojo muy claro */
+    --color-error-border: #e3a8a4;      /* Rojo borde */
 
-    --color-warning: #f59e0b;           /* amber-500 */
-    --color-warning-light: #fbbf24;     /* amber-400 */
-    --color-warning-dark: #d97706;      /* amber-600 */
-    --color-warning-bg: #fef3c7;        /* amber-100 */
-    --color-warning-border: #fcd34d;    /* amber-300 */
+    --color-warning: #d4a574;           /* Mostaza */
+    --color-warning-light: #ddb88a;     /* Mostaza claro */
+    --color-warning-dark: #b88e5e;      /* Mostaza oscuro */
+    --color-warning-bg: #f7f0e6;        /* Mostaza muy claro */
+    --color-warning-border: #e8d0b0;    /* Mostaza borde */
 
-    --color-info: #06b6d4;              /* cyan-500 */
-    --color-info-light: #22d3ee;        /* cyan-400 */
-    --color-info-dark: #0891b2;         /* cyan-600 */
-    --color-info-bg: #cffafe;           /* cyan-100 */
-    --color-info-border: #67e8f9;       /* cyan-300 */
+    --color-info: #5b8fa3;              /* Azul grisáceo */
+    --color-info-light: #75a5b8;        /* Azul claro */
+    --color-info-dark: #4a7689;         /* Azul oscuro */
+    --color-info-bg: #e6f0f4;           /* Azul muy claro */
+    --color-info-border: #a4c7d4;       /* Azul borde */
 
-    /* === ACENTO (Brand) === */
-    --color-accent: #6366f1;            /* indigo-500 */
-    --color-accent-light: #818cf8;      /* indigo-400 */
-    --color-accent-dark: #4f46e5;       /* indigo-600 */
+    /* === ACENTO (gris azulado neutral) === */
+    --color-accent: #5b6b8f;            /* Gris azulado */
+    --color-accent-light: #7585a3;      /* Gris azulado claro */
+    --color-accent-dark: #4a5778;       /* Gris azulado oscuro */
 
     /* === SOMBRAS (4 niveles) === */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -236,30 +236,35 @@
     --color-border: #374151;            /* gray-700 - Borde por defecto */
     --color-border-focus: #4b5563;      /* gray-600 - Hover/focus/active */
 
-    /* === SEMÁNTICOS === */
-    --color-success: #10b981;           /* green-500 */
-    --color-success-light: #34d399;     /* green-400 */
-    --color-success-dark: #059669;      /* green-600 */
-    --color-success-bg: rgba(16, 185, 129, 0.15);
-    --color-success-border: #065f46;    /* green-800 */
+    /* === SEMÁNTICOS (apagados y sobrios) === */
+    --color-success: #4a9f7c;           /* Verde apagado */
+    --color-success-light: #60b591;     /* Verde claro */
+    --color-success-dark: #3d8566;      /* Verde oscuro */
+    --color-success-bg: rgba(74, 159, 124, 0.15);
+    --color-success-border: #3d8566;    /* Verde oscuro para borde */
 
-    --color-error: #ef4444;             /* red-500 */
-    --color-error-light: #f87171;       /* red-400 */
-    --color-error-dark: #dc2626;        /* red-600 */
-    --color-error-bg: rgba(239, 68, 68, 0.15);
-    --color-error-border: #991b1b;      /* red-800 */
+    --color-error: #c85a54;             /* Rojo terracota */
+    --color-error-light: #d47570;       /* Rojo claro */
+    --color-error-dark: #a84842;        /* Rojo oscuro */
+    --color-error-bg: rgba(200, 90, 84, 0.15);
+    --color-error-border: #a84842;      /* Rojo oscuro para borde */
 
-    --color-warning: #f59e0b;           /* amber-500 */
-    --color-warning-light: #fbbf24;     /* amber-400 */
-    --color-warning-dark: #d97706;      /* amber-600 */
-    --color-warning-bg: rgba(245, 158, 11, 0.15);
-    --color-warning-border: #92400e;    /* amber-800 */
+    --color-warning: #d4a574;           /* Mostaza */
+    --color-warning-light: #ddb88a;     /* Mostaza claro */
+    --color-warning-dark: #b88e5e;      /* Mostaza oscuro */
+    --color-warning-bg: rgba(212, 165, 116, 0.15);
+    --color-warning-border: #b88e5e;    /* Mostaza oscuro para borde */
 
-    --color-info: #06b6d4;              /* cyan-500 */
-    --color-info-light: #22d3ee;        /* cyan-400 */
-    --color-info-dark: #0891b2;         /* cyan-600 */
-    --color-info-bg: rgba(6, 182, 212, 0.15);
-    --color-info-border: #155e75;       /* cyan-800 */
+    --color-info: #5b8fa3;              /* Azul grisáceo */
+    --color-info-light: #75a5b8;        /* Azul claro */
+    --color-info-dark: #4a7689;         /* Azul oscuro */
+    --color-info-bg: rgba(91, 143, 163, 0.15);
+    --color-info-border: #4a7689;       /* Azul oscuro para borde */
+
+    /* === ACENTO (azul gris suave) === */
+    --color-accent: #7a8fa8;            /* Azul gris suave */
+    --color-accent-light: #92a5be;      /* Azul gris claro */
+    --color-accent-dark: #657a92;       /* Azul gris oscuro */
 
     /* === SOMBRAS (4 niveles) === */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -268,202 +273,106 @@
     --shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.3);
   }
 
-  /* Ocean theme - Tonos azules y turquesa */
-  .ocean {
-    /* === FONDOS (4 niveles) === */
-    --color-bg-primary: #f0f9ff;        /* sky-50 */
-    --color-bg-secondary: #e0f2fe;      /* sky-100 */
-    --color-bg-tertiary: #bae6fd;       /* sky-200 */
-    --color-bg-hover: #7dd3fc;          /* sky-300 */
+  /* Dusk theme - Tonos tierra cálidos y neutros (ex-Sunset) */
+  .dusk {
+    /* === FONDOS (tonos tierra neutros) === */
+    --color-bg-primary: #f7f4f1;        /* Beige grisáceo */
+    --color-bg-secondary: #ebe6e0;      /* Beige más oscuro */
+    --color-bg-tertiary: #dfd9d1;       /* Gris beige */
+    --color-bg-hover: #d3cdc5;          /* Gris medio */
 
-    /* === TEXTOS (3 niveles) === */
-    --color-text-primary: #0c4a6e;      /* sky-900 */
-    --color-text-secondary: #0369a1;    /* sky-700 */
-    --color-text-muted: #0ea5e9;        /* sky-500 */
+    /* === TEXTOS (marrones suaves) === */
+    --color-text-primary: #2a2420;      /* Marrón muy oscuro */
+    --color-text-secondary: #6a615a;    /* Gris marrón */
+    --color-text-muted: #8f8580;        /* Gris claro */
 
-    /* === BORDES (2 niveles) === */
-    --color-border: #bae6fd;            /* sky-200 */
-    --color-border-focus: #38bdf8;      /* sky-400 */
+    /* === BORDES (tierra sutiles) === */
+    --color-border: #dfd9d1;            /* Gris beige */
+    --color-border-focus: #d3cdc5;      /* Gris medio */
 
-    /* === ACENTO (Brand) === */
-    --color-accent: #0284c7;            /* sky-600 */
-    --color-accent-light: #0ea5e9;      /* sky-500 */
-    --color-accent-dark: #075985;       /* sky-700 */
+    /* === ACENTO (marrón cálido) === */
+    --color-accent: #a67c52;            /* Marrón cálido */
+    --color-accent-light: #b88d68;      /* Marrón claro */
+    --color-accent-dark: #8f6941;       /* Marrón oscuro */
 
-    /* === SEMÁNTICOS === */
-    --color-success: #059669;           /* emerald-600 */
-    --color-success-light: #10b981;     /* emerald-500 */
-    --color-success-dark: #065f46;      /* emerald-800 */
-    --color-success-bg: #d1fae5;        /* emerald-100 */
-    --color-success-border: #6ee7b7;    /* emerald-300 */
+    /* === SEMÁNTICOS (apagados y sobrios) === */
+    --color-success: #4a9f7c;           /* Verde apagado */
+    --color-success-light: #60b591;     /* Verde claro */
+    --color-success-dark: #3d8566;      /* Verde oscuro */
+    --color-success-bg: #e6f4ed;        /* Verde muy claro */
+    --color-success-border: #9cd4ba;    /* Verde borde */
 
-    --color-error: #dc2626;             /* red-600 */
-    --color-error-light: #ef4444;       /* red-500 */
-    --color-error-dark: #991b1b;        /* red-800 */
-    --color-error-bg: #fee2e2;          /* red-100 */
-    --color-error-border: #fca5a5;      /* red-300 */
+    --color-error: #c85a54;             /* Rojo terracota */
+    --color-error-light: #d47570;       /* Rojo claro */
+    --color-error-dark: #a84842;        /* Rojo oscuro */
+    --color-error-bg: #f5e6e5;          /* Rojo muy claro */
+    --color-error-border: #e3a8a4;      /* Rojo borde */
 
-    --color-warning: #d97706;           /* amber-600 */
-    --color-warning-light: #f59e0b;     /* amber-500 */
-    --color-warning-dark: #92400e;      /* amber-800 */
-    --color-warning-bg: #fef3c7;        /* amber-100 */
-    --color-warning-border: #fcd34d;    /* amber-300 */
+    --color-warning: #d4a574;           /* Mostaza */
+    --color-warning-light: #ddb88a;     /* Mostaza claro */
+    --color-warning-dark: #b88e5e;      /* Mostaza oscuro */
+    --color-warning-bg: #f7f0e6;        /* Mostaza muy claro */
+    --color-warning-border: #e8d0b0;    /* Mostaza borde */
 
-    --color-info: #2563eb;              /* blue-600 */
-    --color-info-light: #3b82f6;        /* blue-500 */
-    --color-info-dark: #1e40af;         /* blue-800 */
-    --color-info-bg: #dbeafe;           /* blue-100 */
-    --color-info-border: #93c5fd;       /* blue-300 */
+    --color-info: #5b8fa3;              /* Azul grisáceo */
+    --color-info-light: #75a5b8;        /* Azul claro */
+    --color-info-dark: #4a7689;         /* Azul oscuro */
+    --color-info-bg: #e6f0f4;           /* Azul muy claro */
+    --color-info-border: #a4c7d4;       /* Azul borde */
   }
 
-  /* Forest theme - Tonos verdes naturales */
-  .forest {
-    /* === FONDOS (4 niveles) === */
-    --color-bg-primary: #f0fdf4;        /* green-50 */
-    --color-bg-secondary: #dcfce7;      /* green-100 */
-    --color-bg-tertiary: #bbf7d0;       /* green-200 */
-    --color-bg-hover: #86efac;          /* green-300 */
+  /* Night theme - Azul gris oscuro suave (ex-Midnight) */
+  .night {
+    /* === FONDOS (azul gris oscuro) === */
+    --color-bg-primary: #0f1419;        /* Azul noche muy oscuro */
+    --color-bg-secondary: #1a2128;      /* Azul gris */
+    --color-bg-tertiary: #242c35;       /* Azul medio */
+    --color-bg-hover: #2e3842;          /* Azul claro oscuro */
 
-    /* === TEXTOS (3 niveles) === */
-    --color-text-primary: #14532d;      /* green-900 */
-    --color-text-secondary: #15803d;    /* green-700 */
-    --color-text-muted: #22c55e;        /* green-500 */
+    /* === TEXTOS (gris claro) === */
+    --color-text-primary: #e3e8ee;      /* Gris muy claro */
+    --color-text-secondary: #8b93a1;    /* Gris medio */
+    --color-text-muted: #6b7280;        /* Gris */
 
-    /* === BORDES (2 niveles) === */
-    --color-border: #bbf7d0;            /* green-200 */
-    --color-border-focus: #4ade80;      /* green-400 */
+    /* === BORDES (azul gris sutiles) === */
+    --color-border: #242c35;            /* Azul medio */
+    --color-border-focus: #2e3842;      /* Azul claro oscuro */
 
-    /* === ACENTO (Brand) === */
-    --color-accent: #16a34a;            /* green-600 */
-    --color-accent-light: #22c55e;      /* green-500 */
-    --color-accent-dark: #15803d;       /* green-700 */
+    /* === ACENTO (azul grisáceo) === */
+    --color-accent: #7a95b8;            /* Azul grisáceo */
+    --color-accent-light: #92a9c9;      /* Azul claro */
+    --color-accent-dark: #6481a3;       /* Azul oscuro */
 
-    /* === SEMÁNTICOS === */
-    --color-success: #16a34a;           /* green-600 (matching theme) */
-    --color-success-light: #22c55e;     /* green-500 */
-    --color-success-dark: #15803d;      /* green-700 */
-    --color-success-bg: #dcfce7;        /* green-100 */
-    --color-success-border: #86efac;    /* green-300 */
+    /* === SEMÁNTICOS (apagados y sobrios) === */
+    --color-success: #4a9f7c;           /* Verde apagado */
+    --color-success-light: #60b591;     /* Verde claro */
+    --color-success-dark: #3d8566;      /* Verde oscuro */
+    --color-success-bg: rgba(74, 159, 124, 0.15);
+    --color-success-border: #3d8566;    /* Verde oscuro para borde */
 
-    --color-error: #dc2626;             /* red-600 */
-    --color-error-light: #ef4444;       /* red-500 */
-    --color-error-dark: #991b1b;        /* red-800 */
-    --color-error-bg: #fee2e2;          /* red-100 */
-    --color-error-border: #fca5a5;      /* red-300 */
+    --color-error: #c85a54;             /* Rojo terracota */
+    --color-error-light: #d47570;       /* Rojo claro */
+    --color-error-dark: #a84842;        /* Rojo oscuro */
+    --color-error-bg: rgba(200, 90, 84, 0.15);
+    --color-error-border: #a84842;      /* Rojo oscuro para borde */
 
-    --color-warning: #d97706;           /* amber-600 */
-    --color-warning-light: #f59e0b;     /* amber-500 */
-    --color-warning-dark: #92400e;      /* amber-800 */
-    --color-warning-bg: #fef3c7;        /* amber-100 */
-    --color-warning-border: #fcd34d;    /* amber-300 */
+    --color-warning: #d4a574;           /* Mostaza */
+    --color-warning-light: #ddb88a;     /* Mostaza claro */
+    --color-warning-dark: #b88e5e;      /* Mostaza oscuro */
+    --color-warning-bg: rgba(212, 165, 116, 0.15);
+    --color-warning-border: #b88e5e;    /* Mostaza oscuro para borde */
 
-    --color-info: #0891b2;              /* cyan-600 (complements green) */
-    --color-info-light: #06b6d4;        /* cyan-500 */
-    --color-info-dark: #155e75;         /* cyan-800 */
-    --color-info-bg: #cffafe;           /* cyan-100 */
-    --color-info-border: #67e8f9;       /* cyan-300 */
-  }
+    --color-info: #5b8fa3;              /* Azul grisáceo */
+    --color-info-light: #75a5b8;        /* Azul claro */
+    --color-info-dark: #4a7689;         /* Azul oscuro */
+    --color-info-bg: rgba(91, 143, 163, 0.15);
+    --color-info-border: #4a7689;       /* Azul oscuro para borde */
 
-  /* Sunset theme - Tonos naranjas y rosados */
-  .sunset {
-    /* === FONDOS (4 niveles) === */
-    --color-bg-primary: #fff7ed;        /* orange-50 */
-    --color-bg-secondary: #ffedd5;      /* orange-100 */
-    --color-bg-tertiary: #fed7aa;       /* orange-200 */
-    --color-bg-hover: #fdba74;          /* orange-300 */
-
-    /* === TEXTOS (3 niveles) === */
-    --color-text-primary: #7c2d12;      /* orange-900 */
-    --color-text-secondary: #c2410c;    /* orange-700 */
-    --color-text-muted: #f97316;        /* orange-500 */
-
-    /* === BORDES (2 niveles) === */
-    --color-border: #fed7aa;            /* orange-200 */
-    --color-border-focus: #fb923c;      /* orange-400 */
-
-    /* === ACENTO (Brand) === */
-    --color-accent: #ea580c;            /* orange-600 */
-    --color-accent-light: #f97316;      /* orange-500 */
-    --color-accent-dark: #c2410c;       /* orange-700 */
-
-    /* === SEMÁNTICOS === */
-    --color-success: #16a34a;           /* green-600 */
-    --color-success-light: #22c55e;     /* green-500 */
-    --color-success-dark: #15803d;      /* green-700 */
-    --color-success-bg: #dcfce7;        /* green-100 */
-    --color-success-border: #86efac;    /* green-300 */
-
-    --color-error: #dc2626;             /* red-600 */
-    --color-error-light: #ef4444;       /* red-500 */
-    --color-error-dark: #991b1b;        /* red-800 */
-    --color-error-bg: #fee2e2;          /* red-100 */
-    --color-error-border: #fca5a5;      /* red-300 */
-
-    --color-warning: #ea580c;           /* orange-600 (matching theme) */
-    --color-warning-light: #f97316;     /* orange-500 */
-    --color-warning-dark: #c2410c;      /* orange-700 */
-    --color-warning-bg: #ffedd5;        /* orange-100 */
-    --color-warning-border: #fdba74;    /* orange-300 */
-
-    --color-info: #0891b2;              /* cyan-600 */
-    --color-info-light: #06b6d4;        /* cyan-500 */
-    --color-info-dark: #155e75;         /* cyan-800 */
-    --color-info-bg: #cffafe;           /* cyan-100 */
-    --color-info-border: #67e8f9;       /* cyan-300 */
-  }
-
-  /* Midnight theme - Azul oscuro profundo */
-  .midnight {
-    /* === FONDOS (4 niveles) === */
-    --color-bg-primary: #0c1221;        /* Azul muy oscuro */
-    --color-bg-secondary: #0f172a;      /* slate-900 */
-    --color-bg-tertiary: #1e293b;       /* slate-800 */
-    --color-bg-hover: #334155;          /* slate-700 */
-
-    /* === TEXTOS (3 niveles) === */
-    --color-text-primary: #f1f5f9;      /* slate-100 */
-    --color-text-secondary: #94a3b8;    /* slate-400 */
-    --color-text-muted: #64748b;        /* slate-500 */
-
-    /* === BORDES (2 niveles) === */
-    --color-border: #1e293b;            /* slate-800 */
-    --color-border-focus: #475569;      /* slate-600 */
-
-    /* === ACENTO (Brand) === */
-    --color-accent: #3b82f6;            /* blue-500 */
-    --color-accent-light: #60a5fa;      /* blue-400 */
-    --color-accent-dark: #2563eb;       /* blue-600 */
-
-    /* === SEMÁNTICOS === */
-    --color-success: #10b981;           /* green-500 */
-    --color-success-light: #34d399;     /* green-400 */
-    --color-success-dark: #059669;      /* green-600 */
-    --color-success-bg: rgba(16, 185, 129, 0.15);
-    --color-success-border: #065f46;    /* green-800 */
-
-    --color-error: #ef4444;             /* red-500 */
-    --color-error-light: #f87171;       /* red-400 */
-    --color-error-dark: #dc2626;        /* red-600 */
-    --color-error-bg: rgba(239, 68, 68, 0.15);
-    --color-error-border: #991b1b;      /* red-800 */
-
-    --color-warning: #f59e0b;           /* amber-500 */
-    --color-warning-light: #fbbf24;     /* amber-400 */
-    --color-warning-dark: #d97706;      /* amber-600 */
-    --color-warning-bg: rgba(245, 158, 11, 0.15);
-    --color-warning-border: #92400e;    /* amber-800 */
-
-    --color-info: #06b6d4;              /* cyan-500 */
-    --color-info-light: #22d3ee;        /* cyan-400 */
-    --color-info-dark: #0891b2;         /* cyan-600 */
-    --color-info-bg: rgba(6, 182, 212, 0.15);
-    --color-info-border: #155e75;       /* cyan-800 */
-
-    /* === SOMBRAS === */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.7);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.8);
-    --shadow-focus: 0 0 0 3px rgba(100, 116, 139, 0.3);
+    /* === SOMBRAS (más sutiles que antes) === */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+    --shadow-focus: 0 0 0 3px rgba(122, 149, 184, 0.25);
   }
 }
 
@@ -605,20 +514,21 @@
     color: var(--color-text-secondary);
   }
 
-  /* Inputs */
+  /* Inputs - Minimalista sin bordes */
   .input {
     @apply w-full px-3.5 py-2.5 text-base leading-normal;
     @apply rounded-md;
-    @apply transition-none outline-none;
+    @apply transition-all duration-200 outline-none;
     color: var(--color-text-primary);
     background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border);
+    border: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
   .input:focus {
-    border-color: var(--color-border-focus);
-    background: var(--color-bg-primary);
-    box-shadow: 0 0 0 2px rgba(var(--color-border-focus), 0.2);
+    background: var(--color-bg-secondary);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06),
+                0 0 0 3px rgba(91, 111, 143, 0.08);
   }
 
   .input:disabled {
@@ -631,15 +541,16 @@
     @apply border-error;
   }
 
-  /* Select / Dropdown */
+  /* Select / Dropdown - Minimalista sin bordes */
   .select {
     @apply w-full px-3.5 py-2.5 text-base leading-normal;
     @apply rounded-md;
-    @apply transition-none outline-none cursor-pointer;
+    @apply transition-all duration-200 outline-none cursor-pointer;
     @apply appearance-none bg-no-repeat;
     color: var(--color-text-primary);
     background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border);
+    border: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.5rem center;
     background-size: 1.5em 1.5em;
@@ -647,9 +558,9 @@
   }
 
   .select:focus {
-    border-color: var(--color-border-focus);
-    background: var(--color-bg-primary);
-    box-shadow: 0 0 0 2px rgba(var(--color-border-focus), 0.2);
+    background: var(--color-bg-secondary);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06),
+                0 0 0 3px rgba(91, 111, 143, 0.08);
   }
 
   .select:disabled {
@@ -765,16 +676,17 @@
      DROPDOWNS - Sistema unificado
      ============================================ */
 
-  /* Dropdown Container */
+  /* Dropdown Container - Minimalista sin bordes */
   .dropdown {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
     min-width: 280px;
     background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
+    border: none;
     border-radius: 12px;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07),
+                0 10px 15px rgba(0, 0, 0, 0.10);
     overflow: hidden;
     z-index: var(--z-dropdown);
     animation: dropdownFadeIn var(--transition-fast);

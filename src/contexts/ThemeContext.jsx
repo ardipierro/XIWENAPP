@@ -3,53 +3,39 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext();
 
-// Definición de temas disponibles
+// Definición de temas disponibles (simplificado a 4 temas neutrales)
 export const THEMES = {
   LIGHT: 'light',
   DARK: 'dark',
-  OCEAN: 'ocean',
-  FOREST: 'forest',
-  SUNSET: 'sunset',
-  MIDNIGHT: 'midnight'
+  DUSK: 'dusk',
+  NIGHT: 'night'
 };
 
 // Información sobre cada tema
 export const THEME_INFO = {
   [THEMES.LIGHT]: {
     name: 'Claro',
-    description: 'Tema claro predeterminado',
+    description: 'Tema claro neutro para uso diurno',
     isDark: false,
     themeColor: '#ffffff'
   },
   [THEMES.DARK]: {
     name: 'Oscuro',
-    description: 'Tema oscuro predeterminado',
+    description: 'Tema oscuro neutro estándar',
     isDark: true,
-    themeColor: '#09090b'
+    themeColor: '#111827'
   },
-  [THEMES.OCEAN]: {
-    name: 'Océano',
-    description: 'Tonos azules y turquesa',
+  [THEMES.DUSK]: {
+    name: 'Crepúsculo',
+    description: 'Tonos tierra cálidos y neutros',
     isDark: false,
-    themeColor: '#f0f9ff'
+    themeColor: '#f7f4f1'
   },
-  [THEMES.FOREST]: {
-    name: 'Bosque',
-    description: 'Tonos verdes naturales',
-    isDark: false,
-    themeColor: '#f0fdf4'
-  },
-  [THEMES.SUNSET]: {
-    name: 'Atardecer',
-    description: 'Tonos naranjas y rosados',
-    isDark: false,
-    themeColor: '#fff7ed'
-  },
-  [THEMES.MIDNIGHT]: {
-    name: 'Medianoche',
-    description: 'Azul oscuro profundo',
+  [THEMES.NIGHT]: {
+    name: 'Noche',
+    description: 'Azul gris oscuro suave para los ojos',
     isDark: true,
-    themeColor: '#0c1221'
+    themeColor: '#0f1419'
   }
 };
 

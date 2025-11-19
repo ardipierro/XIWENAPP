@@ -9,7 +9,7 @@ import { Palette, RotateCcw, Download, Upload, Check } from 'lucide-react';
 import { THEMES, THEME_INFO } from '../contexts/ThemeContext';
 import BaseButton from './common/BaseButton';
 
-// Colores por defecto de cada tema (sincronizados exactamente con globals.css)
+// Colores por defecto de cada tema (4 temas neutrales y minimalistas)
 const DEFAULT_THEME_COLORS = {
   light: {
     // Fondos
@@ -24,16 +24,16 @@ const DEFAULT_THEME_COLORS = {
     // Bordes
     'border': '#e5e7eb',
     'border-focus': '#d1d5db',
-    // Semánticos
-    'success': '#10b981',
-    'error': '#ef4444',
-    'warning': '#f59e0b',
-    'info': '#06b6d4',
-    // Acento
-    'accent': '#6366f1',
+    // Semánticos (colores apagados y sobrios)
+    'success': '#4a9f7c',
+    'error': '#c85a54',
+    'warning': '#d4a574',
+    'info': '#5b8fa3',
+    // Acento (gris azulado neutral)
+    'accent': '#5b6b8f',
   },
   dark: {
-    // Fondos (sincronizado con .dark en globals.css)
+    // Fondos
     'bg-primary': '#111827',
     'bg-secondary': '#1f2937',
     'bg-tertiary': '#374151',
@@ -45,97 +45,55 @@ const DEFAULT_THEME_COLORS = {
     // Bordes
     'border': '#374151',
     'border-focus': '#4b5563',
-    // Semánticos
-    'success': '#10b981',
-    'error': '#ef4444',
-    'warning': '#f59e0b',
-    'info': '#06b6d4',
-    // Acento (usa el de :root)
-    'accent': '#6366f1',
+    // Semánticos (mismos colores apagados que light)
+    'success': '#4a9f7c',
+    'error': '#c85a54',
+    'warning': '#d4a574',
+    'info': '#5b8fa3',
+    // Acento (azul gris suave)
+    'accent': '#7a8fa8',
   },
-  ocean: {
-    // Fondos
-    'bg-primary': '#f0f9ff',
-    'bg-secondary': '#e0f2fe',
-    'bg-tertiary': '#bae6fd',
-    'bg-hover': '#7dd3fc',
-    // Textos
-    'text-primary': '#0c4a6e',
-    'text-secondary': '#0369a1',
-    'text-muted': '#0ea5e9',
-    // Bordes
-    'border': '#bae6fd',
-    'border-focus': '#38bdf8',
-    // Semánticos
-    'success': '#059669',
-    'error': '#dc2626',
-    'warning': '#d97706',
-    'info': '#2563eb',
-    // Acento
-    'accent': '#0284c7',
+  dusk: {
+    // Fondos (tonos tierra neutros)
+    'bg-primary': '#f7f4f1',
+    'bg-secondary': '#ebe6e0',
+    'bg-tertiary': '#dfd9d1',
+    'bg-hover': '#d3cdc5',
+    // Textos (marrones suaves)
+    'text-primary': '#2a2420',
+    'text-secondary': '#6a615a',
+    'text-muted': '#8f8580',
+    // Bordes (tierra sutiles)
+    'border': '#dfd9d1',
+    'border-focus': '#d3cdc5',
+    // Semánticos (mismos colores apagados)
+    'success': '#4a9f7c',
+    'error': '#c85a54',
+    'warning': '#d4a574',
+    'info': '#5b8fa3',
+    // Acento (marrón cálido)
+    'accent': '#a67c52',
   },
-  forest: {
-    // Fondos
-    'bg-primary': '#f0fdf4',
-    'bg-secondary': '#dcfce7',
-    'bg-tertiary': '#bbf7d0',
-    'bg-hover': '#86efac',
-    // Textos
-    'text-primary': '#14532d',
-    'text-secondary': '#15803d',
-    'text-muted': '#22c55e',
-    // Bordes
-    'border': '#bbf7d0',
-    'border-focus': '#4ade80',
-    // Semánticos
-    'success': '#16a34a',
-    'error': '#dc2626',
-    'warning': '#d97706',
-    'info': '#0891b2',
-    // Acento
-    'accent': '#16a34a',
-  },
-  sunset: {
-    // Fondos
-    'bg-primary': '#fff7ed',
-    'bg-secondary': '#ffedd5',
-    'bg-tertiary': '#fed7aa',
-    'bg-hover': '#fdba74',
-    // Textos
-    'text-primary': '#7c2d12',
-    'text-secondary': '#c2410c',
-    'text-muted': '#f97316',
-    // Bordes
-    'border': '#fed7aa',
-    'border-focus': '#fb923c',
-    // Semánticos
-    'success': '#16a34a',
-    'error': '#dc2626',
-    'warning': '#ea580c',
-    'info': '#0891b2',
-    // Acento
-    'accent': '#ea580c',
-  },
-  midnight: {
-    // Fondos
-    'bg-primary': '#0c1221',
-    'bg-secondary': '#0f172a',
-    'bg-tertiary': '#1e293b',
-    'bg-hover': '#334155',
-    // Textos
-    'text-primary': '#f1f5f9',
-    'text-secondary': '#94a3b8',
-    'text-muted': '#64748b',
-    // Bordes
-    'border': '#1e293b',
-    'border-focus': '#475569',
-    // Semánticos
-    'success': '#10b981',
-    'error': '#ef4444',
-    'warning': '#f59e0b',
-    'info': '#06b6d4',
-    // Acento
-    'accent': '#3b82f6',
+  night: {
+    // Fondos (azul gris oscuro)
+    'bg-primary': '#0f1419',
+    'bg-secondary': '#1a2128',
+    'bg-tertiary': '#242c35',
+    'bg-hover': '#2e3842',
+    // Textos (gris claro)
+    'text-primary': '#e3e8ee',
+    'text-secondary': '#8b93a1',
+    'text-muted': '#6b7280',
+    // Bordes (azul gris sutiles)
+    'border': '#242c35',
+    'border-focus': '#2e3842',
+    // Semánticos (mismos colores apagados)
+    'success': '#4a9f7c',
+    'error': '#c85a54',
+    'warning': '#d4a574',
+    'info': '#5b8fa3',
+    // Acento (azul grisáceo)
+    'accent': '#7a95b8',
   }
 };
 
