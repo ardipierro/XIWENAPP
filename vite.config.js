@@ -18,7 +18,30 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg'],
-      manifest: false, // Usar manifest.json estático en public/
+      manifest: {
+        name: 'XIWEN - Plataforma Educativa',
+        short_name: 'XIWEN',
+        description: 'Plataforma educativa con juegos, ejercicios y cursos interactivos',
+        start_url: '/',
+        scope: '/',
+        display: 'standalone',
+        background_color: '#09090b',
+        theme_color: '#09090b',
+        icons: [
+          {
+            src: '/icons/icon-192.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/icons/icon-512.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          }
+        ]
+      },
       injectRegister: 'auto',
       devOptions: {
         enabled: false // Disable in dev to avoid conflicts
@@ -53,15 +76,6 @@ export default defineConfig({
 
         // Estrategia de caché optimizada para móvil
         runtimeCaching: [
-          {
-            // Manifest - NetworkFirst para evitar 401
-            urlPattern: /manifest\.json$/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'manifest-cache',
-              networkTimeoutSeconds: 3
-            }
-          },
           {
             // Runtime caching para chunks grandes excluidos del precache
             urlPattern: /assets\/(excalidraw|vendor|ContentManagerTabs|ClassDailyLogManager|PieChart|recharts|ContentReader|MessagesPanel|HomeworkReview|TestPage|AnalyticsDashboard)-.*\.js$/,
@@ -216,9 +230,10 @@ export default defineConfig({
             return 'routes-admin';
           }
 
-          // Ejercicios en chunk separado
+          // Ejercicios - dejar que Vite maneje automáticamente para evitar circular deps
+          // El chunking manual puede causar "Cannot access before initialization"
           if (id.includes('Exercise.jsx') || id.includes('Exercise.js')) {
-            return 'exercises';
+            return; // undefined = dejar que Vite decida
           }
         },
 
