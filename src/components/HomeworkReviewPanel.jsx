@@ -402,22 +402,6 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
               </span>
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 flex-shrink-0">
-            <BaseButton
-              variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
-              size="sm"
-              disabled={isProcessing}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect();
-              }}
-            >
-              <Eye size={16} strokeWidth={2.5} />
-              {isPendingReview ? 'Ver Corrección' : 'Ver Detalles'}
-            </BaseButton>
-          </div>
         </div>
       </BaseCard>
     );
@@ -553,31 +537,6 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
             </div>
           ) : null}
         </div>
-
-        {/* View Button */}
-        <BaseButton
-          variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
-          size="sm"
-          fullWidth
-          disabled={isProcessing}
-          className={
-            isProcessing ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
-            isPendingReview ? 'bg-green-600 hover:bg-green-700 text-white font-semibold' :
-            ''
-          }
-        >
-          {isProcessing ? (
-            <>
-              <Loader size={16} strokeWidth={2.5} className="animate-spin" />
-              ⏳ Espera...
-            </>
-          ) : (
-            <>
-              <Eye size={18} strokeWidth={2.5} />
-              {isPendingReview ? 'Ver Corrección' : 'Ver Detalles'}
-            </>
-          )}
-        </BaseButton>
       </div>
     </BaseCard>
   );
