@@ -44,7 +44,8 @@ function LandingPageTab() {
     features: false,
     faqs: false,
     cta: false,
-    featured: false
+    featured: false,
+    appearance: false
   });
 
   // Exercises for featured content
@@ -594,6 +595,67 @@ function LandingPageTab() {
                 onChange={(e) => updateCTA('secondaryButtonText', e.target.value)}
                 size="sm"
               />
+            </div>
+          </div>
+        )}
+      </BaseCard>
+
+      {/* Appearance Section - NEW */}
+      <BaseCard className="p-5">
+        <button
+          onClick={() => toggleSection('appearance')}
+          className="w-full flex items-center justify-between text-left mb-4 hover:opacity-80 transition-opacity"
+        >
+          <h4 className="text-base font-semibold text-gray-900 dark:text-white m-0">
+            🎨 Apariencia y Tema
+          </h4>
+          {expandedSections.appearance ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+        </button>
+
+        {expandedSections.appearance && (
+          <div className="space-y-4">
+            <BaseAlert variant="info" border>
+              <div className="text-sm">
+                <p className="font-medium mb-1">✅ Tema Actualizado</p>
+                <p className="text-xs opacity-90">
+                  La Landing Page ahora incluye:
+                  <br />• ✅ Modo claro/oscuro completo
+                  <br />• ✅ CSS Variables para colores adaptativos
+                  <br />• ✅ Contraste WCAG AA/AAA en todos los elementos
+                  <br />• ✅ Iconos con colores visibles (verde)
+                  <br />• ✅ Scroll vertical habilitado
+                  <br />• ✅ Smooth scrolling para navegación
+                </p>
+              </div>
+            </BaseAlert>
+
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                🎯 Mejoras de Contraste Implementadas
+              </h5>
+              <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-2">
+                <li>✅ <strong>Navigation:</strong> Adapta colores según tema light/dark</li>
+                <li>✅ <strong>Hero Section:</strong> Gradientes y textos visibles en ambos modos</li>
+                <li>✅ <strong>Iconos CheckCircle:</strong> Color verde visible siempre</li>
+                <li>✅ <strong>Benefits:</strong> Listas con íconos de color verde</li>
+                <li>✅ <strong>Pricing Cards:</strong> Bordes y badges adaptativos</li>
+                <li>✅ <strong>FAQ:</strong> Contraste correcto en preguntas/respuestas</li>
+                <li>✅ <strong>Footer:</strong> Links visibles en ambos modos</li>
+                <li>✅ <strong>Botones:</strong> Nuevo variant "white" para fondos oscuros</li>
+              </ul>
+            </div>
+
+            <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+              <h5 className="text-sm font-semibold text-purple-900 dark:text-purple-200 mb-2">
+                📐 Sistema de Diseño
+              </h5>
+              <p className="text-xs text-purple-700 dark:text-purple-300">
+                La Landing Page ahora cumple con el DESIGN_SYSTEM.md:
+                <br />• CSS Variables en lugar de colores hardcoded
+                <br />• Selectores .dark para dark mode
+                <br />• Border-radius consistente
+                <br />• Spacing estándar
+              </p>
             </div>
           </div>
         )}
