@@ -39,7 +39,7 @@ function BaseBadge({
         border: 'none'
       },
       primary: {
-        backgroundColor: 'var(--badge-primary-bg, #3b82f6)',
+        backgroundColor: 'var(--badge-primary-bg, #5b8fa3)',
         color: 'var(--badge-primary-text, #ffffff)',
         border: 'none'
       },
@@ -59,7 +59,7 @@ function BaseBadge({
         border: 'none'
       },
       info: {
-        backgroundColor: 'var(--badge-info-bg, #8b5cf6)',
+        backgroundColor: 'var(--badge-info-bg, #7a8fa8)',
         color: 'var(--badge-info-text, #ffffff)',
         border: 'none'
       }
@@ -73,8 +73,8 @@ function BaseBadge({
       },
       primary: {
         backgroundColor: 'transparent',
-        color: 'var(--badge-primary-bg, #3b82f6)',
-        border: '1.5px solid var(--badge-primary-bg, #3b82f6)'
+        color: 'var(--badge-primary-bg, #5b8fa3)',
+        border: '1.5px solid var(--badge-primary-bg, #5b8fa3)'
       },
       success: {
         backgroundColor: 'transparent',
@@ -93,8 +93,8 @@ function BaseBadge({
       },
       info: {
         backgroundColor: 'transparent',
-        color: 'var(--badge-info-bg, #8b5cf6)',
-        border: '1.5px solid var(--badge-info-bg, #8b5cf6)'
+        color: 'var(--badge-info-bg, #7a8fa8)',
+        border: '1.5px solid var(--badge-info-bg, #7a8fa8)'
       }
     };
 

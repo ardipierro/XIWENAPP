@@ -292,7 +292,7 @@ export function UniversalCard({
                   ? layoutConfig.avatarSize
                   : variantConfig.avatarSize,
                 fontSize: layout === 'horizontal' ? '18px' : variantConfig.avatarFontSize,
-                backgroundColor: avatarColor || '#3b82f6',
+                backgroundColor: avatarColor || '#5b8fa3',
               }}
             >
               {typeof avatar === 'string' && avatar.length <= 2
@@ -540,7 +540,7 @@ export function UniversalCard({
                       width: '48px',
                       height: '48px',
                       fontSize: '18px',
-                      backgroundColor: avatarColor || '#3b82f6',
+                      backgroundColor: avatarColor || '#5b8fa3',
                     }}
                   >
                     {typeof avatar === 'string' && avatar.length <= 2

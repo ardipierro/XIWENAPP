@@ -132,7 +132,7 @@ export const SAMPLE_EXERCISES = [
         { id: 6, text: 'la silla', correctCategory: 'femenino' }
       ],
       categories: [
-        { id: 'masculino', name: 'Masculino', color: '#3b82f6' },
+        { id: 'masculino', name: 'Masculino', color: '#5b8fa3' },
         { id: 'femenino', name: 'Femenino', color: '#ec4899' }
       ],
       explanation: 'En español, todos los sustantivos tienen género. El artículo nos ayuda a identificarlo.'

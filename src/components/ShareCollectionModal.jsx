@@ -67,7 +67,7 @@ export function ShareCollectionModal({ isOpen, onClose, collectionId, onShare })
     >
       <form onSubmit={handleSubmit} className="share-collection-modal">
         <div className="share-collection-modal__icon">
-          <Share2 size={48} style={{ color: '#3b82f6' }} />
+          <Share2 size={48} style={{ color: '#5b8fa3' }} />
         </div>
 
         <p className="share-collection-modal__description">

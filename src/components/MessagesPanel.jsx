@@ -336,10 +336,10 @@ function ConversationItem({ conversation, isSelected, onClick }) {
 
   const getRoleColor = (role) => {
     const colors = {
-      admin: '#8b5cf6',
+      admin: '#7a8fa8',
       teacher: '#10b981',
       trial_teacher: '#10b981',
-      student: '#3b82f6',
+      student: '#5b8fa3',
       listener: '#6b7280',
       trial: '#6b7280'
     };

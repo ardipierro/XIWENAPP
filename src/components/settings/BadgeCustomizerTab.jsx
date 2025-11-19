@@ -172,7 +172,7 @@ function BadgeCustomizerTab({ user }) {
         error: '#ef4444',
         warning: '#f59e0b',
         info: '#06b6d4',
-        primary: '#6366f1',
+        primary: '#5b6b8f',
       }
     },
     monochrome: {
@@ -204,9 +204,9 @@ function BadgeCustomizerTab({ user }) {
         '#ef4444': palette.colors.error,   // error
         '#f59e0b': palette.colors.warning, // warning
         '#06b6d4': palette.colors.info,    // info
-        '#6366f1': palette.colors.primary, // primary
+        '#5b6b8f': palette.colors.primary, // primary
         // También mapear colores antiguos
-        '#3b82f6': palette.colors.primary,
+        '#5b8fa3': palette.colors.primary,
         '#16a34a': palette.colors.success,
         '#dc2626': palette.colors.error,
         '#d97706': palette.colors.warning,
@@ -487,7 +487,7 @@ function BadgeCustomizerTab({ user }) {
                 </span>
               </div>
               <div className="flex gap-2 flex-wrap justify-center">
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#3b82f6', color: '#ffffff' }}>
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#5b8fa3', color: '#ffffff' }}>
                   Curso
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#10b981', color: '#ffffff' }}>
@@ -519,7 +519,7 @@ function BadgeCustomizerTab({ user }) {
                 </span>
               </div>
               <div className="flex gap-2 flex-wrap justify-center">
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #3b82f6', color: '#3b82f6', backgroundColor: 'transparent' }}>
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #5b8fa3', color: '#5b8fa3', backgroundColor: 'transparent' }}>
                   Curso
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ border: '1.5px solid #10b981', color: '#10b981', backgroundColor: 'transparent' }}>
@@ -967,7 +967,7 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
     icon: '',
     heroicon: '',
     description: '',
-    color: '#3b82f6',
+    color: '#5b8fa3',
     variant: 'primary',
   });
 

@@ -54,7 +54,7 @@ const DEFAULT_THEME_COLORS = {
     'warning': '#f59e0b',
     'info': '#06b6d4',
     // Acento
-    'accent': '#6366f1',
+    'accent': '#5b6b8f',
   },
   dark: {
     'bg-primary': '#09090b',
@@ -70,7 +70,7 @@ const DEFAULT_THEME_COLORS = {
     'error': '#ef4444',
     'warning': '#f59e0b',
     'info': '#06b6d4',
-    'accent': '#6366f1',
+    'accent': '#5b6b8f',
   },
   ocean: {
     'bg-primary': '#f0f9ff',
@@ -85,7 +85,7 @@ const DEFAULT_THEME_COLORS = {
     'success': '#059669',
     'error': '#dc2626',
     'warning': '#d97706',
-    'info': '#2563eb',
+    'info': '#5b8fa3',
     'accent': '#0284c7',
   },
   forest: {
@@ -134,7 +134,7 @@ const DEFAULT_THEME_COLORS = {
     'error': '#ef4444',
     'warning': '#f59e0b',
     'info': '#06b6d4',
-    'accent': '#3b82f6',
+    'accent': '#5b8fa3',
   }
 };
 
@@ -254,7 +254,7 @@ function DesignLab() {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('backgrounds');
   const [showPaletteGenerator, setShowPaletteGenerator] = useState(false);
-  const [baseColor, setBaseColor] = useState('#6366f1');
+  const [baseColor, setBaseColor] = useState('#5b6b8f');
   const fileInputRef = useRef(null);
 
   // Cargar colores personalizados del localStorage

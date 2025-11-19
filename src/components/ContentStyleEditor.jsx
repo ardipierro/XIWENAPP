@@ -29,7 +29,7 @@ const DEFAULT_STYLES = {
   // Colores
   textColor: '#1f2937', // gray-800
   backgroundColor: '#ffffff', // white
-  accentColor: '#4f46e5', // indigo-600
+  accentColor: '#4a5a7a', // indigo-600
 
   // Espaciado
   paragraphSpacing: 'normal', // tight, normal, relaxed

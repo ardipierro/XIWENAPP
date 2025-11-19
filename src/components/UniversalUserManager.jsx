@@ -38,9 +38,9 @@ import logger from '../utils/logger';
 const getAvatarColor = (role) => {
   const colors = {
     admin: '#f59e0b', // amber/orange
-    teacher: '#8b5cf6', // purple
+    teacher: '#7a8fa8', // purple
     trial_teacher: '#a78bfa', // light purple
-    student: '#3b82f6', // blue
+    student: '#5b8fa3', // blue
     listener: '#10b981', // green
     trial: '#06b6d4', // cyan
   };

@@ -94,7 +94,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
       admin: { text: 'Administrador', color: '#ef4444' },
       teacher: { text: 'Profesor', color: '#10b981' },
       trial_teacher: { text: 'Profesor (Prueba)', color: '#f59e0b' },
-      student: { text: 'Estudiante', color: '#3b82f6' },
+      student: { text: 'Estudiante', color: '#5b8fa3' },
       listener: { text: 'Oyente', color: '#6b7280' },
       trial: { text: 'Prueba', color: '#f59e0b' },
     };

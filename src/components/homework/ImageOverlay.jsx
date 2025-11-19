@@ -24,8 +24,8 @@ const ERROR_COLORS = {
   spelling: '#ef4444',      // red-500
   grammar: '#f97316',       // orange-500
   punctuation: '#eab308',   // yellow-500
-  vocabulary: '#3b82f6',    // blue-500
-  default: '#8b5cf6'        // purple-500
+  vocabulary: '#5b8fa3',    // blue-500
+  default: '#7a8fa8'        // purple-500
 };
 
 /**

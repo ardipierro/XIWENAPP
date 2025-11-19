@@ -322,7 +322,7 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="value" fill="#3b82f6" />
+              <Bar dataKey="value" fill="#5b8fa3" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -417,7 +417,7 @@ export default function ContentAnalytics({ contentId = null, courseId = null, te
                   dataKey="value"
                 >
                   {Object.keys(metrics.contentsByType).map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'][index % 5]} />
+                    <Cell key={`cell-${index}`} fill={['#5b8fa3', '#10b981', '#7a8fa8', '#f59e0b', '#ef4444'][index % 5]} />
                   ))}
                 </Pie>
                 <Tooltip />

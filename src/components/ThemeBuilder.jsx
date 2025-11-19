@@ -46,8 +46,8 @@ import { BaseTabs } from './common';
 // Valores por defecto del sistema
 const DEFAULT_CONFIG = {
   colors: {
-    primary: '#6366f1',
-    secondary: '#8b5cf6',
+    primary: '#5b6b8f',
+    secondary: '#7a8fa8',
     accent: '#0ea5e9',
     success: '#10b981',
     warning: '#f59e0b',
@@ -84,7 +84,7 @@ const PRESETS = {
       ...DEFAULT_CONFIG,
       colors: {
         primary: '#1e40af',
-        secondary: '#3b82f6',
+        secondary: '#5b8fa3',
         accent: '#60a5fa',
         success: '#059669',
         warning: '#d97706',
@@ -99,7 +99,7 @@ const PRESETS = {
       ...DEFAULT_CONFIG,
       colors: {
         primary: '#ec4899',
-        secondary: '#8b5cf6',
+        secondary: '#7a8fa8',
         accent: '#06b6d4',
         success: '#10b981',
         warning: '#f59e0b',
@@ -245,7 +245,7 @@ function ThemeBuilder() {
   const [showPresetModal, setShowPresetModal] = useState(false);
   const [activeTab, setActiveTab] = useState('colors'); // colors | shadows | radius | fonts
   const [showPaletteGenerator, setShowPaletteGenerator] = useState(false);
-  const [baseColor, setBaseColor] = useState('#6366f1');
+  const [baseColor, setBaseColor] = useState('#5b6b8f');
   const [exportFormat, setExportFormat] = useState('css'); // css | json | tailwind
   const fileInputRef = useRef(null);
 

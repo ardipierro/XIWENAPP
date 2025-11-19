@@ -204,7 +204,7 @@ class ErrorBoundary extends React.Component {
                 onClick={this.handleReset}
                 style={{
                   padding: '12px 24px',
-                  backgroundColor: '#4f46e5',
+                  backgroundColor: '#4a5a7a',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -214,10 +214,10 @@ class ErrorBoundary extends React.Component {
                   transition: 'all 0.2s'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#4338ca';
+                  e.currentTarget.style.backgroundColor = '#3d4a63';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#4f46e5';
+                  e.currentTarget.style.backgroundColor = '#4a5a7a';
                 }}
               >
                 Intentar de nuevo
@@ -228,8 +228,8 @@ class ErrorBoundary extends React.Component {
                 style={{
                   padding: '12px 24px',
                   backgroundColor: 'white',
-                  color: '#4f46e5',
-                  border: '2px solid #4f46e5',
+                  color: '#4a5a7a',
+                  border: '2px solid #4a5a7a',
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',

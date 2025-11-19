@@ -472,7 +472,7 @@ export function ExerciseBuilder() {
           { id: 10, text: 'la computadora', correctCategory: 'femenino' }
         ],
         categories: [
-          { id: 'masculino', name: 'Masculino', color: '#3b82f6' },
+          { id: 'masculino', name: 'Masculino', color: '#5b8fa3' },
           { id: 'femenino', name: 'Femenino', color: '#ec4899' }
         ],
         explanation: 'En español, todos los sustantivos tienen género gramatical. Los artículos "el" y "la" nos ayudan a identificarlo.',

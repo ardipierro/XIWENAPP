@@ -35,7 +35,7 @@ const DEFAULT_SETTINGS = {
 
   // Colores - Burbujas
   bubbleBgLeft: '#f3f4f6', // gray-100
-  bubbleBgRight: '#3b82f6', // blue-500
+  bubbleBgRight: '#5b8fa3', // blue-500
   bubbleTextLeft: '#111827', // gray-900
   bubbleTextRight: '#ffffff',
   bubbleBorderColor: '#d1d5db', // gray-300
@@ -43,7 +43,7 @@ const DEFAULT_SETTINGS = {
   bubbleBorderStyle: 'solid', // 'solid' | 'dashed' | 'dotted' | 'none'
 
   // Colores - Badges
-  badgePrimaryBg: '#3b82f6',
+  badgePrimaryBg: '#5b8fa3',
   badgePrimaryText: '#ffffff',
   badgeSuccessBg: '#10b981',
   badgeSuccessText: '#ffffff',
@@ -51,7 +51,7 @@ const DEFAULT_SETTINGS = {
   badgeWarningText: '#ffffff',
   badgeDangerBg: '#ef4444',
   badgeDangerText: '#ffffff',
-  badgeInfoBg: '#8b5cf6',
+  badgeInfoBg: '#7a8fa8',
   badgeInfoText: '#ffffff',
 
   // Colores - Fondos y contenedores
@@ -59,7 +59,7 @@ const DEFAULT_SETTINGS = {
   cardBorder: '#e5e7eb',
   cardShadow: true,
   containerBg: '#f9fafb',
-  accentColor: '#8b5cf6', // purple-600
+  accentColor: '#7a8fa8', // purple-600
 
   // Forma y bordes
   borderRadius: 16, // 0-32
@@ -91,7 +91,7 @@ const DEFAULT_SETTINGS = {
   darkMode: {
     enabled: false,
     bubbleBgLeft: '#374151',
-    bubbleBgRight: '#3b82f6',
+    bubbleBgRight: '#5b8fa3',
     bubbleTextLeft: '#f9fafb',
     bubbleTextRight: '#ffffff',
     cardBg: '#1f2937',

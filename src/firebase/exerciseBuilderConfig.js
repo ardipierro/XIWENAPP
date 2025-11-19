@@ -20,7 +20,7 @@ export const PRESET_THEMES = {
       text: '#18181b',
       textSecondary: '#71717a',
       border: '#e4e4e7',
-      accent: '#3b82f6'
+      accent: '#5b8fa3'
     }
   },
   dark: {

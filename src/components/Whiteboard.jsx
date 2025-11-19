@@ -1977,7 +1977,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
                 backgroundColor: obj.color,
                 cursor: isEditing ? 'text' : (tool === 'select' && isSelected ? 'move' : 'pointer'),
                 ...(otherUserSelection && {
-                  boxShadow: '0 0 0 3px #3b82f6, 0 8px 20px rgba(59, 130, 246, 0.3)'
+                  boxShadow: '0 0 0 3px #5b8fa3, 0 8px 20px rgba(59, 130, 246, 0.3)'
                 })
               }}
               onClick={(e) => {
@@ -2163,7 +2163,7 @@ function Whiteboard({ onBack, initialSession = null, isCollaborative = false, co
                 height: `${obj.height}px`,
                 cursor: isEditing ? 'text' : (tool === 'select' && isSelected ? 'move' : 'pointer'),
                 ...(otherUserSelection && {
-                  boxShadow: '0 0 0 3px #3b82f6, 0 8px 20px rgba(59, 130, 246, 0.3)'
+                  boxShadow: '0 0 0 3px #5b8fa3, 0 8px 20px rgba(59, 130, 246, 0.3)'
                 })
               }}
               onClick={(e) => {
