@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Plus, Sparkles, Search, Grid3x3, List, Eye, Edit, Trash2, Play, Download, Share2, Award, Trophy, BarChart3 } from 'lucide-react';
 import { BaseButton, BaseInput, BaseCard, BaseBadge, CategoryBadge, BaseLoading, BaseAlert, BaseEmptyState, BaseModal, BaseTabs } from './common';
+import { CardDeleteButton } from './cards';
 import FlashCardGeneratorModal from './FlashCardGeneratorModal';
 import FlashCardViewer from './FlashCardViewer';
 import FlashCardEditor from './FlashCardEditor';
@@ -377,12 +378,11 @@ export function FlashCardManager({ user }) {
                     onClick={() => handleEditCollection(collection.id)}
                     title="Editar"
                   />
-                  <BaseButton
-                    variant="ghost"
-                    icon={Trash2}
+                  <CardDeleteButton
+                    onDelete={() => handleDeleteCollection(collection.id)}
+                    variant="solid"
                     size="sm"
-                    onClick={() => handleDeleteCollection(collection.id)}
-                    title="Eliminar"
+                    confirmMessage={`¿Eliminar colección "${collection.name}"?`}
                   />
                 </div>
               </div>

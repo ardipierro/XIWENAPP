@@ -7,6 +7,7 @@ import {
   MapPin, Loader, X, Info
 } from 'lucide-react';
 import BaseButton from './common/BaseButton';
+import { CardDeleteButton } from './cards';
 import {
   createScheduledClass,
   createScheduledClassMultipleDays,
@@ -330,13 +331,12 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                         <RefreshCw size={16} strokeWidth={2} />
                       </button>
                     )}
-                    <button
-                      onClick={() => handleDelete(schedule.id)}
-                      className="btn-icon btn-danger"
-                      title="Eliminar horario"
-                    >
-                      <Trash2 size={16} strokeWidth={2} />
-                    </button>
+                    <CardDeleteButton
+                      onDelete={() => handleDelete(schedule.id)}
+                      variant="solid"
+                      size="sm"
+                      confirmMessage={`¿Eliminar horario de ${getDayName(schedule.dayOfWeek)}?`}
+                    />
                   </div>
                 </div>
 
