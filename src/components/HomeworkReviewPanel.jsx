@@ -159,14 +159,10 @@ export default function HomeworkReviewPanel({ teacherId }) {
   useEffect(() => {
     loadAllReviews();
 
-    // Subscribe to real-time updates for instant feedback
-    const unsubscribe = subscribeToPendingReviews((updatedReviews) => {
-      logger.info(`Received ${updatedReviews.length} reviews from real-time subscription`, 'HomeworkReviewPanel');
-      setReviews(updatedReviews);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    // ✨ FIX: Removed subscription that was clearing all reviews on approval
+    // The subscription only listened to pending reviews, so when a task was approved,
+    // it would update with an empty list and clear everything.
+    // Now we rely on manual reloads after actions (approve, delete, etc.)
   }, [teacherId]);
 
   const loadAllReviews = async () => {
@@ -764,11 +760,13 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
       setIsApproving(true);
       setError(null);
 
-      // Add IDs to corrections if they don't have them
+      // ✨ FIX: When teacher approves, mark ALL corrections as approved by default
+      // If teacher wants to reject specific corrections, they should use CorrectionReviewPanel
+      // Otherwise, approving the task means approving all corrections
       const correctionsWithIds = updatedCorrections.map((corr, idx) => ({
         ...corr,
         id: corr.id || `corr_${idx}`,
-        teacherStatus: corr.teacherStatus || 'pending'
+        teacherStatus: corr.teacherStatus || 'approved'  // Changed from 'pending' to 'approved'
       }));
 
       // Calculate approved corrections summary
