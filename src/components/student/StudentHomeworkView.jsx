@@ -29,6 +29,7 @@ import {
   PageHeader,
   SearchBar
 } from '../common';
+import ImageLightbox from '../common/ImageLightbox';
 import StudentFeedbackView from '../StudentFeedbackView';
 import ManualHomeworkUpload from '../homework/ManualHomeworkUpload';
 import { getReviewsByStudent, REVIEW_STATUS } from '../../firebase/homework_reviews';
@@ -490,106 +491,49 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
   const isProcessing = review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing';
   const isPending = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
 
-  // Estado para zoom y pan
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const containerRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  // Estado para ImageLightbox (pantalla completa)
+  const [showImageLightbox, setShowImageLightbox] = useState(false);
 
   // Combinar estados PROCESSING y PENDING_REVIEW como "En revisión" para el alumno
   const isUnderReview = isProcessing || isPending;
 
-  // Handlers para zoom y pan
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleWheel = (e) => {
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      setZoom(prevZoom => {
-        const newZoom = Math.min(Math.max(0.5, prevZoom + delta), 5);
-        if (newZoom === 1) {
-          setPan({ x: 0, y: 0 });
-        }
-        return newZoom;
-      });
-    };
-
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-    };
-  }, []);
-
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - pan.x,
-      y: e.clientY - pan.y
-    });
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDragging) {
-      setPan({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
   return (
-    <BaseModal
-      isOpen={true}
-      onClose={onClose}
-      title="Detalle de Tarea"
-      size={isFullscreen ? "full" : "xl"}
-    >
-      <div className="space-y-6">
-        {/* Status Alert - Solo mostrar "En revisión" si NO está aprobada */}
-        {isUnderReview && (
-          <BaseAlert variant="warning">
-            <div className="flex items-center gap-3">
-              <Clock size={18} />
+    <>
+      <BaseModal
+        isOpen={true}
+        onClose={onClose}
+        title="Detalle de Tarea"
+        size="xl"
+      >
+        <div className="space-y-6">
+          {/* Status Alert - Solo mostrar "En revisión" si NO está aprobada */}
+          {isUnderReview && (
+            <div className="bg-orange-500 text-white px-4 py-3 rounded-lg flex items-center gap-3">
+              <Clock size={20} strokeWidth={2.5} />
               <div>
-                <p className="font-semibold">En revisión</p>
-                <p className="text-sm mt-1">
+                <p className="font-bold">En revisión</p>
+                <p className="text-sm mt-0.5 opacity-90">
                   Tu profesor está revisando tu tarea. Te notificaremos cuando esté lista.
                 </p>
               </div>
             </div>
-          </BaseAlert>
-        )}
+          )}
 
-        {/* Approved Alert */}
-        {isApproved && (
-          <BaseAlert variant="success">
-            <div className="flex items-center gap-3">
-              <CheckCircle size={18} />
+          {/* Approved Alert */}
+          {isApproved && (
+            <div className="bg-green-500 text-white px-4 py-3 rounded-lg flex items-center gap-3">
+              <CheckCircle size={20} strokeWidth={2.5} />
               <div>
-                <p className="font-semibold">✓ Tarea Corregida</p>
-                <p className="text-sm mt-1">
+                <p className="font-bold">Tarea Corregida</p>
+                <p className="text-sm mt-0.5 opacity-90">
                   Tu profesor ha revisado y aprobado tu tarea. Revisa los comentarios abajo.
                 </p>
               </div>
             </div>
-          </BaseAlert>
-        )}
+          )}
 
-        {/* Date & Info */}
-        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-          <div className="flex items-center justify-between">
+          {/* Date & Info */}
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <Calendar className="text-gray-500" size={20} />
               <div>
@@ -605,92 +549,81 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
                 </p>
               </div>
             </div>
-            {isApproved && review.aiProvider && (
-              <BaseBadge variant="info" size="sm">
-                {review.aiProvider} - {review.aiModel || 'sonnet-4-5'}
-              </BaseBadge>
-            )}
           </div>
-        </div>
 
-        {/* Image with Zoom */}
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <ImageIcon size={18} strokeWidth={2} />
-            Tu Tarea
-            <BaseBadge variant="secondary" size="sm" className="ml-auto cursor-help" title="Arrastra la imagen para moverla. Usa la rueda del mouse para zoom.">
-              🖱️ Arrastra y zoom
-            </BaseBadge>
-            <BaseButton
-              variant="ghost"
-              size="sm"
-              onClick={handleFullscreen}
-            >
-              <Maximize2 size={14} />
-              {isFullscreen ? 'Normal' : 'Pantalla completa'}
-            </BaseButton>
-          </h3>
-          <div
-            ref={containerRef}
-            className="rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-50 dark:bg-gray-900 select-none"
-            style={{
-              cursor: isDragging ? 'grabbing' : 'grab',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              MozUserSelect: 'none',
-              msUserSelect: 'none',
-              WebkitUserDrag: 'none',
-              height: isFullscreen ? 'calc(100vh - 300px)' : '400px'
-            }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            <img
-              src={review.imageUrl}
-              alt="Tarea enviada"
-              style={{
-                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                transformOrigin: 'center',
-                transition: isDragging ? 'none' : 'transform 0.1s ease-out',
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain'
-              }}
-              draggable={false}
-            />
-          </div>
-          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            💡 Controles: 🖱️ Arrastra para mover • 🔍 Rueda del mouse para zoom • Zoom: {Math.round(zoom * 100)}%
-          </div>
-        </div>
-
-        {/* Approved Feedback */}
-        {isApproved && (
-          <div className="bg-green-50 dark:bg-green-900/10 border-2 border-green-200 dark:border-green-800 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Sparkles size={24} className="text-green-600 dark:text-green-400" />
-              <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
-                Corrección del Profesor
+          {/* Image Preview */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <ImageIcon size={18} strokeWidth={2} />
+                Tu Tarea
               </h3>
+              <BaseButton
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowImageLightbox(true)}
+              >
+                <Maximize2 size={16} />
+                Pantalla completa
+              </BaseButton>
             </div>
-
-            {/* Use StudentFeedbackView to show the detailed correction */}
-            <StudentFeedbackView
-              submission={{ id: review.submissionId || review.id }}
-              studentId={studentId}
-            />
+            <div className="rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <img
+                src={review.imageUrl}
+                alt="Tarea enviada"
+                className="w-full h-auto cursor-pointer"
+                onClick={() => setShowImageLightbox(true)}
+              />
+            </div>
           </div>
-        )}
 
-        {/* Close Button */}
-        <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
-          <BaseButton variant="primary" onClick={onClose}>
-            Cerrar
-          </BaseButton>
+          {/* Approved Feedback */}
+          {isApproved && (
+            <div className="bg-green-50 dark:bg-green-900/10 border-2 border-green-200 dark:border-green-800 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Sparkles size={24} className="text-green-600 dark:text-green-400" />
+                <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
+                  Corrección del Profesor
+                </h3>
+              </div>
+
+              {/* Use StudentFeedbackView to show the detailed correction */}
+              <StudentFeedbackView
+                submission={{ id: review.submissionId || review.id }}
+                studentId={studentId}
+              />
+            </div>
+          )}
+
+          {/* Close Button */}
+          <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+            <BaseButton variant="primary" onClick={onClose}>
+              Cerrar
+            </BaseButton>
+          </div>
         </div>
-      </div>
-    </BaseModal>
+      </BaseModal>
+
+      {/* ImageLightbox para pantalla completa */}
+      <ImageLightbox
+        isOpen={showImageLightbox}
+        onClose={() => setShowImageLightbox(false)}
+        imageUrl={review.imageUrl}
+        alt="Tarea enviada"
+        words={review.words || []}
+        errors={review.detailedCorrections || []}
+        showOverlay={isApproved}
+        visibleErrorTypes={{
+          spelling: true,
+          grammar: true,
+          punctuation: true,
+          vocabulary: true
+        }}
+        highlightOpacity={0.25}
+        useWavyUnderline={true}
+        showCorrectionText={true}
+        correctionTextFont="Caveat"
+      />
+    </>
   );
 }
