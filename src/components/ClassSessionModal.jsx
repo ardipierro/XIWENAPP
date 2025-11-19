@@ -78,15 +78,19 @@ function ClassSessionModal({
       const scheduledStart = session.scheduledStart?.toDate?.() || null;
 
       // Para recurring, obtener la fecha de inicio
+      // El campo puede ser 'recurringStartDate' o 'startDate' dependiendo de dónde venga
       let recurringStartDateValue = '';
-      if (session.type === 'recurring' && session.recurringStartDate) {
-        if (session.recurringStartDate.toDate) {
-          // Es un Timestamp de Firestore
-          recurringStartDateValue = session.recurringStartDate.toDate().toISOString().split('T')[0];
-        } else if (session.recurringStartDate instanceof Date) {
-          recurringStartDateValue = session.recurringStartDate.toISOString().split('T')[0];
-        } else if (typeof session.recurringStartDate === 'string') {
-          recurringStartDateValue = session.recurringStartDate;
+      if (session.type === 'recurring') {
+        const dateField = session.recurringStartDate || session.startDate;
+        if (dateField) {
+          if (dateField.toDate) {
+            // Es un Timestamp de Firestore
+            recurringStartDateValue = dateField.toDate().toISOString().split('T')[0];
+          } else if (dateField instanceof Date) {
+            recurringStartDateValue = dateField.toISOString().split('T')[0];
+          } else if (typeof dateField === 'string') {
+            recurringStartDateValue = dateField;
+          }
         }
       }
 
@@ -262,12 +266,13 @@ function ClassSessionModal({
         }));
         sessionData.recurringWeeks = parseInt(formData.recurringWeeks);
 
-        // Fecha de inicio: si es edición y ya existe, mantenerla; si no, usar NOW
-        if (isEditing && session?.recurringStartDate) {
-          sessionData.recurringStartDate = session.recurringStartDate;
-        } else if (formData.recurringStartDate) {
+        // Fecha de inicio: usar la del formulario si está disponible
+        if (formData.recurringStartDate) {
           const startDate = new Date(formData.recurringStartDate);
           sessionData.recurringStartDate = Timestamp.fromDate(startDate);
+        } else if (isEditing && (session?.recurringStartDate || session?.startDate)) {
+          // Si es edición y no hay fecha en el formulario, mantener la original
+          sessionData.recurringStartDate = session.recurringStartDate || session.startDate;
         } else {
           // Si es nueva sesión y no se especifica, usar el momento de creación
           sessionData.recurringStartDate = Timestamp.now();
