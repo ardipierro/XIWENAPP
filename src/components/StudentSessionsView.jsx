@@ -212,10 +212,10 @@ function StudentSessionsView({ student }) {
         </div>
 
         {/* Credits Badge */}
-        <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
-          <CreditCard size={24} className="text-blue-600 dark:text-blue-400" />
+        <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700">
+          <CreditCard size={24} className="text-gray-600 dark:text-gray-400" />
           <div>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
               {credits?.availableCredits || 0}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">Créditos disponibles</div>
@@ -366,7 +366,7 @@ function StudentSessionsView({ student }) {
                     )}
 
                     {/* Credits */}
-                    <div className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
                       <CreditCard size={16} />
                       <span>{session.creditCost || 1} crédito{(session.creditCost || 1) !== 1 ? 's' : ''}</span>
                     </div>
@@ -399,19 +399,19 @@ function StudentSessionsView({ student }) {
           </h4>
           <ul className="space-y-1 text-sm">
             <li className="flex items-start gap-2">
-              <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+              <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
               <span>Las clases <strong>en vivo</strong> aparecen cuando tu profesor las inicia</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+              <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
               <span>Al unirte, se deduce <strong>automáticamente</strong> el costo en créditos</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+              <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
               <span>Las clases <strong>recurrentes</strong> se repiten cada semana en los días indicados</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
+              <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
               <span>Si no tienes créditos suficientes, no podrás unirte a la clase</span>
             </li>
           </ul>

@@ -111,12 +111,12 @@ export default function ImageTaskModal({ task, onClose }) {
 
         {/* Progress */}
         {isRunning && progress && (
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/20 rounded-lg">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-300">
                 Generando: {progress.item}
               </span>
-              <span className="text-sm text-blue-700 dark:text-blue-400">
+              <span className="text-sm text-gray-700 dark:text-gray-400">
                 {progress.current} / {progress.total}
               </span>
             </div>

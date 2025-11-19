@@ -99,7 +99,7 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
           {settings.showBadges && (
             <div className="flex gap-1 mt-2 flex-wrap">
               {line.audioUrl && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-[10px] font-medium">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300 rounded text-[10px] font-medium">
                   <Volume2 size={10} />
                   Audio
                 </span>
@@ -124,7 +124,7 @@ function DialogueBubble({ line, index, totalLines, characters = [], onExerciseCo
         {(hasExtras || hasExercise) && (
           <button
             onClick={() => setShowExtras(!showExtras)}
-            className="mt-2 px-3 py-1 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full flex items-center gap-1 transition-colors"
+            className="mt-2 px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/20 rounded-full flex items-center gap-1 transition-colors"
           >
             {showExtras ? (
               <>

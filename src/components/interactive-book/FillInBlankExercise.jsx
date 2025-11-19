@@ -104,7 +104,7 @@ function FillInBlankExercise({ exercise, onComplete }) {
                     ? isCorrect
                       ? 'border-green-600 text-green-700 dark:text-green-400'
                       : 'border-red-600 text-red-700 dark:text-red-400'
-                    : 'border-gray-400 dark:border-gray-600 focus:border-blue-600 dark:focus:border-blue-400'
+                    : 'border-gray-400 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400'
                 }`}
                 placeholder="Escribe aquí..."
               />

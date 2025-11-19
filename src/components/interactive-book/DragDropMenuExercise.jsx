@@ -146,7 +146,7 @@ function DragDropMenuExercise({ exercise, onComplete }) {
                 key={item.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, item)}
-                className="px-3 py-2 bg-white dark:bg-gray-700 border-2 border-blue-500 rounded-lg cursor-move hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="px-3 py-2 bg-white dark:bg-gray-700 border-2 border-gray-400 rounded-lg cursor-move hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors"
               >
                 <span className="text-sm font-medium text-gray-900 dark:text-white">
                   {item.name}
@@ -190,7 +190,7 @@ function DragDropMenuExercise({ exercise, onComplete }) {
                           ? isCorrect
                             ? 'bg-green-100 dark:bg-green-900/30 border border-green-500'
                             : 'bg-red-100 dark:bg-red-900/30 border border-red-500'
-                          : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700'
+                          : 'bg-gray-50 dark:bg-gray-800/20 border border-gray-300 dark:border-gray-600'
                       }`}
                     >
                       <span className="text-sm text-gray-900 dark:text-white">

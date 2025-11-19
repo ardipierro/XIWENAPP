@@ -180,13 +180,13 @@ function TTSSettings({ alwaysOpen = false }) {
             <div className="space-y-4">
               {/* Voz actual */}
               {selectedVoice && (
-                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         Voz actual: {selectedVoice.name}
                       </div>
-                      <div className="text-xs text-blue-700 dark:text-blue-300 mt-1 flex items-center gap-2">
+                      <div className="text-xs text-gray-700 dark:text-gray-300 mt-1 flex items-center gap-2">
                         <Languages size={12} />
                         {selectedVoice.lang}
                         {selectedVoice.lang.includes('AR') && ' 🇦🇷'}
@@ -448,10 +448,10 @@ function TTSSettings({ alwaysOpen = false }) {
               </div>
 
               {/* Info de ElevenLabs */}
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <Zap size={16} className="text-blue-600 dark:text-blue-400 mt-0.5" />
-                  <div className="text-xs text-blue-900 dark:text-blue-100">
+                  <Zap size={16} className="text-gray-600 dark:text-gray-400 mt-0.5" />
+                  <div className="text-xs text-gray-900 dark:text-gray-100">
                     <p className="font-semibold mb-1">Características de ElevenLabs:</p>
                     <ul className="list-disc list-inside space-y-1">
                       <li>Calidad ultra-natural con inteligencia artificial</li>
@@ -485,13 +485,13 @@ function TTSSettings({ alwaysOpen = false }) {
               {activeTab === 'browser' && (
                 <div className="space-y-4">
                   {selectedVoice && (
-                    <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                             Voz actual: {selectedVoice.name}
                           </div>
-                          <div className="text-xs text-blue-700 dark:text-blue-300 mt-1 flex items-center gap-2">
+                          <div className="text-xs text-gray-700 dark:text-gray-300 mt-1 flex items-center gap-2">
                             <Languages size={12} />
                             {selectedVoice.lang}
                             {selectedVoice.lang.includes('AR') && ' 🇦🇷'}

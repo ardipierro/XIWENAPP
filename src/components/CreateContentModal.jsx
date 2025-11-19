@@ -517,7 +517,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
                   />
                 </div>
 
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
                   <p className="text-xs text-blue-800 dark:text-blue-200">
                     💡 <strong>Tip:</strong> Estos campos son opcionales pero ayudan a mejorar la presentación del video con miniaturas y vistas previas animadas.
                   </p>
@@ -583,7 +583,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
                           className={`
                             px-4 py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2
                             ${isSelected
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                              ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300'
                               : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 text-zinc-600 dark:text-zinc-400'
                             }
                           `}
@@ -649,7 +649,7 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
                     </h3>
                   </div>
                   {formData.metadata.childContentIds.length > 0 && (
-                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-gray-100 dark:bg-gray-800/30 text-indigo-700 dark:text-indigo-300">
                       {formData.metadata.childContentIds.length} contenido(s)
                     </span>
                   )}

@@ -150,9 +150,9 @@ export function InteractiveReadingExercise({
           className={`
             relative inline-block px-1 py-0.5 mx-0.5 rounded transition-all
             ${showTranslations ? 'cursor-pointer' : 'cursor-default'}
-            ${showTranslations ? 'border-b-2 border-dotted border-blue-400 dark:border-blue-500' : ''}
-            ${showTranslations ? 'hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-solid' : ''}
-            ${isViewed ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+            ${showTranslations ? 'border-b-2 border-dotted border-gray-400 dark:border-gray-400' : ''}
+            ${showTranslations ? 'hover:bg-gray-100 dark:hover:bg-blue-900/30 hover:border-solid' : ''}
+            ${isViewed ? 'bg-gray-50 dark:bg-gray-800/20' : ''}
           `}
           style={{
             color: config.customColors?.textColor
@@ -226,7 +226,7 @@ export function InteractiveReadingExercise({
           </div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-500 transition-all duration-300"
+              className="h-full bg-gray-500 transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -256,10 +256,10 @@ export function InteractiveReadingExercise({
               top: `${modalPosition.y}px`
             }}
           >
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-blue-500 dark:border-blue-400 p-4 max-w-sm animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-gray-400 dark:border-gray-400 p-4 max-w-sm animate-in fade-in duration-200">
               {/* Palabra en español */}
               <div className="mb-3">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                <div className="text-2xl font-bold text-gray-600 dark:text-gray-400 mb-1">
                   {clickedWord.spanish}
                 </div>
                 {clickedWord.audioUrl && (

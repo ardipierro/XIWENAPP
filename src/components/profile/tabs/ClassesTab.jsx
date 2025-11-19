@@ -217,7 +217,7 @@ function SessionCard({ session, isTeacher, userRole }) {
 
     if (session.status === 'scheduled') {
       return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-semibold">
+        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400 text-xs font-semibold">
           <Clock size={14} strokeWidth={2} />
           Programada
         </div>
@@ -232,8 +232,8 @@ function SessionCard({ session, isTeacher, userRole }) {
 
     const providers = {
       livekit: { label: 'LiveKit', color: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400' },
-      meet: { label: 'Google Meet', color: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' },
-      zoom: { label: 'Zoom', color: 'bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400' },
+      meet: { label: 'Google Meet', color: 'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400' },
+      zoom: { label: 'Zoom', color: 'bg-gray-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400' },
       voov: { label: 'VooV', color: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400' }
     };
 
@@ -306,7 +306,7 @@ function SessionCard({ session, isTeacher, userRole }) {
         )}
 
         {isSchedule && session.schedules && (
-          <div className="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400">
+          <div className="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400">
             {session.schedules.length} horarios/semana
           </div>
         )}

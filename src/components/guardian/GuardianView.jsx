@@ -217,14 +217,14 @@ function GuardianView({ user, onViewStudentDetails }) {
       )}
 
       {/* Help banner */}
-      <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
         <div className="flex items-start gap-3">
-          <Award size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <Award size={20} className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
               Panel de Tutor
             </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               Como tutor, puedes ver el progreso de los estudiantes que te han sido asignados.
               Haz clic en "Ver Detalle" para ver información más completa de cada estudiante.
             </p>

@@ -213,7 +213,7 @@ function HomeView({ user, onNavigate }) {
               {/* Tarjeta de Nivel */}
               <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg">
+                  <div className="p-3 bg-gray-100 dark:bg-indigo-900/40 rounded-lg">
                     <TrendingUp className="text-indigo-600 dark:text-indigo-400" size={24} />
                   </div>
                   <div>

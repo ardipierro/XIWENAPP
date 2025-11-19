@@ -470,7 +470,7 @@ function ThemeBuilder() {
               {/* Compare Mode */}
               <button
                 onClick={() => setCompareMode(!compareMode)}
-                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-2 ${compareMode ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-2 ${compareMode ? 'bg-gray-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
                 title="Compare side by side"
               >
                 <ArrowLeftRight size={18} />
@@ -501,7 +501,7 @@ function ThemeBuilder() {
               {/* Import */}
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
               >
                 <Upload size={18} />
                 Import
@@ -766,7 +766,7 @@ function ThemeBuilder() {
               </button>
               <button
                 onClick={savePreset}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-blue-600"
               >
                 Save
               </button>

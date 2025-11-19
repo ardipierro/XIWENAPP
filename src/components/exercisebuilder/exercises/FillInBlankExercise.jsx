@@ -209,11 +209,11 @@ export function FillInBlankExercise({
             {shownHints.map((hint, index) => (
               <div
                 key={index}
-                className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+                className="p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg"
               >
                 <div className="flex items-start gap-2">
-                  <HelpCircle size={18} className="text-blue-500 flex-shrink-0 mt-0.5" strokeWidth={2} />
-                  <p className="text-sm text-blue-900 dark:text-blue-100">{hint}</p>
+                  <HelpCircle size={18} className="text-gray-600 flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  <p className="text-sm text-gray-900 dark:text-gray-100">{hint}</p>
                 </div>
               </div>
             ))}

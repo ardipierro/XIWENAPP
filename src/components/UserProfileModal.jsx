@@ -575,7 +575,7 @@ function UserProfileModal({
                   htmlFor="avatar-upload"
                   className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg
                              bg-white dark:bg-zinc-800 border-2 border-zinc-300 dark:border-zinc-700
-                             hover:border-indigo-500 dark:hover:border-indigo-500
+                             hover:border-gray-400 dark:hover:border-gray-400
                              cursor-pointer transition-all text-sm font-semibold"
                 >
                   <Upload size={18} strokeWidth={2} />
@@ -636,7 +636,7 @@ function UserProfileModal({
                     key={key}
                     className={`aspect-square rounded-lg flex items-center justify-center transition-all ${
                       !uploadedAvatarUrl
-                        ? 'bg-indigo-100 dark:bg-indigo-900/20 border-2 border-indigo-500'
+                        ? 'bg-gray-100 dark:bg-indigo-900/20 border-2 border-gray-400'
                         : 'bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-indigo-400'
                     }`}
                     onClick={() => handleSelectIconAvatar(key)}

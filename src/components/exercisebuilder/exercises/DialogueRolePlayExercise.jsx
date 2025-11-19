@@ -146,14 +146,14 @@ export function DialogueRolePlayExercise({
       <div className="space-y-6">
         {/* Contexto */}
         {context && (
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
             <div className="flex items-start gap-2">
-              <MessageCircle size={18} className="text-blue-500 flex-shrink-0 mt-0.5" strokeWidth={2} />
+              <MessageCircle size={18} className="text-gray-600 flex-shrink-0 mt-0.5" strokeWidth={2} />
               <div>
-                <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
                   Situación:
                 </p>
-                <p className="text-sm text-blue-900 dark:text-blue-100">
+                <p className="text-sm text-gray-900 dark:text-gray-100">
                   {context}
                 </p>
               </div>
@@ -164,19 +164,19 @@ export function DialogueRolePlayExercise({
         {/* Roles */}
         <div className="flex items-center justify-center gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div className="flex items-center gap-2">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${userRole === 'A' ? 'bg-blue-500' : 'bg-gray-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${userRole === 'A' ? 'bg-gray-500' : 'bg-gray-400'}`}>
               {userRole === 'A' ? <User size={20} className="text-white" strokeWidth={2} /> : <Bot size={20} className="text-white" strokeWidth={2} />}
             </div>
-            <span className={`font-medium ${userRole === 'A' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+            <span className={`font-medium ${userRole === 'A' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}`}>
               {roleA} {userRole === 'A' && '(Tú)'}
             </span>
           </div>
           <span className="text-gray-400">↔</span>
           <div className="flex items-center gap-2">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${userRole === 'B' ? 'bg-blue-500' : 'bg-gray-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${userRole === 'B' ? 'bg-gray-500' : 'bg-gray-400'}`}>
               {userRole === 'B' ? <User size={20} className="text-white" strokeWidth={2} /> : <Bot size={20} className="text-white" strokeWidth={2} />}
             </div>
-            <span className={`font-medium ${userRole === 'B' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+            <span className={`font-medium ${userRole === 'B' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}`}>
               {roleB} {userRole === 'B' && '(Tú)'}
             </span>
           </div>
@@ -187,7 +187,7 @@ export function DialogueRolePlayExercise({
           <div className="flex items-center gap-3">
             <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 transition-all"
+                className="h-full bg-gray-500 transition-all"
                 style={{ width: `${(currentTurn / dialogue.length) * 100}%` }}
               />
             </div>
@@ -224,7 +224,7 @@ export function DialogueRolePlayExercise({
                       max-w-[80%] p-3 rounded-lg
                       ${showFeedback && isCorrectAnswer ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500' : ''}
                       ${showFeedback && isIncorrectAnswer ? 'bg-red-100 dark:bg-red-900/30 border-2 border-red-500' : ''}
-                      ${!showFeedback ? 'bg-blue-500 text-white' : ''}
+                      ${!showFeedback ? 'bg-gray-500 text-white' : ''}
                     `}
                   >
                     <div className="flex items-center gap-2 mb-1">

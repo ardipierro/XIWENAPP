@@ -43,7 +43,7 @@ function MultipleChoiceExercise({ exercise, onComplete }) {
   const getOptionClass = (option) => {
     if (!isChecked) {
       return selectedOption === option.id
-        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+        ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20'
         : 'border-gray-300 dark:border-gray-600 hover:border-gray-400';
     }
 
@@ -89,7 +89,7 @@ function MultipleChoiceExercise({ exercise, onComplete }) {
                   : isChecked && selectedOption === option.id
                   ? 'border-red-600 bg-red-600'
                   : selectedOption === option.id
-                  ? 'border-blue-600 bg-blue-600'
+                  ? 'border-gray-500 bg-blue-600'
                   : 'border-gray-400'
               }`}>
                 {isChecked && option.isCorrect && (
@@ -109,10 +109,10 @@ function MultipleChoiceExercise({ exercise, onComplete }) {
 
       {/* Explicación */}
       {isChecked && exercise.explanation && (
-        <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
           <div className="flex items-start gap-2">
-            <Lightbulb size={18} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-blue-900 dark:text-blue-100">
+            <Lightbulb size={18} className="text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-gray-900 dark:text-gray-100">
               {exercise.explanation}
             </p>
           </div>

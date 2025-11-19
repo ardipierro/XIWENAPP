@@ -126,8 +126,8 @@ export function VerbIdentificationExercise({
           disabled={showFeedback}
           className={`
             relative inline-block px-1 py-0.5 mx-0.5 rounded transition-all
-            ${!showFeedback ? 'cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30' : 'cursor-default'}
-            ${isSelected && !showFeedback ? 'bg-blue-200 dark:bg-blue-800 font-semibold border-b-2 border-blue-600' : ''}
+            ${!showFeedback ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-blue-900/30' : 'cursor-default'}
+            ${isSelected && !showFeedback ? 'bg-blue-200 dark:bg-blue-800 font-semibold border-b-2 border-gray-500' : ''}
             ${isCorrect ? 'bg-green-200 dark:bg-green-800 font-semibold border-b-2 border-green-600' : ''}
             ${isIncorrect ? 'bg-red-200 dark:bg-red-800 font-semibold border-b-2 border-red-600' : ''}
             ${isMissed ? 'bg-yellow-200 dark:bg-yellow-800 border-b-2 border-yellow-600 opacity-70' : ''}
@@ -192,10 +192,10 @@ export function VerbIdentificationExercise({
       <div className="space-y-6">
         {/* Contador de progreso */}
         {!showFeedback && (
-          <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
             <div className="flex items-center gap-2">
-              <BookOpen size={18} className="text-blue-500" strokeWidth={2} />
-              <span className="text-sm text-blue-900 dark:text-blue-100">
+              <BookOpen size={18} className="text-gray-600" strokeWidth={2} />
+              <span className="text-sm text-gray-900 dark:text-gray-100">
                 Haz clic en las palabras que son verbos
               </span>
             </div>

@@ -17,8 +17,8 @@ function RadioCard({ label, description, icon, selected, onClick }) {
       onClick={onClick}
       className={`flex-1 p-4 border-2 rounded-lg text-left transition-all ${
         selected
-          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md'
-          : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20'
+          ? 'border-gray-400 bg-gray-50 dark:bg-blue-900/30 shadow-md'
+          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 hover:bg-gray-50/50 dark:hover:bg-gray-800/20'
       }`}
     >
       <div className="text-2xl mb-2">{icon}</div>
@@ -46,7 +46,7 @@ function CheckboxItem({ label, description, checked, onChange }) {
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+        className="mt-1 w-4 h-4 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-400 dark:focus:ring-gray-500 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
       />
       <div className="flex-1">
         <div className="font-medium text-gray-900 dark:text-white text-sm">{label}</div>
@@ -222,7 +222,7 @@ function TranslatorConfigCard({ config, onChange }) {
 
           {/* 2. PROVEEDOR DE IA (solo si mode = ai o hybrid) */}
           {(config.mode === 'ai' || config.mode === 'hybrid') && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="p-4 bg-gray-50 dark:bg-gray-800/20 rounded-lg border border-gray-200 dark:border-gray-700">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
                 🤖 Proveedor de Inteligencia Artificial
               </h3>
@@ -445,8 +445,8 @@ function TranslatorConfigCard({ config, onChange }) {
           </div>
 
           {/* INFO FOOTER */}
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="p-3 bg-gray-50 dark:bg-gray-800/20 rounded-lg border border-gray-200 dark:border-gray-700">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               💡 <strong>Tip:</strong> El modo híbrido es ideal: usa diccionarios para palabras comunes (rápido y gratis)
               y la IA para frases o contextos complejos.
             </p>

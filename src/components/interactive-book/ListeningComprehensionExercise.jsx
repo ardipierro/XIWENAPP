@@ -137,7 +137,7 @@ function ListeningComprehensionExercise({ exercise, onComplete }) {
                         ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                         : 'border-gray-300 dark:border-gray-600 opacity-50'
                       : isSelected
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20'
                       : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
                   }`}
                 >
@@ -145,7 +145,7 @@ function ListeningComprehensionExercise({ exercise, onComplete }) {
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                       isChecked && option.isCorrect ? 'border-green-600 bg-green-600' :
                       isChecked && isSelected ? 'border-red-600 bg-red-600' :
-                      isSelected ? 'border-blue-600 bg-blue-600' : 'border-gray-400'
+                      isSelected ? 'border-gray-500 bg-blue-600' : 'border-gray-400'
                     }`}>
                       {isChecked && option.isCorrect && <Check size={14} className="text-white" />}
                       {isChecked && isSelected && !option.isCorrect && <X size={14} className="text-white" />}
@@ -172,7 +172,7 @@ function ListeningComprehensionExercise({ exercise, onComplete }) {
                   ? results[question.id]
                     ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                     : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-300 dark:border-gray-600 focus:border-blue-500'
+                  : 'border-gray-300 dark:border-gray-600 focus:border-gray-400'
               }`}
             />
             {isChecked && !results[question.id] && (

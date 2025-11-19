@@ -226,7 +226,7 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
               disabled={isTranslating}
               className="
                 flex items-center justify-center gap-2 px-5 py-3
-                bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+                bg-blue-600 hover:bg-blue-700 dark:bg-gray-500 dark:hover:bg-blue-600
                 disabled:bg-blue-400 dark:disabled:bg-blue-300
                 text-white text-sm font-medium
                 rounded-lg shadow-lg

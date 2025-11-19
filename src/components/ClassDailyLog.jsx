@@ -576,7 +576,7 @@ function ClassDailyLog({ logId, user, onBack }) {
               href={content.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-2xl text-blue-600 dark:text-blue-400 hover:underline break-all"
+              className="text-2xl text-gray-600 dark:text-gray-400 hover:underline break-all"
             >
               {content.url}
             </a>

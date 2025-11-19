@@ -109,7 +109,7 @@ export function VersionHistory({ blockId, currentContent, onRestore }) {
         <History size={16} />
         <span className="text-sm font-semibold">Historial</span>
         {versions.length > 0 && (
-          <span className="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">
+          <span className="px-2 py-0.5 bg-gray-500 text-white text-xs font-bold rounded-full">
             {versions.length}
           </span>
         )}
@@ -126,7 +126,7 @@ export function VersionHistory({ blockId, currentContent, onRestore }) {
             <div className="flex items-center justify-between p-6 border-b
                            border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <History size={24} className="text-blue-500" />
+                <History size={24} className="text-gray-600" />
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     Historial de Versiones
@@ -163,7 +163,7 @@ export function VersionHistory({ blockId, currentContent, onRestore }) {
                     <div
                       key={version.id}
                       className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg
-                               hover:border-blue-400 dark:hover:border-blue-600 transition-colors
+                               hover:border-gray-400 dark:hover:border-gray-500 transition-colors
                                bg-white dark:bg-gray-900"
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -193,8 +193,8 @@ export function VersionHistory({ blockId, currentContent, onRestore }) {
                         <div className="flex gap-2">
                           <button
                             onClick={() => setShowPreview(version.id === showPreview ? null : version.id)}
-                            className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900
-                                     text-blue-600 dark:text-blue-300 hover:bg-blue-200
+                            className="p-2 rounded-lg bg-gray-100 dark:bg-blue-900
+                                     text-gray-600 dark:text-gray-300 hover:bg-blue-200
                                      dark:hover:bg-blue-800 transition-colors"
                             title="Vista previa"
                           >

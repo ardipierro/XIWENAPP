@@ -494,7 +494,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
 
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
               >
                 <Upload size={18} />
                 Import
@@ -536,7 +536,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
                     onClick={() => changeAppTheme(value)}
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       selectedTheme === value
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-gray-500 text-white'
                         : isDarkTheme
                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -595,7 +595,7 @@ ${Object.entries(themeColors).filter(([key]) => key === 'accent').map(([key, val
                   onClick={() => setActiveTab(key)}
                   className={`w-full px-4 py-2 rounded-lg text-left font-medium transition-colors ${
                     activeTab === key
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-gray-500 text-white'
                       : isDarkTheme
                       ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

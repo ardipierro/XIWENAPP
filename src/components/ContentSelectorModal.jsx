@@ -150,9 +150,9 @@ function ContentSelectorModal({ isOpen, onClose, onSelect, teacherId }) {
         </div>
 
         {/* Botón especial: Agregar Bloque de Texto */}
-        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50
-                       dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border-2
-                       border-blue-200 dark:border-blue-800">
+        <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100
+                       dark:from-gray-800/20 dark:to-gray-700/20 rounded-lg border-2
+                       border-gray-200 dark:border-gray-700">
           <button
             onClick={() => {
               const textBlock = {
@@ -167,20 +167,20 @@ function ContentSelectorModal({ isOpen, onClose, onSelect, teacherId }) {
               handleClose();
             }}
             className="w-full p-4 bg-white dark:bg-gray-800 rounded-lg border-2
-                     border-blue-300 dark:border-blue-700 hover:border-blue-400
-                     dark:hover:border-blue-600 transition-all group"
+                     border-gray-300 dark:border-gray-600 hover:border-gray-400
+                     dark:hover:border-gray-500 transition-all group"
           >
             <div className="flex items-center gap-3">
-              <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/50
+              <div className="flex-shrink-0 w-12 h-12 bg-gray-100 dark:bg-gray-800/50
                             rounded-lg flex items-center justify-center group-hover:scale-110
                             transition-transform">
-                <FileText size={24} className="text-blue-600 dark:text-blue-400" />
+                <FileText size={24} className="text-gray-600 dark:text-gray-400" />
               </div>
               <div className="flex-1 text-left">
-                <div className="font-semibold text-blue-900 dark:text-blue-100 text-lg">
+                <div className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
                   ➕ Agregar Bloque de Texto
                 </div>
-                <div className="text-sm text-blue-700 dark:text-blue-300">
+                <div className="text-sm text-gray-700 dark:text-gray-300">
                   Crea un espacio de texto editable con formato enriquecido
                 </div>
               </div>

@@ -488,14 +488,14 @@ function ClassSessionModal({
                     className={`
                       p-4 rounded-lg border-2 transition-all
                       ${formData.videoProvider === 'livekit'
-                        ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                        ? 'border-gray-400 dark:border-gray-400 bg-gray-50 dark:bg-gray-800/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }
                     `}
                   >
-                    <Video size={24} strokeWidth={2} className={`mx-auto mb-2 ${formData.videoProvider === 'livekit' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`} />
-                    <div className={`text-sm font-medium ${formData.videoProvider === 'livekit' ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'}`}>LiveKit</div>
-                    <div className={`text-xs mt-1 ${formData.videoProvider === 'livekit' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'}`}>Integrado</div>
+                    <Video size={24} strokeWidth={2} className={`mx-auto mb-2 ${formData.videoProvider === 'livekit' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-700 dark:text-gray-300'}`} />
+                    <div className={`text-sm font-medium ${formData.videoProvider === 'livekit' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-900 dark:text-white'}`}>LiveKit</div>
+                    <div className={`text-xs mt-1 ${formData.videoProvider === 'livekit' ? 'text-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400'}`}>Integrado</div>
                   </button>
 
                   <button
@@ -547,7 +547,7 @@ function ClassSessionModal({
                   </button>
                 </div>
 
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
                   <p className="text-sm text-blue-800 dark:text-blue-200">
                     💡 La reunión se creará automáticamente al iniciar la clase. Los estudiantes recibirán un link directo.
                   </p>
@@ -694,14 +694,14 @@ function ClassSessionModal({
                     />
 
                     {formData.selectedDays.length > 0 && formData.recurringWeeks > 0 && (
-                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
                         <div className="flex items-start gap-2">
-                          <Users className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                          <Users className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
                           <div>
-                            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                               Se crearán {formData.selectedDays.length * formData.recurringWeeks} clases
                             </p>
-                            <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                            <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
                               {formData.selectedDays.length} día{formData.selectedDays.length !== 1 ? 's' : ''} por semana × {formData.recurringWeeks} semana{formData.recurringWeeks !== 1 ? 's' : ''}
                             </p>
                           </div>
@@ -825,7 +825,7 @@ function ClassSessionModal({
                                   <div className="flex-1">
                                     <div className="font-medium text-gray-900 dark:text-white">{student.name}</div>
                                     <div className="text-sm text-gray-600 dark:text-gray-400">{student.email}</div>
-                                    <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                                       📅 Inscrito desde: {enrollment.enrolledAt?.toDate().toLocaleDateString('es-ES', {
                                         day: 'numeric',
                                         month: 'short',
@@ -856,7 +856,7 @@ function ClassSessionModal({
                             <Plus size={18} strokeWidth={2} />
                             Inscribir Nuevo Estudiante
                           </h4>
-                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <p className="text-sm text-blue-800 dark:text-blue-200">
                               💡 Al inscribir un estudiante, se agregará automáticamente a <strong>todas las clases futuras</strong> desde hoy en adelante.
                             </p>
@@ -959,7 +959,7 @@ function ClassSessionModal({
                               <div className="flex items-center gap-2">
                                 <div className="font-medium text-gray-900 dark:text-white">{content.title}</div>
                                 {content.type && (
-                                  <span className="px-2 py-1 text-xs rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                  <span className="px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300">
                                     {content.type}
                                   </span>
                                 )}
@@ -1033,7 +1033,7 @@ function ClassSessionModal({
                               <div className="flex items-center gap-2">
                                 <div className="font-medium text-gray-900 dark:text-white">{content.title}</div>
                                 {content.type && (
-                                  <span className="px-2 py-1 text-xs rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                  <span className="px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300">
                                     {content.type}
                                   </span>
                                 )}

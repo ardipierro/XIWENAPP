@@ -123,7 +123,7 @@ export function EditableTextBlock({
           onClick={() => setIsEditing(true)}
           className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100
                      transition-all duration-200 flex items-center gap-2 px-3 py-2
-                     bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600
+                     bg-gray-500 text-white rounded-lg shadow-lg hover:bg-blue-600
                      hover:shadow-xl transform hover:scale-105"
         >
           <Edit2 size={16} />
@@ -267,7 +267,7 @@ export function EditableTextBlock({
         className={`
           p-6 bg-white dark:bg-gray-900 min-h-[120px]
           ${isEditing
-            ? 'border-2 border-blue-400 dark:border-blue-500 rounded-b-lg shadow-lg'
+            ? 'border-2 border-gray-400 dark:border-gray-400 rounded-b-lg shadow-lg'
             : 'border border-gray-200 dark:border-gray-700 rounded-lg'
           }
         `}
@@ -295,7 +295,7 @@ function ToolbarButton({ onClick, active, children, title }) {
       className={`
         p-2 rounded transition-all
         ${active
-          ? 'bg-blue-500 text-white shadow-md'
+          ? 'bg-gray-500 text-white shadow-md'
           : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
         }
       `}

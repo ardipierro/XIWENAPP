@@ -304,7 +304,7 @@ export default function UniversalUserManager({ user, userRole }) {
               return (
                 <div
                   key={userItem.id}
-                  className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-500 dark:hover:border-blue-500 cursor-pointer"
+                  className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-400 cursor-pointer"
                   onClick={() => handleViewUserProfile(userItem)}
                 >
                   <div className="flex items-stretch min-h-[96px]">

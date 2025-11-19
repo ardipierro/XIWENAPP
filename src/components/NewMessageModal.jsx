@@ -136,8 +136,8 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
   const getRoleBadgeVariant = (role) => {
     const variants = {
       admin: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
-      teacher: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
-      trial_teacher: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+      teacher: 'bg-gray-100 text-blue-800 dark:bg-gray-800/20 dark:text-gray-300',
+      trial_teacher: 'bg-gray-100 text-blue-800 dark:bg-gray-800/20 dark:text-gray-300',
       student: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
       listener: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
       trial: 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300'

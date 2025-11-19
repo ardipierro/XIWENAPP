@@ -520,7 +520,7 @@ function AudioPlayer({
               <span className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${
                 isElevenLabs
                   ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                  : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  : 'bg-gray-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300'
               }`}>
                 {isElevenLabs ? (
                   <>

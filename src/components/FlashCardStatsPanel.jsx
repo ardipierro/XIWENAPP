@@ -59,7 +59,7 @@ export function FlashCardStatsPanel({ user, collectionId = null }) {
     const level = getMasteryLevel();
     switch (level) {
       case 'Experto': return 'bg-green-500';
-      case 'Avanzado': return 'bg-blue-500';
+      case 'Avanzado': return 'bg-gray-500';
       case 'Intermedio': return 'bg-amber-500';
       default: return 'bg-zinc-500';
     }
@@ -105,8 +105,8 @@ export function FlashCardStatsPanel({ user, collectionId = null }) {
         {/* Total Cards */}
         <BaseCard className="p-6 hover:shadow-md transition-shadow">
           <div className="flex items-start gap-4">
-            <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-              <Target size={32} className="text-blue-600 dark:text-blue-400" />
+            <div className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800/30">
+              <Target size={32} className="text-gray-600 dark:text-gray-400" />
             </div>
             <div className="flex-1">
               <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">

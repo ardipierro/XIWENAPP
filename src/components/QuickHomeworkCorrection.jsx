@@ -345,8 +345,8 @@ function ReviewCard({ review, onClick }) {
         return {
           icon: Clock,
           text: 'Procesando',
-          color: 'text-blue-600 dark:text-blue-400',
-          bg: 'bg-blue-100 dark:bg-blue-900'
+          color: 'text-gray-600 dark:text-gray-400',
+          bg: 'bg-gray-100 dark:bg-blue-900'
         };
       case REVIEW_STATUS.PENDING_REVIEW:
         return {
@@ -523,11 +523,11 @@ function ReviewDetailModal({ review, onClose }) {
 
           {/* Status */}
           {liveReview.status === REVIEW_STATUS.PROCESSING && (
-            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-blue-900 border border-gray-200 dark:border-gray-600 rounded-lg">
               <div className="flex items-center gap-3">
                 <BaseLoading variant="spinner" size="sm" />
                 <div>
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Procesando
                   </p>
                 </div>
@@ -609,7 +609,7 @@ function ReviewDetailModal({ review, onClose }) {
 
               {/* Error Summary */}
               {liveReview.errorSummary && liveReview.errorSummary.total > 0 && (
-                <div className="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                <div className="p-4 bg-gray-50 dark:bg-blue-900 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
                     Resumen de Errores
                   </h3>
@@ -743,9 +743,9 @@ function ErrorSection({ title, errors, color }) {
       text: 'text-yellow-800 dark:text-yellow-200'
     },
     blue: {
-      bg: 'bg-blue-50 dark:bg-blue-900',
-      border: 'border-blue-200 dark:border-blue-700',
-      title: 'text-blue-900 dark:text-blue-100',
+      bg: 'bg-gray-50 dark:bg-blue-900',
+      border: 'border-gray-200 dark:border-gray-600',
+      title: 'text-gray-900 dark:text-gray-100',
       text: 'text-blue-800 dark:text-blue-200'
     }
   };

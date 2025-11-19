@@ -195,8 +195,8 @@ function AudioCacheTab() {
                 {stats?.totalSizeFormatted || '0 B'}
               </div>
             </div>
-            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <HardDrive size={24} className="text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <HardDrive size={24} className="text-gray-600 dark:text-gray-400" />
             </div>
           </div>
         </UniversalCard>
@@ -263,10 +263,10 @@ function AudioCacheTab() {
           </div>
 
           {/* Explicación */}
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/20 rounded-lg">
             <div className="flex items-start gap-2">
-              <TrendingUp size={18} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-700 dark:text-blue-300">
+              <TrendingUp size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-gray-700 dark:text-gray-300">
                 <strong>Hit Rate alto</strong> = Más audios servidos desde caché (más rápido, menos costos).
                 <br />
                 <strong>Cache Miss</strong> = Audio no estaba en caché, se generó con ElevenLabs.

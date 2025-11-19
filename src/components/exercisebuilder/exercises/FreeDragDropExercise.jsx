@@ -246,7 +246,7 @@ export function FreeDragDropExercise({
           <div
             className={`
               p-4 rounded-lg border-2 border-dashed transition-all
-              ${dragOverCategory === 'uncategorized' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'}
+              ${dragOverCategory === 'uncategorized' ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20' : 'border-gray-300 dark:border-gray-600'}
             `}
             onDragOver={(e) => {
               e.preventDefault();
@@ -275,7 +275,7 @@ export function FreeDragDropExercise({
                   className="
                     inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700
                     border-2 border-gray-300 dark:border-gray-600 rounded-lg
-                    cursor-move hover:border-blue-400 dark:hover:border-blue-500
+                    cursor-move hover:border-gray-400 dark:hover:border-gray-400
                     transition-all shadow-sm hover:shadow-md
                   "
                   style={{
@@ -301,7 +301,7 @@ export function FreeDragDropExercise({
                 key={category.id}
                 className={`
                   p-4 rounded-lg border-2 transition-all min-h-[200px]
-                  ${isDragOver && !showFeedback ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105' : ''}
+                  ${isDragOver && !showFeedback ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20 scale-105' : ''}
                   ${!isDragOver && !showFeedback ? 'border-gray-300 dark:border-gray-600' : ''}
                   ${showFeedback ? 'border-gray-300 dark:border-gray-600' : ''}
                 `}

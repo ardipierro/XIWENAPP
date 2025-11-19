@@ -44,8 +44,8 @@ function DialogueExtras({
   // Estilos de tabs
   const tabColors = {
     blue: {
-      active: 'bg-blue-500 text-white border-blue-600',
-      inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+      active: 'bg-gray-500 text-white border-gray-500',
+      inactive: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/20'
     },
     amber: {
       active: 'bg-amber-500 text-white border-amber-600',

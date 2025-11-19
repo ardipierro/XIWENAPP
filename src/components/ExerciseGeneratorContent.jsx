@@ -51,7 +51,7 @@ export const FillGap = ({ sentence, answer, onComplete }) => {
           className={`
             mx-2 px-3 py-1 min-w-[120px] border-2 rounded-lg
             text-center font-medium transition-all
-            focus:ring-2 focus:ring-blue-500 focus:outline-none
+            focus:ring-2 focus:ring-gray-400 focus:outline-none
             disabled:opacity-50 disabled:cursor-not-allowed
             ${feedback === 'correct' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : ''}
             ${feedback === 'incorrect' ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' : ''}

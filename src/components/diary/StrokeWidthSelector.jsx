@@ -49,14 +49,14 @@ export function StrokeWidthSelector({ value = 4, onChange }) {
                  [&::-webkit-slider-thumb]:w-4
                  [&::-webkit-slider-thumb]:h-4
                  [&::-webkit-slider-thumb]:rounded-full
-                 [&::-webkit-slider-thumb]:bg-blue-500
+                 [&::-webkit-slider-thumb]:bg-gray-500
                  [&::-webkit-slider-thumb]:cursor-pointer
                  [&::-webkit-slider-thumb]:shadow-md
                  [&::-webkit-slider-thumb]:hover:bg-blue-600
                  [&::-moz-range-thumb]:w-4
                  [&::-moz-range-thumb]:h-4
                  [&::-moz-range-thumb]:rounded-full
-                 [&::-moz-range-thumb]:bg-blue-500
+                 [&::-moz-range-thumb]:bg-gray-500
                  [&::-moz-range-thumb]:border-0
                  [&::-moz-range-thumb]:cursor-pointer
                  [&::-moz-range-thumb]:hover:bg-blue-600"
@@ -77,8 +77,8 @@ export function StrokeWidthSelector({ value = 4, onChange }) {
 
       {/* Valor numérico */}
       <div className="flex items-center justify-center min-w-[40px] px-2 py-1 rounded-lg
-                     bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700">
-        <span className="text-sm font-bold text-blue-900 dark:text-blue-100">
+                     bg-gray-100 dark:bg-blue-900 border border-gray-300 dark:border-gray-600">
+        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
           {value}
         </span>
       </div>

@@ -219,7 +219,7 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
           >
             {/* Front (Spanish) */}
             <div
-              className="absolute inset-0 backface-hidden rounded-xl shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-zinc-800 dark:to-zinc-900 border-2 border-blue-200 dark:border-blue-700 flex flex-col items-center justify-center p-8"
+              className="absolute inset-0 backface-hidden rounded-xl shadow-xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-zinc-800 dark:to-zinc-900 border-2 border-gray-200 dark:border-gray-600 flex flex-col items-center justify-center p-8"
               style={{ backfaceVisibility: 'hidden' }}
             >
               {currentCard.imageUrl && (
@@ -236,7 +236,7 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
                   {currentCard.spanish}
                 </div>
                 <button
-                  className="p-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+                  className="p-3 rounded-full bg-gray-500 hover:bg-blue-600 text-white transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     handlePlayAudio();
@@ -314,7 +314,7 @@ export function FlashCardViewer({ isOpen, onClose, collectionId, user }) {
                 variant="outline"
                 size="sm"
                 onClick={() => handleRateCard(3)}
-                className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                className="border-gray-400 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/20"
               >
                 <Check size={16} />
                 Bien

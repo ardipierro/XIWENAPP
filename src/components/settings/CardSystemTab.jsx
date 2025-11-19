@@ -832,10 +832,10 @@ Los cambios se aplican instantáneamente en toda la app.`);
 
           <div className="p-5 rounded-xl hover:scale-105 transition-transform cursor-pointer" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/10">
-                <Layers size={20} className="text-blue-600" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-500/10">
+                <Layers size={20} className="text-gray-600" />
               </div>
-              <div className="text-3xl font-black text-blue-600">
+              <div className="text-3xl font-black text-gray-600">
                 {globalStats.baseCard.count}
               </div>
             </div>

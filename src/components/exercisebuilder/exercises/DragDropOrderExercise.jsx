@@ -188,7 +188,7 @@ export function DragDropOrderExercise({
                   flex items-center gap-4 p-4 rounded-lg border-2 transition-all
                   ${!showFeedback ? 'cursor-move hover:border-zinc-400 dark:hover:border-zinc-500' : 'cursor-default'}
                   ${isDragging ? 'opacity-40 scale-95' : 'opacity-100'}
-                  ${isDragOver && !showFeedback ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105' : ''}
+                  ${isDragOver && !showFeedback ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/20 scale-105' : ''}
                   ${!isDragOver && !showFeedback ? 'border-gray-300 dark:border-gray-600' : ''}
                   ${isCorrectPosition ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}
                   ${isIncorrectPosition ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}

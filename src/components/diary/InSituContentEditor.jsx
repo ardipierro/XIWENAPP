@@ -100,7 +100,7 @@ export function InSituContentEditor({
             {/* Botón Vista Previa (MEJORA 2) */}
             <button
               onClick={() => setShowPreview(!showPreview)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600
+              className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-blue-600
                          text-white rounded-lg transition-colors font-semibold shadow-md"
             >
               {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -154,19 +154,19 @@ export function InSituContentEditor({
 
       {/* Vista Previa (MEJORA 2) */}
       {isEditing && showPreview && (
-        <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg
-                        border-2 border-blue-300 dark:border-blue-700">
+        <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/20 rounded-lg
+                        border-2 border-gray-300 dark:border-gray-600">
           <div className="flex items-center gap-2 mb-3">
-            <Eye className="text-blue-600 dark:text-blue-400" size={20} />
-            <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+            <Eye className="text-gray-600 dark:text-gray-400" size={20} />
+            <h4 className="font-semibold text-gray-900 dark:text-gray-100">
               👁️ Vista Previa
             </h4>
-            <span className="text-xs text-blue-700 dark:text-blue-300 ml-auto">
+            <span className="text-xs text-gray-700 dark:text-gray-300 ml-auto">
               Así se verá el contenido después de guardar
             </span>
           </div>
-          <div className="bg-white dark:bg-gray-900 p-4 rounded border border-blue-200
-                          dark:border-blue-800">
+          <div className="bg-white dark:bg-gray-900 p-4 rounded border border-gray-200
+                          dark:border-gray-700">
             {renderComponent(editedData)}
           </div>
         </div>

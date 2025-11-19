@@ -138,13 +138,13 @@ function UpcomingClassesBanner({ student }) {
     <UniversalCard
       variant="elevated"
       size="md"
-      className="border-l-4 border-blue-500 dark:border-blue-400"
+      className="border-l-4 border-gray-400 dark:border-gray-500"
     >
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Calendar size={24} className="text-blue-600 dark:text-blue-400" />
+            <Calendar size={24} className="text-gray-600 dark:text-gray-400" />
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               Próximas Clases
             </h2>
@@ -159,7 +159,7 @@ function UpcomingClassesBanner({ student }) {
           {upcomingClasses.map((classItem, index) => (
             <div
               key={classItem.id}
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800 hover:shadow-md transition-shadow"
+              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-700/20 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
             >
               {/* Emoji/Icon */}
               <div className="flex-shrink-0 text-3xl">
@@ -214,7 +214,7 @@ function UpcomingClassesBanner({ student }) {
                   className={`${
                     classItem.status === 'live'
                       ? 'text-red-500 dark:text-red-400'
-                      : 'text-blue-500 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400'
                   }`}
                 />
               </div>
@@ -226,7 +226,7 @@ function UpcomingClassesBanner({ student }) {
         <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
           <a
             href="/dashboard/my-classes"
-            className="flex items-center justify-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+            className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
           >
             Ver todas mis clases
             <ChevronRight size={16} />

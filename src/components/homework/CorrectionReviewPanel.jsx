@@ -317,7 +317,7 @@ function CorrectionItem({ correction, config, onStatusChange, onNoteChange }) {
 
         {/* Explanation */}
         {correction.explanation && (
-          <div className="p-2 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded">
+          <div className="p-2 bg-gray-50 dark:bg-blue-900/10 border border-gray-200 dark:border-gray-700 rounded">
             <p className="text-xs text-blue-800 dark:text-blue-200">
               {correction.explanation}
             </p>
