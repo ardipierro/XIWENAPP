@@ -18,7 +18,7 @@
 
 /**
  * Configuración por defecto de todas las categorías de badges
- * Estructura: { key: { variant, color, label, icon?, description? } }
+ * Estructura: { key: { variant, color, label, icon?, description?, badgeStyle? } }
  */
 export const DEFAULT_BADGE_CONFIG = {
   // ========================================
@@ -31,7 +31,8 @@ export const DEFAULT_BADGE_CONFIG = {
     icon: '📚',
     heroicon: 'BookOpenIcon',
     description: 'Contenedor de lecciones y ejercicios',
-    category: 'contentType'
+    category: 'contentType',
+    badgeStyle: 'solid'
   },
   CONTENT_LESSON: {
     variant: 'success',
