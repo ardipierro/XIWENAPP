@@ -3,7 +3,7 @@
  * @module components/VoiceRecorder
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Send, X, Play, Pause } from 'lucide-react';
 import logger from '../utils/logger';
 import { BaseButton } from './common';
@@ -30,104 +30,63 @@ function VoiceRecorder({ onSend, onCancel }) {
   const pausedTimeRef = useRef(0);
   const streamRef = useRef(null);
 
-  /**
-   * Release media stream and free microphone
-   */
-  const releaseMediaStream = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => {
-        track.stop();
-        logger.info(`Stopped media track: ${track.kind}, readyState: ${track.readyState}`, 'VoiceRecorder');
-      });
-      streamRef.current = null;
-      logger.info('Media stream released', 'VoiceRecorder');
-    }
-  }, []);
-
-  /**
-   * Stop timer
-   */
-  const stopTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
-  // Cleanup effect
   useEffect(() => {
+    startRecording();
     return () => {
-      // CRITICAL CLEANUP: Release microphone immediately
-      logger.info('VoiceRecorder unmounting - cleaning up...', 'VoiceRecorder');
-
       stopTimer();
-
-      // Stop MediaRecorder first
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        try {
-          mediaRecorderRef.current.stop();
-          logger.info('MediaRecorder stopped during cleanup', 'VoiceRecorder');
-        } catch (error) {
-          logger.error('Error stopping MediaRecorder during cleanup', error, 'VoiceRecorder');
-        }
+      // Stop all media tracks to release microphone
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+          logger.info('Stopped media track on cleanup', 'VoiceRecorder');
+        });
+        streamRef.current = null;
       }
-
-      // IMMEDIATELY stop all media tracks to release microphone
-      releaseMediaStream();
-
-      // Revoke object URL to free memory
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
     };
-  }, [audioUrl, releaseMediaStream, stopTimer]);
+  }, []);
 
   /**
    * Start recording
    */
-  const startRecording = useCallback(async () => {
+  const startRecording = async () => {
     try {
-      // Request high-quality audio with balanced constraints
-      // Note: Some browsers don't support high sampleRate, so we use 'ideal'
+      // Request high-quality audio with specific constraints
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-          // Use ideal instead of exact to allow browser flexibility
-          sampleRate: { ideal: 48000 },
-          sampleSize: { ideal: 16 },
-          channelCount: 1 // Mono for voice
+          sampleRate: 48000, // Higher sample rate for better quality
+          channelCount: 1 // Mono is fine for voice
         }
       });
-      streamRef.current = stream;
+      streamRef.current = stream; // Save stream reference
 
-      // Log actual audio settings received
-      const audioTrack = stream.getAudioTracks()[0];
-      const settings = audioTrack.getSettings();
-      logger.info(`Audio track settings: sampleRate=${settings.sampleRate}Hz, sampleSize=${settings.sampleSize}bit, channels=${settings.channelCount}`, 'VoiceRecorder');
-
-      // Determine the best available audio codec with VERY high bitrate
-      let options = { audioBitsPerSecond: 256000 }; // 256kbps for excellent quality
+      // Determine the best available audio codec with high bitrate
+      let options = { audioBitsPerSecond: 128000 }; // 128kbps for good quality
 
       // Try different codecs in order of preference
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
         options.mimeType = 'audio/webm;codecs=opus';
-        logger.info('Using Opus codec (best for voice)', 'VoiceRecorder');
+        logger.info('Using Opus codec for audio recording', 'VoiceRecorder');
       } else if (MediaRecorder.isTypeSupported('audio/webm')) {
         options.mimeType = 'audio/webm';
-        logger.info('Using WebM', 'VoiceRecorder');
-      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
-        options.mimeType = 'audio/ogg;codecs=opus';
-        logger.info('Using OGG Opus', 'VoiceRecorder');
+        logger.info('Using WebM for audio recording', 'VoiceRecorder');
       } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
         options.mimeType = 'audio/mp4';
-        logger.info('Using MP4', 'VoiceRecorder');
+        logger.info('Using MP4 for audio recording', 'VoiceRecorder');
+      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+        options.mimeType = 'audio/ogg;codecs=opus';
+        logger.info('Using OGG Opus for audio recording', 'VoiceRecorder');
       } else {
-        logger.warn('No preferred audio format supported, using browser default', 'VoiceRecorder');
+        logger.warn('No preferred audio format supported, using default', 'VoiceRecorder');
       }
-
-      logger.info(`Creating MediaRecorder with bitrate: ${options.audioBitsPerSecond / 1000}kbps`, 'VoiceRecorder');
 
       const mediaRecorder = new MediaRecorder(stream, options);
 
@@ -137,69 +96,47 @@ function VoiceRecorder({ onSend, onCancel }) {
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
-          logger.info(`Data chunk received: ${(event.data.size / 1024).toFixed(2)} KB`, 'VoiceRecorder');
         }
       };
 
       mediaRecorder.onstop = () => {
+        // Use the same mimeType that was used for recording
         const mimeType = mediaRecorder.mimeType || 'audio/webm';
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
         const url = URL.createObjectURL(blob);
         setAudioBlob(blob);
         setAudioUrl(url);
 
-        const sizeKB = (blob.size / 1024).toFixed(2);
-        const durationSec = recordingTime || 1;
-        const bitrate = ((blob.size * 8) / durationSec / 1000).toFixed(0);
-        logger.info(`Recording stopped: ${sizeKB}KB, ${durationSec}s, ~${bitrate}kbps actual bitrate, Type: ${mimeType}`, 'VoiceRecorder');
+        logger.info(`Audio recording stopped. Size: ${(blob.size / 1024).toFixed(2)} KB, Type: ${mimeType}`, 'VoiceRecorder');
 
-        // CRITICAL: Release microphone IMMEDIATELY
-        releaseMediaStream();
+        // Stop all tracks to release microphone immediately
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => {
+            track.stop();
+            logger.info('Stopped media track after recording', 'VoiceRecorder');
+          });
+          streamRef.current = null;
+        }
       };
 
-      mediaRecorder.onerror = (event) => {
-        logger.error('MediaRecorder error:', event.error, 'VoiceRecorder');
-        releaseMediaStream();
-      };
-
-      // Start recording with timeslice for better quality and data availability
-      // Collect data every 1000ms instead of only at the end
-      mediaRecorder.start(1000);
+      mediaRecorder.start();
       setIsRecording(true);
       startTimer();
-
-      logger.info('Recording started with timeslice=1000ms', 'VoiceRecorder');
     } catch (error) {
-      logger.error('Error starting recording:', error, 'VoiceRecorder');
-      releaseMediaStream(); // Make sure to clean up on error
+      logger.error('Error starting recording:', error);
       alert('No se pudo acceder al micrófono. Por favor, verifica los permisos.');
-      onCancel(); // Use onCancel directly to avoid circular dependency
+      handleCancel();
     }
-  }, [recordingTime, releaseMediaStream, onCancel]);
-
-  // Start recording on mount
-  useEffect(() => {
-    startRecording();
-  }, [startRecording]);
+  };
 
   /**
    * Stop recording
    */
   const stopRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      logger.info('Stopping recording...', 'VoiceRecorder');
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       stopTimer();
-
-      // CRITICAL: Also release stream here as backup
-      // onstop event might be delayed or not fire in some edge cases
-      setTimeout(() => {
-        if (streamRef.current) {
-          logger.warn('Stream still active after stop - releasing now', 'VoiceRecorder');
-          releaseMediaStream();
-        }
-      }, 500);
     }
   };
 
@@ -246,6 +183,15 @@ function VoiceRecorder({ onSend, onCancel }) {
     }, 1000);
   };
 
+  /**
+   * Stop timer
+   */
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   /**
    * Format time
@@ -277,20 +223,14 @@ function VoiceRecorder({ onSend, onCancel }) {
    */
   const handleSend = () => {
     if (audioBlob) {
-      logger.info('Sending audio message...', 'VoiceRecorder');
-
-      // CRITICAL: Ensure stream is fully released before sending
-      releaseMediaStream();
-
-      // Stop MediaRecorder if still active
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        try {
-          mediaRecorderRef.current.stop();
-        } catch (error) {
-          logger.error('Error stopping MediaRecorder on send', error, 'VoiceRecorder');
-        }
+      // Ensure stream is fully released before sending
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+          logger.info('Stopped media track before send', 'VoiceRecorder');
+        });
+        streamRef.current = null;
       }
-
       onSend(audioBlob, recordingTime);
     }
   };
@@ -299,22 +239,14 @@ function VoiceRecorder({ onSend, onCancel }) {
    * Handle cancel with cleanup
    */
   const handleCancel = () => {
-    logger.info('Canceling recording...', 'VoiceRecorder');
-
-    // Stop recording if active
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      try {
-        mediaRecorderRef.current.stop();
-      } catch (error) {
-        logger.error('Error stopping MediaRecorder on cancel', error, 'VoiceRecorder');
-      }
+    // Ensure stream is fully released when canceling
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+        logger.info('Stopped media track on cancel', 'VoiceRecorder');
+      });
+      streamRef.current = null;
     }
-
-    // CRITICAL: Ensure stream is fully released when canceling
-    releaseMediaStream();
-
-    stopTimer();
-
     onCancel();
   };
 
