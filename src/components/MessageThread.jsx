@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText, ArrowLeft, Play, Pause } from 'lucide-react';
+import { Send, X, MoreVertical, Archive, Paperclip, Image as ImageIcon, File, Download, Search, Smile, Mic, Check, CheckCheck, Trash2, Edit2, Reply, CornerUpLeft, Star, Share2, FileText, ArrowLeft, Play, Pause, Square } from 'lucide-react';
 import {
   subscribeToMessages,
   subscribeToConversation,
@@ -2163,8 +2163,9 @@ const MessageBubble = forwardRef(({
               )}
             </span>
           </div>
-        ) : (
-          /* Footer separado cuando solo hay attachment */
+        ) : message.attachment && !isAudio(message.attachment.type) ? (
+          /* Footer separado SOLO para attachments NO-audio (imágenes, archivos, etc) */
+          /* Los audios ya tienen su propio footer dentro de .attachment-audio-modern */
           <div className="message-footer">
             <div className="message-time">
               {formatTime(message.createdAt)}
@@ -2178,7 +2179,7 @@ const MessageBubble = forwardRef(({
               </div>
             )}
           </div>
-        )}
+        ) : null}
 
         {/* Reactions Display */}
         {message.reactions && Object.keys(message.reactions).length > 0 && (
