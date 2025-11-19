@@ -66,9 +66,31 @@ function ClassSessionModal({
   // Cargar datos si es edición
   useEffect(() => {
     if (session) {
+      logger.info('📝 Cargando datos de sesión para editar:', {
+        id: session.id,
+        type: session.type,
+        name: session.name,
+        schedules: session.schedules,
+        recurringStartDate: session.recurringStartDate,
+        recurringWeeks: session.recurringWeeks
+      });
+
       const scheduledStart = session.scheduledStart?.toDate?.() || null;
 
-      setFormData({
+      // Para recurring, obtener la fecha de inicio
+      let recurringStartDateValue = '';
+      if (session.type === 'recurring' && session.recurringStartDate) {
+        if (session.recurringStartDate.toDate) {
+          // Es un Timestamp de Firestore
+          recurringStartDateValue = session.recurringStartDate.toDate().toISOString().split('T')[0];
+        } else if (session.recurringStartDate instanceof Date) {
+          recurringStartDateValue = session.recurringStartDate.toISOString().split('T')[0];
+        } else if (typeof session.recurringStartDate === 'string') {
+          recurringStartDateValue = session.recurringStartDate;
+        }
+      }
+
+      const formDataToSet = {
         name: session.name || '',
         description: session.description || '',
         courseId: session.courseId || '',
@@ -86,8 +108,11 @@ function ClassSessionModal({
         recurringStartTime: session.schedules?.[0]?.startTime || '10:00',
         recurringEndTime: session.schedules?.[0]?.endTime || '11:00',
         recurringWeeks: session.recurringWeeks || 4,
-        recurringStartDate: session.recurringStartDate || ''
-      });
+        recurringStartDate: recurringStartDateValue
+      };
+
+      logger.debug('📝 FormData establecido:', formDataToSet);
+      setFormData(formDataToSet);
     } else {
       // Reset para crear nueva (con fecha actual por default)
       const today = new Date().toISOString().split('T')[0];
@@ -141,34 +166,55 @@ function ClassSessionModal({
   const validate = () => {
     const newErrors = {};
 
+    // Debug: Log de los datos del formulario
+    logger.debug('📋 Validando formulario:', {
+      type: formData.type,
+      name: formData.name,
+      selectedDays: formData.selectedDays,
+      recurringStartDate: formData.recurringStartDate,
+      recurringWeeks: formData.recurringWeeks,
+      scheduledDate: formData.scheduledDate,
+      scheduledTime: formData.scheduledTime
+    });
+
     if (!formData.name.trim()) {
       newErrors.name = 'El nombre es requerido';
+      logger.warn('❌ Validación fallida: nombre vacío');
     }
 
     if (formData.type === 'single') {
       if (!formData.scheduledDate) {
         newErrors.scheduledDate = 'La fecha es requerida';
+        logger.warn('❌ Validación fallida: scheduledDate vacío');
       }
       if (!formData.scheduledTime) {
         newErrors.scheduledTime = 'La hora es requerida';
+        logger.warn('❌ Validación fallida: scheduledTime vacío');
       }
     }
 
     if (formData.type === 'recurring') {
       if (formData.selectedDays.length === 0) {
         newErrors.selectedDays = 'Seleccione al menos un día';
+        logger.warn('❌ Validación fallida: selectedDays vacío');
       }
       if (!formData.recurringStartDate) {
         newErrors.recurringStartDate = 'La fecha de inicio es requerida';
+        logger.warn('❌ Validación fallida: recurringStartDate vacío');
       }
       if (!formData.recurringWeeks || formData.recurringWeeks < 1) {
         newErrors.recurringWeeks = 'Ingrese un número válido de semanas';
+        logger.warn('❌ Validación fallida: recurringWeeks inválido', formData.recurringWeeks);
       }
     }
 
     if (formData.type === 'instant') {
       // Para clase instantánea, validar que al menos haya un estudiante asignado si está en modo edición
       // No validar meet link porque puede ser opcional
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      logger.warn('❌ Errores de validación encontrados:', newErrors);
     }
 
     setErrors(newErrors);
