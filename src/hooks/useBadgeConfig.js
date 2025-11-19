@@ -65,30 +65,42 @@ function useBadgeConfig() {
   }, []);
 
   /**
-   * Actualizar configuración de librería de iconos
+   * Actualizar configuración de librería de iconos (con guardado inmediato)
    */
   const updateIconLibrary = useCallback((library) => {
-    setIconConfig((prev) => ({ ...prev, library }));
-    setHasChanges(true);
-  }, []);
-
-  /**
-   * Actualizar paleta monocromática
-   */
-  const updateMonochromePalette = useCallback((palette) => {
     setIconConfig((prev) => {
-      const updated = { ...prev, monochromePalette: palette };
+      const updated = { ...prev, library };
+      // Guardar inmediatamente para que se aplique en tiempo real
+      saveIconLibraryConfig(updated);
+      window.dispatchEvent(new CustomEvent('iconLibraryChange', { detail: updated }));
       setHasChanges(true);
       return updated;
     });
   }, []);
 
   /**
-   * Actualizar color custom de paleta monocromática
+   * Actualizar paleta monocromática (con guardado inmediato para que se aplique en tiempo real)
+   */
+  const updateMonochromePalette = useCallback((palette) => {
+    setIconConfig((prev) => {
+      const updated = { ...prev, monochromePalette: palette };
+      // Guardar inmediatamente para que se aplique en tiempo real
+      saveIconLibraryConfig(updated);
+      window.dispatchEvent(new CustomEvent('iconLibraryChange', { detail: updated }));
+      setHasChanges(true);
+      return updated;
+    });
+  }, []);
+
+  /**
+   * Actualizar color custom de paleta monocromática (con guardado inmediato)
    */
   const updateMonochromeColor = useCallback((color) => {
     setIconConfig((prev) => {
       const updated = { ...prev, monochromeColor: color };
+      // Guardar inmediatamente para que se aplique en tiempo real
+      saveIconLibraryConfig(updated);
+      window.dispatchEvent(new CustomEvent('iconLibraryChange', { detail: updated }));
       setHasChanges(true);
       return updated;
     });
