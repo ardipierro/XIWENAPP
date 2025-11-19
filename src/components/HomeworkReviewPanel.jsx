@@ -802,6 +802,29 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
   const [showCorrectionText, setShowCorrectionText] = useState(true);
   const [correctionTextFont, setCorrectionTextFont] = useState('Caveat');
 
+  // ✨ CRITICAL FIX: Normalize correction field names on load
+  // Cloud Function provides 'original', 'type', 'correction'
+  // But ImageOverlay expects 'errorText', 'errorType', 'suggestion'
+  useEffect(() => {
+    const corrections = review.aiSuggestions || review.detailedCorrections || [];
+    const normalized = corrections.map((corr, idx) => ({
+      ...corr,
+      // Ensure errorText field (primary matching field for ImageOverlay)
+      errorText: corr.errorText || corr.original || corr.text || corr.word || '',
+      // Ensure errorType field
+      errorType: corr.errorType || corr.type || 'default',
+      // Ensure suggestion field
+      suggestion: corr.suggestion || corr.correction || corr.correctedText || corr.fix || '',
+      // Ensure id field
+      id: corr.id || `corr_${idx}`,
+      // Keep original fields for backward compatibility
+      original: corr.original || corr.errorText || corr.text || '',
+      type: corr.type || corr.errorType || 'default',
+      correction: corr.correction || corr.suggestion || ''
+    }));
+    setUpdatedCorrections(normalized);
+  }, [review.id]);
+
   const handleApprove = async () => {
     try {
       setIsApproving(true);

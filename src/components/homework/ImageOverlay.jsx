@@ -13,7 +13,7 @@
  * - Improved matching with fuzzy logic
  */
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -97,6 +97,86 @@ function normalizeText(text) {
 }
 
 /**
+ * Calculate Levenshtein distance (edit distance) between two strings
+ * Used for fuzzy matching when exact match fails
+ * @param {string} a - First string
+ * @param {string} b - Second string
+ * @returns {number} Edit distance (lower = more similar)
+ */
+function levenshteinDistance(a, b) {
+  if (!a || !b) return Math.max(a?.length || 0, b?.length || 0);
+  if (a === b) return 0;
+
+  const matrix = [];
+
+  // Initialize first column
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  // Initialize first row
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  // Fill matrix
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
+
+/**
+ * Calculate similarity score (0-1) between two strings
+ * 1.0 = identical, 0.0 = completely different
+ * @param {string} a - First string
+ * @param {string} b - Second string
+ * @returns {number} Similarity score (0-1)
+ */
+function calculateSimilarity(a, b) {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+
+  const maxLength = Math.max(a.length, b.length);
+  if (maxLength === 0) return 1;
+
+  const distance = levenshteinDistance(a, b);
+  return 1 - (distance / maxLength);
+}
+
+/**
+ * Check if two strings match (exact or fuzzy)
+ * @param {string} text1 - First text (normalized)
+ * @param {string} text2 - Second text (normalized)
+ * @param {number} threshold - Similarity threshold (0-1, default 0.8 = 80% similar)
+ * @returns {boolean} True if match
+ */
+function fuzzyMatch(text1, text2, threshold = 0.8) {
+  if (!text1 || !text2) return false;
+
+  // Exact match (fastest)
+  if (text1 === text2) return true;
+
+  // Check if one contains the other (partial match)
+  if (text1.includes(text2) || text2.includes(text1)) return true;
+
+  // Calculate similarity
+  const similarity = calculateSimilarity(text1, text2);
+  return similarity >= threshold;
+}
+
+/**
  * Extract error info from various formats
  */
 function extractErrorInfo(error) {
@@ -114,8 +194,9 @@ function extractErrorInfo(error) {
 
 /**
  * Enhanced Image Overlay Component
+ * Memoized to prevent unnecessary re-renders
  */
-export default function ImageOverlay({
+function ImageOverlay({
   imageUrl,
   words = [],
   errors = [],
@@ -256,6 +337,7 @@ export default function ImageOverlay({
       let matched = false;
 
       // Try to find matching word(s) in coordinates
+      // ✨ NEW: Support exact AND fuzzy matching
       for (let i = 0; i < words.length && !matched; i++) {
         const word = words[i];
 
@@ -266,8 +348,11 @@ export default function ImageOverlay({
 
         const normalizedWord = normalizeText(word.text);
 
-        // Single word match
-        if (normalizedWord === normalizedError) {
+        // ✨ IMPROVED: Single word match with fuzzy matching
+        // Try exact match first (fastest), then fuzzy match
+        const isSingleWordMatch = normalizedWord === normalizedError || fuzzyMatch(normalizedWord, normalizedError, 0.75);
+
+        if (isSingleWordMatch) {
           highlights.push({
             x: word.bounds.x * scaleX,
             y: word.bounds.y * scaleY,
@@ -284,12 +369,13 @@ export default function ImageOverlay({
           console.log(`[ImageOverlay] ✓ Matched single word:`, {
             error: errorText,
             word: word.text,
-            type: errorType
+            type: errorType,
+            fuzzy: normalizedWord !== normalizedError
           });
           break;
         }
 
-        // Multi-word match (phrase)
+        // ✨ IMPROVED: Multi-word match (phrase) with fuzzy matching
         if (errorWords.length > 1) {
           let phraseMatch = true;
           let minX = word.bounds.x;
@@ -304,7 +390,12 @@ export default function ImageOverlay({
               break;
             }
 
-            if (normalizeText(wordToMatch.text) !== errorWords[j]) {
+            const normalizedWordToMatch = normalizeText(wordToMatch.text);
+            // ✨ Use fuzzy matching for each word in phrase
+            const wordMatches = normalizedWordToMatch === errorWords[j] ||
+                                fuzzyMatch(normalizedWordToMatch, errorWords[j], 0.75);
+
+            if (!wordMatches) {
               phraseMatch = false;
               break;
             }
@@ -381,12 +472,47 @@ export default function ImageOverlay({
   // Calculate container transform for zoom and pan
   const containerTransform = `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`;
 
+  // User-friendly messages for missing data
+  const showNoWordsWarning = showOverlay && (!words || words.length === 0) && errors.length > 0;
+  const showNoCorrectionsMessage = showOverlay && words && words.length > 0 && errors.length === 0;
+  const showLowMatchWarning = showOverlay && highlights.length > 0 && debugInfo &&
+    debugInfo.matched < debugInfo.attempted * 0.5; // Less than 50% matched
+
   return (
     <div
       ref={containerRef}
       className={`relative inline-block ${className}`}
       style={{ maxWidth: '100%', overflow: 'hidden', pointerEvents: 'none' }}
     >
+      {/* User-friendly warning messages (visible in production) */}
+      {!import.meta.env.DEV && showNoWordsWarning && (
+        <div className="absolute top-2 left-2 right-2 bg-yellow-500/95 text-white px-4 py-2 rounded-lg shadow-lg z-20 pointer-events-auto">
+          <div className="flex items-start gap-2">
+            <span className="text-lg">⚠️</span>
+            <div className="flex-1 text-sm">
+              <p className="font-bold">No se pueden mostrar anotaciones visuales</p>
+              <p className="text-xs mt-1 opacity-90">
+                Falta el análisis OCR con coordenadas. Contacta al profesor para re-analizar la tarea.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!import.meta.env.DEV && showLowMatchWarning && (
+        <div className="absolute top-2 left-2 right-2 bg-orange-500/95 text-white px-4 py-2 rounded-lg shadow-lg z-20 pointer-events-auto">
+          <div className="flex items-start gap-2">
+            <span className="text-lg">ℹ️</span>
+            <div className="flex-1 text-sm">
+              <p className="font-bold">Algunas correcciones no se pudieron ubicar</p>
+              <p className="text-xs mt-1 opacity-90">
+                {debugInfo.matched} de {debugInfo.attempted} correcciones ubicadas en la imagen. Revisa la lista completa abajo.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Image with zoom/pan transform */}
       <div
         style={{
@@ -593,3 +719,75 @@ ImageOverlay.propTypes = {
   correctionTextFont: PropTypes.string,
   className: PropTypes.string
 };
+
+/**
+ * Memoized export with custom comparison function
+ * Only re-renders if critical props change
+ */
+export default memo(ImageOverlay, (prevProps, nextProps) => {
+  // Return true if props are equal (skip re-render)
+  // Return false if props changed (re-render)
+
+  // Critical props that should trigger re-render
+  if (prevProps.imageUrl !== nextProps.imageUrl) return false;
+  if (prevProps.showOverlay !== nextProps.showOverlay) return false;
+  if (prevProps.highlightOpacity !== nextProps.highlightOpacity) return false;
+  if (prevProps.zoom !== nextProps.zoom) return false;
+  if (prevProps.useWavyUnderline !== nextProps.useWavyUnderline) return false;
+  if (prevProps.showCorrectionText !== nextProps.showCorrectionText) return false;
+  if (prevProps.correctionTextFont !== nextProps.correctionTextFont) return false;
+
+  // Check pan object (shallow comparison)
+  if (prevProps.pan.x !== nextProps.pan.x || prevProps.pan.y !== nextProps.pan.y) return false;
+
+  // Check visible error types (shallow comparison)
+  const prevTypes = prevProps.visibleErrorTypes;
+  const nextTypes = nextProps.visibleErrorTypes;
+  if (prevTypes.spelling !== nextTypes.spelling ||
+      prevTypes.grammar !== nextTypes.grammar ||
+      prevTypes.punctuation !== nextTypes.punctuation ||
+      prevTypes.vocabulary !== nextTypes.vocabulary) {
+    return false;
+  }
+
+  // Deep comparison for arrays (expensive but necessary)
+  // Compare words array
+  if (prevProps.words.length !== nextProps.words.length) return false;
+  if (prevProps.words.length > 0 && nextProps.words.length > 0) {
+    // Sample-based comparison (first, middle, last) for performance
+    const checkIndices = [
+      0,
+      Math.floor(prevProps.words.length / 2),
+      prevProps.words.length - 1
+    ];
+    for (const idx of checkIndices) {
+      const prevWord = prevProps.words[idx];
+      const nextWord = nextProps.words[idx];
+      if (!prevWord || !nextWord || prevWord.text !== nextWord.text) return false;
+    }
+  }
+
+  // Compare errors array
+  if (prevProps.errors.length !== nextProps.errors.length) return false;
+  if (prevProps.errors.length > 0 && nextProps.errors.length > 0) {
+    // Sample-based comparison for performance
+    const checkIndices = [
+      0,
+      Math.floor(prevProps.errors.length / 2),
+      prevProps.errors.length - 1
+    ];
+    for (const idx of checkIndices) {
+      const prevError = prevProps.errors[idx];
+      const nextError = nextProps.errors[idx];
+      if (!prevError || !nextError) return false;
+
+      // Extract error info using same logic as component
+      const prevText = prevError.errorText || prevError.original || prevError.text || '';
+      const nextText = nextError.errorText || nextError.original || nextError.text || '';
+      if (prevText !== nextText) return false;
+    }
+  }
+
+  // Props are equal, skip re-render
+  return true;
+});
