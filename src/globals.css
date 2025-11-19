@@ -155,12 +155,13 @@
     --color-accent: #5b6b8f;            /* Gris azulado */
     --color-accent-light: #7585a3;      /* Gris azulado claro */
     --color-accent-dark: #4a5778;       /* Gris azulado oscuro */
+    --color-primary: #5b6b8f;           /* Alias para compatibilidad */
 
     /* === SOMBRAS (4 niveles) === */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-    --shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    --shadow-focus: 0 0 0 3px rgba(91, 107, 143, 0.12);
 
     /* === BORDER RADIUS === */
     --border-radius-sm: 0.375rem;       /* 6px */
@@ -265,12 +266,13 @@
     --color-accent: #7a8fa8;            /* Azul gris suave */
     --color-accent-light: #92a5be;      /* Azul gris claro */
     --color-accent-dark: #657a92;       /* Azul gris oscuro */
+    --color-primary: #7a8fa8;           /* Alias para compatibilidad */
 
     /* === SOMBRAS (4 niveles) === */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
-    --shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.3);
+    --shadow-focus: 0 0 0 3px rgba(122, 143, 168, 0.25);
   }
 
   /* Dusk theme - Tonos tierra cálidos y neutros (ex-Sunset) */
@@ -294,6 +296,10 @@
     --color-accent: #a67c52;            /* Marrón cálido */
     --color-accent-light: #b88d68;      /* Marrón claro */
     --color-accent-dark: #8f6941;       /* Marrón oscuro */
+    --color-primary: #a67c52;           /* Alias para compatibilidad */
+
+    /* === SOMBRAS === */
+    --shadow-focus: 0 0 0 3px rgba(166, 124, 82, 0.15);
 
     /* === SEMÁNTICOS (apagados y sobrios) === */
     --color-success: #4a9f7c;           /* Verde apagado */
@@ -342,6 +348,7 @@
     --color-accent: #7a95b8;            /* Azul grisáceo */
     --color-accent-light: #92a9c9;      /* Azul claro */
     --color-accent-dark: #6481a3;       /* Azul oscuro */
+    --color-primary: #7a95b8;           /* Alias para compatibilidad */
 
     /* === SEMÁNTICOS (apagados y sobrios) === */
     --color-success: #4a9f7c;           /* Verde apagado */
@@ -528,7 +535,7 @@
   .input:focus {
     background: var(--color-bg-secondary);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06),
-                0 0 0 3px rgba(91, 111, 143, 0.08);
+                var(--shadow-focus);
   }
 
   .input:disabled {
@@ -560,7 +567,7 @@
   .select:focus {
     background: var(--color-bg-secondary);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06),
-                0 0 0 3px rgba(91, 111, 143, 0.08);
+                var(--shadow-focus);
   }
 
   .select:disabled {

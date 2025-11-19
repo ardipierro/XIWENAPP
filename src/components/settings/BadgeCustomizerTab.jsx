@@ -151,6 +151,79 @@ function BadgeCustomizerTab({ user }) {
     setTimeout(() => setSaveMessage(null), 4000);
   };
 
+  // Paletas de colores predefinidas
+  const COLOR_PALETTES = {
+    neutral: {
+      name: 'Neutra (Apagada)',
+      description: 'Colores sobrios y profesionales',
+      colors: {
+        success: '#4a9f7c',
+        error: '#c85a54',
+        warning: '#d4a574',
+        info: '#5b8fa3',
+        primary: '#5b6b8f',
+      }
+    },
+    vibrant: {
+      name: 'Vibrante',
+      description: 'Colores brillantes y llamativos',
+      colors: {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#06b6d4',
+        primary: '#6366f1',
+      }
+    },
+    monochrome: {
+      name: 'Monocromática',
+      description: 'Solo tonos de gris',
+      colors: {
+        success: '#6b7280',
+        error: '#374151',
+        warning: '#9ca3af',
+        info: '#4b5563',
+        primary: '#52525b',
+      }
+    }
+  };
+
+  // Aplicar paleta de colores
+  const handleApplyColorPalette = (paletteKey) => {
+    const palette = COLOR_PALETTES[paletteKey];
+    if (!palette) return;
+
+    // Actualizar colores de badges que usan colores semánticos
+    Object.entries(config).forEach(([badgeKey, badge]) => {
+      // Detectar badges que usan colores semánticos y actualizarlos
+      const currentColor = badge.color;
+
+      // Mapeo de colores vibrantes a neutros
+      const colorMapping = {
+        '#10b981': palette.colors.success, // success
+        '#ef4444': palette.colors.error,   // error
+        '#f59e0b': palette.colors.warning, // warning
+        '#06b6d4': palette.colors.info,    // info
+        '#6366f1': palette.colors.primary, // primary
+        // También mapear colores antiguos
+        '#3b82f6': palette.colors.primary,
+        '#16a34a': palette.colors.success,
+        '#dc2626': palette.colors.error,
+        '#d97706': palette.colors.warning,
+      };
+
+      if (colorMapping[currentColor]) {
+        updateColor(badgeKey, colorMapping[currentColor]);
+      }
+    });
+
+    setSaveMessage({
+      type: 'success',
+      text: `🎨 Paleta "${palette.name}" aplicada. No olvides guardar los cambios.`,
+    });
+    setTimeout(() => setSaveMessage(null), 4000);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -473,6 +546,94 @@ function BadgeCustomizerTab({ user }) {
           <Info size={16} style={{ color: 'var(--color-primary)', marginTop: '2px', flexShrink: 0 }} />
           <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
             <strong>Tip:</strong> Este botón cambia TODOS los badges. Si necesitas ajustar badges individuales, usa el botón de información (ℹ️) en cada badge dentro de las categorías.
+          </p>
+        </div>
+      </div>
+
+      {/* Selector de Paleta de Colores */}
+      <div
+        className="rounded-lg p-4"
+        style={{
+          border: '1px solid var(--color-border)',
+          background: 'var(--color-bg-secondary)',
+        }}
+      >
+        <h3
+          className="text-base font-semibold mb-3 flex items-center gap-2"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          <Palette size={18} />
+          Paleta de Colores Global
+        </h3>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Aplica una paleta de colores a TODOS los badges. Esto cambia los colores semánticos (success, error, warning, info).
+        </p>
+
+        <div className="flex gap-3">
+          {Object.entries(COLOR_PALETTES).map(([key, palette]) => (
+            <button
+              key={key}
+              onClick={() => handleApplyColorPalette(key)}
+              className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
+              style={{
+                borderColor: 'var(--color-border)',
+                background: 'var(--color-bg-primary)',
+              }}
+            >
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                    {palette.name}
+                  </span>
+                </div>
+
+                {/* Vista previa de colores */}
+                <div className="flex gap-1.5 flex-wrap justify-center">
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: palette.colors.success }}
+                    title="Success"
+                  />
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: palette.colors.error }}
+                    title="Error"
+                  />
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: palette.colors.warning }}
+                    title="Warning"
+                  />
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: palette.colors.info }}
+                    title="Info"
+                  />
+                  <div
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: palette.colors.primary }}
+                    title="Primary"
+                  />
+                </div>
+
+                <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                  {palette.description}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <div
+          className="mt-4 p-3 rounded-lg flex items-start gap-2"
+          style={{
+            background: 'var(--color-bg-tertiary)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          <Info size={16} style={{ color: 'var(--color-primary)', marginTop: '2px', flexShrink: 0 }} />
+          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+            <strong>Recomendación:</strong> La paleta "Neutra (Apagada)" es ideal para un diseño minimalista y profesional. Reduce el ruido visual un 40%.
           </p>
         </div>
       </div>

@@ -6,7 +6,7 @@
 import logger from '../utils/logger';
 import { useState, useEffect } from 'react';
 import { Palette, RotateCcw, Download, Upload, Check } from 'lucide-react';
-import { THEMES, THEME_INFO } from '../contexts/ThemeContext';
+import { THEMES, THEME_INFO, useTheme } from '../contexts/ThemeContext';
 import BaseButton from './common/BaseButton';
 
 // Colores por defecto de cada tema (4 temas neutrales y minimalistas)
@@ -130,7 +130,8 @@ const COLOR_CATEGORIES = {
  * Componente para personalizar colores de temas
  */
 function ThemeCustomizer() {
-  const [selectedTheme, setSelectedTheme] = useState(THEMES.DARK);
+  const { currentTheme, setTheme } = useTheme();
+  const [selectedTheme, setSelectedTheme] = useState(currentTheme || THEMES.DARK);
   const [customColors, setCustomColors] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -322,10 +323,12 @@ function ThemeCustomizer() {
                 if (hasChanges) {
                   if (confirm('Tienes cambios sin guardar. ¿Deseas continuar?')) {
                     setSelectedTheme(value);
+                    setTheme(value); // Cambiar tema globalmente
                     setHasChanges(false);
                   }
                 } else {
                   setSelectedTheme(value);
+                  setTheme(value); // Cambiar tema globalmente
                 }
               }}
             >
