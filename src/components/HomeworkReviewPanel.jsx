@@ -452,9 +452,9 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-2 flex-shrink-0">
-            {isStuck && (
+          {/* Actions - Only Cancel button when stuck */}
+          {isStuck && (
+            <div className="flex gap-2 flex-shrink-0">
               <BaseButton
                 variant="danger"
                 size="sm"
@@ -463,20 +463,8 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
                 <XCircle size={16} strokeWidth={2.5} />
                 Cancelar
               </BaseButton>
-            )}
-            <BaseButton
-              variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
-              size="sm"
-              disabled={isProcessing && !isStuck}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect();
-              }}
-            >
-              <Eye size={16} strokeWidth={2.5} />
-              {isPendingReview ? 'Ver Corrección' : 'Ver Detalles'}
-            </BaseButton>
-          </div>
+            </div>
+          )}
         </div>
       </BaseCard>
     );
@@ -633,57 +621,19 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
           ) : null}
         </div>
 
-        {/* View Button */}
-        {isStuck ? (
-          <div className="flex gap-2">
-            <BaseButton
-              variant="danger"
-              size="sm"
-              fullWidth
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCancelClick(e);
-              }}
-            >
-              <XCircle size={16} strokeWidth={2.5} />
-              Cancelar
-            </BaseButton>
-            <BaseButton
-              variant="outline"
-              size="sm"
-              fullWidth
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect();
-              }}
-            >
-              <Eye size={16} strokeWidth={2.5} />
-              Ver
-            </BaseButton>
-          </div>
-        ) : (
+        {/* Cancel Button - Only when stuck */}
+        {isStuck && (
           <BaseButton
-            variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
+            variant="danger"
             size="sm"
             fullWidth
-            disabled={isProcessing}
-            className={
-              isProcessing ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
-              isPendingReview ? 'bg-green-600 hover:bg-green-700 text-white font-semibold' :
-              ''
-            }
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCancelClick(e);
+            }}
           >
-            {isProcessing ? (
-              <>
-                <Loader size={16} strokeWidth={2.5} className="animate-spin" />
-                ⏳ Espera...
-              </>
-            ) : (
-              <>
-                <Eye size={18} strokeWidth={2.5} />
-                {isPendingReview ? 'Ver Corrección' : 'Ver Detalles'}
-              </>
-            )}
+            <XCircle size={16} strokeWidth={2.5} />
+            Cancelar Procesamiento
           </BaseButton>
         )}
       </div>

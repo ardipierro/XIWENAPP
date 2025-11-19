@@ -260,21 +260,6 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
                     </div>
                   </div>
                 )}
-
-                {/* Actions */}
-                <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <BaseButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectAssignment && onSelectAssignment(assignment.id);
-                    }}
-                    variant="primary"
-                    size="sm"
-                    fullWidth
-                  >
-                    {assignment.status === 'pending' ? 'Hacer tarea' : 'Ver detalles'}
-                  </BaseButton>
-                </div>
               </div>
             </UniversalCard>
           ))}
