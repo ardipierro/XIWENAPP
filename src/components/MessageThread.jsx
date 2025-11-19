@@ -1849,9 +1849,9 @@ const MessageBubble = forwardRef(({
               </span>
               {isOwn && !message.deleted && (
                 <span className="message-status">
-                  {message.status === 'sent' && <Check size={12} className="status-icon sent" />}
-                  {message.status === 'delivered' && <CheckCheck size={12} className="status-icon delivered" />}
-                  {message.status === 'read' && <CheckCheck size={12} className="status-icon read" />}
+                  {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
+                  {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
+                  {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
                 </span>
               )}
             </span>
@@ -1865,9 +1865,9 @@ const MessageBubble = forwardRef(({
             </div>
             {isOwn && !message.deleted && (
               <div className="message-status">
-                {message.status === 'sent' && <Check size={12} className="status-icon sent" />}
-                {message.status === 'delivered' && <CheckCheck size={12} className="status-icon delivered" />}
-                {message.status === 'read' && <CheckCheck size={12} className="status-icon read" />}
+                {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
+                {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
+                {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
               </div>
             )}
           </div>

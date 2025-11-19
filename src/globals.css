@@ -2726,7 +2726,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-bubble {
   max-width: 60%;
   min-width: 80px;
-  padding: 5px 8px 4px 8px; /* Reducido para menos altura */
+  padding: 4px 8px; /* Mínimo padding para máxima compactación */
   border-radius: 16px;
   position: relative;
   display: inline-block;
@@ -2748,13 +2748,13 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-sender {
   font-size: 12px;
   font-weight: 600;
-  margin-bottom: 2px; /* Reducido */
+  margin-bottom: 1px; /* Mínimo espacio entre nombre y mensaje */
   opacity: 0.8;
 }
 
 .message-content {
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.2; /* MUY COMPACTO - Reduce el espacio vertical */
   word-wrap: break-word;
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -2767,7 +2767,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .message-time {
-  font-size: 11px;
+  font-size: 11px; /* Restaurado al tamaño original */
   opacity: 0.7;
   margin-top: 0;
 }
@@ -4378,7 +4378,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .message-time {
-  font-size: 10px; /* Un poco más pequeño */
+  font-size: 11px; /* Restaurado al tamaño original para mejor legibilidad */
   color: var(--color-text-tertiary);
   display: inline-flex;
   align-items: center;
@@ -4394,7 +4394,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .edited-indicator {
   font-style: italic;
   opacity: 0.8;
-  font-size: 9px;
+  font-size: 10px; /* Aumentado para mejor legibilidad */
 }
 
 .message-status {
