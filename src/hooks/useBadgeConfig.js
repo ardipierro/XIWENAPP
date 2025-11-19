@@ -20,6 +20,9 @@ import {
   saveIconLibraryConfig,
   resetIconLibraryConfig,
   DEFAULT_ICON_LIBRARY_CONFIG,
+  getGlobalBadgeConfig,
+  saveGlobalBadgeConfig,
+  DEFAULT_GLOBAL_BADGE_CONFIG,
 } from '../config/badgeSystem';
 import logger from '../utils/logger';
 
@@ -34,6 +37,7 @@ import logger from '../utils/logger';
 function useBadgeConfig() {
   const [config, setConfig] = useState(getBadgeConfig());
   const [iconConfig, setIconConfig] = useState(getIconLibraryConfig());
+  const [globalConfig, setGlobalConfig] = useState(getGlobalBadgeConfig());
   const [hasChanges, setHasChanges] = useState(false);
 
   // Cargar configuración al montar
@@ -69,6 +73,39 @@ function useBadgeConfig() {
   }, []);
 
   /**
+   * Actualizar paleta monocromática
+   */
+  const updateMonochromePalette = useCallback((palette) => {
+    setIconConfig((prev) => {
+      const updated = { ...prev, monochromePalette: palette };
+      setHasChanges(true);
+      return updated;
+    });
+  }, []);
+
+  /**
+   * Actualizar color custom de paleta monocromática
+   */
+  const updateMonochromeColor = useCallback((color) => {
+    setIconConfig((prev) => {
+      const updated = { ...prev, monochromeColor: color };
+      setHasChanges(true);
+      return updated;
+    });
+  }, []);
+
+  /**
+   * Actualizar configuración global de badges
+   */
+  const updateGlobalConfig = useCallback((key, value) => {
+    setGlobalConfig((prev) => {
+      const updated = { ...prev, [key]: value };
+      setHasChanges(true);
+      return updated;
+    });
+  }, []);
+
+  /**
    * Cambiar el estilo de TODOS los badges (solid/outline)
    */
   const updateAllBadgeStyles = useCallback((badgeStyle) => {
@@ -87,12 +124,13 @@ function useBadgeConfig() {
   }, []);
 
   /**
-   * Guardar configuración actual (badges + iconos)
+   * Guardar configuración actual (badges + iconos + global)
    */
   const save = useCallback(() => {
     try {
       saveBadgeConfig(config);
       saveIconLibraryConfig(iconConfig);
+      saveGlobalBadgeConfig(globalConfig);
       setHasChanges(false);
       window.dispatchEvent(new Event('xiwen_badge_config_changed'));
       logger.info('Badge configuration saved', 'useBadgeConfig');
@@ -101,7 +139,7 @@ function useBadgeConfig() {
       logger.error('Error saving badge config:', err, 'useBadgeConfig');
       return false;
     }
-  }, [config, iconConfig]);
+  }, [config, iconConfig, globalConfig]);
 
   /**
    * Restaurar configuración por defecto
@@ -109,8 +147,10 @@ function useBadgeConfig() {
   const reset = useCallback(() => {
     resetBadgeConfig();
     resetIconLibraryConfig();
+    localStorage.removeItem('xiwen_global_badge_config');
     setConfig(DEFAULT_BADGE_CONFIG);
     setIconConfig(DEFAULT_ICON_LIBRARY_CONFIG);
+    setGlobalConfig(DEFAULT_GLOBAL_BADGE_CONFIG);
     setHasChanges(false);
     window.dispatchEvent(new Event('xiwen_badge_config_changed'));
     logger.info('Badge configuration reset to defaults', 'useBadgeConfig');
@@ -247,8 +287,10 @@ function useBadgeConfig() {
   const discard = useCallback(() => {
     const saved = getBadgeConfig();
     const savedIconConfig = getIconLibraryConfig();
+    const savedGlobalConfig = getGlobalBadgeConfig();
     setConfig(saved);
     setIconConfig(savedIconConfig);
+    setGlobalConfig(savedGlobalConfig);
     setHasChanges(false);
     logger.info('Badge configuration changes discarded', 'useBadgeConfig');
   }, []);
@@ -257,6 +299,7 @@ function useBadgeConfig() {
     // Estado
     config,
     iconConfig,
+    globalConfig,
     hasChanges,
     categories: BADGE_CATEGORIES,
     defaults: DEFAULT_BADGE_CONFIG,
@@ -274,6 +317,9 @@ function useBadgeConfig() {
     addBadge,
     removeBadge,
     updateIconLibrary,
+    updateMonochromePalette,
+    updateMonochromeColor,
+    updateGlobalConfig,
     updateAllBadgeStyles,
   };
 }

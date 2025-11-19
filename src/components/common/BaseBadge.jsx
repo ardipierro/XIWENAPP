@@ -10,8 +10,8 @@
  *   - 'warning': Ámbar
  *   - 'danger': Rojo
  *   - 'info': Cyan
- * @param {string} badgeStyle - Estilo de renderizado: 'solid' | 'outline'
- * @param {string} size - Tamaño: 'sm', 'md', 'lg'
+ * @param {string} badgeStyle - Estilo de renderizado: 'solid' | 'outline' | 'soft' | 'glass' | 'gradient'
+ * @param {string} size - Tamaño: 'xs', 'sm', 'md', 'lg', 'xl'
  * @param {node} icon - Icono izquierdo (Lucide icon component)
  * @param {boolean} dot - Mostrar punto de color a la izquierda
  * @param {boolean} rounded - Badge completamente redondo (pill)
@@ -29,6 +29,7 @@ function BaseBadge({
   onRemove,
   children,
   className = '',
+  style = {},
 }) {
   // Variant styles using CSS variables
   const getVariantStyle = (variant, badgeStyle) => {
@@ -98,21 +99,144 @@ function BaseBadge({
       }
     };
 
-    const styles = badgeStyle === 'outline' ? outlineStyles : solidStyles;
+    const softStyles = {
+      default: {
+        backgroundColor: 'rgba(229, 231, 235, 0.3)',
+        color: 'var(--badge-info-bg, #1f2937)',
+        border: 'none'
+      },
+      primary: {
+        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+        color: 'var(--badge-primary-bg, #3b82f6)',
+        border: 'none'
+      },
+      success: {
+        backgroundColor: 'rgba(16, 185, 129, 0.15)',
+        color: 'var(--badge-success-bg, #10b981)',
+        border: 'none'
+      },
+      warning: {
+        backgroundColor: 'rgba(245, 158, 11, 0.15)',
+        color: 'var(--badge-warning-bg, #f59e0b)',
+        border: 'none'
+      },
+      danger: {
+        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+        color: 'var(--badge-danger-bg, #ef4444)',
+        border: 'none'
+      },
+      info: {
+        backgroundColor: 'rgba(139, 92, 246, 0.15)',
+        color: 'var(--badge-info-bg, #8b5cf6)',
+        border: 'none'
+      }
+    };
+
+    const glassStyles = {
+      default: {
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        color: 'var(--color-text-primary)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
+      },
+      primary: {
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        color: 'var(--badge-primary-bg, #3b82f6)',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
+      },
+      success: {
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        color: 'var(--badge-success-bg, #10b981)',
+        border: '1px solid rgba(16, 185, 129, 0.3)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
+      },
+      warning: {
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+        color: 'var(--badge-warning-bg, #f59e0b)',
+        border: '1px solid rgba(245, 158, 11, 0.3)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
+      },
+      danger: {
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        color: 'var(--badge-danger-bg, #ef4444)',
+        border: '1px solid rgba(239, 68, 68, 0.3)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
+      },
+      info: {
+        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+        color: 'var(--badge-info-bg, #8b5cf6)',
+        border: '1px solid rgba(139, 92, 246, 0.3)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
+      }
+    };
+
+    const gradientStyles = {
+      default: {
+        background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
+        color: '#1f2937',
+        border: 'none'
+      },
+      primary: {
+        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+        color: '#ffffff',
+        border: 'none'
+      },
+      success: {
+        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        color: '#ffffff',
+        border: 'none'
+      },
+      warning: {
+        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        color: '#ffffff',
+        border: 'none'
+      },
+      danger: {
+        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+        color: '#ffffff',
+        border: 'none'
+      },
+      info: {
+        background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+        color: '#ffffff',
+        border: 'none'
+      }
+    };
+
+    const styleMap = {
+      solid: solidStyles,
+      outline: outlineStyles,
+      soft: softStyles,
+      glass: glassStyles,
+      gradient: gradientStyles
+    };
+
+    const styles = styleMap[badgeStyle] || solidStyles;
     return styles[variant] || styles.default;
   };
 
   // Size styles
   const sizes = {
+    xs: 'px-1.5 py-0.5 text-xs',
     sm: 'px-2 py-0.5 text-xs',
     md: 'px-2.5 py-1 text-sm',
     lg: 'px-3 py-1.5 text-base',
+    xl: 'px-4 py-2 text-lg',
   };
 
   const iconSizes = {
+    xs: 10,
     sm: 12,
     md: 14,
     lg: 16,
+    xl: 18,
   };
 
   const variantStyle = getVariantStyle(variant, badgeStyle);
@@ -125,7 +249,7 @@ function BaseBadge({
         ${sizes[size]}
         ${className}
       `}
-      style={variantStyle}
+      style={{ ...variantStyle, ...style }}
     >
       {/* Dot indicator */}
       {dot && (
