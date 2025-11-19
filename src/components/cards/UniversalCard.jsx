@@ -150,30 +150,23 @@ export function UniversalCard({
 
   // Generate classes and styles - PASS RESOLVED variantConfig object (BUG FIX)
   const classes = generateCardClasses(variantConfig, size, layout);
-  const styles = useMemo(() => ({
-    container: {
-      backgroundColor: 'var(--color-bg-secondary)',
-      border: `1px solid ${variantConfig.normalBorderColor}`,
-      boxShadow: variantConfig.normalShadow,
-      display: 'flex',
-      flexDirection: 'column',
-      ...(variantConfig.cardHeight
-        ? { height: variantConfig.cardHeight, minHeight: 'unset', overflow: 'hidden' }
-        : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
-      ),
-      transitionDuration: variantConfig.transitionDuration,
-      transitionTimingFunction: variantConfig.transitionTiming,
-    },
-    header: {
-      height: layout === 'horizontal' ? '100%' : variantConfig.headerHeight,
-      width: layout === 'horizontal' ? layoutConfig.headerWidth : 'auto',
-    },
-    content: {
-      padding: layout === 'horizontal' && layoutConfig.contentPadding
-        ? layoutConfig.contentPadding
-        : variantConfig.contentPadding,
-    },
-  }), [variantConfig, layout, sizeConfig, layoutConfig]);
+  const styles = useMemo(() => {
+    const baseStyles = generateCardStyles(variantConfig, size, layout);
+    return {
+      container: {
+        ...baseStyles.container,
+        display: 'flex',
+        flexDirection: 'column',
+        // Mantener overflow si cardHeight es fijo
+        ...(variantConfig.cardHeight && variantConfig.cardHeight !== 'auto'
+          ? { overflow: 'hidden' }
+          : {}
+        ),
+      },
+      header: baseStyles.header,
+      content: baseStyles.content,
+    };
+  }, [variantConfig, size, layout]);
 
   /**
    * Handle mouse enter

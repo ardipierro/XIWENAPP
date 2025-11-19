@@ -725,8 +725,9 @@ Los cambios se aplican instantáneamente en toda la app.`);
     if (!variantConfig) return null;
 
     const categories = {
+      '📐 Dimensiones': ['cardWidth', 'cardHeight', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight', 'aspectRatio'],
       '🎨 Header': ['headerHeight', 'headerBg', 'headerGradient', 'headerColor', 'headerImageFit'],
-      '📦 Contenido': ['contentPadding', 'cardHeight', 'contentOverflow'],
+      '📦 Contenido': ['contentPadding', 'contentOverflow', 'contentMinHeight', 'contentMaxHeight'],
       '✨ Hover': ['hoverEnabled', 'hoverTransform', 'hoverShadow', 'hoverBorderColor', 'imageScaleOnHover', 'imageScale'],
       '🔲 Normal': ['normalShadow', 'normalBorderColor'],
       '⏱️ Transiciones': ['transitionDuration', 'transitionTiming'],
