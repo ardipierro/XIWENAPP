@@ -24,10 +24,10 @@ import BaseButton from './common/BaseButton';
 import UniversalCard from './cards/UniversalCard';
 import StudentFeedbackView from './StudentFeedbackView';
 import { uploadMessageAttachment } from '../firebase/storage';
-import { triggerHomeworkAnalysis } from '../firebase/submissions';
+import { triggerHomeworkAnalysis, deleteSubmission } from '../firebase/submissions';
 
 export default function StudentAssignmentsView({ studentId }) {
-  const { assignments, loading } = useAssignments(studentId, 'student');
+  const { assignments, loading, deleteAssignment } = useAssignments(studentId, 'student');
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [filter, setFilter] = useState('all'); // all, pending, submitted, graded
 
@@ -110,6 +110,12 @@ export default function StudentAssignmentsView({ studentId }) {
               key={assignment.id}
               assignment={assignment}
               onClick={() => setSelectedAssignment(assignment)}
+              onDelete={async (assignmentId) => {
+                const result = await deleteAssignment(assignmentId);
+                if (!result.success) {
+                  alert('Error al eliminar la tarea. Intenta de nuevo.');
+                }
+              }}
             />
           ))}
         </div>
@@ -127,7 +133,7 @@ export default function StudentAssignmentsView({ studentId }) {
   );
 }
 
-function AssignmentCard({ assignment, onClick }) {
+function AssignmentCard({ assignment, onClick, onDelete }) {
   const deadline = assignment.deadline?.toDate?.();
   const isOverdue = assignment.isOverdue;
   const isSubmitted = assignment.isSubmitted;
@@ -136,8 +142,25 @@ function AssignmentCard({ assignment, onClick }) {
   // Determine icon based on status
   const icon = isGraded ? CheckCircle : isOverdue ? AlertCircle : FileText;
 
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    if (confirm('¿Eliminar esta tarea? Esta acción no se puede deshacer.')) {
+      onDelete?.(assignment.id);
+    }
+  };
+
   return (
-    <div onClick={onClick} style={{ cursor: 'pointer' }}>
+    <div onClick={onClick} style={{ cursor: 'pointer', position: 'relative' }}>
+      {/* Delete button - Top right corner */}
+      <button
+        onClick={handleDeleteClick}
+        className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors z-10"
+        title="Eliminar tarea"
+        style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
+      >
+        <Trash2 size={16} />
+      </button>
+
       <UniversalCard
         variant="content"
         icon={icon}
@@ -191,10 +214,42 @@ function SubmissionModal({ assignment, studentId, onClose }) {
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const isSubmitted = submission?.status === 'submitted' || submission?.status === 'graded';
   const isGraded = submission?.status === 'graded';
+
+  const handleDeleteSubmission = async () => {
+    if (!submission?.id) {
+      alert('No hay entrega para eliminar.');
+      return;
+    }
+
+    if (!confirm('¿Eliminar tu entrega de esta tarea? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      logger.info('Deleting submission', { submissionId: submission.id, assignmentId: assignment.id });
+
+      const result = await deleteSubmission(submission.id);
+
+      if (result.success) {
+        logger.info('Submission deleted successfully', { submissionId: submission.id });
+        alert('Entrega eliminada exitosamente.');
+        onClose();
+      } else {
+        throw new Error(result.error || 'Error al eliminar');
+      }
+    } catch (err) {
+      logger.error('Error deleting submission', err);
+      alert('Error al eliminar la entrega. Intenta de nuevo.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -546,10 +601,21 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                 >
                   Cancelar
                 </BaseButton>
+                {submission?.id && (
+                  <BaseButton
+                    variant="danger"
+                    onClick={handleDeleteSubmission}
+                    disabled={isSaving || isDeleting}
+                    icon={Trash2}
+                    fullWidth
+                  >
+                    {isDeleting ? 'Eliminando...' : 'Eliminar'}
+                  </BaseButton>
+                )}
                 <BaseButton
                   variant="outline"
                   onClick={handleSaveDraft}
-                  disabled={isSaving}
+                  disabled={isSaving || isDeleting}
                   fullWidth
                 >
                   {isSaving ? 'Guardando...' : 'Guardar borrador'}
@@ -557,7 +623,7 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                 <BaseButton
                   variant="primary"
                   onClick={handleSubmit}
-                  disabled={isSaving}
+                  disabled={isSaving || isDeleting}
                   icon={Send}
                   fullWidth
                 >
@@ -584,13 +650,26 @@ function SubmissionModal({ assignment, studentId, onClose }) {
                 </div>
               </div>
 
-              <BaseButton
-                variant="ghost"
-                onClick={onClose}
-                fullWidth
-              >
-                Cerrar
-              </BaseButton>
+              <div className="flex gap-3">
+                <BaseButton
+                  variant="ghost"
+                  onClick={onClose}
+                  fullWidth
+                >
+                  Cerrar
+                </BaseButton>
+                {submission?.id && (
+                  <BaseButton
+                    variant="danger"
+                    onClick={handleDeleteSubmission}
+                    disabled={isDeleting}
+                    icon={Trash2}
+                    fullWidth
+                  >
+                    {isDeleting ? 'Eliminando...' : 'Eliminar Entrega'}
+                  </BaseButton>
+                )}
+              </div>
             </div>
           )}
         </div>
