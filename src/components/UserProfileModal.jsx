@@ -26,6 +26,7 @@ import StudentsTab from './profile/tabs/StudentsTab';
 import CreditsTab from './profile/tabs/CreditsTab';
 import GuardiansTab from './profile/tabs/GuardiansTab';
 import { AVATARS } from './AvatarSelector';
+import UserAvatar from './UserAvatar';
 import {
   getUserAvatar,
   updateUserAvatar,
@@ -78,7 +79,7 @@ function UserProfileModal({
   } : null;
 
   // Estados del perfil
-  const [userAvatar, setUserAvatar] = useState('default');
+  const [avatarKey, setAvatarKey] = useState(0); // Key para forzar recarga del avatar
   const [userBanner, setUserBanner] = useState(null);
   const [gamification, setGamification] = useState(null);
   const [credits, setCredits] = useState(null);
@@ -105,9 +106,8 @@ function UserProfileModal({
     const loadProfile = async () => {
       if (normalizedUser?.uid) {
         try {
-          // Cargar avatar
+          // Cargar avatar para detectar si es imagen personalizada
           const avatar = await getUserAvatar(normalizedUser.uid);
-          setUserAvatar(avatar);
           if (avatar && avatar.startsWith('http')) {
             setUploadedAvatarUrl(avatar);
           }
@@ -215,8 +215,8 @@ function UserProfileModal({
       const imageUrl = await uploadAvatarImage(normalizedUser.uid, file);
       await updateUserAvatar(normalizedUser.uid, imageUrl);
 
-      setUserAvatar(imageUrl);
       setUploadedAvatarUrl(imageUrl);
+      setAvatarKey(prev => prev + 1); // Forzar recarga del avatar
       setSuccess('Avatar actualizado correctamente');
 
       if (onUpdate) onUpdate();
@@ -237,8 +237,8 @@ function UserProfileModal({
       }
 
       await updateUserAvatar(normalizedUser.uid, avatarId);
-      setUserAvatar(avatarId);
       setShowAvatarOptions(false);
+      setAvatarKey(prev => prev + 1); // Forzar recarga del avatar
       setSuccess('Avatar actualizado correctamente');
 
       if (onUpdate) onUpdate();
@@ -446,29 +446,16 @@ function UserProfileModal({
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3">
             {/* Avatar Container */}
             <div className="relative group flex-shrink-0">
-              <div
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden transition-all shadow-2xl"
-                style={{
-                  background: 'var(--color-bg-secondary)'
-                }}
-              >
-                {uploadedAvatarUrl ? (
-                  <img
-                    src={uploadedAvatarUrl}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div
-                    className="w-full h-full flex items-center justify-center"
-                    style={{ background: 'var(--color-bg-tertiary)' }}
-                  >
-                    {(() => {
-                      const AvatarIcon = AVATARS[userAvatar]?.icon || AVATARS.default.icon;
-                      return <AvatarIcon size={48} strokeWidth={2} />;
-                    })()}
-                  </div>
-                )}
+              {/* Avatar Universal con sombra */}
+              <div className="shadow-2xl rounded-full">
+                <UserAvatar
+                  key={avatarKey}
+                  userId={normalizedUser?.uid}
+                  name={normalizedUser?.displayName || normalizedUser?.name}
+                  email={normalizedUser?.email}
+                  size="xl"
+                  className="!border-4 !border-white dark:!border-zinc-900"
+                />
               </div>
 
               {/* Avatar Edit Overlay - Solo visible al hover */}
@@ -648,7 +635,7 @@ function UserProfileModal({
                   <button
                     key={key}
                     className={`aspect-square rounded-lg flex items-center justify-center transition-all ${
-                      userAvatar === key && !uploadedAvatarUrl
+                      !uploadedAvatarUrl
                         ? 'bg-indigo-100 dark:bg-indigo-900/20 border-2 border-indigo-500'
                         : 'bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-indigo-400'
                     }`}
