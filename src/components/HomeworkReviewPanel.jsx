@@ -49,6 +49,7 @@ import ImageOverlayControls from './homework/ImageOverlayControls';
 import StudentAssigner from './homework/StudentAssigner';
 import {
   getPendingReviews,
+  getAllReviewsForTeacher,
   approveReview,
   subscribeToReview,
   subscribeToPendingReviews,
@@ -153,9 +154,10 @@ export default function HomeworkReviewPanel({ teacherId }) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved'
 
   useEffect(() => {
-    loadPendingReviews();
+    loadAllReviews();
 
     // Subscribe to real-time updates for instant feedback
     const unsubscribe = subscribeToPendingReviews((updatedReviews) => {
@@ -166,6 +168,22 @@ export default function HomeworkReviewPanel({ teacherId }) {
 
     return () => unsubscribe();
   }, [teacherId]);
+
+  const loadAllReviews = async () => {
+    try {
+      setLoading(true);
+      logger.info(`Loading all reviews (teacherId: ${teacherId || 'ALL'})`, 'HomeworkReviewPanel');
+      const allReviews = await getAllReviewsForTeacher(teacherId);
+      setReviews(allReviews);
+      logger.info(`✅ Loaded ${allReviews.length} homework reviews`, 'HomeworkReviewPanel');
+      logger.debug('📋 All reviews:', allReviews);
+    } catch (error) {
+      logger.error('❌ Error loading reviews', 'HomeworkReviewPanel', error);
+      logger.error('Error details:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadPendingReviews = async () => {
     try {
@@ -189,22 +207,22 @@ export default function HomeworkReviewPanel({ teacherId }) {
   };
 
   const handleApproveSuccess = () => {
-    // Reload pending reviews
-    loadPendingReviews();
+    // Reload all reviews (don't remove approved ones)
+    loadAllReviews();
     setShowDetailModal(false);
     setSelectedReview(null);
   };
 
   const handleReanalysisSuccess = () => {
-    // Reload pending reviews to show processing status
-    loadPendingReviews();
+    // Reload all reviews to show processing status
+    loadAllReviews();
     setShowDetailModal(false);
     setSelectedReview(null);
   };
 
   const handleUploadSuccess = () => {
-    // Reload pending reviews to show the new one
-    loadPendingReviews();
+    // Reload all reviews to show the new one
+    loadAllReviews();
     setShowUploadModal(false);
   };
 
@@ -226,16 +244,47 @@ export default function HomeworkReviewPanel({ teacherId }) {
     );
   }
 
-  // Filter reviews based on search term
+  // Filter reviews based on search term and status filter
   const filteredReviews = reviews.filter(review => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      review.studentName?.toLowerCase().includes(searchLower) ||
-      review.aiProvider?.toLowerCase().includes(searchLower) ||
-      review.aiModel?.toLowerCase().includes(searchLower) ||
-      review.status?.toLowerCase().includes(searchLower)
-    );
+    // Status filter
+    if (statusFilter === 'pending') {
+      const isPending =
+        review.status === REVIEW_STATUS.PROCESSING ||
+        review.status === REVIEW_STATUS.PENDING_REVIEW ||
+        !review.teacherReviewed;
+      if (!isPending) return false;
+    } else if (statusFilter === 'approved') {
+      const isApproved =
+        review.status === REVIEW_STATUS.APPROVED &&
+        review.teacherReviewed === true;
+      if (!isApproved) return false;
+    }
+
+    // Search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        review.studentName?.toLowerCase().includes(searchLower) ||
+        review.aiProvider?.toLowerCase().includes(searchLower) ||
+        review.aiModel?.toLowerCase().includes(searchLower) ||
+        review.status?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return true;
   });
+
+  // Calculate counts for filters
+  const pendingCount = reviews.filter(r =>
+    r.status === REVIEW_STATUS.PROCESSING ||
+    r.status === REVIEW_STATUS.PENDING_REVIEW ||
+    !r.teacherReviewed
+  ).length;
+
+  const approvedCount = reviews.filter(r =>
+    r.status === REVIEW_STATUS.APPROVED &&
+    r.teacherReviewed === true
+  ).length;
 
   return (
     <div className="w-full">
@@ -246,6 +295,31 @@ export default function HomeworkReviewPanel({ teacherId }) {
         actionLabel="Subir Tarea"
         onAction={() => setShowUploadModal(true)}
       />
+
+      {/* Status Filter Tabs */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <BaseButton
+          onClick={() => setStatusFilter('all')}
+          variant={statusFilter === 'all' ? 'primary' : 'ghost'}
+          size="sm"
+        >
+          Todas ({reviews.length})
+        </BaseButton>
+        <BaseButton
+          onClick={() => setStatusFilter('pending')}
+          variant={statusFilter === 'pending' ? 'primary' : 'ghost'}
+          size="sm"
+        >
+          🟡 Pendientes ({pendingCount})
+        </BaseButton>
+        <BaseButton
+          onClick={() => setStatusFilter('approved')}
+          variant={statusFilter === 'approved' ? 'primary' : 'ghost'}
+          size="sm"
+        >
+          🟢 Aprobadas ({approvedCount})
+        </BaseButton>
+      </div>
 
       {/* SearchBar */}
       <SearchBar
@@ -284,7 +358,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
                 const result = await cancelProcessingReview(reviewId);
                 if (result.success) {
                   logger.info(`Cancelled processing review ${reviewId}`, 'HomeworkReviewPanel');
-                  loadPendingReviews(); // Reload to show updated status
+                  loadAllReviews(); // Reload to show updated status
                 } else {
                   alert('Error al cancelar el procesamiento. Intenta de nuevo.');
                 }
@@ -293,7 +367,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
                 const result = await deleteHomeworkReview(reviewId);
                 if (result.success) {
                   logger.info(`Deleted homework review ${reviewId}`, 'HomeworkReviewPanel');
-                  loadPendingReviews(); // Reload to refresh list
+                  loadAllReviews(); // Reload to refresh list
                 } else {
                   alert('Error al eliminar la tarea. Intenta de nuevo.');
                 }

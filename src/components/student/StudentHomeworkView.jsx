@@ -30,6 +30,7 @@ import {
   SearchBar
 } from '../common';
 import ImageLightbox from '../common/ImageLightbox';
+import ImageOverlay from '../homework/ImageOverlay';
 import StudentFeedbackView from '../StudentFeedbackView';
 import ManualHomeworkUpload from '../homework/ManualHomeworkUpload';
 import { getReviewsByStudent, REVIEW_STATUS } from '../../firebase/homework_reviews';
@@ -558,12 +559,28 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
               </BaseButton>
             </div>
             <div className="rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-              <img
-                src={review.imageUrl}
-                alt="Tarea enviada"
-                className="w-full h-auto cursor-pointer"
-                onClick={() => setShowImageLightbox(true)}
-              />
+              {/* ✨ FIX: Show corrections on the main image, not just in lightbox */}
+              <div className="cursor-pointer" onClick={() => setShowImageLightbox(true)}>
+                <ImageOverlay
+                  imageUrl={review.imageUrl}
+                  words={review.words || []}
+                  errors={approvedCorrections}
+                  showOverlay={isApproved}
+                  visibleErrorTypes={{
+                    spelling: true,
+                    grammar: true,
+                    punctuation: true,
+                    vocabulary: true
+                  }}
+                  highlightOpacity={0.25}
+                  zoom={1}
+                  pan={{ x: 0, y: 0 }}
+                  useWavyUnderline={true}
+                  showCorrectionText={true}
+                  correctionTextFont="Caveat"
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
 
