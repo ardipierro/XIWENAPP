@@ -425,9 +425,9 @@ export default function UniversalUserManager({ user, userRole }) {
                         size="sm"
                         icon={Trash2}
                       />
-                    )
-                  }
-                />
+                    </div>
+                  )}
+                </div>
               );
             })}
           </CardGrid>
