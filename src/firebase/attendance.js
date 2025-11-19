@@ -145,7 +145,7 @@ export async function markAttendanceByLink(sessionId, studentId, studentName, cr
 async function deductCreditsForAttendance(attendanceId, studentId, creditCost, sessionId) {
   try {
     // Obtener información de la sesión para el reason
-    const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
+    const sessionDoc = await getDoc(doc(db, 'class_instances', sessionId));
     const sessionData = sessionDoc.exists() ? sessionDoc.data() : {};
 
     const className = sessionData.courseName || 'Clase';

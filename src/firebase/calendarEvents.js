@@ -118,351 +118,104 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
     const startTimestamp = Timestamp.fromDate(startDate);
     const endTimestamp = Timestamp.fromDate(endDate);
 
-    // 1. Get class sessions (live/async sessions from class_sessions collection)
-    const sessionsRef = collection(db, 'class_sessions');
+    // 1. Get class_instances (NEW UNIFIED SYSTEM)
+    const instancesRef = collection(db, 'class_instances');
 
     if (userRole === 'admin') {
-      // Admin: get ALL sessions
-      const sessionsQuery = query(
-        sessionsRef,
-        where('active', '==', true)
+      // Admin: get ALL instances within date range
+      const instancesQuery = query(
+        instancesRef,
+        where('scheduledStart', '>=', startTimestamp),
+        where('scheduledStart', '<=', endTimestamp),
+        orderBy('scheduledStart', 'asc')
       );
-      const sessionsSnap = await getDocs(sessionsQuery);
-      logger.info(`📊 Found ${sessionsSnap.docs.length} sessions for admin`, 'Calendar');
-      sessionsSnap.docs.forEach(doc => {
+      const instancesSnap = await getDocs(instancesQuery);
+      logger.info(`📊 Found ${instancesSnap.docs.length} class instances for admin`, 'Calendar');
+
+      instancesSnap.docs.forEach(doc => {
         const data = doc.data();
-        logger.debug(`🔍 Processing session "${data.name}" - type: ${data.type}, active: ${data.active}`, 'Calendar');
-
-        // Handle single and instant sessions
-        if ((data.type === 'single' || data.type === 'instant') && data.scheduledStart) {
-          const sessionDate = data.scheduledStart;
-          logger.debug(`🔍 ${data.type} session "${data.name}" - scheduledStart: ${sessionDate.toDate().toISOString()}, range: ${startTimestamp.toDate().toISOString()} to ${endTimestamp.toDate().toISOString()}`, 'Calendar');
-          if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
-            logger.info(`✅ Adding ${data.type} session to calendar: "${data.name}"`, 'Calendar');
-            events.push({
-              id: doc.id,
-              title: data.name,
-              type: 'session',
-              subtype: data.mode, // 'live' or 'async'
-              startDate: data.scheduledStart,
-              endDate: data.scheduledStart,
-              description: data.description,
-              status: data.status, // 'scheduled', 'live', 'ended', 'cancelled'
-              mode: data.mode,
-              whiteboardType: data.whiteboardType,
-              roomName: data.roomName,
-              participants: data.participants || [],
-              color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : 'blue',
-              sessionData: data // Store full data for modal
-            });
-          }
-        }
-
-        // Handle recurring sessions - expand schedules
-        if (data.type === 'recurring' && data.schedules && data.schedules.length > 0) {
-          // Calculate end date based on recurringWeeks and recurringStartDate
-          const recurringStart = data.recurringStartDate?.toDate() || new Date();
-          const recurringWeeks = data.recurringWeeks || 4;
-          const recurringEnd = new Date(recurringStart);
-          recurringEnd.setDate(recurringEnd.getDate() + (recurringWeeks * 7));
-
-          data.schedules.forEach(schedule => {
-            // Generate instances for each day in the date range
-            // Start from the recurring start date or the calendar start date, whichever is later
-            const currentDate = new Date(Math.max(recurringStart, startDate));
-
-            // End at the recurring end date or the calendar end date, whichever is earlier
-            const effectiveEndDate = new Date(Math.min(recurringEnd, endDate));
-
-            while (currentDate <= effectiveEndDate) {
-              if (currentDate.getDay() === schedule.day) {
-                const [hours, minutes] = schedule.startTime.split(':');
-                const sessionDate = new Date(currentDate);
-                sessionDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-                events.push({
-                  id: `${doc.id}_${currentDate.toISOString()}`,
-                  sessionId: doc.id,
-                  title: data.name,
-                  type: 'session',
-                  subtype: data.mode,
-                  startDate: Timestamp.fromDate(sessionDate),
-                  endDate: Timestamp.fromDate(sessionDate),
-                  description: data.description,
-                  status: data.status,
-                  mode: data.mode,
-                  whiteboardType: data.whiteboardType,
-                  roomName: data.roomName,
-                  participants: data.participants || [],
-                  color: data.status === 'live' ? 'red' : 'blue',
-                  sessionData: data,
-                  isRecurring: true,
-                  recurringStartDate: recurringStart,
-                  recurringEndDate: recurringEnd
-                });
-              }
-              currentDate.setDate(currentDate.getDate() + 1);
-            }
-          });
-        }
+        events.push({
+          id: doc.id,
+          title: data.scheduleName || 'Clase',
+          type: 'class_instance',
+          startDate: data.scheduledStart,
+          endDate: data.scheduledEnd || data.scheduledStart,
+          description: data.description || '',
+          courseId: data.courseId,
+          courseName: data.courseName,
+          teacherId: data.teacherId,
+          teacherName: data.teacherName,
+          status: data.status,
+          location: data.videoProvider || 'Online',
+          color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
+          sessionData: data
+        });
       });
     } else if (userRole === 'teacher') {
-      // Teacher: get their sessions
-      const sessionsQuery = query(
-        sessionsRef,
+      // Teacher: get their instances
+      const instancesQuery = query(
+        instancesRef,
         where('teacherId', '==', userId),
-        where('active', '==', true)
+        where('scheduledStart', '>=', startTimestamp),
+        where('scheduledStart', '<=', endTimestamp),
+        orderBy('scheduledStart', 'asc')
       );
-      const sessionsSnap = await getDocs(sessionsQuery);
-      logger.info(`📊 Found ${sessionsSnap.docs.length} sessions for teacher ${userId}`, 'Calendar');
-      sessionsSnap.docs.forEach(doc => {
+      const instancesSnap = await getDocs(instancesQuery);
+      logger.info(`📊 Found ${instancesSnap.docs.length} class instances for teacher`, 'Calendar');
+
+      instancesSnap.docs.forEach(doc => {
         const data = doc.data();
-        logger.debug(`🔍 Processing session "${data.name}" - type: ${data.type}, active: ${data.active}`, 'Calendar');
-
-        // Handle single and instant sessions
-        if ((data.type === 'single' || data.type === 'instant') && data.scheduledStart) {
-          const sessionDate = data.scheduledStart;
-          logger.debug(`🔍 ${data.type} session "${data.name}" - scheduledStart: ${sessionDate.toDate().toISOString()}, range: ${startTimestamp.toDate().toISOString()} to ${endTimestamp.toDate().toISOString()}`, 'Calendar');
-          if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
-            logger.info(`✅ Adding ${data.type} session to calendar: "${data.name}"`, 'Calendar');
-            events.push({
-              id: doc.id,
-              title: data.name,
-              type: 'session',
-              subtype: data.mode, // 'live' or 'async'
-              startDate: data.scheduledStart,
-              endDate: data.scheduledStart,
-              description: data.description,
-              status: data.status, // 'scheduled', 'live', 'ended', 'cancelled'
-              mode: data.mode,
-              whiteboardType: data.whiteboardType,
-              roomName: data.roomName,
-              participants: data.participants || [],
-              color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : 'blue',
-              sessionData: data // Store full data for modal
-            });
-          }
-        }
-
-        // Handle recurring sessions - expand schedules
-        if (data.type === 'recurring' && data.schedules && data.schedules.length > 0) {
-          // Calculate end date based on recurringWeeks and recurringStartDate
-          const recurringStart = data.recurringStartDate?.toDate() || new Date();
-          const recurringWeeks = data.recurringWeeks || 4;
-          const recurringEnd = new Date(recurringStart);
-          recurringEnd.setDate(recurringEnd.getDate() + (recurringWeeks * 7));
-
-          data.schedules.forEach(schedule => {
-            // Generate instances for each day in the date range
-            // Start from the recurring start date or the calendar start date, whichever is later
-            const currentDate = new Date(Math.max(recurringStart, startDate));
-
-            // End at the recurring end date or the calendar end date, whichever is earlier
-            const effectiveEndDate = new Date(Math.min(recurringEnd, endDate));
-
-            while (currentDate <= effectiveEndDate) {
-              if (currentDate.getDay() === schedule.day) {
-                const [hours, minutes] = schedule.startTime.split(':');
-                const sessionDate = new Date(currentDate);
-                sessionDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-                events.push({
-                  id: `${doc.id}_${currentDate.toISOString()}`,
-                  sessionId: doc.id,
-                  title: data.name,
-                  type: 'session',
-                  subtype: data.mode,
-                  startDate: Timestamp.fromDate(sessionDate),
-                  endDate: Timestamp.fromDate(sessionDate),
-                  description: data.description,
-                  status: data.status,
-                  mode: data.mode,
-                  whiteboardType: data.whiteboardType,
-                  roomName: data.roomName,
-                  participants: data.participants || [],
-                  color: data.status === 'live' ? 'red' : 'blue',
-                  sessionData: data,
-                  isRecurring: true,
-                  recurringStartDate: recurringStart,
-                  recurringEndDate: recurringEnd
-                });
-              }
-              currentDate.setDate(currentDate.getDate() + 1);
-            }
-          });
-        }
+        events.push({
+          id: doc.id,
+          title: data.scheduleName || 'Clase',
+          type: 'class_instance',
+          startDate: data.scheduledStart,
+          endDate: data.scheduledEnd || data.scheduledStart,
+          description: data.description || '',
+          courseId: data.courseId,
+          courseName: data.courseName,
+          teacherId: data.teacherId,
+          teacherName: data.teacherName,
+          status: data.status,
+          location: data.videoProvider || 'Online',
+          color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
+          sessionData: data
+        });
       });
     } else {
-      // Students: get sessions assigned to them
-      const sessionsQuery = query(
-        sessionsRef,
-        where('assignedStudents', 'array-contains', userId),
-        where('active', '==', true)
+      // Students: get instances they're eligible for
+      const instancesQuery = query(
+        instancesRef,
+        where('eligibleStudentIds', 'array-contains', userId),
+        where('scheduledStart', '>=', startTimestamp),
+        where('scheduledStart', '<=', endTimestamp),
+        orderBy('scheduledStart', 'asc')
       );
-      const sessionsSnap = await getDocs(sessionsQuery);
-      sessionsSnap.docs.forEach(doc => {
+      const instancesSnap = await getDocs(instancesQuery);
+      logger.info(`📊 Found ${instancesSnap.docs.length} class instances for student`, 'Calendar');
+
+      instancesSnap.docs.forEach(doc => {
         const data = doc.data();
-
-        // Handle single sessions
-        if (data.type === 'single' && data.scheduledStart) {
-          const sessionDate = data.scheduledStart;
-          if (sessionDate >= startTimestamp && sessionDate <= endTimestamp) {
-            events.push({
-              id: doc.id,
-              title: data.name,
-              type: 'session',
-              subtype: data.mode,
-              startDate: data.scheduledStart,
-              endDate: data.scheduledStart,
-              description: data.description,
-              status: data.status,
-              mode: data.mode,
-              whiteboardType: data.whiteboardType,
-              roomName: data.roomName,
-              participants: data.participants || [],
-              color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : 'blue',
-              sessionData: data
-            });
-          }
-        }
-
-        // Handle recurring sessions
-        if (data.type === 'recurring' && data.schedules && data.schedules.length > 0) {
-          // Calculate end date based on recurringWeeks and recurringStartDate
-          const recurringStart = data.recurringStartDate?.toDate() || new Date();
-          const recurringWeeks = data.recurringWeeks || 4;
-          const recurringEnd = new Date(recurringStart);
-          recurringEnd.setDate(recurringEnd.getDate() + (recurringWeeks * 7));
-
-          data.schedules.forEach(schedule => {
-            // Generate instances for each day in the date range
-            // Start from the recurring start date or the calendar start date, whichever is later
-            const currentDate = new Date(Math.max(recurringStart, startDate));
-
-            // End at the recurring end date or the calendar end date, whichever is earlier
-            const effectiveEndDate = new Date(Math.min(recurringEnd, endDate));
-
-            while (currentDate <= effectiveEndDate) {
-              if (currentDate.getDay() === schedule.day) {
-                const [hours, minutes] = schedule.startTime.split(':');
-                const sessionDate = new Date(currentDate);
-                sessionDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-                events.push({
-                  id: `${doc.id}_${currentDate.toISOString()}`,
-                  sessionId: doc.id,
-                  title: data.name,
-                  type: 'session',
-                  subtype: data.mode,
-                  startDate: Timestamp.fromDate(sessionDate),
-                  endDate: Timestamp.fromDate(sessionDate),
-                  description: data.description,
-                  status: data.status,
-                  mode: data.mode,
-                  whiteboardType: data.whiteboardType,
-                  roomName: data.roomName,
-                  participants: data.participants || [],
-                  color: data.status === 'live' ? 'red' : 'blue',
-                  sessionData: data,
-                  isRecurring: true,
-                  recurringStartDate: recurringStart,
-                  recurringEndDate: recurringEnd
-                });
-              }
-              currentDate.setDate(currentDate.getDate() + 1);
-            }
-          });
-        }
+        events.push({
+          id: doc.id,
+          title: data.scheduleName || 'Clase',
+          type: 'class_instance',
+          startDate: data.scheduledStart,
+          endDate: data.scheduledEnd || data.scheduledStart,
+          description: data.description || '',
+          courseId: data.courseId,
+          courseName: data.courseName,
+          teacherId: data.teacherId,
+          teacherName: data.teacherName,
+          status: data.status,
+          location: data.videoProvider || 'Online',
+          color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
+          sessionData: data
+        });
       });
     }
 
-    // 2. Get scheduled classes - SIMPLIFIED to avoid complex indexes
-    const classesRef = collection(db, 'scheduledClasses');
-
-    if (userRole === 'admin') {
-      // Admin: get ALL classes
-      const classesSnap = await getDocs(classesRef);
-      classesSnap.docs.forEach(doc => {
-        const data = doc.data();
-        const classDate = data.date;
-        // Filter by date range in memory
-        if (classDate && classDate >= startTimestamp && classDate <= endTimestamp) {
-          events.push({
-            id: doc.id,
-            title: data.title || 'Clase',
-            type: 'class',
-            startDate: data.date,
-            endDate: data.endDate || data.date,
-            description: data.description,
-            courseId: data.courseId,
-            location: data.location || 'Online',
-            color: 'blue'
-          });
-        }
-      });
-    } else if (userRole === 'teacher') {
-      // Teacher: get their classes and filter by date in memory
-      const classesQuery = query(
-        classesRef,
-        where('teacherId', '==', userId)
-      );
-      const classesSnap = await getDocs(classesQuery);
-      classesSnap.docs.forEach(doc => {
-        const data = doc.data();
-        const classDate = data.date;
-        // Filter by date range in memory
-        if (classDate && classDate >= startTimestamp && classDate <= endTimestamp) {
-          events.push({
-            id: doc.id,
-            title: data.title || 'Clase',
-            type: 'class',
-            startDate: data.date,
-            endDate: data.endDate || data.date,
-            description: data.description,
-            courseId: data.courseId,
-            location: data.location || 'Online',
-            color: 'blue'
-          });
-        }
-      });
-    } else {
-      // Students: get all classes and filter by enrollment + date in memory
-      const enrollmentsRef = collection(db, 'enrollments');
-      const enrollmentsQuery = query(enrollmentsRef, where('studentId', '==', userId));
-      const enrollmentsSnap = await getDocs(enrollmentsQuery);
-      const courseIds = enrollmentsSnap.docs.map(doc => doc.data().courseId);
-
-      if (courseIds.length > 0) {
-        // Get all classes for enrolled courses
-        for (const courseId of courseIds.slice(0, 10)) {
-          const coursClassesQuery = query(
-            classesRef,
-            where('courseId', '==', courseId)
-          );
-          const classesSnap = await getDocs(coursClassesQuery);
-          classesSnap.docs.forEach(doc => {
-            const data = doc.data();
-            const classDate = data.date;
-            // Filter by date range in memory
-            if (classDate && classDate >= startTimestamp && classDate <= endTimestamp) {
-              events.push({
-                id: doc.id,
-                title: data.title || 'Clase',
-                type: 'class',
-                startDate: data.date,
-                endDate: data.endDate || data.date,
-                description: data.description,
-                courseId: data.courseId,
-                location: data.location || 'Online',
-                color: 'blue'
-              });
-            }
-          });
-        }
-      }
-    }
-
-    // 3. Get assignment deadlines - SIMPLIFIED
+    // 2. Get assignment deadlines - SIMPLIFIED
     const assignmentsRef = collection(db, 'assignments');
 
     if (userRole === 'admin') {

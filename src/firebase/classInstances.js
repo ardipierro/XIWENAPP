@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -295,6 +296,42 @@ export async function cancelClassInstance(instanceId) {
     return { success: true };
   } catch (error) {
     logger.error('❌ Error cancelando instancia:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Eliminar una instancia de clase
+ * Solo puede eliminarse si está en estado 'scheduled' o 'cancelled'
+ * @param {string} instanceId
+ * @returns {Promise<Object>}
+ */
+export async function deleteClassInstance(instanceId) {
+  try {
+    const instanceDoc = await getDoc(doc(db, 'class_instances', instanceId));
+
+    if (!instanceDoc.exists()) {
+      return { success: false, error: 'Instancia no encontrada' };
+    }
+
+    const instance = instanceDoc.data();
+
+    // No permitir eliminar clases que ya empezaron o terminaron
+    if (instance.status === 'live') {
+      return { success: false, error: 'No se puede eliminar una clase que está en vivo' };
+    }
+
+    if (instance.status === 'ended' && instance.attendedStudentIds?.length > 0) {
+      return { success: false, error: 'No se puede eliminar una clase que ya finalizó con asistentes' };
+    }
+
+    // Eliminar la instancia
+    await deleteDoc(doc(db, 'class_instances', instanceId));
+
+    logger.info('✅ Instancia eliminada:', instanceId);
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error eliminando instancia:', error);
     return { success: false, error: error.message };
   }
 }

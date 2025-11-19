@@ -23,7 +23,7 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
   const [error, setError] = useState(null);
   const [isTeacher, setIsTeacher] = useState(false);
 
-  // Detectar si es una sesión del nuevo sistema (class_sessions) o del antiguo (live_classes)
+  // Todas las clases usan el sistema unificado (class_instances)
   const isClassSession = !!liveClass.meetSessionId || liveClass.status === 'live';
 
   useEffect(() => {
@@ -49,9 +49,9 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
 
         setToken(jwtToken);
 
-        // Registrar participante en Firebase según el sistema
+        // Registrar participante en Firebase
         if (isClassSession) {
-          // Nuevo sistema: class_sessions
+          // Sistema unificado: class_instances
           await addParticipantToSession(liveClass.id, {
             userId: user.uid,
             userName: user.displayName || user.email,
@@ -60,7 +60,7 @@ function LiveClassRoom({ liveClass, user, userRole, onLeave }) {
             joinedAt: new Date()
           });
         } else {
-          // Sistema antiguo: live_classes
+          // Fallback para clases legacy (deprecado)
           await joinLiveClass(liveClass.id, user.uid, user.displayName || user.email);
 
           // Si es el profesor y la clase está programada, iniciarla

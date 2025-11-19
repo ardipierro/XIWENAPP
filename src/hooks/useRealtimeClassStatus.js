@@ -42,18 +42,16 @@ export function useRealtimeClassStatus(userId, userRole = 'student', options = {
     if (userRole === 'teacher') {
       // Para profesores: buscar sus propias clases próximas
       q = query(
-        collection(db, 'class_sessions'),
+        collection(db, 'class_instances'),
         where('teacherId', '==', userId),
-        where('type', '==', 'single'), // Solo sesiones únicas por ahora
         where('scheduledStart', '>', now),
         where('scheduledStart', '<=', Timestamp.fromDate(futureDate))
       );
     } else {
       // Para estudiantes: buscar clases asignadas próximas
       q = query(
-        collection(db, 'class_sessions'),
-        where('assignedStudents', 'array-contains', userId),
-        where('type', '==', 'single'),
+        collection(db, 'class_instances'),
+        where('eligibleStudentIds', 'array-contains', userId),
         where('scheduledStart', '>', now),
         where('scheduledStart', '<=', Timestamp.fromDate(futureDate))
       );
