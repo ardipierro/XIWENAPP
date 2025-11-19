@@ -156,7 +156,15 @@ export function UniversalCard({
       flexDirection: 'column',
       ...(variantConfig.cardHeight
         ? { height: variantConfig.cardHeight, minHeight: 'unset', overflow: 'hidden' }
-        : { minHeight: layout === 'horizontal' ? '72px' : sizeConfig.minHeight }
+        : layout === 'horizontal'
+        ? {
+            height: '72px',
+            minHeight: '72px',
+            maxHeight: '72px',
+            overflow: 'hidden',      // CRÍTICO: prevenir expansión vertical
+            overflowY: 'hidden'      // CRÍTICO: prevenir scroll vertical
+          }
+        : { minHeight: sizeConfig.minHeight }
       ),
       transitionDuration: variantConfig.transitionDuration,
       transitionTimingFunction: variantConfig.transitionTiming,
@@ -345,7 +353,7 @@ export function UniversalCard({
     if (!badges || badges.length === 0 || !variantConfig.showBadges) return null;
 
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className={`flex flex-wrap ${layout === 'horizontal' ? 'gap-1' : 'gap-2'}`}>
         {badges.map((badge, index) => {
           // Soportar tanto componentes JSX como objetos de props
           if (typeof badge === 'object' && badge.type) {
@@ -355,7 +363,7 @@ export function UniversalCard({
             // Es un objeto de props para BaseBadge
             const { key, ...restProps } = badge;
             return (
-              <BaseBadge key={index} size={layout === 'horizontal' ? 'sm' : 'md'} {...restProps} />
+              <BaseBadge key={index} size="sm" {...restProps} />
             );
           }
         })}
@@ -542,7 +550,7 @@ export function UniversalCard({
 
             {/* Avatar/Icono/Imagen a la izquierda (48px) */}
             {(avatar || Icon || image) && (
-              <div className="flex-shrink-0 mr-4">
+              <div className="flex-shrink-0 mr-3">
                 {/* Avatar */}
                 {avatar && (
                   <div
@@ -608,21 +616,21 @@ export function UniversalCard({
 
             {/* Sección 2: Stats (espacio medio si existen) */}
             {stats && stats.length > 0 && (
-              <div className="flex-shrink-0 px-4">
+              <div className="flex-shrink-0 px-2">
                 {renderStats()}
               </div>
             )}
 
             {/* Sección 3: Badges (espacio medio si existen) */}
             {badges && badges.length > 0 && (
-              <div className="flex-shrink-0 px-4">
+              <div className="flex-shrink-0 px-2">
                 {renderBadges()}
               </div>
             )}
 
             {/* Sección 4: Actions (al final) */}
             {actions && (
-              <div className="flex-shrink-0 flex gap-2">
+              <div className={`flex-shrink-0 flex ${layout === 'horizontal' ? 'gap-1.5' : 'gap-2'}`}>
                 {Array.isArray(actions) ? (
                   actions.map((action, index) => (
                     <div key={index} onClick={(e) => e.stopPropagation()}>
