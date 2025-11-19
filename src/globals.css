@@ -2726,7 +2726,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-bubble {
   max-width: 60%;
   min-width: 80px;
-  padding: 4px 8px; /* Mínimo padding para máxima compactación */
+  padding: 8px 12px; /* Padding más generoso para mejor legibilidad */
   border-radius: 16px;
   position: relative;
   display: inline-block;
@@ -2748,22 +2748,19 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-sender {
   font-size: 12px;
   font-weight: 600;
-  margin-bottom: 1px; /* Mínimo espacio entre nombre y mensaje */
+  margin-bottom: 4px; /* Espacio adecuado entre nombre y mensaje */
   opacity: 0.8;
 }
 
 .message-content {
   font-size: 14px;
-  line-height: 1.2; /* MUY COMPACTO - Reduce el espacio vertical */
+  line-height: 1.4; /* Más legible y natural */
   word-wrap: break-word;
   white-space: pre-wrap;
   overflow-wrap: break-word;
   max-width: 100%;
   margin: 0;
   padding: 0;
-  /* Espacio para hora y checkmarks inline - estilo WhatsApp */
-  padding-right: 4px;
-  margin-bottom: 0;
 }
 
 .message-time {
@@ -4365,20 +4362,19 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   background: var(--color-bg-secondary);
 }
 
-/* ===== Message Footer (Time + Checkmarks) - Estilo WhatsApp ===== */
+/* ===== Message Footer (Time + Checkmarks) ===== */
 .message-footer {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px; /* Reducido para más compacto */
-  margin-left: 8px;
-  vertical-align: bottom;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px; /* Separación consistente del contenido */
   white-space: nowrap;
-  /* Separación pequeña del texto */
-  padding-left: 6px;
+  font-size: 11px;
+  opacity: 0.8;
 }
 
 .message-time {
-  font-size: 11px; /* Restaurado al tamaño original para mejor legibilidad */
   color: var(--color-text-tertiary);
   display: inline-flex;
   align-items: center;
