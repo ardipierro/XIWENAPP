@@ -584,19 +584,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                   Editar Clase
                 </BaseButton>
               );
-              actions.push(
-                <BaseButton
-                  key="delete"
-                  variant="danger"
-                  size="sm"
-                  icon={Trash2}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(session);
-                  }}
-                  loading={actionLoading === `delete-${session.id}`}
-                />
-              );
+              // Botón eliminar movido a onDelete prop (footer izquierda)
             } else {
               // Acciones para sesión única/instancia
               if (session.status === 'scheduled') {
@@ -650,7 +638,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                 );
               }
 
-              // Botones de editar/eliminar para sesiones no live
+              // Botones de editar para sesiones no live (eliminar movido a onDelete)
               if (session.status !== 'live') {
                 actions.push(
                   <BaseButton
@@ -664,19 +652,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                     }}
                   />
                 );
-                actions.push(
-                  <BaseButton
-                    key="delete"
-                    variant="danger"
-                    size="sm"
-                    icon={Trash2}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(session);
-                    }}
-                    loading={actionLoading === `delete-${session.id}`}
-                  />
-                );
+                // Botón eliminar movido a onDelete prop (footer izquierda)
               }
             }
 
@@ -698,6 +674,8 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                     onJoinSession(session);
                   }
                 }}
+                onDelete={() => handleDelete(session)}  // ← NUEVO: Botón eliminar unificado (footer izquierda)
+                deleteConfirmMessage={`¿Eliminar ${session.type === 'recurring' ? 'clase recurrente' : 'sesión'} "${session.name}"?`}
               />
             );
           })}
