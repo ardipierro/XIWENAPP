@@ -20,6 +20,9 @@ export default defineConfig({
       includeAssets: ['icons/icon.svg'],
       manifest: false, // Usar manifest.json estático en public/
       injectRegister: 'auto',
+      devOptions: {
+        enabled: false // Disable in dev to avoid conflicts
+      },
       workbox: {
         // Solo precachear assets críticos (reducido para móviles)
         globPatterns: ['**/*.{js,css,html,ico,svg}'],
@@ -50,6 +53,15 @@ export default defineConfig({
 
         // Estrategia de caché optimizada para móvil
         runtimeCaching: [
+          {
+            // Manifest - NetworkFirst para evitar 401
+            urlPattern: /manifest\.json$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'manifest-cache',
+              networkTimeoutSeconds: 3
+            }
+          },
           {
             // Runtime caching para chunks grandes excluidos del precache
             urlPattern: /assets\/(excalidraw|vendor|ContentManagerTabs|ClassDailyLogManager|PieChart|recharts|ContentReader|MessagesPanel|HomeworkReview|TestPage|AnalyticsDashboard)-.*\.js$/,
