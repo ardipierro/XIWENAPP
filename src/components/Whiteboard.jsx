@@ -1,6 +1,11 @@
-import logger from '../utils/logger';
+/**
+ * @fileoverview Whiteboard - Pizarra colaborativa refactorizada
+ * Usa hooks personalizados para gestión de estado modular
+ * @module components/Whiteboard
+ */
 
-import { useState, useRef, useEffect } from 'react';
+import logger from '../utils/logger';
+import { useRef, useEffect } from 'react';
 import BaseButton from './common/BaseButton';
 import {
   Pencil,
@@ -36,222 +41,90 @@ import {
 } from 'lucide-react';
 import getStroke from 'perfect-freehand';
 import {
-  createWhiteboardSession,
-  updateWhiteboardSession,
-  getUserWhiteboardSessions,
-  createActiveWhiteboardSession,
-  joinActiveWhiteboardSession,
-  leaveActiveWhiteboardSession,
-  subscribeToActiveWhiteboardSession,
   addStrokeToActiveSession,
   clearSlideInActiveSession,
-  shareContentInSession,
   clearSharedContent,
   addObjectToActiveSession,
   updateObjectInActiveSession,
   deleteObjectFromActiveSession,
   updateActiveSelection
 } from '../firebase/whiteboard';
-import { auth } from '../firebase/config';
 import SharedContentViewer from './SharedContentViewer';
 import './SharedContentViewer.css';
 
+// ✅ IMPORTAR HOOKS PERSONALIZADOS
+import {
+  useWhiteboardSession,
+  useWhiteboardCollaboration,
+  useWhiteboardTools,
+  useWhiteboardCanvas,
+  useWhiteboardHistory,
+  useWhiteboardObjects,
+  useWhiteboardStrokes,
+  useWhiteboardToolbar
+} from '../hooks/whiteboard';
+
+/**
+ * Componente Whiteboard refactorizado con hooks personalizados
+ * Reducido de 53 useState a 8 hooks modulares
+ */
 function Whiteboard({ onBack, initialSession = null, isCollaborative = false, collaborativeSessionId = null }) {
-  // Session management
-  const [currentSessionId, setCurrentSessionId] = useState(initialSession?.id || null);
-  const [sessionTitle, setSessionTitle] = useState(initialSession?.title || '');
-  const [showSaveModal, setShowSaveModal] = useState(false);
-  const [showLoadModal, setShowLoadModal] = useState(false);
-  const [savedSessions, setSavedSessions] = useState([]);
-  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  // ========================================
+  // REFS
+  // ========================================
   const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [tool, setTool] = useState('pencil'); // pencil, pen, marker, highlighter, line, arrow, rectangle, circle, text, eraser, move, select, stickyNote, textBox
-  const [color, setColor] = useState('#000000');
-  const [lineWidth, setLineWidth] = useState(2);
-  const [slides, setSlides] = useState(initialSession?.slides || [{ id: 1, data: null, thumbnail: null }]);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [history, setHistory] = useState([]);
-  const [historyStep, setHistoryStep] = useState(-1);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [textInput, setTextInput] = useState({ show: false, x: 0, y: 0, value: '' });
   const textInputRef = useRef(null);
-  // Text formatting states
-  const [textBold, setTextBold] = useState(false);
-  const [textItalic, setTextItalic] = useState(false);
-  const [textUnderline, setTextUnderline] = useState(false);
-  const [fontSize, setFontSize] = useState(16);
-  // Objects (sticky notes, text boxes)
-  const [objects, setObjects] = useState([]);
-  const [selectedObject, setSelectedObject] = useState(null);
-  const [editingObject, setEditingObject] = useState(null); // ID del objeto en modo edición
-  const [isDraggingObject, setIsDraggingObject] = useState(false);
-  const [dragObjectOffset, setDragObjectOffset] = useState({ x: 0, y: 0 });
-  const [isResizing, setIsResizing] = useState(false);
-  const [resizeHandle, setResizeHandle] = useState(null); // 'se', 'sw', 'ne', 'nw'
-  // Canvas strokes (trazos seleccionables)
-  const [strokes, setStrokes] = useState([]);
-  const [selectedStroke, setSelectedStroke] = useState(null);
-  const [isDraggingStroke, setIsDraggingStroke] = useState(false);
-  const [baseCanvasImage, setBaseCanvasImage] = useState(null); // Captura del canvas sin el trazo seleccionado
-  // Resize state
-  const [resizeStartPos, setResizeStartPos] = useState({ x: 0, y: 0 });
-  const [resizeStartSize, setResizeStartSize] = useState({ width: 0, height: 0, x: 0, y: 0 });
-  const [toolbarPos, setToolbarPos] = useState({ x: 0, y: 0 });
-  const [isDraggingToolbar, setIsDraggingToolbar] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isVertical, setIsVertical] = useState(false);
-  const [verticalSide, setVerticalSide] = useState('right'); // 'left' or 'right'
-  const [lastVerticalState, setLastVerticalState] = useState(false); // Para histéresis
-  const [pendingOrientation, setPendingOrientation] = useState(null); // Orientación pendiente al soltar
   const toolbarRef = useRef(null);
   const colorButtonRef = useRef(null);
-  const [colorPickerPos, setColorPickerPos] = useState({ top: 0, left: 0 });
-  const [currentPoints, setCurrentPoints] = useState([]);
-  // Tool groups expansion state
-  const [expandedGroup, setExpandedGroup] = useState(null); // 'draw', 'shapes', 'objects'
-  const [tempCanvas, setTempCanvas] = useState(null);
 
-  // Collaborative state
-  const [participants, setParticipants] = useState([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const [sharedContent, setSharedContent] = useState(null);
-  const [isHost, setIsHost] = useState(false); // Si el usuario actual es el creador de la sesión
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [shareContentUrl, setShareContentUrl] = useState('');
-  const [shareContentType, setShareContentType] = useState('video'); // 'video', 'pdf', 'image'
-  const [activeSelections, setActiveSelections] = useState({}); // Selecciones de otros usuarios
-  const unsubscribeRef = useRef(null);
+  // ========================================
+  // CUSTOM HOOKS (8 hooks reemplazan 53 useState)
+  // ========================================
 
-  // Colores predefinidos
-  const presetColors = [
-    '#000000', // Negro
-    '#FFFFFF', // Blanco
-    '#FF0000', // Rojo
-    '#0066CC', // Azul
-    '#00AA00', // Verde
-    '#FF6600', // Naranja
-    '#9900CC', // Púrpura
-    '#00CCCC', // Cyan
-    '#FFCC00', // Amarillo dorado
-    '#CC0066', // Magenta
-    '#666666', // Gris oscuro
-    '#FF99CC'  // Rosa
-  ];
+  // 1. Gestión de sesiones (6 estados → 1 hook)
+  const session = useWhiteboardSession(initialSession);
 
-  // Collaborative mode: Join/Create session
-  useEffect(() => {
-    if (!isCollaborative || !collaborativeSessionId) return;
+  // 2. Colaboración en tiempo real (8 estados → 1 hook)
+  const collaboration = useWhiteboardCollaboration(
+    isCollaborative,
+    collaborativeSessionId,
+    session.slides || initialSession?.slides || [{ id: 1, data: null, thumbnail: null }],
+    0 // currentSlide - se sincronizará después
+  );
 
-    const joinSession = async () => {
-      if (!auth.currentUser) {
-        logger.debug('⚠️ No user logged in');
-        return;
-      }
+  // 3. Herramientas de dibujo (8 estados → 1 hook)
+  const tools = useWhiteboardTools();
 
-      try {
-        const user = {
-          uid: auth.currentUser.uid,
-          displayName: auth.currentUser.displayName || auth.currentUser.email || 'Usuario'
-        };
+  // 4. Canvas y slides (6 estados → 1 hook)
+  const canvas = useWhiteboardCanvas(initialSession?.slides);
 
-        logger.debug('🟢 Joining collaborative session:', collaborativeSessionId);
+  // 5. Historial undo/redo (2 estados → 1 hook)
+  const history = useWhiteboardHistory();
 
-        // Try to create session (will work if it doesn't exist)
-        try {
-          await createActiveWhiteboardSession(collaborativeSessionId, user, {
-            title: 'Pizarra Colaborativa',
-            slides: slides
-          });
-        } catch (error) {
-          // Session might already exist, try to join
-          await joinActiveWhiteboardSession(collaborativeSessionId, user);
-        }
+  // 6. Objetos interactivos (9 estados → 1 hook)
+  const objects = useWhiteboardObjects();
 
-        setIsConnected(true);
+  // 7. Trazos seleccionables (4 estados → 1 hook)
+  const strokes = useWhiteboardStrokes();
 
-        // Subscribe to updates
-        const unsubscribe = subscribeToActiveWhiteboardSession(collaborativeSessionId, (sessionData) => {
-          if (sessionData) {
-            logger.debug('📡 Session update received:', sessionData);
-            setParticipants(sessionData.participants || []);
+  // 8. Toolbar UI (10 estados → 1 hook)
+  const toolbar = useWhiteboardToolbar();
 
-            // Set if current user is host
-            if (auth.currentUser) {
-              const isUserHost = sessionData.createdBy === auth.currentUser.uid;
-              logger.debug('🎯 isHost check:', {
-                createdBy: sessionData.createdBy,
-                currentUserId: auth.currentUser.uid,
-                isHost: isUserHost
-              });
-              setIsHost(isUserHost);
-            }
+  // ========================================
+  // ALIASES PARA COMPATIBILIDAD (Temporal durante refactorización completa)
+  // ========================================
+  // Estos aliases permiten que el código legacy funcione mientras se refactoriza
+  const { slides, currentSlide, isDrawing, currentPoints, startPos, tempCanvas, setSlides, setCurrentSlide, setIsDrawing } = canvas;
+  const { tool, color, lineWidth, showColorPicker, textBold, textItalic, textUnderline, fontSize, presetColors } = tools;
+  const { objects: objectsList, selectedObject, editingObject, isDraggingObject, dragObjectOffset, isResizing, resizeHandle, resizeStartPos, resizeStartSize, setObjects } = objects;
+  const { strokes: strokesList, selectedStroke, isDraggingStroke, baseCanvasImage, setStrokes } = strokes;
+  const { participants, isConnected, sharedContent, isHost, showShareModal, shareContentUrl, shareContentType, activeSelections } = collaboration;
+  const { toolbarPos, isDraggingToolbar, dragOffset, isVertical, verticalSide, lastVerticalState, pendingOrientation, expandedGroup, colorPickerPos, textInput } = toolbar;
+  const { history: historyArr, historyStep } = history;
+  const { currentSessionId, sessionTitle, showSaveModal, showLoadModal, savedSessions, isLoadingSessions } = session;
 
-            // Update shared content
-            if (sessionData.sharedContent) {
-              setSharedContent(sessionData.sharedContent);
-            } else {
-              setSharedContent(null);
-            }
-
-            // Update active selections from other users
-            if (sessionData.activeSelections) {
-              setActiveSelections(sessionData.activeSelections);
-            }
-
-            // Update slides from collaborative session
-            if (sessionData.slides && sessionData.slides.length > 0) {
-              const newSlides = sessionData.slides;
-
-              // Only update if there are actual changes
-              setSlides(prevSlides => {
-                // Check if we have new strokes
-                const currentSlideData = newSlides[currentSlide];
-                const prevSlideData = prevSlides[currentSlide];
-
-                if (currentSlideData && prevSlideData) {
-                  const newStrokesCount = currentSlideData.strokes?.length || 0;
-                  const prevStrokesCount = prevSlideData.strokes?.length || 0;
-
-                  // If there are new strokes, draw only the new ones
-                  if (newStrokesCount > prevStrokesCount) {
-                    const newStrokes = currentSlideData.strokes.slice(prevStrokesCount);
-                    logger.debug('🎨 Drawing', newStrokes.length, 'new strokes');
-                    drawNewStrokesOnCanvas(newStrokes);
-                  }
-
-                  // Update objects from Firebase
-                  if (currentSlideData.objects) {
-                    setObjects(currentSlideData.objects);
-                  }
-                }
-
-                return newSlides;
-              });
-            }
-          }
-        });
-
-        unsubscribeRef.current = unsubscribe;
-
-      } catch (error) {
-        logger.error('❌ Error joining session:', error);
-      }
-    };
-
-    joinSession();
-
-    // Cleanup on unmount
-    return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-      }
-      if (auth.currentUser && collaborativeSessionId) {
-        leaveActiveWhiteboardSession(collaborativeSessionId, auth.currentUser.uid);
-      }
-    };
-  }, [isCollaborative, collaborativeSessionId]);
+  // ✅ NOTA: La lógica de colaboración ahora está manejada por useWhiteboardCollaboration hook
+  // El hook maneja automáticamente: join/create session, subscribe to updates, cleanup on unmount
 
   // Event listeners para arrastrar y redimensionar objetos
   useEffect(() => {
