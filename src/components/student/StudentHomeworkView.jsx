@@ -468,6 +468,25 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
   // Combinar estados PROCESSING y PENDING_REVIEW como "En revisión" para el alumno
   const isUnderReview = isProcessing || isPending;
 
+  // ✨ FIX: Get approved corrections only (filtered by teacherStatus)
+  // When teacher approves, corrections are stored in aiSuggestions with teacherStatus
+  const getApprovedCorrections = () => {
+    if (!isApproved) return [];
+
+    // Prefer aiSuggestions (new format with teacher approval)
+    if (review.aiSuggestions && Array.isArray(review.aiSuggestions)) {
+      // Filter only approved corrections
+      return review.aiSuggestions.filter(corr =>
+        corr.teacherStatus === 'approved' || !corr.teacherStatus
+      );
+    }
+
+    // Fallback to detailedCorrections (legacy format)
+    return review.detailedCorrections || [];
+  };
+
+  const approvedCorrections = getApprovedCorrections();
+
   return (
     <>
       <BaseModal
@@ -579,7 +598,7 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
         imageUrl={review.imageUrl}
         alt="Tarea enviada"
         words={review.words || []}
-        errors={review.detailedCorrections || []}
+        errors={approvedCorrections}
         showOverlay={isApproved}
         visibleErrorTypes={{
           spelling: true,
