@@ -121,7 +121,31 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         }
       }
 
-      setMessages(updatedMessages);
+      // Deduplicate messages by ID using a Map to preserve order and avoid duplicates
+      setMessages(prevMessages => {
+        // Create a Map with all messages (old + new) indexed by ID
+        const messageMap = new Map();
+
+        // First, add all previous messages
+        prevMessages.forEach(msg => {
+          messageMap.set(msg.id, msg);
+        });
+
+        // Then, add/update with new messages (this will replace any duplicates)
+        updatedMessages.forEach(msg => {
+          messageMap.set(msg.id, msg);
+        });
+
+        // Convert back to array maintaining chronological order
+        const uniqueMessages = Array.from(messageMap.values());
+        uniqueMessages.sort((a, b) => {
+          const aTime = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+          const bTime = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+          return aTime - bTime; // Oldest first
+        });
+
+        return uniqueMessages;
+      });
 
       // Check if we loaded the initial batch and it's less than 50 (no more messages)
       if (updatedMessages.length < 50) {
@@ -136,7 +160,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
     markMessagesAsRead(conversation.id, currentUser.uid);
 
     return () => unsubscribe();
-  }, [conversation?.id, currentUser.uid, messages.length]);
+  }, [conversation?.id, currentUser.uid]);
 
   // Focus input on mount
   useEffect(() => {
@@ -561,7 +585,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
       url: uploadResult.url,
       filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
       size: audioBlob.size,
-      type: 'audio/webm',
+      type: audioBlob.type || 'audio/webm', // Use the actual blob type
       duration
     };
 
@@ -849,8 +873,31 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
           previousScrollHeightRef.current = container.scrollHeight;
         }
 
-        // Prepend older messages to the list
-        setMessages(prevMessages => [...result.messages, ...prevMessages]);
+        // Prepend older messages to the list, deduplicating by ID
+        setMessages(prevMessages => {
+          // Create a Map to deduplicate by ID
+          const messageMap = new Map();
+
+          // Add old messages first (to maintain priority)
+          result.messages.forEach(msg => {
+            messageMap.set(msg.id, msg);
+          });
+
+          // Add current messages (these will override any duplicates)
+          prevMessages.forEach(msg => {
+            messageMap.set(msg.id, msg);
+          });
+
+          // Convert back to array maintaining chronological order
+          const uniqueMessages = Array.from(messageMap.values());
+          uniqueMessages.sort((a, b) => {
+            const aTime = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+            const bTime = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+            return aTime - bTime; // Oldest first
+          });
+
+          return uniqueMessages;
+        });
 
         // After messages are rendered, restore scroll position
         setTimeout(() => {

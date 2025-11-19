@@ -56,12 +56,39 @@ function VoiceRecorder({ onSend, onCancel }) {
    */
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Request high-quality audio with specific constraints
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 48000, // Higher sample rate for better quality
+          channelCount: 1 // Mono is fine for voice
+        }
+      });
       streamRef.current = stream; // Save stream reference
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm'
-      });
+      // Determine the best available audio codec with high bitrate
+      let options = { audioBitsPerSecond: 128000 }; // 128kbps for good quality
+
+      // Try different codecs in order of preference
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        options.mimeType = 'audio/webm;codecs=opus';
+        logger.info('Using Opus codec for audio recording', 'VoiceRecorder');
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        options.mimeType = 'audio/webm';
+        logger.info('Using WebM for audio recording', 'VoiceRecorder');
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        options.mimeType = 'audio/mp4';
+        logger.info('Using MP4 for audio recording', 'VoiceRecorder');
+      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+        options.mimeType = 'audio/ogg;codecs=opus';
+        logger.info('Using OGG Opus for audio recording', 'VoiceRecorder');
+      } else {
+        logger.warn('No preferred audio format supported, using default', 'VoiceRecorder');
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, options);
 
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -73,10 +100,14 @@ function VoiceRecorder({ onSend, onCancel }) {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        // Use the same mimeType that was used for recording
+        const mimeType = mediaRecorder.mimeType || 'audio/webm';
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
         const url = URL.createObjectURL(blob);
         setAudioBlob(blob);
         setAudioUrl(url);
+
+        logger.info(`Audio recording stopped. Size: ${(blob.size / 1024).toFixed(2)} KB, Type: ${mimeType}`, 'VoiceRecorder');
 
         // Stop all tracks to release microphone immediately
         if (streamRef.current) {
