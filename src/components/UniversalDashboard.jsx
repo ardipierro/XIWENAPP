@@ -40,6 +40,7 @@ const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
 const CreditManager = lazy(() => import('./CreditManager'));
 const SettingsPanel = lazy(() => import('./SettingsPanel'));
 const UniversalUserManager = lazy(() => import('./UniversalUserManager'));
+const UpcomingClassesBanner = lazy(() => import('./UpcomingClassesBanner'));
 
 // Sample exercises component
 const CreateSampleExercisesButton = lazy(() => import('./CreateSampleExercisesButton'));
@@ -162,6 +163,13 @@ function HomeView({ user, onNavigate }) {
           {formattedDate}
         </h1>
       </div>
+
+      {/* Banner de Próximas Clases - Solo para estudiantes */}
+      {user.role === 'student' && (
+        <Suspense fallback={<BaseLoading size="small" text="Cargando próximas clases..." />}>
+          <UpcomingClassesBanner student={user} />
+        </Suspense>
+      )}
 
       {/* Demo: Crear Ejercicios de Ejemplo - Solo para teachers y admins */}
       {can('create-content') && (
