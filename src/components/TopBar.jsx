@@ -14,11 +14,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Bell, MessageCircle, Shield, Lightbulb, ArrowLeft } from 'lucide-react';
 import UserMenu from './UserMenu.jsx';
-import AvatarSelector, { AVATARS } from './AvatarSelector.jsx';
+import AvatarSelector from './AvatarSelector.jsx';
 import UserProfileModal from './UserProfileModal.jsx';
 import ThemeSwitcher from './ThemeSwitcher.jsx';
 import AIAssistantModal from './AIAssistantModal.jsx';
-import { getUserAvatar, updateUserAvatar } from '../firebase/firestore.js';
+import UserAvatar from './UserAvatar.jsx';
+import { updateUserAvatar } from '../firebase/firestore.js';
 import { isAdminEmail } from '../firebase/roleConfig.js';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.js';
 import { useFont } from '../contexts/FontContext.jsx';
@@ -44,7 +45,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [showAIModal, setShowAIModal] = useState(false);
-  const [userAvatar, setUserAvatar] = useState('default');
+  const [avatarKey, setAvatarKey] = useState(0); // Key para forzar recarga del avatar
   const [notificationCount] = useState(0); // Placeholder para futuro
   const messageCount = useUnreadMessages(user?.uid); // Real-time unread count
   const { selectedFont, fontWeight, fontSize } = useFont(); // Fuente del logo
@@ -79,36 +80,9 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
     };
   }, [showUserMenu]);
 
-  // Cargar avatar del usuario al montar
-  useEffect(() => {
-    loadUserAvatar();
-  }, [user?.uid]);
-
-  const loadUserAvatar = async () => {
-    if (user?.uid) {
-      try {
-        const avatar = await getUserAvatar(user.uid);
-        setUserAvatar(avatar);
-      } catch (err) {
-        logger.error('TopBar: Error loading avatar', err);
-      }
-    }
-  };
-
-  // Obtener iniciales para el avatar
-  const getUserInitials = () => {
-    if (user?.displayName) {
-      return user.displayName
-        .split(' ')
-        .map(name => name[0])
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
-    }
-    if (user?.email) {
-      return user.email.substring(0, 2).toUpperCase();
-    }
-    return '??';
+  // Forzar recarga del avatar cuando cambia
+  const reloadAvatar = () => {
+    setAvatarKey(prev => prev + 1);
   };
 
   // Obtener nombre para mostrar
@@ -124,8 +98,8 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
       try {
         const success = await updateUserAvatar(user.uid, avatarId);
         if (success) {
-          setUserAvatar(avatarId);
           setShowAvatarSelector(false);
+          reloadAvatar(); // Forzar recarga del avatar
           logger.info('TopBar: Avatar updated successfully', { avatarId });
         }
       } catch (err) {
@@ -376,31 +350,15 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
                 aria-label="Menú de usuario"
                 aria-expanded={showUserMenu}
               >
-                {/* Avatar */}
-                <div
-                  className="relative flex items-center justify-center
-                             w-8 h-8 flex-shrink-0
-                             rounded-full"
-                >
-                  {userAvatar && userAvatar.startsWith('http') ? (
-                    <img
-                      src={userAvatar}
-                      alt="Avatar"
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    (() => {
-                      const AvatarIcon = AVATARS[userAvatar]?.icon || AVATARS.default.icon;
-                      return (
-                        <AvatarIcon
-                          size={20}
-                          strokeWidth={2}
-                          className="text-zinc-900 dark:text-white"
-                        />
-                      );
-                    })()
-                  )}
-                </div>
+                {/* Avatar - Componente Universal */}
+                <UserAvatar
+                  key={avatarKey}
+                  userId={user?.uid}
+                  name={user?.displayName}
+                  email={user?.email}
+                  size="sm"
+                  className="flex-shrink-0"
+                />
 
                 {/* User Name - Oculto en móvil */}
                 <span
@@ -437,7 +395,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
       {/* Avatar Selector Modal */}
       {showAvatarSelector && (
         <AvatarSelector
-          currentAvatar={userAvatar}
+          currentAvatar={null}
           onSelectAvatar={handleAvatarChange}
           onClose={() => setShowAvatarSelector(false)}
         />
@@ -450,8 +408,9 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
         user={user}
         userRole={userRole}
         currentUserRole={userRole}
+        currentUser={user}
         isAdmin={isAdmin}
-        onUpdate={loadUserAvatar}
+        onUpdate={reloadAvatar}
       />
 
       {/* AI Assistant Modal */}
