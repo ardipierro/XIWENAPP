@@ -15,7 +15,8 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from './config';
 import logger from '../utils/logger';
@@ -136,7 +137,7 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         events.push({
           id: doc.id,
-          title: data.scheduleName || 'Clase',
+          title: data.scheduleName || data.name || 'Clase',
           type: 'class_instance',
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
@@ -167,7 +168,7 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         events.push({
           id: doc.id,
-          title: data.scheduleName || 'Clase',
+          title: data.scheduleName || data.name || 'Clase',
           type: 'class_instance',
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
@@ -198,7 +199,7 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         events.push({
           id: doc.id,
-          title: data.scheduleName || 'Clase',
+          title: data.scheduleName || data.name || 'Clase',
           type: 'class_instance',
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
@@ -332,6 +333,213 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
 }
 
 /**
+ * Subscribe to real-time calendar updates
+ * @param {string} userId - User ID
+ * @param {string} userRole - User role
+ * @param {Date} startDate - Start date
+ * @param {Date} endDate - End date
+ * @param {Function} callback - Callback function to receive events updates
+ * @returns {Function} Unsubscribe function to cleanup listeners
+ */
+export function subscribeToUnifiedCalendar(userId, userRole, startDate, endDate, callback) {
+  logger.info(`🔔 subscribeToUnifiedCalendar - Setting up real-time listeners for ${userRole}`, 'Calendar');
+
+  const startTimestamp = Timestamp.fromDate(startDate);
+  const endTimestamp = Timestamp.fromDate(endDate);
+  const unsubscribers = [];
+  let allEvents = [];
+
+  // Helper to merge and sort events
+  const updateEvents = () => {
+    const sorted = [...allEvents].sort((a, b) => {
+      const dateA = a.startDate?.toMillis?.() || 0;
+      const dateB = b.startDate?.toMillis?.() || 0;
+      return dateA - dateB;
+    });
+    callback(sorted);
+  };
+
+  // 1. Subscribe to class_instances
+  const instancesRef = collection(db, 'class_instances');
+  let instancesQuery;
+
+  if (userRole === 'admin') {
+    instancesQuery = query(
+      instancesRef,
+      where('scheduledStart', '>=', startTimestamp),
+      where('scheduledStart', '<=', endTimestamp),
+      orderBy('scheduledStart', 'asc')
+    );
+  } else if (userRole === 'teacher') {
+    instancesQuery = query(
+      instancesRef,
+      where('teacherId', '==', userId),
+      where('scheduledStart', '>=', startTimestamp),
+      where('scheduledStart', '<=', endTimestamp),
+      orderBy('scheduledStart', 'asc')
+    );
+  } else {
+    // Student
+    instancesQuery = query(
+      instancesRef,
+      where('eligibleStudentIds', 'array-contains', userId),
+      where('scheduledStart', '>=', startTimestamp),
+      where('scheduledStart', '<=', endTimestamp),
+      orderBy('scheduledStart', 'asc')
+    );
+  }
+
+  const unsubscribeInstances = onSnapshot(
+    instancesQuery,
+    (snapshot) => {
+      logger.info(`🔄 Real-time update: ${snapshot.docs.length} class instances for ${userRole}`, 'Calendar');
+
+      // Remove old class instances from allEvents
+      allEvents = allEvents.filter(e => e.type !== 'class_instance');
+
+      // Add new class instances
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        allEvents.push({
+          id: doc.id,
+          title: data.scheduleName || data.name || 'Clase',
+          type: 'class_instance',
+          startDate: data.scheduledStart,
+          endDate: data.scheduledEnd || data.scheduledStart,
+          description: data.description || '',
+          courseId: data.courseId,
+          courseName: data.courseName,
+          teacherId: data.teacherId,
+          teacherName: data.teacherName,
+          status: data.status,
+          location: data.videoProvider || 'Online',
+          color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
+          sessionData: data
+        });
+      });
+
+      updateEvents();
+    },
+    (error) => {
+      logger.error('Error in class instances real-time listener', 'Calendar', error);
+    }
+  );
+
+  unsubscribers.push(unsubscribeInstances);
+
+  // 2. Subscribe to assignments (simplified - fetch once for now)
+  // Note: We keep assignments as one-time fetch since they don't change as frequently
+  // and adding real-time listeners for all assignments would be expensive
+  const loadAssignments = async () => {
+    try {
+      const assignmentsRef = collection(db, 'assignments');
+
+      if (userRole === 'admin') {
+        const assignmentsSnap = await getDocs(assignmentsRef);
+        assignmentsSnap.docs.forEach(doc => {
+          const data = doc.data();
+          const deadline = data.deadline;
+          if (deadline && deadline >= startTimestamp && deadline <= endTimestamp) {
+            allEvents.push({
+              id: doc.id,
+              title: data.title,
+              type: 'assignment',
+              startDate: data.deadline,
+              endDate: data.deadline,
+              description: data.description,
+              courseId: data.courseId,
+              points: data.points,
+              color: 'red'
+            });
+          }
+        });
+      } else if (userRole === 'teacher') {
+        const assignmentsQuery = query(assignmentsRef, where('teacherId', '==', userId));
+        const assignmentsSnap = await getDocs(assignmentsQuery);
+        assignmentsSnap.docs.forEach(doc => {
+          const data = doc.data();
+          const deadline = data.deadline;
+          if (deadline && deadline >= startTimestamp && deadline <= endTimestamp) {
+            allEvents.push({
+              id: doc.id,
+              title: data.title,
+              type: 'assignment',
+              startDate: data.deadline,
+              endDate: data.deadline,
+              description: data.description,
+              courseId: data.courseId,
+              points: data.points,
+              color: 'red'
+            });
+          }
+        });
+      } else {
+        // Students
+        const enrollmentsRef = collection(db, 'enrollments');
+        const enrollmentsQuery = query(enrollmentsRef, where('studentId', '==', userId));
+        const enrollmentsSnap = await getDocs(enrollmentsQuery);
+        const courseIds = enrollmentsSnap.docs.map(doc => doc.data().courseId);
+
+        if (courseIds.length > 0) {
+          for (const courseId of courseIds.slice(0, 10)) {
+            const courseAssignmentsQuery = query(assignmentsRef, where('courseId', '==', courseId));
+            const assignmentsSnap = await getDocs(courseAssignmentsQuery);
+            assignmentsSnap.docs.forEach(doc => {
+              const data = doc.data();
+              const deadline = data.deadline;
+              if (deadline && deadline >= startTimestamp && deadline <= endTimestamp) {
+                allEvents.push({
+                  id: doc.id,
+                  title: data.title,
+                  type: 'assignment',
+                  startDate: data.deadline,
+                  endDate: data.deadline,
+                  description: data.description,
+                  courseId: data.courseId,
+                  points: data.points,
+                  color: 'red'
+                });
+              }
+            });
+          }
+        }
+      }
+
+      updateEvents();
+    } catch (error) {
+      logger.error('Error loading assignments', 'Calendar', error);
+    }
+  };
+
+  // 3. Load custom calendar events (one-time fetch)
+  const loadCustomEvents = async () => {
+    try {
+      const customEvents = await getCalendarEventsForUser(userId, startDate, endDate);
+      customEvents.forEach(event => {
+        allEvents.push({
+          ...event,
+          type: event.type || 'event',
+          color: event.color || 'green'
+        });
+      });
+      updateEvents();
+    } catch (error) {
+      logger.warn('Could not load custom calendar events', 'Calendar', error);
+    }
+  };
+
+  // Load initial assignments and custom events
+  loadAssignments();
+  loadCustomEvents();
+
+  // Return unsubscribe function
+  return () => {
+    logger.info('🔕 Unsubscribing from calendar real-time listeners', 'Calendar');
+    unsubscribers.forEach(unsub => unsub());
+  };
+}
+
+/**
  * Update a calendar event
  * @param {string} eventId - Event ID
  * @param {Object} updates - Fields to update
@@ -403,6 +611,7 @@ export default {
   getCalendarEvent,
   getCalendarEventsForUser,
   getUnifiedCalendar,
+  subscribeToUnifiedCalendar,
   updateCalendarEvent,
   deleteCalendarEvent,
   getTodayEvents,
