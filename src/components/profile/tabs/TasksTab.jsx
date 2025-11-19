@@ -1,11 +1,11 @@
 /**
- * @fileoverview Pestaña de tareas para estudiantes
+ * @fileoverview Pestaña de tareas para estudiantes (sistema homework reviews)
  * @module components/profile/tabs/TasksTab
  */
 
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
-import { getAssignmentsForStudent } from '../../../firebase/assignments';
+import { FileText, CheckCircle, Clock, AlertCircle, Calendar, Sparkles } from 'lucide-react';
+import { getReviewsByStudent, REVIEW_STATUS } from '../../../firebase/homework_reviews';
 import logger from '../../../utils/logger';
 
 /**
@@ -14,49 +14,58 @@ import logger from '../../../utils/logger';
  * @param {Object} user - Usuario actual
  */
 function TasksTab({ user }) {
-  const [assignments, setAssignments] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('pending'); // pending, completed, all
+  const [filter, setFilter] = useState('all'); // all, review, corrected
 
   useEffect(() => {
-    loadAssignments();
+    loadHomework();
   }, [user?.uid]);
 
-  const loadAssignments = async () => {
+  const loadHomework = async () => {
     if (!user?.uid) {
       logger.warn('TasksTab: No user UID provided');
       setLoading(false);
       return;
     }
 
-    logger.debug('TasksTab: Loading assignments', { userId: user.uid });
+    logger.debug('TasksTab: Loading homework reviews', { userId: user.uid });
     setLoading(true);
     try {
-      const data = await getAssignmentsForStudent(user.uid);
-      logger.debug('TasksTab: Assignments loaded successfully', { count: data?.length || 0 });
-      setAssignments(data || []);
+      // includeUnreviewed = true para mostrar TODAS las tareas del estudiante
+      const data = await getReviewsByStudent(user.uid, true);
+      logger.debug('TasksTab: Reviews loaded successfully', { count: data?.length || 0 });
+      setReviews(data || []);
     } catch (err) {
-      logger.error('TasksTab: Error loading assignments', err);
-      setAssignments([]); // Set empty array on error
+      logger.error('TasksTab: Error loading reviews', err);
+      setReviews([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
   };
 
-  const getFilteredAssignments = () => {
-    if (filter === 'all') return assignments;
-    if (filter === 'pending') {
-      return assignments.filter(a => !a.submissionStatus || a.submissionStatus === 'pending');
+  const getFilteredReviews = () => {
+    if (filter === 'all') return reviews;
+    if (filter === 'review') {
+      // En revisión: procesando o pendiente de revisión del profesor
+      return reviews.filter(r =>
+        r.status === REVIEW_STATUS.PROCESSING ||
+        r.status === REVIEW_STATUS.PENDING_REVIEW
+      );
     }
-    if (filter === 'completed') {
-      return assignments.filter(a => a.submissionStatus === 'submitted' || a.submissionStatus === 'graded');
+    if (filter === 'corrected') {
+      // Corregidas: aprobadas por el profesor
+      return reviews.filter(r => r.status === REVIEW_STATUS.APPROVED);
     }
-    return assignments;
+    return reviews;
   };
 
-  const filteredAssignments = getFilteredAssignments();
-  const pendingCount = assignments.filter(a => !a.submissionStatus || a.submissionStatus === 'pending').length;
-  const completedCount = assignments.filter(a => a.submissionStatus === 'submitted' || a.submissionStatus === 'graded').length;
+  const filteredReviews = getFilteredReviews();
+  const reviewCount = reviews.filter(r =>
+    r.status === REVIEW_STATUS.PROCESSING ||
+    r.status === REVIEW_STATUS.PENDING_REVIEW
+  ).length;
+  const correctedCount = reviews.filter(r => r.status === REVIEW_STATUS.APPROVED).length;
 
   if (loading) {
     return (
@@ -70,53 +79,33 @@ function TasksTab({ user }) {
     <div className="p-6 space-y-6">
       {/* Resumen */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-4 text-white">
           <div className="flex items-center gap-2 mb-1">
             <Clock size={20} strokeWidth={2} />
-            <p className="text-sm opacity-90">Pendientes</p>
+            <p className="text-sm opacity-90">En Revisión</p>
           </div>
-          <p className="text-3xl font-bold">{pendingCount}</p>
+          <p className="text-3xl font-bold">{reviewCount}</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 text-white">
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle size={20} strokeWidth={2} />
-            <p className="text-sm opacity-90">Completadas</p>
+            <p className="text-sm opacity-90">Corregidas</p>
           </div>
-          <p className="text-3xl font-bold">{completedCount}</p>
+          <p className="text-3xl font-bold">{correctedCount}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-4 text-white">
           <div className="flex items-center gap-2 mb-1">
             <FileText size={20} strokeWidth={2} />
             <p className="text-sm opacity-90">Total</p>
           </div>
-          <p className="text-3xl font-bold">{assignments.length}</p>
+          <p className="text-3xl font-bold">{reviews.length}</p>
         </div>
       </div>
 
       {/* Filtros */}
       <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setFilter('pending')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            filter === 'pending'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-          }`}
-        >
-          Pendientes ({pendingCount})
-        </button>
-        <button
-          onClick={() => setFilter('completed')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            filter === 'completed'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-          }`}
-        >
-          Completadas ({completedCount})
-        </button>
         <button
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
@@ -125,25 +114,45 @@ function TasksTab({ user }) {
               : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
           }`}
         >
-          Todas ({assignments.length})
+          Todas ({reviews.length})
+        </button>
+        <button
+          onClick={() => setFilter('review')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            filter === 'review'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+          }`}
+        >
+          En Revisión ({reviewCount})
+        </button>
+        <button
+          onClick={() => setFilter('corrected')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            filter === 'corrected'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+          }`}
+        >
+          Corregidas ({correctedCount})
         </button>
       </div>
 
       {/* Lista de tareas */}
-      {filteredAssignments.length > 0 ? (
+      {filteredReviews.length > 0 ? (
         <div className="space-y-3">
-          {filteredAssignments.map((assignment) => (
-            <AssignmentCard key={assignment.id} assignment={assignment} />
+          {filteredReviews.map((review) => (
+            <HomeworkCard key={review.id} review={review} />
           ))}
         </div>
       ) : (
         <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
           <FileText size={48} strokeWidth={2} className="mx-auto text-zinc-300 dark:text-zinc-700 mb-4" />
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-            No hay tareas {filter !== 'all' ? filter === 'pending' ? 'pendientes' : 'completadas' : ''}
+            No hay tareas {filter !== 'all' ? filter === 'review' ? 'en revisión' : 'corregidas' : ''}
           </h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {filter === 'pending' ? '¡Excelente! Estás al día con todas tus tareas' : 'Aún no tienes tareas asignadas'}
+            {filter === 'review' ? '¡Excelente! Todas tus tareas están corregidas' : 'Aún no has enviado tareas'}
           </p>
         </div>
       )}
@@ -152,81 +161,97 @@ function TasksTab({ user }) {
 }
 
 /**
- * AssignmentCard - Card individual de tarea
+ * HomeworkCard - Card individual de tarea (sistema homework reviews)
  */
-function AssignmentCard({ assignment }) {
-  const isSubmitted = assignment.submissionStatus === 'submitted' || assignment.submissionStatus === 'graded';
-  const isGraded = assignment.submissionStatus === 'graded';
-  const isOverdue = assignment.deadline && new Date(assignment.deadline?.toDate()) < new Date() && !isSubmitted;
+function HomeworkCard({ review }) {
+  const isApproved = review.status === REVIEW_STATUS.APPROVED || review.status === 'approved';
+  const isProcessing = review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing';
+  const isPendingReview = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
+  const isFailed = review.status === REVIEW_STATUS.FAILED || review.status === 'failed';
+
+  // Combinar PROCESSING y PENDING_REVIEW como "En revisión" para el alumno
+  const isUnderReview = isProcessing || isPendingReview;
 
   const getStatusBadge = () => {
-    if (isGraded) {
+    if (isApproved) {
       return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-semibold">
+        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-bold">
           <CheckCircle size={14} strokeWidth={2} />
-          Calificada
+          Corregida
         </div>
       );
     }
-    if (isSubmitted) {
+    if (isFailed) {
       return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-semibold">
-          <CheckCircle size={14} strokeWidth={2} />
-          Entregada
-        </div>
-      );
-    }
-    if (isOverdue) {
-      return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-semibold">
+        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-bold">
           <AlertCircle size={14} strokeWidth={2} />
-          Atrasada
+          Error
         </div>
       );
     }
-    return (
-      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-semibold">
-        <Clock size={14} strokeWidth={2} />
-        Pendiente
-      </div>
-    );
+    if (isUnderReview) {
+      return (
+        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-bold">
+          <Clock size={14} strokeWidth={2} />
+          En Revisión
+        </div>
+      );
+    }
+    return null;
   };
+
+  const grade = review.suggestedGrade || 0;
 
   return (
     <div className={`bg-white dark:bg-zinc-950 border rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group ${
-      isOverdue ? 'border-red-300 dark:border-red-800' : 'border-zinc-200 dark:border-zinc-800'
+      isApproved ? 'border-green-300 dark:border-green-800' :
+      isUnderReview ? 'border-blue-300 dark:border-blue-800' :
+      isFailed ? 'border-red-300 dark:border-red-800' :
+      'border-zinc-200 dark:border-zinc-800'
     }`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-            {assignment.title || 'Tarea sin título'}
+            Tarea del {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })}
           </h3>
-          {assignment.description && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2 line-clamp-2">
-              {assignment.description}
-            </p>
-          )}
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-            {assignment.courseName && (
-              <div className="flex items-center gap-1">
-                <FileText size={14} strokeWidth={2} />
-                <span>{assignment.courseName}</span>
-              </div>
-            )}
+          <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+            <div className="flex items-center gap-1">
+              <Calendar size={14} strokeWidth={2} />
+              <span>
+                {review.createdAt?.toDate?.().toLocaleTimeString('es-ES', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
 
-            {assignment.deadline && (
-              <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-600 dark:text-red-400 font-semibold' : ''}`}>
-                <Calendar size={14} strokeWidth={2} />
-                <span>Entrega: {new Date(assignment.deadline?.toDate()).toLocaleDateString()}</span>
-              </div>
-            )}
-
-            {isGraded && assignment.grade !== undefined && (
+            {isApproved && (
               <div className="flex items-center gap-1 text-green-600 dark:text-green-400 font-semibold">
-                <span>Nota: {assignment.grade}/100</span>
+                <Sparkles size={14} strokeWidth={2} />
+                <span>Nota: {grade}/100</span>
               </div>
             )}
+
+            {review.errorSummary?.total > 0 && (
+              <div className="flex items-center gap-1">
+                <AlertCircle size={14} strokeWidth={2} />
+                <span>{review.errorSummary.total} error{review.errorSummary.total !== 1 ? 'es' : ''}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Mini preview de la imagen */}
+          <div className="mt-3">
+            <img
+              src={review.imageUrl}
+              alt="Tarea"
+              className="w-24 h-16 object-cover rounded-lg border border-zinc-200 dark:border-zinc-700"
+            />
           </div>
         </div>
 
