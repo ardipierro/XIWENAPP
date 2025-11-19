@@ -246,11 +246,7 @@ service cloud.firestore {
 
     // Calendar events
     match /calendarEvents/{eventId} {
-      allow read: if isAuthenticated() &&
-        (resource.data.participants.hasAny([request.auth.uid]) ||
-         resource.data.createdBy == request.auth.uid ||
-         isAdmin() ||
-         isTeacher());
+      allow read: if isAuthenticated();
       allow write: if isTeacher() || isAdmin();
     }
 
