@@ -18,25 +18,21 @@ import CardTable from './CardTable';
  * - Loading states
  * - Empty states
  * - Responsive behavior
+ * - Auto-aplica layout horizontal/vertical según viewMode
  *
  * @example
+ * // ⭐ FORMA RECOMENDADA - CardContainer aplica automáticamente el layout
  * <CardContainer
  *   items={users}
- *   viewMode="grid"
- *   columns={{ sm: 1, md: 2, lg: 3, xl: 4 }}
- *   renderCard={(user) => (
+ *   viewMode="grid"  // o "list"
+ *   renderCard={(user, viewMode) => (  // ← viewMode pasado automáticamente
  *     <UniversalCard
  *       key={user.id}
  *       variant="user"
+ *       layout={viewMode === 'list' ? 'horizontal' : 'vertical'}  // Auto
  *       title={user.name}
  *       {...user}
  *     />
- *   )}
- *   renderTableRow={(user) => (
- *     <tr key={user.id}>
- *       <td>{user.name}</td>
- *       <td>{user.email}</td>
- *     </tr>
  *   )}
  *   emptyState={
  *     <BaseEmptyState
@@ -45,6 +41,20 @@ import CardTable from './CardTable';
  *       action={<BaseButton onClick={handleCreate}>Crear Usuario</BaseButton>}
  *     />
  *   }
+ * />
+ *
+ * @example
+ * // Con table mode
+ * <CardContainer
+ *   items={users}
+ *   viewMode="table"
+ *   renderTableRow={(user) => (
+ *     <tr key={user.id}>
+ *       <td>{user.name}</td>
+ *       <td>{user.email}</td>
+ *     </tr>
+ *   )}
+ *   tableHeaders={['Nombre', 'Email', 'Rol']}
  * />
  */
 export function CardContainer({
@@ -155,7 +165,7 @@ export function CardContainer({
           gap={gap}
           className={className}
         >
-          {items.map((item, index) => renderCard(item, index))}
+          {items.map((item, index) => renderCard(item, index, 'grid'))}
         </CardGrid>
       </div>
     );
@@ -163,6 +173,8 @@ export function CardContainer({
 
   /**
    * Render List View
+   * ⭐ NUEVO: Pasa 'list' como tercer parámetro para que renderCard
+   * pueda aplicar layout="horizontal" automáticamente
    */
   if (viewMode === 'list') {
     if (!renderCard) {
@@ -172,8 +184,8 @@ export function CardContainer({
 
     return (
       <div className={containerClassName}>
-        <CardList gap={gap} className={className}>
-          {items.map((item, index) => renderCard(item, index))}
+        <CardList gap={gap || 'gap-3'} className={className}>
+          {items.map((item, index) => renderCard(item, index, 'list'))}
         </CardList>
       </div>
     );

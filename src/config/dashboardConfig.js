@@ -8,7 +8,7 @@
 /**
  * Configuración por defecto aplicable a todos los paneles
  */
-const defaultPanelConfig = {
+export const defaultPanelConfig = {
   // HEADER
   showTitle: true,
   title: '',

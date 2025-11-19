@@ -241,7 +241,7 @@ function StudentSessionsView({ student }) {
             <Play size={20} className="text-red-500" />
             Clases en Vivo Ahora
           </h2>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid-responsive-cards gap-4">
             {liveSessions.map(session => (
               <UniversalCard
                 key={session.id}
@@ -301,7 +301,7 @@ function StudentSessionsView({ student }) {
             <Calendar size={20} />
             Clases Programadas
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid-responsive-cards gap-4">
             {sessions.map(session => {
               const isProcessing = processingSession === session.id;
               const isLive = session.status === 'live';

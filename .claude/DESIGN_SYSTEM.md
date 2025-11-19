@@ -1049,5 +1049,63 @@ src/
 
 ---
 
+## 🔄 Sistema de Modos de Vista (Grid/List/Table)
+
+**⭐ NUEVO - 2025-01-19**: Sistema universal para paneles con selector de vista
+
+### Documentación Completa
+Ver `.claude/VIEW_MODES.md` para la guía completa del sistema.
+
+### Resumen Ejecutivo
+
+Todos los paneles con SearchBar que incluyen selector de vista deben seguir este patrón:
+
+#### Grid Mode (tarjetas en cuadrícula)
+```jsx
+<div className="grid-responsive-cards gap-4">
+  <UniversalCard layout="vertical" {...props} />
+</div>
+```
+
+#### List Mode (tarjetas horizontales compactas)
+```jsx
+<div className="flex flex-col gap-3">
+  <UniversalCard layout="horizontal" {...props} />
+</div>
+```
+
+#### Uso con CardContainer (Recomendado)
+```jsx
+<CardContainer
+  items={items}
+  viewMode={viewMode}
+  renderCard={(item, index, viewMode) => (
+    <UniversalCard
+      layout={viewMode === 'list' ? 'horizontal' : 'vertical'}
+      {...item}
+    />
+  )}
+/>
+```
+
+### Componentes Afectados
+12 paneles principales usan este sistema:
+- AIConfigPanel
+- ClassDailyLogManager
+- ExcalidrawManager
+- FlashCardManager
+- HomeworkReviewPanel
+- StudentDailyLogViewer
+- StudentHomeworkView
+- UniversalUserManager
+- WhiteboardManager
+- CredentialsTab
+- UnifiedContentManager
+- GuardianView
+
+**Ver también**: `.claude/VIEW_MODES.md` para anti-patrones y mejores prácticas
+
+---
+
 **Mantenido por:** Claude Code
-**Última revisión:** 2025-11-17 (v1.2 - Sticky Footer Global Fix)
+**Última revisión:** 2025-01-19 (v1.3 - Sistema Universal de Vistas Grid/List/Table)
