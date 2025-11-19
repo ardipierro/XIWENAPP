@@ -561,7 +561,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
       url: uploadResult.url,
       filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
       size: audioBlob.size,
-      type: 'audio/webm',
+      type: audioBlob.type || 'audio/webm', // Use actual blob type
       duration
     };
 
@@ -585,10 +585,10 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
     setSending(false);
 
     // Close VoiceRecorder AFTER everything is done
-    // This gives time for cleanup to execute properly
+    // Give more time for cleanup to execute properly and release microphone
     setTimeout(() => {
       setShowVoiceRecorder(false);
-    }, 100);
+    }, 300);
 
     if (result) {
       inputRef.current?.focus();
