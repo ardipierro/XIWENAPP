@@ -18,7 +18,6 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  BookOpen,
   DollarSign,
   Mail,
   Eye,
@@ -71,9 +70,6 @@ export default function UniversalUserManager({ user, userRole }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Estados de enrollments (para StudentCard)
-  const [enrollmentCounts, setEnrollmentCounts] = useState({});
-
   // Ref para rastrear si ya se cargaron los usuarios en esta instancia
   const hasLoadedRef = useRef(false);
 
@@ -113,14 +109,6 @@ export default function UniversalUserManager({ user, userRole }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid, permissionsReady]); // Ejecutar cuando user.uid Y permissions estén listos
 
-  // Cargar enrollment counts cuando cambien los usuarios
-  useEffect(() => {
-    if (userManagement.users.length > 0) {
-      loadEnrollmentCounts();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userManagement.users.length]); // Solo cuando cambia la cantidad de usuarios
-
   // Detectar retorno del modo "Ver como" y reabrir perfil
   useEffect(() => {
     const viewAsReturnUserId = sessionStorage.getItem('viewAsReturnUserId');
@@ -141,32 +129,6 @@ export default function UniversalUserManager({ user, userRole }) {
       sessionStorage.removeItem('viewAsReturnUserId');
     }
   }, [userManagement.users]);
-
-  /**
-   * Cargar counts de cursos enrollados por estudiante
-   */
-  const loadEnrollmentCounts = async () => {
-    try {
-      const { getStudentEnrollments } = await import('../firebase/firestore');
-      const counts = {};
-
-      await Promise.all(
-        userManagement.users.map(async (u) => {
-          try {
-            const enrollments = await getStudentEnrollments(u.id);
-            counts[u.id] = enrollments.length;
-          } catch (error) {
-            logger.error(`Error loading enrollments for ${u.id}:`, error);
-            counts[u.id] = 0;
-          }
-        })
-      );
-
-      setEnrollmentCounts(counts);
-    } catch (error) {
-      logger.error('Error loading enrollment counts:', error);
-    }
-  };
 
   /**
    * Crear usuario
@@ -380,15 +342,6 @@ export default function UniversalUserManager({ user, userRole }) {
                       {/* Stats */}
                       <div className="flex gap-6 flex-shrink-0">
                         <div className="flex items-center gap-2">
-                          <BookOpen size={16} className="text-gray-500" />
-                          <div className="flex flex-col">
-                            <span className="text-lg font-extrabold text-gray-900 dark:text-white">
-                              {enrollmentCounts[userItem.id] || 0}
-                            </span>
-                            <span className="text-xs text-gray-500">Cursos</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
                           <DollarSign size={16} className="text-gray-500" />
                           <div className="flex flex-col">
                             <span className="text-lg font-extrabold text-gray-900 dark:text-white">
@@ -450,7 +403,6 @@ export default function UniversalUserManager({ user, userRole }) {
                   subtitle={userItem.email}
                   badges={[<CategoryBadge key="role" type="role" value={userItem.role} size="sm" />]}
                   stats={[
-                    { label: 'Cursos', value: enrollmentCounts[userItem.id] || 0, icon: BookOpen },
                     { label: 'Créditos', value: userItem.credits || 0, icon: DollarSign }
                   ]}
                   onClick={() => handleViewUserProfile(userItem)}
