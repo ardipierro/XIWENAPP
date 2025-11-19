@@ -67,7 +67,9 @@ export default function StudentHomeworkView({ user }) {
       }
 
       logger.info(`Cargando tareas para estudiante: ${user.uid}`, 'StudentHomeworkView');
-      const data = await getReviewsByStudent(user.uid);
+      // includeUnreviewed = true para mostrar TODAS las tareas del estudiante
+      // (procesando, pendientes de revisión, y aprobadas)
+      const data = await getReviewsByStudent(user.uid, true);
 
       if (!data || data.length === 0) {
         logger.debug('📝 No hay tareas enviadas');
