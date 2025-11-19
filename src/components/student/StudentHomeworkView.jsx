@@ -602,25 +602,41 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
       </BaseModal>
 
       {/* ImageLightbox para pantalla completa */}
-      <ImageLightbox
-        isOpen={showImageLightbox}
-        onClose={() => setShowImageLightbox(false)}
-        imageUrl={review.imageUrl}
-        alt="Tarea enviada"
-        words={review.words || []}
-        errors={review.detailedCorrections || []}
-        showOverlay={isApproved}
-        visibleErrorTypes={{
-          spelling: true,
-          grammar: true,
-          punctuation: true,
-          vocabulary: true
-        }}
-        highlightOpacity={0.25}
-        useWavyUnderline={true}
-        showCorrectionText={true}
-        correctionTextFont="Caveat"
-      />
+      {showImageLightbox && (() => {
+        // Debug: Log what data we have
+        console.log('[StudentHomeworkView] ImageLightbox data:', {
+          hasWords: !!review.words,
+          wordsCount: review.words?.length || 0,
+          hasCorrections: !!review.detailedCorrections,
+          correctionsCount: review.detailedCorrections?.length || 0,
+          isApproved,
+          reviewKeys: Object.keys(review),
+          sampleWord: review.words?.[0],
+          sampleCorrection: review.detailedCorrections?.[0]
+        });
+
+        return (
+          <ImageLightbox
+            isOpen={true}
+            onClose={() => setShowImageLightbox(false)}
+            imageUrl={review.imageUrl}
+            alt="Tarea enviada"
+            words={review.words || []}
+            errors={review.detailedCorrections || []}
+            showOverlay={isApproved}
+            visibleErrorTypes={{
+              spelling: true,
+              grammar: true,
+              punctuation: true,
+              vocabulary: true
+            }}
+            highlightOpacity={0.25}
+            useWavyUnderline={true}
+            showCorrectionText={true}
+            correctionTextFont="Caveat"
+          />
+        );
+      })()}
     </>
   );
 }
