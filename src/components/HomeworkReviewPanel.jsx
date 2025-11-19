@@ -24,7 +24,9 @@ import {
   Loader,
   RefreshCw,
   Maximize2,
-  ClipboardList
+  ClipboardList,
+  Trash2,
+  X as XCircle
 } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
@@ -52,6 +54,8 @@ import {
   subscribeToPendingReviews,
   requestReanalysis,
   assignStudentToReview,
+  cancelProcessingReview,
+  deleteHomeworkReview,
   REVIEW_STATUS
 } from '../firebase/homework_reviews';
 import logger from '../utils/logger';
@@ -276,6 +280,24 @@ export default function HomeworkReviewPanel({ teacherId }) {
               review={review}
               onSelect={() => handleSelectReview(review)}
               viewMode={viewMode}
+              onCancel={async (reviewId) => {
+                const result = await cancelProcessingReview(reviewId);
+                if (result.success) {
+                  logger.info(`Cancelled processing review ${reviewId}`, 'HomeworkReviewPanel');
+                  loadPendingReviews(); // Reload to show updated status
+                } else {
+                  alert('Error al cancelar el procesamiento. Intenta de nuevo.');
+                }
+              }}
+              onDelete={async (reviewId) => {
+                const result = await deleteHomeworkReview(reviewId);
+                if (result.success) {
+                  logger.info(`Deleted homework review ${reviewId}`, 'HomeworkReviewPanel');
+                  loadPendingReviews(); // Reload to refresh list
+                } else {
+                  alert('Error al eliminar la tarea. Intenta de nuevo.');
+                }
+              }}
             />
           ))}
         </div>
@@ -319,7 +341,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
 /**
  * Review Card Component
  */
-function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
+function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete }) {
   const grade = review.suggestedGrade || 0;
   const gradeColor = grade >= 90 ? 'success' : grade >= 70 ? 'primary' : grade >= 50 ? 'warning' : 'danger';
 
@@ -332,6 +354,24 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
   const isPendingReview = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
   const isApproved = review.status === REVIEW_STATUS.APPROVED || review.status === 'approved';
   const isReviewed = review.teacherReviewed === true;
+
+  // Check if processing is stuck (more than 2 minutes)
+  const isStuck = isProcessing && review.createdAt?.toDate &&
+    (Date.now() - review.createdAt.toDate().getTime()) > 2 * 60 * 1000;
+
+  const handleCancelClick = (e) => {
+    e.stopPropagation();
+    if (confirm('¿Cancelar el procesamiento de esta tarea? Podrás reintentarla después.')) {
+      onCancel?.(review.id);
+    }
+  };
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    if (confirm('¿Eliminar esta tarea permanentemente? Esta acción no se puede deshacer.')) {
+      onDelete?.(review.id);
+    }
+  };
 
   // List view (horizontal layout)
   if (viewMode === 'list') {
@@ -347,6 +387,15 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
           ''
         }`}
       >
+        {/* Delete button - Top right corner */}
+        <button
+          onClick={handleDeleteClick}
+          className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors z-10"
+          title="Eliminar tarea"
+        >
+          <Trash2 size={16} />
+        </button>
+
         <div className="flex items-center gap-4">
           {/* Status Badge */}
           <div className="flex-shrink-0">
@@ -405,10 +454,20 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
 
           {/* Actions */}
           <div className="flex gap-2 flex-shrink-0">
+            {isStuck && (
+              <BaseButton
+                variant="danger"
+                size="sm"
+                onClick={handleCancelClick}
+              >
+                <XCircle size={16} strokeWidth={2.5} />
+                Cancelar
+              </BaseButton>
+            )}
             <BaseButton
               variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
               size="sm"
-              disabled={isProcessing}
+              disabled={isProcessing && !isStuck}
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect();
@@ -429,6 +488,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
       hover
       onClick={onSelect}
       className={`cursor-pointer relative ${
+        isStuck ? 'border-2 border-red-500 dark:border-red-600 shadow-lg' :
         isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
         isFailed ? 'border-2 border-red-400 dark:border-red-500' :
         isApproved ? 'border-2 border-blue-400 dark:border-blue-500' :
@@ -436,6 +496,15 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
         ''
       }`}
     >
+      {/* Delete button - Top right corner */}
+      <button
+        onClick={handleDeleteClick}
+        className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors z-10"
+        title="Eliminar tarea"
+      >
+        <Trash2 size={16} />
+      </button>
+
       <div className="space-y-3">
         {/* Student Info */}
         <div className="flex items-start justify-between">
@@ -477,7 +546,17 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
         </div>
 
         {/* Stats or Processing Message */}
-        {isProcessing ? (
+        {isStuck ? (
+          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg p-3.5">
+            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
+              <AlertCircle size={18} className="flex-shrink-0" strokeWidth={2.5} />
+              <span className="font-bold">⚠️ Procesamiento atascado</span>
+            </div>
+            <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
+              Lleva más de 2 minutos procesando. Puede estar rota la conexión con el proveedor de IA. Cancela y reintenta.
+            </p>
+          </div>
+        ) : isProcessing ? (
           <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-600 rounded-lg p-3.5">
             <div className="flex items-center gap-2.5 text-sm text-orange-800 dark:text-orange-200">
               <RefreshCw size={18} className="animate-spin flex-shrink-0" strokeWidth={2.5} />
@@ -555,29 +634,58 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
         </div>
 
         {/* View Button */}
-        <BaseButton
-          variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
-          size="sm"
-          fullWidth
-          disabled={isProcessing}
-          className={
-            isProcessing ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
-            isPendingReview ? 'bg-green-600 hover:bg-green-700 text-white font-semibold' :
-            ''
-          }
-        >
-          {isProcessing ? (
-            <>
-              <Loader size={16} strokeWidth={2.5} className="animate-spin" />
-              ⏳ Espera...
-            </>
-          ) : (
-            <>
-              <Eye size={18} strokeWidth={2.5} />
-              {isPendingReview ? 'Ver Corrección' : 'Ver Detalles'}
-            </>
-          )}
-        </BaseButton>
+        {isStuck ? (
+          <div className="flex gap-2">
+            <BaseButton
+              variant="danger"
+              size="sm"
+              fullWidth
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCancelClick(e);
+              }}
+            >
+              <XCircle size={16} strokeWidth={2.5} />
+              Cancelar
+            </BaseButton>
+            <BaseButton
+              variant="outline"
+              size="sm"
+              fullWidth
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect();
+              }}
+            >
+              <Eye size={16} strokeWidth={2.5} />
+              Ver
+            </BaseButton>
+          </div>
+        ) : (
+          <BaseButton
+            variant={isProcessing ? "ghost" : isPendingReview ? "primary" : "outline"}
+            size="sm"
+            fullWidth
+            disabled={isProcessing}
+            className={
+              isProcessing ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
+              isPendingReview ? 'bg-green-600 hover:bg-green-700 text-white font-semibold' :
+              ''
+            }
+          >
+            {isProcessing ? (
+              <>
+                <Loader size={16} strokeWidth={2.5} className="animate-spin" />
+                ⏳ Espera...
+              </>
+            ) : (
+              <>
+                <Eye size={18} strokeWidth={2.5} />
+                {isPendingReview ? 'Ver Corrección' : 'Ver Detalles'}
+              </>
+            )}
+          </BaseButton>
+        )}
       </div>
     </BaseCard>
   );
@@ -588,6 +696,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid' }) {
  */
 function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSuccess, teacherId: parentTeacherId, currentUser }) {
   const [isApproving, setIsApproving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedFeedback, setEditedFeedback] = useState(review.overallFeedback || '');
   const [editedGrade, setEditedGrade] = useState(review.suggestedGrade || 0);
@@ -654,6 +763,33 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
       setError('Error al aprobar la corrección. Intenta de nuevo.');
     } finally {
       setIsApproving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('¿Eliminar esta tarea permanentemente? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      setError(null);
+
+      const result = await deleteHomeworkReview(review.id);
+
+      if (result.success) {
+        logger.info(`Deleted homework review: ${review.id}`, 'HomeworkReviewPanel');
+        onClose();
+        // Trigger reload by calling onApproveSuccess (it reloads the list)
+        onApproveSuccess();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (err) {
+      logger.error('Error deleting review', 'HomeworkReviewPanel', err);
+      setError('Error al eliminar la tarea. Intenta de nuevo.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1027,14 +1163,23 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
           <BaseButton
             variant="outline"
             onClick={onClose}
-            disabled={isApproving}
+            disabled={isApproving || isDeleting}
           >
             Cancelar
           </BaseButton>
           <BaseButton
+            variant="danger"
+            onClick={handleDelete}
+            disabled={isApproving || isDeleting}
+            loading={isDeleting}
+          >
+            <Trash2 size={18} strokeWidth={2} />
+            {isDeleting ? 'Eliminando...' : 'Eliminar'}
+          </BaseButton>
+          <BaseButton
             variant="primary"
             onClick={handleApprove}
-            disabled={isApproving}
+            disabled={isApproving || isDeleting}
             loading={isApproving}
             fullWidth
           >
