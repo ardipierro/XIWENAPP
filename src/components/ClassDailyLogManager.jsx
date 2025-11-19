@@ -250,10 +250,16 @@ function LogCard({ log, onOpen, onDelete, viewMode = 'grid' }) {
 
   const config = statusConfig[log.status] || statusConfig.active;
 
+  // Vista de lista (horizontal)
   if (viewMode === 'list') {
-    // Vista de lista (horizontal)
     return (
-      <UniversalCard variant="default" size="md" hover>
+      <UniversalCard
+        variant="default"
+        size="md"
+        hover
+        onDelete={() => onDelete(log.id)}
+        deleteConfirmMessage={`¿Eliminar diario "${log.name}"?`}
+      >
         <div className="flex items-center gap-4">
           {/* Status Badge */}
           <BaseBadge variant={config.variant} icon={config.icon} size="sm">
@@ -292,11 +298,7 @@ function LogCard({ log, onOpen, onDelete, viewMode = 'grid' }) {
             >
               Abrir
             </BaseButton>
-            <BaseButton
-              variant="danger"
-              icon={Trash2}
-              onClick={() => onDelete(log.id)}
-            />
+            {/* Botón eliminar movido al footer (usando onDelete prop) */}
           </div>
         </div>
       </UniversalCard>
@@ -305,7 +307,13 @@ function LogCard({ log, onOpen, onDelete, viewMode = 'grid' }) {
 
   // Vista de grilla (vertical)
   return (
-    <UniversalCard variant="default" size="md" hover>
+    <UniversalCard
+      variant="default"
+      size="md"
+      hover
+      onDelete={() => onDelete(log.id)}
+      deleteConfirmMessage={`¿Eliminar diario "${log.name}"?`}
+    >
       <div className="space-y-4">
         {/* Header */}
         <div>
@@ -352,11 +360,7 @@ function LogCard({ log, onOpen, onDelete, viewMode = 'grid' }) {
           >
             Abrir
           </BaseButton>
-          <BaseButton
-            variant="danger"
-            icon={Trash2}
-            onClick={() => onDelete(log.id)}
-          />
+          {/* Botón eliminar movido al footer (usando onDelete prop) */}
         </div>
       </div>
     </UniversalCard>
