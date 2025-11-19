@@ -217,6 +217,77 @@ export async function getReviewsByStudent(studentId, includeUnreviewed = false) 
 }
 
 /**
+ * Get ALL reviews for teacher panel (pending + approved)
+ * @param {string} teacherId - Teacher ID (optional, for filtering by teacher's assignments)
+ * @returns {Promise<Array>} Array of all reviews
+ */
+export async function getAllReviewsForTeacher(teacherId = null) {
+  try {
+    console.log(`[getAllReviewsForTeacher] Fetching all reviews (teacherId: ${teacherId || 'ALL'})`);
+    const reviewsRef = collection(db, 'homework_reviews');
+
+    // Fetch ALL statuses: PROCESSING, PENDING_REVIEW, and APPROVED
+    const processingQuery = query(
+      reviewsRef,
+      where('status', '==', REVIEW_STATUS.PROCESSING),
+      orderBy('createdAt', 'desc')
+    );
+
+    const pendingQuery = query(
+      reviewsRef,
+      where('status', '==', REVIEW_STATUS.PENDING_REVIEW),
+      orderBy('createdAt', 'desc')
+    );
+
+    const approvedQuery = query(
+      reviewsRef,
+      where('status', '==', REVIEW_STATUS.APPROVED),
+      orderBy('createdAt', 'desc'),
+      limit(100) // Limit approved to avoid too many results
+    );
+
+    console.log('[getAllReviewsForTeacher] Executing queries...');
+    const [processingSnapshot, pendingSnapshot, approvedSnapshot] = await Promise.all([
+      getDocs(processingQuery),
+      getDocs(pendingQuery),
+      getDocs(approvedQuery)
+    ]);
+
+    console.log(`[getAllReviewsForTeacher] Query returned ${processingSnapshot.docs.length} processing + ${pendingSnapshot.docs.length} pending + ${approvedSnapshot.docs.length} approved`);
+
+    // Combine all results
+    const allReviews = [
+      ...processingSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })),
+      ...pendingSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })),
+      ...approvedSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+    ];
+
+    // Sort by createdAt (most recent first)
+    allReviews.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis?.() || 0;
+      const bTime = b.createdAt?.toMillis?.() || 0;
+      return bTime - aTime;
+    });
+
+    console.log(`[getAllReviewsForTeacher] ✅ Returning ${allReviews.length} reviews total`);
+    return allReviews;
+  } catch (error) {
+    console.error('[getAllReviewsForTeacher] ❌ Error:', error);
+    logger.error('Error getting all reviews for teacher', 'HomeworkReviews', error);
+    return [];
+  }
+}
+
+/**
  * Get pending reviews (not yet reviewed by teacher)
  * Includes both PROCESSING (being analyzed) and PENDING_REVIEW (ready to review) status
  * @param {string} teacherId - Teacher ID (optional, for filtering by teacher's assignments)
