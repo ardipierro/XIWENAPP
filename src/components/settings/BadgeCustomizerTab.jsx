@@ -48,6 +48,7 @@ import logger from '../../utils/logger';
 function BadgeCustomizerTab({ user }) {
   const {
     config,
+    iconConfig,
     hasChanges,
     categories,
     defaults,
@@ -59,6 +60,7 @@ function BadgeCustomizerTab({ user }) {
     addBadge,
     removeBadge,
     getBadgesByCategory,
+    updateIconLibrary,
   } = useBadgeConfig();
 
   const [expandedSections, setExpandedSections] = useState({
@@ -74,11 +76,6 @@ function BadgeCustomizerTab({ user }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState(null);
   const [saveMessage, setSaveMessage] = useState(null);
-
-  // Configuración de librería de iconos
-  const [iconLibraryConfig, setIconLibraryConfig] = useState(
-    getIconLibraryConfig()
-  );
 
   // Validar permisos de admin
   const isAdmin = user?.role === 'admin';
@@ -139,16 +136,8 @@ function BadgeCustomizerTab({ user }) {
 
   // Cambiar librería de iconos
   const handleIconLibraryChange = (library) => {
-    const newConfig = { ...iconLibraryConfig, library };
-    setIconLibraryConfig(newConfig);
-    saveIconLibraryConfig(newConfig); // Esto dispara el evento 'iconLibraryChange'
-    setSaveMessage({
-      type: 'success',
-      text: `✅ Estilo de iconos cambiado a: ${
-        library === 'emoji' ? 'Emoji' : library === 'heroicon' ? 'Heroicons' : 'Sin iconos'
-      }`,
-    });
-    setTimeout(() => setSaveMessage(null), 3000);
+    updateIconLibrary(library);
+    // Ya no se guarda inmediatamente, se marca como cambio pendiente
   };
 
   return (
@@ -249,11 +238,11 @@ function BadgeCustomizerTab({ user }) {
             className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
             style={{
               borderColor:
-                iconLibraryConfig.library === 'emoji'
+                iconConfig.library === 'emoji'
                   ? 'var(--color-primary)'
                   : 'var(--color-border)',
               background:
-                iconLibraryConfig.library === 'emoji'
+                iconConfig.library === 'emoji'
                   ? 'var(--color-bg-tertiary)'
                   : 'var(--color-bg-primary)',
             }}
@@ -263,7 +252,7 @@ function BadgeCustomizerTab({ user }) {
                 size={24}
                 style={{
                   color:
-                    iconLibraryConfig.library === 'emoji'
+                    iconConfig.library === 'emoji'
                       ? 'var(--color-primary)'
                       : 'var(--color-text-secondary)',
                 }}
@@ -272,7 +261,7 @@ function BadgeCustomizerTab({ user }) {
                 className="font-medium"
                 style={{
                   color:
-                    iconLibraryConfig.library === 'emoji'
+                    iconConfig.library === 'emoji'
                       ? 'var(--color-primary)'
                       : 'var(--color-text-primary)',
                 }}
@@ -293,11 +282,11 @@ function BadgeCustomizerTab({ user }) {
             className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
             style={{
               borderColor:
-                iconLibraryConfig.library === 'heroicon'
+                iconConfig.library === 'heroicon'
                   ? 'var(--color-primary)'
                   : 'var(--color-border)',
               background:
-                iconLibraryConfig.library === 'heroicon'
+                iconConfig.library === 'heroicon'
                   ? 'var(--color-bg-tertiary)'
                   : 'var(--color-bg-primary)',
             }}
@@ -307,7 +296,7 @@ function BadgeCustomizerTab({ user }) {
                 size={24}
                 style={{
                   color:
-                    iconLibraryConfig.library === 'heroicon'
+                    iconConfig.library === 'heroicon'
                       ? 'var(--color-primary)'
                       : 'var(--color-text-secondary)',
                 }}
@@ -316,7 +305,7 @@ function BadgeCustomizerTab({ user }) {
                 className="font-medium"
                 style={{
                   color:
-                    iconLibraryConfig.library === 'heroicon'
+                    iconConfig.library === 'heroicon'
                       ? 'var(--color-primary)'
                       : 'var(--color-text-primary)',
                 }}
@@ -337,11 +326,11 @@ function BadgeCustomizerTab({ user }) {
             className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
             style={{
               borderColor:
-                iconLibraryConfig.library === 'none'
+                iconConfig.library === 'none'
                   ? 'var(--color-primary)'
                   : 'var(--color-border)',
               background:
-                iconLibraryConfig.library === 'none'
+                iconConfig.library === 'none'
                   ? 'var(--color-bg-tertiary)'
                   : 'var(--color-bg-primary)',
             }}
@@ -351,7 +340,7 @@ function BadgeCustomizerTab({ user }) {
                 size={24}
                 style={{
                   color:
-                    iconLibraryConfig.library === 'none'
+                    iconConfig.library === 'none'
                       ? 'var(--color-primary)'
                       : 'var(--color-text-secondary)',
                 }}
@@ -360,7 +349,7 @@ function BadgeCustomizerTab({ user }) {
                 className="font-medium"
                 style={{
                   color:
-                    iconLibraryConfig.library === 'none'
+                    iconConfig.library === 'none'
                       ? 'var(--color-primary)'
                       : 'var(--color-text-primary)',
                 }}
@@ -599,6 +588,43 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
             onChange={(e) => onUpdateProperty(badgeKey, 'label', e.target.value)}
             size="sm"
           />
+
+          {/* Selector de estilo */}
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Estilo del Badge
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => onUpdateProperty(badgeKey, 'badgeStyle', 'solid')}
+                className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+                style={{
+                  background: badge.badgeStyle !== 'outline' ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
+                  color: badge.badgeStyle !== 'outline' ? '#ffffff' : 'var(--color-text-secondary)',
+                  border: badge.badgeStyle !== 'outline' ? 'none' : '1px solid var(--color-border)'
+                }}
+              >
+                Sólido
+              </button>
+              <button
+                type="button"
+                onClick={() => onUpdateProperty(badgeKey, 'badgeStyle', 'outline')}
+                className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+                style={{
+                  background: badge.badgeStyle === 'outline' ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
+                  color: badge.badgeStyle === 'outline' ? '#ffffff' : 'var(--color-text-secondary)',
+                  border: badge.badgeStyle === 'outline' ? 'none' : '1px solid var(--color-border)'
+                }}
+              >
+                Contorno (Lightweight)
+              </button>
+            </div>
+            <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+              Lightweight: fondo transparente, solo borde y texto de color
+            </p>
+          </div>
+
           <BaseInput
             label="Icono (emoji)"
             value={badge.icon || ''}

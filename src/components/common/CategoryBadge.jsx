@@ -150,13 +150,22 @@ function CategoryBadge({
   return (
     <BaseBadge
       variant={badgeConfig.variant}
+      badgeStyle={badgeConfig.badgeStyle || 'solid'}
       size={size}
       onRemove={onRemove}
       className={className}
-      style={{
-        backgroundColor: badgeConfig.color,
-        color: getContrastText(badgeConfig.color),
-      }}
+      style={
+        badgeConfig.badgeStyle === 'outline'
+          ? {
+              borderColor: badgeConfig.color,
+              color: badgeConfig.color,
+              backgroundColor: 'transparent',
+            }
+          : {
+              backgroundColor: badgeConfig.color,
+              color: getContrastText(badgeConfig.color),
+            }
+      }
       {...rest}
     >
       {renderIcon()}
