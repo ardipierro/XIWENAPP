@@ -151,12 +151,12 @@ function AssignmentCard({ assignment, onClick, onDelete }) {
 
   return (
     <div onClick={onClick} style={{ cursor: 'pointer', position: 'relative' }}>
-      {/* Delete button - Top right corner */}
+      {/* Delete button - Bottom left corner */}
       <button
         onClick={handleDeleteClick}
-        className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors z-10"
+        className="absolute bottom-2 left-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors z-10"
         title="Eliminar tarea"
-        style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
+        style={{ position: 'absolute', bottom: '0.5rem', left: '0.5rem' }}
       >
         <Trash2 size={16} />
       </button>
