@@ -41,6 +41,7 @@ import {
   ImageLightbox,
   ResponsiveGrid
 } from './common';
+import { CardDeleteButton } from './cards';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
@@ -492,14 +493,16 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
           ''
         }`}
       >
-        {/* Delete button - Bottom left corner */}
-        <button
-          onClick={handleDeleteClick}
-          className="absolute bottom-2 left-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors z-10"
-          title="Eliminar tarea"
-        >
-          <Trash2 size={16} />
-        </button>
+        {/* Delete button - Bottom left corner (UNIFICADO) */}
+        <div className="absolute bottom-2 left-2 z-10">
+          <CardDeleteButton
+            onDelete={handleDeleteClick}
+            variant="solid"
+            size="sm"
+            confirmMessage="¿Eliminar esta tarea?"
+            requireConfirm={false}  // Ya tiene confirmación en handleDeleteClick
+          />
+        </div>
 
         <div className="flex items-center gap-4">
           {/* Status Badge */}
@@ -597,14 +600,16 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
         ''
       }`}
     >
-      {/* Delete button - Bottom left corner */}
-      <button
-        onClick={handleDeleteClick}
-        className="absolute bottom-2 left-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors z-10"
-        title="Eliminar tarea"
-      >
-        <Trash2 size={16} />
-      </button>
+      {/* Delete button - Bottom left corner (UNIFICADO) */}
+      <div className="absolute bottom-2 left-2 z-10">
+        <CardDeleteButton
+          onDelete={handleDeleteClick}
+          variant="solid"
+          size="sm"
+          confirmMessage="¿Eliminar esta tarea?"
+          requireConfirm={false}  // Ya tiene confirmación en handleDeleteClick
+        />
+      </div>
 
       <div className="space-y-3">
         {/* Student Info */}
