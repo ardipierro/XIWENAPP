@@ -173,29 +173,13 @@ export default defineConfig({
     // Rollup optimizations
     rollupOptions: {
       output: {
-        // Code splitting estratégico - SIMPLIFICADO para evitar circular dependencies
-        // Solo separar los vendors más grandes y dejar que Vite maneje el resto
-        manualChunks: (id) => {
-          // Solo separar node_modules en un único vendor chunk
-          // Vite manejará automáticamente el resto para evitar circular deps
-          if (id.includes('node_modules')) {
-            // Firebase - crítico separarlo
-            if (id.includes('firebase')) {
-              return 'vendor-firebase';
-            }
-
-            // React - crítico separarlo
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'vendor-react';
-            }
-
-            // Todos los demás vendors juntos para evitar problemas de inicialización
-            return 'vendor-other';
-          }
-
-          // NO forzar chunking de componentes - dejar que Vite decida
-          // Esto evita el error "Cannot access before initialization"
-        },
+        // ✅ SIN manualChunks - Dejar que Vite maneje COMPLETAMENTE el code splitting
+        // Esto evita TODOS los problemas de:
+        // - Circular dependencies
+        // - "Cannot access before initialization"
+        // - "Cannot read properties of undefined"
+        // - Orden de carga de módulos
+        // Vite es inteligente y hará el mejor trabajo automáticamente
 
         // Naming strategy optimizado
         chunkFileNames: 'assets/[name]-[hash].js',
