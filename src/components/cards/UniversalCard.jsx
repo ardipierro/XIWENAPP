@@ -370,36 +370,47 @@ export function UniversalCard({
 
     return (
       <div
-        className={`flex ${isHorizontal ? 'flex-row' : 'flex-col'} gap-4`}
+        className={`flex ${isHorizontal ? 'flex-row' : 'flex-col'} ${isCompact ? 'gap-3' : 'gap-4'}`}
       >
         {stats.map((stat, index) => {
           const StatIcon = stat.icon;
           return (
             <div
               key={index}
-              className={`flex items-center gap-2 ${isHorizontal ? 'flex-1' : ''}`}
+              className={`flex items-center gap-1.5 ${isHorizontal ? 'flex-1' : ''}`}
             >
               {StatIcon && (
                 <StatIcon
-                  size={isCompact ? 16 : 18}
+                  size={isCompact ? 14 : 18}
                   className="flex-shrink-0"
                   style={{ color: 'var(--color-text-secondary)' }}
                 />
               )}
-              <div className="flex flex-col gap-0.5">
+              {isCompact ? (
+                // Modo horizontal compacto: inline
                 <span
-                  className={`${isCompact ? 'text-lg' : 'text-xl'} font-extrabold leading-none`}
+                  className="text-sm font-semibold whitespace-nowrap"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
                   {stat.value}
                 </span>
-                <span
-                  className="text-xs font-semibold"
-                  style={{ color: 'var(--color-text-secondary)' }}
-                >
-                  {stat.label}
-                </span>
-              </div>
+              ) : (
+                // Modo vertical: columna con label
+                <div className="flex flex-col gap-0.5">
+                  <span
+                    className="text-xl font-extrabold leading-none"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    {stat.value}
+                  </span>
+                  <span
+                    className="text-xs font-semibold"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {stat.label}
+                  </span>
+                </div>
+              )}
             </div>
           );
         })}
@@ -514,7 +525,7 @@ export function UniversalCard({
 
       {/* Content - FORZAR flex-1 para que use todo el espacio restante */}
       <div
-        className={`${classes.content} flex-1 flex flex-col`}
+        className={`${classes.content} flex-1 flex ${layout === 'horizontal' ? 'flex-row items-center' : 'flex-col'}`}
         style={{
           ...styles.content,
           minHeight: 0, // Importante para que el overflow funcione con flex
