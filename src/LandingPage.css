@@ -4,10 +4,18 @@
 .landing-page {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  /* CRITICAL: Override body overflow:hidden to enable vertical scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .dark .landing-page {
   background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
+}
+
+/* Smooth scrolling for navigation links */
+html {
+  scroll-behavior: smooth;
 }
 
 .container {
