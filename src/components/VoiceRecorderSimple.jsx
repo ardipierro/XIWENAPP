@@ -4,9 +4,108 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Send, X } from 'lucide-react';
+import { Mic, Square, Send, X, Play, Pause } from 'lucide-react';
 import logger from '../utils/logger';
 import { BaseButton } from './common';
+
+// Componente de preview de audio - diseño consistente con el chat
+function AudioPreview({ audioUrl, duration }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(duration || 0);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    const handleLoadedMetadata = () => {
+      setAudioDuration(audio.duration);
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, []);
+
+  const togglePlayPause = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleProgressClick = (e) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pos * audioDuration;
+  };
+
+  const formatTime = (seconds) => {
+    if (!isFinite(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const progress = audioDuration > 0 ? (currentTime / audioDuration) * 100 : 0;
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-2 bg-zinc-100 dark:bg-zinc-700/50 rounded-lg">
+      <audio ref={audioRef} src={audioUrl} />
+
+      <button
+        onClick={togglePlayPause}
+        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+          isPlaying
+            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+            : 'bg-zinc-300 dark:bg-zinc-600 hover:bg-zinc-400 dark:hover:bg-zinc-500 text-zinc-700 dark:text-zinc-200'
+        }`}
+      >
+        {isPlaying ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
+      </button>
+
+      <div className="flex-1 flex flex-col gap-1">
+        <div
+          className="h-1.5 bg-zinc-300 dark:bg-zinc-600 rounded-full cursor-pointer overflow-hidden"
+          onClick={handleProgressClick}
+        >
+          <div
+            className="h-full bg-blue-500 transition-all duration-100"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(audioDuration)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function VoiceRecorderSimple({ onSend, onCancel }) {
   const [isRecording, setIsRecording] = useState(false);
@@ -205,40 +304,14 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
           </span>
         </div>
 
-        {/* Visualización de onda (solo cuando graba) */}
-        {isRecording && (
-          <div className="flex-1 flex items-center justify-center gap-1 h-16 px-4">
-            {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className="w-1 bg-gradient-to-t from-red-500 to-red-400 rounded-full animate-pulse"
-                style={{
-                  height: `${20 + Math.random() * 30}px`,
-                  animationDelay: `${i * 0.1}s`,
-                  animationDuration: '0.8s'
-                }}
-              />
-            ))}
-          </div>
-        )}
+        {/* Spacer flexible */}
+        <div className="flex-1"></div>
 
-        {/* Reproductor de audio cuando está detenido */}
+        {/* Preview de audio cuando está listo para enviar */}
         {!isRecording && audioBlob && (
-          <div className="flex-1">
-            <audio
-              controls
-              src={audioUrl}
-              className="w-full h-10 rounded-lg"
-              style={{
-                filter: 'contrast(0.9) brightness(1.1)'
-              }}
-            />
+          <div className="flex-1 max-w-md">
+            <AudioPreview audioUrl={audioUrl} duration={recordingTime} />
           </div>
-        )}
-
-        {/* Spacer cuando no hay nada */}
-        {!isRecording && !audioBlob && (
-          <div className="flex-1"></div>
         )}
 
         {/* Botones con diseño mejorado */}
