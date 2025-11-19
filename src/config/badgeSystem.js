@@ -1168,9 +1168,27 @@ export function updateBadge(key, updates) {
 // ============================================
 
 /**
- * Inicializa el sistema de badges al cargar la app
- * Aplica los colores guardados o los defaults
+ * Aplica paleta de colores global a todos los badges
  */
-export function initBadgeSystem() {
-  applyBadgeColors();
+export function applyColorPalette(palette, badgeConfig) {
+  if (palette === 'default') return badgeConfig;
+
+  const paletteColors = COLOR_PALETTES[palette]?.colors;
+  if (!paletteColors) return badgeConfig;
+
+  const updated = {};
+  Object.entries(badgeConfig).forEach(([key, badge]) => {
+    // Mapear variant a color de paleta
+    let newColor = badge.color;
+    if (paletteColors[badge.variant]) {
+      newColor = paletteColors[badge.variant];
+    }
+
+    updated[key] = {
+      ...badge,
+      color: newColor,
+    };
+  });
+
+  return updated;
 }

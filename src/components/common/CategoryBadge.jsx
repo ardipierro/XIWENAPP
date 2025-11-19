@@ -10,7 +10,7 @@
  * @module components/common/CategoryBadge
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import BaseBadge from './BaseBadge';
 import {
@@ -56,6 +56,9 @@ function CategoryBadge({
     getIconLibraryConfig()
   );
 
+  // Estado para forzar re-render cuando cambie la config de badges
+  const [badgeConfigKey, setBadgeConfigKey] = useState(0);
+
   // Escuchar cambios en la configuración de iconos (MEJORADO)
   useEffect(() => {
     const handleIconLibraryChange = (event) => {
@@ -70,8 +73,15 @@ function CategoryBadge({
       setIconLibraryConfig(newConfig);
     };
 
+    // CRÍTICO: Escuchar cambios en configuración de badges (paleta de colores, etc.)
+    const handleBadgeConfigChange = () => {
+      logger.info('Badge config changed, forcing re-render', 'CategoryBadge');
+      setBadgeConfigKey(k => k + 1);
+    };
+
     window.addEventListener('iconLibraryChange', handleIconLibraryChange);
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
 
     // Cargar config inicial
     setIconLibraryConfig(getIconLibraryConfig());
@@ -79,43 +89,48 @@ function CategoryBadge({
     return () => {
       window.removeEventListener('iconLibraryChange', handleIconLibraryChange);
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
     };
   }, []);
 
-  // Obtener configuración del badge
-  let badgeConfig;
+  // Obtener configuración del badge (MEMOIZADO para reaccionar a cambios)
+  const badgeConfig = useMemo(() => {
+    let config;
 
-  if (badgeKey) {
-    // Uso directo por key
-    badgeConfig = getBadgeByKey(badgeKey);
-  } else if (type && value) {
-    // Uso por tipo + valor
-    switch (type) {
-      case 'content':
-        badgeConfig = getBadgeForContentType(value);
-        break;
-      case 'exercise':
-        badgeConfig = getBadgeForExerciseType(value);
-        break;
-      case 'difficulty':
-        badgeConfig = getBadgeForDifficulty(value);
-        break;
-      case 'cefr':
-        badgeConfig = getBadgeForCEFR(value);
-        break;
-      case 'status':
-        badgeConfig = getBadgeForStatus(value);
-        break;
-      case 'role':
-        badgeConfig = getBadgeForRole(value);
-        break;
-      case 'custom':
-        badgeConfig = getBadgeByKey(value);
-        break;
-      default:
-        badgeConfig = null;
+    if (badgeKey) {
+      // Uso directo por key
+      config = getBadgeByKey(badgeKey);
+    } else if (type && value) {
+      // Uso por tipo + valor
+      switch (type) {
+        case 'content':
+          config = getBadgeForContentType(value);
+          break;
+        case 'exercise':
+          config = getBadgeForExerciseType(value);
+          break;
+        case 'difficulty':
+          config = getBadgeForDifficulty(value);
+          break;
+        case 'cefr':
+          config = getBadgeForCEFR(value);
+          break;
+        case 'status':
+          config = getBadgeForStatus(value);
+          break;
+        case 'role':
+          config = getBadgeForRole(value);
+          break;
+        case 'custom':
+          config = getBadgeByKey(value);
+          break;
+        default:
+          config = null;
+      }
     }
-  }
+
+    return config;
+  }, [badgeKey, type, value, badgeConfigKey]); // CRÍTICO: badgeConfigKey fuerza re-cálculo
 
   // Fallback si no se encuentra configuración
   if (!badgeConfig) {
