@@ -445,7 +445,7 @@ export const cardLayouts = {
     headerPosition: 'left',
     headerWidth: '80px',         // Más compacto para horizontal
     avatarSize: '48px',          // Avatar más pequeño en horizontal
-    contentPadding: '16px',      // Padding reducido
+    contentPadding: '12px 16px', // Padding reducido vertical (más compacto)
     statsLayout: 'inline',       // Stats en línea horizontal
   },
 };
@@ -588,7 +588,7 @@ export function generateCardStyles(variant, size, layout = 'vertical') {
       ...(variantConfig.cardHeight && variantConfig.cardHeight !== 'auto'
         ? { height: variantConfig.cardHeight }
         : {
-            minHeight: variantConfig.minHeight || (layout === 'horizontal' ? '96px' : sizeConfig.minHeight),
+            minHeight: variantConfig.minHeight || (layout === 'horizontal' ? '72px' : sizeConfig.minHeight),
             maxHeight: variantConfig.maxHeight !== 'none' ? variantConfig.maxHeight : undefined,
           }
       ),
