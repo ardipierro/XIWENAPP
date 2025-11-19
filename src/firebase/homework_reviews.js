@@ -14,6 +14,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   serverTimestamp,
   onSnapshot
 } from 'firebase/firestore';
