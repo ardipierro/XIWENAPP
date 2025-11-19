@@ -20,7 +20,6 @@ import {
   ArrowDown,
   DollarSign,
   Mail,
-  Eye,
   Trash2
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
@@ -311,10 +310,10 @@ export default function UniversalUserManager({ user, userRole }) {
                   onClick={() => handleViewUserProfile(userItem)}
                 >
                   <div className="flex items-stretch min-h-[96px]">
-                    {/* Avatar - Cuadrado que ocupa toda la altura */}
-                    <div className="w-[96px] flex-shrink-0 overflow-hidden">
+                    {/* Avatar - Redondo centrado con fondo idéntico a Grid */}
+                    <div className="w-[96px] flex-shrink-0 bg-[var(--color-bg-secondary)] flex items-center justify-center">
                       <div
-                        className="w-full h-full flex items-center justify-center text-white font-extrabold text-2xl"
+                        className="w-16 h-16 rounded-full flex items-center justify-center text-white font-extrabold text-2xl"
                         style={{ backgroundColor: avatarColor }}
                       >
                         {initial}
@@ -353,19 +352,8 @@ export default function UniversalUserManager({ user, userRole }) {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex gap-2 flex-shrink-0">
-                        <BaseButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewUserProfile(userItem);
-                          }}
-                          variant="ghost"
-                          size="sm"
-                          icon={Eye}
-                        >
-                          Ver
-                        </BaseButton>
-                        {can('delete-users') && (
+                      {can('delete-users') && (
+                        <div className="flex gap-2 flex-shrink-0">
                           <BaseButton
                             onClick={(e) => {
                               e.stopPropagation();
@@ -376,8 +364,8 @@ export default function UniversalUserManager({ user, userRole }) {
                             size="sm"
                             icon={Trash2}
                           />
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -407,31 +395,18 @@ export default function UniversalUserManager({ user, userRole }) {
                   ]}
                   onClick={() => handleViewUserProfile(userItem)}
                   actions={
-                    <>
+                    can('delete-users') && (
                       <BaseButton
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleViewUserProfile(userItem);
+                          setUserToDelete(userItem);
+                          setShowDeleteConfirm(true);
                         }}
-                        variant="ghost"
+                        variant="danger"
                         size="sm"
-                        icon={Eye}
-                      >
-                        Ver
-                      </BaseButton>
-                      {can('delete-users') && (
-                        <BaseButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setUserToDelete(userItem);
-                            setShowDeleteConfirm(true);
-                          }}
-                          variant="danger"
-                          size="sm"
-                          icon={Trash2}
-                        />
-                      )}
-                    </>
+                        icon={Trash2}
+                      />
+                    )
                   }
                 />
               );

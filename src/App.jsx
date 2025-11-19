@@ -69,8 +69,10 @@ function App() {
   useEffect(() => {
     if (isViewingAs && viewAsUser) {
       // Crear objeto user sintético para viewAsUser con TODOS los campos necesarios
+      // ✅ CRÍTICO: viewAsUser ya viene normalizado del ViewAsContext con id y uid
       const syntheticUser = {
-        uid: viewAsUser.id,
+        uid: viewAsUser.uid || viewAsUser.id, // ✅ Priorizar uid, fallback a id
+        id: viewAsUser.id || viewAsUser.uid,  // ✅ Incluir ambos campos
         email: viewAsUser.email,
         displayName: viewAsUser.name,
         role: viewAsUser.role, // ✅ CRÍTICO: Incluir el rol para que los permisos funcionen correctamente
