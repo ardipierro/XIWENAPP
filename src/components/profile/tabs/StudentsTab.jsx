@@ -130,7 +130,7 @@ function StudentsTab({ user }) {
  */
 function StudentCard({ student }) {
   return (
-    <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group">
+    <div className="bg-white dark:bg-gray-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group">
       {/* Header con avatar y nombre */}
       <div className="flex items-start gap-3 mb-3">
         {/* Avatar - Componente Universal */}

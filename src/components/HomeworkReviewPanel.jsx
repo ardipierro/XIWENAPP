@@ -47,6 +47,7 @@ import ManualHomeworkUpload from './homework/ManualHomeworkUpload';
 import ImageOverlay from './homework/ImageOverlay';
 import ImageOverlayControls from './homework/ImageOverlayControls';
 import StudentAssigner from './homework/StudentAssigner';
+import UserAvatar from './UserAvatar';
 import {
   getPendingReviews,
   approveReview,
@@ -418,6 +419,14 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
             ) : null}
           </div>
 
+          {/* Student Avatar */}
+          <UserAvatar
+            userId={review.studentId}
+            name={review.studentName}
+            size="lg"
+            className="flex-shrink-0"
+          />
+
           {/* Image Thumbnail */}
           <div className="flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <img
@@ -508,10 +517,13 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
       <div className="space-y-3">
         {/* Student Info */}
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-gray-800">
-              <User size={20} strokeWidth={2.5} className="text-gray-600 dark:text-gray-400" />
-            </div>
+          <div className="flex items-center gap-3">
+            <UserAvatar
+              userId={review.studentId}
+              name={review.studentName}
+              size="md"
+              className="flex-shrink-0"
+            />
             <div>
               <p className="font-semibold text-gray-900 dark:text-white">
                 {review.studentName || 'Sin asignar'}
