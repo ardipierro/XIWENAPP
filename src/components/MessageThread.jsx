@@ -32,7 +32,6 @@ import { showMessageNotification, requestNotificationPermission } from '../utils
 import { exportToTXT, exportToJSON } from '../utils/exportConversation';
 import { compressImage, formatFileSize } from '../utils/imageCompression';
 import EmojiPicker from './EmojiPicker';
-import VoiceRecorderSimple from './VoiceRecorderSimple';
 import ReactionPicker from './ReactionPicker';
 import MediaGallery from './MediaGallery';
 
@@ -53,6 +52,116 @@ const safeAsync = async (fn, options = {}) => {
 };
 
 /**
+ * Voice Preview Player - dentro del input
+ */
+function VoicePreviewPlayer({ audioUrl, duration }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      if (audio.currentTime && isFinite(audio.currentTime)) {
+        setCurrentTime(audio.currentTime);
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        setAudioDuration(audio.duration);
+      } else if (duration && isFinite(duration)) {
+        setAudioDuration(duration);
+      }
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+
+    if (audio.readyState >= 1) {
+      handleLoadedMetadata();
+    }
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [duration]);
+
+  const togglePlayPause = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleProgressClick = (e) => {
+    const audio = audioRef.current;
+    if (!audio || !audioDuration || !isFinite(audioDuration)) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    const newTime = pos * audioDuration;
+    if (isFinite(newTime)) {
+      audio.currentTime = newTime;
+    }
+  };
+
+  const formatTime = (seconds) => {
+    if (!seconds || !isFinite(seconds) || seconds < 0) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const progress = (audioDuration > 0 && isFinite(audioDuration))
+    ? (currentTime / audioDuration) * 100
+    : 0;
+
+  return (
+    <div className="voice-preview-player">
+      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+      <button
+        type="button"
+        onClick={togglePlayPause}
+        className="preview-play-btn"
+        title={isPlaying ? 'Pausar' : 'Reproducir'}
+      >
+        {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+      </button>
+      <div className="preview-progress-container">
+        <div
+          className="preview-progress-bar"
+          onClick={handleProgressClick}
+        >
+          <div
+            className="preview-progress-fill"
+            style={{ width: `${progress}%`, transition: 'width 0.05s linear' }}
+          />
+        </div>
+        <div className="preview-time">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(audioDuration)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Message Thread Component
  * @param {Object} props
  * @param {Object} props.conversation - Conversation data
@@ -60,7 +169,7 @@ const safeAsync = async (fn, options = {}) => {
  * @param {Function} props.onClose - Close handler (mobile)
  * @param {boolean} props.isMobile - Mobile mode flag
  */
-function MessageThread({ conversation, currentUser, onClose, isMobile = false }) {
+function MessageThread({ conversation, currentUser, onClose, isMobile = false}) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -74,7 +183,6 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
   const [searchResults, setSearchResults] = useState([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editingContent, setEditingContent] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
@@ -87,6 +195,13 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
   const [showMediaGallery, setShowMediaGallery] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
+
+  // Voice recorder states - integrado en el input
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [voiceBlob, setVoiceBlob] = useState(null);
+  const [voiceUrl, setVoiceUrl] = useState(null);
+
   const messagesEndRef = useRef(null);
   const messagesListRef = useRef(null);  // Ref al contenedor de mensajes
   const inputRef = useRef(null);
@@ -95,6 +210,12 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
   const searchResultRefs = useRef({});
   const dragCounterRef = useRef(0);
   const previousScrollHeightRef = useRef(0);
+
+  // Voice recorder refs
+  const mediaRecorderRef = useRef(null);
+  const voiceStreamRef = useRef(null);
+  const recordingTimerRef = useRef(null);
+  const voiceChunksRef = useRef([]);
 
   // Subscribe to messages in real-time
   useEffect(() => {
@@ -562,20 +683,110 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
   };
 
   /**
-   * Handle voice message send - SIMPLIFICADO
+   * Voice Recording - Integrated
    */
-  const handleVoiceSend = async (audioBlob, duration) => {
+  const startRecording = async () => {
+    logger.info('🎤 Iniciando grabación integrada...', 'MessageThread');
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      voiceStreamRef.current = stream;
+
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      voiceChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          voiceChunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        if (voiceChunksRef.current.length > 0) {
+          const blob = new Blob(voiceChunksRef.current, { type: 'audio/webm' });
+          const url = URL.createObjectURL(blob);
+          setVoiceBlob(blob);
+          setVoiceUrl(url);
+          logger.info(`✅ Audio grabado: ${(blob.size / 1024).toFixed(2)} KB`, 'MessageThread');
+        }
+      };
+
+      mediaRecorder.start(1000);
+      setIsRecordingVoice(true);
+      setRecordingTime(0);
+
+      // Timer
+      let seconds = 0;
+      recordingTimerRef.current = setInterval(() => {
+        seconds++;
+        setRecordingTime(seconds);
+      }, 1000);
+
+      logger.info('🔴 Grabando...', 'MessageThread');
+    } catch (error) {
+      logger.error('Error al iniciar grabación', error, 'MessageThread');
+      alert('Error al acceder al micrófono: ' + error.message);
+    }
+  };
+
+  const stopRecording = () => {
+    logger.info('⏹️ Deteniendo grabación...', 'MessageThread');
+
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+
+    setIsRecordingVoice(false);
+  };
+
+  const cancelRecording = () => {
+    logger.info('❌ Cancelando grabación...', 'MessageThread');
+
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+
+    if (voiceStreamRef.current) {
+      voiceStreamRef.current.getTracks().forEach(track => track.stop());
+      voiceStreamRef.current = null;
+    }
+
+    if (voiceUrl) {
+      URL.revokeObjectURL(voiceUrl);
+    }
+
+    setIsRecordingVoice(false);
+    setRecordingTime(0);
+    setVoiceBlob(null);
+    setVoiceUrl(null);
+  };
+
+  const sendVoiceMessage = async () => {
+    if (!voiceBlob) return;
+
     logger.info('📤 Enviando audio...', 'MessageThread');
 
-    // Cerrar recorder
-    setShowVoiceRecorder(false);
+    // Detener stream
+    if (voiceStreamRef.current) {
+      voiceStreamRef.current.getTracks().forEach(track => track.stop());
+      voiceStreamRef.current = null;
+    }
 
     setSending(true);
     setUploading(true);
 
     try {
       // Upload
-      const uploadResult = await uploadAudioMessage(audioBlob, conversation.id, currentUser.uid);
+      const uploadResult = await uploadAudioMessage(voiceBlob, conversation.id, currentUser.uid);
 
       setUploading(false);
 
@@ -594,14 +805,19 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         content: '',
         attachment: {
           url: uploadResult.url,
-          filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
-          size: audioBlob.size,
-          type: audioBlob.type || 'audio/webm',
-          duration
+          filename: `Mensaje de voz (${Math.floor(recordingTime / 60)}:${(recordingTime % 60).toString().padStart(2, '0')})`,
+          size: voiceBlob.size,
+          type: voiceBlob.type || 'audio/webm',
+          duration: recordingTime
         }
       });
 
       logger.info('✅ Audio enviado', 'MessageThread');
+
+      // Reset states
+      setRecordingTime(0);
+      setVoiceBlob(null);
+      setVoiceUrl(null);
 
     } catch (error) {
       logger.error('Error:', error, 'MessageThread');
@@ -1198,16 +1414,8 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Voice Recorder Simple - BÁSICO que funcione */}
-      {showVoiceRecorder && (
-        <VoiceRecorderSimple
-          onSend={handleVoiceSend}
-          onCancel={() => setShowVoiceRecorder(false)}
-        />
-      )}
-
       {/* Message Input */}
-      <form className="message-input-container" onSubmit={handleSendMessage}>
+      <form className="message-input-container" onSubmit={voiceBlob ? (e) => { e.preventDefault(); sendVoiceMessage(); } : handleSendMessage}>
         {/* Reply Bar */}
         {replyingTo && (
           <div className="reply-bar">
@@ -1296,85 +1504,149 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
           <div className="input-row">
             {/* Desktop: Botones externos eliminados */}
 
-            {/* Textarea con botones internos */}
+            {/* Textarea / Timer / Player */}
             <div className="textarea-wrapper">
-              <textarea
-                ref={inputRef}
-                className="message-input"
-                placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
-                value={editingMessage ? editingContent : newMessage}
-                onChange={(e) => {
-                  if (editingMessage) {
-                    setEditingContent(e.target.value);
-                  } else {
-                    setNewMessage(e.target.value);
-                  }
-                }}
-                onKeyPress={handleKeyPress}
-                onKeyDown={handleKeyDown}
-                rows={isMobile ? 1 : 3}
-                disabled={sending || uploading}
-              />
-
-              {/* Botones internos - Solo visibles cuando NO hay texto */}
-              {!newMessage.trim() && !editingMessage && (
-                <div className="inner-input-buttons">
-                  {/* Lado izquierdo: Emoji */}
-                  <div className="inner-buttons-left">
-                    <div style={{ position: 'relative' }}>
-                      <button
-                        type="button"
-                        className="inner-input-btn"
-                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        disabled={sending || uploading || showVoiceRecorder}
-                        title="Emojis"
-                      >
-                        <Smile size={20} />
-                      </button>
-
-                      {showEmojiPicker && (
-                        <EmojiPicker
-                          onSelect={handleEmojiSelect}
-                          onClose={() => setShowEmojiPicker(false)}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Lado derecho: Adjuntar + Imagen */}
-                  <div className="inner-buttons-right">
-                    <button
-                      type="button"
-                      className="inner-input-btn"
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'image/*';
-                        input.onchange = handleFileSelect;
-                        input.click();
-                      }}
-                      disabled={sending || uploading}
-                      title="Enviar foto"
-                    >
-                      <ImageIcon size={20} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="inner-input-btn"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={sending || uploading}
-                      title="Adjuntar archivo"
-                    >
-                      <Paperclip size={20} />
-                    </button>
-                  </div>
+              {isRecordingVoice ? (
+                /* Grabando: mostrar timer GRANDE Y NEGRITA */
+                <div className="voice-recording-timer">
+                  <span className="recording-indicator"></span>
+                  <span className="timer-text">
+                    {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+                  </span>
                 </div>
+              ) : voiceBlob ? (
+                /* Preview del audio listo para enviar */
+                <VoicePreviewPlayer
+                  audioUrl={voiceUrl}
+                  duration={recordingTime}
+                />
+              ) : (
+                /* Normal: textarea */
+                <>
+                  <textarea
+                    ref={inputRef}
+                    className="message-input"
+                    placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
+                    value={editingMessage ? editingContent : newMessage}
+                    onChange={(e) => {
+                      if (editingMessage) {
+                        setEditingContent(e.target.value);
+                      } else {
+                        setNewMessage(e.target.value);
+                      }
+                    }}
+                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyDown}
+                    rows={isMobile ? 1 : 3}
+                    disabled={sending || uploading}
+                  />
+
+                  {/* Botones internos - Solo visibles cuando NO hay texto */}
+                  {!newMessage.trim() && !editingMessage && (
+                    <div className="inner-input-buttons">
+                      {/* Lado izquierdo: Emoji */}
+                      <div className="inner-buttons-left">
+                        <div style={{ position: 'relative' }}>
+                          <button
+                            type="button"
+                            className="inner-input-btn"
+                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            disabled={sending || uploading}
+                            title="Emojis"
+                          >
+                            <Smile size={20} />
+                          </button>
+
+                          {showEmojiPicker && (
+                            <EmojiPicker
+                              onSelect={handleEmojiSelect}
+                              onClose={() => setShowEmojiPicker(false)}
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Lado derecho: Adjuntar + Imagen */}
+                      <div className="inner-buttons-right">
+                        <button
+                          type="button"
+                          className="inner-input-btn"
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = handleFileSelect;
+                            input.click();
+                          }}
+                          disabled={sending || uploading}
+                          title="Enviar foto"
+                        >
+                          <ImageIcon size={20} />
+                        </button>
+
+                        <button
+                          type="button"
+                          className="inner-input-btn"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={sending || uploading}
+                          title="Adjuntar archivo"
+                        >
+                          <Paperclip size={20} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
-            {/* Botón derecho: Micrófono (vacío) o Enviar (con texto) */}
-            {newMessage.trim() || selectedFile || editingMessage ? (
+            {/* Botones contextuales */}
+            {isRecordingVoice ? (
+              /* Grabando: STOP + Cancel */
+              <>
+                <button
+                  type="button"
+                  className="voice-stop-button"
+                  onClick={stopRecording}
+                  title="Detener grabación"
+                >
+                  <Square size={22} />
+                </button>
+                <button
+                  type="button"
+                  className="voice-cancel-button"
+                  onClick={cancelRecording}
+                  title="Cancelar"
+                >
+                  <X size={22} />
+                </button>
+              </>
+            ) : voiceBlob ? (
+              /* Audio listo: Send + Cancel */
+              <>
+                <button
+                  type="submit"
+                  className="send-button"
+                  disabled={sending || uploading}
+                  title="Enviar audio"
+                >
+                  {uploading ? (
+                    <div className="spinner-small"></div>
+                  ) : (
+                    <Send size={22} />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="voice-cancel-button"
+                  onClick={cancelRecording}
+                  title="Cancelar"
+                >
+                  <X size={22} />
+                </button>
+              </>
+            ) : newMessage.trim() || selectedFile || editingMessage ? (
+              /* Texto: Send normal */
               <button
                 type="submit"
                 className="send-button"
@@ -1388,11 +1660,12 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
                 )}
               </button>
             ) : (
+              /* Vacío: Micrófono */
               <button
                 type="button"
                 className="voice-button"
-                onClick={() => setShowVoiceRecorder(true)}
-                disabled={sending || uploading || showVoiceRecorder}
+                onClick={startRecording}
+                disabled={sending || uploading}
                 title="Mensaje de voz"
               >
                 <Mic size={22} />
@@ -1791,7 +2064,7 @@ const MessageBubble = forwardRef(({
                   {isPlayingAudio ? <Pause size={18} /> : <Play size={18} />}
                 </button>
 
-                {/* Barra de progreso */}
+                {/* Barra de progreso y tiempos */}
                 <div className="audio-progress-container">
                   <div
                     className="audio-progress-modern"
@@ -1803,12 +2076,25 @@ const MessageBubble = forwardRef(({
                     />
                   </div>
 
-                  {/* Tiempo */}
+                  {/* Tiempo sin "/" */}
                   <div className="audio-time-modern">
                     <span className="current-time">{formatAudioTime(audioCurrentTime)}</span>
-                    <span className="time-separator">/</span>
                     <span className="total-time">{formatAudioTime(audioDuration || message.attachment.duration)}</span>
                   </div>
+                </div>
+
+                {/* Hora y estado EN LA MISMA LÍNEA a la derecha */}
+                <div className="audio-message-footer">
+                  <span className="message-time">
+                    {formatTime(message.createdAt)}
+                  </span>
+                  {isOwn && !message.deleted && (
+                    <span className="message-status">
+                      {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
+                      {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
+                      {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+                    </span>
+                  )}
                 </div>
 
                 <audio

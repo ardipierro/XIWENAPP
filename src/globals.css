@@ -6481,7 +6481,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  min-width: 150px;
+  min-width: 100px;
 }
 
 /* Barra de progreso VISIBLE */
@@ -6515,10 +6515,10 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   background: var(--color-primary, #6366f1);
 }
 
-/* Tiempo del audio */
+/* Tiempo del audio - SIN "/" en el medio */
 .audio-time-modern {
   display: flex;
-  justify-content: space-between;
+  gap: 0.25rem;
   font-size: 10px;
   color: currentColor;
   opacity: 0.75;
@@ -6527,4 +6527,158 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 /* En mensajes propios (texto blanco sobre azul) */
 .message-bubble-container.own .audio-time-modern {
   color: white;
+}
+
+/* Footer del audio: hora y tilde A LA DERECHA en la misma línea */
+.audio-message-footer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   VOICE RECORDER INTEGRADO EN EL INPUT
+   ============================================ */
+
+/* Timer de grabación - grande y negrita dentro del textarea */
+.voice-recording-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 50px;
+  padding: 1rem;
+  background: var(--color-bg-primary);
+}
+
+.recording-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+.timer-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  color: #ef4444;
+}
+
+/* Preview player dentro del textarea */
+.voice-preview-player {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 50px;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-primary);
+}
+
+.preview-play-btn {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--color-primary, #6366f1);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preview-play-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.preview-progress-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.preview-progress-bar {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.dark .preview-progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.preview-progress-fill {
+  height: 100%;
+  background: var(--color-primary, #6366f1);
+  border-radius: 2px;
+}
+
+.preview-time {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-text-secondary);
+}
+
+/* Botones de voz contextuales */
+.voice-stop-button {
+  min-width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f97316;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voice-stop-button:hover {
+  background: #ea580c;
+  transform: scale(1.05);
+}
+
+.voice-cancel-button {
+  min-width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voice-cancel-button:hover {
+  background: var(--color-bg-secondary);
+  transform: scale(1.05);
 }
