@@ -67,9 +67,9 @@ function BaseButton({
         hover: { backgroundColor: 'var(--color-error-dark)' }
       },
       warning: {
-        backgroundColor: '#f59e0b', // amber-500 - Fix: valor directo (no existe variable)
+        backgroundColor: 'var(--color-warning)', // Usar variable
         color: 'white',
-        hover: { backgroundColor: '#d97706' } // amber-600
+        hover: { backgroundColor: 'var(--color-warning-dark)' }
       },
       ghost: {
         backgroundColor: 'var(--color-bg-secondary)', // Fondo sutil visible
@@ -136,12 +136,16 @@ function BaseButton({
       className={`
         inline-flex items-center justify-center gap-2
         font-medium rounded-lg
-        focus:outline-none focus:ring-2 focus:ring-offset-2
+        focus:outline-none
         ${className}
       `}
       style={{
         ...buttonStyle,
-        boxShadow: isHovered && !isDisabled ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+        boxShadow: isHovered && !isDisabled
+          ? '0 2px 4px rgba(0,0,0,0.1)'
+          : isDisabled
+            ? 'none'
+            : 'var(--shadow-focus)'
       }}
       {...rest}
     >
