@@ -99,8 +99,8 @@ function HomeView({ user, onNavigate }) {
       permission: 'grade-assignments'
     },
     {
-      title: 'Juego por Turnos',
-      description: 'Juego clásico de preguntas',
+      title: 'Ejercicio por Turnos',
+      description: 'Ejercicio clásico de preguntas',
       icon: Target,
       path: '/dashboard/turn-game',
       permission: null // Disponible para todos
@@ -113,8 +113,8 @@ function HomeView({ user, onNavigate }) {
       permission: null // Disponible para todos
     },
     {
-      title: 'Juegos en Vivo',
-      description: 'Juegos en tiempo real con estudiantes',
+      title: 'Ejercicio en Vivo',
+      description: 'Ejercicios en tiempo real con estudiantes',
       icon: Gamepad2,
       path: '/dashboard/games',
       permission: 'play-live-games'
@@ -428,12 +428,12 @@ function UniversalDashboardInner() {
               if (!can('view-all-content')) return <PlaceholderView title="Sin acceso" />;
               return <StudentSessionsView student={effectiveUser} />;
 
-            // JUEGOS EN VIVO
+            // EJERCICIO EN VIVO
             case '/dashboard/games':
               if (!can('play-live-games')) return <PlaceholderView title="Sin acceso" />;
               return <LiveGamesHub user={effectiveUser} />;
 
-            // JUEGO POR TURNOS
+            // EJERCICIO POR TURNOS
             case '/dashboard/turn-game':
               return (
                 <GameContainer
