@@ -26,7 +26,7 @@ export const DEFAULT_BADGE_CONFIG = {
   // ========================================
   CONTENT_COURSE: {
     variant: 'primary',
-    color: '#3b82f6',
+    color: '#5b8fa3',
     label: 'Curso',
     icon: '📚',
     heroicon: 'BookOpenIcon',
@@ -45,7 +45,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
   CONTENT_READING: {
     variant: 'info',
-    color: '#8b5cf6',
+    color: '#7a8fa8',
     label: 'Lectura',
     icon: '📖',
     heroicon: 'NewspaperIcon',
@@ -94,7 +94,7 @@ export const DEFAULT_BADGE_CONFIG = {
   // ========================================
   EXERCISE_MULTIPLE_CHOICE: {
     variant: 'primary',
-    color: '#3b82f6',
+    color: '#5b8fa3',
     label: 'Opción Múltiple',
     icon: '☑️',
     heroicon: 'CheckCircleIcon',
@@ -121,7 +121,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
   EXERCISE_ORDERING: {
     variant: 'info',
-    color: '#8b5cf6',
+    color: '#7a8fa8',
     label: 'Ordenar',
     icon: '🔢',
     heroicon: 'ListBulletIcon',
@@ -139,7 +139,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
   EXERCISE_SHORT_ANSWER: {
     variant: 'primary',
-    color: '#3b82f6',
+    color: '#5b8fa3',
     label: 'Respuesta Corta',
     icon: '✍️',
     heroicon: 'PencilSquareIcon',
@@ -299,7 +299,7 @@ export const DEFAULT_BADGE_CONFIG = {
   // ========================================
   THEME_VOCABULARY: {
     variant: 'primary',
-    color: '#3b82f6',
+    color: '#5b8fa3',
     label: 'Vocabulario',
     icon: '📚',
     heroicon: 'BookOpenIcon',
@@ -308,7 +308,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
   THEME_GRAMMAR: {
     variant: 'info',
-    color: '#8b5cf6',
+    color: '#7a8fa8',
     label: 'Gramática',
     icon: '📖',
     heroicon: 'NewspaperIcon',
@@ -353,7 +353,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
   THEME_WRITING: {
     variant: 'primary',
-    color: '#3b82f6',
+    color: '#5b8fa3',
     label: 'Escritura',
     icon: '✍️',
     heroicon: 'PencilSquareIcon',
@@ -402,7 +402,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
   FEATURE_AI_GENERATED: {
     variant: 'info',
-    color: '#8b5cf6',
+    color: '#7a8fa8',
     label: 'Generado con IA',
     icon: '🤖',
     heroicon: 'CpuChipIcon',
@@ -424,7 +424,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
   ROLE_TEACHER: {
     variant: 'info',
-    color: '#8b5cf6',
+    color: '#7a8fa8',
     label: 'Profesor',
     icon: '👨‍🏫',
     heroicon: 'AcademicCapIcon',
@@ -442,7 +442,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
   ROLE_STUDENT: {
     variant: 'primary',
-    color: '#3b82f6',
+    color: '#5b8fa3',
     label: 'Alumno',
     icon: '🎓',
     heroicon: 'AcademicCapIcon',

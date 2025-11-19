@@ -29,7 +29,7 @@ function BaseCard({
   image,
   icon: Icon,
   avatar,
-  avatarColor = '#6366f1',
+  avatarColor = '#5b6b8f',
 
   // Content
   title,

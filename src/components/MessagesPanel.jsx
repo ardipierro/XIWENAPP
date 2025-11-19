@@ -334,6 +334,18 @@ function ConversationItem({ conversation, isSelected, onClick }) {
     return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
   };
 
+  const getRoleColor = (role) => {
+    const colors = {
+      admin: '#7a8fa8',
+      teacher: '#10b981',
+      trial_teacher: '#10b981',
+      student: '#5b8fa3',
+      listener: '#6b7280',
+      trial: '#6b7280'
+    };
+    return colors[role] || '#6b7280';
+  };
+
   return (
     <div
       className={`conversation-item ${isSelected ? 'selected' : ''} ${unreadCount > 0 ? 'unread' : ''}`}

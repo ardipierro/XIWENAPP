@@ -495,7 +495,7 @@ export function QuizModal({ isOpen, onClose, collectionId, user }) {
 
         .quiz-question__progress-fill {
           height: 100%;
-          background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+          background: linear-gradient(90deg, #5b8fa3, #7a8fa8);
           transition: width 0.3s ease;
         }
 

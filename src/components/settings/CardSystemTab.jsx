@@ -119,7 +119,7 @@ Los cambios se aplican instantáneamente en toda la app.`);
     user: {
       variant: 'user',
       avatar: 'JP',
-      avatarColor: '#3b82f6',
+      avatarColor: '#5b8fa3',
       title: 'Juan Pérez',
       subtitle: 'juan@example.com',
       badges: [{ variant: 'success', children: 'Student' }],
@@ -223,7 +223,7 @@ Los cambios se aplican instantáneamente en toda la app.`);
       {
         variant: 'user',
         avatar: 'MP',
-        avatarColor: '#8b5cf6',
+        avatarColor: '#7a8fa8',
         title: 'María Pérez',
         subtitle: 'maria.perez@example.com',
         badges: [
@@ -241,7 +241,7 @@ Los cambios se aplican instantáneamente en toda la app.`);
       {
         variant: 'user',
         avatar: 'JG',
-        avatarColor: '#3b82f6',
+        avatarColor: '#5b8fa3',
         title: 'Juan García',
         subtitle: 'Profesor de Matemáticas',
         badges: [

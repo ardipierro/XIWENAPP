@@ -159,17 +159,17 @@ El sistema de personalización permite a los usuarios modificar **más de 30 asp
 
   // Burbujas
   bubbleBgLeft: '#f3f4f6',
-  bubbleBgRight: '#3b82f6',
+  bubbleBgRight: '#5b8fa3',
   bubbleTextLeft: '#111827',
   bubbleTextRight: '#ffffff',
   bubbleBorderWidth: 0,
 
   // Badges
-  badgePrimaryBg: '#3b82f6',
+  badgePrimaryBg: '#5b8fa3',
   badgeSuccessBg: '#10b981',
   badgeWarningBg: '#f59e0b',
   badgeDangerBg: '#ef4444',
-  badgeInfoBg: '#8b5cf6',
+  badgeInfoBg: '#7a8fa8',
 
   // Layout
   borderRadius: 16,
