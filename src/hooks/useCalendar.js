@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   getUnifiedCalendar,
+  subscribeToUnifiedCalendar,
   getTodayEvents,
   getUpcomingEvents,
   createCalendarEvent,
@@ -32,45 +33,38 @@ export function useCalendar(userId, userRole, startDate = null, endDate = null) 
   const endTime = endDate?.getTime() || null;
 
   useEffect(() => {
-    let isMounted = true;
+    if (!userId || !userRole) {
+      setLoading(false);
+      return;
+    }
 
-    const fetchEvents = async () => {
-      if (!userId || !userRole) {
+    setLoading(true);
+    setError(null);
+
+    // Reconstruct dates from timestamps
+    const now = new Date();
+    const start = startTime ? new Date(startTime) : new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = endTime ? new Date(endTime) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    logger.info(`🔔 useCalendar: Setting up real-time subscription`, 'useCalendar');
+
+    // Set up real-time listener
+    const unsubscribe = subscribeToUnifiedCalendar(
+      userId,
+      userRole,
+      start,
+      end,
+      (updatedEvents) => {
+        logger.info(`📅 useCalendar: Received ${updatedEvents.length} events from real-time listener`, 'useCalendar');
+        setEvents(updatedEvents);
         setLoading(false);
-        return;
       }
+    );
 
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Reconstruct dates from timestamps
-        const now = new Date();
-        const start = startTime ? new Date(startTime) : new Date(now.getFullYear(), now.getMonth(), 1);
-        const end = endTime ? new Date(endTime) : new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-        const data = await getUnifiedCalendar(userId, userRole, start, end);
-
-        if (isMounted) {
-          logger.info(`📅 useCalendar received ${data.length} events from getUnifiedCalendar`, 'useCalendar');
-          setEvents(data);
-        }
-      } catch (err) {
-        logger.error('Error fetching calendar events', 'useCalendar', err);
-        if (isMounted) {
-          setError(err.message);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchEvents();
-
+    // Cleanup listener on unmount or when dependencies change
     return () => {
-      isMounted = false;
+      logger.info('🔕 useCalendar: Cleaning up real-time subscription', 'useCalendar');
+      unsubscribe();
     };
   }, [userId, userRole, startTime, endTime]);
 
