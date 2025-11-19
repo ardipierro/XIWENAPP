@@ -11,6 +11,7 @@
 // Main Components
 export { UniversalCard, default as Card } from './UniversalCard';
 export { CardContainer } from './CardContainer';
+export { default as CardDeleteButton, deleteButtonVariants } from './CardDeleteButton';
 
 // Layout Components
 export { CardGrid } from './CardGrid';
