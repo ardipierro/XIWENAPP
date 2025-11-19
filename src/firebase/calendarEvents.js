@@ -119,11 +119,69 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
     const startTimestamp = Timestamp.fromDate(startDate);
     const endTimestamp = Timestamp.fromDate(endDate);
 
-    // 1. Get class_instances (NEW UNIFIED SYSTEM)
-    const instancesRef = collection(db, 'class_instances');
+    // 1. Get class_instances - USE SAME LOGIC AS ClassSessionManager
+    if (userRole === 'teacher') {
+      // Import getTeacherSessions to use the SAME logic as the class panel
+      const { getTeacherSessions } = await import('./classSessions');
+      const sessions = await getTeacherSessions(userId);
 
-    if (userRole === 'admin') {
+      // Filter sessions by date range and convert to calendar events
+      sessions.forEach(session => {
+        // For recurring schedules, we need to check if any instances fall in the date range
+        if (session.type === 'recurring') {
+          // For recurring, we could expand instances here, but for now show as one item
+          // This matches the class panel behavior
+          const sessionDate = session.createdAt?.toDate?.() || new Date();
+          if (sessionDate >= startDate && sessionDate <= endDate) {
+            events.push({
+              id: session.id,
+              sessionId: session.id,
+              title: session.name || 'Horario Recurrente',
+              type: 'session',
+              startDate: session.createdAt,
+              endDate: session.createdAt,
+              description: session.description || '',
+              courseId: session.courseId,
+              courseName: session.courseName,
+              teacherId: session.teacherId,
+              teacherName: session.teacherName,
+              status: 'scheduled',
+              mode: session.mode || 'live',
+              location: session.videoProvider || 'Online',
+              color: 'blue',
+              sessionData: session
+            });
+          }
+        } else {
+          // For single sessions, check the scheduled date
+          const sessionDate = session.scheduledStart?.toDate?.() || session.createdAt?.toDate?.() || new Date();
+          if (sessionDate >= startDate && sessionDate <= endDate) {
+            events.push({
+              id: session.id,
+              sessionId: session.id,
+              title: session.name || session.scheduleName || 'Clase',
+              type: 'session',
+              startDate: session.scheduledStart || session.createdAt,
+              endDate: session.scheduledEnd || session.scheduledStart || session.createdAt,
+              description: session.description || '',
+              courseId: session.courseId,
+              courseName: session.courseName,
+              teacherId: session.teacherId,
+              teacherName: session.teacherName,
+              status: session.status || 'scheduled',
+              mode: session.mode || 'live',
+              location: session.videoProvider || 'Online',
+              color: session.status === 'live' ? 'red' : session.status === 'ended' ? 'gray' : session.status === 'cancelled' ? 'orange' : 'blue',
+              sessionData: session
+            });
+          }
+        }
+      });
+
+      logger.info(`📊 Found ${events.length} sessions for teacher from getTeacherSessions`, 'Calendar');
+    } else if (userRole === 'admin') {
       // Admin: get ALL instances within date range
+      const instancesRef = collection(db, 'class_instances');
       const instancesQuery = query(
         instancesRef,
         where('scheduledStart', '>=', startTimestamp),
@@ -137,42 +195,9 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         events.push({
           id: doc.id,
-          sessionId: doc.id, // Add sessionId for modal
+          sessionId: doc.id,
           title: data.scheduleName || data.name || 'Clase',
-          type: 'session', // Changed from 'class_instance' to 'session'
-          startDate: data.scheduledStart,
-          endDate: data.scheduledEnd || data.scheduledStart,
-          description: data.description || '',
-          courseId: data.courseId,
-          courseName: data.courseName,
-          teacherId: data.teacherId,
-          teacherName: data.teacherName,
-          status: data.status,
-          mode: data.mode || 'live',
-          location: data.videoProvider || 'Online',
-          color: data.status === 'live' ? 'red' : data.status === 'ended' ? 'gray' : data.status === 'cancelled' ? 'orange' : 'blue',
-          sessionData: data
-        });
-      });
-    } else if (userRole === 'teacher') {
-      // Teacher: get their instances
-      const instancesQuery = query(
-        instancesRef,
-        where('teacherId', '==', userId),
-        where('scheduledStart', '>=', startTimestamp),
-        where('scheduledStart', '<=', endTimestamp),
-        orderBy('scheduledStart', 'asc')
-      );
-      const instancesSnap = await getDocs(instancesQuery);
-      logger.info(`📊 Found ${instancesSnap.docs.length} class instances for teacher`, 'Calendar');
-
-      instancesSnap.docs.forEach(doc => {
-        const data = doc.data();
-        events.push({
-          id: doc.id,
-          sessionId: doc.id, // Add sessionId for modal
-          title: data.scheduleName || data.name || 'Clase',
-          type: 'session', // Changed from 'class_instance' to 'session'
+          type: 'session',
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
           description: data.description || '',
@@ -189,6 +214,7 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
       });
     } else {
       // Students: get instances they're eligible for
+      const instancesRef = collection(db, 'class_instances');
       const instancesQuery = query(
         instancesRef,
         where('eligibleStudentIds', 'array-contains', userId),
@@ -203,9 +229,9 @@ export async function getUnifiedCalendar(userId, userRole, startDate, endDate) {
         const data = doc.data();
         events.push({
           id: doc.id,
-          sessionId: doc.id, // Add sessionId for modal
+          sessionId: doc.id,
           title: data.scheduleName || data.name || 'Clase',
-          type: 'session', // Changed from 'class_instance' to 'session'
+          type: 'session',
           startDate: data.scheduledStart,
           endDate: data.scheduledEnd || data.scheduledStart,
           description: data.description || '',
