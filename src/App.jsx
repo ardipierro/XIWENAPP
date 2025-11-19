@@ -68,11 +68,17 @@ function App() {
    */
   useEffect(() => {
     if (isViewingAs && viewAsUser) {
-      // Crear objeto user sintético para viewAsUser
+      // Crear objeto user sintético para viewAsUser con TODOS los campos necesarios
       const syntheticUser = {
         uid: viewAsUser.id,
         email: viewAsUser.email,
-        displayName: viewAsUser.name
+        displayName: viewAsUser.name,
+        role: viewAsUser.role, // ✅ CRÍTICO: Incluir el rol para que los permisos funcionen correctamente
+        // Incluir otros campos que puedan ser necesarios
+        name: viewAsUser.name,
+        profile: viewAsUser.profile || {},
+        avatar: viewAsUser.avatar || null,
+        credits: viewAsUser.credits || 0
       };
       setEffectiveUser(syntheticUser);
       setEffectiveRole(viewAsUser.role);
