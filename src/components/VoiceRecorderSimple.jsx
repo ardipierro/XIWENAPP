@@ -19,6 +19,7 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
   const streamRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
+  const isInitializedRef = useRef(false); // Prevenir doble inicialización
 
   // PRIMERO: Verificar que el componente se monta
   useEffect(() => {
@@ -26,6 +27,13 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
     console.log('onSend:', typeof onSend);
     console.log('onCancel:', typeof onCancel);
 
+    // Prevenir doble inicialización (React StrictMode monta dos veces en desarrollo)
+    if (isInitializedRef.current) {
+      console.log('⚠️ Ya inicializado, saltando...');
+      return;
+    }
+
+    isInitializedRef.current = true;
     startRecording();
 
     // Cleanup al desmontar
