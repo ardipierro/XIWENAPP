@@ -131,11 +131,28 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
     try {
       setActionLoading(true);
       const sessionId = editingSession.sessionId || editingSession.id;
+      const isRecurringInstance = editingSession.sessionData?.scheduleId;
 
-      const result = await updateClassSession(sessionId, sessionData);
+      // Si es una instancia de horario recurrente, actualizar el horario en lugar de la instancia
+      let result;
+      if (isRecurringInstance) {
+        // Importar updateRecurringSchedule
+        const { updateRecurringSchedule } = await import('../firebase/classSessions');
+        result = await updateRecurringSchedule(editingSession.sessionData.scheduleId, sessionData);
+
+        if (result.success) {
+          logger.info('Recurring schedule updated from calendar');
+        }
+      } else {
+        // Es una clase individual, actualizar normalmente
+        result = await updateClassSession(sessionId, sessionData);
+
+        if (result.success) {
+          logger.info('Individual session updated from calendar');
+        }
+      }
 
       if (result.success) {
-        logger.info('Session updated successfully from calendar');
         setShowEditModal(false);
         setEditingSession(null);
         await refresh(); // Refrescar eventos del calendario
