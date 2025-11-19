@@ -891,7 +891,8 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     return (
       <div
         id={`content-${content.id}`}
-        className={`group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
+        className={`group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 cursor-pointer hover:shadow-lg ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
+        onClick={() => onView(content)}
       >
         <div className="flex items-stretch min-h-[140px]">
           {/* Imagen o Icono - Cuadrado que ocupa toda la altura */}
@@ -988,8 +989,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
           </div>
 
           {/* Footer - Action Buttons */}
-          <div className="flex items-center gap-2 flex-shrink-0 pr-4">
-            <BaseButton variant="ghost" icon={Eye} size="lg" onClick={() => onView(content)} />
+          <div className="flex items-center gap-2 flex-shrink-0 pr-4" onClick={(e) => e.stopPropagation()}>
             <BaseButton variant="ghost" icon={Edit} size="lg" onClick={() => onEdit(content)} />
             <BaseButton variant="ghost" icon={Trash2} size="lg" onClick={() => onDelete(content.id)} />
           </div>
@@ -1070,9 +1070,6 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
 
   // Preparar actions (SOLO botones)
   const contentActions = [
-    <BaseButton key="view" variant="secondary" icon={Eye} onClick={() => onView(content)} fullWidth>
-      Ver
-    </BaseButton>,
     <BaseButton key="edit" variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
       Editar
     </BaseButton>,
@@ -1095,6 +1092,7 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       badges={contentBadges}
       meta={contentMeta}
       actions={contentActions}
+      onClick={() => onView(content)}
     >
       {/* Tags - Solo renderizar si hay contenido */}
       {hasTags && (
