@@ -274,20 +274,15 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
                       }}
                       title="Duplicar"
                     />
-                    <BaseButton
-                      variant="danger"
-                      size="sm"
-                      icon={Trash2}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedSession(session);
-                        setShowConfirmDelete(true);
-                      }}
-                      title="Eliminar"
-                    />
+                    {/* Botón eliminar movido al footer (usando onDelete prop) */}
                   </div>
                 }
                 onClick={() => handleOpenSession(session)}
+                onDelete={async () => {
+                  setSelectedSession(session);
+                  setShowConfirmDelete(true);
+                }}
+                deleteConfirmMessage={`¿Eliminar pizarra "${session.title}"?`}
               />
             );
           })}
@@ -356,20 +351,15 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
                       }}
                       title="Duplicar"
                     />
-                    <BaseButton
-                      variant="danger"
-                      size="sm"
-                      icon={Trash2}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedSession(session);
-                        setShowConfirmDelete(true);
-                      }}
-                      title="Eliminar"
-                    />
+                    {/* Botón eliminar movido al footer (usando onDelete prop) */}
                   </div>
                 }
                 onClick={() => handleOpenSession(session)}
+                onDelete={async () => {
+                  setSelectedSession(session);
+                  setShowConfirmDelete(true);
+                }}
+                deleteConfirmMessage={`¿Eliminar pizarra "${session.title}"?`}
               />
             );
           })}

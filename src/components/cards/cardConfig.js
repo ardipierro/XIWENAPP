@@ -54,6 +54,15 @@ export const cardVariants = {
     footerSticky: true,           // Footer siempre al fondo de la card
     footerSpacing: 'gap-3',       // Espacio entre badges/stats/actions
     footerAlignment: 'start',     // 'start' | 'center' | 'end'
+
+    // Delete Button (NUEVA DIRECTIVA DE DISEÑO)
+    deleteButton: {
+      enabled: true,              // Si se muestra el botón eliminar cuando onDelete existe
+      variant: 'solid',           // 'solid' | 'outlined' | 'ghost' | 'danger'
+      size: 'md',                 // 'sm' | 'md' | 'lg'
+      position: 'footer-left',    // Siempre en esquina inferior izquierda
+      requireConfirm: true,       // Pedir confirmación antes de eliminar
+    },
   },
 
   /**
@@ -102,6 +111,15 @@ export const cardVariants = {
     footerSticky: true,
     footerSpacing: 'gap-3',
     footerAlignment: 'start',
+
+    // Delete Button
+    deleteButton: {
+      enabled: true,
+      variant: 'solid',
+      size: 'md',
+      position: 'footer-left',
+      requireConfirm: true,
+    },
   },
 
   /**
@@ -148,6 +166,15 @@ export const cardVariants = {
     footerSticky: true,
     footerSpacing: 'gap-3',
     footerAlignment: 'start',
+
+    // Delete Button
+    deleteButton: {
+      enabled: true,
+      variant: 'solid',
+      size: 'md',
+      position: 'footer-left',
+      requireConfirm: true,
+    },
   },
 
   /**
@@ -197,6 +224,15 @@ export const cardVariants = {
     footerSticky: true,
     footerSpacing: 'gap-3',
     footerAlignment: 'start',
+
+    // Delete Button
+    deleteButton: {
+      enabled: true,
+      variant: 'solid',
+      size: 'md',
+      position: 'footer-left',
+      requireConfirm: true,
+    },
   },
 
   /**
@@ -238,6 +274,15 @@ export const cardVariants = {
     footerSticky: false,          // Stats cards no necesitan footer sticky
     footerSpacing: 'gap-2',
     footerAlignment: 'start',
+
+    // Delete Button (generalmente NO se usa en stats cards)
+    deleteButton: {
+      enabled: false,             // Stats cards normalmente no se eliminan
+      variant: 'solid',
+      size: 'sm',
+      position: 'footer-left',
+      requireConfirm: true,
+    },
   },
 
   /**
@@ -279,6 +324,15 @@ export const cardVariants = {
     footerSticky: true,
     footerSpacing: 'gap-2',
     footerAlignment: 'start',
+
+    // Delete Button
+    deleteButton: {
+      enabled: true,
+      variant: 'solid',
+      size: 'sm',                 // Tamaño small para cards compactas
+      position: 'footer-left',
+      requireConfirm: true,
+    },
   },
 };
 

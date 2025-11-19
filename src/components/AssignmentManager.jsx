@@ -189,7 +189,12 @@ function AssignmentCard({ assignment, courses, onEdit, onDelete, onViewStats }) 
   const isOverdue = deadline && deadline < new Date();
 
   return (
-    <UniversalCard variant="default" size="md">
+    <UniversalCard
+      variant="default"
+      size="md"
+      onDelete={onDelete}  // ← Botón eliminar unificado (footer izquierda)
+      deleteConfirmMessage={`¿Eliminar tarea "${assignment.title}"?`}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-start gap-3">
@@ -265,14 +270,7 @@ function AssignmentCard({ assignment, courses, onEdit, onDelete, onViewStats }) 
           >
             <Edit size={18} strokeWidth={2} />
           </BaseButton>
-          <BaseButton
-            variant="ghost"
-            size="sm"
-            onClick={onDelete}
-            className="p-2 text-error"
-          >
-            <Trash2 size={18} strokeWidth={2} />
-          </BaseButton>
+          {/* Botón eliminar movido al footer (usando onDelete prop) */}
         </div>
       </div>
 

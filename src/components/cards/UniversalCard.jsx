@@ -12,6 +12,7 @@ import { useState, useMemo, useRef } from 'react';
 import { BaseBadge } from '../common';
 import { useCardConfig } from '../../contexts/CardConfigContext';
 import UserAvatar from '../UserAvatar';
+import CardDeleteButton from './CardDeleteButton';
 import {
   getVariantConfig,
   getSizeConfig,
@@ -107,6 +108,8 @@ export function UniversalCard({
   // Actions
   actions,                 // Array of action components or single JSX
   onClick,
+  onDelete,                // Callback para eliminar (auto-renderiza CardDeleteButton)
+  deleteConfirmMessage,    // Mensaje de confirmación personalizado para eliminar
 
   // States
   loading = false,
@@ -677,7 +680,7 @@ export function UniversalCard({
             </div>
 
             {/* Footer sticky - FUERA del área scrolleable */}
-            {(badges?.length > 0 || stats?.length > 0 || actions) && variantConfig.footerSticky && (
+            {(badges?.length > 0 || stats?.length > 0 || actions || (onDelete && variantConfig.deleteButton?.enabled)) && variantConfig.footerSticky && (
               <div className={`flex-shrink-0 pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                 {/* Badges */}
                 {renderBadges()}
@@ -685,13 +688,34 @@ export function UniversalCard({
                 {/* Stats */}
                 {renderStats()}
 
-                {/* Actions */}
-                {renderActions()}
+                {/* Actions Row: DeleteButton (left) + Regular Actions (right) */}
+                {(actions || (onDelete && variantConfig.deleteButton?.enabled)) && (
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Delete Button - Esquina inferior IZQUIERDA */}
+                    {onDelete && variantConfig.deleteButton?.enabled && (
+                      <CardDeleteButton
+                        onDelete={onDelete}
+                        variant={variantConfig.deleteButton.variant || 'solid'}
+                        size={variantConfig.deleteButton.size || 'md'}
+                        confirmMessage={deleteConfirmMessage}
+                        requireConfirm={variantConfig.deleteButton.requireConfirm}
+                        disabled={disabled}
+                      />
+                    )}
+
+                    {/* Regular Actions - Lado derecho */}
+                    {actions && (
+                      <div className="flex gap-2 ml-auto">
+                        {renderActions()}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
             {/* Footer NO sticky (para stats cards y otros que no necesitan) */}
-            {(badges?.length > 0 || stats?.length > 0 || actions) && !variantConfig.footerSticky && (
+            {(badges?.length > 0 || stats?.length > 0 || actions || (onDelete && variantConfig.deleteButton?.enabled)) && !variantConfig.footerSticky && (
               <div className={`flex-shrink-0 pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                 {/* Badges */}
                 {renderBadges()}
@@ -699,8 +723,29 @@ export function UniversalCard({
                 {/* Stats */}
                 {renderStats()}
 
-                {/* Actions */}
-                {renderActions()}
+                {/* Actions Row: DeleteButton (left) + Regular Actions (right) */}
+                {(actions || (onDelete && variantConfig.deleteButton?.enabled)) && (
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Delete Button - Esquina inferior IZQUIERDA */}
+                    {onDelete && variantConfig.deleteButton?.enabled && (
+                      <CardDeleteButton
+                        onDelete={onDelete}
+                        variant={variantConfig.deleteButton.variant || 'solid'}
+                        size={variantConfig.deleteButton.size || 'md'}
+                        confirmMessage={deleteConfirmMessage}
+                        requireConfirm={variantConfig.deleteButton.requireConfirm}
+                        disabled={disabled}
+                      />
+                    )}
+
+                    {/* Regular Actions - Lado derecho */}
+                    {actions && (
+                      <div className="flex gap-2 ml-auto">
+                        {renderActions()}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </>

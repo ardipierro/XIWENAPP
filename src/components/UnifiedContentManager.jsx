@@ -1078,12 +1078,11 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     });
   }
 
-  // Preparar actions (SOLO botones)
+  // Preparar actions (SOLO botón editar - el delete button se maneja con onDelete)
   const contentActions = [
     <BaseButton key="edit" variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
       Editar
-    </BaseButton>,
-    <BaseButton key="delete" variant="danger" icon={Trash2} onClick={() => onDelete(content.id)} />
+    </BaseButton>
   ];
 
   // Tags van en children (no son badges del sistema)
@@ -1103,6 +1102,8 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       meta={contentMeta}
       actions={contentActions}
       onClick={() => onView(content)}
+      onDelete={() => onDelete(content.id)}  // ← NUEVO: botón eliminar unificado
+      deleteConfirmMessage={`¿Eliminar "${content.title}"?`}  // ← Mensaje personalizado
       customConfig={variantConfig}  // ← PASAR LA CONFIGURACIÓN QUE YA CALCULAMOS
     >
       {/* Tags - Solo renderizar si hay contenido */}
