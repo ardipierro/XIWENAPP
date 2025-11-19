@@ -136,11 +136,19 @@ export async function createRecurringSchedule(scheduleData) {
  */
 export async function updateRecurringSchedule(scheduleId, updates) {
   try {
-    const docRef = doc(db, 'recurring_schedules', scheduleId);
-    await updateDoc(docRef, {
+    // Normalizar campos: convertir 'recurringStartDate' a 'startDate' para recurring_schedules
+    const normalizedUpdates = {
       ...updates,
       updatedAt: serverTimestamp()
-    });
+    };
+
+    // Si se está actualizando 'recurringStartDate', también actualizar 'startDate'
+    if (updates.recurringStartDate !== undefined) {
+      normalizedUpdates.startDate = updates.recurringStartDate;
+    }
+
+    const docRef = doc(db, 'recurring_schedules', scheduleId);
+    await updateDoc(docRef, normalizedUpdates);
 
     logger.info('✅ Horario actualizado:', scheduleId);
     return { success: true };
@@ -217,10 +225,15 @@ export async function getTeacherSchedules(teacherId) {
     );
 
     const snapshot = await getDocs(q);
-    const schedules = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const schedules = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        // Normalizar campo 'startDate' a 'recurringStartDate' para consistencia con el modal
+        recurringStartDate: data.startDate || data.recurringStartDate
+      };
+    });
 
     // Ordenar en el cliente por createdAt (desc)
     return schedules.sort((a, b) => {
