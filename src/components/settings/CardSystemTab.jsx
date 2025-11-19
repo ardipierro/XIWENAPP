@@ -35,6 +35,7 @@ import { BaseButton, BaseBadge } from '../common';
 import { cardVariants } from '../cards/cardConfig';
 import { scanCardUsage, analyzeImpact, getGlobalStats, findMigrationCandidates } from '../../utils/cardUsageScanner';
 import { useCardConfig } from '../../contexts/CardConfigContext';
+import ComponentMappingPanel from './ComponentMappingPanel';
 
 /**
  * CardSystemTab - Configurador avanzado de cards
@@ -45,6 +46,7 @@ function CardSystemTab() {
   const [showImpactAnalysis, setShowImpactAnalysis] = useState(false);
   const [impactData, setImpactData] = useState(null);
   const [previewMode, setPreviewMode] = useState('basic'); // 'basic' | 'real-examples'
+  const [tabMode, setTabMode] = useState('variants'); // 'variants' | 'mapping'
 
   // Hook para recargar config global después de guardar
   const { reloadConfig } = useCardConfig();
@@ -768,6 +770,30 @@ Los cambios se aplican instantáneamente en toda la app.`);
           Configura cada variant, visualiza el impacto en tiempo real, y descubre dónde se usan en la app.
         </p>
 
+        {/* Tab Switcher */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setTabMode('variants')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+              tabMode === 'variants'
+                ? 'bg-primary-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+          >
+            ⚙️ Configuración de Variants
+          </button>
+          <button
+            onClick={() => setTabMode('mapping')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+              tabMode === 'mapping'
+                ? 'bg-primary-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+          >
+            🗺️ Mapeo de Componentes
+          </button>
+        </div>
+
         {/* Global Stats - Mejoradas */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="p-5 rounded-xl hover:scale-105 transition-transform cursor-pointer" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
@@ -840,8 +866,11 @@ Los cambios se aplican instantáneamente en toda la app.`);
         </div>
       </div>
 
-      {/* Main 3-Column Layout REDISEÑADO */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Contenido condicional según tab */}
+      {tabMode === 'variants' ? (
+        <>
+          {/* Main 3-Column Layout REDISEÑADO */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* COLUMNA 1: Selector de Variants (3 cols) */}
         <div className="lg:col-span-3 space-y-3">
           <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
@@ -1182,6 +1211,11 @@ Los cambios se aplican instantáneamente en toda la app.`);
         </div>
       </div>
       {/* Fin del grid rediseñado */}
+        </>
+      ) : (
+        /* Panel de Mapeo de Componentes */
+        <ComponentMappingPanel />
+      )}
     </div>
   );
 }

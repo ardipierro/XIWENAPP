@@ -16,6 +16,10 @@ import {
   DEFAULT_BADGE_CONFIG,
   BADGE_CATEGORIES,
   applyBadgeColors,
+  getIconLibraryConfig,
+  saveIconLibraryConfig,
+  resetIconLibraryConfig,
+  DEFAULT_ICON_LIBRARY_CONFIG,
 } from '../config/badgeSystem';
 import logger from '../utils/logger';
 
@@ -29,6 +33,7 @@ import logger from '../utils/logger';
  */
 function useBadgeConfig() {
   const [config, setConfig] = useState(getBadgeConfig());
+  const [iconConfig, setIconConfig] = useState(getIconLibraryConfig());
   const [hasChanges, setHasChanges] = useState(false);
 
   // Cargar configuración al montar
@@ -56,11 +61,23 @@ function useBadgeConfig() {
   }, []);
 
   /**
-   * Guardar configuración actual
+   * Actualizar configuración de librería de iconos
+   */
+  const updateIconLibrary = useCallback((library) => {
+    setIconConfig((prev) => {
+      const updated = { ...prev, library };
+      setHasChanges(true);
+      return updated;
+    });
+  }, []);
+
+  /**
+   * Guardar configuración actual (badges + iconos)
    */
   const save = useCallback(() => {
     try {
       saveBadgeConfig(config);
+      saveIconLibraryConfig(iconConfig);
       setHasChanges(false);
       window.dispatchEvent(new Event('xiwen_badge_config_changed'));
       logger.info('Badge configuration saved', 'useBadgeConfig');
@@ -69,14 +86,16 @@ function useBadgeConfig() {
       logger.error('Error saving badge config:', err, 'useBadgeConfig');
       return false;
     }
-  }, [config]);
+  }, [config, iconConfig]);
 
   /**
    * Restaurar configuración por defecto
    */
   const reset = useCallback(() => {
     resetBadgeConfig();
+    resetIconLibraryConfig();
     setConfig(DEFAULT_BADGE_CONFIG);
+    setIconConfig(DEFAULT_ICON_LIBRARY_CONFIG);
     setHasChanges(false);
     window.dispatchEvent(new Event('xiwen_badge_config_changed'));
     logger.info('Badge configuration reset to defaults', 'useBadgeConfig');
@@ -218,7 +237,9 @@ function useBadgeConfig() {
    */
   const discard = useCallback(() => {
     const saved = getBadgeConfig();
+    const savedIconConfig = getIconLibraryConfig();
     setConfig(saved);
+    setIconConfig(savedIconConfig);
     setHasChanges(false);
     logger.info('Badge configuration changes discarded', 'useBadgeConfig');
   }, []);
@@ -226,6 +247,7 @@ function useBadgeConfig() {
   return {
     // Estado
     config,
+    iconConfig,
     hasChanges,
     categories: BADGE_CATEGORIES,
     defaults: DEFAULT_BADGE_CONFIG,
@@ -242,6 +264,7 @@ function useBadgeConfig() {
     updateProperty,
     addBadge,
     removeBadge,
+    updateIconLibrary,
   };
 }
 

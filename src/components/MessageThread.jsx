@@ -32,7 +32,7 @@ import { showMessageNotification, requestNotificationPermission } from '../utils
 import { exportToTXT, exportToJSON } from '../utils/exportConversation';
 import { compressImage, formatFileSize } from '../utils/imageCompression';
 import EmojiPicker from './EmojiPicker';
-import VoiceRecorder from './VoiceRecorder';
+import VoiceRecorderSimple from './VoiceRecorderSimple';
 import ReactionPicker from './ReactionPicker';
 import MediaGallery from './MediaGallery';
 
@@ -562,66 +562,53 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
   };
 
   /**
-   * Handle voice message send
+   * Handle voice message send - SIMPLIFICADO
    */
   const handleVoiceSend = async (audioBlob, duration) => {
+    logger.info('📤 Enviando audio...', 'MessageThread');
+
+    // Cerrar recorder
+    setShowVoiceRecorder(false);
+
     setSending(true);
     setUploading(true);
 
-    // Upload audio
-    const uploadResult = await safeAsync(
-      () => uploadAudioMessage(audioBlob, conversation.id, currentUser.uid),
-      {
-        context: 'MessageThread',
-        onError: (error) => {
-          logger.error('Failed to upload audio', error);
-          alert('Error al subir el audio. Por favor, intenta de nuevo.');
-        }
+    try {
+      // Upload
+      const uploadResult = await uploadAudioMessage(audioBlob, conversation.id, currentUser.uid);
+
+      setUploading(false);
+
+      if (!uploadResult || !uploadResult.success) {
+        setSending(false);
+        alert('Error al subir el audio');
+        return;
       }
-    );
 
-    setUploading(false);
-
-    if (!uploadResult || !uploadResult.success) {
-      setSending(false);
-      setShowVoiceRecorder(false); // Close on error
-      return;
-    }
-
-    // Send message with audio attachment
-    const audioAttachment = {
-      url: uploadResult.url,
-      filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
-      size: audioBlob.size,
-      type: audioBlob.type || 'audio/webm', // Use the actual blob type
-      duration
-    };
-
-    const result = await safeAsync(
-      () => sendMessage({
+      // Send
+      await sendMessage({
         conversationId: conversation.id,
         senderId: currentUser.uid,
         senderName: currentUser.displayName || currentUser.email,
         receiverId: conversation.otherUser.id,
         content: '',
-        attachment: audioAttachment
-      }),
-      {
-        context: 'MessageThread',
-        onError: (error) => {
-          logger.error('Failed to send voice message', error);
+        attachment: {
+          url: uploadResult.url,
+          filename: `Mensaje de voz (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`,
+          size: audioBlob.size,
+          type: audioBlob.type || 'audio/webm',
+          duration
         }
-      }
-    );
+      });
 
-    setSending(false);
+      logger.info('✅ Audio enviado', 'MessageThread');
 
-    // ARREGLADO: Cerrar inmediatamente después del envío
-    // El VoiceRecorder ya hizo cleanup del stream en handleSend
-    setShowVoiceRecorder(false);
-
-    if (result) {
-      logger.info('Voice message sent successfully', 'MessageThread');
+    } catch (error) {
+      logger.error('Error:', error, 'MessageThread');
+      alert('Error al enviar el audio');
+    } finally {
+      setSending(false);
+      setUploading(false);
       inputRef.current?.focus();
     }
   };
@@ -1211,9 +1198,9 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false })
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Voice Recorder */}
+      {/* Voice Recorder Simple - BÁSICO que funcione */}
       {showVoiceRecorder && (
-        <VoiceRecorder
+        <VoiceRecorderSimple
           onSend={handleVoiceSend}
           onCancel={() => setShowVoiceRecorder(false)}
         />
@@ -1636,10 +1623,22 @@ const MessageBubble = forwardRef(({
     const audio = audioRef.current;
     if (!audio) return;
 
+    // Validar que audio.duration sea válido
+    if (!audio.duration || !isFinite(audio.duration)) {
+      logger.warn('Audio duration is not valid, cannot seek', 'MessageBubble');
+      return;
+    }
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = x / rect.width;
     const newTime = percentage * audio.duration;
+
+    // Validar que newTime sea finito
+    if (!isFinite(newTime)) {
+      logger.warn('Calculated time is not finite, cannot seek', 'MessageBubble');
+      return;
+    }
 
     audio.currentTime = newTime;
     setAudioCurrentTime(newTime);
@@ -1835,26 +1834,41 @@ const MessageBubble = forwardRef(({
           </div>
         )}
 
-        {/* Text Content */}
-        {message.content && (
+        {/* Text Content + Footer inline (estilo WhatsApp) */}
+        {message.content ? (
           <div className="message-content">
             {highlightText(message.content, searchTerm)}
+            {/* Footer inline con el texto */}
+            <span className="message-footer">
+              <span className="message-time">
+                {formatTime(message.createdAt)}
+                {message.edited && <span className="edited-indicator"> (editado)</span>}
+              </span>
+              {isOwn && !message.deleted && (
+                <span className="message-status">
+                  {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
+                  {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
+                  {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+                </span>
+              )}
+            </span>
+          </div>
+        ) : (
+          /* Footer separado cuando solo hay attachment */
+          <div className="message-footer">
+            <div className="message-time">
+              {formatTime(message.createdAt)}
+              {message.edited && <span className="edited-indicator"> (editado)</span>}
+            </div>
+            {isOwn && !message.deleted && (
+              <div className="message-status">
+                {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
+                {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
+                {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+              </div>
+            )}
           </div>
         )}
-
-        <div className="message-footer">
-          <div className="message-time">
-            {formatTime(message.createdAt)}
-            {message.edited && <span className="edited-indicator"> (editado)</span>}
-          </div>
-          {isOwn && !message.deleted && (
-            <div className="message-status">
-              {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
-              {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
-              {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
-            </div>
-          )}
-        </div>
 
         {/* Reactions Display */}
         {message.reactions && Object.keys(message.reactions).length > 0 && (

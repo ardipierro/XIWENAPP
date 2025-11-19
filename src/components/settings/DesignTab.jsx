@@ -108,7 +108,7 @@ function DesignTab() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                 Selecciona una fuente ({availableFonts.length} disponibles):
               </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-96 overflow-y-auto pr-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 max-h-96 overflow-y-auto pr-2">
                   {availableFonts.map((font) => {
                     const styleColors = {
                       modern: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',

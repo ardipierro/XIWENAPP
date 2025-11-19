@@ -204,7 +204,7 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
         />
       ) : (
         /* Assignment cards */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {filteredAssignments.map((assignment) => (
             <UniversalCard
               variant="default"
@@ -260,21 +260,6 @@ function MyAssignmentsView({ user, onSelectAssignment }) {
                     </div>
                   </div>
                 )}
-
-                {/* Actions */}
-                <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <BaseButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectAssignment && onSelectAssignment(assignment.id);
-                    }}
-                    variant="primary"
-                    size="sm"
-                    fullWidth
-                  >
-                    {assignment.status === 'pending' ? 'Hacer tarea' : 'Ver detalles'}
-                  </BaseButton>
-                </div>
               </div>
             </UniversalCard>
           ))}

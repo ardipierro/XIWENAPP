@@ -10,6 +10,7 @@
  *   - 'warning': Ámbar
  *   - 'danger': Rojo
  *   - 'info': Cyan
+ * @param {string} badgeStyle - Estilo de renderizado: 'solid' | 'outline'
  * @param {string} size - Tamaño: 'sm', 'md', 'lg'
  * @param {node} icon - Icono izquierdo (Lucide icon component)
  * @param {boolean} dot - Mostrar punto de color a la izquierda
@@ -20,6 +21,7 @@
  */
 function BaseBadge({
   variant = 'default',
+  badgeStyle = 'solid',
   size = 'md',
   icon: Icon,
   dot = false,
@@ -29,33 +31,74 @@ function BaseBadge({
   className = '',
 }) {
   // Variant styles using CSS variables
-  const getVariantStyle = (variant) => {
-    const styles = {
+  const getVariantStyle = (variant, badgeStyle) => {
+    const solidStyles = {
       default: {
         backgroundColor: 'var(--badge-info-bg, #e5e7eb)',
-        color: 'var(--badge-info-text, #1f2937)'
+        color: 'var(--badge-info-text, #1f2937)',
+        border: 'none'
       },
       primary: {
         backgroundColor: 'var(--badge-primary-bg, #3b82f6)',
-        color: 'var(--badge-primary-text, #ffffff)'
+        color: 'var(--badge-primary-text, #ffffff)',
+        border: 'none'
       },
       success: {
         backgroundColor: 'var(--badge-success-bg, #10b981)',
-        color: 'var(--badge-success-text, #ffffff)'
+        color: 'var(--badge-success-text, #ffffff)',
+        border: 'none'
       },
       warning: {
         backgroundColor: 'var(--badge-warning-bg, #f59e0b)',
-        color: 'var(--badge-warning-text, #ffffff)'
+        color: 'var(--badge-warning-text, #ffffff)',
+        border: 'none'
       },
       danger: {
         backgroundColor: 'var(--badge-danger-bg, #ef4444)',
-        color: 'var(--badge-danger-text, #ffffff)'
+        color: 'var(--badge-danger-text, #ffffff)',
+        border: 'none'
       },
       info: {
         backgroundColor: 'var(--badge-info-bg, #8b5cf6)',
-        color: 'var(--badge-info-text, #ffffff)'
+        color: 'var(--badge-info-text, #ffffff)',
+        border: 'none'
       }
     };
+
+    const outlineStyles = {
+      default: {
+        backgroundColor: 'transparent',
+        color: 'var(--badge-info-bg, #1f2937)',
+        border: '1.5px solid var(--badge-info-bg, #e5e7eb)'
+      },
+      primary: {
+        backgroundColor: 'transparent',
+        color: 'var(--badge-primary-bg, #3b82f6)',
+        border: '1.5px solid var(--badge-primary-bg, #3b82f6)'
+      },
+      success: {
+        backgroundColor: 'transparent',
+        color: 'var(--badge-success-bg, #10b981)',
+        border: '1.5px solid var(--badge-success-bg, #10b981)'
+      },
+      warning: {
+        backgroundColor: 'transparent',
+        color: 'var(--badge-warning-bg, #f59e0b)',
+        border: '1.5px solid var(--badge-warning-bg, #f59e0b)'
+      },
+      danger: {
+        backgroundColor: 'transparent',
+        color: 'var(--badge-danger-bg, #ef4444)',
+        border: '1.5px solid var(--badge-danger-bg, #ef4444)'
+      },
+      info: {
+        backgroundColor: 'transparent',
+        color: 'var(--badge-info-bg, #8b5cf6)',
+        border: '1.5px solid var(--badge-info-bg, #8b5cf6)'
+      }
+    };
+
+    const styles = badgeStyle === 'outline' ? outlineStyles : solidStyles;
     return styles[variant] || styles.default;
   };
 
@@ -72,7 +115,7 @@ function BaseBadge({
     lg: 16,
   };
 
-  const variantStyle = getVariantStyle(variant);
+  const variantStyle = getVariantStyle(variant, badgeStyle);
 
   return (
     <span

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { Users, Search, BookOpen, TrendingUp, Mail } from 'lucide-react';
 import { getStudentsByTeacher } from '../../../firebase/users';
 import { getUserGamification } from '../../../firebase/gamification';
-import { AVATARS } from '../../AvatarSelector';
+import UserAvatar from '../../UserAvatar';
 import logger from '../../../utils/logger';
 
 /**
@@ -129,26 +129,18 @@ function StudentsTab({ user }) {
  * StudentCard - Card individual de estudiante
  */
 function StudentCard({ student }) {
-  const AvatarIcon = AVATARS[student.avatar]?.icon || AVATARS.default.icon;
-
   return (
     <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group">
       {/* Header con avatar y nombre */}
       <div className="flex items-start gap-3 mb-3">
-        {/* Avatar */}
-        <div className="flex-shrink-0">
-          {student.avatar?.startsWith('http') ? (
-            <img
-              src={student.avatar}
-              alt={student.name || 'Avatar'}
-              className="w-12 h-12 rounded-full object-cover border-2 border-zinc-200 dark:border-zinc-700"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border-2 border-zinc-200 dark:border-zinc-700">
-              <AvatarIcon size={24} strokeWidth={2} className="text-zinc-600 dark:text-zinc-400" />
-            </div>
-          )}
-        </div>
+        {/* Avatar - Componente Universal */}
+        <UserAvatar
+          userId={student.id || student.uid}
+          name={student.name}
+          email={student.email}
+          size="md"
+          className="flex-shrink-0"
+        />
 
         {/* Info */}
         <div className="flex-1 min-w-0">

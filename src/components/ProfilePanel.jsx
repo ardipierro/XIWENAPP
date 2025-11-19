@@ -5,10 +5,11 @@ import { User, Mail, Shield, Upload, X } from 'lucide-react';
 import { getUserAvatar, updateUserAvatar } from '../firebase/firestore';
 import { uploadAvatarImage, deleteAvatarImage } from '../firebase/storage';
 import { AVATARS } from './AvatarSelector';
+import UserAvatar from './UserAvatar';
 import { BaseButton } from './common';
 
 function ProfilePanel({ user, userRole, onClose, onUpdate }) {
-  const [userAvatar, setUserAvatar] = useState('default');
+  const [avatarKey, setAvatarKey] = useState(0); // Key para forzar recarga del avatar
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [uploading, setUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
@@ -20,8 +21,6 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
     const loadAvatar = async () => {
       if (user?.uid) {
         const avatar = await getUserAvatar(user.uid);
-        setUserAvatar(avatar);
-
         // Si el avatar es una URL (imagen subida), guardarlo
         if (avatar && avatar.startsWith('http')) {
           setUploadedImageUrl(avatar);
@@ -57,8 +56,8 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
       // Guardar URL en Firestore
       await updateUserAvatar(user.uid, imageUrl);
 
-      setUserAvatar(imageUrl);
       setUploadedImageUrl(imageUrl);
+      setAvatarKey(prev => prev + 1); // Forzar recarga del avatar
       setSuccess('Avatar actualizado correctamente');
 
       if (onUpdate) onUpdate();
@@ -79,8 +78,8 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
       }
 
       await updateUserAvatar(user.uid, avatarId);
-      setUserAvatar(avatarId);
       setShowAvatarOptions(false);
+      setAvatarKey(prev => prev + 1); // Forzar recarga del avatar
       setSuccess('Avatar actualizado correctamente');
 
       if (onUpdate) onUpdate();
@@ -139,25 +138,19 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
           {/* Avatar Section */}
           <div className="mb-8">
             <div
-              className="relative w-[120px] h-[120px] mx-auto mb-5 transition-all hover:scale-105 hover:opacity-80"
+              className="mx-auto mb-5 w-fit"
               onClick={() => setShowAvatarOptions(!showAvatarOptions)}
               style={{ cursor: 'pointer' }}
               title="Click para cambiar avatar"
             >
-              {uploadedImageUrl ? (
-                <img
-                  src={uploadedImageUrl}
-                  alt="Avatar"
-                  className="w-full h-full rounded-full object-cover border-[3px] style={{ borderColor: 'var(--color-border)' }}"
-                />
-              ) : (
-                <div className="w-full h-full rounded-full style={{ background: 'var(--color-bg-tertiary)' }} flex items-center justify-center text-[64px] border-[3px] style={{ borderColor: 'var(--color-border)' }}">
-                  {(() => {
-                    const AvatarIcon = AVATARS[userAvatar]?.icon || AVATARS.default.icon;
-                    return <AvatarIcon size={48} strokeWidth={2} />;
-                  })()}
-                </div>
-              )}
+              <UserAvatar
+                key={avatarKey}
+                userId={user?.uid}
+                name={user?.displayName}
+                email={user?.email}
+                size="2xl"
+                clickable
+              />
             </div>
 
             {showAvatarOptions && (
@@ -189,7 +182,7 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
                   {Object.entries(AVATARS).map(([key, { icon: Icon, label }]) => (
                     <button
                       key={key}
-                      className={`aspect-square style={{ background: 'var(--color-bg-secondary)' }} border-2 ${userAvatar === key && !uploadedImageUrl ? 'border-zinc-400 dark:border-zinc-600 style={{ background: 'var(--color-bg-tertiary)' }}' : 'border-zinc-200 dark:border-zinc-800'} rounded-lg text-[32px] cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center`}
+                      className={`aspect-square style={{ background: 'var(--color-bg-secondary)' }} border-2 ${!uploadedImageUrl ? 'border-zinc-400 dark:border-zinc-600 style={{ background: 'var(--color-bg-tertiary)' }}' : 'border-zinc-200 dark:border-zinc-800'} rounded-lg text-[32px] cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center`}
                       onClick={() => handleSelectEmoji(key)}
                       title={label}
                     >

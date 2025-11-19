@@ -228,6 +228,22 @@ service cloud.firestore {
       allow write: if request.auth.uid == userId || isAdmin();
     }
 
+    // Gamification collection - students can read/write their own, admins can read all
+    match /gamification/{userId} {
+      allow read: if isAuthenticated() &&
+        (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth.uid == userId || isAdmin();
+    }
+
+    // Gamification activities - students can read/write their own, admins can read all
+    match /gamificationActivities/{activityId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+    }
+
     // ============================================
     // CLASS MANAGEMENT COLLECTIONS
     // ============================================

@@ -18,6 +18,7 @@ import useClassNotifications from '../hooks/useClassNotifications';
 import CreditBadge from './common/CreditBadge';
 import UserProfileModal from './UserProfileModal';
 import NotificationCenter from './NotificationCenter';
+import UserAvatar from './UserAvatar';
 import { BaseButton } from './common';
 import logger from '../utils/logger';
 
@@ -38,6 +39,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [avatarKey, setAvatarKey] = useState(0); // Key para forzar recarga del avatar
   const userMenuRef = useRef(null);
 
   // Usuario efectivo: ViewAs user si está activo, sino el user normal
@@ -193,13 +195,15 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
             onClick={handleUserMenuToggle}
             aria-label="Menú de usuario"
           >
-            <div className="universal-topbar__avatar">
-              {effectiveUser?.photoURL ? (
-                <img src={effectiveUser.photoURL} alt={effectiveUser.displayName || effectiveUser.name} />
-              ) : (
-                <User size={20} />
-              )}
-            </div>
+            {/* Avatar - Componente Universal */}
+            <UserAvatar
+              key={avatarKey}
+              userId={effectiveUser?.uid}
+              name={effectiveUser?.displayName || effectiveUser?.name}
+              email={effectiveUser?.email}
+              size="sm"
+              className="universal-topbar__avatar"
+            />
             <span className="universal-topbar__username">
               {effectiveUser?.displayName || effectiveUser?.name || effectiveUser?.email}
             </span>
@@ -247,8 +251,10 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           user={effectiveUser}
           userRole={role}
           currentUserRole={role}
+          currentUser={user}
           isAdmin={isAdmin()}
           onClose={() => setShowProfileModal(false)}
+          onUpdate={() => setAvatarKey(prev => prev + 1)}
         />
       )}
 
