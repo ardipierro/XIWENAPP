@@ -6431,3 +6431,197 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     transform: rotate(360deg);
   }
 }
+
+/* ============================================
+   AUDIO PLAYER MODERNO - MENSAJES
+   ============================================ */
+
+.attachment-audio-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border-radius: 1rem;
+  min-width: 280px;
+  max-width: 350px;
+}
+
+.dark .attachment-audio-modern {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+}
+
+/* Icono de micrófono decorativo */
+.audio-mic-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mic-circle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.mic-circle.playing {
+  animation: pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.6);
+  }
+}
+
+/* Visualización de forma de onda */
+.audio-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  gap: 2px;
+}
+
+.waveform-bar {
+  flex: 1;
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.dark .waveform-bar {
+  background: rgba(156, 163, 175, 0.2);
+}
+
+.waveform-bar.active {
+  background: linear-gradient(to top, #3b82f6, #8b5cf6);
+}
+
+/* Sección de controles */
+.audio-controls-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.audio-play-btn-modern {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.audio-play-btn-modern:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.audio-play-btn-modern:active {
+  transform: scale(0.95);
+}
+
+.audio-play-btn-modern.playing {
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+}
+
+/* Tiempo del audio */
+.audio-time-modern {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.dark .audio-time-modern {
+  color: #9ca3af;
+}
+
+.current-time {
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.dark .current-time {
+  color: #60a5fa;
+}
+
+.time-separator {
+  color: #d1d5db;
+}
+
+.dark .time-separator {
+  color: #4b5563;
+}
+
+.total-time {
+  color: #9ca3af;
+}
+
+.dark .total-time {
+  color: #6b7280;
+}
+
+/* Barra de progreso moderna */
+.audio-progress-modern {
+  position: relative;
+  height: 6px;
+  background: rgba(209, 213, 219, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.dark .audio-progress-modern {
+  background: rgba(75, 85, 99, 0.3);
+}
+
+.progress-fill-modern {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.progress-thumb {
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: white;
+  border: 2px solid #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.audio-progress-modern:hover .progress-thumb {
+  opacity: 1;
+}

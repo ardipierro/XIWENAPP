@@ -179,53 +179,94 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
   }
 
   return (
-    <div className="p-4 bg-yellow-100 border-t-4 border-yellow-500">
-      <div className="mb-2 text-center">
-        <p className="text-2xl font-bold text-yellow-900">🎙️ GRABADOR DE VOZ 🎙️</p>
-        <p className="text-sm text-yellow-800">VoiceRecorderSimple cargado correctamente</p>
-      </div>
-
+    <div className="p-4 bg-white dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700 shadow-lg">
       <div className="flex items-center gap-4">
-        {/* Indicador */}
-        <div className={`w-10 h-10 rounded-full ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-zinc-500'} flex items-center justify-center`}>
-          <Mic size={20} className="text-white" />
+        {/* Indicador de grabación con animación */}
+        <div className="relative">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+            isRecording
+              ? 'bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/50'
+              : 'bg-gradient-to-br from-zinc-300 to-zinc-400 dark:from-zinc-600 dark:to-zinc-700'
+          }`}>
+            <Mic size={24} className="text-white" />
+          </div>
+          {isRecording && (
+            <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
+          )}
         </div>
 
-        {/* Timer */}
-        <div className="text-lg font-mono font-bold">
-          {formatTime(recordingTime)}
+        {/* Timer con diseño mejorado */}
+        <div className="flex flex-col">
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+            {isRecording ? 'Grabando...' : audioBlob ? 'Listo para enviar' : 'Preparando...'}
+          </span>
+          <span className="text-2xl font-mono font-bold text-zinc-900 dark:text-zinc-100">
+            {formatTime(recordingTime)}
+          </span>
         </div>
 
-        {/* Spacer */}
-        <div className="flex-1"></div>
+        {/* Visualización de onda (solo cuando graba) */}
+        {isRecording && (
+          <div className="flex-1 flex items-center justify-center gap-1 h-16 px-4">
+            {[...Array(12)].map((_, i) => (
+              <div
+                key={i}
+                className="w-1 bg-gradient-to-t from-red-500 to-red-400 rounded-full animate-pulse"
+                style={{
+                  height: `${20 + Math.random() * 30}px`,
+                  animationDelay: `${i * 0.1}s`,
+                  animationDuration: '0.8s'
+                }}
+              />
+            ))}
+          </div>
+        )}
 
-        {/* Botones */}
+        {/* Reproductor de audio cuando está detenido */}
+        {!isRecording && audioBlob && (
+          <div className="flex-1">
+            <audio
+              controls
+              src={audioUrl}
+              className="w-full h-10 rounded-lg"
+              style={{
+                filter: 'contrast(0.9) brightness(1.1)'
+              }}
+            />
+          </div>
+        )}
+
+        {/* Spacer cuando no hay nada */}
+        {!isRecording && !audioBlob && (
+          <div className="flex-1"></div>
+        )}
+
+        {/* Botones con diseño mejorado */}
         <div className="flex gap-2">
           {isRecording ? (
             <button
               onClick={stopRecording}
-              className="px-4 py-2 bg-orange-500 text-white rounded font-bold"
+              className="group relative px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
             >
-              ⏹️ DETENER
+              <Square size={18} className="group-hover:scale-110 transition-transform" />
+              Detener
             </button>
           ) : audioBlob ? (
-            <>
-              <button
-                onClick={handleSend}
-                className="px-4 py-2 bg-green-500 text-white rounded font-bold"
-              >
-                📤 ENVIAR
-              </button>
-
-              <audio controls src={audioUrl} className="h-10" />
-            </>
+            <button
+              onClick={handleSend}
+              className="group relative px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            >
+              <Send size={18} className="group-hover:translate-x-0.5 transition-transform" />
+              Enviar
+            </button>
           ) : null}
 
           <button
             onClick={handleCancel}
-            className="px-4 py-2 bg-red-500 text-white rounded font-bold"
+            className="group relative px-6 py-3 bg-gradient-to-r from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800 hover:from-zinc-300 hover:to-zinc-400 dark:hover:from-zinc-600 dark:hover:to-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
           >
-            ❌ CANCELAR
+            <X size={18} className="group-hover:rotate-90 transition-transform" />
+            Cancelar
           </button>
         </div>
       </div>
