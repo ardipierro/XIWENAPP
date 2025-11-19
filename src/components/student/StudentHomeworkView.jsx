@@ -474,16 +474,39 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
   const getApprovedCorrections = () => {
     if (!isApproved) return [];
 
+    let corrections = [];
+
     // Prefer aiSuggestions (new format with teacher approval)
     if (review.aiSuggestions && Array.isArray(review.aiSuggestions)) {
       // Filter only approved corrections
-      return review.aiSuggestions.filter(corr =>
+      corrections = review.aiSuggestions.filter(corr =>
         corr.teacherStatus === 'approved' || !corr.teacherStatus
       );
+    } else if (review.detailedCorrections && Array.isArray(review.detailedCorrections)) {
+      // Fallback to detailedCorrections (legacy format)
+      corrections = review.detailedCorrections;
     }
 
-    // Fallback to detailedCorrections (legacy format)
-    return review.detailedCorrections || [];
+    // ✨ CRITICAL FIX: Normalize field names for ImageOverlay compatibility
+    // ImageOverlay expects 'errorText', but Cloud Function provides 'original'
+    const normalizedCorrections = corrections.map(corr => ({
+      ...corr,
+      // Ensure errorText field exists (ImageOverlay primary field)
+      errorText: corr.errorText || corr.original || corr.text || corr.word || '',
+      // Ensure errorType field exists
+      errorType: corr.errorType || corr.type || 'default',
+      // Ensure suggestion field exists
+      suggestion: corr.suggestion || corr.correction || corr.correctedText || corr.fix || ''
+    }));
+
+    console.log('[StudentHomeworkView] Approved corrections:', {
+      total: normalizedCorrections.length,
+      hasWords: !!(review.words && review.words.length),
+      wordsCount: review.words?.length || 0,
+      sample: normalizedCorrections.slice(0, 3)
+    });
+
+    return normalizedCorrections;
   };
 
   const approvedCorrections = getApprovedCorrections();
