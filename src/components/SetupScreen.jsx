@@ -176,7 +176,7 @@ function SetupScreen({
             </BaseButton>
           )}
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex-1 text-center">
-            Juego de Preguntas por Turnos
+            Ejercicio de Preguntas por Turnos
           </h1>
           {onBack && <div className="w-24"></div>}
         </div>

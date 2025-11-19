@@ -73,10 +73,10 @@ function LiveGamesHub({ user }) {
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <Gamepad2 size={32} />
-                Juegos en Vivo
+                Ejercicio en Vivo
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Crea juegos interactivos para tus estudiantes
+                Crea ejercicios interactivos para tus estudiantes
               </p>
             </div>
 
@@ -87,14 +87,14 @@ function LiveGamesHub({ user }) {
                 size="md"
               >
                 <Play size={16} className="mr-2" />
-                Crear Juego
+                Crear Ejercicio
               </BaseButton>
             </div>
           </div>
 
           {/* Grid de opciones */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Crear nuevo juego */}
+            {/* Crear nuevo ejercicio */}
             <div
               onClick={() => setView('create')}
               className="group cursor-pointer"
@@ -120,11 +120,11 @@ function LiveGamesHub({ user }) {
                     <Play size={24} className="text-white" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Crear Juego
+                    Crear Ejercicio
                   </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Configura un nuevo juego interactivo con preguntas de opción múltiple
+                  Configura un nuevo ejercicio interactivo con preguntas de opción múltiple
                 </p>
               </div>
             </div>
@@ -201,13 +201,13 @@ function LiveGamesHub({ user }) {
             }}
           >
             <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-              📋 Cómo usar Juegos en Vivo
+              📋 Cómo usar Ejercicios en Vivo
             </h3>
             <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li>Haz clic en "Crear Juego" para configurar una nueva sesión</li>
+              <li>Haz clic en "Crear Ejercicio" para configurar una nueva sesión</li>
               <li>Selecciona una categoría de preguntas y configura participantes</li>
-              <li>Los estudiantes podrán ver y unirse al juego desde sus dispositivos</li>
-              <li>Usa "Proyección" para mostrar el juego en pantalla grande</li>
+              <li>Los estudiantes podrán ver y unirse al ejercicio desde sus dispositivos</li>
+              <li>Usa "Proyección" para mostrar el ejercicio en pantalla grande</li>
               <li>Los estudiantes responden desde sus propios dispositivos en tiempo real</li>
             </ol>
           </div>

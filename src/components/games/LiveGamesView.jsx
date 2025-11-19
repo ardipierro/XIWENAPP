@@ -114,7 +114,7 @@ function LiveGamesView({ user, onJoinGame }) {
 
   // Loading state
   if (loading) {
-    return <BaseLoading size="large" text="Buscando juegos en vivo..." />;
+    return <BaseLoading size="large" text="Buscando ejercicios en vivo..." />;
   }
 
   return (
@@ -124,10 +124,10 @@ function LiveGamesView({ user, onJoinGame }) {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <Gamepad2 size={32} />
-            Juegos en Vivo
+            Ejercicios en Vivo
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {filteredGames.length} {filteredGames.length === 1 ? 'juego disponible' : 'juegos disponibles'}
+            {filteredGames.length} {filteredGames.length === 1 ? 'ejercicio disponible' : 'ejercicios disponibles'}
           </p>
         </div>
       </div>
@@ -161,18 +161,18 @@ function LiveGamesView({ user, onJoinGame }) {
       {filteredGames.length === 0 ? (
         <BaseEmptyState
           icon={Gamepad2}
-          title="No hay juegos disponibles"
+          title="No hay ejercicios disponibles"
           description={
             filter === 'all'
-              ? 'No hay juegos en vivo en este momento. Tu profesor creará un juego próximamente.'
+              ? 'No hay ejercicios en vivo en este momento. Tu profesor creará un ejercicio próximamente.'
               : filter === 'available'
-              ? 'No hay juegos esperando jugadores en este momento'
-              : 'No hay juegos en progreso en este momento'
+              ? 'No hay ejercicios esperando jugadores en este momento'
+              : 'No hay ejercicios en progreso en este momento'
           }
           action={
             filter !== 'all' && (
               <BaseButton onClick={() => setFilter('all')} variant="primary">
-                Ver todos los juegos
+                Ver todos los ejercicios
               </BaseButton>
             )
           }
@@ -273,10 +273,10 @@ function LiveGamesView({ user, onJoinGame }) {
           <Gamepad2 size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
-              ¿Cómo funcionan los juegos en vivo?
+              ¿Cómo funcionan los ejercicios en vivo?
             </h4>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Tu profesor creará juegos en vivo durante la clase. Cuando veas un juego "Esperando",
+              Tu profesor creará ejercicios en vivo durante la clase. Cuando veas un ejercicio "Esperando",
               puedes unirte haciendo clic. ¡Compite con tus compañeros y gana puntos!
             </p>
           </div>
