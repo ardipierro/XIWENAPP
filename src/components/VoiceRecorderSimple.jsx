@@ -96,27 +96,28 @@ function AudioPreview({ audioUrl, duration }) {
     : 0;
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+    <div className="flex items-center gap-2 w-full">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
       <button
         onClick={togglePlayPause}
-        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-yellow-500 hover:bg-yellow-600 text-white"
+        className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all bg-blue-600 hover:bg-blue-700 text-white"
+        title={isPlaying ? 'Pausar' : 'Reproducir'}
       >
-        {isPlaying ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
+        {isPlaying ? <Pause size={12} /> : <Play size={12} className="ml-0.5" />}
       </button>
 
-      <div className="flex-1 flex flex-col gap-1 min-w-[150px]">
+      <div className="flex-1 flex flex-col gap-0.5 min-w-0">
         <div
-          className="h-1 bg-yellow-200 dark:bg-yellow-800 rounded-full cursor-pointer overflow-hidden"
+          className="h-1 bg-zinc-200 dark:bg-zinc-700 rounded-full cursor-pointer overflow-hidden"
           onClick={handleProgressClick}
         >
           <div
-            className="h-full bg-yellow-500 transition-all duration-100"
-            style={{ width: `${progress}%` }}
+            className="h-full bg-blue-600 rounded-full"
+            style={{ width: `${progress}%`, transition: 'width 0.05s linear' }}
           />
         </div>
-        <div className="flex justify-between text-[10px] text-yellow-800 dark:text-yellow-300">
+        <div className="flex justify-between text-[10px] text-zinc-500 dark:text-zinc-400">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(audioDuration)}</span>
         </div>
@@ -296,68 +297,49 @@ function VoiceRecorderSimple({ onSend, onCancel }) {
   }
 
   return (
-    <div className="p-4 bg-white dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700 shadow-lg">
-      <div className="flex items-center gap-4">
-        {/* Indicador de grabación con animación */}
-        <div className="relative">
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-            isRecording
-              ? 'bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/50'
-              : 'bg-gradient-to-br from-zinc-300 to-zinc-400 dark:from-zinc-600 dark:to-zinc-700'
-          }`}>
-            <Mic size={24} className="text-white" />
-          </div>
-          {isRecording && (
-            <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
-          )}
+    <div className="p-3 bg-white dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700">
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Timer pequeño */}
+        <div className={`text-sm font-mono ${isRecording ? 'text-red-600' : 'text-zinc-600 dark:text-zinc-400'}`}>
+          {formatTime(recordingTime)}
         </div>
 
-        {/* Timer con diseño mejorado */}
-        <div className="flex flex-col">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-            {isRecording ? 'Grabando...' : audioBlob ? 'Listo para enviar' : 'Preparando...'}
-          </span>
-          <span className="text-2xl font-mono font-bold text-zinc-900 dark:text-zinc-100">
-            {formatTime(recordingTime)}
-          </span>
-        </div>
-
-        {/* Spacer flexible */}
-        <div className="flex-1"></div>
-
-        {/* Preview de audio cuando está listo para enviar */}
+        {/* Preview de audio cuando está listo */}
         {!isRecording && audioBlob && (
-          <div className="flex-1 max-w-md">
+          <div className="flex-1 min-w-0">
             <AudioPreview audioUrl={audioUrl} duration={recordingTime} />
           </div>
         )}
 
-        {/* Botones con diseño mejorado */}
-        <div className="flex gap-2">
+        {/* Spacer cuando no hay preview */}
+        {(isRecording || !audioBlob) && <div className="flex-1"></div>}
+
+        {/* Botones - SOLO ICONOS */}
+        <div className="flex gap-2 flex-shrink-0">
           {isRecording ? (
             <button
               onClick={stopRecording}
-              className="group relative px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+              className="w-9 h-9 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center transition-all"
+              title="Detener"
             >
-              <Square size={18} className="group-hover:scale-110 transition-transform" />
-              Detener
+              <Square size={16} />
             </button>
           ) : audioBlob ? (
             <button
               onClick={handleSend}
-              className="group relative px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+              className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-all"
+              title="Enviar"
             >
-              <Send size={18} className="group-hover:translate-x-0.5 transition-transform" />
-              Enviar
+              <Send size={16} />
             </button>
           ) : null}
 
           <button
             onClick={handleCancel}
-            className="group relative px-6 py-3 bg-gradient-to-r from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-800 hover:from-zinc-300 hover:to-zinc-400 dark:hover:from-zinc-600 dark:hover:to-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+            className="w-9 h-9 rounded-full bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-600 text-zinc-700 dark:text-zinc-200 flex items-center justify-center transition-all"
+            title="Cancelar"
           >
-            <X size={18} className="group-hover:rotate-90 transition-transform" />
-            Cancelar
+            <X size={16} />
           </button>
         </div>
       </div>
