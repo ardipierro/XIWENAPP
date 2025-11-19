@@ -103,33 +103,43 @@ function HomeView({ user, onNavigate }) {
       description: 'Ejercicio clásico de preguntas',
       icon: Target,
       path: '/dashboard/turn-game',
-      permission: null // Disponible para todos
+      permission: null, // Disponible para todos
+      hideForStudents: true // Ocultar para estudiantes
     },
     {
       title: 'Calendario',
       description: 'Eventos y clases programadas',
       icon: Calendar,
       path: '/dashboard/calendar',
-      permission: null // Disponible para todos
+      permission: null, // Disponible para todos
+      hideForStudents: true // Ocultar para estudiantes
     },
     {
       title: 'Ejercicio en Vivo',
       description: 'Ejercicios en tiempo real con estudiantes',
       icon: Gamepad2,
       path: '/dashboard/games',
-      permission: 'play-live-games'
+      permission: 'play-live-games',
+      hideForStudents: true // Ocultar para estudiantes
     },
     {
       title: 'ADE1 2026 - Fonética',
       description: 'Libro interactivo con 120+ slides y ejercicios',
       icon: BookOpen,
       path: '/dashboard/ade1-content',
-      permission: null // Disponible para todos
+      permission: null, // Disponible para todos
+      hideForStudents: true // Ocultar para estudiantes
     }
   ];
 
-  // Filtrar tarjetas según permisos
+  // Filtrar tarjetas según permisos y rol
   const visibleCards = quickAccessCards.filter(card => {
+    // Ocultar tarjetas marcadas para estudiantes
+    if (card.hideForStudents && user.role === 'student') {
+      return false;
+    }
+
+    // Verificar permisos
     if (!card.permission) return true; // Sin permiso requerido = visible para todos
     return can(card.permission);
   });
