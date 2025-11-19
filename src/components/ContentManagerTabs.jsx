@@ -12,7 +12,6 @@ import UnifiedContentManager from './UnifiedContentManager';
 import AIConfigPanel from './AIConfigPanel';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import SlidePackageGenerator from './SlidePackageGenerator';
-// import ContentReader from './ContentReader'; // TEMPORALMENTE DESHABILITADO
 import FlashCardManager from './FlashCardManager';
 import { usePermissions } from '../hooks/usePermissions';
 
@@ -93,16 +92,6 @@ export function ContentManagerTabs({ user, userRole }) {
         return <InteractiveBookViewer />;
       case 'slide-generator':
         return <SlidePackageGenerator />;
-      // TEMPORALMENTE DESHABILITADO
-      // case 'visor-contenidos':
-      //   return (
-      //     <ContentReader
-      //       contentId="demo-content"
-      //       initialContent="<h1>Visor de Contenidos</h1><p>Este es el visor de contenidos con herramientas avanzadas de anotación.</p><p>Utiliza las herramientas de la barra lateral para:</p><ul><li>Resaltar texto</li><li>Dibujar y escribir</li><li>Agregar notas adhesivas</li><li>Insertar texto flotante</li></ul>"
-      //       userId={user?.uid}
-      //       readOnly={false}
-      //     />
-      //   );
       default:
         return null;
     }
