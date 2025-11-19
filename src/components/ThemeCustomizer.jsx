@@ -31,6 +31,9 @@ const DEFAULT_THEME_COLORS = {
     'info': '#5b8fa3',
     // Acento (gris azulado neutral)
     'accent': '#5b6b8f',
+    // Tailwind Classes (sincronizados con tailwind.config.js)
+    'tailwind-accent': '#5b6b8f',      // accent.DEFAULT
+    'tailwind-secondary': '#4a9f7c',   // secondary.DEFAULT
   },
   dark: {
     // Fondos
@@ -52,6 +55,9 @@ const DEFAULT_THEME_COLORS = {
     'info': '#5b8fa3',
     // Acento (azul gris suave)
     'accent': '#7a8fa8',
+    // Tailwind Classes (sincronizados con tailwind.config.js)
+    'tailwind-accent': '#5b6b8f',      // accent.DEFAULT (mismo en todos los temas)
+    'tailwind-secondary': '#4a9f7c',   // secondary.DEFAULT
   },
   dusk: {
     // Fondos (tonos tierra neutros)
@@ -73,6 +79,9 @@ const DEFAULT_THEME_COLORS = {
     'info': '#5b8fa3',
     // Acento (marrón cálido)
     'accent': '#a67c52',
+    // Tailwind Classes (sincronizados con tailwind.config.js)
+    'tailwind-accent': '#5b6b8f',      // accent.DEFAULT (mismo en todos los temas)
+    'tailwind-secondary': '#4a9f7c',   // secondary.DEFAULT
   },
   night: {
     // Fondos (azul gris oscuro)
@@ -94,6 +103,9 @@ const DEFAULT_THEME_COLORS = {
     'info': '#5b8fa3',
     // Acento (azul grisáceo)
     'accent': '#7a95b8',
+    // Tailwind Classes (sincronizados con tailwind.config.js)
+    'tailwind-accent': '#5b6b8f',      // accent.DEFAULT (mismo en todos los temas)
+    'tailwind-secondary': '#4a9f7c',   // secondary.DEFAULT
   }
 };
 
@@ -115,14 +127,20 @@ const COLOR_CATEGORIES = {
     colors: ['border', 'border-focus']
   },
   semantic: {
-    label: 'Semánticos',
+    label: 'Semánticos (CSS Variables)',
     icon: '🎯',
     colors: ['success', 'error', 'warning', 'info']
   },
   accent: {
-    label: 'Acento',
+    label: 'Acento Principal',
     icon: '✨',
     colors: ['accent']
+  },
+  tailwind: {
+    label: 'Tailwind Classes (bg-*, text-*, border-*)',
+    icon: '⚡',
+    description: 'Estos colores están definidos en tailwind.config.js y se usan cuando empleas clases de Tailwind como bg-accent, text-secondary, border-accent, etc. Son GLOBALES y afectan a TODA la aplicación. Si cambias estos colores aquí, debes también actualizar tailwind.config.js manualmente para que coincidan.',
+    colors: ['tailwind-accent', 'tailwind-secondary']
   }
 };
 
@@ -374,7 +392,7 @@ function ThemeCustomizer() {
                 fontSize: '16px',
                 fontWeight: '600',
                 color: 'var(--color-text-primary)',
-                marginBottom: '16px',
+                marginBottom: category.description ? '8px' : '16px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
@@ -382,6 +400,30 @@ function ThemeCustomizer() {
                 <span>{category.icon}</span>
                 {category.label}
               </h4>
+
+              {/* Descripción opcional */}
+              {category.description && (
+                <div style={{
+                  padding: '12px',
+                  marginBottom: '16px',
+                  borderRadius: '8px',
+                  background: 'var(--color-warning-bg)',
+                  border: '1px solid var(--color-warning-border)',
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'start'
+                }}>
+                  <span style={{ color: 'var(--color-warning)', fontSize: '18px', flexShrink: 0 }}>⚠️</span>
+                  <p style={{
+                    margin: 0,
+                    fontSize: '13px',
+                    color: 'var(--color-text-primary)',
+                    lineHeight: '1.5'
+                  }}>
+                    <strong>Importante:</strong> {category.description}
+                  </p>
+                </div>
+              )}
 
               <div style={{
                 display: 'grid',
