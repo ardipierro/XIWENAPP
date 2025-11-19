@@ -320,40 +320,65 @@ export default function UniversalUserManager({ user, userRole }) {
                       </div>
                     </div>
 
-                    {/* Contenido */}
-                    <div className="flex-1 flex items-center gap-4 px-5 py-4 min-w-0">
+                    {/* Contenido - Distribución equidistante */}
+                    <div className="flex-1 flex items-center gap-3 px-5 py-4 min-w-0">
                       {/* Nombre y Email */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                      <div className="flex flex-col gap-1" style={{ flexBasis: '220px', minWidth: 0 }}>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
                           {userItem.name}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                          <Mail size={14} className="inline mr-1" />
+                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                          <Mail size={12} className="inline mr-1" />
                           {userItem.email}
                         </p>
                       </div>
 
-                      {/* Badge Rol */}
-                      <div className="flex-shrink-0">
+                      {/* Nombre en Chino */}
+                      <div className="flex flex-col gap-1" style={{ flexBasis: '120px', minWidth: 0 }}>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">中文名</span>
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                          {userItem.chineseLastName && userItem.chineseFirstName
+                            ? `${userItem.chineseLastName}${userItem.chineseFirstName}`
+                            : userItem.chineseLastName || userItem.chineseFirstName || '-'
+                          }
+                        </span>
+                      </div>
+
+                      {/* Rol */}
+                      <div className="flex flex-col gap-1" style={{ flexBasis: '100px', minWidth: 0 }}>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Rol</span>
                         <CategoryBadge type="role" value={userItem.role} size="sm" />
                       </div>
 
-                      {/* Stats */}
-                      <div className="flex gap-6 flex-shrink-0">
-                        <div className="flex items-center gap-2">
-                          <DollarSign size={16} className="text-gray-500" />
-                          <div className="flex flex-col">
-                            <span className="text-lg font-extrabold text-gray-900 dark:text-white">
-                              {userItem.credits || 0}
-                            </span>
-                            <span className="text-xs text-gray-500">Créditos</span>
-                          </div>
+                      {/* Créditos */}
+                      <div className="flex flex-col gap-1" style={{ flexBasis: '100px', minWidth: 0 }}>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Créditos</span>
+                        <div className="flex items-center gap-1">
+                          <DollarSign size={14} className="text-gray-500 flex-shrink-0" />
+                          <span className="text-base font-bold text-gray-900 dark:text-white">
+                            {userItem.credits || 0}
+                          </span>
                         </div>
+                      </div>
+
+                      {/* Fecha de Registro */}
+                      <div className="flex flex-col gap-1" style={{ flexBasis: '120px', minWidth: 0 }}>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Registro</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {userItem.createdAt
+                            ? new Date(userItem.createdAt.seconds * 1000).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })
+                            : 'N/A'
+                          }
+                        </span>
                       </div>
 
                       {/* Actions */}
                       {can('delete-users') && (
-                        <div className="flex gap-2 flex-shrink-0">
+                        <div className="flex gap-2 flex-shrink-0 ml-auto">
                           <BaseButton
                             onClick={(e) => {
                               e.stopPropagation();
