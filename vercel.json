@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/((?!assets|icons|manifest\\.json|sw\\.js|workbox-.*\\.js).*)",
+      "source": "/((?!assets|icons|manifest\\.webmanifest|manifest\\.json|sw\\.js|workbox-.*\\.js).*)",
       "destination": "/index.html"
     }
   ],
@@ -26,6 +26,19 @@
     },
     {
       "source": "/manifest.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
       "headers": [
         {
           "key": "Content-Type",

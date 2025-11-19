@@ -173,68 +173,28 @@ export default defineConfig({
     // Rollup optimizations
     rollupOptions: {
       output: {
-        // Code splitting estratégico para optimizar bundle size
+        // Code splitting estratégico - SIMPLIFICADO para evitar circular dependencies
+        // Solo separar los vendors más grandes y dejar que Vite maneje el resto
         manualChunks: (id) => {
-          // Excalidraw - NO incluir en ningún chunk manual
-          // Dejar que Vite lo maneje automáticamente para evitar circular deps
-          if (id.includes('@excalidraw/excalidraw')) {
-            return; // undefined = dejar que Vite decida
-          }
-
-          // Separar vendors pesados en chunks propios
+          // Solo separar node_modules en un único vendor chunk
+          // Vite manejará automáticamente el resto para evitar circular deps
           if (id.includes('node_modules')) {
-            // Firebase - chunk separado (200 KB)
+            // Firebase - crítico separarlo
             if (id.includes('firebase')) {
               return 'vendor-firebase';
             }
 
-            // React - chunk separado (core framework)
+            // React - crítico separarlo
             if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
               return 'vendor-react';
             }
 
-            // Recharts - chunk separado (321 KB)
-            if (id.includes('recharts')) {
-              return 'vendor-recharts';
-            }
-
-            // LiveKit - chunk separado (150 KB)
-            if (id.includes('livekit') || id.includes('@livekit')) {
-              return 'vendor-livekit';
-            }
-
-            // Tiptap - chunk separado (100 KB)
-            if (id.includes('@tiptap')) {
-              return 'vendor-tiptap';
-            }
-
-            // DND Kit - chunk separado
-            if (id.includes('@dnd-kit')) {
-              return 'vendor-dndkit';
-            }
-
-            // Resto de vendors
+            // Todos los demás vendors juntos para evitar problemas de inicialización
             return 'vendor-other';
           }
 
-          // Separar componentes por rol/área
-          if (id.includes('/components/student/')) {
-            return 'routes-student';
-          }
-
-          if (id.includes('/components/teacher/')) {
-            return 'routes-teacher';
-          }
-
-          if (id.includes('/components/admin/')) {
-            return 'routes-admin';
-          }
-
-          // Ejercicios - dejar que Vite maneje automáticamente para evitar circular deps
-          // El chunking manual puede causar "Cannot access before initialization"
-          if (id.includes('Exercise.jsx') || id.includes('Exercise.js')) {
-            return; // undefined = dejar que Vite decida
-          }
+          // NO forzar chunking de componentes - dejar que Vite decida
+          // Esto evita el error "Cannot access before initialization"
         },
 
         // Naming strategy optimizado
