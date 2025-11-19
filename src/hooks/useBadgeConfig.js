@@ -64,11 +64,8 @@ function useBadgeConfig() {
    * Actualizar configuración de librería de iconos
    */
   const updateIconLibrary = useCallback((library) => {
-    setIconConfig((prev) => {
-      const updated = { ...prev, library };
-      setHasChanges(true);
-      return updated;
-    });
+    setIconConfig((prev) => ({ ...prev, library }));
+    setHasChanges(true);
   }, []);
 
   /**
@@ -83,10 +80,10 @@ function useBadgeConfig() {
           badgeStyle,
         };
       });
-      setHasChanges(true);
-      logger.info(`All badges updated to style: ${badgeStyle}`, 'useBadgeConfig');
       return updated;
     });
+    setHasChanges(true);
+    logger.info(`All badges updated to style: ${badgeStyle}`, 'useBadgeConfig');
   }, []);
 
   /**
@@ -130,17 +127,15 @@ function useBadgeConfig() {
         return prev;
       }
 
-      const updated = {
+      return {
         ...prev,
         [badgeKey]: {
           ...badge,
           color: newColor,
         },
       };
-
-      setHasChanges(true);
-      return updated;
     });
+    setHasChanges(true);
   }, []);
 
   /**
@@ -154,17 +149,15 @@ function useBadgeConfig() {
         return prev;
       }
 
-      const updated = {
+      return {
         ...prev,
         [badgeKey]: {
           ...badge,
           [property]: value,
         },
       };
-
-      setHasChanges(true);
-      return updated;
     });
+    setHasChanges(true);
   }, []);
 
   /**
@@ -189,15 +182,13 @@ function useBadgeConfig() {
         ...badgeData,
       };
 
-      const updated = {
+      return {
         ...prev,
         [key]: newBadge,
       };
-
-      setHasChanges(true);
-      logger.info(`Custom badge added: ${key}`, 'useBadgeConfig');
-      return updated;
     });
+    setHasChanges(true);
+    logger.info(`Custom badge added: ${key}`, 'useBadgeConfig');
   }, []);
 
   /**
@@ -219,10 +210,10 @@ function useBadgeConfig() {
       }
 
       const { [badgeKey]: removed, ...remaining } = prev;
-      setHasChanges(true);
-      logger.info(`Custom badge removed: ${badgeKey}`, 'useBadgeConfig');
       return remaining;
     });
+    setHasChanges(true);
+    logger.info(`Custom badge removed: ${badgeKey}`, 'useBadgeConfig');
   }, []);
 
   /**

@@ -35,27 +35,27 @@ function BaseAlert({
         containerBg: 'var(--color-success-light, #dcfce7)',
         borderColor: 'var(--color-success, #10b981)',
         borderLeft: 'var(--color-success-dark, #059669)',
-        iconColor: 'var(--color-success, #10b981)',
-        titleColor: 'var(--color-text-primary)',
-        textColor: 'var(--color-text-secondary)',
+        iconColor: 'var(--color-success-dark, #059669)',
+        titleColor: '#065f46', // Green 900 - Better contrast
+        textColor: '#047857', // Green 700 - Better contrast
         defaultIcon: CheckCircle,
       },
       danger: {
         containerBg: 'var(--color-danger-light, #fee2e2)',
         borderColor: 'var(--color-danger, #ef4444)',
         borderLeft: 'var(--color-danger-dark, #dc2626)',
-        iconColor: 'var(--color-danger, #ef4444)',
-        titleColor: 'var(--color-text-primary)',
-        textColor: 'var(--color-text-secondary)',
+        iconColor: 'var(--color-danger-dark, #dc2626)',
+        titleColor: '#991b1b', // Red 900 - Better contrast
+        textColor: '#b91c1c', // Red 700 - Better contrast
         defaultIcon: AlertCircle,
       },
       warning: {
         containerBg: 'var(--color-warning-light, #fef3c7)',
         borderColor: 'var(--color-warning, #f59e0b)',
         borderLeft: 'var(--color-warning-dark, #d97706)',
-        iconColor: 'var(--color-warning, #f59e0b)',
-        titleColor: 'var(--color-text-primary)',
-        textColor: 'var(--color-text-secondary)',
+        iconColor: 'var(--color-warning-dark, #d97706)',
+        titleColor: '#78350f', // Amber 900 - Better contrast
+        textColor: '#92400e', // Amber 800 - Better contrast
         defaultIcon: AlertTriangle,
       },
       info: {
