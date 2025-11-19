@@ -40,6 +40,7 @@ import {
   startClassInstance,
   endClassInstance,
   cancelClassInstance,
+  deleteClassInstance,
   recordAttendance,
   getUpcomingInstances,
   getLiveInstances
@@ -205,14 +206,14 @@ export async function createClassSession(sessionData) {
 }
 
 /**
- * Actualizar una sesión existente
+ * Actualizar una sesión existente (solo class_instances)
  * @param {string} sessionId - ID de la sesión
  * @param {Object} updates - Campos a actualizar
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function updateClassSession(sessionId, updates) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
+    const docRef = doc(db, 'class_instances', sessionId);
     await updateDoc(docRef, {
       ...updates,
       updatedAt: serverTimestamp()
@@ -227,15 +228,13 @@ export async function updateClassSession(sessionId, updates) {
 }
 
 /**
- * Eliminar una sesión
+ * Eliminar una sesión (solo class_instances)
  * @param {string} sessionId - ID de la sesión
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function deleteClassSession(sessionId) {
   try {
-    await deleteDoc(doc(db, 'class_sessions', sessionId));
-    logger.info('✅ Sesión eliminada:', sessionId);
-    return { success: true };
+    return await deleteClassInstance(sessionId);
   } catch (error) {
     logger.error('❌ Error eliminando sesión:', error);
     return { success: false, error: error.message };
@@ -243,23 +242,13 @@ export async function deleteClassSession(sessionId) {
 }
 
 /**
- * Obtener sesión por ID
+ * Obtener sesión por ID (solo class_instances)
  * @param {string} sessionId - ID de la sesión
  * @returns {Promise<Object|null>} - Sesión o null
  */
 export async function getClassSession(sessionId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
-    const docSnap = await getDoc(docRef);
-
-    if (!docSnap.exists()) {
-      return null;
-    }
-
-    return {
-      id: docSnap.id,
-      ...docSnap.data()
-    };
+    return await getClassInstance(sessionId);
   } catch (error) {
     logger.error('❌ Error obteniendo sesión:', error);
     return null;
@@ -268,7 +257,7 @@ export async function getClassSession(sessionId) {
 
 /**
  * Obtener todas las sesiones de un profesor
- * NUEVO: Combina recurring_schedules + class_instances + legacy class_sessions
+ * Combina recurring_schedules + class_instances
  *
  * @param {string} teacherId - ID del profesor
  * @returns {Promise<Array>} - Array de sesiones
@@ -291,24 +280,10 @@ export async function getTeacherSessions(teacherId) {
       type: 'single' // Marcar como single para el UI
     }));
 
-    // 3. Obtener sesiones legacy (class_sessions) si existen
-    const legacyQuery = query(
-      collection(db, 'class_sessions'),
-      where('teacherId', '==', teacherId),
-      where('active', '==', true)
-    );
-    const legacySnapshot = await getDocs(legacyQuery);
-    const legacySessions = legacySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      type: doc.data().type || 'legacy'
-    }));
-
     // Combinar todo
     const allSessions = [
       ...schedules.map(s => ({ ...s, type: 'recurring' })),
-      ...singleInstances,
-      ...legacySessions
+      ...singleInstances
     ];
 
     // Ordenar por createdAt (desc)
@@ -324,24 +299,13 @@ export async function getTeacherSessions(teacherId) {
 }
 
 /**
- * Obtener sesiones asignadas a un estudiante
+ * Obtener sesiones asignadas a un estudiante (solo class_instances)
  * @param {string} studentId - ID del estudiante
  * @returns {Promise<Array>} - Array de sesiones
  */
 export async function getStudentSessions(studentId) {
   try {
-    const q = query(
-      collection(db, 'class_sessions'),
-      where('assignedStudents', 'array-contains', studentId),
-      where('active', '==', true),
-      orderBy('createdAt', 'desc')
-    );
-
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    return await getStudentInstances(studentId);
   } catch (error) {
     logger.error('❌ Error obteniendo sesiones del estudiante:', error);
     return [];
@@ -349,33 +313,13 @@ export async function getStudentSessions(studentId) {
 }
 
 /**
- * Obtener sesiones en vivo (status='live')
+ * Obtener sesiones en vivo (status='live' solo class_instances)
  * @param {string} teacherId - ID del profesor (opcional)
  * @returns {Promise<Array>} - Array de sesiones
  */
 export async function getLiveSessions(teacherId = null) {
   try {
-    let q;
-    if (teacherId) {
-      q = query(
-        collection(db, 'class_sessions'),
-        where('teacherId', '==', teacherId),
-        where('status', '==', 'live'),
-        orderBy('startedAt', 'desc')
-      );
-    } else {
-      q = query(
-        collection(db, 'class_sessions'),
-        where('status', '==', 'live'),
-        orderBy('startedAt', 'desc')
-      );
-    }
-
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    return await getLiveInstances(teacherId);
   } catch (error) {
     logger.error('❌ Error obteniendo sesiones en vivo:', error);
     return [];
@@ -383,96 +327,14 @@ export async function getLiveSessions(teacherId = null) {
 }
 
 /**
- * Iniciar una sesión (cambiar status a 'live')
- * NUEVO: Detecta si es instancia o sesión legacy y actúa apropiadamente
+ * Iniciar una sesión (cambiar status a 'live' - solo class_instances)
  *
- * @param {string} sessionId - ID de la sesión o instancia
+ * @param {string} sessionId - ID de la sesión/instancia
  * @returns {Promise<Object>} - {success: boolean, meetSessionId?: string, error?: string}
  */
 export async function startClassSession(sessionId) {
   try {
-    // Intentar obtener como instancia primero
-    const instanceDoc = await getDoc(doc(db, 'class_instances', sessionId));
-
-    if (instanceDoc.exists()) {
-      // Es una instancia → usar función de instancias
-      logger.info('🎯 Iniciando instancia de clase...');
-      return await startClassInstance(sessionId);
-    }
-
-    // Si no es instancia, buscar en class_sessions (legacy)
-    const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
-
-    if (!sessionDoc.exists()) {
-      return { success: false, error: 'Sesión no encontrada' };
-    }
-
-    logger.info('🔄 Iniciando sesión legacy...');
-    const sessionData = sessionDoc.data();
-
-    // Si es un horario recurrente (legacy), no se puede iniciar directamente
-    if (sessionData.type === 'recurring') {
-      return {
-        success: false,
-        error: 'No se puede iniciar un horario recurrente directamente. Debe iniciar una clase específica.'
-      };
-    }
-
-    // Actualizar status a 'live'
-    const docRef = doc(db, 'class_sessions', sessionId);
-    await updateDoc(docRef, {
-      status: 'live',
-      startedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-
-    let meetSessionId = null;
-
-    // Crear meet_session automáticamente (todas las clases son live ahora)
-    try {
-      meetSessionId = await createMeetSession({
-        classSessionId: sessionId,
-        ownerId: sessionData.teacherId,
-        ownerName: sessionData.teacherName,
-        roomName: sessionData.roomName,
-        sessionName: sessionData.name,
-        courseId: sessionData.courseId,
-        courseName: sessionData.courseName
-      });
-
-      await updateDoc(docRef, {
-        meetSessionId: meetSessionId
-      });
-
-      logger.info('✅ Meet session creada automáticamente:', meetSessionId);
-    } catch (meetError) {
-      logger.error('⚠️ Error creando meet session (no crítico):', meetError);
-    }
-
-    // Notificar a estudiantes asignados
-    const assignedStudents = sessionData.assignedStudents || [];
-
-    if (assignedStudents.length > 0) {
-      try {
-        await notifyClassStarted(assignedStudents, {
-          sessionId: sessionId,
-          name: sessionData.name,
-          teacherId: sessionData.teacherId,
-          teacherName: sessionData.teacherName,
-          courseId: sessionData.courseId,
-          courseName: sessionData.courseName,
-          joinUrl: `${window.location.origin}/class-session/${sessionId}`,
-          roomName: sessionData.roomName
-        });
-
-        logger.info(`✅ ${assignedStudents.length} estudiantes notificados`);
-      } catch (notifyError) {
-        logger.error('⚠️ Error enviando notificaciones (no crítico):', notifyError);
-      }
-    }
-
-    logger.info('✅ Sesión legacy iniciada:', sessionId);
-    return { success: true, meetSessionId };
+    return await startClassInstance(sessionId);
   } catch (error) {
     logger.error('❌ Error iniciando sesión:', error);
     return { success: false, error: error.message };
@@ -480,78 +342,15 @@ export async function startClassSession(sessionId) {
 }
 
 /**
- * Finalizar una sesión (cambiar status a 'ended')
- * NUEVO: Detecta si es instancia o sesión legacy
+ * Finalizar una sesión (cambiar status a 'ended' - solo class_instances)
  *
- * @param {string} sessionId - ID de la sesión o instancia
+ * @param {string} sessionId - ID de la sesión/instancia
+ * @param {Object} data - Datos adicionales (attendedStudentIds, etc.)
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
-export async function endClassSession(sessionId) {
+export async function endClassSession(sessionId, data = {}) {
   try {
-    // Intentar obtener como instancia primero
-    const instanceDoc = await getDoc(doc(db, 'class_instances', sessionId));
-
-    if (instanceDoc.exists()) {
-      // Es una instancia → usar función de instancias
-      logger.info('🎯 Finalizando instancia de clase...');
-      return await endClassInstance(sessionId);
-    }
-
-    // Si no es instancia, buscar en class_sessions (legacy)
-    const sessionDoc = await getDoc(doc(db, 'class_sessions', sessionId));
-
-    if (!sessionDoc.exists()) {
-      return { success: false, error: 'Sesión no encontrada' };
-    }
-
-    logger.info('🔄 Finalizando sesión legacy...');
-    const sessionData = sessionDoc.data();
-
-    // Si es un horario recurrente (legacy), no se puede finalizar directamente
-    if (sessionData.type === 'recurring') {
-      return {
-        success: false,
-        error: 'No se puede finalizar un horario recurrente. Debe finalizar clases individuales.'
-      };
-    }
-
-    // Actualizar status a 'ended'
-    const docRef = doc(db, 'class_sessions', sessionId);
-    await updateDoc(docRef, {
-      status: 'ended',
-      endedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-
-    // Finalizar meet_session si existe (todas las clases son live ahora)
-    try {
-      await endMeetSessionByClassId(sessionId);
-      logger.info('✅ Meet session finalizada automáticamente');
-    } catch (meetError) {
-      logger.error('⚠️ Error finalizando meet session (no crítico):', meetError);
-    }
-
-    // Notificar a estudiantes que participaron
-    const assignedStudents = sessionData.assignedStudents || [];
-
-    if (assignedStudents.length > 0) {
-      try {
-        await notifyClassEnded(assignedStudents, {
-          sessionId: sessionId,
-          name: sessionData.name,
-          teacherId: sessionData.teacherId,
-          teacherName: sessionData.teacherName,
-          recordingUrl: sessionData.recordingUrl || null
-        });
-
-        logger.info(`✅ ${assignedStudents.length} estudiantes notificados del fin de clase`);
-      } catch (notifyError) {
-        logger.error('⚠️ Error enviando notificaciones (no crítico):', notifyError);
-      }
-    }
-
-    logger.info('✅ Sesión legacy finalizada:', sessionId);
-    return { success: true };
+    return await endClassInstance(sessionId, data);
   } catch (error) {
     logger.error('❌ Error finalizando sesión:', error);
     return { success: false, error: error.message };
@@ -565,7 +364,7 @@ export async function endClassSession(sessionId) {
  */
 export async function cancelClassSession(sessionId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
+    const docRef = doc(db, 'class_instances', sessionId);
     await updateDoc(docRef, {
       status: 'cancelled',
       updatedAt: serverTimestamp()
@@ -588,7 +387,7 @@ export async function cancelClassSession(sessionId) {
  */
 export async function assignWhiteboardToSession(sessionId, whiteboardType, whiteboardSessionId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
+    const docRef = doc(db, 'class_instances', sessionId);
     const updates = {
       whiteboardType,
       updatedAt: serverTimestamp()
@@ -618,7 +417,7 @@ export async function assignWhiteboardToSession(sessionId, whiteboardType, white
  */
 export async function assignGroupToSession(sessionId, groupId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
+    const docRef = doc(db, 'class_instances', sessionId);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
@@ -651,7 +450,7 @@ export async function assignGroupToSession(sessionId, groupId) {
  */
 export async function unassignGroupFromSession(sessionId, groupId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
+    const docRef = doc(db, 'class_instances', sessionId);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
@@ -704,7 +503,7 @@ export async function assignStudentToSession(sessionId, studentId) {
     }
 
     // Si no está en class_instances, buscar en class_sessions (legacy)
-    const sessionRef = doc(db, 'class_sessions', sessionId);
+    const sessionRef = doc(db, 'class_instances', sessionId);
     const sessionSnap = await getDoc(sessionRef);
 
     if (!sessionSnap.exists()) {
@@ -757,7 +556,7 @@ export async function unassignStudentFromSession(sessionId, studentId) {
     }
 
     // Si no está en class_instances, buscar en class_sessions (legacy)
-    const sessionRef = doc(db, 'class_sessions', sessionId);
+    const sessionRef = doc(db, 'class_instances', sessionId);
     const sessionSnap = await getDoc(sessionRef);
 
     if (!sessionSnap.exists()) {
@@ -788,7 +587,7 @@ export async function unassignStudentFromSession(sessionId, studentId) {
  */
 export async function addParticipantToSession(sessionId, participant) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
+    const docRef = doc(db, 'class_instances', sessionId);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
@@ -832,7 +631,7 @@ export async function addParticipantToSession(sessionId, participant) {
  */
 export async function removeParticipantFromSession(sessionId, userId) {
   try {
-    const docRef = doc(db, 'class_sessions', sessionId);
+    const docRef = doc(db, 'class_instances', sessionId);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
@@ -885,7 +684,7 @@ export async function assignContentToSession(sessionId, contentId) {
     }
 
     // Si no está en class_instances, buscar en class_sessions (legacy)
-    const sessionRef = doc(db, 'class_sessions', sessionId);
+    const sessionRef = doc(db, 'class_instances', sessionId);
     const sessionSnap = await getDoc(sessionRef);
 
     if (!sessionSnap.exists()) {
@@ -938,7 +737,7 @@ export async function unassignContentFromSession(sessionId, contentId) {
     }
 
     // Si no está en class_instances, buscar en class_sessions (legacy)
-    const sessionRef = doc(db, 'class_sessions', sessionId);
+    const sessionRef = doc(db, 'class_instances', sessionId);
     const sessionSnap = await getDoc(sessionRef);
 
     if (!sessionSnap.exists()) {
