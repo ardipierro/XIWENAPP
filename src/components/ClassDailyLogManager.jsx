@@ -286,14 +286,15 @@ function LogCard({ log, onOpen, onDelete, layout = 'vertical' }) {
     });
   }
 
-  // ⭐ ÚNICO RENDER - Sin duplicación
+  // ⭐ ÚNICO RENDER - SIN header gigante
   return (
     <UniversalCard
       variant="default"
       size="md"
       layout={layout}
-      icon={BookOpen}
+      showHeader={false}  // ← SIN header que ocupe espacio
       title={log.name}
+      subtitle={layout === 'horizontal' ? (log.courseName || undefined) : undefined}
       description={layout === 'vertical' ? log.description : undefined}
       badges={[
         {
@@ -303,7 +304,7 @@ function LogCard({ log, onOpen, onDelete, layout = 'vertical' }) {
           size: 'sm'
         }
       ]}
-      stats={stats}
+      stats={layout === 'horizontal' ? stats.filter(s => s.icon !== BookOpen) : stats}
       actions={[
         <BaseButton
           key="open"

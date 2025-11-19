@@ -156,7 +156,7 @@ export function UniversalCard({
       flexDirection: 'column',
       ...(variantConfig.cardHeight
         ? { height: variantConfig.cardHeight, minHeight: 'unset', overflow: 'hidden' }
-        : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
+        : { minHeight: layout === 'horizontal' ? '72px' : sizeConfig.minHeight }
       ),
       transitionDuration: variantConfig.transitionDuration,
       transitionTimingFunction: variantConfig.transitionTiming,

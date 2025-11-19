@@ -331,7 +331,7 @@ export const cardLayouts = {
     headerPosition: 'left',
     headerWidth: '80px',         // Más compacto para horizontal
     avatarSize: '48px',          // Avatar más pequeño en horizontal
-    contentPadding: '16px',      // Padding reducido
+    contentPadding: '12px 16px', // Padding reducido vertical (más compacto)
     statsLayout: 'inline',       // Stats en línea horizontal
   },
 };
@@ -466,7 +466,7 @@ export function generateCardStyles(variant, size, layout = 'vertical') {
       // Altura: si tiene cardHeight usar fija, sino usar minHeight
       ...(variantConfig.cardHeight
         ? { height: variantConfig.cardHeight, minHeight: 'unset' }
-        : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
+        : { minHeight: layout === 'horizontal' ? '72px' : sizeConfig.minHeight }
       ),
       transitionDuration: variantConfig.transitionDuration,
       transitionTimingFunction: variantConfig.transitionTiming,
