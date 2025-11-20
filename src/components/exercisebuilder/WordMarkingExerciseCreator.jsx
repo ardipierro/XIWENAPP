@@ -212,14 +212,12 @@ export function WordMarkingExerciseCreator({ isOpen, onClose, onSave, embedded =
         logger.info('AI exercise generated successfully');
 
       } else {
-        setValidationError('La IA no pudo generar el ejercicio. Intenta con otra configuración.');
+        setValidationError('La IA no generó ningún ejercicio válido. Intenta con otra configuración (tema, nivel, cantidad de palabras).');
       }
 
     } catch (error) {
       logger.error('Error generating AI exercise:', error);
-      setValidationError(
-        error.message || 'Error al generar con IA. Verifica que tengas un proveedor configurado en Configuración > IA.'
-      );
+      setValidationError(error.message || 'Error al generar con IA.');
     } finally {
       setIsGenerating(false);
     }

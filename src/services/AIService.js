@@ -234,9 +234,9 @@ export async function generateExercisesFromText(promptOrText, options = {}) {
     await aiServiceInstance.initialize();
 
     if (!aiServiceInstance.isConfigured()) {
-      // Fallback: retornar ejercicio de ejemplo si no hay IA configurada
-      logger.info('No AI provider configured, returning empty array', 'AIService');
-      return [];
+      // Lanzar error descriptivo cuando no hay IA configurada
+      logger.info('No AI provider configured', 'AIService');
+      throw new Error('No hay proveedores de IA configurados. Ve a Configuración > IA para configurar OpenAI, Gemini, Claude o Grok.');
     }
 
     // Usar el prompt directamente (ya viene formateado desde WordMarkingExerciseCreator)
