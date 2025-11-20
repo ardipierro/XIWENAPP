@@ -11,11 +11,13 @@ import {
   BookOpen,
   Download,
   Upload,
-  Save
+  Save,
+  Highlighter
 } from 'lucide-react';
 import { BaseButton, BaseCard, BaseBadge, BaseEmptyState, BaseLoading, BaseAlert } from '../components/common';
 import { TextToExerciseParser } from '../components/exercisebuilder/TextToExerciseParser';
 import { SettingsPanel } from '../components/exercisebuilder/SettingsPanel';
+import { WordMarkingExerciseCreator } from '../components/exercisebuilder/WordMarkingExerciseCreator';
 import { useContentExport } from '../hooks/useContentExport';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -47,7 +49,7 @@ export function ExerciseBuilder() {
   const { config, loading } = useExerciseBuilderConfig();
   const { exportContent, loading: exportLoading, error: exportError, success: exportSuccess } = useContentExport();
   const { user } = useAuth();
-  const [activeView, setActiveView] = useState('parser'); // parser | examples
+  const [activeView, setActiveView] = useState('parser'); // parser | word-marking | examples
   const [generatedExercises, setGeneratedExercises] = useState([]);
   const [stats, setStats] = useState({
     totalExercises: 0,
@@ -56,10 +58,25 @@ export function ExerciseBuilder() {
     totalPoints: 0
   });
   const [saveMessage, setSaveMessage] = useState(null); // { type: 'success' | 'error', text: string }
+  const [showWordMarkingModal, setShowWordMarkingModal] = useState(false);
+  const [wordMarkingExercises, setWordMarkingExercises] = useState([]);
 
   const handleExerciseGenerated = (exercise) => {
     setGeneratedExercises((prev) => [...prev, { ...exercise, id: Date.now() }]);
     logger.info('Exercise added to collection');
+  };
+
+  const handleWordMarkingSave = (exercise) => {
+    setWordMarkingExercises((prev) => [...prev, { ...exercise, id: Date.now() }]);
+    setShowWordMarkingModal(false);
+    logger.info('Word marking exercise saved:', exercise);
+
+    // Mostrar mensaje de éxito
+    setSaveMessage({
+      type: 'success',
+      text: '✅ Ejercicio de marcado creado exitosamente'
+    });
+    setTimeout(() => setSaveMessage(null), 3000);
   };
 
   const handleExerciseComplete = (result) => {
@@ -146,6 +163,7 @@ export function ExerciseBuilder() {
 
   const views = [
     { id: 'parser', label: 'Parser', icon: FileText },
+    { id: 'word-marking', label: 'Marcado de Palabras', icon: Highlighter },
     { id: 'examples', label: 'Ejemplos', icon: Layers }
   ];
 
@@ -525,6 +543,148 @@ export function ExerciseBuilder() {
         {/* Parser */}
         {activeView === 'parser' && (
           <TextToExerciseParser onExerciseGenerated={handleExerciseGenerated} />
+        )}
+
+        {/* Word Marking */}
+        {activeView === 'word-marking' && (
+          <div className="space-y-6">
+            {/* Feedback message */}
+            {saveMessage && (
+              <BaseAlert
+                variant={saveMessage.type === 'success' ? 'success' : 'error'}
+                onClose={() => setSaveMessage(null)}
+              >
+                {saveMessage.text}
+              </BaseAlert>
+            )}
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Ejercicios de Marcado de Palabras
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Crea ejercicios para identificar verbos, sustantivos, adjetivos y más
+                </p>
+              </div>
+              <BaseButton
+                variant="primary"
+                icon={Highlighter}
+                onClick={() => setShowWordMarkingModal(true)}
+                size="md"
+              >
+                Crear Nuevo Ejercicio
+              </BaseButton>
+            </div>
+
+            {/* Lista de ejercicios creados */}
+            {wordMarkingExercises.length === 0 ? (
+              <BaseEmptyState
+                icon={Highlighter}
+                title="No hay ejercicios de marcado"
+                description="Crea tu primer ejercicio de marcado de palabras haciendo click en el botón de arriba"
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-6">
+                {wordMarkingExercises.map((exercise, index) => (
+                  <BaseCard key={exercise.id || index}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                          {exercise.instruction || 'Ejercicio de marcado'}
+                        </h3>
+                        <div className="flex gap-2 mt-2">
+                          {exercise.cefrLevel && (
+                            <BaseBadge variant="info">{exercise.cefrLevel}</BaseBadge>
+                          )}
+                          {exercise.wordType && (
+                            <BaseBadge variant="default">{exercise.wordType}</BaseBadge>
+                          )}
+                          {exercise.markedWords?.length && (
+                            <BaseBadge variant="success">
+                              {exercise.markedWords.length} palabras
+                            </BaseBadge>
+                          )}
+                          {exercise.aiGenerated && (
+                            <BaseBadge variant="warning">IA</BaseBadge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <VerbIdentificationExercise
+                      instruction={exercise.instruction}
+                      text={exercise.text}
+                      words={exercise.words}
+                      verbsToFind={exercise.markedWords?.length || 0}
+                      cefrLevel={exercise.cefrLevel}
+                      onComplete={handleExerciseComplete}
+                    />
+                  </BaseCard>
+                ))}
+              </div>
+            )}
+
+            {/* Guardar todos en Contenidos */}
+            {wordMarkingExercises.length > 0 && (
+              <div className="flex justify-end gap-2">
+                <BaseButton
+                  variant="primary"
+                  icon={Save}
+                  onClick={async () => {
+                    // Guardar todos los ejercicios
+                    let savedCount = 0;
+                    for (const exercise of wordMarkingExercises) {
+                      const result = await exportContent({
+                        type: 'exercise',
+                        title: exercise.instruction || 'Ejercicio de marcado',
+                        description: `Ejercicio de ${exercise.wordType || 'palabras'}`,
+                        body: JSON.stringify(exercise),
+                        metadata: {
+                          exerciseType: 'word-marking',
+                          difficulty: config.difficulty || 'intermediate',
+                          cefrLevel: exercise.cefrLevel || 'A1',
+                          points: 100,
+                          source: 'ExerciseBuilder'
+                        },
+                        createdBy: user.uid
+                      });
+                      if (result.success) savedCount++;
+                    }
+                    setSaveMessage({
+                      type: 'success',
+                      text: `✅ ${savedCount} ejercicio(s) guardado(s) en Contenidos`
+                    });
+                    setTimeout(() => setSaveMessage(null), 5000);
+                  }}
+                  loading={exportLoading}
+                >
+                  Guardar en Contenidos ({wordMarkingExercises.length})
+                </BaseButton>
+                <BaseButton
+                  variant="outline"
+                  icon={Download}
+                  onClick={() => {
+                    const dataStr = JSON.stringify(wordMarkingExercises, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `word-marking-exercises-${Date.now()}.json`;
+                    link.click();
+                  }}
+                >
+                  Exportar JSON
+                </BaseButton>
+              </div>
+            )}
+
+            {/* Modal de creación */}
+            <WordMarkingExerciseCreator
+              isOpen={showWordMarkingModal}
+              onClose={() => setShowWordMarkingModal(false)}
+              onSave={handleWordMarkingSave}
+            />
+          </div>
         )}
 
         {/* Examples */}
