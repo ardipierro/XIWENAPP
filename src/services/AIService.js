@@ -8,12 +8,13 @@ import logger from '../utils/logger';
 
 // AI Provider metadata
 // IMPORTANT: credentialsField must match the field name in Firestore credentials object
+// IMPORTANT: localStorageName must match the exact casing used by CredentialsTab
 const AI_PROVIDERS = [
-  { id: 'openai', name: 'openai', label: 'ChatGPT', icon: '🤖', model: 'gpt-4', credentialsField: 'openai_api_key', type: 'text' },
-  { id: 'grok', name: 'grok', label: 'Grok', icon: '⚡', model: 'grok-2', credentialsField: 'grok_api_key', type: 'text' },
-  { id: 'gemini', name: 'gemini', label: 'Google Gemini', icon: '🔮', model: 'gemini-1.5-pro', credentialsField: 'google_api_key', type: 'text' },
-  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet', credentialsField: 'anthropic_api_key', type: 'text' },
-  { id: 'elevenlabs', name: 'elevenlabs', label: 'ElevenLabs TTS', icon: '🎤', model: 'eleven_multilingual_v2', credentialsField: 'elevenlabs_api_key', type: 'tts' }
+  { id: 'openai', name: 'openai', label: 'ChatGPT', icon: '🤖', model: 'gpt-4', credentialsField: 'openai_api_key', localStorageName: 'OpenAI', type: 'text' },
+  { id: 'grok', name: 'grok', label: 'Grok', icon: '⚡', model: 'grok-2', credentialsField: 'grok_api_key', localStorageName: 'Grok', type: 'text' },
+  { id: 'gemini', name: 'gemini', label: 'Google Gemini', icon: '🔮', model: 'gemini-1.5-pro', credentialsField: 'google_api_key', localStorageName: 'Google', type: 'text' },
+  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet', credentialsField: 'anthropic_api_key', localStorageName: 'Claude', type: 'text' },
+  { id: 'elevenlabs', name: 'elevenlabs', label: 'ElevenLabs TTS', icon: '🎤', model: 'eleven_multilingual_v2', credentialsField: 'elevenlabs_api_key', localStorageName: 'elevenlabs', type: 'tts' }
 ];
 
 class AIService {
@@ -41,19 +42,11 @@ class AIService {
       let apiKey = rawConfig.credentials?.[apiKeyField];
 
       // Fallback to localStorage (legacy)
-      if (!apiKey) {
-        const localStorageKeys = [
-          `ai_credentials_${provider.name}`,
-          `ai_credentials_${provider.id}`,
-          `ai_credentials_${provider.label}`
-        ];
-
-        for (const lsKey of localStorageKeys) {
-          apiKey = localStorage.getItem(lsKey);
-          if (apiKey) {
-            logger.info(`Found ${provider.id} API key in localStorage: ${lsKey}`, 'AIService');
-            break;
-          }
+      if (!apiKey && provider.localStorageName) {
+        const localStorageKey = `ai_credentials_${provider.localStorageName}`;
+        apiKey = localStorage.getItem(localStorageKey);
+        if (apiKey) {
+          logger.info(`Found ${provider.id} API key in localStorage: ${localStorageKey}`, 'AIService');
         }
       }
 
