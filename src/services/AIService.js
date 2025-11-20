@@ -4,6 +4,7 @@
  */
 
 import { getAIConfig, callAI } from '../firebase/aiConfig';
+import logger from '../utils/logger';
 
 // AI Provider metadata
 const AI_PROVIDERS = [
