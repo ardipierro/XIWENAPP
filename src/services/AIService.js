@@ -9,11 +9,11 @@ import logger from '../utils/logger';
 // AI Provider metadata
 // IMPORTANT: credentialsField must match the field name in Firestore credentials object
 const AI_PROVIDERS = [
-  { id: 'openai', name: 'openai', label: 'ChatGPT', icon: '🤖', model: 'gpt-4', credentialsField: 'openai_api_key' },
-  { id: 'grok', name: 'grok', label: 'Grok', icon: '⚡', model: 'grok-2', credentialsField: 'grok_api_key' },
-  { id: 'gemini', name: 'gemini', label: 'Google Gemini', icon: '🔮', model: 'gemini-1.5-pro', credentialsField: 'google_api_key' },
-  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet', credentialsField: 'anthropic_api_key' },
-  { id: 'elevenlabs', name: 'elevenlabs', label: 'ElevenLabs TTS', icon: '🎤', model: 'eleven_multilingual_v2', credentialsField: 'elevenlabs_api_key' }
+  { id: 'openai', name: 'openai', label: 'ChatGPT', icon: '🤖', model: 'gpt-4', credentialsField: 'openai_api_key', type: 'text' },
+  { id: 'grok', name: 'grok', label: 'Grok', icon: '⚡', model: 'grok-2', credentialsField: 'grok_api_key', type: 'text' },
+  { id: 'gemini', name: 'gemini', label: 'Google Gemini', icon: '🔮', model: 'gemini-1.5-pro', credentialsField: 'google_api_key', type: 'text' },
+  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet', credentialsField: 'anthropic_api_key', type: 'text' },
+  { id: 'elevenlabs', name: 'elevenlabs', label: 'ElevenLabs TTS', icon: '🎤', model: 'eleven_multilingual_v2', credentialsField: 'elevenlabs_api_key', type: 'tts' }
 ];
 
 class AIService {
@@ -61,9 +61,11 @@ class AIService {
     console.table(configStatus);
     logger.info('AI Config loaded (see table above):', 'AIService');
 
-    // Find first enabled provider
+    // Find first enabled TEXT provider (skip TTS-only providers like elevenlabs)
     for (const provider of AI_PROVIDERS) {
-      if (this.config[provider.id]?.enabled && this.config[provider.id]?.apiKey) {
+      if (provider.type === 'text' &&
+          this.config[provider.id]?.enabled &&
+          this.config[provider.id]?.apiKey) {
         this.currentProvider = provider.id;
         logger.info(`Selected AI provider: ${provider.id}`, 'AIService');
         break;
@@ -71,7 +73,7 @@ class AIService {
     }
 
     if (!this.currentProvider) {
-      logger.warn('No AI provider found with API key in credentials', 'AIService');
+      logger.warn('No TEXT AI provider found with API key. Only TTS providers available?', 'AIService');
     }
 
     return this.currentProvider !== null;
