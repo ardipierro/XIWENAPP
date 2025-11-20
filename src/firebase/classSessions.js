@@ -314,6 +314,36 @@ export async function updateClassSession(sessionId, updates) {
         }
       } else {
         logger.warn('⚠️ scheduled_classes no encontrado:', scheduleId);
+        logger.info('🔍 Buscando instancias futuras por coincidencia de campos (nombre, profesor)...');
+
+        // FALLBACK: Si no existe el scheduled_classes, buscar instancias futuras por campos comunes
+        const now = Timestamp.now();
+        const currentScheduleName = instance.scheduleName;
+        const currentTeacherId = instance.teacherId;
+
+        if (currentScheduleName && currentTeacherId) {
+          const futureInstancesQuery = query(
+            collection(db, 'class_instances'),
+            where('teacherId', '==', currentTeacherId),
+            where('scheduleName', '==', currentScheduleName),
+            where('scheduledStart', '>=', now),
+            where('status', '==', 'scheduled')
+          );
+
+          const futureInstancesSnap = await getDocs(futureInstancesQuery);
+          logger.info(`📊 Encontradas ${futureInstancesSnap.size} instancias futuras con el mismo nombre y profesor`);
+
+          if (futureInstancesSnap.size > 0) {
+            const updatePromises = futureInstancesSnap.docs.map(doc => {
+              const docData = doc.data();
+              logger.info(`  → Actualizando instancia ${doc.id}: ${docData.scheduleName} (${docData.scheduledStart.toDate().toLocaleString()})`);
+              return updateDoc(doc.ref, cleanUpdates);
+            });
+
+            await Promise.all(updatePromises);
+            logger.info(`✅ ${futureInstancesSnap.size} instancias futuras actualizadas (por coincidencia)`);
+          }
+        }
       }
     }
 
