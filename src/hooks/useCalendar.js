@@ -33,7 +33,6 @@ export function useCalendar(userId, userRole, startDate = null, endDate = null) 
 
   useEffect(() => {
     let isMounted = true;
-    let refreshInterval;
 
     const fetchEvents = async () => {
       if (!userId || !userRole) {
@@ -41,11 +40,7 @@ export function useCalendar(userId, userRole, startDate = null, endDate = null) 
         return;
       }
 
-      // Don't show loading on auto-refresh
-      const isInitialLoad = events.length === 0;
-      if (isInitialLoad) {
-        setLoading(true);
-      }
+      setLoading(true);
       setError(null);
 
       try {
@@ -66,26 +61,17 @@ export function useCalendar(userId, userRole, startDate = null, endDate = null) 
           setError(err.message);
         }
       } finally {
-        if (isMounted && isInitialLoad) {
+        if (isMounted) {
           setLoading(false);
         }
       }
     };
 
-    // Initial fetch
+    // Initial fetch only
     fetchEvents();
-
-    // Auto-refresh every 15 seconds (fast enough for good UX, not too heavy)
-    refreshInterval = setInterval(() => {
-      logger.info('🔄 Auto-refreshing calendar...', 'useCalendar');
-      fetchEvents();
-    }, 15000);
 
     return () => {
       isMounted = false;
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
     };
   }, [userId, userRole, startTime, endTime]);
 
