@@ -10,7 +10,7 @@
  * @module components/common/CategoryBadge
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import BaseBadge from './BaseBadge';
 import {
@@ -51,57 +51,13 @@ function CategoryBadge({
   className = '',
   ...rest
 }) {
-  // Función helper para obtener la configuración del badge (memoizada)
-  const getBadgeConfiguration = useCallback(() => {
-    if (badgeKey) {
-      return getBadgeByKey(badgeKey);
-    } else if (type && value) {
-      switch (type) {
-        case 'content':
-          return getBadgeForContentType(value);
-        case 'exercise':
-          return getBadgeForExerciseType(value);
-        case 'difficulty':
-          return getBadgeForDifficulty(value);
-        case 'cefr':
-          return getBadgeForCEFR(value);
-        case 'status':
-          return getBadgeForStatus(value);
-        case 'role':
-          return getBadgeForRole(value);
-        case 'custom':
-          return getBadgeByKey(value);
-        default:
-          return null;
-      }
-    }
-    return null;
-  }, [badgeKey, type, value]);
-
-  // Estado para configuración de badges (SE ACTUALIZA DINÁMICAMENTE)
-  const [badgeConfig, setBadgeConfig] = useState(getBadgeConfiguration);
-
   // Estado para configuración de iconos
   const [iconLibraryConfig, setIconLibraryConfig] = useState(
     getIconLibraryConfig()
   );
 
-  // ✅ ACTUALIZAR BADGE CONFIG CUANDO CAMBIAN LAS PROPS (NUEVO)
-  useEffect(() => {
-    const updatedConfig = getBadgeConfiguration();
-    setBadgeConfig(updatedConfig);
-  }, [getBadgeConfiguration]);
-
-  // ✅ ESCUCHAR CAMBIOS EN LA CONFIGURACIÓN DE BADGES (NUEVO)
-  useEffect(() => {
-    const handleBadgeConfigChange = () => {
-      const updatedConfig = getBadgeConfiguration();
-      setBadgeConfig(updatedConfig);
-    };
-
-    window.addEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
-    return () => window.removeEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
-  }, [getBadgeConfiguration]); // Dependencia: la función memoizada
+  // Estado para forzar re-render cuando cambie la config de badges
+  const [badgeConfigKey, setBadgeConfigKey] = useState(0);
 
   // Escuchar cambios en la configuración de iconos (MEJORADO)
   useEffect(() => {
@@ -117,8 +73,15 @@ function CategoryBadge({
       setIconLibraryConfig(newConfig);
     };
 
+    // CRÍTICO: Escuchar cambios en configuración de badges (paleta de colores, etc.)
+    const handleBadgeConfigChange = () => {
+      logger.info('Badge config changed, forcing re-render', 'CategoryBadge');
+      setBadgeConfigKey(k => k + 1);
+    };
+
     window.addEventListener('iconLibraryChange', handleIconLibraryChange);
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
 
     // Cargar config inicial
     setIconLibraryConfig(getIconLibraryConfig());
@@ -126,8 +89,48 @@ function CategoryBadge({
     return () => {
       window.removeEventListener('iconLibraryChange', handleIconLibraryChange);
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
     };
   }, []);
+
+  // Obtener configuración del badge (MEMOIZADO para reaccionar a cambios)
+  const badgeConfig = useMemo(() => {
+    let config;
+
+    if (badgeKey) {
+      // Uso directo por key
+      config = getBadgeByKey(badgeKey);
+    } else if (type && value) {
+      // Uso por tipo + valor
+      switch (type) {
+        case 'content':
+          config = getBadgeForContentType(value);
+          break;
+        case 'exercise':
+          config = getBadgeForExerciseType(value);
+          break;
+        case 'difficulty':
+          config = getBadgeForDifficulty(value);
+          break;
+        case 'cefr':
+          config = getBadgeForCEFR(value);
+          break;
+        case 'status':
+          config = getBadgeForStatus(value);
+          break;
+        case 'role':
+          config = getBadgeForRole(value);
+          break;
+        case 'custom':
+          config = getBadgeByKey(value);
+          break;
+        default:
+          config = null;
+      }
+    }
+
+    return config;
+  }, [badgeKey, type, value, badgeConfigKey]); // CRÍTICO: badgeConfigKey fuerza re-cálculo
 
   // Fallback si no se encuentra configuración
   if (!badgeConfig) {

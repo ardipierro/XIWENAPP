@@ -107,11 +107,24 @@ function useBadgeConfig() {
   }, []);
 
   /**
-   * Actualizar configuración global de badges
+   * Actualizar configuración global de badges (con aplicación de paleta)
    */
   const updateGlobalConfig = useCallback((key, value) => {
     setGlobalConfig((prev) => {
       const updated = { ...prev, [key]: value };
+
+      // Si cambia la paleta de colores, aplicar inmediatamente
+      if (key === 'colorPalette') {
+        const { applyColorPalette } = require('../config/badgeSystem');
+        setConfig((currentConfig) => {
+          const newConfig = applyColorPalette(value, currentConfig);
+          // Guardar y disparar evento
+          saveBadgeConfig(newConfig);
+          window.dispatchEvent(new Event('xiwen_badge_config_changed'));
+          return newConfig;
+        });
+      }
+
       setHasChanges(true);
       return updated;
     });
