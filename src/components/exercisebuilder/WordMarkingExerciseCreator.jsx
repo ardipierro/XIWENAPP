@@ -32,8 +32,9 @@ import logger from '../../utils/logger';
  * @param {boolean} isOpen - Si el modal está abierto
  * @param {Function} onClose - Callback al cerrar
  * @param {Function} onSave - Callback al guardar (recibe ejercicio)
+ * @param {boolean} embedded - Si está embebido (no renderiza BaseModal)
  */
-export function WordMarkingExerciseCreator({ isOpen, onClose, onSave }) {
+export function WordMarkingExerciseCreator({ isOpen, onClose, onSave, embedded = false }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('manual');
 
@@ -348,23 +349,18 @@ IMPORTANTE:
 
   const wordTypes = getWordTypes();
 
-  return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Crear Ejercicio de Marcado de Palabras"
-      icon={Sparkles}
-      size="2xl"
-    >
-      <div className="space-y-6">
+  // Contenido del creador (usado tanto embebido como en modal)
+  const creatorContent = (
+    <div className="space-y-6">
         {/* Tabs */}
         <BaseTabs
-          value={activeTab}
-          onChange={setActiveTab}
           tabs={[
-            { value: 'manual', label: 'Manual', icon: FileText },
-            { value: 'ai', label: 'Generar con IA', icon: Wand2 }
+            { id: 'manual', label: 'Manual', icon: FileText },
+            { id: 'ai', label: 'Generar con IA', icon: Wand2 }
           ]}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="underline"
         />
 
         {/* Mensajes de error/validación */}
@@ -668,6 +664,24 @@ IMPORTANTE:
           Guardar Ejercicio
         </BaseButton>
       </div>
+    </div>
+  );
+
+  // Si está embebido, devolver solo el contenido
+  if (embedded) {
+    return creatorContent;
+  }
+
+  // Si NO está embebido, devolver BaseModal con contenido
+  return (
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Crear Ejercicio de Marcado de Palabras"
+      icon={Sparkles}
+      size="2xl"
+    >
+      {creatorContent}
     </BaseModal>
   );
 }
