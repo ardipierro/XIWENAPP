@@ -24,39 +24,70 @@ class AIService {
   }
 
   /**
-   * Initialize service (load config from Firestore)
+   * Initialize service (load config from Firestore + Backend Secret Manager)
    */
   async initialize() {
     const rawConfig = await getAIConfig();
+
+    // Import checkAICredentials to detect backend credentials
+    const { checkAICredentials } = await import('../firebase/aiConfig');
+    const backendCredentials = await checkAICredentials();
 
     // Adapt config structure from credentials format to expected format
     // Firestore stores: { credentials: { openai_api_key: "...", gemini_api_key: "..." } }
     // We need: { openai: { enabled: true, apiKey: "..." }, gemini: { ... } }
     this.config = {};
 
-    // Build config from credentials (Firestore) + localStorage fallback
+    // Build config from credentials (Firestore) + localStorage + functions[] + backend
     for (const provider of AI_PROVIDERS) {
       const apiKeyField = provider.credentialsField || `${provider.id}_api_key`;
 
-      // Try Firestore first
-      let apiKey = rawConfig.credentials?.[apiKeyField];
+      // Priority 1: Backend Secret Manager (most secure, via Cloud Functions)
+      let apiKey = null;
+      let source = null;
 
-      // Fallback to localStorage (legacy)
-      if (!apiKey && provider.localStorageName) {
+      if (backendCredentials?.[provider.id]) {
+        // Backend has this credential - mark as enabled with special marker
+        apiKey = '***BACKEND***';
+        source = 'backend:secret_manager';
+        logger.info(`${provider.id} configured in Backend Secret Manager`, 'AIService');
+      }
+      // Priority 2: Try Firestore credentials{}
+      else if (rawConfig.credentials?.[apiKeyField]) {
+        apiKey = rawConfig.credentials[apiKeyField];
+        source = 'firestore:credentials';
+      }
+      // Priority 3: Fallback to localStorage
+      else if (provider.localStorageName) {
         const localStorageKey = `ai_credentials_${provider.localStorageName}`;
-        apiKey = localStorage.getItem(localStorageKey);
-        if (apiKey) {
+        const lsValue = localStorage.getItem(localStorageKey);
+        if (lsValue) {
+          apiKey = lsValue;
+          source = 'localStorage';
           logger.info(`Found ${provider.id} API key in localStorage: ${localStorageKey}`, 'AIService');
         }
       }
+      // Priority 4: Fallback to Firestore functions[] (check all functions for this provider)
+      if (!apiKey && rawConfig?.functions) {
+        for (const [funcId, funcConfig] of Object.entries(rawConfig.functions)) {
+          if (funcConfig.provider === provider.id && funcConfig.apiKey?.trim() && funcConfig.apiKey !== '123456') {
+            apiKey = funcConfig.apiKey;
+            source = `firestore:functions[${funcId}]`;
+            logger.info(`Found ${provider.id} API key in functions[${funcId}]`, 'AIService');
+            break;
+          }
+        }
+      }
 
-      if (apiKey) {
+      if (apiKey && apiKey !== '123456') {
         this.config[provider.id] = {
           enabled: true,
-          apiKey: apiKey,
+          apiKey: apiKey, // Can be actual key or '***BACKEND***' marker
           basePrompt: rawConfig[provider.id]?.basePrompt || 'Eres un asistente educativo experto.',
-          tone: rawConfig[provider.id]?.tone || 'professional'
+          tone: rawConfig[provider.id]?.tone || 'professional',
+          source: source // Track where it came from
         };
+        logger.info(`${provider.id} configured from ${source}`, 'AIService');
       }
     }
 

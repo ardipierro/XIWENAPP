@@ -592,39 +592,61 @@ IMPORTANTE:
             <BaseButton
               variant="outline"
               onClick={async () => {
+                console.log('=== 🔍 LOCALSTORAGE DEBUG ===');
+
+                // Check what's ACTUALLY in localStorage
+                const localStorageKeys = [
+                  'ai_credentials_OpenAI',
+                  'ai_credentials_Claude',
+                  'ai_credentials_Google',
+                  'ai_credentials_Grok',
+                  'ai_credentials_elevenlabs'
+                ];
+
+                const localStorageData = {};
+                localStorageKeys.forEach(key => {
+                  const value = localStorage.getItem(key);
+                  localStorageData[key] = value ? `${value.substring(0, 10)}... (length: ${value.length})` : '❌ NOT FOUND';
+                });
+
+                console.log('localStorage contents:');
+                console.table(localStorageData);
+
+                console.log('\n=== 🔥 FIRESTORE CONFIG ===');
                 const { getAIConfig } = await import('../../firebase/aiConfig');
                 const rawConfig = await getAIConfig();
+                console.log('Firestore credentials:', rawConfig.credentials);
 
-                console.log('=== RAW FIRESTORE CONFIG ===');
-                console.log(rawConfig);
-
-                console.log('=== CREDENTIALS ===');
-                console.log(rawConfig.credentials);
-                console.log('CREDENTIAL KEYS:', Object.keys(rawConfig.credentials || {}));
-
-                // Simulate AIService transformation
+                console.log('\n=== 🤖 AISERVICE SIMULATION ===');
                 const AI_PROVIDERS = [
-                  { id: 'openai', credentialsField: 'openai_api_key' },
-                  { id: 'grok', credentialsField: 'grok_api_key' },
-                  { id: 'gemini', credentialsField: 'google_api_key' },
-                  { id: 'claude', credentialsField: 'anthropic_api_key' },
-                  { id: 'elevenlabs', credentialsField: 'elevenlabs_api_key' }
+                  { id: 'openai', credentialsField: 'openai_api_key', localStorageName: 'OpenAI' },
+                  { id: 'grok', credentialsField: 'grok_api_key', localStorageName: 'Grok' },
+                  { id: 'gemini', credentialsField: 'google_api_key', localStorageName: 'Google' },
+                  { id: 'claude', credentialsField: 'anthropic_api_key', localStorageName: 'Claude' },
+                  { id: 'elevenlabs', credentialsField: 'elevenlabs_api_key', localStorageName: 'elevenlabs' }
                 ];
 
                 const adaptedConfig = AI_PROVIDERS.map(provider => {
-                  const apiKeyField = provider.credentialsField;
-                  const apiKey = rawConfig.credentials?.[apiKeyField];
+                  // Try Firestore first
+                  let apiKey = rawConfig.credentials?.[provider.credentialsField];
+                  let source = 'firestore';
+
+                  // Fallback to localStorage
+                  if (!apiKey && provider.localStorageName) {
+                    const lsKey = `ai_credentials_${provider.localStorageName}`;
+                    apiKey = localStorage.getItem(lsKey);
+                    source = 'localStorage';
+                  }
 
                   return {
                     id: provider.id,
-                    credField: apiKeyField,
-                    enabled: !!apiKey,
+                    source: apiKey ? source : 'none',
                     hasApiKey: !!apiKey,
                     apiKeyLength: apiKey?.length || 0
                   };
                 });
 
-                console.log('=== ADAPTED CONFIG (as AIService sees it) ===');
+                console.log('Final config (as AIService builds it):');
                 console.table(adaptedConfig);
               }}
             >

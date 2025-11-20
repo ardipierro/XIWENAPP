@@ -501,6 +501,24 @@ function CredentialsTab() {
             Sin Configurar ({AI_PROVIDERS.length - configuredCount})
           </button>
         </div>
+
+        <button
+          onClick={async () => {
+            console.log('=== 🔍 FULL FIRESTORE CONFIG ===');
+            const fullConfig = await getAIConfig();
+            console.log(JSON.stringify(fullConfig, null, 2));
+
+            console.log('\n=== 📦 LOCALSTORAGE ===');
+            const lsKeys = ['ai_credentials_OpenAI', 'ai_credentials_Claude', 'ai_credentials_Google', 'ai_credentials_Grok', 'ai_credentials_elevenlabs'];
+            lsKeys.forEach(key => {
+              const val = localStorage.getItem(key);
+              console.log(`${key}: ${val ? `${val.substring(0, 20)}... (${val.length})` : 'NOT FOUND'}`);
+            });
+          }}
+          className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-800 dark:bg-gray-600 text-white hover:bg-gray-700"
+        >
+          🐛 Debug Full Config
+        </button>
       </div>
 
       {/* Grid - 5 COLUMNAS */}
