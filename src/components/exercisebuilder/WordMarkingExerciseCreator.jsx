@@ -349,8 +349,8 @@ IMPORTANTE:
 
   const wordTypes = getWordTypes();
 
-  // Contenido del creador (usado tanto embebido como en modal)
-  const creatorContent = (
+  // Renderizar contenido
+  const renderContent = () => (
     <div className="space-y-6">
         {/* Tabs */}
         <BaseTabs
@@ -669,7 +669,7 @@ IMPORTANTE:
 
   // Si está embebido, devolver solo el contenido
   if (embedded) {
-    return creatorContent;
+    return renderContent();
   }
 
   // Si NO está embebido, devolver BaseModal con contenido
@@ -681,7 +681,7 @@ IMPORTANTE:
       icon={Sparkles}
       size="2xl"
     >
-      {creatorContent}
+      {renderContent()}
     </BaseModal>
   );
 }
