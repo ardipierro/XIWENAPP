@@ -260,6 +260,12 @@ service cloud.firestore {
       allow write: if isTeacher() || isAdmin();
     }
 
+    // Scheduled classes - single and recurring class schedules
+    match /scheduled_classes/{classId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isAdmin();
+    }
+
     // Class instances - specific occurrences of classes
     match /class_instances/{instanceId} {
       allow read: if isAuthenticated();
