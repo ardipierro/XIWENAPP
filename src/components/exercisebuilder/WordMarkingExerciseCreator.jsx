@@ -593,14 +593,39 @@ IMPORTANTE:
               variant="outline"
               onClick={async () => {
                 const { getAIConfig } = await import('../../firebase/aiConfig');
-                const config = await getAIConfig();
-                console.log('=== FIRESTORE AI CONFIG ===');
-                console.table(Object.entries(config).map(([id, cfg]) => ({
-                  id,
-                  enabled: cfg?.enabled,
-                  hasApiKey: !!cfg?.apiKey,
-                  apiKeyLength: cfg?.apiKey?.length || 0
-                })));
+                const rawConfig = await getAIConfig();
+
+                console.log('=== RAW FIRESTORE CONFIG ===');
+                console.log(rawConfig);
+
+                console.log('=== CREDENTIALS ===');
+                console.log(rawConfig.credentials);
+                console.log('CREDENTIAL KEYS:', Object.keys(rawConfig.credentials || {}));
+
+                // Simulate AIService transformation
+                const AI_PROVIDERS = [
+                  { id: 'openai', credentialsField: 'openai_api_key' },
+                  { id: 'grok', credentialsField: 'grok_api_key' },
+                  { id: 'gemini', credentialsField: 'google_api_key' },
+                  { id: 'claude', credentialsField: 'anthropic_api_key' },
+                  { id: 'elevenlabs', credentialsField: 'elevenlabs_api_key' }
+                ];
+
+                const adaptedConfig = AI_PROVIDERS.map(provider => {
+                  const apiKeyField = provider.credentialsField;
+                  const apiKey = rawConfig.credentials?.[apiKeyField];
+
+                  return {
+                    id: provider.id,
+                    credField: apiKeyField,
+                    enabled: !!apiKey,
+                    hasApiKey: !!apiKey,
+                    apiKeyLength: apiKey?.length || 0
+                  };
+                });
+
+                console.log('=== ADAPTED CONFIG (as AIService sees it) ===');
+                console.table(adaptedConfig);
               }}
             >
               🐛 Debug Config

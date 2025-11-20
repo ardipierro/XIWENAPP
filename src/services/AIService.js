@@ -7,12 +7,13 @@ import { getAIConfig, callAI } from '../firebase/aiConfig';
 import logger from '../utils/logger';
 
 // AI Provider metadata
+// IMPORTANT: credentialsField must match the field name in Firestore credentials object
 const AI_PROVIDERS = [
-  { id: 'openai', name: 'openai', label: 'ChatGPT', icon: '🤖', model: 'gpt-4' },
-  { id: 'grok', name: 'grok', label: 'Grok', icon: '⚡', model: 'grok-2' },
-  { id: 'gemini', name: 'gemini', label: 'Google Gemini', icon: '🔮', model: 'gemini-1.5-pro' },
-  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet' },
-  { id: 'elevenlabs', name: 'elevenlabs', label: 'ElevenLabs TTS', icon: '🎤', model: 'eleven_multilingual_v2' }
+  { id: 'openai', name: 'openai', label: 'ChatGPT', icon: '🤖', model: 'gpt-4', credentialsField: 'openai_api_key' },
+  { id: 'grok', name: 'grok', label: 'Grok', icon: '⚡', model: 'grok-2', credentialsField: 'grok_api_key' },
+  { id: 'gemini', name: 'gemini', label: 'Google Gemini', icon: '🔮', model: 'gemini-1.5-pro', credentialsField: 'google_api_key' },
+  { id: 'claude', name: 'claude', label: 'Claude', icon: '💬', model: 'claude-3-sonnet', credentialsField: 'anthropic_api_key' },
+  { id: 'elevenlabs', name: 'elevenlabs', label: 'ElevenLabs TTS', icon: '🎤', model: 'eleven_multilingual_v2', credentialsField: 'elevenlabs_api_key' }
 ];
 
 class AIService {
@@ -34,7 +35,8 @@ class AIService {
 
     if (rawConfig.credentials) {
       for (const provider of AI_PROVIDERS) {
-        const apiKeyField = `${provider.id}_api_key`;
+        // Use the credentialsField from provider metadata
+        const apiKeyField = provider.credentialsField || `${provider.id}_api_key`;
         const apiKey = rawConfig.credentials[apiKeyField];
 
         if (apiKey) {
