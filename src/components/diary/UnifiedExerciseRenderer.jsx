@@ -32,7 +32,13 @@ const exerciseComponents = {
   'sentence-builder': lazy(() => import('../exercisebuilder/exercises/SentenceBuilderExercise')),
   'interactive-reading': lazy(() => import('../exercisebuilder/exercises/InteractiveReadingExercise')),
   'hotspot-image': lazy(() => import('../exercisebuilder/exercises/HotspotImageExercise')),
+
+  // Ejercicios de marcado de palabras (word-marking)
+  'word-marking': lazy(() => import('../exercisebuilder/exercises/VerbIdentificationExercise')),
 };
+
+// Componente editable para word-marking (lazy load)
+const EditableWordMarkingExercise = lazy(() => import('../exercisebuilder/exercises/EditableWordMarkingExercise'));
 
 /**
  * UnifiedExerciseRenderer - Renderiza dinámicamente ejercicios del Exercise Builder
@@ -40,12 +46,16 @@ const exerciseComponents = {
  * @param {Object} content - Contenido del ejercicio desde Firebase
  * @param {Function} onComplete - Callback cuando el ejercicio se completa
  * @param {boolean} readOnly - Modo solo lectura (para estudiantes en clases finalizadas)
+ * @param {boolean} isTeacher - Si el usuario es profesor (para habilitar edición)
+ * @param {Function} onSaveExercise - Callback para guardar ejercicio editado
  * @param {string} logId - ID del diario de clases
  */
 export function UnifiedExerciseRenderer({
   content,
   onComplete,
   readOnly = false,
+  isTeacher = false,
+  onSaveExercise,
   logId = null
 }) {
   const [exerciseData, setExerciseData] = useState(null);
@@ -106,6 +116,9 @@ export function UnifiedExerciseRenderer({
 
   // Detectar tipo de ejercicio desde metadata o datos
   const exerciseType = content.metadata?.exerciseType || exerciseData.type;
+
+  // Detectar si es ejercicio de marcado de palabras (word-marking)
+  const isWordMarking = ['word-marking', 'verb-identification'].includes(exerciseType);
 
   // Obtener componente correcto
   const ExerciseComponent = exerciseComponents[exerciseType];
@@ -233,14 +246,36 @@ export function UnifiedExerciseRenderer({
             </div>
           }
         >
-          <ExerciseComponent
-            {...exerciseData}
-            onAnswer={handleAnswer}
-            readOnly={readOnly}
-            showFeedback={!readOnly}
-            userAnswer={userAnswer}
-            isCorrect={isCorrect}
-          />
+          {/* Si es word-marking Y es profesor, usar versión editable */}
+          {isWordMarking && isTeacher && !readOnly ? (
+            <EditableWordMarkingExercise
+              initialExercise={exerciseData}
+              onSave={async (updatedExercise) => {
+                // Actualizar ejercicio en Firebase
+                if (onSaveExercise) {
+                  await onSaveExercise(content.id, updatedExercise);
+                }
+                // Actualizar estado local
+                setExerciseData(updatedExercise);
+              }}
+              isTeacher={isTeacher}
+              readOnly={readOnly}
+              onAnswer={handleAnswer}
+              showFeedback={!readOnly}
+              userAnswer={userAnswer}
+              isCorrect={isCorrect}
+            />
+          ) : (
+            /* Sino, usar componente normal */
+            <ExerciseComponent
+              {...exerciseData}
+              onAnswer={handleAnswer}
+              readOnly={readOnly}
+              showFeedback={!readOnly}
+              userAnswer={userAnswer}
+              isCorrect={isCorrect}
+            />
+          )}
         </Suspense>
       </div>
 

@@ -209,11 +209,98 @@ const aiServiceInstance = new AIService();
 export default aiServiceInstance;
 
 /**
- * Generate exercises from text (stub)
- * @param {string} sourceText - Source text
+ * Generate exercises from text or with custom prompt
+ * Funciona con cualquier proveedor de IA configurado
+ *
+ * @param {string} promptOrText - Prompt completo o texto base
  * @param {Object} options - Options
- * @returns {Promise<Array>} Exercises
+ * @param {string} options.exerciseType - Tipo de ejercicio (word-marking, mcq, etc.)
+ * @param {string} options.cefrLevel - Nivel CEFR (A1-C2)
+ * @param {string} options.wordType - Tipo de palabra para word-marking
+ * @param {number} options.quantity - Cantidad de ejercicios (default: 1)
+ * @returns {Promise<Array>} Array de ejercicios generados
  */
-export async function generateExercisesFromText(sourceText, options = {}) {
-  return [];
+export async function generateExercisesFromText(promptOrText, options = {}) {
+  const {
+    exerciseType = 'word-marking',
+    cefrLevel = 'A2',
+    wordType = 'verb',
+    quantity = 1
+  } = options;
+
+  try {
+    // Inicializar servicio
+    await aiServiceInstance.initialize();
+
+    if (!aiServiceInstance.isConfigured()) {
+      // Fallback: retornar ejercicio de ejemplo si no hay IA configurada
+      console.warn('No AI provider configured, returning empty array');
+      return [];
+    }
+
+    // Usar el prompt directamente (ya viene formateado desde WordMarkingExerciseCreator)
+    const result = await aiServiceInstance.generateExercises({
+      theme: 'ELE', // Español como Lengua Extranjera
+      type: exerciseType,
+      difficulty: cefrLevel,
+      quantity,
+      context: promptOrText
+    });
+
+    if (!result.success) {
+      console.error('AI generation failed:', result.error);
+      return [];
+    }
+
+    // Parsear respuesta de la IA
+    const rawResponse = result.data;
+
+    // Si la respuesta es un string, crear ejercicio a partir del texto
+    if (typeof rawResponse === 'string') {
+      // Detectar si tiene marcadores de palabras (*)
+      const hasMarkers = rawResponse.includes('*');
+
+      if (hasMarkers && exerciseType === 'word-marking') {
+        // Retornar el texto marcado para que sea parseado por el componente
+        return [{
+          type: 'word-marking',
+          text: rawResponse,
+          cefrLevel,
+          wordType,
+          aiGenerated: true
+        }];
+      }
+
+      // Si no tiene marcadores, retornar texto plano
+      return [{
+        type: exerciseType,
+        text: rawResponse,
+        cefrLevel,
+        aiGenerated: true
+      }];
+    }
+
+    // Si la respuesta es un objeto/array, retornarla
+    if (Array.isArray(rawResponse)) {
+      return rawResponse.map(ex => ({
+        ...ex,
+        cefrLevel,
+        aiGenerated: true
+      }));
+    }
+
+    if (typeof rawResponse === 'object') {
+      return [{
+        ...rawResponse,
+        cefrLevel,
+        aiGenerated: true
+      }];
+    }
+
+    return [];
+
+  } catch (error) {
+    console.error('Error in generateExercisesFromText:', error);
+    return [];
+  }
 }
