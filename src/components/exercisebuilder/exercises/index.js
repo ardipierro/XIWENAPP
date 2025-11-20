@@ -30,3 +30,6 @@ export { CollocationMatchingExercise } from './CollocationMatchingExercise';
 export { HotspotImageExercise } from './HotspotImageExercise';
 export { GrammarTransformationExercise } from './GrammarTransformationExercise';
 export { DialogueCompletionExercise } from './DialogueCompletionExercise';
+
+// Editable Exercises (for Diary integration)
+export { EditableWordMarkingExercise } from './EditableWordMarkingExercise';
