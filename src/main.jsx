@@ -20,7 +20,7 @@ import { DashboardConfigProvider } from './contexts/DashboardConfigContext.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 
 // Badge System Initialization
-import { initBadgeSystem } from './config/badgeSystem.js';
+import { applyBadgeColors } from './config/badgeSystem.js';
 
 /**
  * Orden de Providers (de fuera hacia adentro):
@@ -35,7 +35,7 @@ import { initBadgeSystem } from './config/badgeSystem.js';
  */
 
 // Inicializar sistema de badges (aplicar colores guardados)
-initBadgeSystem();
+applyBadgeColors();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

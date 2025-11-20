@@ -23,6 +23,7 @@ import {
   getGlobalBadgeConfig,
   saveGlobalBadgeConfig,
   DEFAULT_GLOBAL_BADGE_CONFIG,
+  applyColorPalette,
 } from '../config/badgeSystem';
 import logger from '../utils/logger';
 
@@ -115,7 +116,6 @@ function useBadgeConfig() {
 
       // Si cambia la paleta de colores, aplicar inmediatamente
       if (key === 'colorPalette') {
-        const { applyColorPalette } = require('../config/badgeSystem');
         setConfig((currentConfig) => {
           const newConfig = applyColorPalette(value, currentConfig);
           // Guardar y disparar evento

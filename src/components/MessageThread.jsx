@@ -2149,7 +2149,7 @@ const MessageBubble = forwardRef(({
           <div className="message-content">
             {highlightText(message.content, searchTerm)}
           </div>
-        ) : null}
+        )}
 
         {/* Footer - Siempre separado del contenido */}
         <div className="message-footer">

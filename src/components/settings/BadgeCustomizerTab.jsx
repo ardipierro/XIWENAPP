@@ -252,48 +252,60 @@ function BadgeCustomizerTab({ user }) {
           {Object.entries(COLOR_PALETTES).map(([key, palette]) => (
             <button
               key={key}
-              onClick={() => handleApplyColorPalette(key)}
+              onClick={() => updateGlobalConfig('colorPalette', key)}
               className="flex-1 p-4 rounded-lg border-2 transition-all hover:scale-105"
               style={{
-                borderColor: 'var(--color-border)',
+                borderColor: globalConfig.colorPalette === key ? 'var(--color-primary)' : 'var(--color-border)',
                 background: 'var(--color-bg-primary)',
               }}
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                    {palette.name}
+                    {palette.label}
                   </span>
                 </div>
 
                 {/* Vista previa de colores */}
-                <div className="flex gap-1.5 flex-wrap justify-center">
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{ backgroundColor: palette.colors.success }}
-                    title="Success"
-                  />
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{ backgroundColor: palette.colors.error }}
-                    title="Error"
-                  />
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{ backgroundColor: palette.colors.warning }}
-                    title="Warning"
-                  />
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{ backgroundColor: palette.colors.info }}
-                    title="Info"
-                  />
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{ backgroundColor: palette.colors.primary }}
-                    title="Primary"
-                  />
-                </div>
+                {palette.colors && (
+                  <div className="flex gap-1.5 flex-wrap justify-center">
+                    {palette.colors.success && (
+                      <div
+                        className="w-8 h-8 rounded-full"
+                        style={{ backgroundColor: palette.colors.success }}
+                        title="Success"
+                      />
+                    )}
+                    {palette.colors.danger && (
+                      <div
+                        className="w-8 h-8 rounded-full"
+                        style={{ backgroundColor: palette.colors.danger }}
+                        title="Danger"
+                      />
+                    )}
+                    {palette.colors.warning && (
+                      <div
+                        className="w-8 h-8 rounded-full"
+                        style={{ backgroundColor: palette.colors.warning }}
+                        title="Warning"
+                      />
+                    )}
+                    {palette.colors.info && (
+                      <div
+                        className="w-8 h-8 rounded-full"
+                        style={{ backgroundColor: palette.colors.info }}
+                        title="Info"
+                      />
+                    )}
+                    {palette.colors.primary && (
+                      <div
+                        className="w-8 h-8 rounded-full"
+                        style={{ backgroundColor: palette.colors.primary }}
+                        title="Primary"
+                      />
+                    )}
+                  </div>
+                )}
 
                 <p className="text-xs text-center" style={{ color: 'var(--color-text-secondary)' }}>
                   {palette.description}
