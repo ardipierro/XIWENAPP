@@ -176,6 +176,14 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
 
   // Manejar click en evento
   const handleEventClick = (event) => {
+    logger.info('🖱️ Event clicked:', {
+      type: event.type,
+      id: event.id,
+      title: event.title,
+      hasSessionData: !!event.sessionData,
+      scheduleId: event.sessionData?.scheduleId || 'NO SCHEDULE ID'
+    }, 'UnifiedCalendar');
+
     // Si es una sesión de clase, abrir modal de edición completo
     if (event.type === 'session') {
       // Extraer los datos de la sesión original y combinarlos con datos del evento

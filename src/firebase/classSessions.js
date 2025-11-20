@@ -288,6 +288,8 @@ export async function updateClassSession(sessionId, updates) {
 
         // Actualizar todas las instancias futuras del mismo horario
         const now = Timestamp.now();
+        logger.info(`🔍 Buscando instancias futuras para scheduleId: ${scheduleId}, desde: ${now.toDate().toISOString()}`);
+
         const futureInstancesQuery = query(
           collection(db, 'class_instances'),
           where('scheduleId', '==', scheduleId),
@@ -296,12 +298,20 @@ export async function updateClassSession(sessionId, updates) {
         );
 
         const futureInstancesSnap = await getDocs(futureInstancesQuery);
-        const updatePromises = futureInstancesSnap.docs.map(doc =>
-          updateDoc(doc.ref, cleanUpdates)
-        );
+        logger.info(`📊 Encontradas ${futureInstancesSnap.size} instancias futuras para actualizar`);
 
-        await Promise.all(updatePromises);
-        logger.info(`✅ ${futureInstancesSnap.size} instancias futuras actualizadas`);
+        if (futureInstancesSnap.size > 0) {
+          const updatePromises = futureInstancesSnap.docs.map(doc => {
+            const docData = doc.data();
+            logger.info(`  → Actualizando instancia ${doc.id}: ${docData.scheduleName} (${docData.scheduledStart.toDate().toLocaleString()})`);
+            return updateDoc(doc.ref, cleanUpdates);
+          });
+
+          await Promise.all(updatePromises);
+          logger.info(`✅ ${futureInstancesSnap.size} instancias futuras actualizadas correctamente`);
+        } else {
+          logger.warn(`⚠️ No se encontraron instancias futuras para actualizar (scheduleId: ${scheduleId})`);
+        }
       } else {
         logger.warn('⚠️ scheduled_classes no encontrado:', scheduleId);
       }
