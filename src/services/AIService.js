@@ -33,20 +33,37 @@ class AIService {
     // We need: { openai: { enabled: true, apiKey: "..." }, gemini: { ... } }
     this.config = {};
 
-    if (rawConfig.credentials) {
-      for (const provider of AI_PROVIDERS) {
-        // Use the credentialsField from provider metadata
-        const apiKeyField = provider.credentialsField || `${provider.id}_api_key`;
-        const apiKey = rawConfig.credentials[apiKeyField];
+    // Build config from credentials (Firestore) + localStorage fallback
+    for (const provider of AI_PROVIDERS) {
+      const apiKeyField = provider.credentialsField || `${provider.id}_api_key`;
 
-        if (apiKey) {
-          this.config[provider.id] = {
-            enabled: true, // If API key exists, consider it enabled
-            apiKey: apiKey,
-            basePrompt: rawConfig[provider.id]?.basePrompt || 'Eres un asistente educativo experto.',
-            tone: rawConfig[provider.id]?.tone || 'professional'
-          };
+      // Try Firestore first
+      let apiKey = rawConfig.credentials?.[apiKeyField];
+
+      // Fallback to localStorage (legacy)
+      if (!apiKey) {
+        const localStorageKeys = [
+          `ai_credentials_${provider.name}`,
+          `ai_credentials_${provider.id}`,
+          `ai_credentials_${provider.label}`
+        ];
+
+        for (const lsKey of localStorageKeys) {
+          apiKey = localStorage.getItem(lsKey);
+          if (apiKey) {
+            logger.info(`Found ${provider.id} API key in localStorage: ${lsKey}`, 'AIService');
+            break;
+          }
         }
+      }
+
+      if (apiKey) {
+        this.config[provider.id] = {
+          enabled: true,
+          apiKey: apiKey,
+          basePrompt: rawConfig[provider.id]?.basePrompt || 'Eres un asistente educativo experto.',
+          tone: rawConfig[provider.id]?.tone || 'professional'
+        };
       }
     }
 
