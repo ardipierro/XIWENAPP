@@ -734,6 +734,12 @@ export const COLOR_PALETTES = {
       default: '#a1a1aa',
     },
   },
+  monochrome: {
+    label: 'Monocromática',
+    description: 'Un solo color para todos',
+    icon: '🎨',
+    isCustom: true, // Indica que requiere un color personalizado
+  },
 };
 
 /**
@@ -756,7 +762,8 @@ export const DEFAULT_GLOBAL_BADGE_CONFIG = {
   fontWeight: 'medium', // 'normal' | 'medium' | 'semibold' | 'bold'
   spacing: 'normal', // 'compact' | 'normal' | 'relaxed'
   defaultBadgeStyle: 'solid', // 'solid' | 'outline' | 'soft' | 'glass' | 'gradient'
-  colorPalette: 'default', // 'default' | 'material' | 'pastel' | 'neon' | 'flat'
+  colorPalette: 'default', // 'default' | 'material' | 'pastel' | 'neon' | 'flat' | 'grayscale' | 'monochrome'
+  monochromeColor: '#5b8fa3', // Color para paleta monocromática
 };
 
 /**
@@ -1182,11 +1189,30 @@ export function updateBadge(key, updates) {
 
 /**
  * Aplica paleta de colores global a todos los badges
+ * @param {string} palette - Nombre de la paleta
+ * @param {Object} badgeConfig - Configuración actual de badges
+ * @param {string} monochromeColor - Color personalizado para paleta monocromática
  */
-export function applyColorPalette(palette, badgeConfig) {
+export function applyColorPalette(palette, badgeConfig, monochromeColor = null) {
   if (palette === 'default') return badgeConfig;
 
-  const paletteColors = COLOR_PALETTES[palette]?.colors;
+  const paletteInfo = COLOR_PALETTES[palette];
+  if (!paletteInfo) return badgeConfig;
+
+  // PALETA MONOCROMÁTICA: Aplicar un solo color a TODOS los badges
+  if (palette === 'monochrome' && monochromeColor) {
+    const updated = {};
+    Object.entries(badgeConfig).forEach(([key, badge]) => {
+      updated[key] = {
+        ...badge,
+        color: monochromeColor,
+      };
+    });
+    return updated;
+  }
+
+  // PALETAS NORMALES: Mapear variant a color de paleta
+  const paletteColors = paletteInfo.colors;
   if (!paletteColors) return badgeConfig;
 
   const updated = {};

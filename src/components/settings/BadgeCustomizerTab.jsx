@@ -799,6 +799,32 @@ function GlobalConfigPanel({
             </button>
           ))}
         </div>
+
+        {/* Selector de color monocromático (solo si paleta monocromática está seleccionada) */}
+        {globalConfig.colorPalette === 'monochrome' && (
+          <div className="mt-3 p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Color Monocromático
+            </label>
+            <p className="text-xs mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+              Este color se aplicará a TODOS los badges
+            </p>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={globalConfig.monochromeColor || '#5b8fa3'}
+                onChange={(e) => onGlobalConfigChange('monochromeColor', e.target.value)}
+                className="w-16 h-10 rounded cursor-pointer"
+                style={{ border: '2px solid var(--color-border)' }}
+              />
+              <div className="flex-1">
+                <code className="px-3 py-1.5 rounded text-sm font-mono" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+                  {globalConfig.monochromeColor || '#5b8fa3'}
+                </code>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* FILA 5: OPCIONES AVANZADAS (horizontal) */}

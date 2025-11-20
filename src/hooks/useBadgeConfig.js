@@ -108,16 +108,16 @@ function useBadgeConfig() {
   }, []);
 
   /**
-   * Actualizar configuración global de badges (con aplicación de paleta)
+   * Actualizar configuración global de badges (con guardado inmediato)
    */
   const updateGlobalConfig = useCallback((key, value) => {
     setGlobalConfig((prev) => {
       const updated = { ...prev, [key]: value };
 
-      // Si cambia la paleta de colores, aplicar inmediatamente
+      // Si cambia la paleta de colores, aplicar inmediatamente a los badges
       if (key === 'colorPalette') {
         setConfig((currentConfig) => {
-          const newConfig = applyColorPalette(value, currentConfig);
+          const newConfig = applyColorPalette(value, currentConfig, updated.monochromeColor);
           // Guardar y disparar evento
           saveBadgeConfig(newConfig);
           window.dispatchEvent(new Event('xiwen_badge_config_changed'));
@@ -125,9 +125,24 @@ function useBadgeConfig() {
         });
       }
 
-      setHasChanges(true);
+      // Si cambia el color monocromático y la paleta es monocromática, reaplicar
+      if (key === 'monochromeColor' && prev.colorPalette === 'monochrome') {
+        setConfig((currentConfig) => {
+          const newConfig = applyColorPalette('monochrome', currentConfig, value);
+          // Guardar y disparar evento
+          saveBadgeConfig(newConfig);
+          window.dispatchEvent(new Event('xiwen_badge_config_changed'));
+          return newConfig;
+        });
+      }
+
+      // CRÍTICO: Guardar configuración global inmediatamente
+      saveGlobalBadgeConfig(updated);
+      window.dispatchEvent(new CustomEvent('globalBadgeConfigChange', { detail: updated }));
+
       return updated;
     });
+    setHasChanges(false); // Ya se guardó, no hay cambios pendientes
   }, []);
 
   /**
