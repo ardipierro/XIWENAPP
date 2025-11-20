@@ -53,7 +53,7 @@ export async function getAIConfig() {
         basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
         tone: 'professional'
       },
-      google: {
+      gemini: {
         enabled: false,
         apiKey: '',
         basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
@@ -63,6 +63,12 @@ export async function getAIConfig() {
         enabled: false,
         apiKey: '',
         basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
+        tone: 'professional'
+      },
+      elevenlabs: {
+        enabled: false,
+        apiKey: '',
+        basePrompt: 'Eres un asistente de voz experto. Genera audio claro y natural.',
         tone: 'professional'
       }
     };

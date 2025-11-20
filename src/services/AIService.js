@@ -27,12 +27,24 @@ class AIService {
   async initialize() {
     this.config = await getAIConfig();
 
+    logger.info('AI Config loaded:', 'AIService', {
+      providers: Object.keys(this.config || {}),
+      enabledProviders: Object.entries(this.config || {})
+        .filter(([_, cfg]) => cfg?.enabled)
+        .map(([id]) => id)
+    });
+
     // Find first enabled provider
     for (const provider of AI_PROVIDERS) {
       if (this.config[provider.id]?.enabled && this.config[provider.id]?.apiKey) {
         this.currentProvider = provider.id;
+        logger.info(`Selected AI provider: ${provider.id}`, 'AIService');
         break;
       }
+    }
+
+    if (!this.currentProvider) {
+      logger.warn('No AI provider found with both enabled=true and apiKey set', 'AIService');
     }
 
     return this.currentProvider !== null;
@@ -74,9 +86,20 @@ class AIService {
    * Check if service is configured
    */
   isConfigured() {
-    return this.currentProvider !== null &&
+    const isConfigured = this.currentProvider !== null &&
            this.config[this.currentProvider]?.enabled &&
            !!this.config[this.currentProvider]?.apiKey;
+
+    // Debug logging
+    logger.info('AI Service Configuration Check:', 'AIService', {
+      currentProvider: this.currentProvider,
+      hasConfig: !!this.config,
+      providerEnabled: this.config?.[this.currentProvider]?.enabled,
+      hasApiKey: !!this.config?.[this.currentProvider]?.apiKey,
+      isConfigured
+    });
+
+    return isConfigured;
   }
 
   /**
