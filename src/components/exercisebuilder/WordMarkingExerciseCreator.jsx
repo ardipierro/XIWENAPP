@@ -641,7 +641,6 @@ IMPORTANTE:
             </div>
           </div>
         )}
-      </div>
 
       {/* Botones de acción */}
       <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
