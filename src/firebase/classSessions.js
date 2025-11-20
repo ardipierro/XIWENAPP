@@ -206,14 +206,26 @@ export async function createClassSession(sessionData) {
 }
 
 /**
- * Actualizar una sesión existente (solo class_instances)
- * @param {string} sessionId - ID de la sesión
+ * Actualizar una sesión existente
+ * Si la instancia pertenece a un scheduled_classes, actualiza el horario original
+ * @param {string} sessionId - ID de la sesión/instancia
  * @param {Object} updates - Campos a actualizar
  * @returns {Promise<Object>} - {success: boolean, error?: string}
  */
 export async function updateClassSession(sessionId, updates) {
   try {
-    // Normalizar campos: convertir 'name' a 'scheduleName' para class_instances
+    // 1. Obtener la instancia para ver si pertenece a un horario
+    const instanceRef = doc(db, 'class_instances', sessionId);
+    const instanceSnap = await getDoc(instanceRef);
+
+    if (!instanceSnap.exists()) {
+      return { success: false, error: 'Sesión no encontrada' };
+    }
+
+    const instance = instanceSnap.data();
+    const scheduleId = instance.scheduleId;
+
+    // 2. Normalizar campos: convertir 'name' a 'scheduleName' y 'courseName' para class_instances
     const normalizedUpdates = {
       ...updates,
       updatedAt: serverTimestamp()
@@ -229,8 +241,69 @@ export async function updateClassSession(sessionId, updates) {
       Object.entries(normalizedUpdates).filter(([_, value]) => value !== undefined)
     );
 
-    const docRef = doc(db, 'class_instances', sessionId);
-    await updateDoc(docRef, cleanUpdates);
+    // 3. Si la instancia pertenece a un scheduled_classes, actualizar el horario original
+    if (scheduleId) {
+      logger.info('🔄 Instancia pertenece a scheduled_classes:', scheduleId);
+
+      // Preparar updates para scheduled_classes
+      const scheduleUpdates = {
+        updatedAt: serverTimestamp()
+      };
+
+      // Mapear campos de la sesión a campos de scheduled_classes
+      if (updates.name !== undefined) {
+        scheduleUpdates.courseName = updates.name;
+      }
+      if (updates.description !== undefined) {
+        scheduleUpdates.description = updates.description;
+      }
+      if (updates.videoProvider !== undefined) {
+        scheduleUpdates.videoProvider = updates.videoProvider;
+      }
+      if (updates.whiteboardType !== undefined) {
+        scheduleUpdates.whiteboardType = updates.whiteboardType;
+      }
+      if (updates.creditCost !== undefined) {
+        scheduleUpdates.creditCost = updates.creditCost;
+      }
+      if (updates.maxParticipants !== undefined) {
+        scheduleUpdates.maxParticipants = updates.maxParticipants;
+      }
+      if (updates.duration !== undefined) {
+        scheduleUpdates.duration = updates.duration;
+      }
+
+      // Actualizar el scheduled_classes original
+      const scheduleRef = doc(db, 'scheduled_classes', scheduleId);
+      const scheduleSnap = await getDoc(scheduleRef);
+
+      if (scheduleSnap.exists()) {
+        await updateDoc(scheduleRef, scheduleUpdates);
+        logger.info('✅ scheduled_classes actualizado:', scheduleId);
+
+        // Actualizar todas las instancias futuras del mismo horario
+        const now = Timestamp.now();
+        const futureInstancesQuery = query(
+          collection(db, 'class_instances'),
+          where('scheduleId', '==', scheduleId),
+          where('scheduledStart', '>=', now),
+          where('status', '==', 'scheduled')
+        );
+
+        const futureInstancesSnap = await getDocs(futureInstancesQuery);
+        const updatePromises = futureInstancesSnap.docs.map(doc =>
+          updateDoc(doc.ref, cleanUpdates)
+        );
+
+        await Promise.all(updatePromises);
+        logger.info(`✅ ${futureInstancesSnap.size} instancias futuras actualizadas`);
+      } else {
+        logger.warn('⚠️ scheduled_classes no encontrado:', scheduleId);
+      }
+    }
+
+    // 4. Actualizar la instancia actual de todas formas
+    await updateDoc(instanceRef, cleanUpdates);
 
     logger.info('✅ Sesión actualizada:', sessionId);
     return { success: true };
@@ -855,6 +928,170 @@ export async function createInstantMeetSession(config) {
   } catch (error) {
     logger.error('❌ Error creando clase instantánea:', error);
     return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Generar instancias de clase para un scheduled_classes
+ * Esta función es para compatibilidad con el sistema scheduled_classes
+ * @param {string} scheduleId - ID del scheduled_classes
+ * @param {Object} schedule - Datos del horario
+ * @param {number} weeksToGenerate - Número de semanas a generar
+ * @returns {Promise<Object>}
+ */
+export async function generateSessionsForScheduledClass(scheduleId, schedule, weeksToGenerate = 4) {
+  try {
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + (weeksToGenerate * 7));
+
+    let instancesCreated = 0;
+
+    // Iterar cada día desde ahora hasta endDate
+    for (let date = new Date(now); date <= endDate; date.setDate(date.getDate() + 1)) {
+      const dayOfWeek = date.getDay();
+
+      // Ver si este día coincide con el dayOfWeek del horario
+      if (dayOfWeek === schedule.dayOfWeek) {
+        const [hours, minutes] = schedule.startTime.split(':');
+        const classDateTime = new Date(date);
+        classDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+        // Solo crear si es fecha futura
+        if (classDateTime >= now) {
+          const scheduledStart = Timestamp.fromDate(classDateTime);
+
+          // Verificar que no exista ya esta instancia
+          const existingQuery = query(
+            collection(db, 'class_instances'),
+            where('scheduleId', '==', scheduleId),
+            where('scheduledStart', '==', scheduledStart)
+          );
+          const existingSnapshot = await getDocs(existingQuery);
+
+          if (existingSnapshot.empty) {
+            // Calcular duración
+            const [endHours, endMinutes] = schedule.endTime.split(':');
+            const endDateTime = new Date(classDateTime);
+            endDateTime.setHours(parseInt(endHours), parseInt(endMinutes), 0, 0);
+            const scheduledEnd = Timestamp.fromDate(endDateTime);
+
+            // Generar roomName único
+            const roomName = `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            // Crear instancia
+            const instanceData = {
+              scheduleId,
+              scheduleName: schedule.courseName || 'Clase',
+              scheduleType: 'scheduled_class',
+
+              // Fecha/hora
+              scheduledStart,
+              scheduledEnd,
+
+              // Info del profesor y grupo
+              teacherId: schedule.teacherId,
+              teacherName: schedule.teacherName || '',
+              groupId: schedule.groupId,
+              groupName: schedule.groupName,
+              courseId: null,
+              courseName: schedule.courseName,
+
+              // Modalidad
+              videoProvider: schedule.videoProvider || 'meet',
+              whiteboardType: schedule.whiteboardType || 'none',
+              roomName,
+
+              // Estudiantes (vacío por ahora, se asignan dinámicamente)
+              eligibleStudentIds: [],
+              attendedStudentIds: [],
+
+              // Estado
+              status: 'scheduled',
+              startedAt: null,
+              endedAt: null,
+
+              // Meta
+              duration: schedule.duration || 60,
+              creditCost: schedule.creditCost || 1,
+
+              // Video config
+              maxParticipants: schedule.maxParticipants || 30,
+              recordingEnabled: false,
+              meetSessionId: null,
+              videoMeetingUrl: null,
+
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp()
+            };
+
+            await addDoc(collection(db, 'class_instances'), instanceData);
+            instancesCreated++;
+          }
+        }
+      }
+    }
+
+    logger.info(`✅ ${instancesCreated} instancias generadas para scheduled_classes ${scheduleId}`);
+    return { success: true, created: instancesCreated };
+  } catch (error) {
+    logger.error('❌ Error generando instancias para scheduled_classes:', error);
+    return { success: false, created: 0, error: error.message };
+  }
+}
+
+/**
+ * Obtener estadísticas de un scheduled_classes
+ * @param {string} scheduleId - ID del scheduled_classes
+ * @returns {Promise<Object>} - { total, upcoming, completed, nextSession }
+ */
+export async function getScheduledClassStats(scheduleId) {
+  try {
+    const now = Timestamp.now();
+
+    // Obtener todas las instancias del horario
+    const allInstancesQuery = query(
+      collection(db, 'class_instances'),
+      where('scheduleId', '==', scheduleId),
+      orderBy('scheduledStart', 'asc')
+    );
+    const allInstancesSnap = await getDocs(allInstancesQuery);
+
+    const total = allInstancesSnap.size;
+    let upcoming = 0;
+    let completed = 0;
+    let nextSession = null;
+
+    allInstancesSnap.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.status === 'ended') {
+        completed++;
+      } else if (data.status === 'scheduled' && data.scheduledStart >= now) {
+        upcoming++;
+        if (!nextSession) {
+          nextSession = {
+            id: doc.id,
+            date: data.scheduledStart,
+            ...data
+          };
+        }
+      }
+    });
+
+    return {
+      total,
+      upcoming,
+      completed,
+      nextSession
+    };
+  } catch (error) {
+    logger.error('❌ Error obteniendo estadísticas de scheduled_classes:', error);
+    return {
+      total: 0,
+      upcoming: 0,
+      completed: 0,
+      nextSession: null
+    };
   }
 }
 
