@@ -26,32 +26,35 @@ export function ExerciseBuilderModal({ isOpen, onClose }) {
         icon={Sparkles}
         size="xl"
       >
+        {/* Pestañas de navegación */}
         <BaseTabs
-          value={activeTab}
-          onChange={setActiveTab}
           tabs={[
             {
-              value: 'ai-generator',
+              id: 'ai-generator',
               label: 'Generador con IA',
               icon: Wand2
             },
             {
-              value: 'word-marking',
+              id: 'word-marking',
               label: 'Marcado de Palabras',
               icon: Highlighter
             }
           ]}
-        >
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="underline"
+        />
+
+        {/* Contenido de las pestañas */}
+        <div className="pt-6">
           {/* Pestaña: Generador con IA */}
           {activeTab === 'ai-generator' && (
-            <div className="pt-4">
-              <AIExerciseGenerator />
-            </div>
+            <AIExerciseGenerator />
           )}
 
           {/* Pestaña: Marcado de Palabras */}
           {activeTab === 'word-marking' && (
-            <div className="pt-4 space-y-4">
+            <div className="space-y-4">
               <div className="text-center">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   Ejercicios de Marcado de Palabras
@@ -91,7 +94,7 @@ export function ExerciseBuilderModal({ isOpen, onClose }) {
               </div>
             </div>
           )}
-        </BaseTabs>
+        </div>
       </BaseModal>
 
       {/* Modal de WordMarking (standalone) */}
