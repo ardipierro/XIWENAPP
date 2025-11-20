@@ -721,6 +721,19 @@ export const COLOR_PALETTES = {
       default: '#95a5a6',
     },
   },
+  grayscale: {
+    label: 'Escala de Grises',
+    description: 'Tonos monocromáticos neutros',
+    icon: '🌫️',
+    colors: {
+      primary: '#52525b',
+      success: '#71717a',
+      warning: '#a1a1aa',
+      danger: '#3f3f46',
+      info: '#71717a',
+      default: '#a1a1aa',
+    },
+  },
 };
 
 /**

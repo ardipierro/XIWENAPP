@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { getGlobalBadgeConfig } from '../../config/badgeSystem';
+
 /**
  * BaseBadge - Componente badge/tag base reutilizable (100% Tailwind)
  *
@@ -21,16 +24,41 @@
  */
 function BaseBadge({
   variant = 'default',
-  badgeStyle = 'solid',
-  size = 'md',
+  badgeStyle,
+  size,
   icon: Icon,
   dot = false,
-  rounded = true,
+  rounded,
   onRemove,
   children,
   className = '',
   style = {},
 }) {
+  // Leer configuración global
+  const [globalConfig, setGlobalConfig] = useState(getGlobalBadgeConfig());
+
+  // Escuchar cambios en configuración global
+  useEffect(() => {
+    const handleConfigChange = () => {
+      setGlobalConfig(getGlobalBadgeConfig());
+    };
+    window.addEventListener('globalBadgeConfigChange', handleConfigChange);
+    window.addEventListener('xiwen_badge_config_changed', handleConfigChange);
+    return () => {
+      window.removeEventListener('globalBadgeConfigChange', handleConfigChange);
+      window.removeEventListener('xiwen_badge_config_changed', handleConfigChange);
+    };
+  }, []);
+
+  // Aplicar configuración global si no se provee prop específico
+  const effectiveBadgeStyle = badgeStyle || globalConfig.defaultBadgeStyle || 'solid';
+  const effectiveSize = size || globalConfig.size || 'md';
+  const effectiveBorderRadius = globalConfig.borderRadius || 'rounded';
+  const effectiveFontWeight = globalConfig.fontWeight || 'medium';
+  const effectiveSpacing = globalConfig.spacing || 'normal';
+
+  // Si rounded no está especificado, usar borderRadius de config
+  const effectiveRounded = rounded !== undefined ? rounded : (effectiveBorderRadius === 'pill');
   // Variant styles using CSS variables
   const getVariantStyle = (variant, badgeStyle) => {
     const solidStyles = {
@@ -222,31 +250,85 @@ function BaseBadge({
     return styles[variant] || styles.default;
   };
 
-  // Size styles
-  const sizes = {
-    xs: 'px-1.5 py-0.5 text-xs',
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-2.5 py-1 text-sm',
-    lg: 'px-3 py-1.5 text-base',
-    xl: 'px-4 py-2 text-lg',
+  // Size styles (con soporte para spacing)
+  const getSizeClasses = (size, spacing) => {
+    const baseSize = {
+      xs: { text: 'text-xs', icon: 10 },
+      sm: { text: 'text-xs', icon: 12 },
+      md: { text: 'text-sm', icon: 14 },
+      lg: { text: 'text-base', icon: 16 },
+      xl: { text: 'text-lg', icon: 18 },
+    }[size] || { text: 'text-sm', icon: 14 };
+
+    const spacingClasses = {
+      compact: {
+        xs: 'px-1 py-0.5',
+        sm: 'px-1.5 py-0.5',
+        md: 'px-2 py-0.5',
+        lg: 'px-2.5 py-1',
+        xl: 'px-3 py-1.5',
+      },
+      normal: {
+        xs: 'px-1.5 py-0.5',
+        sm: 'px-2 py-0.5',
+        md: 'px-2.5 py-1',
+        lg: 'px-3 py-1.5',
+        xl: 'px-4 py-2',
+      },
+      relaxed: {
+        xs: 'px-2 py-1',
+        sm: 'px-2.5 py-1',
+        md: 'px-3 py-1.5',
+        lg: 'px-4 py-2',
+        xl: 'px-5 py-2.5',
+      },
+    }[spacing] || {
+      xs: 'px-1.5 py-0.5',
+      sm: 'px-2 py-0.5',
+      md: 'px-2.5 py-1',
+      lg: 'px-3 py-1.5',
+      xl: 'px-4 py-2',
+    };
+
+    return {
+      classes: `${spacingClasses[size]} ${baseSize.text}`,
+      iconSize: baseSize.icon,
+    };
   };
 
-  const iconSizes = {
-    xs: 10,
-    sm: 12,
-    md: 14,
-    lg: 16,
-    xl: 18,
+  // Border radius classes
+  const getBorderRadiusClass = (borderRadius, isRounded) => {
+    if (isRounded) return 'rounded-full';
+
+    switch (borderRadius) {
+      case 'sharp': return 'rounded-none';
+      case 'rounded': return 'rounded-md';
+      case 'pill': return 'rounded-full';
+      default: return 'rounded-md';
+    }
   };
 
-  const variantStyle = getVariantStyle(variant, badgeStyle);
+  // Font weight classes
+  const getFontWeightClass = (fontWeight) => {
+    switch (fontWeight) {
+      case 'normal': return 'font-normal';
+      case 'medium': return 'font-medium';
+      case 'semibold': return 'font-semibold';
+      case 'bold': return 'font-bold';
+      default: return 'font-medium';
+    }
+  };
+
+  const sizeConfig = getSizeClasses(effectiveSize, effectiveSpacing);
+  const variantStyle = getVariantStyle(variant, effectiveBadgeStyle);
 
   return (
     <span
       className={`
-        inline-flex items-center gap-1.5 font-medium
-        ${rounded ? 'rounded-full' : 'rounded-md'}
-        ${sizes[size]}
+        inline-flex items-center gap-1.5
+        ${getBorderRadiusClass(effectiveBorderRadius, effectiveRounded)}
+        ${getFontWeightClass(effectiveFontWeight)}
+        ${sizeConfig.classes}
         ${className}
       `}
       style={{ ...variantStyle, ...style }}
@@ -258,7 +340,7 @@ function BaseBadge({
 
       {/* Icon */}
       {Icon && (
-        <Icon size={iconSizes[size]} strokeWidth={2} />
+        <Icon size={sizeConfig.iconSize} strokeWidth={2} />
       )}
 
       {/* Content */}

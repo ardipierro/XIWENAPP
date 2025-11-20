@@ -131,7 +131,7 @@ function useBadgeConfig() {
   }, []);
 
   /**
-   * Cambiar el estilo de TODOS los badges (solid/outline)
+   * Cambiar el estilo de TODOS los badges (solid/outline/soft/glass/gradient)
    */
   const updateAllBadgeStyles = useCallback((badgeStyle) => {
     setConfig((prev) => {
@@ -142,10 +142,15 @@ function useBadgeConfig() {
           badgeStyle,
         };
       });
+
+      // Guardar inmediatamente para que se aplique en tiempo real
+      saveBadgeConfig(updated);
+      window.dispatchEvent(new Event('xiwen_badge_config_changed'));
+      logger.info(`All badges updated to style: ${badgeStyle}`, 'useBadgeConfig');
+
       return updated;
     });
-    setHasChanges(true);
-    logger.info(`All badges updated to style: ${badgeStyle}`, 'useBadgeConfig');
+    setHasChanges(false); // Ya se guardó, no hay cambios pendientes
   }, []);
 
   /**
