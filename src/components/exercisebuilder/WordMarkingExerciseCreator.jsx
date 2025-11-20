@@ -588,6 +588,24 @@ IMPORTANTE:
               </div>
             </div>
 
+            {/* Debug button - TEMPORAL */}
+            <BaseButton
+              variant="outline"
+              onClick={async () => {
+                const { getAIConfig } = await import('../../firebase/aiConfig');
+                const config = await getAIConfig();
+                console.log('=== FIRESTORE AI CONFIG ===');
+                console.table(Object.entries(config).map(([id, cfg]) => ({
+                  id,
+                  enabled: cfg?.enabled,
+                  hasApiKey: !!cfg?.apiKey,
+                  apiKeyLength: cfg?.apiKey?.length || 0
+                })));
+              }}
+            >
+              🐛 Debug Config
+            </BaseButton>
+
             {/* Botón generar */}
             <BaseButton
               variant="primary"

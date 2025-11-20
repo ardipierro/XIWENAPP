@@ -25,14 +25,39 @@ class AIService {
    * Initialize service (load config from Firestore)
    */
   async initialize() {
-    this.config = await getAIConfig();
+    const rawConfig = await getAIConfig();
 
-    logger.info('AI Config loaded:', 'AIService', {
-      providers: Object.keys(this.config || {}),
-      enabledProviders: Object.entries(this.config || {})
-        .filter(([_, cfg]) => cfg?.enabled)
-        .map(([id]) => id)
-    });
+    // Adapt config structure from credentials format to expected format
+    // Firestore stores: { credentials: { openai_api_key: "...", gemini_api_key: "..." } }
+    // We need: { openai: { enabled: true, apiKey: "..." }, gemini: { ... } }
+    this.config = {};
+
+    if (rawConfig.credentials) {
+      for (const provider of AI_PROVIDERS) {
+        const apiKeyField = `${provider.id}_api_key`;
+        const apiKey = rawConfig.credentials[apiKeyField];
+
+        if (apiKey) {
+          this.config[provider.id] = {
+            enabled: true, // If API key exists, consider it enabled
+            apiKey: apiKey,
+            basePrompt: rawConfig[provider.id]?.basePrompt || 'Eres un asistente educativo experto.',
+            tone: rawConfig[provider.id]?.tone || 'professional'
+          };
+        }
+      }
+    }
+
+    // Debug: Show full config status for each provider
+    const configStatus = AI_PROVIDERS.map(provider => ({
+      id: provider.id,
+      enabled: this.config[provider.id]?.enabled || false,
+      hasApiKey: !!this.config[provider.id]?.apiKey,
+      apiKeyLength: this.config[provider.id]?.apiKey?.length || 0
+    }));
+
+    console.table(configStatus);
+    logger.info('AI Config loaded (see table above):', 'AIService');
 
     // Find first enabled provider
     for (const provider of AI_PROVIDERS) {
@@ -44,7 +69,7 @@ class AIService {
     }
 
     if (!this.currentProvider) {
-      logger.warn('No AI provider found with both enabled=true and apiKey set', 'AIService');
+      logger.warn('No AI provider found with API key in credentials', 'AIService');
     }
 
     return this.currentProvider !== null;
