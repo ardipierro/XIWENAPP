@@ -106,7 +106,7 @@ class AIService {
         provider: this.currentProvider
       };
     } catch (error) {
-      console.error('AIService error:', error);
+      logger.error('AIService error:', 'AIService', error);
       return {
         success: false,
         error: error.message || 'Error al generar ejercicios'
@@ -234,7 +234,7 @@ export async function generateExercisesFromText(promptOrText, options = {}) {
 
     if (!aiServiceInstance.isConfigured()) {
       // Fallback: retornar ejercicio de ejemplo si no hay IA configurada
-      console.warn('No AI provider configured, returning empty array');
+      logger.info('No AI provider configured, returning empty array', 'AIService');
       return [];
     }
 
@@ -248,7 +248,7 @@ export async function generateExercisesFromText(promptOrText, options = {}) {
     });
 
     if (!result.success) {
-      console.error('AI generation failed:', result.error);
+      logger.error('AI generation failed:', 'AIService', result.error);
       return [];
     }
 
@@ -300,7 +300,7 @@ export async function generateExercisesFromText(promptOrText, options = {}) {
     return [];
 
   } catch (error) {
-    console.error('Error in generateExercisesFromText:', error);
+    logger.error('Error in generateExercisesFromText:', 'AIService', error);
     return [];
   }
 }
