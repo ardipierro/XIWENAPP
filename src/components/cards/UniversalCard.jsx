@@ -74,7 +74,7 @@ export function UniversalCard({
   // Layout & Variant
   variant = 'default',      // 'default' | 'user' | 'class' | 'content' | 'stats' | 'compact'
   size = 'md',             // 'sm' | 'md' | 'lg' | 'xl'
-  layout = 'vertical',     // 'vertical' | 'horizontal'
+  layout = 'vertical',     // 'vertical' | 'horizontal' | 'row'
 
   // Header
   image,                   // Image URL (para variant='content')
@@ -150,30 +150,50 @@ export function UniversalCard({
 
   // Generate classes and styles - PASS RESOLVED variantConfig object (BUG FIX)
   const classes = generateCardClasses(variantConfig, size, layout);
-  const styles = useMemo(() => ({
-    container: {
-      backgroundColor: 'var(--color-bg-secondary)',
-      border: `1px solid ${variantConfig.normalBorderColor}`,
-      boxShadow: variantConfig.normalShadow,
-      display: 'flex',
-      flexDirection: 'column',
-      ...(variantConfig.cardHeight
-        ? { height: variantConfig.cardHeight, minHeight: 'unset', overflow: 'hidden' }
-        : { minHeight: layout === 'horizontal' ? '96px' : sizeConfig.minHeight }
-      ),
-      transitionDuration: variantConfig.transitionDuration,
-      transitionTimingFunction: variantConfig.transitionTiming,
-    },
-    header: {
-      height: layout === 'horizontal' ? '100%' : variantConfig.headerHeight,
-      width: layout === 'horizontal' ? layoutConfig.headerWidth : 'auto',
-    },
-    content: {
-      padding: layout === 'horizontal' && layoutConfig.contentPadding
-        ? layoutConfig.contentPadding
-        : variantConfig.contentPadding,
-    },
-  }), [variantConfig, layout, sizeConfig, layoutConfig]);
+  const styles = useMemo(() => {
+    // Determinar minHeight según layout y variant
+    let minHeight;
+    if (layout === 'row') {
+      // Layout row: altura basada en el tipo de variant
+      if (variant === 'user') {
+        minHeight = layoutConfig.minHeightUser || '96px';
+      } else if (variant === 'compact') {
+        minHeight = layoutConfig.minHeightCompact || '80px';
+      } else {
+        minHeight = layoutConfig.minHeight || '140px';
+      }
+    } else if (layout === 'horizontal') {
+      minHeight = '96px';
+    } else {
+      minHeight = sizeConfig.minHeight;
+    }
+
+    return {
+      container: {
+        backgroundColor: 'var(--color-bg-secondary)',
+        border: `1px solid ${variantConfig.normalBorderColor}`,
+        boxShadow: variantConfig.normalShadow,
+        display: 'flex',
+        flexDirection: layout === 'row' || layout === 'horizontal' ? 'row' : 'column',
+        alignItems: layout === 'row' ? 'stretch' : undefined,
+        ...(variantConfig.cardHeight && layout !== 'row'
+          ? { height: variantConfig.cardHeight, minHeight: 'unset', overflow: 'hidden' }
+          : { minHeight }
+        ),
+        transitionDuration: variantConfig.transitionDuration,
+        transitionTimingFunction: variantConfig.transitionTiming,
+      },
+      header: {
+        height: layout === 'horizontal' || layout === 'row' ? '100%' : variantConfig.headerHeight,
+        width: layout === 'horizontal' || layout === 'row' ? layoutConfig.headerWidth : 'auto',
+      },
+      content: {
+        padding: (layout === 'horizontal' || layout === 'row') && layoutConfig.contentPadding
+          ? layoutConfig.contentPadding
+          : variantConfig.contentPadding,
+      },
+    };
+  }, [variantConfig, layout, variant, sizeConfig, layoutConfig]);
 
   /**
    * Handle mouse enter
@@ -517,18 +537,135 @@ export function UniversalCard({
       {renderLiveIndicator()}
 
       {/* Header - Solo en modo vertical */}
-      {layout !== 'horizontal' && renderHeader()}
+      {layout === 'vertical' && renderHeader()}
 
       {/* Content - FORZAR flex-1 para que use todo el espacio restante */}
       <div
-        className={`${classes.content} flex-1 flex flex-col`}
+        className={`${classes.content} flex-1 flex ${layout === 'row' ? 'flex-row items-stretch' : 'flex-col'}`}
         style={{
           ...styles.content,
           minHeight: 0, // Importante para que el overflow funcione con flex
           overflow: 'hidden' // Evitar que el contenido empuje fuera del contenedor
         }}
       >
-        {layout === 'horizontal' ? (
+        {layout === 'row' ? (
+          <>
+            {/* ROW Layout - Vista de Lista Estirada */}
+
+            {/* Sección 1: Imagen/Avatar/Ícono cuadrado (ancho fijo) */}
+            <div
+              className="flex-shrink-0 overflow-hidden flex items-center justify-center"
+              style={{
+                width: variant === 'user' ? layoutConfig.avatarWidth :
+                       variant === 'content' && image ? layoutConfig.imageWidth :
+                       layoutConfig.iconWidth,
+                backgroundColor: variant === 'user' || !image ? 'var(--color-bg-tertiary)' : 'transparent',
+              }}
+            >
+              {/* Imagen (variant='content') */}
+              {image && (
+                <img
+                  src={image}
+                  alt={title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              )}
+
+              {/* Avatar (variant='user') */}
+              {!image && (avatar || userId) && (
+                userId ? (
+                  <UserAvatar
+                    userId={userId}
+                    name={userName || title}
+                    email={userEmail || subtitle}
+                    size="lg"
+                  />
+                ) : (
+                  <div
+                    className="rounded-full flex items-center justify-center text-white font-extrabold shadow-lg"
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      fontSize: '24px',
+                      backgroundColor: avatarColor || '#3b82f6',
+                    }}
+                  >
+                    {typeof avatar === 'string' && avatar.length <= 2
+                      ? avatar.toUpperCase()
+                      : avatar}
+                  </div>
+                )
+              )}
+
+              {/* Ícono (variant='default', 'compact', etc.) */}
+              {!image && !avatar && !userId && Icon && (
+                <Icon size={48} className="text-gray-500 dark:text-gray-400" strokeWidth={2} />
+              )}
+            </div>
+
+            {/* Sección 2: Contenido principal (flex-1, se estira) */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center" style={{ padding: styles.content.padding }}>
+              {/* Badges */}
+              {variantConfig.showBadges && badges && badges.length > 0 && (
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  {renderBadges()}
+                </div>
+              )}
+
+              {/* Título */}
+              {title && (
+                <h3 className="text-lg font-bold truncate mb-1 text-gray-900 dark:text-white">
+                  {title}
+                </h3>
+              )}
+
+              {/* Subtitle */}
+              {subtitle && (
+                <p className="text-sm line-clamp-1 mb-2 text-gray-600 dark:text-gray-400">
+                  {subtitle}
+                </p>
+              )}
+
+              {/* Description */}
+              {description && (
+                <p className="text-sm line-clamp-1 mb-2 text-gray-600 dark:text-gray-400">
+                  {description}
+                </p>
+              )}
+
+              {/* Meta Info (para variant='class') */}
+              {renderMeta()}
+
+              {/* Children custom */}
+              {children}
+            </div>
+
+            {/* Sección 3: Stats (si existen) */}
+            {stats && stats.length > 0 && variantConfig.showStats && (
+              <div className="flex-shrink-0 flex items-center gap-6 px-5">
+                {renderStats()}
+              </div>
+            )}
+
+            {/* Sección 4: Actions (botones al final) */}
+            <div className="flex-shrink-0 flex items-center gap-2 pr-4" onClick={(e) => e.stopPropagation()}>
+              {actions && renderActions()}
+
+              {/* Delete Button */}
+              {onDelete && variantConfig.deleteButton?.enabled && (
+                <CardDeleteButton
+                  onDelete={onDelete}
+                  variant={variantConfig.deleteButton.variant || 'solid'}
+                  size={variantConfig.deleteButton.size || 'md'}
+                  confirmMessage={deleteConfirmMessage}
+                  requireConfirm={variantConfig.deleteButton.requireConfirm}
+                  disabled={disabled}
+                />
+              )}
+            </div>
+          </>
+        ) : layout === 'horizontal' ? (
           <>
             {/* Horizontal Layout - Avatar/Icono pequeño a la izquierda */}
 

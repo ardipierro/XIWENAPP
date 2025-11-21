@@ -7,7 +7,8 @@ import {
   MapPin, Loader, X, Info
 } from 'lucide-react';
 import BaseButton from './common/BaseButton';
-import { CardDeleteButton } from './cards';
+import { CardDeleteButton, UniversalCard } from './cards';
+import SearchBar from './common/SearchBar';
 import {
   createScheduledClass,
   createScheduledClassMultipleDays,
@@ -30,6 +31,8 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
   const [showModal, setShowModal] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [formData, setFormData] = useState({
     daysOfWeek: [1], // Array de días seleccionados (Lunes por defecto)
@@ -280,6 +283,17 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
         </div>
       )}
 
+      {/* Search + View Toggle */}
+      {schedules.length > 0 && (
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar horarios..."
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+      )}
+
       {/* Schedules List */}
       {schedules.length === 0 ? (
         <div className="empty-schedules">
@@ -291,7 +305,75 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
             Agrega un horario recurrente para que se generen las sesiones automáticamente
           </p>
         </div>
+      ) : viewMode === 'list' ? (
+        /* VISTA LIST con UniversalCard layout="row" */
+        <div className="w-full flex flex-col gap-3 mt-4">
+          {schedules.map(schedule => {
+            const stats = scheduleStats[schedule.id] || {};
+            const nextSession = stats.nextSession;
+            const isLowSessions = (stats.upcoming || 0) < 3;
+            const hasNoSessions = stats.upcoming === 0;
+
+            return (
+              <UniversalCard
+                key={schedule.id}
+                variant="class"
+                layout="row"
+                size="md"
+                icon={Calendar}
+                title={`${getDayName(schedule.dayOfWeek)} | ${schedule.startTime} - ${schedule.endTime}`}
+                subtitle={schedule.courseName || 'Sin asignatura'}
+                badges={[
+                  schedule.autoRenew && { variant: 'primary', icon: Repeat, children: 'Auto-renovación' },
+                  hasNoSessions && { variant: 'danger', children: 'Sin sesiones' },
+                  isLowSessions && !hasNoSessions && { variant: 'warning', children: 'Pocas sesiones' },
+                ].filter(Boolean)}
+                stats={[
+                  { label: 'Realizadas', value: stats.completed || 0, icon: CheckCircle },
+                  { label: 'Pendientes', value: stats.upcoming || 0, icon: Clock },
+                ]}
+                meta={[
+                  schedule.meetingLink && { icon: <Video size={14} />, text: 'Videollamada disponible' },
+                  { icon: <CreditCard size={14} />, text: `${schedule.creditCost} crédito${schedule.creditCost !== 1 ? 's' : ''}` },
+                  nextSession && { icon: <MapPin size={14} />, text: `Próxima: ${nextSession.date?.toDate?.().toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) || 'N/A'}` },
+                ].filter(Boolean)}
+                actions={[
+                  <BaseButton
+                    key="generate"
+                    variant={hasNoSessions || isLowSessions ? 'primary' : 'ghost'}
+                    icon={RefreshCw}
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGenerateMoreSessions(schedule);
+                    }}
+                    title="Generar más sesiones"
+                  >
+                    Generar
+                  </BaseButton>,
+                  schedule.meetingLink && (
+                    <BaseButton
+                      key="open-link"
+                      variant="ghost"
+                      icon={Video}
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(schedule.meetingLink, '_blank', 'noopener,noreferrer');
+                      }}
+                    >
+                      Abrir
+                    </BaseButton>
+                  )
+                ].filter(Boolean)}
+                onDelete={() => handleDelete(schedule.id)}
+                deleteConfirmMessage={`¿Eliminar horario de ${getDayName(schedule.dayOfWeek)}?`}
+              />
+            );
+          })}
+        </div>
       ) : (
+        /* VISTA GRID (diseño original con CSS custom) */
         <div className="schedules-list">
           {schedules.map(schedule => {
             const stats = scheduleStats[schedule.id] || {};

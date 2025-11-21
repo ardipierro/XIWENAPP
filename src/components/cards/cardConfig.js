@@ -388,6 +388,26 @@ export const cardLayouts = {
     contentPadding: '16px',      // Padding reducido
     statsLayout: 'inline',       // Stats en línea horizontal
   },
+  /**
+   * ROW - Layout horizontal estirado para vistas de lista
+   * Similar a horizontal pero optimizado para filas completas
+   * Usado en: Vistas de lista de ContentManager, UserManager, etc.
+   */
+  row: {
+    flexDirection: 'flex-row',
+    headerPosition: 'left',
+    headerWidth: '140px',        // Ancho fijo del área de imagen/avatar (square)
+    headerHeight: '100%',        // Ocupa toda la altura de la fila
+    imageWidth: '140px',         // Imagen cuadrada para contenido
+    avatarWidth: '96px',         // Avatar cuadrado para usuarios
+    iconWidth: '96px',           // Ícono cuadrado para otros tipos
+    minHeight: '140px',          // Altura mínima de la fila (para contenido)
+    minHeightUser: '96px',       // Altura mínima de la fila (para usuarios)
+    minHeightCompact: '80px',    // Altura mínima de la fila (compacto)
+    contentPadding: '20px',      // Padding del contenido
+    itemsAlign: 'stretch',       // Hace que todos los hijos tengan la misma altura
+    statsLayout: 'inline',       // Stats en línea horizontal
+  },
 };
 
 /**

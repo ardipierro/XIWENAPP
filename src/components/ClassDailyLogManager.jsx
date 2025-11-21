@@ -250,58 +250,37 @@ function LogCard({ log, onOpen, onDelete, viewMode = 'grid' }) {
 
   const config = statusConfig[log.status] || statusConfig.active;
 
-  // Vista de lista (horizontal)
+  // Vista de lista (horizontal con layout="row")
   if (viewMode === 'list') {
     return (
       <UniversalCard
         variant="default"
+        layout="row"
         size="md"
-        hover
+        icon={BookOpen}
+        title={log.name}
+        subtitle={log.courseName || 'Sin curso'}
+        badges={[
+          { variant: config.variant, icon: config.icon, children: config.label }
+        ]}
+        meta={[
+          { icon: <Calendar size={14} />, text: log.createdAt?.toDate?.().toLocaleDateString() || 'Sin fecha' },
+          { icon: <Clock size={14} />, text: `${log.entries?.length || 0} contenidos` }
+        ]}
+        actions={[
+          <BaseButton
+            key="open"
+            variant="primary"
+            icon={Play}
+            onClick={() => onOpen(log.id)}
+          >
+            Abrir
+          </BaseButton>
+        ]}
         onDelete={() => onDelete(log.id)}
         deleteConfirmMessage={`¿Eliminar diario "${log.name}"?`}
-      >
-        <div className="flex items-center gap-4">
-          {/* Status Badge */}
-          <BaseBadge variant={config.variant} icon={config.icon} size="sm">
-            {config.label}
-          </BaseBadge>
-
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-              {log.name}
-            </h3>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              {log.courseName && (
-                <div className="flex items-center gap-1">
-                  <BookOpen size={14} />
-                  <span>{log.courseName}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Calendar size={14} />
-                <span>{log.createdAt?.toDate?.().toLocaleDateString() || 'Sin fecha'}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock size={14} />
-                <span>{log.entries?.length || 0} contenidos</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 flex-shrink-0">
-            <BaseButton
-              variant="primary"
-              icon={Play}
-              onClick={() => onOpen(log.id)}
-            >
-              Abrir
-            </BaseButton>
-            {/* Botón eliminar movido al footer (usando onDelete prop) */}
-          </div>
-        </div>
-      </UniversalCard>
+        onClick={() => onOpen(log.id)}
+      />
     );
   }
 

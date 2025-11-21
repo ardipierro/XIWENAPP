@@ -546,7 +546,7 @@ function CredentialsTab() {
                 key={provider.id}
                 variant="default"
                 size="sm"
-                layout="horizontal"
+                layout="row"
                 icon={() => <div className="text-4xl">{provider.icon}</div>}
                 title={provider.name}
                 description={provider.description}
@@ -554,6 +554,19 @@ function CredentialsTab() {
                   isConfigured
                     ? { variant: 'success', children: <><CheckCircle size={16} className="inline" /> Configurado</> }
                     : { variant: 'warning', children: <><XCircle size={16} className="inline" /> Sin Configurar</> }
+                ]}
+                actions={[
+                  <button
+                    key="config"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedProvider(provider);
+                    }}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-sm"
+                  >
+                    {isConfigured ? 'Editar' : 'Configurar'}
+                  </button>
                 ]}
                 onClick={(e) => {
                   e.preventDefault();
