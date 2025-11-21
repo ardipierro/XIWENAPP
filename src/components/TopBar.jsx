@@ -162,10 +162,10 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
                   <span className="block w-full h-0.5 bg-zinc-900 dark:bg-white" />
                 </button>
 
-                {/* Logo - Oculto en móvil */}
+                {/* Logo - Botón de inicio (clickeable, visible móvil + desktop) */}
                 <button
                   onClick={() => handleNavigate('/')}
-                  className="hidden md:flex items-center gap-2
+                  className="flex items-center gap-2
                              text-zinc-900 dark:text-white
                              cursor-pointer select-none
                              hover:opacity-80 transition-all duration-300"

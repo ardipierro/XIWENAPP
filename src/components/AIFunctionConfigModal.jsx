@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, TestTube, Loader2, XCircle } from 'lucide-react';
+import { Save, TestTube, Loader2, XCircle, Trash2 } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
@@ -20,7 +20,7 @@ import logger from '../utils/logger';
 /**
  * Modal de configuración de función de IA
  */
-function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onSave }) {
+function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onSave, onDelete }) {
   // Estado interno del formulario
   const [config, setConfig] = useState(aiFunction.defaultConfig);
   const [testing, setTesting] = useState(false);
@@ -85,6 +85,41 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
     }
   };
 
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      `¿Estás seguro de que quieres eliminar la configuración de "${aiFunction.name}"?\n\nSe eliminará completamente y se usarán los valores por defecto.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      // Llamar a la función de eliminación si existe
+      if (onDelete) {
+        await onDelete(aiFunction.id);
+      } else {
+        // Fallback: restaurar defaults si no hay función de eliminación
+        const defaultConfig = aiFunction.defaultConfig;
+        setConfig(defaultConfig);
+        await onSave(aiFunction.id, defaultConfig);
+      }
+
+      logger.info(`Configuration deleted for ${aiFunction.id}`, 'AIFunctionConfigModal');
+
+      // Cerrar modal
+      onClose();
+    } catch (err) {
+      logger.error('Failed to delete AI config:', err);
+      setError(`Error al eliminar: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -111,23 +146,38 @@ function AIFunctionConfigModal({ isOpen, onClose, aiFunction, initialConfig, onS
       icon={aiFunction.icon}
       size="xl"
       footer={
-        <>
-          <BaseButton
-            variant="secondary"
-            onClick={onClose}
-            disabled={saving}
-          >
-            Cancelar
-          </BaseButton>
-          <BaseButton
-            variant="primary"
-            icon={Save}
-            onClick={handleSave}
-            loading={saving}
-          >
-            Guardar Configuración
-          </BaseButton>
-        </>
+        <div className="flex items-center justify-between w-full">
+          {/* Botón Eliminar a la izquierda */}
+          <div>
+            <BaseButton
+              variant="danger"
+              icon={Trash2}
+              onClick={handleDelete}
+              disabled={saving}
+            >
+              Eliminar
+            </BaseButton>
+          </div>
+
+          {/* Botones de acción a la derecha */}
+          <div className="flex gap-2">
+            <BaseButton
+              variant="secondary"
+              onClick={onClose}
+              disabled={saving}
+            >
+              Cancelar
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              icon={Save}
+              onClick={handleSave}
+              loading={saving}
+            >
+              Guardar Configuración
+            </BaseButton>
+          </div>
+        </div>
       }
     >
       <div className="space-y-6">

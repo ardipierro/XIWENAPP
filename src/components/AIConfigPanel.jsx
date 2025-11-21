@@ -7,7 +7,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers, Sparkles } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
-import { getCorrectionProfilesByTeacher } from '../firebase/correctionProfiles';
+import { getAllCorrectionProfiles } from '../firebase/correctionProfiles';
 import logger from '../utils/logger';
 import {
   BaseButton,
@@ -38,7 +38,6 @@ function AIConfigPanel() {
   const [loading, setLoading] = useState(true);
   const [selectedFunction, setSelectedFunction] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [error, setError] = useState(null);
@@ -58,8 +57,12 @@ function AIConfigPanel() {
   // Estado para Exercise Builder
   const [showExerciseBuilder, setShowExerciseBuilder] = useState(false);
 
+  // Estado para modal "Crear Nueva"
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedConfigType, setSelectedConfigType] = useState('');
+
   // Get current user and role
-  const { user, userRole } = useAuth();
+  const { user, userRole} = useAuth();
   const isAdmin = userRole === 'admin';
 
   // ============================================================================
@@ -117,53 +120,45 @@ function AIConfigPanel() {
       setLoading(true);
       setError(null);
 
+      console.log('🔄 Cargando configuración desde Firebase...');
       const result = await getAIConfig();
+      console.log('📦 Config recibida de Firebase:', JSON.parse(JSON.stringify(result || {})));
 
-      // Crear config default con todas las funciones
-      const defaultConfig = { functions: {} };
-      AI_FUNCTIONS.forEach(func => {
-        defaultConfig.functions[func.id] = func.defaultConfig;
-      });
-
-      // Mergear con config de Firebase si existe
+      // Si existe config en Firebase, usarla tal cual (sin defaults automáticos)
+      // Los defaults se aplicarán on-demand cuando se muestre cada función
       if (result && result.functions) {
-        const mergedConfig = {
-          functions: {
-            ...defaultConfig.functions,
-            ...result.functions
-          }
-        };
-        setConfig(mergedConfig);
-        logger.info('AI config loaded and merged');
+        console.log('✅ Usando config de Firebase con', Object.keys(result.functions).length, 'funciones');
+        setConfig({ functions: result.functions });
+        logger.info('AI config loaded from Firebase');
       } else {
-        setConfig(defaultConfig);
-        logger.info('Using default AI config');
+        console.log('⚠️ No hay config en Firebase, usando config vacía');
+        // Si no hay nada en Firebase, empezar con config vacía
+        setConfig({ functions: {} });
+        logger.info('No AI config in Firebase, using empty config');
       }
     } catch (err) {
+      console.error('❌ Error al cargar config:', err);
       logger.error('Failed to load AI config:', err);
       setError('Error al cargar configuración');
 
-      // Usar config default incluso en error
-      const defaultConfig = { functions: {} };
-      AI_FUNCTIONS.forEach(func => {
-        defaultConfig.functions[func.id] = func.defaultConfig;
-      });
-      setConfig(defaultConfig);
+      // En caso de error, empezar con config vacía
+      setConfig({ functions: {} });
     } finally {
       setLoading(false);
     }
   };
 
   /**
-   * Cargar perfiles de corrección
+   * Cargar perfiles de corrección universales
    */
   const loadCorrectionProfiles = async () => {
     if (!user) return;
 
     try {
-      const profiles = await getCorrectionProfilesByTeacher(user.uid, isAdmin);
+      // Load all universal correction profiles (same for all users)
+      const profiles = await getAllCorrectionProfiles();
       setCorrectionProfiles(profiles);
-      logger.info('Correction profiles loaded:', profiles.length);
+      logger.info('Universal correction profiles loaded:', profiles.length);
     } catch (err) {
       logger.error('Failed to load correction profiles:', err);
     }
@@ -238,6 +233,44 @@ function AIConfigPanel() {
   };
 
   /**
+   * Eliminar configuración de función
+   */
+  const handleDeleteFunction = async (functionId) => {
+    try {
+      console.log('🗑️ Eliminando configuración de:', functionId);
+      console.log('📦 Config ANTES de eliminar:', JSON.parse(JSON.stringify(config)));
+
+      // Crear una copia del config sin la función eliminada
+      const { [functionId]: removed, ...remainingFunctions } = config.functions;
+
+      const updatedConfig = {
+        ...config,
+        functions: remainingFunctions
+      };
+
+      console.log('📦 Config que se guardará en Firebase:', JSON.parse(JSON.stringify(updatedConfig)));
+
+      // Guardar en Firebase
+      await saveAIConfig(updatedConfig);
+      console.log('✅ Guardado en Firebase exitosamente');
+
+      // Recargar desde Firebase para asegurar sincronización
+      await loadConfig();
+      console.log('✅ Recargado desde Firebase');
+
+      setSuccess('Configuración eliminada exitosamente');
+      logger.info('AI function config deleted:', functionId);
+
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('❌ Error al eliminar:', err);
+      logger.error('Failed to delete AI function config:', err);
+      setError(`Error al eliminar: ${err.message}`);
+      throw err;
+    }
+  };
+
+  /**
    * Cerrar modal
    */
   const handleCloseModal = () => {
@@ -301,43 +334,55 @@ function AIConfigPanel() {
 
   /**
    * Obtener todas las funciones (AI + Perfiles + Tareas + Traductor + Exercise Builder)
+   * SOLO muestra funciones que tienen configuración guardada en Firebase
    */
   const getAllFunctions = () => {
-    const aiFunctions = [...AI_FUNCTIONS];
+    // Filtrar solo las funciones de AI que tienen config guardada
+    const configuredAIFunctions = AI_FUNCTIONS.filter(func => {
+      return config && config.functions && config.functions[func.id] !== undefined;
+    });
+
     const profileFunctions = correctionProfiles.map(profileToFunction);
     const taskFunctions = IMAGE_GENERATION_TASKS.map(imageTaskToFunction);
 
-    // Agregar función del traductor visual
-    const translatorFunction = {
-      id: 'translator_visual',
-      name: 'Traductor Visual',
-      description: 'Configura traducciones, diccionarios y contenidos interactivos',
-      icon: Layers,
-      category: 'content',
-      isTranslator: true,
-      defaultConfig: {
-        enabled: true,
-        provider: 'translator',
-        model: 'visual'
-      }
-    };
+    // Agregar función del traductor visual solo si está configurada
+    const functions = [...configuredAIFunctions, ...profileFunctions, ...taskFunctions];
 
-    // Agregar función del Exercise Builder
-    const exerciseBuilderFunction = {
-      id: 'exercise_builder',
-      name: 'Generador de Ejercicios',
-      description: 'Crea ejercicios con IA a partir de texto. 19 tipos disponibles',
-      icon: Sparkles,
-      category: 'content',
-      isExerciseBuilder: true,
-      defaultConfig: {
-        enabled: true,
-        provider: 'exercise-builder',
-        model: 'ai-generator'
-      }
-    };
+    // Agregar traductor visual si está configurado
+    if (config && config.functions && config.functions['translator_visual']) {
+      functions.push({
+        id: 'translator_visual',
+        name: 'Traductor Visual',
+        description: 'Configura traducciones, diccionarios y contenidos interactivos',
+        icon: Layers,
+        category: 'content',
+        isTranslator: true,
+        defaultConfig: {
+          enabled: true,
+          provider: 'translator',
+          model: 'visual'
+        }
+      });
+    }
 
-    return [...aiFunctions, ...profileFunctions, ...taskFunctions, translatorFunction, exerciseBuilderFunction];
+    // Agregar Exercise Builder si está configurado
+    if (config && config.functions && config.functions['exercise_builder']) {
+      functions.push({
+        id: 'exercise_builder',
+        name: 'Generador de Ejercicios',
+        description: 'Crea ejercicios con IA a partir de texto. 19 tipos disponibles',
+        icon: Sparkles,
+        category: 'content',
+        isExerciseBuilder: true,
+        defaultConfig: {
+          enabled: true,
+          provider: 'exercise-builder',
+          model: 'ai-generator'
+        }
+      });
+    }
+
+    return functions;
   };
 
   /**
@@ -345,11 +390,6 @@ function AIConfigPanel() {
    */
   const getFilteredFunctions = () => {
     let filtered = getAllFunctions();
-
-    // Filtrar por categoría
-    if (selectedCategory) {
-      filtered = filtered.filter(f => f.category === selectedCategory);
-    }
 
     // Filtrar por búsqueda
     if (searchTerm) {
@@ -387,7 +427,7 @@ function AIConfigPanel() {
   // ============================================================================
   const filteredFunctions = useMemo(() => {
     return getFilteredFunctions();
-  }, [selectedCategory, searchTerm, correctionProfiles, config]);
+  }, [searchTerm, correctionProfiles, config]);
 
   const allFunctions = useMemo(() => {
     return getAllFunctions();
@@ -448,6 +488,24 @@ function AIConfigPanel() {
         </BaseAlert>
       )}
 
+      {/* Header con botón Crear Nueva */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          Configuraciones de IA
+        </h2>
+        {isAdmin && (
+          <BaseButton
+            variant="primary"
+            size="md"
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2"
+          >
+            <Sparkles size={18} />
+            Crear Nueva
+          </BaseButton>
+        )}
+      </div>
+
       {/* Search Bar */}
       <SearchBar
         value={searchTerm}
@@ -457,33 +515,6 @@ function AIConfigPanel() {
         onViewModeChange={setViewMode}
         className="mb-6"
       />
-
-      {/* Category Filter */}
-      <div className="mb-6 flex flex-wrap gap-2 items-center">
-        <Filter className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }} />
-        <BaseButton
-          variant={selectedCategory === null ? 'primary' : 'secondary'}
-          size="sm"
-          onClick={() => setSelectedCategory(null)}
-        >
-          Todas ({allFunctions.length})
-        </BaseButton>
-        {AI_CATEGORIES.map(category => {
-          const count = allFunctions.filter(f => f.category === category.id).length;
-          const CategoryIcon = category.icon;
-          return (
-            <BaseButton
-              key={category.id}
-              variant={selectedCategory === category.id ? 'primary' : 'secondary'}
-              size="sm"
-              icon={CategoryIcon}
-              onClick={() => setSelectedCategory(category.id)}
-            >
-              {category.label} ({count})
-            </BaseButton>
-          );
-        })}
-      </div>
 
       {/* Functions Grid/List or Empty State */}
       {filteredFunctions.length === 0 ? (
@@ -554,7 +585,7 @@ function AIConfigPanel() {
               <AIFunctionCard
                 key={func.id}
                 aiFunction={func}
-                config={config.functions[func.id]}
+                config={config.functions[func.id] || func.defaultConfig}
                 onConfigure={() => handleConfigureFunction(func.id)}
                 viewMode="grid"
               />
@@ -622,7 +653,7 @@ function AIConfigPanel() {
               <AIFunctionCard
                 key={func.id}
                 aiFunction={func}
-                config={config.functions[func.id]}
+                config={config.functions[func.id] || func.defaultConfig}
                 onConfigure={() => handleConfigureFunction(func.id)}
                 viewMode="list"
               />
@@ -667,9 +698,99 @@ function AIConfigPanel() {
             aiFunction={selectedFunction}
             initialConfig={config.functions[selectedFunction.id] || selectedFunction.defaultConfig}
             onSave={handleSaveFunction}
+            onDelete={handleDeleteFunction}
           />
         ),
         document.body
+      )}
+
+      {/* Modal Crear Nueva Configuración */}
+      {showCreateModal && (
+        <BaseModal
+          isOpen={true}
+          onClose={() => {
+            setShowCreateModal(false);
+            setSelectedConfigType('');
+          }}
+          title="Crear Nueva Configuración"
+          size="md"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Selecciona el tipo de configuración que deseas crear:
+            </p>
+
+            {/* Selector de tipo */}
+            <select
+              value={selectedConfigType}
+              onChange={(e) => setSelectedConfigType(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Selecciona un tipo...</option>
+              <option value="correction-profile">📝 Perfil de Corrección de Tareas</option>
+              <option value="ai-function">🤖 Función de IA</option>
+              <option value="translator">🌐 Configuración de Traductor</option>
+            </select>
+
+            {/* Descripción según tipo seleccionado */}
+            {selectedConfigType === 'correction-profile' && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <strong>Perfil de Corrección:</strong> Configura cómo la IA debe corregir las tareas escritas de los estudiantes (ortografía, gramática, puntuación, etc.).
+                </p>
+              </div>
+            )}
+
+            {selectedConfigType === 'ai-function' && (
+              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  <strong>Función de IA:</strong> Próximamente. Crea nuevas funciones de IA personalizadas.
+                </p>
+              </div>
+            )}
+
+            {selectedConfigType === 'translator' && (
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  <strong>Traductor:</strong> Próximamente. Configura nuevas opciones de traducción.
+                </p>
+              </div>
+            )}
+
+            {/* Botones */}
+            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <BaseButton
+                variant="outline"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setSelectedConfigType('');
+                }}
+                fullWidth
+              >
+                Cancelar
+              </BaseButton>
+              <BaseButton
+                variant="primary"
+                onClick={() => {
+                  if (selectedConfigType === 'correction-profile') {
+                    setShowCreateModal(false);
+                    setSelectedConfigType('');
+                    setSelectedProfile(null); // null = crear nuevo
+                    setShowProfileEditor(true);
+                  } else if (selectedConfigType === 'ai-function') {
+                    alert('Próximamente: Crear nueva función de IA');
+                  } else if (selectedConfigType === 'translator') {
+                    alert('Próximamente: Configurar traductor');
+                  }
+                }}
+                disabled={!selectedConfigType}
+                fullWidth
+              >
+                Continuar
+              </BaseButton>
+            </div>
+          </div>
+        </BaseModal>
       )}
 
       {/* Profile Editor Modal */}
@@ -677,8 +798,7 @@ function AIConfigPanel() {
         <ProfileEditor
           profile={selectedProfile}
           onClose={handleCloseProfileEditor}
-          teacherId={user.uid}
-          userRole={userRole}
+          userId={user.uid}
         />
       )}
 

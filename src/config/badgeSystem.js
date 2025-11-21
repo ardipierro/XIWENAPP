@@ -467,6 +467,95 @@ export const DEFAULT_BADGE_CONFIG = {
     category: 'role',
     heroicon: 'BeakerIcon'
   },
+
+  // ========================================
+  // ESTADOS DE CORRECCIÓN DE TAREAS
+  // ========================================
+  HOMEWORK_PENDING: {
+    variant: 'warning',
+    color: '#f59e0b',
+    label: 'Pendiente Revisión',
+    icon: '⏳',
+    heroicon: 'ClockIcon',
+    description: 'Esperando revisión del profesor',
+    category: 'homework_status'
+  },
+  HOMEWORK_APPROVED: {
+    variant: 'success',
+    color: '#10b981',
+    label: 'Aprobado',
+    icon: '✅',
+    heroicon: 'CheckCircleIcon',
+    description: 'Tarea aprobada por el profesor',
+    category: 'homework_status'
+  },
+  HOMEWORK_REJECTED: {
+    variant: 'danger',
+    color: '#ef4444',
+    label: 'Rechazado',
+    icon: '❌',
+    heroicon: 'XCircleIcon',
+    description: 'Tarea rechazada, requiere corrección',
+    category: 'homework_status'
+  },
+  HOMEWORK_PROCESSING: {
+    variant: 'info',
+    color: '#7a8fa8',
+    label: 'Procesando',
+    icon: '⚙️',
+    heroicon: 'CogIcon',
+    description: 'Siendo analizada por IA',
+    category: 'homework_status'
+  },
+  HOMEWORK_ERROR: {
+    variant: 'danger',
+    color: '#dc2626',
+    label: 'Error',
+    icon: '⚠️',
+    heroicon: 'ExclamationTriangleIcon',
+    description: 'Error en el procesamiento',
+    category: 'homework_status'
+  },
+
+  // ========================================
+  // GAMIFICACIÓN (Créditos, XP, Nivel)
+  // ========================================
+  GAMIFICATION_CREDITS: {
+    variant: 'success',
+    color: '#10b981',
+    label: 'Créditos',
+    icon: '💰',
+    heroicon: 'CurrencyDollarIcon',
+    description: 'Créditos disponibles',
+    category: 'gamification'
+  },
+  GAMIFICATION_LEVEL: {
+    variant: 'info',
+    color: '#a78bfa',
+    label: 'Nivel',
+    icon: '⭐',
+    heroicon: 'StarIcon',
+    description: 'Nivel de experiencia',
+    category: 'gamification'
+  },
+  GAMIFICATION_XP: {
+    variant: 'warning',
+    color: '#f59e0b',
+    label: 'XP',
+    icon: '⚡',
+    heroicon: 'BoltIcon',
+    description: 'Puntos de experiencia',
+    category: 'gamification'
+  },
+  GAMIFICATION_STREAK: {
+    variant: 'danger',
+    color: '#ef4444',
+    label: 'Racha',
+    icon: '🔥',
+    heroicon: 'FireIcon',
+    description: 'Días consecutivos',
+    category: 'gamification'
+  },
 };
 
 // ============================================
@@ -764,6 +853,7 @@ export const DEFAULT_GLOBAL_BADGE_CONFIG = {
   defaultBadgeStyle: 'solid', // 'solid' | 'outline' | 'soft' | 'glass' | 'gradient'
   colorPalette: 'default', // 'default' | 'material' | 'pastel' | 'neon' | 'flat' | 'grayscale' | 'monochrome'
   monochromeColor: '#5b8fa3', // Color para paleta monocromática
+  textColor: 'auto', // 'auto' (contraste automático) | hex color (ej: '#ffffff')
 };
 
 /**
@@ -835,6 +925,150 @@ export function resetIconLibraryConfig() {
   return DEFAULT_ICON_LIBRARY_CONFIG;
 }
 
+/**
+ * Obtiene las clases CSS para el tamaño de badge configurado globalmente
+ * @param {string} size - Tamaño del badge ('xs' | 'sm' | 'md' | 'lg' | 'xl') o undefined para usar config global
+ * @returns {string} - Clases Tailwind para padding y texto
+ */
+export function getBadgeSizeClasses(size) {
+  const globalConfig = getGlobalBadgeConfig();
+  const effectiveSize = size || globalConfig.size;
+
+  const sizeMap = {
+    xs: 'px-2 py-0.5 text-xs',
+    sm: 'px-2.5 py-1 text-xs',
+    md: 'px-3 py-1.5 text-xs',
+    lg: 'px-3.5 py-2 text-sm',
+    xl: 'px-4 py-2.5 text-base'
+  };
+
+  return sizeMap[effectiveSize] || sizeMap.md;
+}
+
+/**
+ * Obtiene el tamaño del icono según el tamaño de badge configurado globalmente
+ * @param {string} size - Tamaño del badge o undefined para usar config global
+ * @returns {number} - Tamaño del icono en píxeles
+ */
+export function getBadgeIconSize(size) {
+  const globalConfig = getGlobalBadgeConfig();
+  const effectiveSize = size || globalConfig.size;
+
+  const sizeMap = {
+    xs: 12,
+    sm: 13,
+    md: 14,
+    lg: 16,
+    xl: 18
+  };
+
+  return sizeMap[effectiveSize] || sizeMap.md;
+}
+
+/**
+ * Obtiene el color de texto según la configuración global
+ * Si textColor es 'auto', calcula contraste automático
+ * Si es un color hex, usa ese color
+ * @param {string} backgroundColor - Color de fondo del badge en formato hex
+ * @param {string} style - Estilo del badge (solid, outline, etc.)
+ * @returns {string} - Color de texto en formato hex
+ */
+export function getBadgeTextColor(backgroundColor, style) {
+  const globalConfig = getGlobalBadgeConfig();
+  const effectiveStyle = style || globalConfig.defaultBadgeStyle || 'solid';
+
+  // Para outline, el texto usa el color de fondo
+  if (effectiveStyle === 'outline') {
+    return backgroundColor;
+  }
+
+  // Si hay un color personalizado configurado (no 'auto'), usarlo
+  if (globalConfig.textColor && globalConfig.textColor !== 'auto') {
+    return globalConfig.textColor;
+  }
+
+  // Si es 'auto' o no está definido, calcular contraste automático
+  return getContrastText(backgroundColor);
+}
+
+/**
+ * Obtiene los estilos CSS inline para el badge según el estilo configurado
+ * @param {string} backgroundColor - Color de fondo en formato hex
+ * @param {string} style - Estilo del badge o undefined para usar config global
+ * @returns {Object} - Objeto con propiedades CSS para aplicar con style={{...}}
+ */
+export function getBadgeStyles(backgroundColor, style) {
+  const globalConfig = getGlobalBadgeConfig();
+  const effectiveStyle = style || globalConfig.defaultBadgeStyle || 'solid';
+  const textColor = getBadgeTextColor(backgroundColor, effectiveStyle);
+
+  const styles = {
+    color: textColor
+  };
+
+  switch (effectiveStyle) {
+    case 'solid':
+      styles.backgroundColor = backgroundColor;
+      break;
+
+    case 'outline':
+      styles.backgroundColor = 'transparent';
+      styles.border = `2px solid ${backgroundColor}`;
+      styles.color = backgroundColor;
+      break;
+
+    case 'soft':
+      // Fondo semi-transparente con el color
+      styles.backgroundColor = `${backgroundColor}20`; // 20 = ~12% opacity en hex
+      styles.color = backgroundColor;
+      break;
+
+    case 'glass':
+      // Efecto glassmorphism
+      styles.backgroundColor = `${backgroundColor}30`; // 30 = ~19% opacity
+      styles.backdropFilter = 'blur(10px)';
+      styles.border = `1px solid ${backgroundColor}40`;
+      styles.color = textColor;
+      break;
+
+    case 'gradient':
+      // Gradiente sutil
+      const lighterColor = lightenColor(backgroundColor, 20);
+      styles.backgroundImage = `linear-gradient(135deg, ${backgroundColor} 0%, ${lighterColor} 100%)`;
+      styles.color = textColor;
+      break;
+
+    default:
+      styles.backgroundColor = backgroundColor;
+  }
+
+  return styles;
+}
+
+/**
+ * Aclara un color hex por un porcentaje
+ * @param {string} hex - Color en formato hex
+ * @param {number} percent - Porcentaje a aclarar (0-100)
+ * @returns {string} - Color aclarado en formato hex
+ */
+function lightenColor(hex, percent) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return hex;
+
+  const rgb = {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  };
+
+  const amount = Math.round(2.55 * percent);
+  const r = Math.min(255, rgb.r + amount);
+  const g = Math.min(255, rgb.g + amount);
+  const b = Math.min(255, rgb.b + amount);
+
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
 // ============================================
 // CATEGORÍAS ORGANIZADAS
 // ============================================
@@ -897,6 +1131,22 @@ export const BADGE_CATEGORIES = {
     allowCustom: true,
     systemCategory: true,
     warning: 'Los roles del sistema (Admin, Profesor, Alumno) son fijos y controlan permisos. Los badges custom son solo visuales.',
+  },
+  homework_status: {
+    label: 'Estados de Corrección',
+    description: 'Estados del sistema de revisión de tareas',
+    icon: '📋',
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los estados del sistema de corrección son funcionales. Los badges custom son solo para personalización visual.',
+  },
+  gamification: {
+    label: 'Gamificación',
+    description: 'Elementos de progreso y logros del estudiante',
+    icon: '🎮',
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los elementos de gamificación son dinámicos y se calculan automáticamente.',
   },
 };
 
@@ -964,6 +1214,23 @@ export const BADGE_MAPPINGS = {
     'student': 'ROLE_STUDENT',
     'listener': 'ROLE_LISTENER',
     'trial': 'ROLE_TRIAL',
+  },
+
+  // Homework Status → Badge key
+  homework_status: {
+    'pending': 'HOMEWORK_PENDING',
+    'approved': 'HOMEWORK_APPROVED',
+    'rejected': 'HOMEWORK_REJECTED',
+    'processing': 'HOMEWORK_PROCESSING',
+    'error': 'HOMEWORK_ERROR',
+  },
+
+  // Gamification → Badge key
+  gamification: {
+    'credits': 'GAMIFICATION_CREDITS',
+    'level': 'GAMIFICATION_LEVEL',
+    'xp': 'GAMIFICATION_XP',
+    'streak': 'GAMIFICATION_STREAK',
   },
 };
 
@@ -1073,6 +1340,22 @@ export function getBadgeForRole(role) {
 }
 
 /**
+ * Obtiene la configuración de badge para un estado de corrección de tarea
+ */
+export function getBadgeForHomeworkStatus(status) {
+  const key = BADGE_MAPPINGS.homework_status[status];
+  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.HOMEWORK_PENDING;
+}
+
+/**
+ * Obtiene la configuración de badge para un elemento de gamificación
+ */
+export function getBadgeForGamification(type) {
+  const key = BADGE_MAPPINGS.gamification[type];
+  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.GAMIFICATION_CREDITS;
+}
+
+/**
  * Obtiene todos los badges de una categoría
  */
 export function getBadgesByCategory(categoryName) {
@@ -1101,8 +1384,10 @@ export function applyBadgeColors(config = null) {
 
 /**
  * Calcula color de texto con buen contraste
+ * @param {string} bgColor - Color de fondo en formato hexadecimal
+ * @returns {string} - Color de texto (#000000 o #ffffff)
  */
-function getContrastText(bgColor) {
+export function getContrastText(bgColor) {
   const rgb = hexToRgb(bgColor);
   if (!rgb) return '#ffffff';
 
@@ -1114,8 +1399,10 @@ function getContrastText(bgColor) {
 
 /**
  * Convierte hex a RGB
+ * @param {string} hex - Color en formato hexadecimal
+ * @returns {Object|null} - Objeto {r, g, b} o null
  */
-function hexToRgb(hex) {
+export function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
     r: parseInt(result[1], 16),

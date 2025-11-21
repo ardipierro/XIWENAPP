@@ -61,6 +61,20 @@ export const DEFAULT_PROFILES = [
         showExplanations: true,
         showSuggestions: true,
         highlightOnImage: false
+      },
+      visualization: {
+        highlightOpacity: 0.15,
+        useWavyUnderline: false,
+        showCorrectionText: true,
+        correctionTextFont: 'Caveat',
+        colors: {
+          spelling: '#ef4444',
+          grammar: '#f97316',
+          punctuation: '#eab308',
+          vocabulary: '#5b8fa3'
+        },
+        strokeWidth: 2,
+        strokeOpacity: 0.8
       }
     }
   },
@@ -83,6 +97,20 @@ export const DEFAULT_PROFILES = [
         showExplanations: true,
         showSuggestions: true,
         highlightOnImage: true
+      },
+      visualization: {
+        highlightOpacity: 0.25,
+        useWavyUnderline: true,
+        showCorrectionText: true,
+        correctionTextFont: 'Caveat',
+        colors: {
+          spelling: '#ef4444',
+          grammar: '#f97316',
+          punctuation: '#eab308',
+          vocabulary: '#5b8fa3'
+        },
+        strokeWidth: 2,
+        strokeOpacity: 0.8
       }
     }
   },
@@ -105,22 +133,37 @@ export const DEFAULT_PROFILES = [
         showExplanations: true,
         showSuggestions: true,
         highlightOnImage: true
+      },
+      visualization: {
+        highlightOpacity: 0.40,
+        useWavyUnderline: true,
+        showCorrectionText: true,
+        correctionTextFont: 'Shadows Into Light',
+        colors: {
+          spelling: '#dc2626',
+          grammar: '#ea580c',
+          punctuation: '#ca8a04',
+          vocabulary: '#0284c7'
+        },
+        strokeWidth: 3,
+        strokeOpacity: 1.0
       }
     }
   }
 ];
 
 /**
- * Create a correction profile
- * @param {string} teacherId - Teacher ID
+ * Create a correction profile (Admin only)
+ * @param {string} createdBy - Admin user ID who creates the profile
  * @param {Object} profileData - Profile data
  * @returns {Promise<Object>} Result with id
  */
-export async function createCorrectionProfile(teacherId, profileData) {
+export async function createCorrectionProfile(createdBy, profileData) {
   try {
     const profilesRef = collection(db, 'correction_profiles');
     const docRef = await addDoc(profilesRef, {
-      teacherId,
+      createdBy,
+      isSystemProfile: true,
       ...profileData,
       isDefault: false,
       assignedToStudents: [],
@@ -129,7 +172,7 @@ export async function createCorrectionProfile(teacherId, profileData) {
       updatedAt: serverTimestamp()
     });
 
-    logger.info(`Created correction profile: ${docRef.id}`, 'CorrectionProfiles');
+    logger.info(`Created universal correction profile: ${docRef.id}`, 'CorrectionProfiles');
     return { success: true, id: docRef.id };
   } catch (error) {
     logger.error('Error creating correction profile', 'CorrectionProfiles', error);
@@ -180,22 +223,19 @@ export async function getCorrectionProfile(profileId) {
 }
 
 /**
- * Get all correction profiles for a teacher (or all if admin)
- * @param {string} teacherId - Teacher ID
- * @param {boolean} isAdmin - Whether the user is an admin
- * @returns {Promise<Array>} Array of profiles
+ * Get all universal correction profiles
+ * All users (admin and teachers) see the same universal profiles
+ * @returns {Promise<Array>} Array of universal profiles
  */
-export async function getCorrectionProfilesByTeacher(teacherId, isAdmin = false) {
+export async function getAllCorrectionProfiles() {
   try {
     const profilesRef = collection(db, 'correction_profiles');
 
-    // Admins can see all profiles, teachers only their own
-    const q = isAdmin
-      ? query(profilesRef)
-      : query(
-          profilesRef,
-          where('teacherId', '==', teacherId)
-        );
+    // Get all system profiles (universal)
+    const q = query(
+      profilesRef,
+      where('isSystemProfile', '==', true)
+    );
 
     const snapshot = await getDocs(q);
 
@@ -211,11 +251,21 @@ export async function getCorrectionProfilesByTeacher(teacherId, isAdmin = false)
       return timeB - timeA; // Desc order (newest first)
     });
 
+    logger.info(`Loaded ${profiles.length} universal correction profiles`, 'CorrectionProfiles');
     return profiles;
   } catch (error) {
-    logger.error(`Error getting profiles for teacher ${teacherId}`, 'CorrectionProfiles', error);
+    logger.error('Error getting universal correction profiles', 'CorrectionProfiles', error);
     return [];
   }
+}
+
+/**
+ * @deprecated Use getAllCorrectionProfiles() instead
+ * Kept for backwards compatibility
+ */
+export async function getCorrectionProfilesByTeacher(teacherId, isAdmin = false) {
+  logger.warn('getCorrectionProfilesByTeacher is deprecated, use getAllCorrectionProfiles', 'CorrectionProfiles');
+  return getAllCorrectionProfiles();
 }
 
 /**
@@ -281,18 +331,17 @@ export async function assignProfileToGroups(profileId, groupIds) {
 }
 
 /**
- * Set a profile as default for a teacher
- * @param {string} teacherId - Teacher ID
+ * Set a profile as the system-wide default (Admin only)
  * @param {string} profileId - Profile ID to set as default
  * @returns {Promise<Object>} Result
  */
-export async function setDefaultProfile(teacherId, profileId) {
+export async function setDefaultProfile(profileId) {
   try {
-    // First, unset all other defaults for this teacher
+    // First, unset all other defaults (system-wide)
     const profilesRef = collection(db, 'correction_profiles');
     const q = query(
       profilesRef,
-      where('teacherId', '==', teacherId),
+      where('isSystemProfile', '==', true),
       where('isDefault', '==', true)
     );
     const snapshot = await getDocs(q);
@@ -310,7 +359,7 @@ export async function setDefaultProfile(teacherId, profileId) {
       updatedAt: serverTimestamp()
     });
 
-    logger.info(`Set profile ${profileId} as default for teacher ${teacherId}`, 'CorrectionProfiles');
+    logger.info(`Set profile ${profileId} as system-wide default`, 'CorrectionProfiles');
     return { success: true };
   } catch (error) {
     logger.error(`Error setting default profile ${profileId}`, 'CorrectionProfiles', error);
@@ -319,54 +368,56 @@ export async function setDefaultProfile(teacherId, profileId) {
 }
 
 /**
- * Get default profile for a teacher
- * @param {string} teacherId - Teacher ID
+ * Get the system-wide default profile
  * @returns {Promise<Object|null>} Default profile or null
  */
-export async function getDefaultProfile(teacherId) {
+export async function getDefaultProfile() {
   try {
     const profilesRef = collection(db, 'correction_profiles');
     const q = query(
       profilesRef,
-      where('teacherId', '==', teacherId),
+      where('isSystemProfile', '==', true),
       where('isDefault', '==', true)
     );
     const snapshot = await getDocs(q);
 
     if (!snapshot.empty) {
-      const doc = snapshot.docs[0];
-      return { id: doc.id, ...doc.data() };
+      const docSnap = snapshot.docs[0];
+      logger.info('Found system-wide default profile', 'CorrectionProfiles');
+      return { id: docSnap.id, ...docSnap.data() };
     }
+
+    logger.warn('No system-wide default profile found', 'CorrectionProfiles');
     return null;
   } catch (error) {
-    logger.error(`Error getting default profile for teacher ${teacherId}`, 'CorrectionProfiles', error);
+    logger.error('Error getting system default profile', 'CorrectionProfiles', error);
     return null;
   }
 }
 
 /**
- * Initialize default profiles for a teacher
- * @param {string} teacherId - Teacher ID
+ * Initialize default system profiles (Admin only)
+ * @param {string} adminUserId - Admin user ID who initializes the profiles
  * @returns {Promise<Object>} Result
  */
-export async function initializeDefaultProfiles(teacherId) {
+export async function initializeDefaultProfiles(adminUserId) {
   try {
     const results = [];
 
     for (const profile of DEFAULT_PROFILES) {
-      const result = await createCorrectionProfile(teacherId, profile);
+      const result = await createCorrectionProfile(adminUserId, profile);
       results.push(result);
     }
 
-    // Set first profile as default
+    // Set first profile as system-wide default
     if (results.length > 0 && results[0].success) {
-      await setDefaultProfile(teacherId, results[0].id);
+      await setDefaultProfile(results[0].id);
     }
 
-    logger.info(`Initialized ${results.length} default profiles for teacher ${teacherId}`, 'CorrectionProfiles');
+    logger.info(`Initialized ${results.length} default system profiles`, 'CorrectionProfiles');
     return { success: true, count: results.length };
   } catch (error) {
-    logger.error(`Error initializing default profiles for teacher ${teacherId}`, 'CorrectionProfiles', error);
+    logger.error('Error initializing default system profiles', 'CorrectionProfiles', error);
     return { success: false, error: error.message };
   }
 }
@@ -419,19 +470,17 @@ export async function assignProfileToStudent(profileId, studentId, teacherId) {
 
 /**
  * Get the correction profile for a student
- * Returns individual assignment or teacher's default profile
+ * Returns individual assignment or system default profile
  * @param {string} studentId - Student ID
- * @param {string} teacherId - Teacher ID
  * @returns {Promise<Object|null>} Profile or null
  */
-export async function getStudentProfile(studentId, teacherId) {
+export async function getStudentProfile(studentId) {
   try {
     // First, check for individual assignment
     const assignmentsRef = collection(db, 'profile_students');
     const q = query(
       assignmentsRef,
-      where('studentId', '==', studentId),
-      where('teacherId', '==', teacherId)
+      where('studentId', '==', studentId)
     );
     const assignmentSnapshot = await getDocs(q);
 
@@ -439,15 +488,15 @@ export async function getStudentProfile(studentId, teacherId) {
       const assignment = assignmentSnapshot.docs[0].data();
       const profile = await getCorrectionProfile(assignment.profileId);
       if (profile) {
-        logger.info(`Found individual profile for student ${studentId}`, 'CorrectionProfiles');
+        logger.info(`Found individual profile assignment for student ${studentId}`, 'CorrectionProfiles');
         return profile;
       }
     }
 
-    // Fallback to teacher's default profile
-    const defaultProfile = await getDefaultProfile(teacherId);
+    // Fallback to system-wide default profile
+    const defaultProfile = await getDefaultProfile();
     if (defaultProfile) {
-      logger.info(`Using default profile for student ${studentId}`, 'CorrectionProfiles');
+      logger.info(`Using system default profile for student ${studentId}`, 'CorrectionProfiles');
       return defaultProfile;
     }
 
@@ -492,7 +541,8 @@ export default {
   createCorrectionProfile,
   updateCorrectionProfile,
   getCorrectionProfile,
-  getCorrectionProfilesByTeacher,
+  getAllCorrectionProfiles,
+  getCorrectionProfilesByTeacher, // Deprecated, kept for backwards compatibility
   deleteCorrectionProfile,
   assignProfileToStudents,
   assignProfileToGroups,

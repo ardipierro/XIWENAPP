@@ -16,6 +16,18 @@ import { useNavigate } from 'react-router-dom';
 import { Pencil, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound, Coins, Eye } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
+import CategoryBadge from './common/CategoryBadge';
+import {
+  getBadgeByKey,
+  getContrastText,
+  getIconLibraryConfig,
+  getBadgeSizeClasses,
+  getBadgeIconSize,
+  getBadgeTextColor,
+  getBadgeStyles
+} from '../config/badgeSystem';
+import * as HeroIcons from '@heroicons/react/24/outline';
+import * as HeroIconsSolid from '@heroicons/react/24/solid';
 import { useViewAs } from '../contexts/ViewAsContext';
 import ProfileTabs from './profile/ProfileTabs';
 import InfoTab from './profile/tabs/InfoTab';
@@ -66,6 +78,8 @@ function UserProfileModal({
   isAdmin = false,
   onUpdate
 }) {
+  // Estado para forzar re-render cuando cambia la configuración de badges
+  const [badgeConfigVersion, setBadgeConfigVersion] = useState(0);
   // Hooks
   const navigate = useNavigate();
   const { startViewingAs } = useViewAs();
@@ -83,6 +97,7 @@ function UserProfileModal({
   const [userBanner, setUserBanner] = useState(null);
   const [gamification, setGamification] = useState(null);
   const [credits, setCredits] = useState(null);
+  const [iconLibraryConfig, setIconLibraryConfig] = useState(getIconLibraryConfig());
 
   // Estados de edición y navegación
   const [uploading, setUploading] = useState(false);
@@ -135,6 +150,18 @@ function UserProfileModal({
       loadProfile();
     }
   }, [normalizedUser?.uid, isOpen]);
+
+  // Escuchar cambios en la configuración de badges
+  useEffect(() => {
+    const handleBadgeConfigChange = () => {
+      setBadgeConfigVersion(prev => prev + 1);
+    };
+
+    window.addEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+    return () => {
+      window.removeEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+    };
+  }, []);
 
   // Limpiar mensajes después de 3 segundos
   useEffect(() => {
@@ -263,20 +290,11 @@ function UserProfileModal({
     navigate('/dashboard', { replace: true });
   };
 
-  // Generar gradiente aleatorio para banner por defecto
-  const getDefaultBannerGradient = () => {
-    const gradients = [
-      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
-    ];
-    const index = normalizedUser?.email
-      ? normalizedUser.email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length
-      : 0;
-    return gradients[index];
+  // Banner con color de fondo usando CSS variables (sin gradientes hardcoded)
+  const getDefaultBannerStyle = () => {
+    return {
+      background: 'var(--color-bg-tertiary)',
+    };
   };
 
   // Callbacks para comunicación con InfoTab
@@ -390,6 +408,41 @@ function UserProfileModal({
 
   const tabs = getTabs();
 
+  /**
+   * Renderiza el icono del badge según la configuración global
+   * Lee automáticamente el tamaño desde la configuración global
+   * @param {string} badgeKey - Key del badge en el sistema (ej: 'GAMIFICATION_LEVEL')
+   * @param {string} fallbackEmoji - Emoji a usar si library='emoji'
+   * @param {string} textColor - Color de contraste para los iconos (debe coincidir con el texto)
+   * @returns {JSX.Element|null} Icono renderizado o null
+   */
+  const renderBadgeIcon = (badgeKey, fallbackEmoji, textColor) => {
+    const library = iconLibraryConfig.library || 'emoji';
+    const iconSize = getBadgeIconSize(); // Lee tamaño global
+
+    // Sin icono
+    if (library === 'none') return null;
+
+    // HeroIcons (outline o filled)
+    if (library === 'heroicon' || library === 'heroicon-filled') {
+      const badgeConfig = getBadgeByKey(badgeKey);
+      const iconName = badgeConfig?.heroicon;
+
+      if (iconName) {
+        const IconComponent = library === 'heroicon-filled'
+          ? HeroIconsSolid[iconName]
+          : HeroIcons[iconName];
+
+        if (IconComponent) {
+          return <IconComponent style={{ width: iconSize, height: iconSize, marginRight: '4px', color: textColor }} />;
+        }
+      }
+    }
+
+    // Emoji (por defecto)
+    return <span style={{ marginRight: '4px' }}>{fallbackEmoji}</span>;
+  };
+
   // Debug logs
   console.log('📊 UserProfileModal state:', {
     activeTab,
@@ -422,12 +475,9 @@ function UserProfileModal({
           ) : (
             <div
               className="w-full h-full"
-              style={{ background: getDefaultBannerGradient() }}
+              style={getDefaultBannerStyle()}
             />
           )}
-
-          {/* Overlay degradé para legibilidad del texto */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none"></div>
 
           {/* Botón cerrar - Siempre visible */}
           <button
@@ -454,7 +504,7 @@ function UserProfileModal({
                   name={normalizedUser?.displayName || normalizedUser?.name}
                   email={normalizedUser?.email}
                   size="xl"
-                  className="!border-4 !border-white dark:!border-zinc-900"
+                  showBorder={false}
                 />
               </div>
 
@@ -483,51 +533,110 @@ function UserProfileModal({
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {/* Badge de Rol */}
                 {/* ✅ CRÍTICO: Mostrar userRole del perfil, no si quien está viendo es admin */}
-                {userRole && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-indigo-600 shadow-lg">
-                    {userRole}
-                  </span>
-                )}
+                {userRole && (() => {
+                  const badgeConfig = getBadgeByKey(`ROLE_${userRole.toUpperCase()}`);
+                  const bgColor = badgeConfig?.color || '#6b7280';
+                  const badgeStyles = getBadgeStyles(bgColor);
+                  return (
+                    <span
+                      key={`badge-role-${badgeConfigVersion}`}
+                      className={`inline-flex items-centers gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                      style={badgeStyles}
+                    >
+                      {renderBadgeIcon(`ROLE_${userRole.toUpperCase()}`, '👤', badgeStyles.color)}
+                      {badgeConfig?.label || userRole}
+                    </span>
+                  );
+                })()}
 
                 {/* Badge de Créditos */}
-                {credits && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/90 text-white shadow-lg backdrop-blur-sm">
-                    <Coins size={14} strokeWidth={2} />
-                    {credits.availableCredits || 0} créditos
-                  </span>
-                )}
+                {credits && (() => {
+                  const badgeConfig = getBadgeByKey('GAMIFICATION_CREDITS');
+                  const bgColor = badgeConfig?.color || '#10b981';
+                  const badgeStyles = getBadgeStyles(bgColor);
+                  return (
+                    <span
+                      key={`badge-credits-${badgeConfigVersion}`}
+                      className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                      style={badgeStyles}
+                    >
+                      {renderBadgeIcon('GAMIFICATION_CREDITS', '💰', badgeStyles.color)}
+                      {credits.availableCredits || 0} créditos
+                    </span>
+                  );
+                })()}
 
                 {/* Badges de Gamificación */}
                 {gamification && (
                   <>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/90 text-white shadow-lg backdrop-blur-sm">
-                      ⭐ Nivel {gamification.level || 1}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/90 text-white shadow-lg backdrop-blur-sm">
-                      ⚡ {gamification.xp || 0} XP
-                    </span>
-                    {gamification.streakDays > 0 && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/90 text-white shadow-lg backdrop-blur-sm">
-                        🔥 {gamification.streakDays} días
-                      </span>
-                    )}
+                    {(() => {
+                      const badgeConfig = getBadgeByKey('GAMIFICATION_LEVEL');
+                      const bgColor = badgeConfig?.color || '#a78bfa';
+                      const badgeStyles = getBadgeStyles(bgColor);
+                      return (
+                        <span
+                          key={`badge-level-${badgeConfigVersion}`}
+                          className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                          style={badgeStyles}
+                        >
+                          {renderBadgeIcon('GAMIFICATION_LEVEL', '⭐', badgeStyles.color)}
+                          Nivel {gamification.level || 1}
+                        </span>
+                      );
+                    })()}
+                    {(() => {
+                      const badgeConfig = getBadgeByKey('GAMIFICATION_XP');
+                      const bgColor = badgeConfig?.color || '#f59e0b';
+                      const badgeStyles = getBadgeStyles(bgColor);
+                      return (
+                        <span
+                          key={`badge-xp-${badgeConfigVersion}`}
+                          className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                          style={badgeStyles}
+                        >
+                          {renderBadgeIcon('GAMIFICATION_XP', '⚡', badgeStyles.color)}
+                          {gamification.xp || 0} XP
+                        </span>
+                      );
+                    })()}
+                    {gamification.streakDays > 0 && (() => {
+                      const badgeConfig = getBadgeByKey('GAMIFICATION_STREAK');
+                      const bgColor = badgeConfig?.color || '#ef4444';
+                      const badgeStyles = getBadgeStyles(bgColor);
+                      return (
+                        <span
+                          key={`badge-streak-${badgeConfigVersion}`}
+                          className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                          style={badgeStyles}
+                        >
+                          {renderBadgeIcon('GAMIFICATION_STREAK', '🔥', badgeStyles.color)}
+                          {gamification.streakDays} días
+                        </span>
+                      );
+                    })()}
                   </>
                 )}
 
                 {/* Badge Ver como (clickeable) - Solo para admins */}
-                {isAdmin && currentUser?.uid !== normalizedUser?.uid && (
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleViewAs();
-                    }}
-                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-orange-500 text-white shadow-lg cursor-pointer hover:bg-orange-600 transition-colors"
-                    title="Cambiar a la vista de este usuario"
-                  >
-                    <Eye size={14} strokeWidth={2} />
-                    Ver como
-                  </span>
-                )}
+                {isAdmin && currentUser?.uid !== normalizedUser?.uid && (() => {
+                  const bgColor = '#f97316';
+                  const badgeStyles = getBadgeStyles(bgColor);
+                  const iconSize = getBadgeIconSize();
+                  return (
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewAs();
+                      }}
+                      className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm cursor-pointer hover:opacity-90 transition-opacity`}
+                      style={badgeStyles}
+                      title="Cambiar a la vista de este usuario"
+                    >
+                      <Eye size={iconSize} strokeWidth={2} style={{ color: 'inherit' }} />
+                      Ver como
+                    </span>
+                  );
+                })()}
               </div>
             </div>
           </div>

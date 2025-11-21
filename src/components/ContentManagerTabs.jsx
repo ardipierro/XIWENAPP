@@ -5,11 +5,12 @@
  */
 
 import { useState } from 'react';
-import { Layers, Sparkles, Lightbulb, BookOpen, CreditCard, Package } from 'lucide-react';
+import { Layers, Sparkles, Lightbulb, BookOpen, CreditCard, Package, Box } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import BaseTabs from './common/BaseTabs';
 import UnifiedContentManager from './UnifiedContentManager';
 import AIConfigPanel from './AIConfigPanel';
+import ContainerConfig from './ContainerConfig';
 import InteractiveBookViewer from './InteractiveBookViewer';
 import SlidePackageGenerator from './SlidePackageGenerator';
 import FlashCardManager from './FlashCardManager';
@@ -31,6 +32,12 @@ const TABS = [
     label: 'Configurar IA',
     icon: Lightbulb,
     permission: 'configure-ai',
+  },
+  {
+    id: 'container',
+    label: 'Contenedor',
+    icon: Box,
+    permission: 'create-content',
   },
   {
     id: 'flashcards',
@@ -86,6 +93,8 @@ export function ContentManagerTabs({ user, userRole }) {
         return <UnifiedContentManager user={user} />;
       case 'ai-config':
         return <AIConfigPanel />;
+      case 'container':
+        return <ContainerConfig />;
       case 'flashcards':
         return <FlashCardManager user={user} />;
       case 'libro-ade1':

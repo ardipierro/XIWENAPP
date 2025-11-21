@@ -11,7 +11,6 @@ import {
   FileText,
   Calendar,
   Dice3,
-  Home,
   ClipboardList,
   Presentation,
   GraduationCap,
@@ -100,7 +99,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
     if (['teacher', 'trial_teacher'].includes(userRole)) {
       return {
         items: [
-          { icon: BarChart3, label: 'Inicio', path: '/teacher', action: 'dashboard' },
           { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
           { icon: BookOpen, label: 'Contenidos', path: '/teacher', action: 'unifiedContent' },
           { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classSessions' },
@@ -119,7 +117,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
     if (['student', 'listener', 'trial'].includes(userRole)) {
       return {
         items: [
-          { icon: Home, label: 'Inicio', path: '/student', action: 'dashboard' },
           { icon: BookOpen, label: 'Contenidos', path: '/student', action: 'courses' },
           { icon: CheckSquare, label: 'Tareas', path: '/student', action: 'quickCorrection' },
           { icon: BookMarked, label: 'Diario de Clases', path: '/student', action: 'dailyLogs' },

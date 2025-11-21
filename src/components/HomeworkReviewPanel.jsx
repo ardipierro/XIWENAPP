@@ -3,7 +3,7 @@
  * @module components/HomeworkReviewPanel
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   CheckCircle,
   Clock,
@@ -41,6 +41,8 @@ import {
   ImageLightbox,
   ResponsiveGrid
 } from './common';
+import CategoryBadge from './common/CategoryBadge';
+import { getBadgeByKey, getContrastText } from '../config/badgeSystem';
 import { CardDeleteButton } from './cards';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
@@ -704,10 +706,10 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
                 <BaseBadge variant={gradeColor} className="text-sm">
                   {grade}/100
                 </BaseBadge>
-                <PerformanceIcon size={14} strokeWidth={2} className="text-gray-400" />
+                <PerformanceIcon size={14} strokeWidth={2} style={{ color: 'inherit' }} />
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                <AlertCircle size={14} strokeWidth={2} />
+                <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
                 {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
               </div>
             </div>
@@ -718,10 +720,10 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
               <BaseBadge variant={gradeColor}>
                 {grade}/100
               </BaseBadge>
-              <PerformanceIcon size={14} strokeWidth={2} className="text-gray-400" />
+              <PerformanceIcon size={14} strokeWidth={2} style={{ color: 'inherit' }} />
             </div>
             <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-              <AlertCircle size={14} strokeWidth={2} />
+              <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
               {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
             </div>
           </div>
@@ -729,27 +731,55 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
 
         {/* Status Badge - Below grade container */}
         <div className="flex justify-center">
-          {isProcessing ? (
-            <div className="bg-orange-500 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
-              <RefreshCw size={14} className="animate-spin" />
-              <span className="text-xs font-bold">PROCESANDO</span>
-            </div>
-          ) : isFailed ? (
-            <div className="bg-red-500 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
-              <AlertCircle size={14} />
-              <span className="text-xs font-bold">ERROR</span>
-            </div>
-          ) : isTeacherApproved ? (
-            <div className="bg-green-600 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
-              <CheckCircle size={14} />
-              <span className="text-xs font-bold">✓ APROBADO</span>
-            </div>
-          ) : isAIReady ? (
-            <div className="bg-yellow-500 text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
-              <Clock size={14} />
-              <span className="text-xs font-bold">PENDIENTE REVISIÓN</span>
-            </div>
-          ) : null}
+          {isProcessing ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_PROCESSING');
+            const bgColor = badgeConfig?.color || '#7a8fa8';
+            return (
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <RefreshCw size={14} className="animate-spin" style={{ color: 'inherit' }} />
+                <span className="text-xs font-semibold">PROCESANDO</span>
+              </span>
+            );
+          })() : isFailed ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_ERROR');
+            const bgColor = badgeConfig?.color || '#dc2626';
+            return (
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <AlertCircle size={14} style={{ color: 'inherit' }} />
+                <span className="text-xs font-semibold">ERROR</span>
+              </span>
+            );
+          })() : isTeacherApproved ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
+            const bgColor = badgeConfig?.color || '#10b981';
+            return (
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <CheckCircle size={14} style={{ color: 'inherit' }} />
+                <span className="text-xs font-semibold">✓ APROBADO</span>
+              </span>
+            );
+          })() : isAIReady ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
+            const bgColor = badgeConfig?.color || '#f59e0b';
+            return (
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <Clock size={14} style={{ color: 'inherit' }} />
+                <span className="text-xs font-semibold">PENDIENTE REVISIÓN</span>
+              </span>
+            );
+          })() : null}
         </div>
 
         {/* Cancel Button - Only when stuck */}
@@ -788,19 +818,41 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
   const [assignedStudentId, setAssignedStudentId] = useState(review.studentId);
   const [assignedStudentName, setAssignedStudentName] = useState(review.studentName);
 
-  // Image overlay visualization controls
+  // Local review state that gets updated by subscription
+  const [currentReview, setCurrentReview] = useState(review);
+
+  // Selected correction profile (received from ProfileSelector)
+  const [selectedProfile, setSelectedProfile] = useState(null);
+
+  // Image zoom/pan controls (kept, not part of profile)
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+
+  // Visualization settings from profile (with defaults) - MEMOIZED to prevent infinite loop
+  const visualization = useMemo(() => {
+    return selectedProfile?.settings?.visualization || {
+      highlightOpacity: 0.25,
+      useWavyUnderline: true,
+      showCorrectionText: true,
+      correctionTextFont: 'Caveat',
+      colors: {
+        spelling: '#ef4444',
+        grammar: '#f97316',
+        punctuation: '#eab308',
+        vocabulary: '#5b8fa3'
+      },
+      strokeWidth: 2,
+      strokeOpacity: 0.8
+    };
+  }, [selectedProfile]);
+
+  // Visible error types (kept as local state for filtering, not part of profile config)
   const [visibleErrorTypes, setVisibleErrorTypes] = useState({
     spelling: true,
     grammar: true,
     punctuation: true,
     vocabulary: true
   });
-  const [highlightOpacity, setHighlightOpacity] = useState(0.25);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [useWavyUnderline, setUseWavyUnderline] = useState(true);
-  const [showCorrectionText, setShowCorrectionText] = useState(true);
-  const [correctionTextFont, setCorrectionTextFont] = useState('Caveat');
 
   // ✨ CRITICAL FIX: Normalize correction field names on load
   // Cloud Function provides 'original', 'type', 'correction'
@@ -824,6 +876,62 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
     }));
     setUpdatedCorrections(normalized);
   }, [review.id]);
+
+  // ✨ NEW: Subscribe to review changes when processing
+  useEffect(() => {
+    const isProcessing = currentReview.status === REVIEW_STATUS.PROCESSING || currentReview.status === 'processing';
+
+    if (!isProcessing) {
+      return; // Only subscribe if processing
+    }
+
+    logger.info(`🔔 Subscribing to review ${currentReview.id} updates (status: ${currentReview.status})`, 'HomeworkReviewPanel');
+
+    const unsubscribe = subscribeToReview(currentReview.id, (updatedReview) => {
+      logger.info(`📥 Review ${currentReview.id} updated - new status: ${updatedReview.status}`, 'HomeworkReviewPanel');
+
+      // ✅ Update the entire review object (this will make banners disappear)
+      setCurrentReview(updatedReview);
+
+      // Update local state with new data
+      if (updatedReview.aiSuggestions) {
+        const normalized = updatedReview.aiSuggestions.map((corr, idx) => ({
+          ...corr,
+          errorText: corr.errorText || corr.original || corr.text || corr.word || '',
+          errorType: corr.errorType || corr.type || 'default',
+          suggestion: corr.suggestion || corr.correction || corr.correctedText || corr.fix || '',
+          id: corr.id || `corr_${idx}`,
+          original: corr.original || corr.errorText || corr.text || '',
+          type: corr.type || corr.errorType || 'default',
+          correction: corr.correction || corr.suggestion || ''
+        }));
+        setUpdatedCorrections(normalized);
+      }
+
+      if (updatedReview.overallFeedback) {
+        setEditedFeedback(updatedReview.overallFeedback);
+      }
+
+      if (updatedReview.suggestedGrade !== undefined) {
+        setEditedGrade(updatedReview.suggestedGrade);
+      }
+
+      // If processing finished, show success message
+      if (updatedReview.status === REVIEW_STATUS.PENDING_REVIEW || updatedReview.status === 'pending_review') {
+        setSuccess('✅ ¡Análisis completado! Revisa las correcciones y aprueba.');
+      }
+
+      // If processing failed, show error
+      if (updatedReview.status === REVIEW_STATUS.FAILED || updatedReview.status === 'failed') {
+        setError(updatedReview.errorMessage || 'Error al procesar la tarea');
+      }
+    });
+
+    return () => {
+      logger.info(`🔕 Unsubscribing from review ${currentReview.id}`, 'HomeworkReviewPanel');
+      unsubscribe();
+    };
+  }, [currentReview.id, currentReview.status]);
 
   const handleApprove = async () => {
     try {
@@ -920,7 +1028,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
     }
   };
 
-  const grade = isEditing ? editedGrade : review.suggestedGrade;
+  const grade = isEditing ? editedGrade : currentReview.suggestedGrade;
   const gradeColor = grade >= 90 ? 'success' : grade >= 70 ? 'primary' : grade >= 50 ? 'warning' : 'danger';
 
   const errorTypeLabels = {
@@ -965,14 +1073,14 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         )}
 
         {/* Processing Alert */}
-        {(review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing') && (
+        {(currentReview.status === REVIEW_STATUS.PROCESSING || currentReview.status === 'processing') && (
           <BaseAlert variant="info">
             <div className="flex items-center gap-3">
               <RefreshCw size={18} className="animate-spin" />
               <div>
                 <p className="font-semibold">IA está analizando esta tarea</p>
                 <p className="text-sm mt-1">
-                  El análisis automático puede tardar 10-30 segundos. La página se actualizará cuando esté listo.
+                  El análisis automático puede tardar 10-30 segundos. La página se actualizará automáticamente cuando esté listo.
                 </p>
               </div>
             </div>
@@ -980,14 +1088,14 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         )}
 
         {/* Failed Alert */}
-        {(review.status === REVIEW_STATUS.FAILED || review.status === 'failed') && (
+        {(currentReview.status === REVIEW_STATUS.FAILED || currentReview.status === 'failed') && (
           <BaseAlert variant="danger">
             <div className="flex items-center gap-3">
               <AlertCircle size={18} />
               <div>
                 <p className="font-semibold">Error al procesar la tarea</p>
-                {review.errorMessage && (
-                  <p className="text-sm mt-1">{review.errorMessage}</p>
+                {currentReview.errorMessage && (
+                  <p className="text-sm mt-1">{currentReview.errorMessage}</p>
                 )}
               </div>
             </div>
@@ -1004,14 +1112,14 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                   {assignedStudentName || 'Estudiante'}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                  <Calendar size={14} strokeWidth={2} />
-                  {review.createdAt?.toDate?.().toLocaleString('es-ES')}
+                  <Calendar size={14} strokeWidth={2} style={{ color: 'inherit' }} />
+                  {currentReview.createdAt?.toDate?.().toLocaleString('es-ES')}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <BaseBadge variant="info">
-                {review.aiProvider || 'claude'} - {review.aiModel || 'sonnet-4-5'}
+                {currentReview.aiProvider || 'claude'} - {currentReview.aiModel || 'sonnet-4-5'}
               </BaseBadge>
               <BaseBadge variant={gradeColor} size="lg">
                 {grade}/100
@@ -1022,7 +1130,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
 
         {/* Student Assignment - Compact */}
         <StudentAssigner
-          teacherId={review.teacherId || parentTeacherId || currentUser?.uid}
+          teacherId={currentReview.teacherId || parentTeacherId || currentUser?.uid}
           currentStudentId={assignedStudentId}
           currentStudentName={assignedStudentName}
           onAssign={handleStudentAssignment}
@@ -1034,29 +1142,43 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
             <ImageIcon size={18} strokeWidth={2} />
             Imagen de la Tarea
-            {review.words && review.words.length > 0 && (
+            {currentReview.words && currentReview.words.length > 0 && (
               <BaseBadge variant="success" size="sm">
-                {review.words.length} palabras detectadas
+                {currentReview.words.length} palabras detectadas
               </BaseBadge>
             )}
           </h3>
 
-          {/* Visualization Controls */}
-          {review.words && review.words.length > 0 && (
-            <div className="mb-3">
-              <ImageOverlayControls
-                visibleErrorTypes={visibleErrorTypes}
-                onVisibleErrorTypesChange={setVisibleErrorTypes}
-                highlightOpacity={highlightOpacity}
-                onOpacityChange={setHighlightOpacity}
-                useWavyUnderline={useWavyUnderline}
-                onWavyUnderlineChange={setUseWavyUnderline}
-                showCorrectionText={showCorrectionText}
-                onShowCorrectionTextChange={setShowCorrectionText}
-                correctionTextFont={correctionTextFont}
-                onCorrectionTextFontChange={setCorrectionTextFont}
-                errorCounts={review.errorSummary || {}}
-              />
+          {/* Visualization Controls - Now controlled by profile configuration */}
+          {currentReview.words && currentReview.words.length > 0 && selectedProfile && (
+            <div className="mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <Target size={14} className="text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                  Visualización configurada por perfil: {selectedProfile.icon} {selectedProfile.name}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center gap-3 flex-wrap">
+                {/* Show active error type filters */}
+                {Object.entries(visibleErrorTypes).map(([type, visible]) => (
+                  visible && (
+                    <label key={type} className="flex items-center gap-1.5 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={visible}
+                        onChange={(e) => setVisibleErrorTypes({ ...visibleErrorTypes, [type]: e.target.checked })}
+                        className="w-3 h-3"
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">
+                        {type === 'spelling' ? '🔴 Ortografía' :
+                         type === 'grammar' ? '🟠 Gramática' :
+                         type === 'punctuation' ? '🟡 Puntuación' :
+                         '🔵 Vocabulario'}
+                      </span>
+                    </label>
+                  )
+                ))}
+              </div>
             </div>
           )}
 
@@ -1070,7 +1192,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                 size="sm"
                 onClick={() => setShowImageLightbox(true)}
               >
-                <Maximize2 size={14} />
+                <Maximize2 size={14} style={{ color: 'inherit' }} />
                 Pantalla completa
               </BaseButton>
             </div>
@@ -1082,22 +1204,25 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
               setPan={setPan}
             >
               <ImageOverlay
-                imageUrl={review.imageUrl}
-                words={review.words || []}
+                imageUrl={currentReview.imageUrl}
+                words={currentReview.words || []}
                 errors={updatedCorrections}
-                showOverlay={review.words && review.words.length > 0}
+                showOverlay={currentReview.words && currentReview.words.length > 0}
                 visibleErrorTypes={visibleErrorTypes}
-                highlightOpacity={highlightOpacity}
+                highlightOpacity={visualization.highlightOpacity}
                 zoom={zoom}
                 pan={pan}
-                useWavyUnderline={useWavyUnderline}
-                showCorrectionText={showCorrectionText}
-                correctionTextFont={correctionTextFont}
+                useWavyUnderline={visualization.useWavyUnderline}
+                showCorrectionText={visualization.showCorrectionText}
+                correctionTextFont={visualization.correctionTextFont}
+                errorColors={visualization.colors}
+                strokeWidth={visualization.strokeWidth}
+                strokeOpacity={visualization.strokeOpacity}
                 className="max-w-full max-h-96"
               />
             </InteractiveImageContainer>
           </div>
-          {review.words && review.words.length > 0 && (
+          {currentReview.words && currentReview.words.length > 0 && (
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
               💡 Controles disponibles:
               <span className="ml-2">🖱️ Arrastra la imagen</span>
@@ -1111,20 +1236,41 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
               <span>🎨 Opacidad</span>
             </div>
           )}
-          {!review.words || review.words.length === 0 && (
-            <div className="mt-2 text-xs text-yellow-600 dark:text-yellow-500">
-              ⚠️ Esta tarea no tiene coordenadas de palabras. Configura Google Vision API para habilitar el resaltado visual.
-            </div>
+          {(!currentReview.words || currentReview.words.length === 0) && (
+            <BaseAlert variant="warning" className="mt-3">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle size={16} />
+                  <span className="font-semibold text-sm">Sin coordenadas de palabras</span>
+                </div>
+                <p className="text-xs">
+                  El texto fue extraído correctamente, pero no se detectaron las posiciones de cada palabra en la imagen.
+                  Esto significa que <strong>no se pueden mostrar marcas visuales</strong> sobre la imagen (subrayados, círculos, etc.).
+                </p>
+                <p className="text-xs">
+                  <strong>Causa:</strong> El backend de Google Vision API no está devolviendo coordenadas.
+                  Verifica que la Cloud Function esté guardando el campo <code className="bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded">words</code> en Firestore.
+                </p>
+                <p className="text-xs italic text-gray-600 dark:text-gray-400">
+                  💡 Las correcciones de texto siguen funcionando normalmente. Solo falta el resaltado visual.
+                </p>
+              </div>
+            </BaseAlert>
           )}
         </div>
 
         {/* Profile Selector */}
         <ProfileSelector
-          studentId={review.studentId}
-          teacherId={review.teacherId || parentTeacherId || currentUser?.uid}
-          currentReviewId={review.id}
+          studentId={currentReview.studentId}
+          teacherId={currentReview.teacherId || parentTeacherId || currentUser?.uid}
+          currentReviewId={currentReview.id}
+          onProfileSelect={(profile) => {
+            // Receive the full profile object and update visualization settings
+            setSelectedProfile(profile);
+            logger.info('Profile selected for visualization', 'HomeworkReviewPanel', { profileId: profile?.id, profileName: profile?.name });
+          }}
           onReanalyze={async (profileId) => {
-            const result = await requestReanalysis(review.id, profileId);
+            const result = await requestReanalysis(currentReview.id, profileId);
             if (result.success) {
               // Show success message
               setSuccess('Re-análisis solicitado. La tarea se procesará en unos momentos...');
@@ -1140,7 +1286,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         />
 
         {/* Transcription with highlighted errors */}
-        {review.transcription && (
+        {currentReview.transcription && (
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
               <FileText size={18} strokeWidth={2} />
@@ -1151,7 +1297,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
             </h3>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <HighlightedTranscription
-                transcription={review.transcription}
+                transcription={currentReview.transcription}
                 corrections={updatedCorrections}
               />
             </div>
@@ -1166,7 +1312,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
               Errores:
             </span>
             {Object.entries(errorTypeLabels).map(([type, label]) => {
-              const count = review.errorSummary?.[type] || 0;
+              const count = currentReview.errorSummary?.[type] || 0;
               if (count === 0) return null;
 
               return (
@@ -1185,7 +1331,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                 </div>
               );
             })}
-            {(review.errorSummary?.total || 0) === 0 && (
+            {(currentReview.errorSummary?.total || 0) === 0 && (
               <span className="text-xs text-gray-500 dark:text-gray-400">Sin errores detectados</span>
             )}
           </div>
@@ -1194,7 +1340,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         {/* ✨ NEW: Correction Review Panel - Individual approval/rejection */}
         {updatedCorrections && updatedCorrections.length > 0 && (
           <CorrectionReviewPanel
-            review={{ ...review, aiSuggestions: updatedCorrections }}
+            review={{ ...currentReview, aiSuggestions: updatedCorrections }}
             onCorrectionsUpdate={(corrections) => setUpdatedCorrections(corrections)}
           />
         )}
@@ -1247,8 +1393,8 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
                   size="sm"
                   onClick={() => {
                     setIsEditing(false);
-                    setEditedFeedback(review.overallFeedback || '');
-                    setEditedGrade(review.suggestedGrade || 0);
+                    setEditedFeedback(currentReview.overallFeedback || '');
+                    setEditedGrade(currentReview.suggestedGrade || 0);
                   }}
                 >
                   Cancelar
@@ -1258,7 +1404,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
           ) : (
             <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
               <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-                {review.overallFeedback || 'Sin comentarios'}
+                {currentReview.overallFeedback || 'Sin comentarios'}
               </p>
             </div>
           )}
@@ -1299,16 +1445,19 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
       <ImageLightbox
         isOpen={showImageLightbox}
         onClose={() => setShowImageLightbox(false)}
-        imageUrl={review.imageUrl}
+        imageUrl={currentReview.imageUrl}
         alt="Tarea del estudiante"
-        words={review.words || []}
+        words={currentReview.words || []}
         errors={updatedCorrections}
-        showOverlay={review.words && review.words.length > 0}
+        showOverlay={currentReview.words && currentReview.words.length > 0}
         visibleErrorTypes={visibleErrorTypes}
-        highlightOpacity={highlightOpacity}
-        useWavyUnderline={useWavyUnderline}
-        showCorrectionText={showCorrectionText}
-        correctionTextFont={correctionTextFont}
+        highlightOpacity={visualization.highlightOpacity}
+        useWavyUnderline={visualization.useWavyUnderline}
+        showCorrectionText={visualization.showCorrectionText}
+        correctionTextFont={visualization.correctionTextFont}
+        errorColors={visualization.colors}
+        strokeWidth={visualization.strokeWidth}
+        strokeOpacity={visualization.strokeOpacity}
       />
     </BaseModal>
   );

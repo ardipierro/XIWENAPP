@@ -71,15 +71,73 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
     }
   };
 
-  // Determinar badge de estado
+  // Determinar badge de estado (retorna JSX, no objeto)
   const getStatusBadge = () => {
     if (!isConfigured) {
-      return { variant: 'default', children: 'Sin configurar' };
+      return (
+        <BaseBadge variant="default" size="sm">
+          Sin configurar
+        </BaseBadge>
+      );
     }
     if (isEnabled) {
-      return { variant: 'success', children: 'Activo' };
+      return (
+        <BaseBadge variant="success" size="sm">
+          Activo
+        </BaseBadge>
+      );
     }
-    return { variant: 'default', children: 'Configurado' };
+    return (
+      <BaseBadge variant="default" size="sm">
+        Configurado
+      </BaseBadge>
+    );
+  };
+
+  // Renderizar botones para el footer (actions)
+  const renderActions = () => {
+    const buttons = [];
+
+    // Quick test para imágenes
+    if (isImageFunction && isConfigured) {
+      buttons.push(
+        <BaseButton
+          key="test"
+          variant="outline"
+          icon={Sparkles}
+          onClick={handleQuickImageTest}
+          disabled={testingImage}
+          loading={testingImage}
+          fullWidth
+          size="sm"
+        >
+          {testingImage ? 'Generando...' : 'Prueba Rápida'}
+        </BaseButton>
+      );
+    }
+
+    // Botón configurar (siempre presente)
+    buttons.push(
+      <BaseButton
+        key="configure"
+        variant={isConfigured ? "secondary" : "primary"}
+        icon={Settings}
+        onClick={(e) => {
+          e.stopPropagation();
+          onConfigure();
+        }}
+        fullWidth
+        size="sm"
+      >
+        {isConfigured ? 'Configurar' : 'Configurar función'}
+      </BaseButton>
+    );
+
+    return (
+      <div className="flex flex-col gap-2 w-full">
+        {buttons}
+      </div>
+    );
   };
 
   return (
@@ -90,8 +148,9 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
       icon={FunctionIcon}
       title={aiFunction.name}
       subtitle={aiFunction.description}
-      badges={[getStatusBadge()]}
+      badge={getStatusBadge()}
       onClick={onConfigure}
+      actions={renderActions()}
     >
       {/* Info de proveedor si está configurado */}
       {isConfigured && provider && (
@@ -145,38 +204,6 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
           </p>
         </div>
       )}
-
-      {/* Botones */}
-      <div className="flex flex-col gap-2 mt-auto">
-        {/* Quick test para imágenes */}
-        {isImageFunction && isConfigured && (
-          <BaseButton
-            variant="outline"
-            icon={Sparkles}
-            onClick={handleQuickImageTest}
-            disabled={testingImage}
-            loading={testingImage}
-            fullWidth
-            size="sm"
-          >
-            {testingImage ? 'Generando...' : 'Prueba Rápida'}
-          </BaseButton>
-        )}
-
-        {/* Botón configurar */}
-        <BaseButton
-          variant={isConfigured ? "secondary" : "primary"}
-          icon={Settings}
-          onClick={(e) => {
-            e.stopPropagation();
-            onConfigure();
-          }}
-          fullWidth
-          size="sm"
-        >
-          {isConfigured ? 'Configurar' : 'Configurar función'}
-        </BaseButton>
-      </div>
     </UniversalCard>
   );
 }

@@ -39,9 +39,16 @@ import {
   saveIconLibraryConfig,
   MONOCHROME_PALETTES,
   COLOR_PALETTES,
+  getBadgeByKey,
+  getBadgeSizeClasses,
+  getBadgeIconSize,
+  getBadgeTextColor,
+  getContrastText,
+  getBadgeStyles,
 } from '../../config/badgeSystem';
 import IconPickerModal from './IconPickerModal';
 import * as HeroIcons from '@heroicons/react/24/outline';
+import * as HeroIconsSolid from '@heroicons/react/24/solid';
 import logger from '../../utils/logger';
 
 /**
@@ -78,6 +85,9 @@ function BadgeCustomizerTab({ user }) {
     status: false,
     theme: false,
     feature: false,
+    role: false,
+    homework_status: false,
+    gamification: false,
   });
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -215,7 +225,7 @@ function BadgeCustomizerTab({ user }) {
       )}
 
       {/* Vista Previa (ARRIBA DE TODO) */}
-      <PreviewSection badges={config} iconConfig={iconConfig} />
+      <PreviewSection badges={config} iconConfig={iconConfig} globalConfig={globalConfig} />
 
       {/* Configuración Global Rediseñada */}
       <GlobalConfigPanel
@@ -508,13 +518,13 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
 // COMPONENTE: PreviewSection (ARRIBA DE TODO)
 // ============================================
 
-function PreviewSection({ badges, iconConfig }) {
+function PreviewSection({ badges, iconConfig, globalConfig }) {
   const [key, setKey] = useState(0);
 
-  // Forzar actualización cuando cambie iconConfig
+  // Forzar actualización cuando cambie iconConfig o globalConfig
   useEffect(() => {
     setKey(k => k + 1);
-  }, [iconConfig]);
+  }, [iconConfig, globalConfig]);
 
   // CRÍTICO: Forzar actualización cuando cambien los badges (colores, paleta, etc.)
   useEffect(() => {
@@ -536,6 +546,33 @@ function PreviewSection({ badges, iconConfig }) {
     return keys.slice(0, 16); // Primeros 16 badges
   }, [badges]);
 
+  /**
+   * Renderiza el icono del badge según configuración global
+   */
+  const renderBadgeIcon = (badgeKey, fallbackEmoji, textColor) => {
+    const library = iconConfig.library || 'emoji';
+    const iconSize = getBadgeIconSize();
+
+    if (library === 'none') return null;
+
+    if (library === 'heroicon' || library === 'heroicon-filled') {
+      const badgeConfig = getBadgeByKey(badgeKey);
+      const iconName = badgeConfig?.heroicon;
+
+      if (iconName) {
+        const IconComponent = library === 'heroicon-filled'
+          ? HeroIconsSolid[iconName]
+          : HeroIcons[iconName];
+
+        if (IconComponent) {
+          return <IconComponent style={{ width: iconSize, height: iconSize, marginRight: '4px', color: textColor }} />;
+        }
+      }
+    }
+
+    return <span style={{ marginRight: '4px' }}>{fallbackEmoji}</span>;
+  };
+
   return (
     <div
       className="rounded-lg p-3"
@@ -553,17 +590,26 @@ function PreviewSection({ badges, iconConfig }) {
           {iconConfig.library === 'heroicon' || iconConfig.library === 'heroicon-filled'
             ? `Paleta: ${MONOCHROME_PALETTES[iconConfig.monochromePalette]?.label || 'Vibrante'}`
             : `Iconos: ${iconConfig.library === 'emoji' ? 'Emojis' : iconConfig.library === 'none' ? 'Sin iconos' : iconConfig.library}`}
+          {' • '}
+          Tamaño: {globalConfig.size?.toUpperCase() || 'MD'}
         </span>
       </h3>
 
       <div className="flex flex-wrap gap-2">
         {previewBadges.map((badgeKey, index) => {
+          const badgeConfig = badges[badgeKey];
+          const bgColor = badgeConfig?.color || '#6b7280';
+          const badgeStyles = getBadgeStyles(bgColor);
+
           return (
-            <CategoryBadge
+            <span
               key={`preview-${badgeKey}-${key}-${index}`}
-              badgeKey={badgeKey}
-              size="md"
-            />
+              className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+              style={badgeStyles}
+            >
+              {renderBadgeIcon(badgeKey, badgeConfig?.icon || '•', badgeStyles.color)}
+              {badgeConfig?.label || badgeKey}
+            </span>
           );
         })}
       </div>
@@ -909,6 +955,56 @@ function GlobalConfigPanel({
           </div>
         </div>
       </div>
+
+      {/* COLOR DE FUENTE */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          Color de Fuente
+        </label>
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="textColor"
+              value="auto"
+              checked={globalConfig.textColor === 'auto' || !globalConfig.textColor}
+              onChange={() => onGlobalConfigChange('textColor', 'auto')}
+            />
+            <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+              Automático (contraste)
+            </span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="textColor"
+              value="custom"
+              checked={globalConfig.textColor !== 'auto' && globalConfig.textColor}
+              onChange={() => onGlobalConfigChange('textColor', '#ffffff')}
+            />
+            <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+              Personalizado
+            </span>
+          </label>
+          {globalConfig.textColor !== 'auto' && globalConfig.textColor && (
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={globalConfig.textColor || '#ffffff'}
+                onChange={(e) => onGlobalConfigChange('textColor', e.target.value)}
+                className="w-12 h-8 rounded cursor-pointer"
+                style={{ border: '2px solid var(--color-border)' }}
+              />
+              <code className="px-2 py-1 rounded text-xs font-mono" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+                {globalConfig.textColor}
+              </code>
+            </div>
+          )}
+        </div>
+        <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+          Controla el color del texto en todos los badges. "Automático" calcula blanco o negro según el fondo.
+        </p>
+      </div>
     </div>
   );
 }
@@ -1116,28 +1212,6 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
       </div>
     </div>
   );
-}
-
-// ============================================
-// HELPERS
-// ============================================
-
-function getContrastText(bgColor) {
-  const rgb = hexToRgb(bgColor);
-  if (!rgb) return '#ffffff';
-  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-  return luminance > 0.5 ? '#000000' : '#ffffff';
-}
-
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
 }
 
 export default BadgeCustomizerTab;

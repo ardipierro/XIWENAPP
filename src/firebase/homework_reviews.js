@@ -218,7 +218,7 @@ export async function getReviewsByStudent(studentId, includeUnreviewed = false) 
 }
 
 /**
- * Get ALL reviews for teacher panel (pending + approved)
+ * Get ALL reviews for teacher panel (pending + approved + failed)
  * @param {string} teacherId - Teacher ID (optional, for filtering by teacher's assignments)
  * @returns {Promise<Array>} Array of all reviews
  */
@@ -227,7 +227,7 @@ export async function getAllReviewsForTeacher(teacherId = null) {
     console.log(`[getAllReviewsForTeacher] Fetching all reviews (teacherId: ${teacherId || 'ALL'})`);
     const reviewsRef = collection(db, 'homework_reviews');
 
-    // Fetch ALL statuses: PROCESSING, PENDING_REVIEW, and APPROVED
+    // Fetch ALL statuses: PROCESSING, PENDING_REVIEW, APPROVED, and FAILED
     const processingQuery = query(
       reviewsRef,
       where('status', '==', REVIEW_STATUS.PROCESSING),
@@ -247,14 +247,22 @@ export async function getAllReviewsForTeacher(teacherId = null) {
       limit(100) // Limit approved to avoid too many results
     );
 
+    const failedQuery = query(
+      reviewsRef,
+      where('status', '==', REVIEW_STATUS.FAILED),
+      orderBy('createdAt', 'desc'),
+      limit(50) // Limit failed to avoid too many results
+    );
+
     console.log('[getAllReviewsForTeacher] Executing queries...');
-    const [processingSnapshot, pendingSnapshot, approvedSnapshot] = await Promise.all([
+    const [processingSnapshot, pendingSnapshot, approvedSnapshot, failedSnapshot] = await Promise.all([
       getDocs(processingQuery),
       getDocs(pendingQuery),
-      getDocs(approvedQuery)
+      getDocs(approvedQuery),
+      getDocs(failedQuery)
     ]);
 
-    console.log(`[getAllReviewsForTeacher] Query returned ${processingSnapshot.docs.length} processing + ${pendingSnapshot.docs.length} pending + ${approvedSnapshot.docs.length} approved`);
+    console.log(`[getAllReviewsForTeacher] Query returned ${processingSnapshot.docs.length} processing + ${pendingSnapshot.docs.length} pending + ${approvedSnapshot.docs.length} approved + ${failedSnapshot.docs.length} failed`);
 
     // Combine all results
     const allReviews = [
@@ -267,6 +275,10 @@ export async function getAllReviewsForTeacher(teacherId = null) {
         ...doc.data()
       })),
       ...approvedSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })),
+      ...failedSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }))

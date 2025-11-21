@@ -44,13 +44,28 @@ function ProfileTabs({ tabs, defaultTab, onTabChange }) {
                 onClick={() => handleTabClick(tab.id)}
                 className={`
                   flex items-center gap-2 px-4 py-3 min-h-[48px]
-                  font-semibold text-sm transition-all
+                  font-medium text-sm transition-all duration-200
                   border-b-2 flex-shrink-0
-                  ${isActive
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20'
-                    : 'border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                  }
                 `}
+                style={isActive ? {
+                  borderBottomColor: 'var(--color-text-primary)',
+                  color: 'var(--color-text-primary)',
+                } : {
+                  borderBottomColor: 'transparent',
+                  color: 'var(--color-text-secondary)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = 'var(--color-text-primary)';
+                    e.currentTarget.style.borderBottomColor = 'var(--color-border-focus)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = 'var(--color-text-secondary)';
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }
+                }}
                 aria-selected={isActive}
                 role="tab"
               >

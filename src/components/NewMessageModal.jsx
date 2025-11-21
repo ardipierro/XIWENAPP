@@ -13,6 +13,46 @@ import {
 import UserAvatar from './UserAvatar';
 import logger from '../utils/logger';
 import { BaseModal, BaseButton, BaseInput, BaseTextarea, CategoryBadge } from './common';
+import {
+  getBadgeByKey,
+  getContrastText,
+  getIconLibraryConfig,
+  getBadgeSizeClasses,
+  getBadgeIconSize,
+  getBadgeTextColor,
+  getBadgeStyles
+} from '../config/badgeSystem';
+import * as HeroIcons from '@heroicons/react/24/outline';
+import * as HeroIconsSolid from '@heroicons/react/24/solid';
+
+/**
+ * Renderiza el icono del badge según la configuración global
+ * Lee automáticamente el tamaño desde la configuración global
+ */
+const renderBadgeIcon = (badgeKey, fallbackEmoji, textColor) => {
+  const iconLibraryConfig = getIconLibraryConfig();
+  const library = iconLibraryConfig.library || 'emoji';
+  const iconSize = getBadgeIconSize(); // Lee tamaño global
+
+  if (library === 'none') return null;
+
+  if (library === 'heroicon' || library === 'heroicon-filled') {
+    const badgeConfig = getBadgeByKey(badgeKey);
+    const iconName = badgeConfig?.heroicon;
+
+    if (iconName) {
+      const IconComponent = library === 'heroicon-filled'
+        ? HeroIconsSolid[iconName]
+        : HeroIcons[iconName];
+
+      if (IconComponent) {
+        return <IconComponent style={{ width: iconSize, height: iconSize, marginRight: '4px', color: textColor }} />;
+      }
+    }
+  }
+
+  return <span style={{ marginRight: '4px' }}>{fallbackEmoji}</span>;
+};
 
 /**
  * New Message Modal Component
@@ -28,6 +68,16 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
   const [message, setMessage] = useState('');
   const [searching, setSearching] = useState(false);
   const [sending, setSending] = useState(false);
+  const [badgeConfigVersion, setBadgeConfigVersion] = useState(0);
+
+  // Escuchar cambios en la configuración de badges
+  useEffect(() => {
+    const handleBadgeConfigChange = () => {
+      setBadgeConfigVersion(prev => prev + 1);
+    };
+    window.addEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+    return () => window.removeEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+  }, []);
 
   // Search users when search term changes
   useEffect(() => {
@@ -174,7 +224,21 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
                     {selectedUser.email}
                   </div>
                 </div>
-                <CategoryBadge type="role" value={selectedUser.role} size="sm" />
+                {(() => {
+                  const badgeConfig = getBadgeByKey(`ROLE_${selectedUser.role.toUpperCase()}`);
+                  const bgColor = badgeConfig?.color || '#6b7280';
+                  const badgeStyles = getBadgeStyles(bgColor);
+                  return (
+                    <span
+                      key={`badge-${badgeConfigVersion}`}
+                      className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                      style={badgeStyles}
+                    >
+                      {renderBadgeIcon(`ROLE_${selectedUser.role.toUpperCase()}`, '👤', badgeStyles.color)}
+                      {badgeConfig?.label || selectedUser.role}
+                    </span>
+                  );
+                })()}
               </div>
               <BaseButton
                 variant="ghost"
@@ -224,7 +288,21 @@ function NewMessageModal({ currentUser, onClose, onConversationCreated }) {
                         {user.email}
                       </div>
                     </div>
-                    <CategoryBadge type="role" value={user.role} size="sm" />
+                    {(() => {
+                      const badgeConfig = getBadgeByKey(`ROLE_${user.role.toUpperCase()}`);
+                      const bgColor = badgeConfig?.color || '#6b7280';
+                      const badgeStyles = getBadgeStyles(bgColor);
+                      return (
+                        <span
+                          key={`badge-${badgeConfigVersion}`}
+                          className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                          style={badgeStyles}
+                        >
+                          {renderBadgeIcon(`ROLE_${user.role.toUpperCase()}`, '👤', badgeStyles.color)}
+                          {badgeConfig?.label || user.role}
+                        </span>
+                      );
+                    })()}
                   </div>
                 ))
               ) : searchTerm.trim().length >= 2 ? (

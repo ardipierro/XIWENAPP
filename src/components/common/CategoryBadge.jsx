@@ -20,6 +20,8 @@ import {
   getBadgeForCEFR,
   getBadgeForStatus,
   getBadgeForRole,
+  getBadgeForHomeworkStatus,
+  getBadgeForGamification,
   getBadgeByKey,
   getIconLibraryConfig,
   MONOCHROME_PALETTES,
@@ -32,13 +34,14 @@ import logger from '../../utils/logger';
  * Badge inteligente con mapeo automático de categorías
  *
  * @param {Object} props
- * @param {string} props.type - Tipo de categoría: 'content' | 'exercise' | 'difficulty' | 'cefr' | 'status' | 'role' | 'custom'
- * @param {string} props.value - Valor dentro de la categoría (ej: 'course', 'intermediate', 'admin')
+ * @param {string} props.type - Tipo de categoría: 'content' | 'exercise' | 'difficulty' | 'cefr' | 'status' | 'role' | 'homework_status' | 'gamification' | 'custom'
+ * @param {string} props.value - Valor dentro de la categoría (ej: 'course', 'intermediate', 'admin', 'pending', 'credits')
  * @param {string} props.badgeKey - Clave directa del badge (alternativa a type+value)
  * @param {string} props.size - Tamaño del badge: 'sm' | 'md' | 'lg'
  * @param {boolean} props.showIcon - Mostrar icono emoji
  * @param {boolean} props.showLabel - Mostrar texto del label
  * @param {function} props.onRemove - Callback para remover (muestra X)
+ * @param {React.ReactNode} props.children - Contenido personalizado (sobrescribe icono y label)
  */
 function CategoryBadge({
   type,
@@ -49,6 +52,7 @@ function CategoryBadge({
   showLabel = true,
   onRemove,
   className = '',
+  children,
   ...rest
 }) {
   // Estado para configuración de iconos
@@ -120,6 +124,12 @@ function CategoryBadge({
           break;
         case 'role':
           config = getBadgeForRole(value);
+          break;
+        case 'homework_status':
+          config = getBadgeForHomeworkStatus(value);
+          break;
+        case 'gamification':
+          config = getBadgeForGamification(value);
           break;
         case 'custom':
           config = getBadgeByKey(value);
@@ -237,8 +247,16 @@ function CategoryBadge({
       }
       {...rest}
     >
-      {renderIcon()}
-      {showLabel && badgeConfig.label}
+      {children ? (
+        // Si hay children, renderizarlos directamente
+        children
+      ) : (
+        // Si no hay children, renderizar icono y label por defecto
+        <>
+          {renderIcon()}
+          {showLabel && badgeConfig.label}
+        </>
+      )}
     </BaseBadge>
   );
 }
@@ -271,7 +289,7 @@ function hexToRgb(hex) {
 }
 
 CategoryBadge.propTypes = {
-  type: PropTypes.oneOf(['content', 'exercise', 'difficulty', 'cefr', 'status', 'role', 'custom']),
+  type: PropTypes.oneOf(['content', 'exercise', 'difficulty', 'cefr', 'status', 'role', 'homework_status', 'gamification', 'custom']),
   value: PropTypes.string,
   badgeKey: PropTypes.string,
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
@@ -279,6 +297,7 @@ CategoryBadge.propTypes = {
   showLabel: PropTypes.bool,
   onRemove: PropTypes.func,
   className: PropTypes.string,
+  children: PropTypes.node,
 };
 
 export default CategoryBadge;

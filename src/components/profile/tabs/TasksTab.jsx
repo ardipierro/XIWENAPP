@@ -6,6 +6,13 @@
 import { useState, useEffect } from 'react';
 import { FileText, CheckCircle, Clock, AlertCircle, Calendar, Sparkles } from 'lucide-react';
 import { getReviewsByStudent, REVIEW_STATUS } from '../../../firebase/homework_reviews';
+import {
+  getBadgeByKey,
+  getContrastText,
+  getBadgeSizeClasses,
+  getBadgeTextColor,
+  getBadgeStyles
+} from '../../../config/badgeSystem';
 import logger from '../../../utils/logger';
 
 /**
@@ -17,10 +24,20 @@ function TasksTab({ user }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, review, corrected
+  const [badgeConfigVersion, setBadgeConfigVersion] = useState(0);
 
   useEffect(() => {
     loadHomework();
   }, [user?.uid]);
+
+  // Escuchar cambios en la configuración de badges
+  useEffect(() => {
+    const handleBadgeConfigChange = () => {
+      setBadgeConfigVersion(prev => prev + 1);
+    };
+    window.addEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+    return () => window.removeEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+  }, []);
 
   const loadHomework = async () => {
     if (!user?.uid) {
@@ -79,28 +96,28 @@ function TasksTab({ user }) {
     <div className="p-6 space-y-6">
       {/* Resumen */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-4 text-white">
+        <div className="border-l-4 rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', borderLeftColor: 'var(--color-warning)' }}>
           <div className="flex items-center gap-2 mb-1">
-            <Clock size={20} strokeWidth={2} />
-            <p className="text-sm opacity-90">En Revisión</p>
+            <Clock size={20} strokeWidth={2} style={{ color: 'var(--color-warning)' }} />
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>En Revisión</p>
           </div>
-          <p className="text-3xl font-bold">{reviewCount}</p>
+          <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{reviewCount}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 text-white">
+        <div className="border-l-4 rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', borderLeftColor: 'var(--color-success)' }}>
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle size={20} strokeWidth={2} />
-            <p className="text-sm opacity-90">Corregidas</p>
+            <CheckCircle size={20} strokeWidth={2} style={{ color: 'var(--color-success)' }} />
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Corregidas</p>
           </div>
-          <p className="text-3xl font-bold">{correctedCount}</p>
+          <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{correctedCount}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-4 text-white">
+        <div className="border-l-4 rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', borderLeftColor: 'var(--color-border)' }}>
           <div className="flex items-center gap-2 mb-1">
-            <FileText size={20} strokeWidth={2} />
-            <p className="text-sm opacity-90">Total</p>
+            <FileText size={20} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total</p>
           </div>
-          <p className="text-3xl font-bold">{reviews.length}</p>
+          <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{reviews.length}</p>
         </div>
       </div>
 
@@ -108,31 +125,76 @@ function TasksTab({ user }) {
       <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            filter === 'all'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-          }`}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          style={filter === 'all' ? {
+            background: 'var(--color-text-primary)',
+            color: 'var(--color-bg-primary)',
+          } : {
+            background: 'transparent',
+            color: 'var(--color-text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (filter !== 'all') {
+              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+              e.currentTarget.style.color = 'var(--color-text-primary)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (filter !== 'all') {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            }
+          }}
         >
           Todas ({reviews.length})
         </button>
         <button
           onClick={() => setFilter('review')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            filter === 'review'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-          }`}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          style={filter === 'review' ? {
+            background: 'var(--color-text-primary)',
+            color: 'var(--color-bg-primary)',
+          } : {
+            background: 'transparent',
+            color: 'var(--color-text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (filter !== 'review') {
+              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+              e.currentTarget.style.color = 'var(--color-text-primary)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (filter !== 'review') {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            }
+          }}
         >
           En Revisión ({reviewCount})
         </button>
         <button
           onClick={() => setFilter('corrected')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            filter === 'corrected'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-          }`}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          style={filter === 'corrected' ? {
+            background: 'var(--color-text-primary)',
+            color: 'var(--color-bg-primary)',
+          } : {
+            background: 'transparent',
+            color: 'var(--color-text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (filter !== 'corrected') {
+              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+              e.currentTarget.style.color = 'var(--color-text-primary)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (filter !== 'corrected') {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            }
+          }}
         >
           Corregidas ({correctedCount})
         </button>
@@ -142,16 +204,22 @@ function TasksTab({ user }) {
       {filteredReviews.length > 0 ? (
         <div className="space-y-3">
           {filteredReviews.map((review) => (
-            <HomeworkCard key={review.id} review={review} />
+            <HomeworkCard key={review.id} review={review} badgeConfigVersion={badgeConfigVersion} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-          <FileText size={48} strokeWidth={2} className="mx-auto text-zinc-300 dark:text-zinc-700 mb-4" />
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+        <div
+          className="text-center py-12 rounded-lg"
+          style={{
+            background: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <FileText size={48} strokeWidth={2} className="mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+          <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             No hay tareas {filter !== 'all' ? filter === 'review' ? 'en revisión' : 'corregidas' : ''}
           </h3>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             {filter === 'review' ? '¡Excelente! Todas tus tareas están corregidas' : 'Aún no has enviado tareas'}
           </p>
         </div>
@@ -163,7 +231,7 @@ function TasksTab({ user }) {
 /**
  * HomeworkCard - Card individual de tarea (sistema homework reviews)
  */
-function HomeworkCard({ review }) {
+function HomeworkCard({ review, badgeConfigVersion }) {
   const isApproved = review.status === REVIEW_STATUS.APPROVED || review.status === 'approved';
   const isProcessing = review.status === REVIEW_STATUS.PROCESSING || review.status === 'processing';
   const isPendingReview = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
@@ -174,25 +242,46 @@ function HomeworkCard({ review }) {
 
   const getStatusBadge = () => {
     if (isApproved) {
+      const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
+      const bgColor = badgeConfig?.color || '#10b981';
+      const badgeStyles = getBadgeStyles(bgColor);
       return (
-        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-bold">
-          <CheckCircle size={14} strokeWidth={2} />
+        <div
+          key={`badge-${badgeConfigVersion}`}
+          className={`flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold`}
+          style={badgeStyles}
+        >
+          <CheckCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
           Corregida
         </div>
       );
     }
     if (isFailed) {
+      const badgeConfig = getBadgeByKey('HOMEWORK_ERROR');
+      const bgColor = badgeConfig?.color || '#dc2626';
+      const badgeStyles = getBadgeStyles(bgColor);
       return (
-        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-bold">
-          <AlertCircle size={14} strokeWidth={2} />
+        <div
+          key={`badge-${badgeConfigVersion}`}
+          className={`flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold`}
+          style={badgeStyles}
+        >
+          <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
           Error
         </div>
       );
     }
     if (isUnderReview) {
+      const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
+      const bgColor = badgeConfig?.color || '#f59e0b';
+      const badgeStyles = getBadgeStyles(bgColor);
       return (
-        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400 text-xs font-bold">
-          <Clock size={14} strokeWidth={2} />
+        <div
+          key={`badge-${badgeConfigVersion}`}
+          className={`flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold`}
+          style={badgeStyles}
+        >
+          <Clock size={14} strokeWidth={2} style={{ color: 'inherit' }} />
           En Revisión
         </div>
       );
@@ -202,16 +291,25 @@ function HomeworkCard({ review }) {
 
   const grade = review.suggestedGrade || 0;
 
+  const cardStyle = {
+    background: 'var(--color-bg-primary)',
+    border: '1px solid var(--color-border)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+  };
+
   return (
-    <div className={`bg-white dark:bg-zinc-950 border rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group ${
-      isApproved ? 'border-green-300 dark:border-green-800' :
-      isUnderReview ? 'border-gray-300 dark:border-gray-700' :
-      isFailed ? 'border-red-300 dark:border-red-800' :
-      'border-zinc-200 dark:border-zinc-800'
-    }`}>
+    <div
+      className="rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group"
+      style={cardStyle}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
-          <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+          <h3
+            className="text-base font-bold mb-1 transition-colors"
+            style={{ color: 'var(--color-text-primary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-text-secondary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-primary)'}
+          >
             Tarea del {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
               day: 'numeric',
               month: 'long',
@@ -219,9 +317,9 @@ function HomeworkCard({ review }) {
             })}
           </h3>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+          <div className="flex flex-wrap items-center gap-3 text-xs mt-2" style={{ color: 'var(--color-text-secondary)' }}>
             <div className="flex items-center gap-1">
-              <Calendar size={14} strokeWidth={2} />
+              <Calendar size={14} strokeWidth={2} style={{ color: 'inherit' }} />
               <span>
                 {review.createdAt?.toDate?.().toLocaleTimeString('es-ES', {
                   hour: '2-digit',
@@ -231,15 +329,15 @@ function HomeworkCard({ review }) {
             </div>
 
             {isApproved && (
-              <div className="flex items-center gap-1 text-green-600 dark:text-green-400 font-semibold">
-                <Sparkles size={14} strokeWidth={2} />
+              <div className="flex items-center gap-1 font-semibold" style={{ color: 'var(--color-success)' }}>
+                <Sparkles size={14} strokeWidth={2} style={{ color: 'inherit' }} />
                 <span>Nota: {grade}/100</span>
               </div>
             )}
 
             {review.errorSummary?.total > 0 && (
               <div className="flex items-center gap-1">
-                <AlertCircle size={14} strokeWidth={2} />
+                <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
                 <span>{review.errorSummary.total} error{review.errorSummary.total !== 1 ? 'es' : ''}</span>
               </div>
             )}
@@ -250,7 +348,8 @@ function HomeworkCard({ review }) {
             <img
               src={review.imageUrl}
               alt="Tarea"
-              className="w-24 h-16 object-cover rounded-lg border border-zinc-200 dark:border-zinc-700"
+              className="w-24 h-16 object-cover rounded-lg"
+              style={{ border: '1px solid var(--color-border)' }}
             />
           </div>
         </div>

@@ -1,0 +1,141 @@
+/**
+ * @fileoverview Container Config - Panel principal de configuración de wrappers
+ * @module components/ContainerConfig
+ */
+
+import { useState } from 'react';
+import { Box, CheckSquare, Move, Edit3, HelpCircle } from 'lucide-react';
+import { BaseBadge } from './common';
+import WordHighlightConfig from './container/WordHighlightConfig';
+import logger from '../utils/logger';
+
+/**
+ * Tabs disponibles para configurar diferentes tipos de ejercicios
+ */
+const CONTAINER_TABS = [
+  {
+    id: 'word-highlight',
+    label: 'Marcar Palabras',
+    icon: CheckSquare,
+    description: 'Ejercicios de identificación de palabras (verbos, sustantivos, etc.)',
+    component: WordHighlightConfig,
+    available: true
+  },
+  {
+    id: 'drag-drop',
+    label: 'Drag & Drop',
+    icon: Move,
+    description: 'Ejercicios de arrastrar y soltar elementos',
+    component: null,
+    available: false
+  },
+  {
+    id: 'fill-blank',
+    label: 'Llenar Palabras',
+    icon: Edit3,
+    description: 'Ejercicios de completar espacios en blanco',
+    component: null,
+    available: false
+  },
+  {
+    id: 'multiple-choice',
+    label: 'Multiple Choice',
+    icon: HelpCircle,
+    description: 'Ejercicios de selección múltiple',
+    component: null,
+    available: false
+  }
+];
+
+/**
+ * Panel principal de configuración de contenedores/wrappers
+ */
+function ContainerConfig({ onBack }) {
+  const [activeTab, setActiveTab] = useState('word-highlight');
+
+  const currentTab = CONTAINER_TABS.find(tab => tab.id === activeTab);
+  const ActiveComponent = currentTab?.component;
+
+  return (
+    <div className="w-full h-full flex flex-col">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <Box className="w-6 h-6" style={{ color: 'var(--color-primary)' }} />
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            Configuración de Contenedores
+          </h2>
+        </div>
+        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          Configura el comportamiento y estilo de diferentes tipos de ejercicios interactivos
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b mb-6" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="flex gap-1 overflow-x-auto">
+          {CONTAINER_TABS.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => tab.available && setActiveTab(tab.id)}
+                disabled={!tab.available}
+                className={`
+                  flex items-center gap-2 px-4 py-3 border-b-2 transition-all
+                  ${isActive
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
+                    : 'border-transparent hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  }
+                  ${!tab.available && 'opacity-50 cursor-not-allowed'}
+                `}
+                style={{
+                  color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                  borderBottomColor: isActive ? 'var(--color-primary)' : 'transparent'
+                }}
+              >
+                <Icon size={18} />
+                <span className="font-medium whitespace-nowrap">{tab.label}</span>
+                {!tab.available && (
+                  <BaseBadge variant="default" size="sm">Próximamente</BaseBadge>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tab description */}
+      <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+          {currentTab?.description}
+        </p>
+      </div>
+
+      {/* Tab Content */}
+      <div className="flex-1 overflow-y-auto">
+        {ActiveComponent ? (
+          <ActiveComponent
+            onSave={(config) => {
+              logger.info(`Config saved for ${activeTab}:`, config);
+            }}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="text-6xl mb-4">🚧</div>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Próximamente
+            </h3>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Este tipo de ejercicio estará disponible pronto
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default ContainerConfig;

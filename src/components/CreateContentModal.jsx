@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send } from 'lucide-react';
+import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send, Trash2 } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
@@ -56,7 +56,7 @@ const STATUS_OPTIONS = [
   { value: CONTENT_STATUS.ARCHIVED, label: '📦 Archivado', icon: Archive }
 ];
 
-function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userId, onNavigateToAIConfig }) {
+function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = null, userId, onNavigateToAIConfig }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -194,6 +194,37 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
     }));
 
     logger.info('Exercises auto-populated to form:', { title: formData.title, exerciseCount: exercises.length });
+  };
+
+  const handleDelete = async () => {
+    if (!initialData || !initialData.id) {
+      logger.warn('No se puede eliminar: no hay contenido cargado', 'CreateContentModal');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `¿Estás seguro de que quieres eliminar "${formData.title}"?\n\nEsta acción no se puede deshacer.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      logger.info(`Eliminando contenido: ${initialData.id}`, 'CreateContentModal');
+
+      if (onDelete) {
+        await onDelete(initialData.id);
+      }
+
+      handleClose();
+    } catch (err) {
+      logger.error('Error al eliminar contenido:', err, 'CreateContentModal');
+      setError('Error al eliminar el contenido. Por favor, inténtalo de nuevo.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -377,24 +408,41 @@ function CreateContentModal({ isOpen, onClose, onSave, initialData = null, userI
       size="xl"
       loading={saving}
       footer={
-        <>
-          <BaseButton
-            variant="secondary"
-            onClick={handleClose}
-            disabled={saving}
-          >
-            Cancelar
-          </BaseButton>
-          <BaseButton
-            variant="primary"
-            icon={Save}
-            type="submit"
-            form="content-form"
-            loading={saving}
-          >
-            {saving ? 'Guardando...' : (initialData ? 'Actualizar' : 'Crear')}
-          </BaseButton>
-        </>
+        <div className="flex items-center justify-between w-full">
+          {/* Botón Eliminar a la izquierda (solo en modo edición) */}
+          <div>
+            {initialData && (
+              <BaseButton
+                variant="danger"
+                icon={Trash2}
+                onClick={handleDelete}
+                disabled={saving}
+              >
+                Eliminar
+              </BaseButton>
+            )}
+          </div>
+
+          {/* Botones de acción a la derecha */}
+          <div className="flex gap-2">
+            <BaseButton
+              variant="secondary"
+              onClick={handleClose}
+              disabled={saving}
+            >
+              Cancelar
+            </BaseButton>
+            <BaseButton
+              variant="primary"
+              icon={Save}
+              type="submit"
+              form="content-form"
+              loading={saving}
+            >
+              {saving ? 'Guardando...' : (initialData ? 'Actualizar' : 'Crear')}
+            </BaseButton>
+          </div>
+        </div>
       }
     >
       <form id="content-form" onSubmit={handleSubmit} className="space-y-6">

@@ -34,6 +34,7 @@ import ImageOverlay from '../homework/ImageOverlay';
 import StudentFeedbackView from '../StudentFeedbackView';
 import ManualHomeworkUpload from '../homework/ManualHomeworkUpload';
 import { getReviewsByStudent, REVIEW_STATUS } from '../../firebase/homework_reviews';
+import { getBadgeByKey, getContrastText } from '../../config/badgeSystem';
 import logger from '../../utils/logger';
 
 /**
@@ -241,9 +242,9 @@ export default function StudentHomeworkView({ user }) {
           size="lg"
         >
           <ManualHomeworkUpload
-            teacherId={user?.teacherId} // Si el estudiante tiene un profesor asignado
+            teacherId={user?.uid} // Usar el ID del estudiante para organizar sus tareas
             userRole="student"
-            studentId={user?.uid}
+            preselectedStudentId={user?.uid} // Pre-seleccionar al estudiante actual
             onSuccess={handleUploadSuccess}
             onCancel={() => setShowUploadModal(false)}
           />
@@ -365,27 +366,48 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
       <div className="space-y-3">
         {/* Status Badge - Top Right */}
         <div className="absolute top-2 right-2 z-10">
-          {(isProcessing || isPendingReview) ? (
-            <div className="bg-gray-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-              <Clock size={14} />
-              <span className="text-xs font-bold">EN REVISIÓN</span>
-            </div>
-          ) : isFailed ? (
-            <div className="bg-red-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-              <AlertCircle size={14} />
-              <span className="text-xs font-bold">ERROR</span>
-            </div>
-          ) : isApproved ? (
-            <div className="bg-green-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-              <CheckCircle size={14} />
-              <span className="text-xs font-bold">✓ CORREGIDA</span>
-            </div>
-          ) : null}
+          {(isProcessing || isPendingReview) ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
+            const bgColor = badgeConfig?.color || '#f59e0b';
+            return (
+              <div
+                className="px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <Clock size={14} style={{ color: 'inherit' }} />
+                <span className="text-xs font-semibold">EN REVISIÓN</span>
+              </div>
+            );
+          })() : isFailed ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_ERROR');
+            const bgColor = badgeConfig?.color || '#dc2626';
+            return (
+              <div
+                className="px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <AlertCircle size={14} style={{ color: 'inherit' }} />
+                <span className="text-xs font-semibold">ERROR</span>
+              </div>
+            );
+          })() : isApproved ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
+            const bgColor = badgeConfig?.color || '#10b981';
+            return (
+              <div
+                className="px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <CheckCircle size={14} style={{ color: 'inherit' }} />
+                <span className="text-xs font-semibold">✓ CORREGIDA</span>
+              </div>
+            );
+          })() : null}
         </div>
 
         {/* Date Info */}
         <div className="flex items-center gap-2">
-          <Calendar size={16} className="text-gray-500 dark:text-gray-400" />
+          <Calendar size={16} style={{ color: 'inherit' }} className="text-gray-500 dark:text-gray-400" />
           <div>
             <p className="text-sm font-medium text-gray-900 dark:text-white">
               {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
@@ -416,7 +438,7 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
         {(isProcessing || isPendingReview) ? (
           <div className="bg-gray-50 dark:bg-gray-800/20 border-2 border-gray-300 dark:border-gray-500 rounded-lg p-3.5">
             <div className="flex items-center gap-2.5 text-sm text-blue-800 dark:text-blue-200">
-              <Clock size={18} className="flex-shrink-0" strokeWidth={2.5} />
+              <Clock size={18} style={{ color: 'inherit' }} className="flex-shrink-0" strokeWidth={2.5} />
               <span className="font-bold">En revisión</span>
             </div>
             <p className="text-xs text-gray-700 dark:text-gray-300 mt-2 ml-6 font-medium">
@@ -426,7 +448,7 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
         ) : isFailed ? (
           <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-600 rounded-lg p-3.5">
             <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
-              <AlertCircle size={18} strokeWidth={2.5} className="flex-shrink-0" />
+              <AlertCircle size={18} style={{ color: 'inherit' }} strokeWidth={2.5} className="flex-shrink-0" />
               <span className="font-bold">Error al procesar</span>
             </div>
             {review.errorMessage && (
@@ -439,7 +461,7 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles size={16} className="text-green-600 dark:text-green-400" />
+                <Sparkles size={16} style={{ color: 'inherit' }} className="text-green-600 dark:text-green-400" />
                 <span className="text-sm font-medium text-green-900 dark:text-green-100">
                   Calificación:
                 </span>
@@ -521,30 +543,44 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
       >
         <div className="space-y-6">
           {/* Status Alert - Solo mostrar "En revisión" si NO está aprobada */}
-          {isUnderReview && (
-            <div className="bg-orange-500 text-white px-4 py-3 rounded-lg flex items-center gap-3">
-              <Clock size={20} strokeWidth={2.5} />
-              <div>
-                <p className="font-bold">En revisión</p>
-                <p className="text-sm mt-0.5 opacity-90">
-                  Tu profesor está revisando tu tarea. Te notificaremos cuando esté lista.
-                </p>
+          {isUnderReview && (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
+            const bgColor = badgeConfig?.color || '#f59e0b';
+            return (
+              <div
+                className="px-4 py-3 rounded-lg flex items-center gap-3"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <Clock size={20} strokeWidth={2.5} />
+                <div>
+                  <p className="font-bold">En revisión</p>
+                  <p className="text-sm mt-0.5 opacity-90">
+                    Tu profesor está revisando tu tarea. Te notificaremos cuando esté lista.
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Approved Alert */}
-          {isApproved && (
-            <div className="bg-green-500 text-white px-4 py-3 rounded-lg flex items-center gap-3">
-              <CheckCircle size={20} strokeWidth={2.5} />
-              <div>
-                <p className="font-bold">Tarea Corregida</p>
-                <p className="text-sm mt-0.5 opacity-90">
-                  Tu profesor ha revisado y aprobado tu tarea. Revisa los comentarios abajo.
-                </p>
+          {isApproved && (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
+            const bgColor = badgeConfig?.color || '#10b981';
+            return (
+              <div
+                className="px-4 py-3 rounded-lg flex items-center gap-3"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+              >
+                <CheckCircle size={20} strokeWidth={2.5} />
+                <div>
+                  <p className="font-bold">Tarea Corregida</p>
+                  <p className="text-sm mt-0.5 opacity-90">
+                    Tu profesor ha revisado y aprobado tu tarea. Revisa los comentarios abajo.
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Date & Info */}
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">

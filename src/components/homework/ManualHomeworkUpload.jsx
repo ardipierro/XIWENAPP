@@ -16,14 +16,15 @@ import logger from '../../utils/logger';
  * Allows teachers/admins to upload homework images for students manually
  *
  * @param {Object} props
- * @param {string} props.teacherId - Current teacher ID
- * @param {string} props.userRole - Current user role (admin/teacher)
+ * @param {string} props.teacherId - Current teacher ID (or student ID when self-uploading)
+ * @param {string} props.userRole - Current user role (admin/teacher/student)
+ * @param {string} props.preselectedStudentId - Pre-selected student ID (for student self-upload)
  * @param {function} props.onSuccess - Callback when upload succeeds
  * @param {function} props.onCancel - Callback when cancelled
  */
-export default function ManualHomeworkUpload({ teacherId, userRole, onSuccess, onCancel }) {
+export default function ManualHomeworkUpload({ teacherId, userRole, preselectedStudentId, onSuccess, onCancel }) {
   const [students, setStudents] = useState([]);
-  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [selectedStudentId, setSelectedStudentId] = useState(preselectedStudentId || '');
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(true);

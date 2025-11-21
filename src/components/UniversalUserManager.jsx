@@ -28,6 +28,49 @@ import { createUser, deleteUser } from '../firebase/users';
 import SearchBar from './common/SearchBar';
 import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge, CategoryBadge, BaseModal } from './common';
 import { UniversalCard, CardGrid, CardDeleteButton } from './cards';
+import {
+  getBadgeByKey,
+  getContrastText,
+  getIconLibraryConfig,
+  getBadgeSizeClasses,
+  getBadgeIconSize,
+  getBadgeTextColor,
+  getBadgeStyles
+} from '../config/badgeSystem';
+import * as HeroIcons from '@heroicons/react/24/outline';
+import * as HeroIconsSolid from '@heroicons/react/24/solid';
+
+/**
+ * Renderiza el icono del badge según la configuración global
+ * Lee automáticamente el tamaño desde la configuración global
+ */
+const renderBadgeIcon = (badgeKey, fallbackEmoji, textColor) => {
+  const iconLibraryConfig = getIconLibraryConfig();
+  const library = iconLibraryConfig.library || 'emoji';
+  const iconSize = getBadgeIconSize(); // Lee tamaño global
+
+  // Sin icono
+  if (library === 'none') return null;
+
+  // HeroIcons (outline o filled)
+  if (library === 'heroicon' || library === 'heroicon-filled') {
+    const badgeConfig = getBadgeByKey(badgeKey);
+    const iconName = badgeConfig?.heroicon;
+
+    if (iconName) {
+      const IconComponent = library === 'heroicon-filled'
+        ? HeroIconsSolid[iconName]
+        : HeroIcons[iconName];
+
+      if (IconComponent) {
+        return <IconComponent style={{ width: iconSize, height: iconSize, marginRight: '4px', color: textColor }} />;
+      }
+    }
+  }
+
+  // Emoji (por defecto)
+  return <span style={{ marginRight: '4px' }}>{fallbackEmoji}</span>;
+};
 import AddUserModal from './AddUserModal';
 import UserProfileModal from './UserProfileModal';
 import UserAvatar from './UserAvatar';
@@ -69,9 +112,19 @@ export default function UniversalUserManager({ user, userRole }) {
   const [userToDelete, setUserToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [badgeConfigVersion, setBadgeConfigVersion] = useState(0);
 
   // Ref para rastrear si ya se cargaron los usuarios en esta instancia
   const hasLoadedRef = useRef(false);
+
+  // Escuchar cambios en la configuración de badges
+  useEffect(() => {
+    const handleBadgeConfigChange = () => {
+      setBadgeConfigVersion(prev => prev + 1);
+    };
+    window.addEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+    return () => window.removeEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+  }, []);
 
   // Cargar usuarios cuando el usuario esté autenticado Y los permisos estén listos
   useEffect(() => {
@@ -333,7 +386,21 @@ export default function UniversalUserManager({ user, userRole }) {
 
                       {/* Badge Rol */}
                       <div className="flex-shrink-0">
-                        <CategoryBadge type="role" value={userItem.role} size="sm" />
+                        {(() => {
+                          const badgeConfig = getBadgeByKey(`ROLE_${userItem.role.toUpperCase()}`);
+                          const bgColor = badgeConfig?.color || '#6b7280';
+                          const badgeStyles = getBadgeStyles(bgColor);
+                          return (
+                            <span
+                              key={`badge-${userItem.uid}-${badgeConfigVersion}`}
+                              className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                              style={badgeStyles}
+                            >
+                              {renderBadgeIcon(`ROLE_${userItem.role.toUpperCase()}`, '👤', badgeStyles.color)}
+                              {badgeConfig?.label || userItem.role}
+                            </span>
+                          );
+                        })()}
                       </div>
 
                       {/* Stats */}
@@ -402,7 +469,21 @@ export default function UniversalUserManager({ user, userRole }) {
 
                   {/* Badge de Rol */}
                   <div className="flex justify-center mb-3">
-                    <CategoryBadge type="role" value={userItem.role} size="sm" />
+                    {(() => {
+                      const badgeConfig = getBadgeByKey(`ROLE_${userItem.role.toUpperCase()}`);
+                      const bgColor = badgeConfig?.color || '#6b7280';
+                      const badgeStyles = getBadgeStyles(bgColor);
+                      return (
+                        <span
+                          key={`badge-card-${userItem.uid}-${badgeConfigVersion}`}
+                          className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                          style={badgeStyles}
+                        >
+                          {renderBadgeIcon(`ROLE_${userItem.role.toUpperCase()}`, '👤', badgeStyles.color)}
+                          {badgeConfig?.label || userItem.role}
+                        </span>
+                      );
+                    })()}
                   </div>
 
                   {/* Stats */}
@@ -575,7 +656,21 @@ export default function UniversalUserManager({ user, userRole }) {
                     </td>
                     <td>{userItem.email}</td>
                     <td>
-                      <CategoryBadge type="role" value={userItem.role} size="sm" />
+                      {(() => {
+                        const badgeConfig = getBadgeByKey(`ROLE_${userItem.role.toUpperCase()}`);
+                        const bgColor = badgeConfig?.color || '#6b7280';
+                        const badgeStyles = getBadgeStyles(bgColor);
+                        return (
+                          <span
+                            key={`badge-table-${userItem.uid}-${badgeConfigVersion}`}
+                            className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                            style={badgeStyles}
+                          >
+                            {renderBadgeIcon(`ROLE_${userItem.role.toUpperCase()}`, '👤', badgeStyles.color)}
+                            {badgeConfig?.label || userItem.role}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td>
                       <span className="font-bold">{userItem.credits || 0}</span>

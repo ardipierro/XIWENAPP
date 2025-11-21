@@ -50,6 +50,7 @@ import {
   EnhancedTextEditor,
   InSituContentEditor
 } from './diary';
+import WordHighlightExercise from './container/WordHighlightExercise';
 
 // ============================================
 // CONTENT TYPE ICONS
@@ -584,7 +585,32 @@ function ClassDailyLog({ logId, user, onBack }) {
         );
 
       case 'exercise':
-        // Nuevo: Ejercicios totalmente interactivos
+        // Detectar ejercicios generados con IA
+        if (content.metadata?.exerciseType === 'ai_generated') {
+          // Cargar configuración desde localStorage
+          const savedConfig = localStorage.getItem('wordHighlightConfig');
+          const config = savedConfig ? JSON.parse(savedConfig) : null;
+
+          return (
+            <WordHighlightExercise
+              text={content.content}
+              config={config}
+              onComplete={(result) => {
+                // Adaptar resultado al formato esperado por handleExerciseComplete
+                handleExerciseComplete({
+                  exerciseId: content.id,
+                  logId: logId,
+                  answer: { clickedWords: result.totalClicks, score: result.score },
+                  correct: result.score > 0,
+                  timestamp: Date.now(),
+                  exerciseType: 'ai_generated'
+                });
+              }}
+            />
+          );
+        }
+
+        // Ejercicios normales del Exercise Builder
         return isTeacher ? (
           <InSituContentEditor
             content={content}

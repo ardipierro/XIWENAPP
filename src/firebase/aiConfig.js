@@ -14,13 +14,17 @@ import logger from '../utils/logger';
  */
 export async function saveAIConfig(config) {
   try {
+    console.log('💾 [Firebase] Guardando config en ai_config/global:', JSON.parse(JSON.stringify(config)));
     const configRef = doc(db, 'ai_config', 'global');
-    await setDoc(configRef, {
+    const dataToSave = {
       ...config,
       updatedAt: new Date().toISOString()
-    });
+    };
+    await setDoc(configRef, dataToSave);
+    console.log('✅ [Firebase] Config guardada exitosamente');
     logger.info('AI configuration saved', 'AIConfig');
   } catch (error) {
+    console.error('❌ [Firebase] Error al guardar config:', error);
     logger.error('Error saving AI configuration', error, 'AIConfig');
     throw error;
   }
@@ -32,47 +36,21 @@ export async function saveAIConfig(config) {
  */
 export async function getAIConfig() {
   try {
+    console.log('🔍 [Firebase] Leyendo config de ai_config/global...');
     const configRef = doc(db, 'ai_config', 'global');
     const configDoc = await getDoc(configRef);
 
     if (configDoc.exists()) {
-      return configDoc.data();
+      const data = configDoc.data();
+      console.log('📦 [Firebase] Config encontrada:', JSON.parse(JSON.stringify(data)));
+      return data;
     }
 
-    // Default configuration
-    return {
-      openai: {
-        enabled: false,
-        apiKey: '',
-        basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
-        tone: 'professional'
-      },
-      grok: {
-        enabled: false,
-        apiKey: '',
-        basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
-        tone: 'professional'
-      },
-      gemini: {
-        enabled: false,
-        apiKey: '',
-        basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
-        tone: 'professional'
-      },
-      claude: {
-        enabled: false,
-        apiKey: '',
-        basePrompt: 'Eres un asistente educativo experto. Responde de manera clara y pedagógica.',
-        tone: 'professional'
-      },
-      elevenlabs: {
-        enabled: false,
-        apiKey: '',
-        basePrompt: 'Eres un asistente de voz experto. Genera audio claro y natural.',
-        tone: 'professional'
-      }
-    };
+    console.log('⚠️ [Firebase] No existe config en Firebase, devolviendo null');
+    // NO devolver defaults legacy, devolver null para que AIConfigPanel maneje esto
+    return null;
   } catch (error) {
+    console.error('❌ [Firebase] Error al leer config:', error);
     logger.error('Error getting AI configuration', error, 'AIConfig');
     throw error;
   }

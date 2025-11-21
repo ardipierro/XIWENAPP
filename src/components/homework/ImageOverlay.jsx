@@ -213,6 +213,9 @@ function ImageOverlay({
   useWavyUnderline = true,
   showCorrectionText = true,
   correctionTextFont = 'Caveat',
+  errorColors = ERROR_COLORS, // Colors from profile or default
+  strokeWidth = 2, // Stroke width from profile or default
+  strokeOpacity = 0.8, // Stroke opacity from profile or default
   className = ''
 }) {
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
@@ -413,7 +416,7 @@ function ImageOverlay({
               y: minY * scaleY,
               width: (maxX - minX) * scaleX,
               height: (maxY - minY) * scaleY,
-              color: ERROR_COLORS[errorType] || ERROR_COLORS.default,
+              color: errorColors[errorType] || errorColors.default || ERROR_COLORS.default,
               errorType: errorType,
               errorText: errorText,
               suggestion: suggestion,
@@ -459,7 +462,8 @@ function ImageOverlay({
     imageNaturalDimensions.width,
     imageNaturalDimensions.height,
     visibleErrorTypes,
-    showOverlay
+    showOverlay,
+    errorColors
   ]);
 
   // Update debug info when stats change (separate from render)
@@ -561,8 +565,8 @@ function ImageOverlay({
                     fill={highlight.color}
                     fillOpacity={highlightOpacity}
                     stroke={highlight.color}
-                    strokeWidth="2"
-                    strokeOpacity="0.8"
+                    strokeWidth={strokeWidth}
+                    strokeOpacity={strokeOpacity}
                     rx="2"
                   />
 
@@ -577,9 +581,9 @@ function ImageOverlay({
                         8
                       )}
                       stroke={highlight.color}
-                      strokeWidth="2"
+                      strokeWidth={strokeWidth}
                       fill="none"
-                      strokeOpacity="1"
+                      strokeOpacity={strokeOpacity}
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
@@ -590,8 +594,8 @@ function ImageOverlay({
                       x2={highlight.x + highlight.width}
                       y2={highlight.y + highlight.height}
                       stroke={highlight.color}
-                      strokeWidth="3"
-                      strokeOpacity="1"
+                      strokeWidth={strokeWidth}
+                      strokeOpacity={strokeOpacity}
                       strokeLinecap="round"
                     />
                   )}
@@ -717,6 +721,9 @@ ImageOverlay.propTypes = {
   useWavyUnderline: PropTypes.bool,
   showCorrectionText: PropTypes.bool,
   correctionTextFont: PropTypes.string,
+  errorColors: PropTypes.object, // Colors from profile { spelling, grammar, punctuation, vocabulary, default }
+  strokeWidth: PropTypes.number, // Stroke width from profile
+  strokeOpacity: PropTypes.number, // Stroke opacity from profile
   className: PropTypes.string
 };
 

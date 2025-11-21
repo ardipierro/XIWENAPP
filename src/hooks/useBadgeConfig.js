@@ -165,6 +165,16 @@ function useBadgeConfig() {
 
       return updated;
     });
+
+    // CRÍTICO: También actualizar la configuración GLOBAL
+    setGlobalConfig((prev) => {
+      const updated = { ...prev, defaultBadgeStyle: badgeStyle };
+      saveGlobalBadgeConfig(updated);
+      window.dispatchEvent(new CustomEvent('globalBadgeConfigChange', { detail: updated }));
+      logger.info(`Global badge style updated to: ${badgeStyle}`, 'useBadgeConfig');
+      return updated;
+    });
+
     setHasChanges(false); // Ya se guardó, no hay cambios pendientes
   }, []);
 

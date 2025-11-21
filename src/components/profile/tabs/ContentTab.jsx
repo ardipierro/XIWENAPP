@@ -56,7 +56,10 @@ function ContentTab({ user }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div
+          className="animate-spin rounded-full h-12 w-12 border-b-2"
+          style={{ borderColor: 'var(--color-text-primary)' }}
+        ></div>
       </div>
     );
   }
@@ -67,22 +70,52 @@ function ContentTab({ user }) {
       <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            filter === 'all'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-          }`}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          style={filter === 'all' ? {
+            background: 'var(--color-text-primary)',
+            color: 'var(--color-bg-primary)',
+          } : {
+            background: 'transparent',
+            color: 'var(--color-text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (filter !== 'all') {
+              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+              e.currentTarget.style.color = 'var(--color-text-primary)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (filter !== 'all') {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            }
+          }}
         >
           Todos ({contents.length})
         </button>
         {countByType('lesson') > 0 && (
           <button
             onClick={() => setFilter('lesson')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              filter === 'lesson'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+            style={filter === 'lesson' ? {
+              background: 'var(--color-text-primary)',
+              color: 'var(--color-bg-primary)',
+            } : {
+              background: 'transparent',
+              color: 'var(--color-text-secondary)',
+            }}
+            onMouseEnter={(e) => {
+              if (filter !== 'lesson') {
+                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+                e.currentTarget.style.color = 'var(--color-text-primary)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (filter !== 'lesson') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+              }
+            }}
           >
             Lecciones ({countByType('lesson')})
           </button>
@@ -90,11 +123,26 @@ function ContentTab({ user }) {
         {countByType('reading') > 0 && (
           <button
             onClick={() => setFilter('reading')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              filter === 'reading'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+            style={filter === 'reading' ? {
+              background: 'var(--color-text-primary)',
+              color: 'var(--color-bg-primary)',
+            } : {
+              background: 'transparent',
+              color: 'var(--color-text-secondary)',
+            }}
+            onMouseEnter={(e) => {
+              if (filter !== 'reading') {
+                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+                e.currentTarget.style.color = 'var(--color-text-primary)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (filter !== 'reading') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+              }
+            }}
           >
             Lecturas ({countByType('reading')})
           </button>
@@ -102,11 +150,26 @@ function ContentTab({ user }) {
         {countByType('video') > 0 && (
           <button
             onClick={() => setFilter('video')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              filter === 'video'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+            style={filter === 'video' ? {
+              background: 'var(--color-text-primary)',
+              color: 'var(--color-bg-primary)',
+            } : {
+              background: 'transparent',
+              color: 'var(--color-text-secondary)',
+            }}
+            onMouseEnter={(e) => {
+              if (filter !== 'video') {
+                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+                e.currentTarget.style.color = 'var(--color-text-primary)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (filter !== 'video') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+              }
+            }}
           >
             Videos ({countByType('video')})
           </button>
@@ -114,11 +177,26 @@ function ContentTab({ user }) {
         {countByType('exercise') > 0 && (
           <button
             onClick={() => setFilter('exercise')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              filter === 'exercise'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+            style={filter === 'exercise' ? {
+              background: 'var(--color-text-primary)',
+              color: 'var(--color-bg-primary)',
+            } : {
+              background: 'transparent',
+              color: 'var(--color-text-secondary)',
+            }}
+            onMouseEnter={(e) => {
+              if (filter !== 'exercise') {
+                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+                e.currentTarget.style.color = 'var(--color-text-primary)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (filter !== 'exercise') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+              }
+            }}
           >
             Ejercicios ({countByType('exercise')})
           </button>
@@ -133,12 +211,18 @@ function ContentTab({ user }) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-          <FileText size={48} strokeWidth={2} className="mx-auto text-zinc-300 dark:text-zinc-700 mb-4" />
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+        <div
+          className="text-center py-12 rounded-lg"
+          style={{
+            background: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <FileText size={48} strokeWidth={2} className="mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+          <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             No hay contenidos asignados
           </h3>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             {filter === 'all'
               ? 'Aún no tienes contenidos asignados por tus profesores'
               : `No tienes ${getFilterLabel(filter)} asignados`
@@ -214,19 +298,30 @@ function ContentCard({ content }) {
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group">
+    <div
+      className="rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group"
+      style={{
+        background: 'var(--color-bg-primary)',
+        border: '1px solid var(--color-border)',
+      }}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
-          <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+          <h3
+            className="text-base font-bold mb-1 transition-colors"
+            style={{ color: 'var(--color-text-primary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-text-secondary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-primary)'}
+          >
             {contentData.title || 'Contenido sin título'}
           </h3>
           {contentData.description && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2 line-clamp-2">
+            <p className="text-sm mb-2 line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>
               {contentData.description}
             </p>
           )}
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex flex-wrap items-center gap-3 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
             {content.assignedAt && (
               <div className="flex items-center gap-1">
                 <Calendar size={14} strokeWidth={2} />

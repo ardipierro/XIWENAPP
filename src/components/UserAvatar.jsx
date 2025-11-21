@@ -155,7 +155,8 @@ function UserAvatar({
   status = null,
   showStatusBadge = false,
   notificationCount = 0,
-  showNotificationBadge = false
+  showNotificationBadge = false,
+  showBorder = false
 }) {
   // Estados
   const [loadedAvatar, setLoadedAvatar] = useState(avatar || avatarUrl || null);
@@ -217,8 +218,8 @@ function UserAvatar({
     'rounded-full',
     'flex items-center justify-center',
     'relative overflow-hidden',
-    sizeConfig.border,
-    'border-[var(--color-border)]',
+    showBorder ? sizeConfig.border : '',
+    showBorder ? 'border-[var(--color-border)]' : '',
     clickable ? 'cursor-pointer hover:opacity-80 hover:scale-105 transition-all duration-200' : '',
     className
   ].filter(Boolean).join(' ');

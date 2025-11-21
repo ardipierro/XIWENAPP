@@ -93,16 +93,27 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           <Menu size={24} />
         </button>
 
-        {/* App title - siempre visible */}
-        <div className="universal-topbar__app-title">
+        {/* App title - clickeable como botón de inicio */}
+        <button
+          className="universal-topbar__app-title"
+          onClick={() => navigate('/')}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0
+          }}
+          aria-label="Ir al inicio"
+        >
           <h1 style={{
             fontFamily: selectedFont,
             fontWeight: fontWeight,
-            fontSize: `${fontSize}rem`
+            fontSize: `${fontSize}rem`,
+            margin: 0
           }}>
             西文教室
           </h1>
-        </div>
+        </button>
 
         {/* Back button - solo si hay configuración dinámica */}
         {config.showBackButton && (

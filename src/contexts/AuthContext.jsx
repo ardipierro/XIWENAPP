@@ -17,6 +17,7 @@ import { getUserRole, setUserRole } from '../firebase/firestore.js';
 import UserRepository from '../services/UserRepository.js';
 import { validateSchema, loginSchema, registerSchema, resetPasswordSchema } from '../utils/validators/authSchemas.js';
 import { AUTH_ERROR_MESSAGES, USER_ROLES } from '../constants/auth.js';
+import { isAdminEmail } from '../firebase/roleConfig.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -96,6 +97,9 @@ export function AuthProvider({ children }) {
       // Obtener rol
       let role = await getUserRole(firebaseUser.uid);
 
+      // Verificar si el email es admin y corregir el rol si es necesario
+      const shouldBeAdmin = isAdminEmail(firebaseUser.email);
+
       // Si no tiene rol, el documento en Firestore no existe
       // Crear documento básico para sincronizar Auth con Firestore
       if (!role) {
@@ -106,28 +110,54 @@ export function AuthProvider({ children }) {
           const { setDoc, doc, serverTimestamp } = await import('firebase/firestore');
           const { db } = await import('../firebase/config.js');
 
-          // Crear documento básico con rol student por defecto
+          // Determinar el rol correcto: admin si es email admin, sino student
+          const assignedRole = shouldBeAdmin ? USER_ROLES.ADMIN : USER_ROLES.STUDENT;
+
+          // Crear documento básico con rol correcto
           const userDocRef = doc(db, 'users', firebaseUser.uid);
           await setDoc(userDocRef, {
             email: firebaseUser.email,
             name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-            role: 'student',
+            role: assignedRole,
             status: 'active',
             active: true,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
             lastLogin: null,
-            avatar: '🎓',
+            avatar: assignedRole === USER_ROLES.ADMIN ? '👑' : '🎓',
             temporaryPassword: false
           });
 
-          role = 'student';
-          logger.info('Documento de usuario creado exitosamente con rol: student', 'AuthContext');
+          role = assignedRole;
+          logger.info(`Documento de usuario creado exitosamente con rol: ${assignedRole}`, 'AuthContext');
         } catch (createError) {
           logger.error('Error creando documento de usuario', createError, 'AuthContext');
           // Hacer logout si no se puede crear el documento
           await signOut(auth);
           return;
+        }
+      }
+      // Si el email es admin pero el rol no es admin, actualizar el rol
+      else if (shouldBeAdmin && role !== USER_ROLES.ADMIN) {
+        logger.warn(`Email admin detectado con rol incorrecto (${role}), actualizando a admin...`, 'AuthContext');
+
+        try {
+          // Importar dinámicamente
+          const { updateDoc, doc } = await import('firebase/firestore');
+          const { db } = await import('../firebase/config.js');
+
+          // Actualizar rol a admin
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          await updateDoc(userDocRef, {
+            role: USER_ROLES.ADMIN,
+            avatar: '👑'
+          });
+
+          role = USER_ROLES.ADMIN;
+          logger.info('Rol actualizado exitosamente a admin', 'AuthContext');
+        } catch (updateError) {
+          logger.error('Error actualizando rol a admin', updateError, 'AuthContext');
+          // Continuar con el rol actual si falla la actualización
         }
       }
 

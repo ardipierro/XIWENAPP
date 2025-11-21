@@ -1752,7 +1752,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-accent) 0%, #5b8fa3 100%);
+  background: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1880,12 +1880,13 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .universal-sidemenu__item--active {
-  background: linear-gradient(135deg, var(--color-accent) 0%, #5b8fa3 100%);
+  background: var(--color-accent);
   color: #ffffff;
 }
 
 .universal-sidemenu__item--active:hover {
-  background: linear-gradient(135deg, #5b8fa3 0%, #4a7689 100%);
+  background: var(--color-accent);
+  opacity: 0.9;
 }
 
 .universal-sidemenu__icon {
@@ -1997,12 +1998,13 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .sidemenu-item.active {
-  background: linear-gradient(135deg, var(--color-accent) 0%, #5b8fa3 100%);
+  background: var(--color-accent);
   color: #ffffff;
 }
 
 .sidemenu-item.active:hover {
-  background: linear-gradient(135deg, #5b8fa3 0%, #4a7689 100%);
+  background: var(--color-accent);
+  opacity: 0.9;
 }
 
 .sidemenu-item-icon {
@@ -2391,7 +2393,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5b6b8f, #6b7a94);
+  background: var(--color-accent);
   color: white;
   display: flex;
   align-items: center;
@@ -2518,7 +2520,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5b6b8f, #6b7a94);
+  background: var(--color-accent);
   color: white;
   display: flex;
   align-items: center;
@@ -2634,7 +2636,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5b6b8f, #6b7a94);
+  background: var(--color-accent);
   color: white;
   display: flex;
   align-items: center;
@@ -2781,7 +2783,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5b6b8f, #6b7a94);
+  background: var(--color-accent);
   color: white;
   display: flex;
   align-items: center;
@@ -3420,7 +3422,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5b6b8f, #6b7a94);
+  background: var(--color-accent);
   color: white;
   display: flex;
   align-items: center;
@@ -5506,8 +5508,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .credit-stat-card:hover {
-  border-color: #5b6b8f;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  border-color: var(--color-border-focus);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .credit-stat-card .stat-icon {
@@ -5516,7 +5518,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .credit-stat-card .stat-icon svg {
-  color: #5b6b8f;
+  color: var(--color-text-secondary);
   width: 24px;
   height: 24px;
 }
@@ -5524,7 +5526,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .credit-stat-card .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-text-primary);
   line-height: 1;
   margin: 0;
 }
@@ -5532,7 +5534,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .credit-stat-card .stat-label {
   font-size: 11px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0;
@@ -5777,25 +5779,25 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 /* Dark Mode */
 .dark .credit-stat-card {
-  background: #1f2937;
-  border-color: #374151;
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
 }
 
 .dark .credit-stat-card:hover {
-  border-color: #818cf8;
-  box-shadow: 0 4px 12px rgba(129, 140, 248, 0.15);
+  border-color: var(--color-border-focus);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .dark .credit-stat-card .stat-icon svg {
-  color: #818cf8;
+  color: var(--color-text-secondary);
 }
 
 .dark .credit-stat-card .stat-value {
-  color: #f9fafb;
+  color: var(--color-text-primary);
 }
 
 .dark .credit-stat-card .stat-label {
-  color: #9ca3af;
+  color: var(--color-text-secondary);
 }
 
 .dark .credit-notes-section {

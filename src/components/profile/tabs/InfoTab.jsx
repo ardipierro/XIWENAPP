@@ -121,18 +121,20 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
       <form id="profile-info-form" onSubmit={handleSave} className="space-y-5">
         {/* Nombre */}
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             <User size={16} strokeWidth={2} />
             Nombre (Español)
           </label>
           <input
             type="text"
             className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
-                       text-zinc-900 dark:text-zinc-50
-                       bg-white dark:bg-zinc-950
-                       border border-zinc-200 dark:border-zinc-800
                        focus:outline-none focus:ring-2 focus:ring-gray-400
                        disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{
+              color: 'var(--color-text-primary)',
+              background: 'var(--color-bg-primary)',
+              border: '1px solid var(--color-border)'
+            }}
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
             placeholder="Tu nombre completo"
@@ -143,17 +145,19 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
         {/* Nombre en Chino */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+            <label className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               Apellido en Chino
             </label>
             <input
               type="text"
               className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
-                         text-zinc-900 dark:text-zinc-50
-                         bg-white dark:bg-zinc-950
-                         border border-zinc-200 dark:border-zinc-800
                          focus:outline-none focus:ring-2 focus:ring-gray-400
                          disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                color: 'var(--color-text-primary)',
+                background: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)'
+              }}
               value={formData.chineseLastName}
               onChange={(e) => handleChange('chineseLastName', e.target.value)}
               placeholder="姓"
@@ -161,17 +165,19 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+            <label className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               Nombre en Chino
             </label>
             <input
               type="text"
               className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
-                         text-zinc-900 dark:text-zinc-50
-                         bg-white dark:bg-zinc-950
-                         border border-zinc-200 dark:border-zinc-800
                          focus:outline-none focus:ring-2 focus:ring-gray-400
                          disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                color: 'var(--color-text-primary)',
+                background: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)'
+              }}
               value={formData.chineseFirstName}
               onChange={(e) => handleChange('chineseFirstName', e.target.value)}
               placeholder="名"
@@ -182,39 +188,43 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
 
         {/* Email */}
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             <Mail size={16} strokeWidth={2} />
             Email
           </label>
           <input
             type="email"
             className="w-full px-3.5 py-2.5 text-[15px] rounded-md
-                       text-zinc-900 dark:text-zinc-50
-                       bg-zinc-100 dark:bg-zinc-900
-                       border border-zinc-200 dark:border-zinc-800
                        cursor-not-allowed opacity-60"
+            style={{
+              color: 'var(--color-text-primary)',
+              background: 'var(--color-bg-tertiary)',
+              border: '1px solid var(--color-border)'
+            }}
             value={formData.email}
             disabled
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
             El email no se puede cambiar
           </p>
         </div>
 
         {/* Teléfono */}
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             <Phone size={16} strokeWidth={2} />
             Teléfono
           </label>
           <input
             type="tel"
             className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
-                       text-zinc-900 dark:text-zinc-50
-                       bg-white dark:bg-zinc-950
-                       border border-zinc-200 dark:border-zinc-800
                        focus:outline-none focus:ring-2 focus:ring-gray-400
                        disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{
+              color: 'var(--color-text-primary)',
+              background: 'var(--color-bg-primary)',
+              border: '1px solid var(--color-border)'
+            }}
             value={formData.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
             placeholder="+00 000 000 000"
@@ -224,18 +234,20 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
 
         {/* Dirección */}
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             <MapPin size={16} strokeWidth={2} />
             Dirección
           </label>
           <input
             type="text"
             className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
-                       text-zinc-900 dark:text-zinc-50
-                       bg-white dark:bg-zinc-950
-                       border border-zinc-200 dark:border-zinc-800
                        focus:outline-none focus:ring-2 focus:ring-gray-400
                        disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{
+              color: 'var(--color-text-primary)',
+              background: 'var(--color-bg-primary)',
+              border: '1px solid var(--color-border)'
+            }}
             value={formData.address}
             onChange={(e) => handleChange('address', e.target.value)}
             placeholder="Tu dirección"
@@ -245,18 +257,20 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
 
         {/* Fecha de nacimiento */}
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             <Calendar size={16} strokeWidth={2} />
             Fecha de nacimiento
           </label>
           <input
             type="date"
             className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
-                       text-zinc-900 dark:text-zinc-50
-                       bg-white dark:bg-zinc-950
-                       border border-zinc-200 dark:border-zinc-800
                        focus:outline-none focus:ring-2 focus:ring-gray-400
                        disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{
+              color: 'var(--color-text-primary)',
+              background: 'var(--color-bg-primary)',
+              border: '1px solid var(--color-border)'
+            }}
             value={formData.birthDate}
             onChange={(e) => handleChange('birthDate', e.target.value)}
             disabled={!editing || (!canEditLimited && !canEditAll)}
@@ -265,16 +279,13 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
 
         {/* Rol - Solo visible */}
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             <Shield size={16} strokeWidth={2} />
             Rol
           </label>
           {canEditAll && editing ? (
             <select
               className="w-full px-3.5 py-2.5 text-[15px] rounded-md transition-all
-                         text-zinc-900 dark:text-zinc-50
-                         bg-white dark:bg-zinc-950
-                         border border-zinc-200 dark:border-zinc-800
                          focus:outline-none focus:ring-2 focus:ring-gray-400"
               value={formData.role}
               onChange={(e) => handleChange('role', e.target.value)}
@@ -294,7 +305,7 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
         {/* Estado - Solo para admin */}
         {canEditAll && (
           <div className="flex flex-col gap-2">
-            <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+            <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               Estado
             </label>
             {editing ? (
@@ -327,11 +338,18 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
 
         {/* ID del usuario - Solo para admin */}
         {isAdmin && (
-          <div className="flex flex-col gap-2 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+          <div className="flex flex-col gap-2 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+            <label className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
               ID de Usuario
             </label>
-            <code className="px-3 py-2 text-xs bg-zinc-100 dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-800 font-mono text-zinc-700 dark:text-zinc-300">
+            <code
+              className="px-3 py-2 text-xs rounded font-mono"
+              style={{
+                background: 'var(--color-bg-tertiary)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-secondary)'
+              }}
+            >
               {user?.uid}
             </code>
           </div>

@@ -31,9 +31,9 @@ const DEFAULT_THEME_COLORS = {
     'info': '#5b8fa3',
     // Acento (gris azulado neutral)
     'accent': '#5b6b8f',
-    // Tailwind Classes (sincronizados con tailwind.config.js)
-    'tailwind-accent': '#5b6b8f',      // accent.DEFAULT
-    'tailwind-secondary': '#4a9f7c',   // secondary.DEFAULT
+    // Tailwind Classes (AHORA siguen al tema dinámicamente)
+    'tailwind-accent': '#5b6b8f',      // Sigue al acento del tema
+    'tailwind-secondary': '#4a9f7c',   // Sigue al color success
   },
   dark: {
     // Fondos
@@ -55,9 +55,9 @@ const DEFAULT_THEME_COLORS = {
     'info': '#5b8fa3',
     // Acento (azul gris suave)
     'accent': '#7a8fa8',
-    // Tailwind Classes (sincronizados con tailwind.config.js)
-    'tailwind-accent': '#5b6b8f',      // accent.DEFAULT (mismo en todos los temas)
-    'tailwind-secondary': '#4a9f7c',   // secondary.DEFAULT
+    // Tailwind Classes (AHORA siguen al tema dinámicamente)
+    'tailwind-accent': '#7a8fa8',      // Sigue al acento del tema DARK
+    'tailwind-secondary': '#4a9f7c',   // Sigue al color success
   },
   dusk: {
     // Fondos (tonos tierra neutros)
@@ -79,9 +79,9 @@ const DEFAULT_THEME_COLORS = {
     'info': '#5b8fa3',
     // Acento (marrón cálido)
     'accent': '#a67c52',
-    // Tailwind Classes (sincronizados con tailwind.config.js)
-    'tailwind-accent': '#5b6b8f',      // accent.DEFAULT (mismo en todos los temas)
-    'tailwind-secondary': '#4a9f7c',   // secondary.DEFAULT
+    // Tailwind Classes (AHORA siguen al tema dinámicamente)
+    'tailwind-accent': '#a67c52',      // Sigue al acento del tema DUSK
+    'tailwind-secondary': '#4a9f7c',   // Sigue al color success
   },
   night: {
     // Fondos (azul gris oscuro)
@@ -103,9 +103,9 @@ const DEFAULT_THEME_COLORS = {
     'info': '#5b8fa3',
     // Acento (azul grisáceo)
     'accent': '#7a95b8',
-    // Tailwind Classes (sincronizados con tailwind.config.js)
-    'tailwind-accent': '#5b6b8f',      // accent.DEFAULT (mismo en todos los temas)
-    'tailwind-secondary': '#4a9f7c',   // secondary.DEFAULT
+    // Tailwind Classes (AHORA siguen al tema dinámicamente)
+    'tailwind-accent': '#7a95b8',      // Sigue al acento del tema NIGHT
+    'tailwind-secondary': '#4a9f7c',   // Sigue al color success
   }
 };
 
@@ -139,7 +139,7 @@ const COLOR_CATEGORIES = {
   tailwind: {
     label: 'Tailwind Classes (bg-*, text-*, border-*)',
     icon: '⚡',
-    description: 'Estos colores están definidos en tailwind.config.js y se usan cuando empleas clases de Tailwind como bg-accent, text-secondary, border-accent, etc. Son GLOBALES y afectan a TODA la aplicación. Si cambias estos colores aquí, debes también actualizar tailwind.config.js manualmente para que coincidan.',
+    description: '✅ ACTUALIZADOS: Ahora estos colores SIGUEN al tema activo dinámicamente. Las clases de Tailwind como bg-accent, text-secondary ahora cambiarán automáticamente cuando cambies de tema.',
     colors: ['tailwind-accent', 'tailwind-secondary']
   }
 };

@@ -5,7 +5,6 @@
  */
 
 import {
-  Home,
   BookOpen,
   Users,
   Calendar,
@@ -27,13 +26,6 @@ import { usePermissions } from '../hooks/usePermissions';
  */
 const MENU_ITEMS = [
   // COMÚN PARA TODOS
-  {
-    id: 'home',
-    label: 'Inicio',
-    icon: Home,
-    path: '/dashboard',
-    permission: null, // null = todos pueden acceder
-  },
   {
     id: 'calendar',
     label: 'Calendario',

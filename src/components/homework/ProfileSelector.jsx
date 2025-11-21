@@ -4,25 +4,25 @@
  */
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, User, Plus } from 'lucide-react';
+import { RefreshCw, User } from 'lucide-react';
 import { BaseButton } from '../common';
 import { UniversalCard } from '../cards';
 import {
-  getCorrectionProfilesByTeacher,
+  getAllCorrectionProfiles,
   getStudentProfile,
-  getDefaultProfile,
-  initializeDefaultProfiles
+  getDefaultProfile
 } from '../../firebase/correctionProfiles';
 import logger from '../../utils/logger';
 
 /**
  * Profile Selector Component
- * Shows current profile and allows changing it
+ * Shows universal correction profiles and allows selecting one for the student
+ * All profiles are system-wide, not teacher-specific
  */
 export default function ProfileSelector({
   studentId,
-  teacherId,
-  onProfileSelect,
+  teacherId, // Kept for backwards compatibility but not used for profile loading
+  onProfileSelect, // Callback with full profile object (not just ID)
   onReanalyze,
   currentReviewId
 }) {
@@ -30,55 +30,52 @@ export default function ProfileSelector({
   const [currentProfile, setCurrentProfile] = useState(null);
   const [defaultProfile, setDefaultProfile] = useState(null);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
+  const [selectedProfile, setSelectedProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reanalyzing, setReanalyzing] = useState(false);
-  const [initializing, setInitializing] = useState(false);
 
   useEffect(() => {
     loadProfilesAndCurrent();
-  }, [studentId, teacherId]);
+  }, [studentId]); // teacherId no longer needed for loading universal profiles
 
   const loadProfilesAndCurrent = async () => {
     try {
       setLoading(true);
 
-      // Load all profiles for this teacher
-      const allProfiles = await getCorrectionProfilesByTeacher(teacherId, false);
+      // Load all universal correction profiles
+      const allProfiles = await getAllCorrectionProfiles();
       setProfiles(allProfiles);
 
-      // Load student's current profile
-      const studentProfile = await getStudentProfile(studentId, teacherId);
-      setCurrentProfile(studentProfile);
-      setSelectedProfileId(studentProfile?.id || null);
+      // Load student's current profile (individual assignment or system default)
+      const studentProfile = await getStudentProfile(studentId);
 
-      // Load default profile
-      const defProfile = await getDefaultProfile(teacherId);
+      // Load system-wide default profile
+      const defProfile = await getDefaultProfile();
       setDefaultProfile(defProfile);
+
+      // Use studentProfile if available, otherwise fallback to default profile, otherwise first profile
+      const profileToUse = studentProfile || defProfile || (allProfiles.length > 0 ? allProfiles[0] : null);
+
+      setCurrentProfile(profileToUse);
+      setSelectedProfileId(profileToUse?.id || null);
+      setSelectedProfile(profileToUse);
+
+      // ALWAYS notify parent of profile selection (even with fallback)
+      if (onProfileSelect && profileToUse) {
+        const source = studentProfile ? 'student-assignment' : defProfile ? 'system-default' : 'first-available';
+        logger.info(`✅ Profile auto-selected: "${profileToUse.name}" (source: ${source})`, 'ProfileSelector', {
+          profileId: profileToUse.id,
+          profileName: profileToUse.name,
+          source
+        });
+        onProfileSelect(profileToUse);
+      } else if (onProfileSelect && !profileToUse) {
+        logger.warn('⚠️ No profiles available in system - using hardcoded defaults for visualization', 'ProfileSelector');
+      }
     } catch (error) {
       logger.error('Error loading profiles', 'ProfileSelector', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleInitializeProfiles = async () => {
-    try {
-      setInitializing(true);
-      const result = await initializeDefaultProfiles(teacherId);
-
-      if (result.success) {
-        // Reload profiles
-        await loadProfilesAndCurrent();
-        logger.info('Default profiles initialized successfully', 'ProfileSelector');
-      } else {
-        logger.error('Failed to initialize profiles', 'ProfileSelector', result.error);
-        alert('Error al crear perfiles por defecto');
-      }
-    } catch (error) {
-      logger.error('Error initializing profiles', 'ProfileSelector', error);
-      alert('Error al crear perfiles por defecto');
-    } finally {
-      setInitializing(false);
     }
   };
 
@@ -113,36 +110,16 @@ export default function ProfileSelector({
   if (profiles.length === 0) {
     return (
       <UniversalCard variant="warning" size="md" className="mb-4">
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
             <User size={18} />
-            <span className="font-semibold">No hay perfiles de corrección configurados</span>
+            <span className="font-semibold">No hay perfiles de corrección en el sistema</span>
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Los perfiles definen cómo se corrigen las tareas (nivel de exigencia, qué errores revisar, etc.)
+            Los perfiles de corrección son universales y deben configurarse desde <strong>Configurar → Contenidos</strong> por un administrador.
           </p>
-          <BaseButton
-            variant="primary"
-            size="sm"
-            icon={Plus}
-            onClick={handleInitializeProfiles}
-            disabled={initializing}
-            className="w-full"
-          >
-            {initializing ? (
-              <>
-                <RefreshCw size={14} className="animate-spin" />
-                Creando perfiles...
-              </>
-            ) : (
-              <>
-                <Plus size={14} />
-                Crear perfiles por defecto (3)
-              </>
-            )}
-          </BaseButton>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Se crearán perfiles para: Principiantes (A1-A2), Intermedio (B1-B2) y Avanzado (C1-C2)
+          <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+            Solo los administradores pueden crear y gestionar perfiles de corrección.
           </p>
         </div>
       </UniversalCard>
@@ -166,7 +143,19 @@ export default function ProfileSelector({
         <div className="flex-1">
           <select
             value={selectedProfileId || ''}
-            onChange={(e) => setSelectedProfileId(e.target.value)}
+            onChange={(e) => {
+              const newProfileId = e.target.value;
+              setSelectedProfileId(newProfileId);
+
+              // Find the full profile object
+              const fullProfile = profiles.find(p => p.id === newProfileId);
+              setSelectedProfile(fullProfile || null);
+
+              // Notify parent with full profile object
+              if (onProfileSelect && fullProfile) {
+                onProfileSelect(fullProfile);
+              }
+            }}
             className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             <option value="">Selecciona un perfil...</option>
@@ -179,19 +168,17 @@ export default function ProfileSelector({
           </select>
         </div>
 
-        {/* Reanalyze Button - Only when changed */}
-        {isProfileChanged && (
-          <BaseButton
-            variant="primary"
-            size="sm"
-            onClick={handleReanalyze}
-            disabled={reanalyzing}
-            className="flex items-center gap-1.5 flex-shrink-0"
-          >
-            <RefreshCw size={12} className={reanalyzing ? 'animate-spin' : ''} />
-            {reanalyzing ? 'Re-analizando...' : 'Re-analizar'}
-          </BaseButton>
-        )}
+        {/* Reanalyze Button - Always visible */}
+        <BaseButton
+          variant="primary"
+          size="sm"
+          onClick={handleReanalyze}
+          disabled={reanalyzing}
+          className="flex items-center gap-1.5 flex-shrink-0"
+        >
+          <RefreshCw size={12} className={reanalyzing ? 'animate-spin' : ''} />
+          {reanalyzing ? 'Re-analizando...' : 'Re-analizar'}
+        </BaseButton>
       </div>
     </div>
   );
