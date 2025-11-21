@@ -16,17 +16,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-
-/**
- * Error type to color mapping
- */
-const ERROR_COLORS = {
-  spelling: '#ef4444',      // red-500
-  grammar: '#f97316',       // orange-500
-  punctuation: '#eab308',   // yellow-500
-  vocabulary: '#3b82f6',    // blue-500
-  default: '#8b5cf6'        // purple-500
-};
+import {
+  getErrorColorsMap,
+  DEFAULT_OVERLAY_CONFIG,
+} from '../../config/errorTypeConfig';
 
 /**
  * Generate wavy line path (Word-style underline)
@@ -140,6 +133,9 @@ export default function ImageOverlay({
   const [debugExpanded, setDebugExpanded] = useState(true);
   const imageRef = useRef(null);
   const containerRef = useRef(null);
+
+  // Get error colors from centralized config
+  const ERROR_COLORS = getErrorColorsMap();
 
   // Handle image load to get dimensions
   useEffect(() => {

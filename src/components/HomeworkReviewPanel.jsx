@@ -584,18 +584,12 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
   }
 
   // Grid view (vertical layout - original)
+  // NOTE: Status is indicated by a single badge (below), not by borders
   return (
     <BaseCard
       hover
       onClick={onSelect}
-      className={`cursor-pointer relative ${
-        isStuck ? 'border-2 border-red-500 dark:border-red-600 shadow-lg' :
-        isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
-        isFailed ? 'border-2 border-red-400 dark:border-red-500' :
-        isTeacherApproved ? 'border-2 border-green-400 dark:border-green-500' :
-        isAIReady ? 'border-2 border-yellow-400 dark:border-yellow-500' :
-        ''
-      }`}
+      className="cursor-pointer relative"
     >
       {/* Delete button - Bottom left corner */}
       <button
@@ -628,14 +622,6 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
                   minute: '2-digit'
                 })}
               </p>
-              {isApproved && review.teacherReviewedAt && (
-                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
-                  ✓ Aprobado {review.teacherReviewedAt?.toDate?.().toLocaleDateString('es-ES', {
-                    day: 'numeric',
-                    month: 'short'
-                  })}
-                </p>
-              )}
             </div>
           </div>
         </div>
@@ -649,78 +635,33 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
           />
         </div>
 
-        {/* Stats or Processing Message */}
+        {/* Stats - Simplified (status is shown in badge below) */}
         {isStuck ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
-              <AlertCircle size={18} className="flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">⚠️ Procesamiento atascado</span>
-            </div>
-            <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
-              Lleva más de 2 minutos procesando. Puede estar rota la conexión con el proveedor de IA. Cancela y reintenta.
-            </p>
-          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            Lleva más de 2 min procesando
+          </p>
         ) : isProcessing ? (
-          <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-orange-800 dark:text-orange-200">
-              <RefreshCw size={18} className="animate-spin flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">IA analizando la tarea...</span>
-            </div>
-            <p className="text-xs text-orange-700 dark:text-orange-300 mt-2 ml-6 font-medium">
-              ⏱️ Esto puede tardar 10-30 segundos
-            </p>
-          </div>
-        ) : isFailed ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
-              <AlertCircle size={18} strokeWidth={2.5} className="flex-shrink-0" />
-              <span className="font-bold">Error al procesar</span>
-            </div>
-            {review.errorMessage && (
-              <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
-                {review.errorMessage}
-              </p>
-            )}
-          </div>
-        ) : isAIReady ? (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-yellow-800 dark:text-yellow-200">
-              <Clock size={18} className="flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">Pendiente revisión</span>
-            </div>
-            <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 ml-6 font-medium">
-              ✨ IA terminó. Revisa y aprueba
-            </p>
-          </div>
-        ) : isTeacherApproved ? (
-          <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-2">
-                <BaseBadge variant={gradeColor} className="text-sm">
-                  {grade}/100
-                </BaseBadge>
-                <PerformanceIcon size={14} strokeWidth={2} className="text-gray-400" />
-              </div>
-              <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                <AlertCircle size={14} strokeWidth={2} />
-                {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center gap-2">
-              <BaseBadge variant={gradeColor}>
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            Esperando análisis de IA...
+          </p>
+        ) : isFailed && review.errorMessage ? (
+          <p className="text-xs text-red-600 dark:text-red-400 text-center line-clamp-2">
+            {review.errorMessage}
+          </p>
+        ) : (review.suggestedGrade !== undefined || review.errorSummary?.total > 0) ? (
+          <div className="flex items-center justify-center gap-3">
+            {review.suggestedGrade !== undefined && (
+              <BaseBadge variant={gradeColor} className="text-sm">
                 {grade}/100
               </BaseBadge>
-              <PerformanceIcon size={14} strokeWidth={2} className="text-gray-400" />
-            </div>
-            <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-              <AlertCircle size={14} strokeWidth={2} />
-              {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
-            </div>
+            )}
+            {review.errorSummary?.total > 0 && (
+              <span className="text-xs text-gray-600 dark:text-gray-400">
+                {review.errorSummary.total} error{review.errorSummary.total !== 1 ? 'es' : ''}
+              </span>
+            )}
           </div>
-        )}
+        ) : null}
 
         {/* Status Badge - Below grade container */}
         <div className="flex justify-center">

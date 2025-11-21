@@ -8,32 +8,10 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-
-/**
- * Error type configuration
- */
-const ERROR_TYPE_CONFIG = {
-  spelling: {
-    label: 'Ortografía',
-    color: 'bg-red-500',
-    icon: '🔴'
-  },
-  grammar: {
-    label: 'Gramática',
-    color: 'bg-orange-500',
-    icon: '🟠'
-  },
-  punctuation: {
-    label: 'Puntuación',
-    color: 'bg-yellow-500',
-    icon: '🟡'
-  },
-  vocabulary: {
-    label: 'Vocabulario',
-    color: 'bg-blue-500',
-    icon: '🔵'
-  }
-};
+import {
+  getErrorTypeConfig,
+  DEFAULT_OVERLAY_CONFIG,
+} from '../../config/errorTypeConfig';
 
 /**
  * Image Overlay Controls Component
@@ -65,6 +43,10 @@ export default function ImageOverlayControls({
   onCorrectionTextFontChange,
   errorCounts = {}
 }) {
+  // Obtener configuración centralizada
+  const ERROR_TYPE_CONFIG = getErrorTypeConfig();
+  const { opacityLevels, availableFonts } = DEFAULT_OVERLAY_CONFIG;
+
   const handleToggleErrorType = (type) => {
     onVisibleErrorTypesChange({
       ...visibleErrorTypes,
@@ -103,6 +85,7 @@ export default function ImageOverlayControls({
           {Object.entries(ERROR_TYPE_CONFIG).map(([type, config]) => {
             const count = errorCounts[type] || 0;
             const isVisible = visibleErrorTypes[type];
+            const IconComponent = config.iconComponent;
 
             return (
               <button
@@ -120,7 +103,10 @@ export default function ImageOverlayControls({
                 `}
               >
                 {isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
-                <span className={`w-3 h-3 rounded-full ${config.color}`} />
+                <span
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: config.color }}
+                />
                 <span className="flex-1 text-left">{config.label}</span>
                 <span className="text-xs bg-gray-200 dark:bg-gray-600 px-1.5 py-0.5 rounded">
                   {count}
@@ -144,9 +130,11 @@ export default function ImageOverlayControls({
             onChange={(e) => onOpacityChange(parseFloat(e.target.value))}
             className="px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
-            <option value={0.15}>Intensidad: Baja</option>
-            <option value={0.25}>Intensidad: Media</option>
-            <option value={0.40}>Intensidad: Alta</option>
+            {opacityLevels.map(({ value, label }) => (
+              <option key={value} value={value}>
+                Intensidad: {label}
+              </option>
+            ))}
           </select>
 
           {/* Wavy Toggle */}
@@ -186,10 +174,11 @@ export default function ImageOverlayControls({
             className="px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ fontFamily: showCorrectionText ? correctionTextFont : undefined }}
           >
-            <option value="Caveat" style={{ fontFamily: 'Caveat' }}>Fuente: Caveat</option>
-            <option value="Shadows Into Light" style={{ fontFamily: 'Shadows Into Light' }}>Fuente: Shadows</option>
-            <option value="Indie Flower" style={{ fontFamily: 'Indie Flower' }}>Fuente: Indie</option>
-            <option value="Patrick Hand" style={{ fontFamily: 'Patrick Hand' }}>Fuente: Patrick</option>
+            {availableFonts.map(({ value, label }) => (
+              <option key={value} value={value} style={{ fontFamily: value }}>
+                Fuente: {label}
+              </option>
+            ))}
           </select>
         </div>
 

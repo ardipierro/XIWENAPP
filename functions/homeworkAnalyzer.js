@@ -65,6 +65,13 @@ async function getStudentCorrectionProfile(studentId, teacherId, db) {
  * Map correction profile to analysis parameters
  */
 function mapProfileToParams(profile) {
+  // Default AI parameters
+  const DEFAULT_AI_PARAMS = {
+    temperature: 0.4,
+    maxTokens: 4000,
+    feedbackStyle: 'encouraging',
+  };
+
   if (!profile) {
     return {
       strictnessLevel: 'intermediate',
@@ -74,10 +81,12 @@ function mapProfileToParams(profile) {
         punctuation: true,
         vocabulary: true
       },
-      feedbackStyle: 'encouraging',
+      feedbackStyle: DEFAULT_AI_PARAMS.feedbackStyle,
       detailedExplanations: true,
       includeSynonyms: false,
-      includeExamples: true
+      includeExamples: true,
+      // AI parameters
+      ai: DEFAULT_AI_PARAMS,
     };
   }
 
@@ -103,13 +112,23 @@ function mapProfileToParams(profile) {
   // Get display settings
   const display = settings.display || {};
 
+  // Get AI settings from profile (new feature)
+  const aiSettings = settings.ai || {};
+  const ai = {
+    temperature: aiSettings.temperature ?? DEFAULT_AI_PARAMS.temperature,
+    maxTokens: aiSettings.maxTokens ?? DEFAULT_AI_PARAMS.maxTokens,
+    feedbackStyle: aiSettings.feedbackStyle ?? DEFAULT_AI_PARAMS.feedbackStyle,
+  };
+
   return {
     strictnessLevel: strictnessMap[settings.strictness] || 'intermediate',
     correctionTypes,
-    feedbackStyle: 'encouraging',
+    feedbackStyle: ai.feedbackStyle,
     detailedExplanations: display.showDetailedErrors !== false,
     includeSynonyms: false,
-    includeExamples: true
+    includeExamples: true,
+    // AI parameters
+    ai,
   };
 }
 
@@ -138,13 +157,23 @@ async function downloadImageAsBase64(imageUrl) {
 
 /**
  * Analyze homework image using Claude Vision API
+ * @param {string} imageUrl - URL of the image
+ * @param {string} imageBase64 - Base64 encoded image
+ * @param {string} systemPrompt - System prompt for analysis
+ * @param {Object} aiParams - AI parameters from profile
+ * @param {number} aiParams.temperature - Temperature for AI (0.1-1.0)
+ * @param {number} aiParams.maxTokens - Max tokens for response
  */
-async function analyzeWithClaude(imageUrl, imageBase64, systemPrompt) {
+async function analyzeWithClaude(imageUrl, imageBase64, systemPrompt, aiParams = {}) {
   const apiKey = process.env.CLAUDE_API_KEY;
 
   if (!apiKey) {
     throw new Error('Claude API key not configured');
   }
+
+  // AI parameters with defaults
+  const temperature = aiParams.temperature ?? 0.4;
+  const maxTokens = aiParams.maxTokens ?? 4000;
 
   // Detect image type from URL
   const imageType = imageUrl.toLowerCase().includes('.png') ? 'image/png' : 'image/jpeg';
@@ -152,11 +181,12 @@ async function analyzeWithClaude(imageUrl, imageBase64, systemPrompt) {
   console.log('[Claude Vision] Analyzing image...');
   console.log('[Claude Vision] Image type:', imageType);
   console.log('[Claude Vision] Image size (base64):', imageBase64.length, 'chars');
+  console.log('[Claude Vision] AI params:', { temperature, maxTokens });
 
   const requestBody = {
     model: 'claude-sonnet-4-5-20250929', // Latest model with vision
-    max_tokens: 4000,
-    temperature: 0.4,
+    max_tokens: maxTokens,
+    temperature: temperature,
     system: systemPrompt,
     messages: [
       {
@@ -205,19 +235,30 @@ async function analyzeWithClaude(imageUrl, imageBase64, systemPrompt) {
 
 /**
  * Analyze homework image using OpenAI GPT-4 Vision API
+ * @param {string} imageUrl - URL of the image
+ * @param {string} imageBase64 - Base64 encoded image
+ * @param {string} systemPrompt - System prompt for analysis
+ * @param {Object} aiParams - AI parameters from profile
+ * @param {number} aiParams.temperature - Temperature for AI (0.1-1.0)
+ * @param {number} aiParams.maxTokens - Max tokens for response
  */
-async function analyzeWithOpenAI(imageUrl, imageBase64, systemPrompt) {
+async function analyzeWithOpenAI(imageUrl, imageBase64, systemPrompt, aiParams = {}) {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     throw new Error('OpenAI API key not configured');
   }
 
+  // AI parameters with defaults
+  const temperature = aiParams.temperature ?? 0.4;
+  const maxTokens = aiParams.maxTokens ?? 4000;
+
   // Detect image type from URL
   const imageType = imageUrl.toLowerCase().includes('.png') ? 'image/png' : 'image/jpeg';
 
   console.log('[GPT-4 Vision] Analyzing image...');
   console.log('[GPT-4 Vision] Image type:', imageType);
+  console.log('[GPT-4 Vision] AI params:', { temperature, maxTokens });
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -227,6 +268,8 @@ async function analyzeWithOpenAI(imageUrl, imageBase64, systemPrompt) {
     },
     body: JSON.stringify({
       model: 'gpt-4o', // GPT-4 with vision
+      temperature: temperature,
+      max_tokens: maxTokens,
       messages: [
         {
           role: 'system',
@@ -594,12 +637,14 @@ FORMATO DE RESPUESTA (JSON):
 Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
 
     // ✨ STEP 2: Analyze with selected provider for error correction
+    // Pass AI parameters from profile for temperature and maxTokens
+    const aiParams = profileParams.ai || {};
     let aiResponse;
     if (functionConfig.analysis_provider === 'openai') {
-      aiResponse = await analyzeWithOpenAI(reviewData.imageUrl, imageBase64, systemPrompt);
+      aiResponse = await analyzeWithOpenAI(reviewData.imageUrl, imageBase64, systemPrompt, aiParams);
     } else {
       // Default to Claude
-      aiResponse = await analyzeWithClaude(reviewData.imageUrl, imageBase64, systemPrompt);
+      aiResponse = await analyzeWithClaude(reviewData.imageUrl, imageBase64, systemPrompt, aiParams);
     }
 
     // Parse JSON response
@@ -920,12 +965,14 @@ FORMATO DE RESPUESTA (JSON):
 Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
 
     // ✨ STEP 2: Analyze with selected provider for error correction
+    // Pass AI parameters from profile for temperature and maxTokens
+    const aiParams = profileParams.ai || {};
     let aiResponse;
     if (functionConfig.analysis_provider === 'openai') {
-      aiResponse = await analyzeWithOpenAI(afterData.imageUrl, imageBase64, systemPrompt);
+      aiResponse = await analyzeWithOpenAI(afterData.imageUrl, imageBase64, systemPrompt, aiParams);
     } else {
       // Default to Claude
-      aiResponse = await analyzeWithClaude(afterData.imageUrl, imageBase64, systemPrompt);
+      aiResponse = await analyzeWithClaude(afterData.imageUrl, imageBase64, systemPrompt, aiParams);
     }
 
     // Parse JSON response
