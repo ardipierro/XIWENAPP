@@ -286,6 +286,40 @@ function LogCard({ log, onOpen, onDelete, layout = 'vertical' }) {
     });
   }
 
+  // Vista de lista (horizontal con layout="row")
+  if (layout === 'horizontal') {
+    return (
+      <UniversalCard
+        variant="default"
+        layout="row"
+        size="md"
+        icon={BookOpen}
+        title={log.name}
+        subtitle={log.courseName || 'Sin curso'}
+        badges={[
+          { variant: config.variant, icon: config.icon, children: config.label }
+        ]}
+        meta={[
+          { icon: <Calendar size={14} />, text: log.createdAt?.toDate?.().toLocaleDateString() || 'Sin fecha' },
+          { icon: <Clock size={14} />, text: `${log.entries?.length || 0} contenidos` }
+        ]}
+        actions={[
+          <BaseButton
+            key="open"
+            variant="primary"
+            icon={Play}
+            onClick={() => onOpen(log.id)}
+          >
+            Abrir
+          </BaseButton>
+        ]}
+        onDelete={() => onDelete(log.id)}
+        deleteConfirmMessage={`¿Eliminar diario "${log.name}"?`}
+        onClick={() => onOpen(log.id)}
+      />
+    );
+  }
+
   // ⭐ ÚNICO RENDER - SIN header gigante
   return (
     <UniversalCard

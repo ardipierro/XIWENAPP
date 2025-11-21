@@ -46,7 +46,7 @@ function CardSystemTab() {
   const [showImpactAnalysis, setShowImpactAnalysis] = useState(false);
   const [impactData, setImpactData] = useState(null);
   const [previewMode, setPreviewMode] = useState('basic'); // 'basic' | 'real-examples'
-  const [tabMode, setTabMode] = useState('variants'); // 'variants' | 'mapping'
+  const [tabMode, setTabMode] = useState('variants'); // 'variants' | 'mapping' | 'layouts'
 
   // Hook para recargar config global después de guardar
   const { reloadConfig } = useCardConfig();
@@ -793,6 +793,16 @@ Los cambios se aplican instantáneamente en toda la app.`);
           >
             🗺️ Mapeo de Componentes
           </button>
+          <button
+            onClick={() => setTabMode('layouts')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+              tabMode === 'layouts'
+                ? 'bg-primary-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+          >
+            📐 Layouts Disponibles
+          </button>
         </div>
 
         {/* Global Stats - Mejoradas */}
@@ -1213,9 +1223,177 @@ Los cambios se aplican instantáneamente en toda la app.`);
       </div>
       {/* Fin del grid rediseñado */}
         </>
-      ) : (
+      ) : tabMode === 'mapping' ? (
         /* Panel de Mapeo de Componentes */
         <ComponentMappingPanel />
+      ) : (
+        /* Panel de Layouts Disponibles */
+        <div className="space-y-6">
+          <div className="rounded-xl p-6" style={{ background: 'var(--color-bg-secondary)', border: '2px solid var(--color-border)' }}>
+            <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+              Layouts Disponibles
+            </h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+              UniversalCard soporta 3 layouts diferentes. Cada layout está optimizado para casos de uso específicos.
+            </p>
+
+            {/* Layout Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* VERTICAL */}
+              <div className="p-5 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-500/10">
+                    <Layers size={20} className="text-blue-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                      Vertical
+                    </h4>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                      layout="vertical"
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+                  Layout por defecto. Header arriba, contenido abajo. Ideal para grids de cards.
+                </p>
+                <BaseBadge variant="primary" size="sm">Por defecto</BaseBadge>
+                <div className="mt-4 text-xs font-mono p-3 rounded" style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}>
+                  {'<UniversalCard\n  layout="vertical"\n  variant="default"\n/>'}
+                </div>
+              </div>
+
+              {/* HORIZONTAL */}
+              <div className="p-5 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-green-500/10">
+                    <Layers size={20} className="text-green-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                      Horizontal
+                    </h4>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                      layout="horizontal"
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+                  Avatar/ícono pequeño (48px) a la izquierda. Para cards compactas horizontales.
+                </p>
+                <BaseBadge variant="success" size="sm">Compacto</BaseBadge>
+                <div className="mt-4 text-xs font-mono p-3 rounded" style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}>
+                  {'<UniversalCard\n  layout="horizontal"\n  variant="user"\n/>'}
+                </div>
+              </div>
+
+              {/* ROW */}
+              <div className="p-5 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '2px solid var(--color-success-border)' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-purple-500/10">
+                    <Sparkles size={20} className="text-purple-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                      Row (Nuevo) ✨
+                    </h4>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                      layout="row"
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+                  Imagen/avatar/ícono cuadrado (96-140px) a la izquierda. Contenido estirado. Ideal para vistas de lista.
+                </p>
+                <BaseBadge variant="warning" size="sm">Nuevo</BaseBadge>
+                <div className="mt-4 text-xs font-mono p-3 rounded" style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}>
+                  {'<UniversalCard\n  layout="row"\n  variant="content"\n/>'}
+                </div>
+              </div>
+            </div>
+
+            {/* Comparación de anchos */}
+            <div className="mt-8 p-5 rounded-lg" style={{ background: 'var(--color-warning-bg)', border: '1px solid var(--color-warning-border)' }}>
+              <h4 className="text-base font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                <Info size={18} />
+                Comparación de Anchos de Imagen/Avatar/Ícono
+              </h4>
+              <div className="text-sm space-y-2" style={{ color: 'var(--color-text-secondary)' }}>
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold w-32">Horizontal:</span>
+                  <span className="font-mono">80px</span>
+                  <span className="text-xs opacity-75">(compacto)</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold w-32">Row (usuarios):</span>
+                  <span className="font-mono">96px</span>
+                  <span className="text-xs opacity-75">(avatares)</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold w-32">Row (contenido):</span>
+                  <span className="font-mono">140px</span>
+                  <span className="text-xs opacity-75">(imágenes de cursos, etc.)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Casos de Uso */}
+            <div className="mt-8">
+              <h4 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+                Casos de Uso Recomendados
+              </h4>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                        Usa <span className="font-mono text-sm">layout="vertical"</span> para:
+                      </p>
+                      <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+                        <li>• Grids de cards (dashboard, galería de cursos)</li>
+                        <li>• Quick access cards</li>
+                        <li>• Stats y métricas</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                        Usa <span className="font-mono text-sm">layout="horizontal"</span> para:
+                      </p>
+                      <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+                        <li>• Cards muy compactas en sidebars</li>
+                        <li>• Listas densas con poco contenido</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg" style={{ background: 'var(--color-success-bg)', border: '2px solid var(--color-success-border)' }}>
+                  <div className="flex items-start gap-3">
+                    <Sparkles size={20} className="text-purple-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                        Usa <span className="font-mono text-sm">layout="row"</span> para:
+                      </p>
+                      <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+                        <li>• <strong>Vistas de lista</strong> (list view en managers)</li>
+                        <li>• Filas estiradas horizontalmente</li>
+                        <li>• Cuando necesitas imagen/avatar cuadrado grande (96-140px)</li>
+                        <li>• ContentManager, UserManager, ClassDailyLogManager (vista list)</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
