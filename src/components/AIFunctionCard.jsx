@@ -144,7 +144,7 @@ function AIFunctionCard({ aiFunction, config, onConfigure, viewMode = 'grid' }) 
     <UniversalCard
       variant={viewMode === 'grid' ? 'default' : 'compact'}
       size="md"
-      layout={viewMode === 'grid' ? 'vertical' : 'horizontal'}
+      layout={viewMode === 'grid' ? 'vertical' : 'row'}
       icon={FunctionIcon}
       title={aiFunction.name}
       subtitle={aiFunction.description}

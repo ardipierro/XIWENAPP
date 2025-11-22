@@ -46,7 +46,7 @@ import {
 } from './common';
 import CategoryBadge from './common/CategoryBadge';
 import { getBadgeByKey, getContrastText } from '../config/badgeSystem';
-import { CardDeleteButton } from './cards';
+import { CardDeleteButton, UniversalCard } from './cards';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
@@ -525,98 +525,85 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
     }
   };
 
-  // List view (horizontal layout) - Consistente con UnifiedContentManager y UniversalUserManager
+  // List view (horizontal layout) - Usando UniversalCard layout="row"
   if (viewMode === 'list') {
+    // Construir badges para UniversalCard
+    const statusBadges = [];
+    if (isProcessing) {
+      statusBadges.push(
+        <BaseBadge key="status" variant="warning" icon={RefreshCw} size="sm" className="animate-pulse">
+          PROCESANDO
+        </BaseBadge>
+      );
+    } else if (isFailed) {
+      statusBadges.push(
+        <BaseBadge key="status" variant="danger" icon={AlertCircle} size="sm">
+          ERROR
+        </BaseBadge>
+      );
+    } else if (isTeacherApproved) {
+      statusBadges.push(
+        <BaseBadge key="status" variant="success" icon={CheckCircle} size="sm">
+          APROBADO
+        </BaseBadge>
+      );
+    } else if (isAIReady) {
+      statusBadges.push(
+        <BaseBadge key="status" variant="warning" icon={Clock} size="sm">
+          PENDIENTE
+        </BaseBadge>
+      );
+    }
+    statusBadges.push(
+      <BaseBadge key="grade" variant={gradeColor} size="sm">
+        {grade}/100
+      </BaseBadge>
+    );
+
+    // Construir actions
+    const actionButtons = [];
+    if (isStuck) {
+      actionButtons.push(
+        <BaseButton
+          key="cancel"
+          variant="danger"
+          size="sm"
+          onClick={handleCancelClick}
+        >
+          <XCircle size={16} strokeWidth={2.5} />
+          Cancelar
+        </BaseButton>
+      );
+    }
+
     return (
-      <div
-        className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
+      <UniversalCard
+        layout="row"
+        variant="content"
+        image={review.imageUrl}
+        badges={statusBadges}
+        title={review.studentName || 'Sin asignar'}
         onClick={onSelect}
+        actions={actionButtons}
+        onDelete={handleDeleteClick}
+        deleteConfirmMessage="¿Eliminar esta tarea?"
       >
-        <div className="flex items-stretch min-h-[96px]">
-          {/* Imagen de la tarea - Cuadrado que ocupa toda la altura */}
-          <div className="w-[96px] flex-shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-900">
-            <img
-              src={review.imageUrl}
-              alt="Vista previa"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Contenido principal */}
-          <div className="flex-1 min-w-0 py-3 px-4">
-            {/* Badges - Status + Grade */}
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              {isProcessing ? (
-                <BaseBadge variant="warning" icon={RefreshCw} size="sm" className="animate-pulse">
-                  PROCESANDO
-                </BaseBadge>
-              ) : isFailed ? (
-                <BaseBadge variant="danger" icon={AlertCircle} size="sm">
-                  ERROR
-                </BaseBadge>
-              ) : isTeacherApproved ? (
-                <BaseBadge variant="success" icon={CheckCircle} size="sm">
-                  APROBADO
-                </BaseBadge>
-              ) : isAIReady ? (
-                <BaseBadge variant="warning" icon={Clock} size="sm">
-                  PENDIENTE
-                </BaseBadge>
-              ) : null}
-              <BaseBadge variant={gradeColor} size="sm">
-                {grade}/100
-              </BaseBadge>
-            </div>
-
-            {/* Nombre del estudiante */}
-            <h3 className="text-base font-semibold truncate mb-1 text-gray-900 dark:text-white flex items-center gap-2">
-              <UserAvatar
-                userId={review.studentId}
-                name={review.studentName}
-                size="sm"
-              />
-              {review.studentName || 'Sin asignar'}
-            </h3>
-
-            {/* Metadata */}
-            <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-              <span className="flex items-center gap-1">
-                <Calendar size={12} />
-                {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                })}
-              </span>
-              <span className="flex items-center gap-1">
-                <AlertCircle size={12} />
-                {review.errorSummary?.total || 0} errores
-              </span>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0 pr-4" onClick={(e) => e.stopPropagation()}>
-            {isStuck && (
-              <BaseButton
-                variant="danger"
-                size="sm"
-                onClick={handleCancelClick}
-              >
-                <XCircle size={16} strokeWidth={2.5} />
-                Cancelar
-              </BaseButton>
-            )}
-            <CardDeleteButton
-              onDelete={handleDeleteClick}
-              variant="solid"
-              size="sm"
-              confirmMessage="¿Eliminar esta tarea?"
-              requireConfirm={false}
-            />
-          </div>
+        {/* Metadata personalizada */}
+        <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mt-1">
+          <span className="flex items-center gap-1">
+            <Calendar size={12} />
+            {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            })}
+          </span>
+          <span className="flex items-center gap-1">
+            <AlertCircle size={12} />
+            {review.errorSummary?.total || 0} errores
+          </span>
         </div>
-      </div>
+      </UniversalCard>
     );
   }
 

@@ -125,7 +125,7 @@ function GuardianView({ user, onViewStudentDetails }) {
                 key={student.id}
                 variant="user"
                 size="md"
-                layout={viewMode === 'list' ? 'horizontal' : 'vertical'}
+                layout={viewMode === 'list' ? 'row' : 'vertical'}
                 userId={student.id}
                 userName={student.name}
                 userEmail={student.email}
