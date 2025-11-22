@@ -558,7 +558,10 @@ export function UniversalCard({
 
       {/* Content - FORZAR flex-1 para que use todo el espacio restante */}
       <div
-        className={`${classes.content} flex-1 flex ${layout === 'row' ? 'flex-row items-stretch' : layout === 'horizontal' ? 'flex-row items-center' : 'flex-col'}`}
+        className={isRowLayout
+          ? 'flex-1 flex flex-row items-stretch'
+          : `${classes.content} flex-1 flex ${layout === 'horizontal' ? 'flex-row items-center' : 'flex-col'}`
+        }
         style={{
           ...(isRowLayout ? {} : styles.content),
           minHeight: isRowLayout
