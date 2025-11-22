@@ -315,17 +315,21 @@ export default function HomeworkReviewPanel({ teacherId }) {
         <div className="flex items-center gap-2">
           <BaseButton
             variant="secondary"
+            size="md"
             onClick={() => setShowCameraModal(true)}
             icon={Camera}
+            className="sm:min-w-[145px]"
           >
-            Tomar Foto
+            <span className="hidden sm:inline">Tomar Foto</span>
           </BaseButton>
           <BaseButton
             variant="primary"
+            size="md"
             onClick={() => setShowUploadModal(true)}
             icon={Upload}
+            className="sm:min-w-[145px]"
           >
-            Subir Tarea
+            <span className="hidden sm:inline">Subir Tarea</span>
           </BaseButton>
         </div>
       </div>
@@ -344,14 +348,14 @@ export default function HomeworkReviewPanel({ teacherId }) {
           variant={statusFilter === 'pending' ? 'primary' : 'ghost'}
           size="sm"
         >
-          🟡 Pendientes ({pendingCount})
+          Pendientes ({pendingCount})
         </BaseButton>
         <BaseButton
           onClick={() => setStatusFilter('approved')}
           variant={statusFilter === 'approved' ? 'primary' : 'ghost'}
           size="sm"
         >
-          🟢 Aprobadas ({approvedCount})
+          Aprobadas ({approvedCount})
         </BaseButton>
       </div>
 
@@ -527,39 +531,6 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
 
   // List view (horizontal layout) - Usando UniversalCard layout="row"
   if (viewMode === 'list') {
-    // Construir badges para UniversalCard
-    const statusBadges = [];
-    if (isProcessing) {
-      statusBadges.push(
-        <BaseBadge key="status" variant="warning" icon={RefreshCw} size="sm" className="animate-pulse">
-          PROCESANDO
-        </BaseBadge>
-      );
-    } else if (isFailed) {
-      statusBadges.push(
-        <BaseBadge key="status" variant="danger" icon={AlertCircle} size="sm">
-          ERROR
-        </BaseBadge>
-      );
-    } else if (isTeacherApproved) {
-      statusBadges.push(
-        <BaseBadge key="status" variant="success" icon={CheckCircle} size="sm">
-          APROBADO
-        </BaseBadge>
-      );
-    } else if (isAIReady) {
-      statusBadges.push(
-        <BaseBadge key="status" variant="warning" icon={Clock} size="sm">
-          PENDIENTE
-        </BaseBadge>
-      );
-    }
-    statusBadges.push(
-      <BaseBadge key="grade" variant={gradeColor} size="sm">
-        {grade}/100
-      </BaseBadge>
-    );
-
     // Construir actions
     const actionButtons = [];
     if (isStuck) {
@@ -576,31 +547,61 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
       );
     }
 
+    // Icono de estado
+    const StatusIcon = () => {
+      if (isProcessing) {
+        return (
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30" title="Procesando">
+            <Clock size={14} className="text-orange-500 animate-pulse" />
+          </span>
+        );
+      } else if (isFailed) {
+        return (
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 dark:bg-red-900/30" title="Error">
+            <AlertCircle size={14} className="text-red-500" />
+          </span>
+        );
+      } else if (isTeacherApproved) {
+        return (
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30" title="Aprobado">
+            <CheckCircle size={14} className="text-green-500" />
+          </span>
+        );
+      } else if (isAIReady) {
+        return (
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30" title="Pendiente revisión">
+            <Clock size={14} className="text-yellow-500" />
+          </span>
+        );
+      }
+      return null;
+    };
+
     return (
       <UniversalCard
         layout="row"
         variant="content"
         image={review.imageUrl}
-        badges={statusBadges}
         title={review.studentName || 'Sin asignar'}
         onClick={onSelect}
         actions={actionButtons}
         onDelete={handleDeleteClick}
         deleteConfirmMessage="¿Eliminar esta tarea?"
       >
-        {/* Metadata personalizada */}
-        <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mt-1">
+        {/* Indicador de estado + Nota + Metadata - Colapsa en móvil */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 text-xs text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-2">
+            <StatusIcon />
+            <BaseBadge variant={gradeColor} size="sm">
+              {grade}/100
+            </BaseBadge>
+          </div>
           <span className="flex items-center gap-1">
             <Calendar size={12} />
             {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
               day: 'numeric',
-              month: 'short',
-              year: 'numeric'
+              month: 'short'
             })}
-          </span>
-          <span className="flex items-center gap-1">
-            <AlertCircle size={12} />
-            {review.errorSummary?.total || 0} errores
           </span>
         </div>
       </UniversalCard>
@@ -675,68 +676,11 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
           />
         </div>
 
-        {/* Stats or Processing Message */}
-        {isStuck ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
-              <AlertCircle size={18} className="flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">⚠️ Procesamiento atascado</span>
-            </div>
-            <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
-              Lleva más de 2 minutos procesando. Puede estar rota la conexión con el proveedor de IA. Cancela y reintenta.
-            </p>
-          </div>
-        ) : isProcessing ? (
-          <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-orange-800 dark:text-orange-200">
-              <RefreshCw size={18} className="animate-spin flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">IA analizando la tarea...</span>
-            </div>
-            <p className="text-xs text-orange-700 dark:text-orange-300 mt-2 ml-6 font-medium">
-              ⏱️ Esto puede tardar 10-30 segundos
-            </p>
-          </div>
-        ) : isFailed ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
-              <AlertCircle size={18} strokeWidth={2.5} className="flex-shrink-0" />
-              <span className="font-bold">Error al procesar</span>
-            </div>
-            {review.errorMessage && (
-              <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
-                {review.errorMessage}
-              </p>
-            )}
-          </div>
-        ) : isAIReady ? (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-yellow-800 dark:text-yellow-200">
-              <Clock size={18} className="flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">Pendiente revisión</span>
-            </div>
-            <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 ml-6 font-medium">
-              ✨ IA terminó. Revisa y aprueba
-            </p>
-          </div>
-        ) : isTeacherApproved ? (
-          <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-2">
-                <BaseBadge variant={gradeColor} className="text-sm">
-                  {grade}/100
-                </BaseBadge>
-                <PerformanceIcon size={14} strokeWidth={2} style={{ color: 'inherit' }} />
-              </div>
-              <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
-                {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
-              </div>
-            </div>
-          </div>
-        ) : (
+        {/* Stats - Mostrar nota y errores cuando hay datos */}
+        {(isTeacherApproved || isAIReady || (!isProcessing && !isFailed && !isStuck)) && (
           <div className="grid grid-cols-2 gap-2">
             <div className="flex items-center gap-2">
-              <BaseBadge variant={gradeColor}>
+              <BaseBadge variant={gradeColor} className="text-sm">
                 {grade}/100
               </BaseBadge>
               <PerformanceIcon size={14} strokeWidth={2} style={{ color: 'inherit' }} />
@@ -745,6 +689,17 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
               <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
               {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
             </div>
+          </div>
+        )}
+
+        {/* Mensaje temporal solo durante procesamiento activo */}
+        {(isProcessing || isStuck) && (
+          <div className={`text-xs text-center py-2 px-3 rounded-lg ${
+            isStuck
+              ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+              : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
+          }`}>
+            {isStuck ? '⚠️ Procesamiento lento - considera cancelar' : '⏳ Analizando...'}
           </div>
         )}
 
@@ -783,7 +738,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
                 style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
               >
                 <CheckCircle size={14} style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">✓ APROBADO</span>
+                <span className="text-xs font-semibold">APROBADO</span>
               </span>
             );
           })() : isAIReady ? (() => {
