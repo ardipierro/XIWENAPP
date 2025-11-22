@@ -41,6 +41,15 @@ export const FEEDBACK_STYLES = {
 };
 
 /**
+ * Display modes for correction results
+ */
+export const DISPLAY_MODES = {
+  OVERLAY: 'overlay',     // Show corrections on image
+  QUICK: 'quick',         // Show corrections as text list only
+  BOTH: 'both'            // Show both overlay and text list
+};
+
+/**
  * Default AI configuration values
  */
 export const AI_CONFIG_DEFAULTS = {
@@ -137,7 +146,9 @@ export const DEFAULT_PROFILES = [
         responseLanguage: 'es',
         includeSynonyms: false,
         includeExamples: false         // Keep it simple
-      }
+      },
+      // Display mode - quick text for beginners (less overwhelming)
+      displayMode: DISPLAY_MODES.QUICK
     }
   },
   {
@@ -182,7 +193,9 @@ export const DEFAULT_PROFILES = [
         responseLanguage: 'es',
         includeSynonyms: false,
         includeExamples: true          // Include usage examples
-      }
+      },
+      // Display mode - overlay for visual learners
+      displayMode: DISPLAY_MODES.OVERLAY
     }
   },
   {
@@ -227,7 +240,9 @@ export const DEFAULT_PROFILES = [
         responseLanguage: 'es',
         includeSynonyms: true,         // Suggest alternatives
         includeExamples: true          // Detailed examples
-      }
+      },
+      // Display mode - both for comprehensive review
+      displayMode: DISPLAY_MODES.BOTH
     }
   }
 ];
@@ -637,5 +652,6 @@ export default {
   DEFAULT_PROFILES,
   FEEDBACK_STYLES,
   AI_CONFIG_DEFAULTS,
-  AI_CONFIG_BY_STRICTNESS
+  AI_CONFIG_BY_STRICTNESS,
+  DISPLAY_MODES
 };
