@@ -40,6 +40,7 @@ import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
 import { UniversalCard } from './cards';
 import ClassDailyLog from './ClassDailyLog';
+import EditLogModal from './EditLogModal';
 
 function ClassDailyLogManager({ user }) {
   const [logs, setLogs] = useState([]);
@@ -50,8 +51,10 @@ function ClassDailyLogManager({ user }) {
   const [activeLogId, setActiveLogId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
+  const [editingLog, setEditingLog] = useState(null);
 
   const createModal = useModal();
+  const editModal = useModal();
 
   useEffect(() => {
     loadData();
@@ -127,6 +130,17 @@ function ClassDailyLogManager({ user }) {
   const handleCloseLog = () => {
     setActiveLogId(null);
     loadData();
+  };
+
+  const handleEditLog = (log) => {
+    setEditingLog(log);
+    editModal.open();
+  };
+
+  const handleEditSave = (updatedLog) => {
+    setMessage({ type: 'success', text: '✅ Diario actualizado' });
+    loadData();
+    setTimeout(() => setMessage(null), 5000);
   };
 
   if (activeLogId) {
@@ -219,6 +233,7 @@ function ClassDailyLogManager({ user }) {
               key={log.id}
               log={log}
               onOpen={handleOpenLog}
+              onEdit={handleEditLog}
               onDelete={handleDeleteLog}
               layout={viewMode === 'list' ? 'horizontal' : 'vertical'}
             />
@@ -232,6 +247,18 @@ function ClassDailyLogManager({ user }) {
         onClose={createModal.close}
         onCreate={handleCreateLog}
         courses={courses}
+      />
+
+      {/* Edit Modal */}
+      <EditLogModal
+        isOpen={editModal.isOpen}
+        onClose={() => {
+          editModal.close();
+          setEditingLog(null);
+        }}
+        log={editingLog}
+        teacherId={user.uid}
+        onSave={handleEditSave}
       />
     </div>
   );
@@ -250,7 +277,7 @@ function ClassDailyLogManager({ user }) {
  * @param {Function} onDelete - Callback para eliminar diario
  * @param {string} layout - 'vertical' (grid) o 'horizontal' (list)
  */
-function LogCard({ log, onOpen, onDelete, layout = 'vertical' }) {
+function LogCard({ log, onOpen, onEdit, onDelete, layout = 'vertical' }) {
   // Config de badges según estado
   const statusConfig = {
     active: { variant: 'success', label: 'Activa', icon: Activity },
@@ -301,9 +328,19 @@ function LogCard({ log, onOpen, onDelete, layout = 'vertical' }) {
         ]}
         meta={[
           { icon: <Calendar size={14} />, text: log.createdAt?.toDate?.().toLocaleDateString() || 'Sin fecha' },
-          { icon: <Clock size={14} />, text: `${log.entries?.length || 0} contenidos` }
+          { icon: <Clock size={14} />, text: `${log.entries?.length || 0} contenidos` },
+          { icon: <Users size={14} />, text: `${log.assignedStudents?.length || 0} alumnos` }
         ]}
         actions={[
+          <BaseButton
+            key="edit"
+            variant="secondary"
+            icon={Edit}
+            size="sm"
+            onClick={(e) => { e.stopPropagation(); onEdit(log); }}
+          >
+            Editar
+          </BaseButton>,
           <BaseButton
             key="open"
             variant="primary"
@@ -321,6 +358,16 @@ function LogCard({ log, onOpen, onDelete, layout = 'vertical' }) {
   }
 
   // ⭐ ÚNICO RENDER - SIN header gigante
+  // Agregar stat de alumnos asignados
+  const allStats = [
+    ...stats,
+    {
+      icon: Users,
+      label: 'Alumnos',
+      value: log.assignedStudents?.length || 0
+    }
+  ];
+
   return (
     <UniversalCard
       variant="default"
@@ -338,8 +385,18 @@ function LogCard({ log, onOpen, onDelete, layout = 'vertical' }) {
           size: 'sm'
         }
       ]}
-      stats={layout === 'horizontal' ? stats.filter(s => s.icon !== BookOpen) : stats}
+      stats={layout === 'horizontal' ? allStats.filter(s => s.icon !== BookOpen) : allStats}
       actions={[
+        <BaseButton
+          key="edit"
+          variant="secondary"
+          icon={Edit}
+          size={layout === 'horizontal' ? 'sm' : 'md'}
+          onClick={(e) => { e.stopPropagation(); onEdit(log); }}
+          fullWidth={layout === 'vertical'}
+        >
+          Editar
+        </BaseButton>,
         <BaseButton
           key="open"
           variant="primary"
