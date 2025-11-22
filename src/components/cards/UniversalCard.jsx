@@ -530,16 +530,22 @@ export function UniversalCard({
     );
   };
 
+  // ⭐ Para layout="row", usar clases Tailwind directamente para consistencia
+  const isRowLayout = layout === 'row' && layoutConfig.useTailwindClasses;
+  const rowContainerClasses = isRowLayout
+    ? `${layoutConfig.containerClass} ${layoutConfig.bgClass} ${layoutConfig.borderClass} ${layoutConfig.hoverClass}`
+    : '';
+
   return (
     <article
       ref={cardRef}
-      className={`${classes.container} ${className} ${
+      className={`${isRowLayout ? rowContainerClasses : classes.container} ${className} ${
         selected ? 'ring-2 ring-primary-500' : ''
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-      style={{ ...styles.container, ...style }}
+      style={isRowLayout ? style : { ...styles.container, ...style }}
       onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={isRowLayout ? undefined : handleMouseEnter}
+      onMouseLeave={isRowLayout ? undefined : handleMouseLeave}
       aria-label={ariaLabel || title}
       role={role}
       aria-disabled={disabled}
@@ -554,9 +560,13 @@ export function UniversalCard({
       <div
         className={`${classes.content} flex-1 flex ${layout === 'row' ? 'flex-row items-stretch' : layout === 'horizontal' ? 'flex-row items-center' : 'flex-col'}`}
         style={{
-          ...styles.content,
-          minHeight: 0, // Importante para que el overflow funcione con flex
-          overflow: 'hidden' // Evitar que el contenido empuje fuera del contenedor
+          ...(isRowLayout ? {} : styles.content),
+          minHeight: isRowLayout
+            ? (variant === 'user' ? layoutConfig.minHeightUser :
+               variant === 'compact' ? layoutConfig.minHeightCompact :
+               layoutConfig.minHeightCompact) // Usar compacto por defecto en row
+            : 0,
+          overflow: 'hidden'
         }}
       >
         {layout === 'row' ? (
@@ -565,12 +575,14 @@ export function UniversalCard({
 
             {/* Sección 1: Imagen/Avatar/Ícono cuadrado (ancho fijo) */}
             <div
-              className="flex-shrink-0 overflow-hidden flex items-center justify-center"
+              className={`flex-shrink-0 overflow-hidden flex items-center justify-center ${
+                isRowLayout && !image ? layoutConfig.iconBgClass : ''
+              }`}
               style={{
                 width: variant === 'user' ? layoutConfig.avatarWidth :
                        variant === 'content' && image ? layoutConfig.imageWidth :
                        layoutConfig.iconWidth,
-                backgroundColor: variant === 'user' || !image ? 'var(--color-bg-tertiary)' : 'transparent',
+                ...(!isRowLayout && (variant === 'user' || !image) ? { backgroundColor: 'var(--color-bg-tertiary)' } : {}),
               }}
             >
               {/* Imagen (variant='content') */}

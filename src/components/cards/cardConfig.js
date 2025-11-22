@@ -452,6 +452,10 @@ export const cardLayouts = {
    * ROW - Layout horizontal estirado para vistas de lista
    * Similar a horizontal pero optimizado para filas completas
    * Usado en: Vistas de lista de ContentManager, UserManager, etc.
+   *
+   * ⭐ IMPORTANTE: Este layout usa clases Tailwind directamente para
+   * garantizar consistencia visual con todos los managers (HomeworkReviewPanel,
+   * UnifiedContentManager, UniversalUserManager, CredentialsTab, etc.)
    */
   row: {
     flexDirection: 'flex-row',
@@ -460,13 +464,22 @@ export const cardLayouts = {
     headerHeight: '100%',        // Ocupa toda la altura de la fila
     imageWidth: '140px',         // Imagen cuadrada para contenido
     avatarWidth: '96px',         // Avatar cuadrado para usuarios
-    iconWidth: '96px',           // Ícono cuadrado para otros tipos
+    iconWidth: '80px',           // Ícono cuadrado para otros tipos (compacto)
     minHeight: '140px',          // Altura mínima de la fila (para contenido)
     minHeightUser: '96px',       // Altura mínima de la fila (para usuarios)
     minHeightCompact: '80px',    // Altura mínima de la fila (compacto)
-    contentPadding: '20px',      // Padding del contenido
+    contentPadding: '12px 16px', // Padding del contenido (py-3 px-4)
     itemsAlign: 'stretch',       // Hace que todos los hijos tengan la misma altura
     statsLayout: 'inline',       // Stats en línea horizontal
+
+    // ⭐ Clases Tailwind para consistencia visual
+    useTailwindClasses: true,
+    containerClass: 'group rounded-lg transition-all overflow-hidden cursor-pointer',
+    bgClass: 'bg-white dark:bg-gray-800',
+    borderClass: 'border border-gray-200 dark:border-gray-700',
+    hoverClass: 'hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500',
+    iconBgClass: 'bg-gray-50 dark:bg-gray-900',
+    hoverTransform: false,       // Sin translateY en layout row
   },
 };
 
