@@ -542,6 +542,7 @@ export function generateCardClasses(variant, size, layout) {
   return {
     container: `
       ${layoutConfig.flexDirection}
+      h-full
       rounded-xl
       overflow-hidden
       transition-all
