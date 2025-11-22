@@ -51,6 +51,7 @@ import {
   InSituContentEditor
 } from './diary';
 import WordHighlightExercise from './container/WordHighlightExercise';
+import SelectionDetector from './translation/SelectionDetector';
 
 // ============================================
 // CONTENT TYPE ICONS
@@ -727,38 +728,40 @@ function ClassDailyLog({ logId, user, onBack }) {
           )}
         </div>
 
-        {/* Scroll Area */}
-        <div
-          ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900"
-        >
-          {log.entries.length === 0 ? (
-            <div className="min-h-full flex items-center justify-center p-6">
-              <BaseEmptyState
-                icon={BookOpen}
-                title="Clase vacía"
-                description={
-                  isTeacher
-                    ? 'Comienza agregando contenidos a esta clase'
-                    : 'El profesor aún no ha agregado contenidos'
-                }
-                action={
-                  isTeacher && (
-                    <BaseButton
-                      variant="primary"
-                      icon={Plus}
-                      onClick={contentSelectorModal.open}
-                    >
-                      Agregar Primer Contenido
-                    </BaseButton>
-                  )
-                }
-              />
-            </div>
-          ) : (
-            log.entries.map((entry, index) => renderContentEntry(entry, index))
-          )}
-        </div>
+        {/* Scroll Area - Wrapped with SelectionDetector for translation/pronunciation */}
+        <SelectionDetector enabled={true}>
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900"
+          >
+            {log.entries.length === 0 ? (
+              <div className="min-h-full flex items-center justify-center p-6">
+                <BaseEmptyState
+                  icon={BookOpen}
+                  title="Clase vacía"
+                  description={
+                    isTeacher
+                      ? 'Comienza agregando contenidos a esta clase'
+                      : 'El profesor aún no ha agregado contenidos'
+                  }
+                  action={
+                    isTeacher && (
+                      <BaseButton
+                        variant="primary"
+                        icon={Plus}
+                        onClick={contentSelectorModal.open}
+                      >
+                        Agregar Primer Contenido
+                      </BaseButton>
+                    )
+                  }
+                />
+              </div>
+            ) : (
+              log.entries.map((entry, index) => renderContentEntry(entry, index))
+            )}
+          </div>
+        </SelectionDetector>
       </div>
 
       {/* Content Selector Modal */}

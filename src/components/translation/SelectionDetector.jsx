@@ -1,15 +1,16 @@
 /**
  * SelectionDetector Component
- * Detects text selection and shows translation + speaker buttons
+ * Detects text selection and shows translation + speaker + dictionary buttons
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Languages } from 'lucide-react';
+import { Languages, BookOpen, X, ExternalLink, Copy, Check } from 'lucide-react';
 import PropTypes from 'prop-types';
 import TranslationPopup from './TranslationPopup';
 import SpeakerButton from '../selection/SpeakerButton';
 import useTranslator from '../../hooks/useTranslator';
 import useSpeaker from '../../hooks/useSpeaker';
+import { autoTranslate, isGoogleTranslateConfigured } from '../../services/googleTranslateService';
 import logger from '../../utils/logger';
 
 const SelectionDetector = ({ children, enabled = true, containerRef = null }) => {
@@ -17,6 +18,13 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
   const [selectionPosition, setSelectionPosition] = useState(null);
   const [showButtons, setShowButtons] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+
+  // Estados para el diccionario de Google Translate
+  const [showDictPopup, setShowDictPopup] = useState(false);
+  const [dictTranslation, setDictTranslation] = useState(null);
+  const [isDictLoading, setIsDictLoading] = useState(false);
+  const [dictError, setDictError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const buttonsRef = useRef(null);
   const selectionTimeoutRef = useRef(null); // ✅ Para debouncing en iOS
@@ -122,13 +130,83 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
   }, [selectedText, speak]);
 
   /**
+   * Handle dictionary button click - Uses Google Translate API
+   */
+  const handleDictionary = useCallback(async () => {
+    if (!selectedText) return;
+
+    setIsDictLoading(true);
+    setDictError(null);
+    setDictTranslation(null);
+
+    try {
+      logger.info(`📖 Dictionary lookup: "${selectedText.substring(0, 30)}..."`, 'SelectionDetector');
+
+      // Verificar si Google Translate está configurado
+      if (!isGoogleTranslateConfigured()) {
+        throw new Error('Google Translate no configurado. Ve a Ajustes > Credenciales para agregar tu API key.');
+      }
+
+      const result = await autoTranslate(selectedText);
+
+      setDictTranslation(result);
+      setShowButtons(false);
+      setShowDictPopup(true);
+
+    } catch (err) {
+      logger.error('Dictionary error:', err, 'SelectionDetector');
+      setDictError(err.message || 'Error al consultar diccionario');
+      setShowButtons(false);
+      setShowDictPopup(true);
+    } finally {
+      setIsDictLoading(false);
+    }
+  }, [selectedText]);
+
+  /**
+   * Copy translation to clipboard
+   */
+  const handleCopyTranslation = useCallback(async () => {
+    if (!dictTranslation?.translatedText) return;
+
+    try {
+      await navigator.clipboard.writeText(dictTranslation.translatedText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      logger.error('Copy error:', err, 'SelectionDetector');
+    }
+  }, [dictTranslation]);
+
+  /**
+   * Open external dictionary (MDBG) in new tab
+   */
+  const handleOpenExternal = useCallback(() => {
+    if (!selectedText) return;
+
+    // Detectar si es chino o español
+    const hasChineseChars = /[\u4e00-\u9fa5]/.test(selectedText);
+
+    if (hasChineseChars) {
+      // Para texto chino, buscar en MDBG
+      window.open(`https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=${encodeURIComponent(selectedText)}`, '_blank');
+    } else {
+      // Para texto español, buscar en Google Translate web
+      window.open(`https://translate.google.com/?sl=es&tl=zh-CN&text=${encodeURIComponent(selectedText)}&op=translate`, '_blank');
+    }
+  }, [selectedText]);
+
+  /**
    * Close popup and reset state
    */
   const handleClosePopup = useCallback(() => {
     setShowPopup(false);
+    setShowDictPopup(false);
     setShowButtons(false);
     setSelectedText('');
     setSelectionPosition(null);
+    setDictTranslation(null);
+    setDictError(null);
     clearError();
     clearSpeakError();
 
@@ -172,13 +250,13 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
 
   /**
    * Calculate buttons container position
-   * Displays 2 buttons side by side on desktop, stacked on mobile
+   * Displays 3 buttons side by side on desktop, stacked on mobile
    * ✅ Mejorado para iPad con área táctil más grande
    */
   const getButtonsStyle = () => {
     if (!selectionPosition) return {};
 
-    const buttonsWidth = 300; // ✅ Aumentado para mejor toque en iPad
+    const buttonsWidth = 420; // ✅ Aumentado para 3 botones
     const buttonsHeight = 48; // ✅ Aumentado a 48px (mínimo recomendado para touch)
     const offset = 12; // ✅ Mayor offset para no cubrir el texto seleccionado
 
@@ -225,7 +303,7 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
               onClick={handleTranslate}
               disabled={isTranslating}
               className="
-                flex items-center justify-center gap-2 px-5 py-3
+                flex items-center justify-center gap-2 px-4 py-3
                 bg-blue-600 hover:bg-blue-700 dark:bg-gray-500 dark:hover:bg-blue-600
                 disabled:bg-blue-400 dark:disabled:bg-blue-300
                 text-white text-sm font-medium
@@ -233,7 +311,7 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
                 transition-all duration-200
                 hover:scale-105 active:scale-95
                 disabled:cursor-not-allowed
-                min-h-[44px] min-w-[140px]
+                min-h-[44px] min-w-[110px]
                 touch-manipulation
               "
               style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -249,7 +327,7 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
               onClick={handleSpeak}
               disabled={isGenerating}
               className="
-                flex items-center justify-center gap-2 px-5 py-3
+                flex items-center justify-center gap-2 px-4 py-3
                 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600
                 disabled:bg-indigo-400 dark:disabled:bg-indigo-300
                 text-white text-sm font-medium
@@ -257,7 +335,7 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
                 transition-all duration-200
                 hover:scale-105 active:scale-95
                 disabled:cursor-not-allowed
-                min-h-[44px] min-w-[140px]
+                min-h-[44px] min-w-[110px]
                 touch-manipulation
               "
               style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -266,12 +344,44 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
               {isGenerating ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span className="whitespace-nowrap">Generando...</span>
+                  <span className="whitespace-nowrap">...</span>
                 </>
               ) : (
                 <>
                   <span className="text-base">🔊</span>
                   <span className="whitespace-nowrap">Pronunciar</span>
+                </>
+              )}
+            </button>
+
+            {/* Dictionary Button - Google Translate rápido */}
+            <button
+              onClick={handleDictionary}
+              disabled={isDictLoading}
+              className="
+                flex items-center justify-center gap-2 px-4 py-3
+                bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600
+                disabled:bg-emerald-400 dark:disabled:bg-emerald-300
+                text-white text-sm font-medium
+                rounded-lg shadow-lg
+                transition-all duration-200
+                hover:scale-105 active:scale-95
+                disabled:cursor-not-allowed
+                min-h-[44px] min-w-[110px]
+                touch-manipulation
+              "
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+              aria-label="Buscar en diccionario Google"
+            >
+              {isDictLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="whitespace-nowrap">...</span>
+                </>
+              ) : (
+                <>
+                  <BookOpen size={16} strokeWidth={2} />
+                  <span className="whitespace-nowrap">Diccionario</span>
                 </>
               )}
             </button>
@@ -288,6 +398,130 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
           isLoading={isTranslating}
           error={error}
         />
+      )}
+
+      {/* Dictionary Popup - Google Translate Results */}
+      {showDictPopup && (
+        <div
+          className="fixed inset-0 z-[1070] flex items-center justify-center p-4"
+          onClick={handleClosePopup}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+
+          {/* Popup Card */}
+          <div
+            className="
+              relative w-full max-w-sm
+              bg-white dark:bg-gray-800
+              rounded-2xl shadow-2xl
+              border border-gray-200 dark:border-gray-700
+              overflow-hidden
+              animate-in zoom-in-95 fade-in duration-200
+            "
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-emerald-500 to-teal-500">
+              <div className="flex items-center gap-2 text-white">
+                <BookOpen size={20} />
+                <span className="font-semibold">Diccionario Rápido</span>
+              </div>
+              <button
+                onClick={handleClosePopup}
+                className="p-1 rounded-full hover:bg-white/20 text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+              {/* Loading State */}
+              {isDictLoading && (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Consultando Google Translate...</p>
+                </div>
+              )}
+
+              {/* Error State */}
+              {dictError && !isDictLoading && (
+                <div className="py-4">
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <p className="text-sm text-red-700 dark:text-red-300">{dictError}</p>
+                  </div>
+                  <button
+                    onClick={handleOpenExternal}
+                    className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                  >
+                    <ExternalLink size={16} />
+                    <span>Abrir en Google Translate</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Success State */}
+              {dictTranslation && !isDictLoading && !dictError && (
+                <div className="space-y-4">
+                  {/* Original Text */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
+                      Original ({dictTranslation.sourceLang === 'es' ? 'Español' : 'Chino'})
+                    </p>
+                    <p className="text-base text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                      {dictTranslation.originalText}
+                    </p>
+                  </div>
+
+                  {/* Translation */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
+                      Traducción ({dictTranslation.targetLang === 'zh-CN' ? '中文' : 'Español'})
+                    </p>
+                    <div className="flex items-start gap-2">
+                      <p
+                        className={`
+                          flex-1 p-3 rounded-lg border-2 border-emerald-200 dark:border-emerald-800
+                          bg-emerald-50 dark:bg-emerald-900/20
+                          ${dictTranslation.targetLang === 'zh-CN' ? 'text-3xl font-medium' : 'text-base'}
+                          text-gray-900 dark:text-white
+                        `}
+                      >
+                        {dictTranslation.translatedText}
+                      </p>
+                      <button
+                        onClick={handleCopyTranslation}
+                        className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        title="Copiar traducción"
+                      >
+                        {copied ? (
+                          <Check size={18} className="text-emerald-500" />
+                        ) : (
+                          <Copy size={18} className="text-gray-600 dark:text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Source Badge */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      Fuente: Google Translate
+                    </span>
+                    <button
+                      onClick={handleOpenExternal}
+                      className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                    >
+                      <ExternalLink size={12} />
+                      Ver más detalles
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
