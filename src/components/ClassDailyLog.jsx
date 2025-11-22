@@ -42,7 +42,8 @@ import {
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
-  useModal
+  useModal,
+  VideoPlayer
 } from './common';
 import ContentSelectorModal from './ContentSelectorModal';
 import {
@@ -554,22 +555,14 @@ function ClassDailyLog({ logId, user, onBack }) {
         );
 
       case 'video':
-        return (
-          <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-            {content.url && (
-              <iframe
-                width="100%"
-                height="100%"
-                src={content.url}
-                title={content.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            )}
-          </div>
-        );
+        return content.url ? (
+          <VideoPlayer
+            src={content.url}
+            title={content.title}
+            controls={true}
+            className="w-full"
+          />
+        ) : null;
 
       case 'link':
         return (

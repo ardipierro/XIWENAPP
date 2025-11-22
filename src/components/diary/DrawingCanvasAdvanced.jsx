@@ -35,6 +35,12 @@ export function DrawingCanvasAdvanced({
 
   const [eraserMode, setEraserMode] = useState(false);
 
+  // Palm Rejection: track active stylus/pen
+  const [activePenPointer, setActivePenPointer] = useState(null);
+
+  // Palm Rejection threshold (px) - touches larger than this are rejected as palm
+  const PALM_REJECTION_THRESHOLD = 25;
+
   // Usar refs para propiedades que cambian frecuentemente (performance)
   const colorRef = useRef(color);
   const opacityRef = useRef(opacity);
@@ -181,6 +187,27 @@ export function DrawingCanvasAdvanced({
   const handlePointerDown = useCallback((e) => {
     if (!enabled) return;
 
+    // ===== PALM REJECTION =====
+    // Accept pen/stylus always
+    if (e.pointerType === 'pen') {
+      setActivePenPointer(e.pointerId);
+    }
+    // For touch input, apply palm rejection
+    else if (e.pointerType === 'touch') {
+      // If a pen is currently active, reject all touch input
+      if (activePenPointer !== null) {
+        return; // Ignore touch while pen is active
+      }
+
+      // Reject large contact areas (likely palm)
+      const contactSize = Math.max(e.width || 0, e.height || 0);
+      if (contactSize > PALM_REJECTION_THRESHOLD) {
+        return; // Reject - likely palm or large finger area
+      }
+    }
+    // Mouse is always accepted
+    // ===== END PALM REJECTION =====
+
     e.preventDefault();
     setIsDrawing(true);
 
@@ -199,7 +226,7 @@ export function DrawingCanvasAdvanced({
     } else {
       setCurrentStroke([[x, y, pressure]]);
     }
-  }, [enabled, eraserMode, strokes, getRelativeCoordinates, addToHistory, isPointNearStroke]);
+  }, [enabled, eraserMode, strokes, getRelativeCoordinates, addToHistory, isPointNearStroke, activePenPointer]);
 
   // Continuar trazo (SIN límite de puntos - el usuario necesita trazos largos continuos)
   const handlePointerMove = useCallback((e) => {
@@ -213,7 +240,12 @@ export function DrawingCanvasAdvanced({
   }, [isDrawing, enabled, eraserMode, getRelativeCoordinates]);
 
   // Finalizar trazo (optimizado con refs)
-  const handlePointerUp = useCallback(() => {
+  const handlePointerUp = useCallback((e) => {
+    // Clear active pen pointer when pen is lifted
+    if (e?.pointerType === 'pen') {
+      setActivePenPointer(null);
+    }
+
     if (!isDrawing) return;
 
     setIsDrawing(false);

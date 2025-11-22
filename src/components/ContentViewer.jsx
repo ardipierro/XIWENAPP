@@ -10,7 +10,7 @@
 
 import { useState, useRef } from 'react';
 import { BookMarked, FileText, Video, Link as LinkIcon, PenTool, BookOpen, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { ExpandableModal } from './common';
+import { ExpandableModal, VideoPlayer } from './common';
 import SelectionDetector from './translation/SelectionDetector';
 import logger from '../utils/logger';
 
@@ -323,24 +323,21 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
   };
 
   /**
-   * Renderiza un video de YouTube
+   * Renderiza un video (YouTube, HLS, mp4, etc.)
    */
   const renderVideo = () => {
-    const videoUrl = content.body.replace('watch?v=', 'embed/');
+    // Use url field or body field (for backwards compatibility)
+    const videoUrl = content.url || content.body;
+    if (!videoUrl) return null;
+
     return (
       <div className="space-y-4">
-        <div className="aspect-video w-full rounded-lg overflow-hidden bg-zinc-900">
-          <iframe
-            width="100%"
-            height="100%"
-            src={videoUrl}
-            title={content.title}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full"
-          />
-        </div>
+        <VideoPlayer
+          src={videoUrl}
+          title={content.title}
+          controls={true}
+          className="w-full"
+        />
       </div>
     );
   };

@@ -51,7 +51,8 @@ import {
   BaseAlert,
   BaseEmptyState,
   BaseModal,
-  ExpandableModal
+  ExpandableModal,
+  VideoPlayer
 } from './common';
 import { UniversalCard } from './cards';
 import CreateContentModal from './CreateContentModal';
@@ -537,18 +538,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
             {/* Video */}
             {viewingContent.type === CONTENT_TYPES.VIDEO && viewingContent.url && (
               <div className="space-y-4">
-                <div className="aspect-video w-full rounded-lg overflow-hidden bg-zinc-900">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={viewingContent.url}
-                    title={viewingContent.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full"
-                  />
-                </div>
+                <VideoPlayer
+                  src={viewingContent.url}
+                  title={viewingContent.title}
+                  controls={true}
+                  className="w-full"
+                />
                 {viewingContent.videoData && (
                   <div className="text-sm space-y-2 text-gray-600 dark:text-gray-400">
                     {viewingContent.videoData.duration && (

@@ -9,6 +9,7 @@ import { db } from '../../firebase/config';
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { markContentCompleted, getCourseProgress } from '../../firebase/studentProgress';
 import BaseButton from '../common/BaseButton';
+import { VideoPlayer } from '../common';
 
 function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
   const [content, setContent] = useState(null);
@@ -144,24 +145,12 @@ function ContentPlayer({ user, contentId, courseId, onBack, onComplete }) {
         return (
           <div className="content-video">
             {content.url ? (
-              <div className="video-container">
-                {/* YouTube embed */}
-                {content.url.includes('youtube.com') || content.url.includes('youtu.be') ? (
-                  <iframe
-                    src={getYouTubeEmbedUrl(content.url)}
-                    title={content.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="video-iframe"
-                  />
-                ) : (
-                  <video controls className="video-player">
-                    <source src={content.url} type="video/mp4" />
-                    Tu navegador no soporta el elemento de video.
-                  </video>
-                )}
-              </div>
+              <VideoPlayer
+                src={content.url}
+                title={content.title}
+                controls={true}
+                className="w-full"
+              />
             ) : (
               <p>No hay video disponible</p>
             )}
