@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Key, CheckCircle, XCircle, ExternalLink, Plus, Trash2 } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../../firebase/aiConfig';
-import { BaseAlert, BaseLoading } from '../common';
+import { BaseAlert, BaseLoading, BaseBadge } from '../common';
 import SearchBar from '../common/SearchBar';
 import CredentialConfigModal from './CredentialConfigModal';
 import AddCustomCredentialModal from './AddCustomCredentialModal';
