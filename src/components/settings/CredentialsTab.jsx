@@ -698,76 +698,112 @@ function CredentialsTab() {
         </div>
       ) : (
         <div className="w-full flex flex-col gap-3">
-          {/* Proveedores predefinidos - List view */}
+          {/* Proveedores predefinidos - List view (consistente con otros managers) */}
           {filteredProviders.map((provider) => {
             const isConfigured = isProviderConfigured(provider);
             return (
-              <UniversalCard
+              <div
                 key={provider.id}
-                variant="default"
-                size="sm"
-                layout="row"
-                icon={() => <div className="text-4xl">{provider.icon}</div>}
-                title={provider.name}
-                description={provider.description}
-                badges={[
-                  isConfigured
-                    ? { variant: 'success', children: <><CheckCircle size={16} className="inline" /> Configurado</> }
-                    : { variant: 'warning', children: <><XCircle size={16} className="inline" /> Sin Configurar</> }
-                ]}
-                actions={[
-                  <button
-                    key="config"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setSelectedProvider(provider);
-                    }}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-sm"
-                  >
-                    {isConfigured ? 'Editar' : 'Configurar'}
-                  </button>
-                ]}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedProvider(provider);
-                }}
-              />
+                className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
+                onClick={() => setSelectedProvider(provider)}
+              >
+                <div className="flex items-stretch min-h-[80px]">
+                  {/* Icono */}
+                  <div className="w-[80px] flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                    <span className="text-4xl">{provider.icon}</span>
+                  </div>
+
+                  {/* Contenido */}
+                  <div className="flex-1 min-w-0 py-3 px-4">
+                    {/* Badge */}
+                    <div className="flex items-center gap-2 mb-1">
+                      {isConfigured ? (
+                        <BaseBadge variant="success" size="sm">
+                          <CheckCircle size={14} className="inline mr-1" /> Configurado
+                        </BaseBadge>
+                      ) : (
+                        <BaseBadge variant="warning" size="sm">
+                          <XCircle size={14} className="inline mr-1" /> Sin Configurar
+                        </BaseBadge>
+                      )}
+                    </div>
+
+                    {/* Título */}
+                    <h3 className="text-base font-semibold truncate text-gray-900 dark:text-white">
+                      {provider.name}
+                    </h3>
+
+                    {/* Descripción */}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {provider.description}
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 flex-shrink-0 pr-4" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => setSelectedProvider(provider)}
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-sm"
+                    >
+                      {isConfigured ? 'Editar' : 'Configurar'}
+                    </button>
+                  </div>
+                </div>
+              </div>
             );
           })}
 
           {/* Credenciales personalizadas - List view */}
           {filteredCustomCredentials.map((cred) => (
-            <UniversalCard
+            <div
               key={cred.id}
-              variant="default"
-              size="sm"
-              layout="row"
-              icon={() => <div className="text-4xl">{cred.icon}</div>}
-              title={cred.name}
-              description={cred.description}
-              badges={[
-                cred.hasKey
-                  ? { variant: 'success', children: <><CheckCircle size={16} className="inline" /> Configurado</> }
-                  : { variant: 'warning', children: <><XCircle size={16} className="inline" /> Sin Configurar</> },
-                { variant: 'info', children: 'Personalizado' }
-              ]}
-              actions={[
-                <button
-                  key="delete"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDeleteCustomCredential(cred.name);
-                  }}
-                  className="px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg"
-                  title="Eliminar"
-                >
-                  <Trash2 size={16} />
-                </button>
-              ]}
-            />
+              className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
+            >
+              <div className="flex items-stretch min-h-[80px]">
+                {/* Icono */}
+                <div className="w-[80px] flex-shrink-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                  <span className="text-4xl">{cred.icon}</span>
+                </div>
+
+                {/* Contenido */}
+                <div className="flex-1 min-w-0 py-3 px-4">
+                  {/* Badges */}
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    {cred.hasKey ? (
+                      <BaseBadge variant="success" size="sm">
+                        <CheckCircle size={14} className="inline mr-1" /> Configurado
+                      </BaseBadge>
+                    ) : (
+                      <BaseBadge variant="warning" size="sm">
+                        <XCircle size={14} className="inline mr-1" /> Sin Configurar
+                      </BaseBadge>
+                    )}
+                    <BaseBadge variant="info" size="sm">Personalizado</BaseBadge>
+                  </div>
+
+                  {/* Título */}
+                  <h3 className="text-base font-semibold truncate text-gray-900 dark:text-white">
+                    {cred.name}
+                  </h3>
+
+                  {/* Descripción */}
+                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                    {cred.description}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 flex-shrink-0 pr-4">
+                  <button
+                    onClick={() => handleDeleteCustomCredential(cred.name)}
+                    className="px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg"
+                    title="Eliminar"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
