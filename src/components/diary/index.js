@@ -49,3 +49,4 @@ export { StrokeWidthSelector } from './StrokeWidthSelector';
 export { ZoomControls } from './ZoomControls';
 export { ImageUploader } from './ImageUploader';
 export { VersionHistory } from './VersionHistory';
+export { default as EntryOptionsMenu } from './EntryOptionsMenu';
