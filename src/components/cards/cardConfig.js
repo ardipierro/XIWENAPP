@@ -474,7 +474,7 @@ export const cardLayouts = {
 
     // ⭐ Clases Tailwind para consistencia visual
     useTailwindClasses: true,
-    containerClass: 'group rounded-lg transition-all overflow-hidden cursor-pointer',
+    containerClass: 'group flex items-stretch rounded-lg transition-all overflow-hidden cursor-pointer',
     bgClass: 'bg-white dark:bg-gray-800',
     borderClass: 'border border-gray-200 dark:border-gray-700',
     hoverClass: 'hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500',
