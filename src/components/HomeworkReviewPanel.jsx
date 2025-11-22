@@ -527,16 +527,9 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
 
   // List view (horizontal layout) - Consistente con UnifiedContentManager y UniversalUserManager
   if (viewMode === 'list') {
-    // Determinar color del borde según estado
-    const borderClass = isProcessing ? 'border-orange-400 dark:border-orange-500' :
-      isFailed ? 'border-red-400 dark:border-red-500' :
-      isApproved ? 'border-gray-300 dark:border-gray-600' :
-      isPendingReview ? 'border-green-400 dark:border-green-500' :
-      'border-gray-200 dark:border-gray-700';
-
     return (
       <div
-        className={`group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border-2 ${borderClass} hover:shadow-lg cursor-pointer`}
+        className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
         onClick={onSelect}
       >
         <div className="flex items-stretch min-h-[96px]">
