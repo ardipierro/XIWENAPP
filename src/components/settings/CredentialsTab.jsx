@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Key, CheckCircle, XCircle, ExternalLink, Plus, Trash2 } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../../firebase/aiConfig';
-import { BaseAlert, BaseLoading } from '../common';
+import { BaseAlert, BaseLoading, BaseBadge } from '../common';
 import SearchBar from '../common/SearchBar';
 import CredentialConfigModal from './CredentialConfigModal';
 import AddCustomCredentialModal from './AddCustomCredentialModal';
@@ -698,28 +698,26 @@ function CredentialsTab() {
         </div>
       ) : (
         <div className="w-full flex flex-col gap-3">
-          {/* Proveedores predefinidos - List view */}
+          {/* Proveedores predefinidos - List view con UniversalCard layout="row" */}
           {filteredProviders.map((provider) => {
             const isConfigured = isProviderConfigured(provider);
             return (
               <UniversalCard
                 key={provider.id}
-                variant="default"
-                size="sm"
+                variant="compact"
                 layout="row"
-                icon={() => <div className="text-4xl">{provider.icon}</div>}
+                icon={() => <span className="text-4xl">{provider.icon}</span>}
                 title={provider.name}
                 description={provider.description}
                 badges={[
                   isConfigured
-                    ? { variant: 'success', children: <><CheckCircle size={16} className="inline" /> Configurado</> }
-                    : { variant: 'warning', children: <><XCircle size={16} className="inline" /> Sin Configurar</> }
+                    ? { variant: 'success', children: <><CheckCircle size={14} className="inline mr-1" /> Configurado</> }
+                    : { variant: 'warning', children: <><XCircle size={14} className="inline mr-1" /> Sin Configurar</> }
                 ]}
                 actions={[
                   <button
                     key="config"
                     onClick={(e) => {
-                      e.preventDefault();
                       e.stopPropagation();
                       setSelectedProvider(provider);
                     }}
@@ -728,36 +726,30 @@ function CredentialsTab() {
                     {isConfigured ? 'Editar' : 'Configurar'}
                   </button>
                 ]}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedProvider(provider);
-                }}
+                onClick={() => setSelectedProvider(provider)}
               />
             );
           })}
 
-          {/* Credenciales personalizadas - List view */}
+          {/* Credenciales personalizadas - List view con UniversalCard layout="row" */}
           {filteredCustomCredentials.map((cred) => (
             <UniversalCard
               key={cred.id}
-              variant="default"
-              size="sm"
+              variant="compact"
               layout="row"
-              icon={() => <div className="text-4xl">{cred.icon}</div>}
+              icon={() => <span className="text-4xl">{cred.icon}</span>}
               title={cred.name}
               description={cred.description}
               badges={[
                 cred.hasKey
-                  ? { variant: 'success', children: <><CheckCircle size={16} className="inline" /> Configurado</> }
-                  : { variant: 'warning', children: <><XCircle size={16} className="inline" /> Sin Configurar</> },
+                  ? { variant: 'success', children: <><CheckCircle size={14} className="inline mr-1" /> Configurado</> }
+                  : { variant: 'warning', children: <><XCircle size={14} className="inline mr-1" /> Sin Configurar</> },
                 { variant: 'info', children: 'Personalizado' }
               ]}
               actions={[
                 <button
                   key="delete"
                   onClick={(e) => {
-                    e.preventDefault();
                     e.stopPropagation();
                     handleDeleteCustomCredential(cred.name);
                   }}

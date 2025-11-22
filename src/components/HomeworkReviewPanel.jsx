@@ -525,63 +525,16 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
     }
   };
 
-  // List view (horizontal layout)
+  // List view (horizontal layout) - Consistente con UnifiedContentManager y UniversalUserManager
   if (viewMode === 'list') {
     return (
-      <BaseCard
-        hover
+      <div
+        className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
         onClick={onSelect}
-        className={`cursor-pointer relative ${
-          isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
-          isFailed ? 'border-2 border-red-400 dark:border-red-500' :
-          isApproved ? 'border-2 border-gray-400 dark:border-gray-400' :
-          isPendingReview ? 'border-2 border-green-400 dark:border-green-500' :
-          ''
-        }`}
       >
-        {/* Delete button - Bottom left corner (UNIFICADO) */}
-        <div className="absolute bottom-2 left-2 z-10">
-          <CardDeleteButton
-            onDelete={handleDeleteClick}
-            variant="solid"
-            size="sm"
-            confirmMessage="¿Eliminar esta tarea?"
-            requireConfirm={false}  // Ya tiene confirmación en handleDeleteClick
-          />
-        </div>
-
-        <div className="flex items-center gap-4">
-          {/* Status Badge */}
-          <div className="flex-shrink-0">
-            {isProcessing ? (
-              <BaseBadge variant="warning" icon={RefreshCw} size="sm" className="animate-pulse">
-                PROCESANDO
-              </BaseBadge>
-            ) : isFailed ? (
-              <BaseBadge variant="danger" icon={AlertCircle} size="sm">
-                ERROR
-              </BaseBadge>
-            ) : isTeacherApproved ? (
-              <BaseBadge variant="success" icon={CheckCircle} size="sm">
-                ✓ APROBADO
-              </BaseBadge>
-            ) : isAIReady ? (
-              <BaseBadge variant="warning" icon={Clock} size="sm">
-                PENDIENTE REVISIÓN
-              </BaseBadge>
-            ) : null}
-          </div>
-
-          {/* Student Avatar */}
-          <UserAvatar
-            userId={review.studentId}
-            name={review.studentName}
-            size="lg"
-            className="flex-shrink-0"
-          />
-
-          {/* Image Thumbnail */}
-          <div className="flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="flex items-stretch min-h-[96px]">
+          {/* Imagen de la tarea - Cuadrado que ocupa toda la altura */}
+          <div className="w-[96px] flex-shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-900">
             <img
               src={review.imageUrl}
               alt="Vista previa"
@@ -589,23 +542,51 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
             />
           </div>
 
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 dark:text-white mb-1">
+          {/* Contenido principal */}
+          <div className="flex-1 min-w-0 py-3 px-4">
+            {/* Badges - Status + Grade */}
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              {isProcessing ? (
+                <BaseBadge variant="warning" icon={RefreshCw} size="sm" className="animate-pulse">
+                  PROCESANDO
+                </BaseBadge>
+              ) : isFailed ? (
+                <BaseBadge variant="danger" icon={AlertCircle} size="sm">
+                  ERROR
+                </BaseBadge>
+              ) : isTeacherApproved ? (
+                <BaseBadge variant="success" icon={CheckCircle} size="sm">
+                  APROBADO
+                </BaseBadge>
+              ) : isAIReady ? (
+                <BaseBadge variant="warning" icon={Clock} size="sm">
+                  PENDIENTE
+                </BaseBadge>
+              ) : null}
+              <BaseBadge variant={gradeColor} size="sm">
+                {grade}/100
+              </BaseBadge>
+            </div>
+
+            {/* Nombre del estudiante */}
+            <h3 className="text-base font-semibold truncate mb-1 text-gray-900 dark:text-white flex items-center gap-2">
+              <UserAvatar
+                userId={review.studentId}
+                name={review.studentName}
+                size="sm"
+              />
               {review.studentName || 'Sin asignar'}
-            </p>
-            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+            </h3>
+
+            {/* Metadata */}
+            <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
               <span className="flex items-center gap-1">
                 <Calendar size={12} />
                 {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
                   day: 'numeric',
-                  month: 'short'
+                  month: 'short',
+                  year: 'numeric'
                 })}
-              </span>
-              <span className="flex items-center gap-1">
-                <BaseBadge variant={gradeColor} size="sm">
-                  {grade}/100
-                </BaseBadge>
               </span>
               <span className="flex items-center gap-1">
                 <AlertCircle size={12} />
@@ -614,9 +595,9 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
             </div>
           </div>
 
-          {/* Actions - Only Cancel button when stuck */}
-          {isStuck && (
-            <div className="flex gap-2 flex-shrink-0">
+          {/* Actions */}
+          <div className="flex items-center gap-2 flex-shrink-0 pr-4" onClick={(e) => e.stopPropagation()}>
+            {isStuck && (
               <BaseButton
                 variant="danger"
                 size="sm"
@@ -625,10 +606,17 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
                 <XCircle size={16} strokeWidth={2.5} />
                 Cancelar
               </BaseButton>
-            </div>
-          )}
+            )}
+            <CardDeleteButton
+              onDelete={handleDeleteClick}
+              variant="solid"
+              size="sm"
+              confirmMessage="¿Eliminar esta tarea?"
+              requireConfirm={false}
+            />
+          </div>
         </div>
-      </BaseCard>
+      </div>
     );
   }
 
