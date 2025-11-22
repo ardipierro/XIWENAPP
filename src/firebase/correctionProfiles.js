@@ -29,6 +29,59 @@ export const STRICTNESS_LEVELS = {
 };
 
 /**
+ * Feedback styles for AI responses
+ * Controls the tone and approach of corrections
+ */
+export const FEEDBACK_STYLES = {
+  ENCOURAGING: 'encouraging',   // Positive, motivating tone for beginners
+  NEUTRAL: 'neutral',           // Professional, objective tone
+  STRICT: 'strict',             // Direct, no-nonsense feedback
+  PLAYFUL: 'playful',           // Fun, engaging for children
+  ACADEMIC: 'academic'          // Formal, scholarly tone
+};
+
+/**
+ * Default AI configuration values
+ */
+export const AI_CONFIG_DEFAULTS = {
+  temperature: 0.7,          // 0.0-1.0 (creativity level)
+  maxTokens: 2000,           // Max response length
+  topP: 1,                   // Nucleus sampling
+  model: 'auto',             // 'auto' uses the global config, or specify model
+  feedbackStyle: FEEDBACK_STYLES.ENCOURAGING,
+  responseLanguage: 'es',    // Response language
+  includeSynonyms: false,    // Include synonyms in vocabulary corrections
+  includeExamples: true      // Include usage examples
+};
+
+/**
+ * AI Config presets by strictness level
+ */
+export const AI_CONFIG_BY_STRICTNESS = {
+  [STRICTNESS_LEVELS.LENIENT]: {
+    temperature: 0.8,        // More creative, forgiving responses
+    maxTokens: 1500,
+    feedbackStyle: FEEDBACK_STYLES.ENCOURAGING,
+    includeSynonyms: false,
+    includeExamples: false
+  },
+  [STRICTNESS_LEVELS.MODERATE]: {
+    temperature: 0.7,
+    maxTokens: 2000,
+    feedbackStyle: FEEDBACK_STYLES.ENCOURAGING,
+    includeSynonyms: false,
+    includeExamples: true
+  },
+  [STRICTNESS_LEVELS.STRICT]: {
+    temperature: 0.4,        // More precise, less creative
+    maxTokens: 3000,
+    feedbackStyle: FEEDBACK_STYLES.ACADEMIC,
+    includeSynonyms: true,
+    includeExamples: true
+  }
+};
+
+/**
  * Check types for corrections
  */
 export const CHECK_TYPES = {
@@ -75,6 +128,15 @@ export const DEFAULT_PROFILES = [
         },
         strokeWidth: 2,
         strokeOpacity: 0.8
+      },
+      // AI Configuration for beginners
+      aiConfig: {
+        temperature: 0.8,              // More creative, forgiving
+        maxTokens: 1500,
+        feedbackStyle: FEEDBACK_STYLES.PLAYFUL,  // Fun for beginners
+        responseLanguage: 'es',
+        includeSynonyms: false,
+        includeExamples: false         // Keep it simple
       }
     }
   },
@@ -111,6 +173,15 @@ export const DEFAULT_PROFILES = [
         },
         strokeWidth: 2,
         strokeOpacity: 0.8
+      },
+      // AI Configuration for intermediate
+      aiConfig: {
+        temperature: 0.7,              // Balanced
+        maxTokens: 2000,
+        feedbackStyle: FEEDBACK_STYLES.ENCOURAGING,
+        responseLanguage: 'es',
+        includeSynonyms: false,
+        includeExamples: true          // Include usage examples
       }
     }
   },
@@ -147,6 +218,15 @@ export const DEFAULT_PROFILES = [
         },
         strokeWidth: 3,
         strokeOpacity: 1.0
+      },
+      // AI Configuration for advanced
+      aiConfig: {
+        temperature: 0.4,              // More precise, less creative
+        maxTokens: 3000,
+        feedbackStyle: FEEDBACK_STYLES.ACADEMIC,
+        responseLanguage: 'es',
+        includeSynonyms: true,         // Suggest alternatives
+        includeExamples: true          // Detailed examples
       }
     }
   }
@@ -554,5 +634,8 @@ export default {
   initializeDefaultProfiles,
   STRICTNESS_LEVELS,
   CHECK_TYPES,
-  DEFAULT_PROFILES
+  DEFAULT_PROFILES,
+  FEEDBACK_STYLES,
+  AI_CONFIG_DEFAULTS,
+  AI_CONFIG_BY_STRICTNESS
 };
