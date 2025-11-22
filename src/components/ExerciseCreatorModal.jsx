@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { Upload, Edit3, Eye, Sparkles } from 'lucide-react';
+import { Upload, Edit3, Eye, Sparkles, AlertTriangle } from 'lucide-react';
 import {
   BaseModal,
   BaseSelect,
@@ -14,7 +14,7 @@ import {
   BaseAlert
 } from './common';
 import { callAI, getAIConfig } from '../firebase/aiConfig';
-import { createContent, updateContent, CONTENT_TYPES } from '../firebase/content';
+import { createContent, updateContent, findByExactTitle, CONTENT_TYPES } from '../firebase/content';
 import { AI_FUNCTIONS } from '../constants/aiFunctions';
 import logger from '../utils/logger';
 
@@ -39,6 +39,9 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState(null);
   const [aiConfig, setAiConfig] = useState(null);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [existingExercise, setExistingExercise] = useState(null);
+  const [checkingDuplicate, setCheckingDuplicate] = useState(false);
 
   const temaFileRef = useRef(null);
   const formatoFileRef = useRef(null);
@@ -155,7 +158,61 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
   };
 
   /**
-   * Guardar ejercicio en Firebase
+   * Detectar tipo de ejercicio basado en prefijo del contenido
+   */
+  const detectExerciseType = (content) => {
+    if (!content) return 'ai_generated';
+    const firstLine = content.trim().split('\n')[0].toLowerCase();
+    if (firstLine.startsWith('#marcar') || firstLine.includes('[tipo:marcar]')) return 'word-highlight';
+    if (firstLine.startsWith('#arrastrar') || firstLine.includes('[tipo:arrastrar]')) return 'drag-drop';
+    if (firstLine.startsWith('#completar') || firstLine.includes('[tipo:completar]')) return 'fill-blanks';
+    return 'ai_generated';
+  };
+
+  /**
+   * Construir datos del ejercicio
+   */
+  const buildContentData = () => ({
+    title: titulo.trim(),
+    description: `Ejercicio generado con ${AI_PROVIDERS.find(p => p.value === provider)?.label || provider}`,
+    type: CONTENT_TYPES.EXERCISE,
+    content: resultado,
+    status: 'published',
+    createdBy: userId,
+    metadata: {
+      aiProvider: provider,
+      aiTema: tema,
+      aiFormato: formato,
+      exerciseType: detectExerciseType(resultado)
+    }
+  });
+
+  /**
+   * Verificar si existe un ejercicio con el mismo título
+   */
+  const checkForDuplicate = async () => {
+    if (!titulo.trim() || !userId) return null;
+
+    // Si estamos editando el mismo ejercicio, no es duplicado
+    if (initialData?.id && initialData.title.toLowerCase() === titulo.trim().toLowerCase()) {
+      return null;
+    }
+
+    try {
+      const existing = await findByExactTitle(titulo.trim(), userId, CONTENT_TYPES.EXERCISE);
+      // Si encontramos uno pero es el mismo que estamos editando, no es duplicado
+      if (existing && initialData?.id && existing.id === initialData.id) {
+        return null;
+      }
+      return existing;
+    } catch (err) {
+      logger.error('Error checking for duplicate:', err, 'ExerciseCreatorModal');
+      return null;
+    }
+  };
+
+  /**
+   * Guardar ejercicio en Firebase (llamado después de verificar duplicados)
    */
   const handleSave = async () => {
     if (!titulo.trim()) return;
@@ -164,25 +221,45 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
       return;
     }
 
+    setCheckingDuplicate(true);
+
     try {
-      const contentData = {
-        title: titulo.trim(),
-        description: `Ejercicio generado con ${AI_PROVIDERS.find(p => p.value === provider)?.label || provider}`,
-        type: CONTENT_TYPES.EXERCISE,
-        content: resultado,
-        status: 'published',
-        createdBy: userId,
-        metadata: {
-          aiProvider: provider,
-          aiTema: tema,
-          aiFormato: formato,
-          exerciseType: 'ai_generated'
-        }
-      };
+      // Verificar duplicados (solo si no estamos editando un ejercicio existente)
+      const duplicate = await checkForDuplicate();
+
+      if (duplicate) {
+        // Mostrar modal de advertencia
+        setExistingExercise(duplicate);
+        setShowDuplicateWarning(true);
+        setCheckingDuplicate(false);
+        return;
+      }
+
+      // No hay duplicado, guardar normalmente
+      await saveExercise();
+    } catch (err) {
+      logger.error('Error al guardar ejercicio:', err, 'ExerciseCreatorModal');
+      setError(err.message || 'Error al guardar el ejercicio');
+    } finally {
+      setCheckingDuplicate(false);
+    }
+  };
+
+  /**
+   * Guardar ejercicio (sin verificación de duplicados)
+   */
+  const saveExercise = async (overwriteId = null) => {
+    try {
+      const contentData = buildContentData();
 
       let savedId;
-      if (initialData?.id) {
-        // Actualizar existente
+      if (overwriteId) {
+        // Sobrescribir ejercicio existente
+        await updateContent(overwriteId, contentData);
+        savedId = overwriteId;
+        logger.info(`Ejercicio sobrescrito: ${savedId}`, 'ExerciseCreatorModal');
+      } else if (initialData?.id) {
+        // Actualizar el ejercicio que estamos editando
         await updateContent(initialData.id, contentData);
         savedId = initialData.id;
         logger.info(`Ejercicio actualizado: ${savedId}`, 'ExerciseCreatorModal');
@@ -208,6 +285,29 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
   };
 
   /**
+   * Sobrescribir ejercicio existente
+   */
+  const handleOverwrite = async () => {
+    setShowDuplicateWarning(false);
+    if (existingExercise?.id) {
+      await saveExercise(existingExercise.id);
+    }
+    setExistingExercise(null);
+  };
+
+  /**
+   * Guardar como nuevo (sugerir nombre alternativo)
+   */
+  const handleSaveAsNew = () => {
+    setShowDuplicateWarning(false);
+    // Sugerir un nombre nuevo agregando sufijo
+    const baseName = titulo.trim();
+    const timestamp = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    setTitulo(`${baseName} (${timestamp})`);
+    setExistingExercise(null);
+  };
+
+  /**
    * Resetear formulario
    */
   const handleReset = () => {
@@ -221,6 +321,9 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
     setGenerating(false);
     setError(null);
     setAiConfig(null);
+    setShowDuplicateWarning(false);
+    setExistingExercise(null);
+    setCheckingDuplicate(false);
   };
 
   /**
@@ -417,9 +520,60 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
             <BaseButton
               variant="primary"
               onClick={handleSave}
-              disabled={!titulo.trim()}
+              disabled={!titulo.trim() || checkingDuplicate}
+              loading={checkingDuplicate}
             >
-              Guardar
+              {checkingDuplicate ? 'Verificando...' : 'Guardar'}
+            </BaseButton>
+          </div>
+        </div>
+      </BaseModal>
+
+      {/* Modal de advertencia de duplicado */}
+      <BaseModal
+        isOpen={showDuplicateWarning}
+        onClose={() => setShowDuplicateWarning(false)}
+        title="Ejercicio duplicado"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-4 rounded-lg" style={{ backgroundColor: 'var(--color-warning-bg, #fef3c7)' }}>
+            <AlertTriangle className="w-6 h-6 flex-shrink-0" style={{ color: 'var(--color-warning, #d97706)' }} />
+            <div>
+              <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                Ya existe un ejercicio con este nombre
+              </p>
+              <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                "{existingExercise?.title}"
+              </p>
+            </div>
+          </div>
+
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            ¿Qué deseas hacer?
+          </p>
+
+          <div className="flex flex-col gap-2">
+            <BaseButton
+              variant="danger"
+              onClick={handleOverwrite}
+              className="w-full"
+            >
+              Sobrescribir ejercicio existente
+            </BaseButton>
+            <BaseButton
+              variant="secondary"
+              onClick={handleSaveAsNew}
+              className="w-full"
+            >
+              Guardar como nuevo (agregar sufijo)
+            </BaseButton>
+            <BaseButton
+              variant="ghost"
+              onClick={() => setShowDuplicateWarning(false)}
+              className="w-full"
+            >
+              Cancelar
             </BaseButton>
           </div>
         </div>

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, X, Info, Trash2 } from 'lucide-react';
+import { Save, X, Info, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import {
   BaseButton,
   BaseModal,
@@ -18,12 +18,16 @@ import {
   CHECK_TYPES,
   STRICTNESS_LEVELS
 } from '../../firebase/correctionProfiles';
+import PresetSelector from './PresetSelector';
+import { getPreset } from '../../config/correctionPresets';
 import logger from '../../utils/logger';
 
 const ICON_OPTIONS = ['🌱', '📚', '🎓', '⭐', '🔥', '💎', '🎯', '📝'];
 
 export default function ProfileEditor({ profile, userId, onClose }) {
   const isEditing = !!profile;
+  const [showPresets, setShowPresets] = useState(!isEditing); // Mostrar presets para nuevos perfiles
+  const [selectedPreset, setSelectedPreset] = useState(null);
 
   const [formData, setFormData] = useState({
     name: profile?.name || '',
@@ -64,6 +68,30 @@ export default function ProfileEditor({ profile, userId, onClose }) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+
+  /**
+   * Handle preset selection - loads config from preset
+   */
+  const handlePresetSelect = (presetId, presetConfig) => {
+    const preset = getPreset(presetId);
+    if (!preset) return;
+
+    setSelectedPreset(presetId);
+    setFormData({
+      name: preset.name,
+      description: preset.description,
+      icon: preset.icon,
+      settings: {
+        checks: presetConfig.checks,
+        strictness: presetConfig.strictness,
+        weights: presetConfig.weights,
+        minGrade: presetConfig.minGrade,
+        display: presetConfig.display,
+        visualization: presetConfig.visualization
+      }
+    });
+    setShowPresets(false); // Ocultar presets después de seleccionar
+  };
 
   const handleCheckToggle = (checkType) => {
     const currentChecks = formData.settings.checks;
@@ -174,6 +202,29 @@ export default function ProfileEditor({ profile, userId, onClose }) {
           <BaseAlert variant="danger" dismissible onDismiss={() => setError(null)}>
             {error}
           </BaseAlert>
+        )}
+
+        {/* Preset Selector - Solo para nuevos perfiles */}
+        {!isEditing && (
+          <div className="space-y-3">
+            <button
+              onClick={() => setShowPresets(!showPresets)}
+              className="flex items-center justify-between w-full p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+            >
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {selectedPreset ? `Basado en: ${getPreset(selectedPreset)?.name || 'Personalizado'}` : 'Usar plantilla predefinida'}
+              </span>
+              {showPresets ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </button>
+
+            {showPresets && (
+              <PresetSelector
+                onSelect={handlePresetSelect}
+                currentPreset={selectedPreset}
+                onCustom={() => setShowPresets(false)}
+              />
+            )}
+          </div>
         )}
 
         {/* Basic Info */}

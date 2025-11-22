@@ -14,21 +14,27 @@ const GOOGLE_API_KEY_STORAGE = 'ai_credentials_google_translate';
 
 /**
  * Obtiene la API key de Google Translate
- * Prioridad: localStorage > parámetro > null
+ * Prioridad: localStorage (varias keys) > null
  * @returns {string|null}
  */
 export function getGoogleTranslateApiKey() {
   try {
-    // Intentar localStorage primero
-    const stored = localStorage.getItem(GOOGLE_API_KEY_STORAGE);
-    if (stored && stored.trim()) {
-      return stored.trim();
-    }
+    // Lista de keys a buscar en orden de prioridad
+    const keysToCheck = [
+      GOOGLE_API_KEY_STORAGE,                       // ai_credentials_google_translate
+      'ai_credentials_Google',                      // CredentialsTab usa mayúscula
+      'ai_credentials_google',                      // Versión lowercase
+      'ai_credentials_GoogleTranslate',             // Custom credential
+      'ai_credentials_Google Cloud Translate API', // Custom con nombre largo
+      'ai_credentials_Google Translate',            // Variante común
+    ];
 
-    // También buscar en la clave genérica de Google
-    const googleKey = localStorage.getItem('ai_credentials_google');
-    if (googleKey && googleKey.trim()) {
-      return googleKey.trim();
+    for (const key of keysToCheck) {
+      const stored = localStorage.getItem(key);
+      if (stored && stored.trim()) {
+        logger.info(`Found Google API key in: ${key}`, 'googleTranslateService');
+        return stored.trim();
+      }
     }
 
     return null;

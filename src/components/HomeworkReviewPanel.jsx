@@ -16,6 +16,8 @@ import {
   Image as ImageIcon,
   FileText,
   Target,
+  List,
+  Layers,
   Award,
   TrendingUp,
   TrendingDown,
@@ -26,7 +28,8 @@ import {
   Maximize2,
   ClipboardList,
   Trash2,
-  X as XCircle
+  X as XCircle,
+  Camera
 } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
@@ -51,6 +54,8 @@ import ManualHomeworkUpload from './homework/ManualHomeworkUpload';
 import ImageOverlay from './homework/ImageOverlay';
 import ImageOverlayControls from './homework/ImageOverlayControls';
 import StudentAssigner from './homework/StudentAssigner';
+import QuickCorrectionView from './homework/QuickCorrectionView';
+import StudentCameraUpload from './homework/StudentCameraUpload';
 import UserAvatar from './UserAvatar';
 import {
   getPendingReviews,
@@ -157,6 +162,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
   const [selectedReview, setSelectedReview] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved'
@@ -227,6 +233,12 @@ export default function HomeworkReviewPanel({ teacherId }) {
     setShowUploadModal(false);
   };
 
+  const handleCameraSuccess = () => {
+    // Reload all reviews to show the new one
+    loadAllReviews();
+    setShowCameraModal(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -290,12 +302,33 @@ export default function HomeworkReviewPanel({ teacherId }) {
   return (
     <div className="w-full">
       {/* Page Header */}
-      <PageHeader
-        icon={ClipboardList}
-        title="Revisar Correcciones"
-        actionLabel="Subir Tarea"
-        onAction={() => setShowUploadModal(true)}
-      />
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+            <ClipboardList className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Revisar Correcciones</h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{reviews.length} {reviews.length === 1 ? 'tarea' : 'tareas'}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <BaseButton
+            variant="secondary"
+            onClick={() => setShowCameraModal(true)}
+            icon={Camera}
+          >
+            Tomar Foto
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            onClick={() => setShowUploadModal(true)}
+            icon={Upload}
+          >
+            Subir Tarea
+          </BaseButton>
+        </div>
+      </div>
 
       {/* Status Filter Tabs */}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -437,6 +470,17 @@ export default function HomeworkReviewPanel({ teacherId }) {
             onCancel={() => setShowUploadModal(false)}
           />
         </BaseModal>
+      )}
+
+      {/* Camera Upload Modal */}
+      {showCameraModal && (
+        <StudentCameraUpload
+          studentId={null}
+          studentName=""
+          teacherId={teacherId || user?.uid}
+          onSuccess={handleCameraSuccess}
+          onClose={() => setShowCameraModal(false)}
+        />
       )}
     </div>
   );
@@ -824,6 +868,9 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
   // Selected correction profile (received from ProfileSelector)
   const [selectedProfile, setSelectedProfile] = useState(null);
 
+  // View mode: 'overlay' (image with marks) or 'quick' (text list)
+  const [correctionViewMode, setCorrectionViewMode] = useState('overlay');
+
   // Image zoom/pan controls (kept, not part of profile)
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -1139,15 +1186,42 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
 
         {/* Image with Error Overlay */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <ImageIcon size={18} strokeWidth={2} />
-            Imagen de la Tarea
-            {currentReview.words && currentReview.words.length > 0 && (
-              <BaseBadge variant="success" size="sm">
-                {currentReview.words.length} palabras detectadas
-              </BaseBadge>
-            )}
-          </h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <ImageIcon size={18} strokeWidth={2} />
+              Imagen de la Tarea
+              {currentReview.words && currentReview.words.length > 0 && (
+                <BaseBadge variant="success" size="sm">
+                  {currentReview.words.length} palabras detectadas
+                </BaseBadge>
+              )}
+            </h3>
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
+              <button
+                onClick={() => setCorrectionViewMode('overlay')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  correctionViewMode === 'overlay'
+                    ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                }`}
+              >
+                <Layers size={14} />
+                Overlay
+              </button>
+              <button
+                onClick={() => setCorrectionViewMode('quick')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  correctionViewMode === 'quick'
+                    ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                }`}
+              >
+                <List size={14} />
+                Texto
+              </button>
+            </div>
+          </div>
 
           {/* Visualization Controls - Now controlled by profile configuration */}
           {currentReview.words && currentReview.words.length > 0 && selectedProfile && (
@@ -1182,47 +1256,71 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
             </div>
           )}
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-end gap-2">
-              <BaseBadge variant="secondary" size="sm" className="cursor-help" title="Arrastra la imagen para moverla. Usa la rueda del mouse para zoom.">
-                🖱️ Arrastra y zoom
-              </BaseBadge>
-              <BaseButton
-                variant="outline"
-                size="sm"
-                onClick={() => setShowImageLightbox(true)}
-              >
-                <Maximize2 size={14} style={{ color: 'inherit' }} />
-                Pantalla completa
-              </BaseButton>
-            </div>
+          {/* Conditional View: Overlay or Quick Text */}
+          {correctionViewMode === 'overlay' ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-end gap-2">
+                <BaseBadge variant="secondary" size="sm" className="cursor-help" title="Arrastra la imagen para moverla. Usa la rueda del mouse para zoom.">
+                  🖱️ Arrastra y zoom
+                </BaseBadge>
+                <BaseButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowImageLightbox(true)}
+                >
+                  <Maximize2 size={14} style={{ color: 'inherit' }} />
+                  Pantalla completa
+                </BaseButton>
+              </div>
 
-            <InteractiveImageContainer
-              zoom={zoom}
-              setZoom={setZoom}
-              pan={pan}
-              setPan={setPan}
-            >
-              <ImageOverlay
-                imageUrl={currentReview.imageUrl}
-                words={currentReview.words || []}
-                errors={updatedCorrections}
-                showOverlay={currentReview.words && currentReview.words.length > 0}
-                visibleErrorTypes={visibleErrorTypes}
-                highlightOpacity={visualization.highlightOpacity}
+              <InteractiveImageContainer
                 zoom={zoom}
+                setZoom={setZoom}
                 pan={pan}
-                useWavyUnderline={visualization.useWavyUnderline}
-                showCorrectionText={visualization.showCorrectionText}
-                correctionTextFont={visualization.correctionTextFont}
-                errorColors={visualization.colors}
-                strokeWidth={visualization.strokeWidth}
-                strokeOpacity={visualization.strokeOpacity}
-                className="max-w-full max-h-96"
-              />
-            </InteractiveImageContainer>
-          </div>
-          {currentReview.words && currentReview.words.length > 0 && (
+                setPan={setPan}
+              >
+                <ImageOverlay
+                  imageUrl={currentReview.imageUrl}
+                  words={currentReview.words || []}
+                  errors={updatedCorrections}
+                  showOverlay={currentReview.words && currentReview.words.length > 0}
+                  visibleErrorTypes={visibleErrorTypes}
+                  highlightOpacity={visualization.highlightOpacity}
+                  zoom={zoom}
+                  pan={pan}
+                  useWavyUnderline={visualization.useWavyUnderline}
+                  showCorrectionText={visualization.showCorrectionText}
+                  correctionTextFont={visualization.correctionTextFont}
+                  errorColors={visualization.colors}
+                  strokeWidth={visualization.strokeWidth}
+                  strokeOpacity={visualization.strokeOpacity}
+                  className="max-w-full max-h-96"
+                />
+              </InteractiveImageContainer>
+            </div>
+          ) : (
+            /* Quick Text View - Show corrections as text list */
+            <div className="space-y-4">
+              {/* Small image preview */}
+              <div className="flex gap-4">
+                <div className="w-32 h-24 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 flex-shrink-0 cursor-pointer" onClick={() => setShowImageLightbox(true)}>
+                  <img src={currentReview.imageUrl} alt="Vista previa" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1">
+                  <QuickCorrectionView
+                    review={{
+                      ...currentReview,
+                      detailedCorrections: updatedCorrections,
+                      aiSuggestions: updatedCorrections
+                    }}
+                    showSummary={true}
+                    showTranscription={false}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {correctionViewMode === 'overlay' && currentReview.words && currentReview.words.length > 0 && (
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
               💡 Controles disponibles:
               <span className="ml-2">🖱️ Arrastra la imagen</span>
@@ -1236,7 +1334,7 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
               <span>🎨 Opacidad</span>
             </div>
           )}
-          {(!currentReview.words || currentReview.words.length === 0) && (
+          {correctionViewMode === 'overlay' && (!currentReview.words || currentReview.words.length === 0) && (
             <BaseAlert variant="warning" className="mt-3">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">

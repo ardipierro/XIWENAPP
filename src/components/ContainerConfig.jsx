@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { Box, CheckSquare, Move, Edit3, HelpCircle } from 'lucide-react';
 import { BaseBadge } from './common';
 import WordHighlightConfig from './container/WordHighlightConfig';
+import DragDropConfig from './container/DragDropConfig';
+import FillBlanksConfig from './container/FillBlanksConfig';
 import logger from '../utils/logger';
 
 /**
@@ -17,7 +19,7 @@ const CONTAINER_TABS = [
     id: 'word-highlight',
     label: 'Marcar Palabras',
     icon: CheckSquare,
-    description: 'Ejercicios de identificación de palabras (verbos, sustantivos, etc.)',
+    description: 'Ejercicios de identificación de palabras (verbos, sustantivos, etc.). Usa *palabra* para marcar objetivos.',
     component: WordHighlightConfig,
     available: true
   },
@@ -25,17 +27,17 @@ const CONTAINER_TABS = [
     id: 'drag-drop',
     label: 'Drag & Drop',
     icon: Move,
-    description: 'Ejercicios de arrastrar y soltar elementos',
-    component: null,
-    available: false
+    description: 'Ejercicios de arrastrar y soltar. Las palabras entre *asteriscos* se convierten en elementos arrastrables.',
+    component: DragDropConfig,
+    available: true
   },
   {
     id: 'fill-blank',
     label: 'Llenar Palabras',
     icon: Edit3,
-    description: 'Ejercicios de completar espacios en blanco',
-    component: null,
-    available: false
+    description: 'Ejercicios de completar espacios. Las palabras entre *asteriscos* se convierten en campos de texto.',
+    component: FillBlanksConfig,
+    available: true
   },
   {
     id: 'multiple-choice',

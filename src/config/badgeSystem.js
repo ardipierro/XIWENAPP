@@ -164,6 +164,42 @@ export const DEFAULT_BADGE_CONFIG = {
     description: 'Ejercicio de audio',
     category: 'exerciseType'
   },
+  EXERCISE_WORD_HIGHLIGHT: {
+    variant: 'info',
+    color: '#6366f1',
+    label: 'Marcar Palabras',
+    icon: '🎯',
+    heroicon: 'CursorArrowRaysIcon',
+    description: 'Identificar palabras en el texto',
+    category: 'exerciseType'
+  },
+  EXERCISE_DRAG_DROP: {
+    variant: 'success',
+    color: '#14b8a6',
+    label: 'Arrastrar',
+    icon: '✋',
+    heroicon: 'Squares2X2Icon',
+    description: 'Arrastrar palabras a su posición',
+    category: 'exerciseType'
+  },
+  EXERCISE_FILL_BLANKS: {
+    variant: 'primary',
+    color: '#3b82f6',
+    label: 'Completar',
+    icon: '✏️',
+    heroicon: 'PencilIcon',
+    description: 'Escribir palabras en espacios',
+    category: 'exerciseType'
+  },
+  EXERCISE_AI_GENERATED: {
+    variant: 'secondary',
+    color: '#8b5cf6',
+    label: 'Generado con IA',
+    icon: '🤖',
+    heroicon: 'SparklesIcon',
+    description: 'Ejercicio creado con inteligencia artificial',
+    category: 'exerciseType'
+  },
 
   // ========================================
   // NIVELES DE DIFICULTAD
@@ -1179,6 +1215,10 @@ export const BADGE_MAPPINGS = {
     'short-answer': 'EXERCISE_SHORT_ANSWER',
     'essay': 'EXERCISE_ESSAY',
     'listening': 'EXERCISE_LISTENING',
+    'word-highlight': 'EXERCISE_WORD_HIGHLIGHT',
+    'drag-drop': 'EXERCISE_DRAG_DROP',
+    'fill-blanks': 'EXERCISE_FILL_BLANKS',
+    'ai_generated': 'EXERCISE_AI_GENERATED',
   },
 
   // Dificultad → Badge key

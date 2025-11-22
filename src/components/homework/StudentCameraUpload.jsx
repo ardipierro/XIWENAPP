@@ -18,7 +18,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { BaseButton, BaseModal, BaseAlert } from '../common';
-import { uploadFile, deleteFile } from '../../firebase/storage';
+import { uploadImage } from '../../firebase/storage';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import logger from '../../utils/logger';
@@ -178,10 +178,10 @@ export default function StudentCameraUpload({
     try {
       // Compress image if needed
       setUploadProgress(10);
-      let uploadFile = file;
+      let fileToUpload = file;
       if (file.size > 1024 * 1024) { // Compress if > 1MB
         const compressed = await compressImage(file);
-        uploadFile = new File([compressed], file.name, { type: 'image/jpeg' });
+        fileToUpload = new File([compressed], file.name, { type: 'image/jpeg' });
       }
       setUploadProgress(30);
 
@@ -189,7 +189,7 @@ export default function StudentCameraUpload({
       const timestamp = Date.now();
       const path = `homework/${teacherId}/${studentId}/${timestamp}_${file.name}`;
 
-      const uploadResult = await uploadFile(uploadFile, path);
+      const uploadResult = await uploadImage(fileToUpload, path);
       if (!uploadResult.success) {
         throw new Error(uploadResult.error || 'Error al subir imagen');
       }
@@ -238,6 +238,7 @@ export default function StudentCameraUpload({
 
   return (
     <BaseModal
+      isOpen={true}
       title="Subir Tarea"
       onClose={onClose}
       size="md"

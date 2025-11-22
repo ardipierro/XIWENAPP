@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import AssignmentManager from './components/AssignmentManager';
-import StudentAssignmentsView from './components/StudentAssignmentsView';
+// REMOVED: AssignmentManager and StudentAssignmentsView (legacy components deleted)
 import GradingInterface from './components/GradingInterface';
 import GamificationPanel from './components/GamificationPanel';
 import UnifiedCalendar from './components/UnifiedCalendar';
@@ -26,13 +25,6 @@ export default function TestPage() {
     deadline: new Date()
   };
 
-  // Mock user for guardian dashboard
-  const mockGuardianUser = {
-    uid: 'test-guardian-001',
-    email: 'guardian@test.com',
-    displayName: 'Tutor de Prueba'
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -49,30 +41,6 @@ export default function TestPage() {
         {/* Menu */}
         {currentView === 'menu' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="card p-6">
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
-                📝 Assignment Manager
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Gestión de tareas (vista profesor)
-              </p>
-              <BaseButton variant="primary" onClick={() => setCurrentView('assignments')}>
-                Probar
-              </BaseButton>
-            </div>
-
-            <div className="card p-6">
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
-                🎓 Student Assignments
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Vista de tareas (estudiante)
-              </p>
-              <BaseButton variant="primary" onClick={() => setCurrentView('student')}>
-                Probar
-              </BaseButton>
-            </div>
-
             <div className="card p-6">
               <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
                 ✅ Grading Interface
@@ -157,17 +125,7 @@ export default function TestPage() {
         )}
 
         {/* Component Views */}
-        {currentView === 'assignments' && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-            <AssignmentManager teacherId={testTeacherId} />
-          </div>
-        )}
-
-        {currentView === 'student' && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-            <StudentAssignmentsView studentId={testUserId} />
-          </div>
-        )}
+        {/* REMOVED: assignments and student views (legacy components deleted) */}
 
         {currentView === 'grading' && (
           <GradingInterface

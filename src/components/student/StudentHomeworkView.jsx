@@ -16,7 +16,8 @@ import {
   FileText,
   Calendar,
   Sparkles,
-  Maximize2
+  Maximize2,
+  Camera
 } from 'lucide-react';
 import {
   BaseButton,
@@ -33,6 +34,7 @@ import ImageLightbox from '../common/ImageLightbox';
 import ImageOverlay from '../homework/ImageOverlay';
 import StudentFeedbackView from '../StudentFeedbackView';
 import ManualHomeworkUpload from '../homework/ManualHomeworkUpload';
+import StudentCameraUpload from '../homework/StudentCameraUpload';
 import { getReviewsByStudent, REVIEW_STATUS } from '../../firebase/homework_reviews';
 import { getBadgeByKey, getContrastText } from '../../config/badgeSystem';
 import logger from '../../utils/logger';
@@ -45,6 +47,7 @@ export default function StudentHomeworkView({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,6 +98,11 @@ export default function StudentHomeworkView({ user }) {
   const handleUploadSuccess = () => {
     loadHomework();
     setShowUploadModal(false);
+  };
+
+  const handleCameraSuccess = () => {
+    loadHomework();
+    setShowCameraModal(false);
   };
 
   const handleSelectReview = (review) => {
@@ -156,13 +164,33 @@ export default function StudentHomeworkView({ user }) {
   return (
     <div className="w-full">
       {/* Header */}
-      <PageHeader
-        icon={FileText}
-        title="Mis Tareas"
-        subtitle={`${reviews.length} ${reviews.length === 1 ? 'tarea enviada' : 'tareas enviadas'}`}
-        actionLabel="Subir Tarea"
-        onAction={() => setShowUploadModal(true)}
-      />
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+            <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Mis Tareas</h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{reviews.length} {reviews.length === 1 ? 'tarea enviada' : 'tareas enviadas'}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <BaseButton
+            variant="secondary"
+            onClick={() => setShowCameraModal(true)}
+            icon={Camera}
+          >
+            Tomar Foto
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            onClick={() => setShowUploadModal(true)}
+            icon={Upload}
+          >
+            Subir Tarea
+          </BaseButton>
+        </div>
+      </div>
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -205,11 +233,16 @@ export default function StudentHomeworkView({ user }) {
           <BaseEmptyState
             icon={FileText}
             title="No has enviado tareas"
-            description="Sube tu primera tarea usando el botón 'Subir Tarea'"
+            description="Toma una foto o sube una imagen de tu tarea"
             action={
-              <BaseButton onClick={() => setShowUploadModal(true)} variant="primary" icon={Upload}>
-                Subir Tarea
-              </BaseButton>
+              <div className="flex items-center gap-2">
+                <BaseButton onClick={() => setShowCameraModal(true)} variant="secondary" icon={Camera}>
+                  Tomar Foto
+                </BaseButton>
+                <BaseButton onClick={() => setShowUploadModal(true)} variant="primary" icon={Upload}>
+                  Subir Tarea
+                </BaseButton>
+              </div>
             }
           />
         ) : (
@@ -249,6 +282,17 @@ export default function StudentHomeworkView({ user }) {
             onCancel={() => setShowUploadModal(false)}
           />
         </BaseModal>
+      )}
+
+      {/* Camera Upload Modal */}
+      {showCameraModal && (
+        <StudentCameraUpload
+          studentId={user?.uid}
+          studentName={user?.displayName || user?.name || 'Estudiante'}
+          teacherId={user?.teacherId || user?.uid} // Use assigned teacher or self
+          onSuccess={handleCameraSuccess}
+          onClose={() => setShowCameraModal(false)}
+        />
       )}
 
       {/* Detail Modal */}

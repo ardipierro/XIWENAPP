@@ -240,11 +240,28 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   };
 
   const handleEdit = (content) => {
-    // Si es un ejercicio generado con IA, abrir el modal de ejercicios
-    if (content.metadata?.exerciseType === 'ai_generated') {
+    // Tipos de ejercicios que se editan con el modal de IA
+    const aiExerciseTypes = [
+      'ai_generated',
+      'word-highlight',
+      'drag-drop',
+      'fill-blanks'
+    ];
+
+    // Verificar si es un ejercicio interactivo por metadata o por contenido
+    const exerciseType = content.metadata?.exerciseType;
+    const isAIExercise = aiExerciseTypes.includes(exerciseType);
+
+    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar o asteriscos)
+    const hasInteractiveContent = content.content && (
+      /^#(marcar|arrastrar|completar)/i.test(content.content.trim()) ||
+      /\*[^*]+\*/g.test(content.content)
+    );
+
+    if (isAIExercise || hasInteractiveContent) {
       setSelectedExercise(content);
       setShowExerciseModal(true);
-      logger.info('Opening AI exercise in editor (edit):', content);
+      logger.info('Opening interactive exercise in editor (edit):', content);
     } else {
       setSelectedContent(content);
       setShowCreateModal(true);
@@ -309,8 +326,25 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   };
 
   const handleView = (content) => {
-    // Si es un ejercicio generado con IA, abrir el viewer interactivo
-    if (content.metadata?.exerciseType === 'ai_generated') {
+    // Tipos de ejercicios interactivos que soporta ExerciseViewerModal
+    const interactiveExerciseTypes = [
+      'ai_generated',
+      'word-highlight',
+      'drag-drop',
+      'fill-blanks'
+    ];
+
+    // Verificar si es un ejercicio interactivo por metadata o por contenido
+    const exerciseType = content.metadata?.exerciseType;
+    const isInteractive = interactiveExerciseTypes.includes(exerciseType);
+
+    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar o asteriscos)
+    const hasInteractiveContent = content.content && (
+      /^#(marcar|arrastrar|completar)/i.test(content.content.trim()) ||
+      /\*[^*]+\*/g.test(content.content)
+    );
+
+    if (isInteractive || hasInteractiveContent) {
       setViewingExercise(content);
       setShowExerciseViewer(true);
       logger.info('Opening interactive exercise viewer:', content);

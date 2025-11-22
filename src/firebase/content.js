@@ -198,6 +198,33 @@ class UnifiedContentRepository extends BaseRepository {
   }
 
   /**
+   * Buscar ejercicio por título exacto (para detección de duplicados)
+   * @param {string} title - Título a buscar
+   * @param {string} teacherId - ID del profesor
+   * @param {string} type - Tipo de contenido (opcional)
+   * @returns {Object|null} El contenido encontrado o null
+   */
+  async findByExactTitle(title, teacherId, type = null) {
+    try {
+      const normalizedTitle = title.trim().toLowerCase();
+
+      const allContent = teacherId
+        ? await this.getContentByTeacher(teacherId)
+        : await this.getAllContent();
+
+      return allContent.find(item => {
+        const itemTitle = (item.title || '').trim().toLowerCase();
+        const matchesTitle = itemTitle === normalizedTitle;
+        const matchesType = !type || item.type === type;
+        return matchesTitle && matchesType;
+      }) || null;
+    } catch (error) {
+      logger.error(`Error finding content by exact title:`, error, 'UnifiedContentRepository');
+      throw error;
+    }
+  }
+
+  /**
    * Obtener contenido por curso (ordenado por order ascendente)
    * @deprecated Usar getContentByCourse en relationships.js
    */
@@ -247,6 +274,7 @@ export const getExercises = (teacherId = null) => contentRepo.getExercises(teach
 export const getByDifficulty = (difficulty) => contentRepo.getByDifficulty(difficulty);
 export const getByTags = (tags) => contentRepo.getByTags(tags);
 export const searchContent = (searchTerm, teacherId = null) => contentRepo.searchContent(searchTerm, teacherId);
+export const findByExactTitle = (title, teacherId, type = null) => contentRepo.findByExactTitle(title, teacherId, type);
 
 // Status management
 export const getByStatus = (status) => contentRepo.getByStatus(status);

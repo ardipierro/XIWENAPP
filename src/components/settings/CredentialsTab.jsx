@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Key, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { Key, CheckCircle, XCircle, ExternalLink, Plus, Trash2 } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../../firebase/aiConfig';
 import { BaseAlert, BaseLoading } from '../common';
 import SearchBar from '../common/SearchBar';
 import CredentialConfigModal from './CredentialConfigModal';
+import AddCustomCredentialModal from './AddCustomCredentialModal';
 import logger from '../../utils/logger';
 import { UniversalCard } from '../cards';
 
@@ -203,6 +204,8 @@ function CredentialsTab() {
   const [viewMode, setViewMode] = useState('grid');
   const [filter, setFilter] = useState('all');
   const [selectedProvider, setSelectedProvider] = useState(null);
+  const [showAddCustomModal, setShowAddCustomModal] = useState(false);
+  const [customCredentials, setCustomCredentials] = useState([]);
   const hasLoadedRef = useRef(false);
 
   // ============================================================================
@@ -366,6 +369,94 @@ function CredentialsTab() {
   };
 
   // ============================================================================
+  // CUSTOM CREDENTIALS MANAGEMENT
+  // ============================================================================
+
+  const CUSTOM_CREDENTIALS_KEY = 'ai_custom_credentials_list';
+
+  const loadCustomCredentials = () => {
+    try {
+      const stored = localStorage.getItem(CUSTOM_CREDENTIALS_KEY);
+      if (stored) {
+        const names = JSON.parse(stored);
+        const customs = names.map(name => ({
+          id: `custom_${name.toLowerCase().replace(/\s+/g, '_')}`,
+          name: name,
+          description: 'Credencial personalizada',
+          apiKeyField: `custom_${name}`,
+          icon: '🔑',
+          color: 'slate',
+          isCustom: true,
+          hasKey: !!localStorage.getItem(`ai_credentials_${name}`)
+        }));
+        setCustomCredentials(customs);
+        logger.info(`Loaded ${customs.length} custom credentials`, 'CredentialsTab');
+      }
+    } catch (err) {
+      logger.error('Error loading custom credentials', err, 'CredentialsTab');
+    }
+  };
+
+  const handleSaveCustomCredential = async (providerName, apiKey) => {
+    try {
+      // 1. Guardar API key en localStorage
+      localStorage.setItem(`ai_credentials_${providerName}`, apiKey);
+
+      // 2. Agregar nombre a la lista de custom credentials
+      const stored = localStorage.getItem(CUSTOM_CREDENTIALS_KEY);
+      const names = stored ? JSON.parse(stored) : [];
+      if (!names.includes(providerName)) {
+        names.push(providerName);
+        localStorage.setItem(CUSTOM_CREDENTIALS_KEY, JSON.stringify(names));
+      }
+
+      // 3. Recargar lista
+      loadCustomCredentials();
+
+      // 4. Cerrar modal y mostrar éxito
+      setShowAddCustomModal(false);
+      setSuccess(`Credencial "${providerName}" guardada exitosamente`);
+      setTimeout(() => setSuccess(null), 3000);
+
+      logger.info(`Saved custom credential: ${providerName}`, 'CredentialsTab');
+    } catch (err) {
+      logger.error('Error saving custom credential', err, 'CredentialsTab');
+      throw err;
+    }
+  };
+
+  const handleDeleteCustomCredential = (providerName) => {
+    if (!confirm(`¿Eliminar la credencial "${providerName}"?`)) return;
+
+    try {
+      // 1. Eliminar API key
+      localStorage.removeItem(`ai_credentials_${providerName}`);
+
+      // 2. Eliminar de la lista
+      const stored = localStorage.getItem(CUSTOM_CREDENTIALS_KEY);
+      if (stored) {
+        const names = JSON.parse(stored).filter(n => n !== providerName);
+        localStorage.setItem(CUSTOM_CREDENTIALS_KEY, JSON.stringify(names));
+      }
+
+      // 3. Recargar lista
+      loadCustomCredentials();
+
+      setSuccess(`Credencial "${providerName}" eliminada`);
+      setTimeout(() => setSuccess(null), 3000);
+
+      logger.info(`Deleted custom credential: ${providerName}`, 'CredentialsTab');
+    } catch (err) {
+      logger.error('Error deleting custom credential', err, 'CredentialsTab');
+    }
+  };
+
+  // Cargar custom credentials al iniciar
+  useEffect(() => {
+    loadCustomCredentials();
+  }, []);
+
+  // ============================================================================
   // SAVE CREDENTIAL
   // ============================================================================
 
@@ -461,6 +552,15 @@ function CredentialsTab() {
 
   const configuredCount = AI_PROVIDERS.filter(isProviderConfigured).length;
 
+  // Filtrar custom credentials
+  const filteredCustomCredentials = customCredentials.filter(cred => {
+    const matchesSearch = cred.name.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+    if (filter === 'configured') return cred.hasKey;
+    if (filter === 'unconfigured') return !cred.hasKey;
+    return true;
+  });
+
   // ============================================================================
   // RENDER
   // ============================================================================
@@ -490,15 +590,22 @@ function CredentialsTab() {
 
       {/* Filters */}
       <div className="w-full flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === 'all' ? 'bg-purple-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
-            Todos ({AI_PROVIDERS.length})
+            Todos ({AI_PROVIDERS.length + customCredentials.length})
           </button>
           <button onClick={() => setFilter('configured')} className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === 'configured' ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
-            Configurados ({configuredCount})
+            Configurados ({configuredCount + customCredentials.filter(c => c.hasKey).length})
           </button>
           <button onClick={() => setFilter('unconfigured')} className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === 'unconfigured' ? 'bg-amber-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
-            Sin Configurar ({AI_PROVIDERS.length - configuredCount})
+            Sin Configurar ({AI_PROVIDERS.length - configuredCount + customCredentials.filter(c => !c.hasKey).length})
+          </button>
+          <button
+            onClick={() => setShowAddCustomModal(true)}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Agregar Credencial
           </button>
         </div>
 
@@ -524,6 +631,7 @@ function CredentialsTab() {
       {/* Grid - 5 COLUMNAS */}
       {viewMode === 'grid' ? (
         <div className="w-full grid-responsive-cards gap-4">
+          {/* Proveedores predefinidos */}
           {filteredProviders.map((provider) => {
             const isConfigured = isProviderConfigured(provider);
             return (
@@ -554,9 +662,43 @@ function CredentialsTab() {
               />
             );
           })}
+
+          {/* Credenciales personalizadas */}
+          {filteredCustomCredentials.map((cred) => (
+            <UniversalCard
+              key={cred.id}
+              variant="default"
+              size="sm"
+              icon={() => <div className="text-5xl">{cred.icon}</div>}
+              title={cred.name}
+              description={cred.description}
+              badges={[
+                cred.hasKey
+                  ? { variant: 'success', children: <><CheckCircle size={14} className="inline" /> Configurado</> }
+                  : { variant: 'warning', children: <><XCircle size={14} className="inline" /> Sin Configurar</> },
+                { variant: 'info', children: 'Personalizado' }
+              ]}
+              actions={
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteCustomCredential(cred.name);
+                    }}
+                    className="px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg"
+                    title="Eliminar"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              }
+            />
+          ))}
         </div>
       ) : (
         <div className="w-full flex flex-col gap-3">
+          {/* Proveedores predefinidos - List view */}
           {filteredProviders.map((provider) => {
             const isConfigured = isProviderConfigured(provider);
             return (
@@ -594,16 +736,61 @@ function CredentialsTab() {
               />
             );
           })}
+
+          {/* Credenciales personalizadas - List view */}
+          {filteredCustomCredentials.map((cred) => (
+            <UniversalCard
+              key={cred.id}
+              variant="default"
+              size="sm"
+              layout="row"
+              icon={() => <div className="text-4xl">{cred.icon}</div>}
+              title={cred.name}
+              description={cred.description}
+              badges={[
+                cred.hasKey
+                  ? { variant: 'success', children: <><CheckCircle size={16} className="inline" /> Configurado</> }
+                  : { variant: 'warning', children: <><XCircle size={16} className="inline" /> Sin Configurar</> },
+                { variant: 'info', children: 'Personalizado' }
+              ]}
+              actions={[
+                <button
+                  key="delete"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDeleteCustomCredential(cred.name);
+                  }}
+                  className="px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg"
+                  title="Eliminar"
+                >
+                  <Trash2 size={16} />
+                </button>
+              ]}
+            />
+          ))}
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modal para providers predefinidos */}
       {selectedProvider && (
         <CredentialConfigModal
           provider={selectedProvider}
           initialValue={credentials[selectedProvider.apiKeyField] || ''}
           onSave={handleSaveCredential}
           onClose={() => setSelectedProvider(null)}
+        />
+      )}
+
+      {/* Modal para agregar credencial personalizada */}
+      {showAddCustomModal && (
+        <AddCustomCredentialModal
+          onSave={handleSaveCustomCredential}
+          onClose={() => setShowAddCustomModal(false)}
+          existingNames={[
+            ...AI_PROVIDERS.map(p => p.name),
+            ...customCredentials.map(c => c.name)
+          ]}
         />
       )}
     </div>
