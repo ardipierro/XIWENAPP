@@ -356,7 +356,8 @@ function FillInBlanksExercise({ text, config, onComplete }) {
         style={{
           backgroundColor: 'var(--color-bg-secondary)',
           color: 'var(--color-text-primary)',
-          lineHeight: '2.8'
+          lineHeight: '2.8',
+          whiteSpace: 'pre-line'
         }}
       >
         {parsedContent.parts.map((part, index) => {

@@ -192,6 +192,7 @@ function WordHighlightExercise({ text, config, onComplete }) {
 
   /**
    * Parsear texto y extraer palabras con/sin asteriscos
+   * Preserva saltos de línea para mostrar oraciones separadas
    */
   const parsedContent = useMemo(() => {
     const parts = [];
@@ -199,26 +200,36 @@ function WordHighlightExercise({ text, config, onComplete }) {
     const regex = /\*([^*]+)\*/g;
     let match;
 
+    /**
+     * Procesa un fragmento de texto extrayendo palabras y saltos de línea
+     */
+    const processTextFragment = (fragment) => {
+      // Regex que captura palabras O saltos de línea como elementos separados
+      const tokenRegex = /(\S+)|(\n)/g;
+      let tokenMatch;
+      while ((tokenMatch = tokenRegex.exec(fragment)) !== null) {
+        if (tokenMatch[1]) {
+          // Es una palabra
+          parts.push({ text: tokenMatch[1], isTarget: false, isLineBreak: false });
+        } else if (tokenMatch[2]) {
+          // Es un salto de línea
+          parts.push({ text: '\n', isTarget: false, isLineBreak: true });
+        }
+      }
+    };
+
     while ((match = regex.exec(text)) !== null) {
       if (match.index > lastIndex) {
         const beforeText = text.slice(lastIndex, match.index);
-        beforeText.split(/\s+/).forEach(word => {
-          if (word.trim()) {
-            parts.push({ text: word, isTarget: false });
-          }
-        });
+        processTextFragment(beforeText);
       }
-      parts.push({ text: match[1], isTarget: true });
+      parts.push({ text: match[1], isTarget: true, isLineBreak: false });
       lastIndex = regex.lastIndex;
     }
 
     if (lastIndex < text.length) {
       const afterText = text.slice(lastIndex);
-      afterText.split(/\s+/).forEach(word => {
-        if (word.trim()) {
-          parts.push({ text: word, isTarget: false });
-        }
-      });
+      processTextFragment(afterText);
     }
 
     return parts;
@@ -1041,16 +1052,23 @@ function WordHighlightExercise({ text, config, onComplete }) {
           lineHeight: '2.2'
         }}
       >
-        {parsedContent.map((part, index) => (
-          <span
-            key={index}
-            onClick={() => handleWordClick(part.text, part.isTarget, index)}
-            style={getWordStyle(index, part.text, part.isTarget)}
-            className="hover:opacity-80 select-none"
-          >
-            {renderWord(part, index)}{' '}
-          </span>
-        ))}
+        {parsedContent.map((part, index) => {
+          // Renderizar saltos de línea
+          if (part.isLineBreak) {
+            return <br key={index} />;
+          }
+
+          return (
+            <span
+              key={index}
+              onClick={() => handleWordClick(part.text, part.isTarget, index)}
+              style={getWordStyle(index, part.text, part.isTarget)}
+              className="hover:opacity-80 select-none"
+            >
+              {renderWord(part, index)}{' '}
+            </span>
+          );
+        })}
       </div>
 
       {/* Leyenda de hints si están activos */}
