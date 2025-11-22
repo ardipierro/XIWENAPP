@@ -12,7 +12,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, MessageCircle, Shield, Lightbulb, ArrowLeft } from 'lucide-react';
+import { Bell, MessageCircle, Shield, Lightbulb, ArrowLeft, Eye, Pencil } from 'lucide-react';
 import UserMenu from './UserMenu.jsx';
 import AvatarSelector from './AvatarSelector.jsx';
 import UserProfileModal from './UserProfileModal.jsx';
@@ -24,6 +24,7 @@ import { isAdminEmail } from '../firebase/roleConfig.js';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.js';
 import { useFont } from '../contexts/FontContext.jsx';
 import { useTopBar } from '../contexts/TopBarContext.jsx';
+import { useEditMode } from '../contexts/EditModeContext.jsx';
 import logger from '../utils/logger.js';
 
 /**
@@ -50,6 +51,7 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
   const messageCount = useUnreadMessages(user?.uid); // Real-time unread count
   const { selectedFont, fontWeight, fontSize } = useFont(); // Fuente del logo
   const { config } = useTopBar(); // Configuración dinámica de TopBar
+  const { isEditMode, toggleEditMode } = useEditMode(); // Modo edición global
   const userMenuRef = useRef(null);
 
   // Verificar si es admin
@@ -238,6 +240,28 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
 
           {/* Sección Derecha: Acciones + Avatar */}
           <div className="flex items-center gap-2 md:gap-3">
+            {/* Edit Mode Toggle */}
+            <button
+              onClick={toggleEditMode}
+              className={`relative flex items-center justify-center
+                         w-9 h-9 p-2
+                         border-none cursor-pointer
+                         rounded-md
+                         transition-all duration-200
+                         ${isEditMode
+                           ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20'
+                           : 'bg-transparent text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                         }`}
+              aria-label={isEditMode ? 'Modo Edición activo - Click para ver' : 'Modo Ver - Click para editar'}
+              title={isEditMode ? 'Modo Edición (click para cambiar a Ver)' : 'Modo Ver (click para cambiar a Editar)'}
+            >
+              {isEditMode ? (
+                <Pencil size={20} strokeWidth={2} />
+              ) : (
+                <Eye size={20} strokeWidth={2} />
+              )}
+            </button>
+
             {/* Theme Switcher */}
             <ThemeSwitcher />
 

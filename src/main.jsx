@@ -15,6 +15,7 @@ import { ViewAsProvider } from './contexts/ViewAsContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CardConfigProvider } from './contexts/CardConfigContext.jsx';
 import { DashboardConfigProvider } from './contexts/DashboardConfigContext.jsx';
+import { EditModeProvider } from './contexts/EditModeContext.jsx';
 
 // Error Boundary
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
@@ -28,10 +29,11 @@ import { applyBadgeColors } from './config/badgeSystem.js';
  * 2. AuthProvider - Estado de autenticación global
  * 3. ThemeProvider - Tema (claro/oscuro)
  * 4. CardConfigProvider - Configuración global de cards
- * 5. DashboardConfigProvider - Configuración global de paneles
- * 6. FontProvider - Fuente del logo de la aplicación
- * 7. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
- * 8. App - Componente principal
+ * 5. EditModeProvider - Modo edición global (oculta/muestra botones destructivos)
+ * 6. DashboardConfigProvider - Configuración global de paneles
+ * 7. FontProvider - Fuente del logo de la aplicación
+ * 8. ViewAsProvider - Funcionalidad "Ver como" (profesor viendo como alumno)
+ * 9. App - Componente principal
  */
 
 // Inicializar sistema de badges (aplicar colores guardados)
@@ -43,13 +45,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <ThemeProvider>
           <CardConfigProvider>
-            <DashboardConfigProvider>
-              <FontProvider>
-                <ViewAsProvider>
-                  <App />
-                </ViewAsProvider>
-              </FontProvider>
-            </DashboardConfigProvider>
+            <EditModeProvider>
+              <DashboardConfigProvider>
+                <FontProvider>
+                  <ViewAsProvider>
+                    <App />
+                  </ViewAsProvider>
+                </FontProvider>
+              </DashboardConfigProvider>
+            </EditModeProvider>
           </CardConfigProvider>
         </ThemeProvider>
       </AuthProvider>

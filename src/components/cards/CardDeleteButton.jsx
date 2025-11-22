@@ -12,6 +12,7 @@
 
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useEditMode } from '../../contexts/EditModeContext.jsx';
 
 /**
  * Estilos predefinidos de botón eliminar
@@ -69,6 +70,7 @@ export const deleteButtonVariants = {
  * @param {boolean} disabled - Si está deshabilitado
  * @param {string} size - Tamaño: 'sm' | 'md' | 'lg'
  * @param {string} className - Clases CSS adicionales
+ * @param {boolean} ignoreEditMode - Si true, ignora el modo edición global y siempre muestra el botón
  *
  * @example
  * <CardDeleteButton
@@ -85,8 +87,15 @@ function CardDeleteButton({
   disabled = false,
   size = 'md',
   className = '',
+  ignoreEditMode = false,
 }) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const { isEditMode } = useEditMode();
+
+  // Si no está en modo edición y no se ignora, no renderizar el botón
+  if (!isEditMode && !ignoreEditMode) {
+    return null;
+  }
 
   // Obtener estilos de la variante
   const variantStyles = deleteButtonVariants[variant] || deleteButtonVariants.solid;
