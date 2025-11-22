@@ -16,7 +16,9 @@ import {
   updateCorrectionProfile,
   deleteCorrectionProfile,
   CHECK_TYPES,
-  STRICTNESS_LEVELS
+  STRICTNESS_LEVELS,
+  FEEDBACK_STYLES,
+  DISPLAY_MODES
 } from '../../firebase/correctionProfiles';
 import PresetSelector from './PresetSelector';
 import { getPreset } from '../../config/correctionPresets';
@@ -62,7 +64,17 @@ export default function ProfileEditor({ profile, userId, onClose }) {
         },
         strokeWidth: 2,
         strokeOpacity: 0.8
-      }
+      },
+      // ✨ Configuración de IA (NUEVO - ahora visible y editable)
+      aiConfig: profile?.settings?.aiConfig || {
+        temperature: 0.7,
+        maxTokens: 2000,
+        feedbackStyle: 'encouraging',
+        responseLanguage: 'es',
+        includeSynonyms: false,
+        includeExamples: true
+      },
+      displayMode: profile?.settings?.displayMode || 'overlay'
     }
   });
 
@@ -87,7 +99,17 @@ export default function ProfileEditor({ profile, userId, onClose }) {
         weights: presetConfig.weights,
         minGrade: presetConfig.minGrade,
         display: presetConfig.display,
-        visualization: presetConfig.visualization
+        visualization: presetConfig.visualization,
+        // ✨ FIX: Incluir aiConfig del preset (antes faltaba y causaba errores)
+        aiConfig: presetConfig.aiConfig || {
+          temperature: 0.7,
+          maxTokens: 2000,
+          feedbackStyle: 'encouraging',
+          responseLanguage: 'es',
+          includeSynonyms: false,
+          includeExamples: true
+        },
+        displayMode: presetConfig.displayMode || 'overlay'
       }
     });
     setShowPresets(false); // Ocultar presets después de seleccionar
@@ -658,6 +680,196 @@ export default function ProfileEditor({ profile, userId, onClose }) {
                   className="w-full h-10 rounded border border-zinc-300 dark:border-zinc-600"
                 />
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ✨ AI Configuration - NUEVA SECCIÓN COMPLETA */}
+        <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-2">
+            🤖 Configuración de IA
+            <span className="text-xs font-normal text-blue-600 dark:text-blue-400">
+              (Estos parámetros controlan cómo la IA analiza y corrige)
+            </span>
+          </h3>
+
+          {/* Temperature */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              🎯 Precisión vs Creatividad (Temperature): {formData.settings.aiConfig?.temperature || 0.7}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={formData.settings.aiConfig?.temperature || 0.7}
+              onChange={(e) => setFormData({
+                ...formData,
+                settings: {
+                  ...formData.settings,
+                  aiConfig: {
+                    ...formData.settings.aiConfig,
+                    temperature: parseFloat(e.target.value)
+                  }
+                }
+              })}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              <span>0.0 - Muy preciso (menos errores falsos)</span>
+              <span>1.0 - Más creativo (puede inventar errores)</span>
+            </div>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 italic">
+              💡 Recomendado: 0.3-0.5 para correcciones precisas, 0.7-0.9 para feedback más variado
+            </p>
+          </div>
+
+          {/* Max Tokens */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              📝 Longitud máxima de respuesta (Max Tokens): {formData.settings.aiConfig?.maxTokens || 2000}
+            </label>
+            <select
+              value={formData.settings.aiConfig?.maxTokens || 2000}
+              onChange={(e) => setFormData({
+                ...formData,
+                settings: {
+                  ...formData.settings,
+                  aiConfig: {
+                    ...formData.settings.aiConfig,
+                    maxTokens: parseInt(e.target.value)
+                  }
+                }
+              })}
+              className="input"
+            >
+              <option value={1000}>1000 - Respuestas cortas</option>
+              <option value={1500}>1500 - Respuestas breves</option>
+              <option value={2000}>2000 - Respuestas estándar</option>
+              <option value={2500}>2500 - Respuestas detalladas</option>
+              <option value={3000}>3000 - Respuestas muy detalladas</option>
+              <option value={4000}>4000 - Respuestas exhaustivas</option>
+            </select>
+          </div>
+
+          {/* Feedback Style */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              💬 Estilo de Feedback
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {Object.entries({
+                [FEEDBACK_STYLES.PLAYFUL]: { label: '🎈 Divertido', desc: 'Para niños, usa emojis' },
+                [FEEDBACK_STYLES.ENCOURAGING]: { label: '💪 Motivador', desc: 'Positivo, alentador' },
+                [FEEDBACK_STYLES.NEUTRAL]: { label: '📋 Neutral', desc: 'Objetivo, profesional' },
+                [FEEDBACK_STYLES.STRICT]: { label: '📏 Directo', desc: 'Sin rodeos' },
+                [FEEDBACK_STYLES.ACADEMIC]: { label: '🎓 Académico', desc: 'Formal, técnico' }
+              }).map(([style, { label, desc }]) => (
+                <button
+                  key={style}
+                  type="button"
+                  onClick={() => setFormData({
+                    ...formData,
+                    settings: {
+                      ...formData.settings,
+                      aiConfig: {
+                        ...formData.settings.aiConfig,
+                        feedbackStyle: style
+                      }
+                    }
+                  })}
+                  className={`p-2 rounded-lg border-2 text-left transition-colors ${
+                    formData.settings.aiConfig?.feedbackStyle === style
+                      ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/50'
+                      : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300'
+                  }`}
+                >
+                  <div className="text-sm font-medium">{label}</div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Additional Options */}
+          <div className="grid grid-cols-2 gap-4">
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800">
+              <input
+                type="checkbox"
+                checked={formData.settings.aiConfig?.includeSynonyms || false}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  settings: {
+                    ...formData.settings,
+                    aiConfig: {
+                      ...formData.settings.aiConfig,
+                      includeSynonyms: e.target.checked
+                    }
+                  }
+                })}
+                className="w-4 h-4"
+              />
+              <div>
+                <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">📚 Incluir sinónimos</div>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Sugiere alternativas de vocabulario</div>
+              </div>
+            </label>
+
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800">
+              <input
+                type="checkbox"
+                checked={formData.settings.aiConfig?.includeExamples || false}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  settings: {
+                    ...formData.settings,
+                    aiConfig: {
+                      ...formData.settings.aiConfig,
+                      includeExamples: e.target.checked
+                    }
+                  }
+                })}
+                className="w-4 h-4"
+              />
+              <div>
+                <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">💡 Incluir ejemplos</div>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Muestra ejemplos de uso correcto</div>
+              </div>
+            </label>
+          </div>
+
+          {/* Display Mode */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              🖼️ Modo de Visualización
+            </label>
+            <div className="flex gap-2">
+              {Object.entries({
+                [DISPLAY_MODES.OVERLAY]: { label: '🖼️ Overlay', desc: 'Marcas sobre la imagen' },
+                [DISPLAY_MODES.QUICK]: { label: '📝 Solo texto', desc: 'Lista de errores' },
+                [DISPLAY_MODES.BOTH]: { label: '📊 Ambos', desc: 'Imagen + lista' }
+              }).map(([mode, { label, desc }]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setFormData({
+                    ...formData,
+                    settings: {
+                      ...formData.settings,
+                      displayMode: mode
+                    }
+                  })}
+                  className={`flex-1 p-2 rounded-lg border-2 text-center transition-colors ${
+                    formData.settings.displayMode === mode
+                      ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/50'
+                      : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300'
+                  }`}
+                >
+                  <div className="text-sm font-medium">{label}</div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{desc}</div>
+                </button>
+              ))}
             </div>
           </div>
         </div>

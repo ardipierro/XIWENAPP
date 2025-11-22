@@ -587,13 +587,23 @@ ${strictnessInstructions[strictnessLevel]}
 ESTILO DE FEEDBACK: ${feedbackStyle.toUpperCase()}
 ${feedbackInstructions[feedbackStyle]}
 
+⚠️ REGLAS CRÍTICAS ANTI-FALSOS POSITIVOS:
+- SOLO marca como error palabras que tengan un error REAL y EVIDENTE
+- Si una palabra está escrita correctamente, NO la incluyas como error
+- NO inventes errores. Si el texto está bien escrito, reporta 0 errores
+- Si tienes DUDA sobre si algo es un error, NO lo incluyas
+- El campo "original" debe ser DIFERENTE del campo "correction". Si son iguales, no es un error
+- Acepta variantes válidas del español (España y Latinoamérica)
+- No marques como error regionalismos o variantes aceptadas
+- Solo reporta errores cuando estés >90% seguro
+
 INSTRUCCIONES:
 1. Analiza el texto extraído mostrado arriba
 2. ${typesInstructions}
 3. Clasifica cada error por tipo
 4. Para cada error, proporciona:
-   - El texto original (con el error)
-   - La corrección apropiada
+   - El texto original (con el error) - DEBE ser diferente de la corrección
+   - La corrección apropiada - DEBE ser diferente del original
    - ${detailedExplanations ? 'Una explicación clara, detallada y pedagógica del error' : 'Una explicación breve del error'}
    - El número de línea aproximado donde aparece
 ${optionalFeatures.length > 0 ? optionalFeatures.join('\n') : ''}
@@ -637,13 +647,23 @@ ${strictnessInstructions[strictnessLevel]}
 ESTILO DE FEEDBACK: ${feedbackStyle.toUpperCase()}
 ${feedbackInstructions[feedbackStyle]}
 
+⚠️ REGLAS CRÍTICAS ANTI-FALSOS POSITIVOS:
+- SOLO marca como error palabras que tengan un error REAL y EVIDENTE
+- Si una palabra está escrita correctamente, NO la incluyas como error
+- NO inventes errores. Si el texto está bien escrito, reporta 0 errores
+- Si tienes DUDA sobre si algo es un error, NO lo incluyas
+- El campo "original" debe ser DIFERENTE del campo "correction". Si son iguales, no es un error
+- Acepta variantes válidas del español (España y Latinoamérica)
+- No marques como error regionalismos o variantes aceptadas
+- Solo reporta errores cuando estés >90% seguro
+
 INSTRUCCIONES:
 1. Lee cuidadosamente el texto en la imagen (puede ser manuscrito o impreso)
 2. ${typesInstructions}
 3. Clasifica cada error por tipo
 4. Para cada error, proporciona:
-   - El texto original (con el error)
-   - La corrección apropiada
+   - El texto original (con el error) - DEBE ser diferente de la corrección
+   - La corrección apropiada - DEBE ser diferente del original
    - ${detailedExplanations ? 'Una explicación clara, detallada y pedagógica del error' : 'Una explicación breve del error'}
    - El número de línea aproximado donde aparece
 ${optionalFeatures.length > 0 ? optionalFeatures.join('\n') : ''}
@@ -705,12 +725,44 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
     // Update review document with results
     console.log('[analyzeHomeworkImage] Updating review document...');
 
-    // Add IDs and teacherStatus to each correction
-    const correctionsWithIds = (analysisResult.detailedCorrections || []).map((corr, idx) => ({
+    // ✨ FILTRO ANTI-FALSOS POSITIVOS: Eliminar correcciones donde original === correction
+    const rawCorrections = analysisResult.detailedCorrections || [];
+    const validCorrections = rawCorrections.filter(corr => {
+      const original = (corr.original || '').trim().toLowerCase();
+      const correction = (corr.correction || '').trim().toLowerCase();
+
+      // Filtrar si son iguales (no es un error real)
+      if (original === correction) {
+        console.log(`[homeworkAnalyzer] ⚠️ Filtered invalid correction: "${corr.original}" === "${corr.correction}"`);
+        return false;
+      }
+
+      // Filtrar si están vacíos
+      if (!original || !correction) {
+        console.log(`[homeworkAnalyzer] ⚠️ Filtered empty correction`);
+        return false;
+      }
+
+      return true;
+    });
+
+    console.log(`[homeworkAnalyzer] Filtered ${rawCorrections.length - validCorrections.length} invalid corrections`);
+
+    // Add IDs and teacherStatus to each valid correction
+    const correctionsWithIds = validCorrections.map((corr, idx) => ({
       ...corr,
       id: `corr_${idx}`,
       teacherStatus: 'pending'
     }));
+
+    // ✨ Recalcular errorSummary basado en correcciones VÁLIDAS (después del filtro anti-falsos-positivos)
+    const recalculatedSummary = {
+      spelling: correctionsWithIds.filter(c => c.type === 'spelling').length,
+      grammar: correctionsWithIds.filter(c => c.type === 'grammar').length,
+      punctuation: correctionsWithIds.filter(c => c.type === 'punctuation').length,
+      vocabulary: correctionsWithIds.filter(c => c.type === 'vocabulary').length,
+      total: correctionsWithIds.length
+    };
 
     // Build update object
     const updateData = {
@@ -723,12 +775,12 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       // ✨ New structure: aiSuggestions with IDs and teacher status
       aiSuggestions: correctionsWithIds,
 
-      // ✨ Keep original AI summary separate
+      // ✨ Keep original AI summary separate (before filtering)
       aiErrorSummary: analysisResult.errorSummary,
 
       // Keep legacy field for backward compatibility
-      detailedCorrections: analysisResult.detailedCorrections || [],
-      errorSummary: analysisResult.errorSummary,
+      detailedCorrections: validCorrections,  // ✨ Use filtered corrections
+      errorSummary: recalculatedSummary,  // ✨ Use recalculated summary
 
       overallFeedback: analysisResult.overallFeedback || '',
       suggestedGrade: analysisResult.suggestedGrade || 0,
@@ -919,13 +971,23 @@ ${strictnessInstructions[strictnessLevel]}
 ESTILO DE FEEDBACK: ${feedbackStyle.toUpperCase()}
 ${feedbackInstructions[feedbackStyle]}
 
+⚠️ REGLAS CRÍTICAS ANTI-FALSOS POSITIVOS:
+- SOLO marca como error palabras que tengan un error REAL y EVIDENTE
+- Si una palabra está escrita correctamente, NO la incluyas como error
+- NO inventes errores. Si el texto está bien escrito, reporta 0 errores
+- Si tienes DUDA sobre si algo es un error, NO lo incluyas
+- El campo "original" debe ser DIFERENTE del campo "correction". Si son iguales, no es un error
+- Acepta variantes válidas del español (España y Latinoamérica)
+- No marques como error regionalismos o variantes aceptadas
+- Solo reporta errores cuando estés >90% seguro
+
 INSTRUCCIONES:
 1. Analiza el texto extraído mostrado arriba
 2. ${typesInstructions}
 3. Clasifica cada error por tipo
 4. Para cada error, proporciona:
-   - El texto original (con el error)
-   - La corrección apropiada
+   - El texto original (con el error) - DEBE ser diferente de la corrección
+   - La corrección apropiada - DEBE ser diferente del original
    - ${detailedExplanations ? 'Una explicación clara, detallada y pedagógica del error' : 'Una explicación breve del error'}
    - El número de línea aproximado donde aparece
 ${optionalFeatures.length > 0 ? optionalFeatures.join('\n') : ''}
@@ -969,13 +1031,23 @@ ${strictnessInstructions[strictnessLevel]}
 ESTILO DE FEEDBACK: ${feedbackStyle.toUpperCase()}
 ${feedbackInstructions[feedbackStyle]}
 
+⚠️ REGLAS CRÍTICAS ANTI-FALSOS POSITIVOS:
+- SOLO marca como error palabras que tengan un error REAL y EVIDENTE
+- Si una palabra está escrita correctamente, NO la incluyas como error
+- NO inventes errores. Si el texto está bien escrito, reporta 0 errores
+- Si tienes DUDA sobre si algo es un error, NO lo incluyas
+- El campo "original" debe ser DIFERENTE del campo "correction". Si son iguales, no es un error
+- Acepta variantes válidas del español (España y Latinoamérica)
+- No marques como error regionalismos o variantes aceptadas
+- Solo reporta errores cuando estés >90% seguro
+
 INSTRUCCIONES:
 1. Lee cuidadosamente el texto en la imagen (puede ser manuscrito o impreso)
 2. ${typesInstructions}
 3. Clasifica cada error por tipo
 4. Para cada error, proporciona:
-   - El texto original (con el error)
-   - La corrección apropiada
+   - El texto original (con el error) - DEBE ser diferente de la corrección
+   - La corrección apropiada - DEBE ser diferente del original
    - ${detailedExplanations ? 'Una explicación clara, detallada y pedagógica del error' : 'Una explicación breve del error'}
    - El número de línea aproximado donde aparece
 ${optionalFeatures.length > 0 ? optionalFeatures.join('\n') : ''}
@@ -1037,12 +1109,44 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
     // Update review document with new results
     console.log('[reanalyzeHomework] Updating review document...');
 
-    // Add IDs and teacherStatus to each correction
-    const correctionsWithIds = (analysisResult.detailedCorrections || []).map((corr, idx) => ({
+    // ✨ FILTRO ANTI-FALSOS POSITIVOS: Eliminar correcciones donde original === correction
+    const rawCorrections = analysisResult.detailedCorrections || [];
+    const validCorrections = rawCorrections.filter(corr => {
+      const original = (corr.original || '').trim().toLowerCase();
+      const correction = (corr.correction || '').trim().toLowerCase();
+
+      // Filtrar si son iguales (no es un error real)
+      if (original === correction) {
+        console.log(`[homeworkAnalyzer] ⚠️ Filtered invalid correction: "${corr.original}" === "${corr.correction}"`);
+        return false;
+      }
+
+      // Filtrar si están vacíos
+      if (!original || !correction) {
+        console.log(`[homeworkAnalyzer] ⚠️ Filtered empty correction`);
+        return false;
+      }
+
+      return true;
+    });
+
+    console.log(`[homeworkAnalyzer] Filtered ${rawCorrections.length - validCorrections.length} invalid corrections`);
+
+    // Add IDs and teacherStatus to each valid correction
+    const correctionsWithIds = validCorrections.map((corr, idx) => ({
       ...corr,
       id: `corr_${idx}`,
       teacherStatus: 'pending'
     }));
+
+    // ✨ Recalcular errorSummary basado en correcciones VÁLIDAS (después del filtro anti-falsos-positivos)
+    const recalculatedSummary = {
+      spelling: correctionsWithIds.filter(c => c.type === 'spelling').length,
+      grammar: correctionsWithIds.filter(c => c.type === 'grammar').length,
+      punctuation: correctionsWithIds.filter(c => c.type === 'punctuation').length,
+      vocabulary: correctionsWithIds.filter(c => c.type === 'vocabulary').length,
+      total: correctionsWithIds.length
+    };
 
     // Build update object
     const updateData = {
@@ -1055,12 +1159,12 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       // New structure: aiSuggestions with IDs and teacher status
       aiSuggestions: correctionsWithIds,
 
-      // Keep original AI summary separate
+      // Keep original AI summary separate (before filtering)
       aiErrorSummary: analysisResult.errorSummary,
 
-      // Keep legacy field for backward compatibility
-      detailedCorrections: analysisResult.detailedCorrections || [],
-      errorSummary: analysisResult.errorSummary,
+      // Keep legacy field for backward compatibility - use FILTERED data
+      detailedCorrections: validCorrections,
+      errorSummary: recalculatedSummary,
 
       overallFeedback: analysisResult.overallFeedback || '',
       suggestedGrade: analysisResult.suggestedGrade || 0,

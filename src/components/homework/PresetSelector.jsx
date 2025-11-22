@@ -159,22 +159,57 @@ export default function PresetSelector({
                 </span>
               </div>
 
-              {/* Hover details */}
+              {/* Hover details - Información completa del preset */}
               {isHovered && (
-                <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-700">
+                <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-700 space-y-2">
+                  {/* Checks */}
                   <div className="flex flex-wrap gap-1 text-xs text-zinc-500 dark:text-zinc-400">
-                    <span>Revisa:</span>
+                    <span className="font-medium">Revisa:</span>
                     {preset.config.checks.map(check => (
                       <span
                         key={check}
                         className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded"
                       >
-                        {check === 'spelling' ? 'Ortografía' :
-                         check === 'grammar' ? 'Gramática' :
-                         check === 'punctuation' ? 'Puntuación' : 'Vocabulario'}
+                        {check === 'spelling' ? '📝 Ortografía' :
+                         check === 'grammar' ? '📚 Gramática' :
+                         check === 'punctuation' ? '❗ Puntuación' : '💬 Vocabulario'}
                       </span>
                     ))}
                   </div>
+
+                  {/* AI Config details */}
+                  {preset.config.aiConfig && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 text-xs space-y-1">
+                      <div className="font-medium text-blue-700 dark:text-blue-300 mb-1">🤖 Config IA:</div>
+                      <div className="grid grid-cols-2 gap-1 text-zinc-600 dark:text-zinc-400">
+                        <span>
+                          🎯 Temp: <b>{preset.config.aiConfig.temperature}</b>
+                          {preset.config.aiConfig.temperature <= 0.4 ? ' (Preciso)' :
+                           preset.config.aiConfig.temperature >= 0.8 ? ' (Creativo)' : ''}
+                        </span>
+                        <span>
+                          📝 Tokens: <b>{preset.config.aiConfig.maxTokens}</b>
+                        </span>
+                        <span className="col-span-2">
+                          💬 Estilo: <b>
+                            {preset.config.aiConfig.feedbackStyle === 'playful' ? '🎈 Divertido' :
+                             preset.config.aiConfig.feedbackStyle === 'encouraging' ? '💪 Motivador' :
+                             preset.config.aiConfig.feedbackStyle === 'neutral' ? '📋 Neutral' :
+                             preset.config.aiConfig.feedbackStyle === 'strict' ? '📏 Directo' :
+                             preset.config.aiConfig.feedbackStyle === 'academic' ? '🎓 Académico' :
+                             preset.config.aiConfig.feedbackStyle}
+                          </b>
+                        </span>
+                        {(preset.config.aiConfig.includeSynonyms || preset.config.aiConfig.includeExamples) && (
+                          <span className="col-span-2">
+                            Extras:
+                            {preset.config.aiConfig.includeSynonyms && ' 📚 Sinónimos'}
+                            {preset.config.aiConfig.includeExamples && ' 💡 Ejemplos'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
