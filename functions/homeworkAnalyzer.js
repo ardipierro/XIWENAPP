@@ -62,7 +62,49 @@ async function getStudentCorrectionProfile(studentId, teacherId, db) {
 }
 
 /**
+ * Default AI configuration values (must match frontend)
+ */
+const DEFAULT_AI_CONFIG = {
+  temperature: 0.7,
+  maxTokens: 2000,
+  topP: 1,
+  model: 'auto',
+  feedbackStyle: 'encouraging',
+  responseLanguage: 'es',
+  includeSynonyms: false,
+  includeExamples: true
+};
+
+/**
+ * AI Config presets by strictness level
+ */
+const AI_CONFIG_BY_STRICTNESS = {
+  lenient: {
+    temperature: 0.8,
+    maxTokens: 1500,
+    feedbackStyle: 'playful',
+    includeSynonyms: false,
+    includeExamples: false
+  },
+  moderate: {
+    temperature: 0.7,
+    maxTokens: 2000,
+    feedbackStyle: 'encouraging',
+    includeSynonyms: false,
+    includeExamples: true
+  },
+  strict: {
+    temperature: 0.4,
+    maxTokens: 3000,
+    feedbackStyle: 'academic',
+    includeSynonyms: true,
+    includeExamples: true
+  }
+};
+
+/**
  * Map correction profile to analysis parameters
+ * Now reads aiConfig from profile for temperature, feedbackStyle, etc.
  */
 function mapProfileToParams(profile) {
   if (!profile) {
@@ -74,10 +116,12 @@ function mapProfileToParams(profile) {
         punctuation: true,
         vocabulary: true
       },
-      feedbackStyle: 'encouraging',
+      // Default AI config
+      aiConfig: { ...DEFAULT_AI_CONFIG },
+      feedbackStyle: DEFAULT_AI_CONFIG.feedbackStyle,
       detailedExplanations: true,
-      includeSynonyms: false,
-      includeExamples: true
+      includeSynonyms: DEFAULT_AI_CONFIG.includeSynonyms,
+      includeExamples: DEFAULT_AI_CONFIG.includeExamples
     };
   }
 
@@ -103,13 +147,36 @@ function mapProfileToParams(profile) {
   // Get display settings
   const display = settings.display || {};
 
+  // ✨ Get AI config from profile, with fallback to strictness-based defaults
+  const strictness = settings.strictness || 'moderate';
+  const strictnessDefaults = AI_CONFIG_BY_STRICTNESS[strictness] || AI_CONFIG_BY_STRICTNESS.moderate;
+
+  // Profile aiConfig takes precedence over strictness defaults
+  const profileAiConfig = settings.aiConfig || {};
+
+  const aiConfig = {
+    temperature: profileAiConfig.temperature ?? strictnessDefaults.temperature ?? DEFAULT_AI_CONFIG.temperature,
+    maxTokens: profileAiConfig.maxTokens ?? strictnessDefaults.maxTokens ?? DEFAULT_AI_CONFIG.maxTokens,
+    topP: profileAiConfig.topP ?? DEFAULT_AI_CONFIG.topP,
+    model: profileAiConfig.model ?? DEFAULT_AI_CONFIG.model,
+    feedbackStyle: profileAiConfig.feedbackStyle ?? strictnessDefaults.feedbackStyle ?? DEFAULT_AI_CONFIG.feedbackStyle,
+    responseLanguage: profileAiConfig.responseLanguage ?? DEFAULT_AI_CONFIG.responseLanguage,
+    includeSynonyms: profileAiConfig.includeSynonyms ?? strictnessDefaults.includeSynonyms ?? DEFAULT_AI_CONFIG.includeSynonyms,
+    includeExamples: profileAiConfig.includeExamples ?? strictnessDefaults.includeExamples ?? DEFAULT_AI_CONFIG.includeExamples
+  };
+
+  console.log(`[mapProfileToParams] Profile: ${profile.name}, Strictness: ${strictness}`);
+  console.log(`[mapProfileToParams] AI Config: temp=${aiConfig.temperature}, style=${aiConfig.feedbackStyle}, tokens=${aiConfig.maxTokens}`);
+
   return {
-    strictnessLevel: strictnessMap[settings.strictness] || 'intermediate',
+    strictnessLevel: strictnessMap[strictness] || 'intermediate',
     correctionTypes,
-    feedbackStyle: 'encouraging',
+    // ✨ Include full aiConfig for use in API calls
+    aiConfig,
+    feedbackStyle: aiConfig.feedbackStyle,
     detailedExplanations: display.showDetailedErrors !== false,
-    includeSynonyms: false,
-    includeExamples: true
+    includeSynonyms: aiConfig.includeSynonyms,
+    includeExamples: aiConfig.includeExamples
   };
 }
 
@@ -138,8 +205,12 @@ async function downloadImageAsBase64(imageUrl) {
 
 /**
  * Analyze homework image using Claude Vision API
+ * @param {string} imageUrl - URL of the image
+ * @param {string} imageBase64 - Base64 encoded image
+ * @param {string} systemPrompt - System prompt for the AI
+ * @param {Object} aiConfig - AI configuration from profile (temperature, maxTokens, etc.)
  */
-async function analyzeWithClaude(imageUrl, imageBase64, systemPrompt) {
+async function analyzeWithClaude(imageUrl, imageBase64, systemPrompt, aiConfig = {}) {
   const apiKey = process.env.CLAUDE_API_KEY;
 
   if (!apiKey) {
@@ -149,14 +220,19 @@ async function analyzeWithClaude(imageUrl, imageBase64, systemPrompt) {
   // Detect image type from URL
   const imageType = imageUrl.toLowerCase().includes('.png') ? 'image/png' : 'image/jpeg';
 
+  // Use aiConfig values with sensible defaults
+  const temperature = aiConfig.temperature ?? 0.4;
+  const maxTokens = aiConfig.maxTokens ?? 4000;
+
   console.log('[Claude Vision] Analyzing image...');
   console.log('[Claude Vision] Image type:', imageType);
   console.log('[Claude Vision] Image size (base64):', imageBase64.length, 'chars');
+  console.log(`[Claude Vision] AI Config: temperature=${temperature}, maxTokens=${maxTokens}`);
 
   const requestBody = {
     model: 'claude-sonnet-4-5-20250929', // Latest model with vision
-    max_tokens: 4000,
-    temperature: 0.4,
+    max_tokens: maxTokens,
+    temperature: temperature,
     system: systemPrompt,
     messages: [
       {
@@ -205,8 +281,12 @@ async function analyzeWithClaude(imageUrl, imageBase64, systemPrompt) {
 
 /**
  * Analyze homework image using OpenAI GPT-4 Vision API
+ * @param {string} imageUrl - URL of the image
+ * @param {string} imageBase64 - Base64 encoded image
+ * @param {string} systemPrompt - System prompt for the AI
+ * @param {Object} aiConfig - AI configuration from profile (temperature, maxTokens, etc.)
  */
-async function analyzeWithOpenAI(imageUrl, imageBase64, systemPrompt) {
+async function analyzeWithOpenAI(imageUrl, imageBase64, systemPrompt, aiConfig = {}) {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -216,8 +296,13 @@ async function analyzeWithOpenAI(imageUrl, imageBase64, systemPrompt) {
   // Detect image type from URL
   const imageType = imageUrl.toLowerCase().includes('.png') ? 'image/png' : 'image/jpeg';
 
+  // Use aiConfig values with sensible defaults
+  const temperature = aiConfig.temperature ?? 0.4;
+  const maxTokens = aiConfig.maxTokens ?? 4000;
+
   console.log('[GPT-4 Vision] Analyzing image...');
   console.log('[GPT-4 Vision] Image type:', imageType);
+  console.log(`[GPT-4 Vision] AI Config: temperature=${temperature}, maxTokens=${maxTokens}`);
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -249,8 +334,8 @@ async function analyzeWithOpenAI(imageUrl, imageBase64, systemPrompt) {
           ]
         }
       ],
-      temperature: 0.4,
-      max_tokens: 4000
+      temperature: temperature,
+      max_tokens: maxTokens
     })
   });
 
@@ -461,11 +546,13 @@ exports.analyzeHomeworkImage = onDocumentCreated({
       advanced: 'Sé estricto y minucioso. Detecta todos los errores, incluidos matices de vocabulario, estilo, registro formal/informal, y sutilezas gramaticales.'
     };
 
-    // Feedback style instructions
+    // Feedback style instructions (matches FEEDBACK_STYLES constant)
     const feedbackInstructions = {
       encouraging: 'Usa un tono positivo, alentador y motivador. Destaca los aciertos antes de mencionar errores. Usa frases como "¡Muy bien!", "Excelente intento", "Vas por buen camino". Sé comprensivo y pedagógico.',
       neutral: 'Usa un tono directo, objetivo y profesional. Sé claro y conciso en tus observaciones sin ser ni demasiado positivo ni negativo. Enfócate en los hechos.',
-      academic: 'Usa un tono formal y académico. Proporciona feedback detallado con terminología técnica apropiada. Sé preciso y exhaustivo en tus explicaciones.'
+      strict: 'Usa un tono directo y sin rodeos. Señala los errores de manera clara y concisa. No uses elogios innecesarios. El objetivo es que el estudiante entienda exactamente qué corregir.',
+      playful: 'Usa un tono divertido y lúdico, ideal para niños. Usa emojis ocasionalmente (🌟, 👍, 🎉). Convierte los errores en oportunidades de aprendizaje con frases como "¡Casi lo tienes!", "¡Ups, pequeño detalle!", "¡Súper cerca!". Celebra los aciertos con entusiasmo.',
+      academic: 'Usa un tono formal y académico. Proporciona feedback detallado con terminología técnica apropiada. Sé preciso y exhaustivo en tus explicaciones. Usa referencias a reglas gramaticales específicas.'
     };
 
     // Build error types to detect
@@ -594,12 +681,16 @@ FORMATO DE RESPUESTA (JSON):
 Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
 
     // ✨ STEP 2: Analyze with selected provider for error correction
+    // Pass aiConfig from profile for temperature, maxTokens control
+    const aiConfig = profileParams.aiConfig || {};
+    console.log(`[analyzeHomeworkImage] Using AI config from profile: temp=${aiConfig.temperature}, tokens=${aiConfig.maxTokens}, style=${aiConfig.feedbackStyle}`);
+
     let aiResponse;
     if (functionConfig.analysis_provider === 'openai') {
-      aiResponse = await analyzeWithOpenAI(reviewData.imageUrl, imageBase64, systemPrompt);
+      aiResponse = await analyzeWithOpenAI(reviewData.imageUrl, imageBase64, systemPrompt, aiConfig);
     } else {
       // Default to Claude
-      aiResponse = await analyzeWithClaude(reviewData.imageUrl, imageBase64, systemPrompt);
+      aiResponse = await analyzeWithClaude(reviewData.imageUrl, imageBase64, systemPrompt, aiConfig);
     }
 
     // Parse JSON response
@@ -787,11 +878,13 @@ exports.reanalyzeHomework = onDocumentUpdated({
       advanced: 'Sé estricto y minucioso. Detecta todos los errores, incluidos matices de vocabulario, estilo, registro formal/informal, y sutilezas gramaticales.'
     };
 
-    // Feedback style instructions
+    // Feedback style instructions (matches FEEDBACK_STYLES constant)
     const feedbackInstructions = {
       encouraging: 'Usa un tono positivo, alentador y motivador. Destaca los aciertos antes de mencionar errores. Usa frases como "¡Muy bien!", "Excelente intento", "Vas por buen camino". Sé comprensivo y pedagógico.',
       neutral: 'Usa un tono directo, objetivo y profesional. Sé claro y conciso en tus observaciones sin ser ni demasiado positivo ni negativo. Enfócate en los hechos.',
-      academic: 'Usa un tono formal y académico. Proporciona feedback detallado con terminología técnica apropiada. Sé preciso y exhaustivo en tus explicaciones.'
+      strict: 'Usa un tono directo y sin rodeos. Señala los errores de manera clara y concisa. No uses elogios innecesarios. El objetivo es que el estudiante entienda exactamente qué corregir.',
+      playful: 'Usa un tono divertido y lúdico, ideal para niños. Usa emojis ocasionalmente (🌟, 👍, 🎉). Convierte los errores en oportunidades de aprendizaje con frases como "¡Casi lo tienes!", "¡Ups, pequeño detalle!", "¡Súper cerca!". Celebra los aciertos con entusiasmo.',
+      academic: 'Usa un tono formal y académico. Proporciona feedback detallado con terminología técnica apropiada. Sé preciso y exhaustivo en tus explicaciones. Usa referencias a reglas gramaticales específicas.'
     };
 
     // Build error types to detect
@@ -920,12 +1013,16 @@ FORMATO DE RESPUESTA (JSON):
 Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
 
     // ✨ STEP 2: Analyze with selected provider for error correction
+    // Pass aiConfig from profile for temperature, maxTokens control
+    const aiConfig = profileParams.aiConfig || {};
+    console.log(`[reanalyzeHomework] Using AI config from profile: temp=${aiConfig.temperature}, tokens=${aiConfig.maxTokens}, style=${aiConfig.feedbackStyle}`);
+
     let aiResponse;
     if (functionConfig.analysis_provider === 'openai') {
-      aiResponse = await analyzeWithOpenAI(afterData.imageUrl, imageBase64, systemPrompt);
+      aiResponse = await analyzeWithOpenAI(afterData.imageUrl, imageBase64, systemPrompt, aiConfig);
     } else {
       // Default to Claude
-      aiResponse = await analyzeWithClaude(afterData.imageUrl, imageBase64, systemPrompt);
+      aiResponse = await analyzeWithClaude(afterData.imageUrl, imageBase64, systemPrompt, aiConfig);
     }
 
     // Parse JSON response
