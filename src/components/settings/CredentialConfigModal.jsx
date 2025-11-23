@@ -9,6 +9,7 @@ function CredentialConfigModal({ provider, initialValue = '', onSave, onClose })
   const [saving, setSaving] = useState(false);
 
   const hasChanged = apiKey !== initialValue;
+  const IconComponent = provider.icon;
 
   const handleSave = async () => {
     try {
@@ -27,7 +28,9 @@ function CredentialConfigModal({ provider, initialValue = '', onSave, onClose })
         {/* Header */}
         <div className={`modal-header bg-gradient-to-r from-${provider.color}-500 to-${provider.color}-600`}>
           <div className="flex items-center gap-3">
-            <div className="text-4xl">{provider.icon}</div>
+            <div className="text-4xl">
+              {provider.emoji || (IconComponent && <IconComponent size={32} className="text-white" />)}
+            </div>
             <div>
               <h3 className="modal-title text-white m-0">Configurar {provider.name}</h3>
               <p className="text-sm text-white/90 m-0">{provider.description}</p>
