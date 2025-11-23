@@ -1928,7 +1928,9 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .sidemenu {
   position: fixed;
   left: 0;
-  top: 64px;
+  /* Safe area: calc(topbar + max(safe-area, 20px)) para móviles */
+  /* En desktop (lg:) usamos 64px porque no hay barra de estado */
+  top: calc(48px + max(env(safe-area-inset-top), 20px));
   bottom: 0;
   width: 260px;
   background: var(--color-bg-primary);
@@ -1937,6 +1939,13 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   transition: transform 0.3s ease, top 0.3s ease;
   z-index: 90;
   overflow-y: auto;
+}
+
+/* Desktop: sin safe-area extra porque no hay barra de estado */
+@media (min-width: 1024px) {
+  .sidemenu {
+    top: 64px;
+  }
 }
 
 .sidemenu.open {
@@ -2049,9 +2058,19 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   }
 }
 
-@media (max-width: 768px) {
+/* Tablets: safe-area con fallback + altura de topbar de tablet (56px) */
+@media (min-width: 768px) and (max-width: 1023px) {
   .sidemenu {
-    top: 56px;
+    top: calc(56px + max(env(safe-area-inset-top), 20px));
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Móvil pequeño: mantener estilos de layout */
+@media (max-width: 767px) {
+  .sidemenu {
     width: 100%;
     max-width: 300px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
