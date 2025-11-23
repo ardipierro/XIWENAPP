@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, X, AlertTriangle, Trash2, Info, Copy, Check } from 'lucide-react';
+import { Save, X, AlertTriangle, Trash2, Info, Copy, Check, Settings2 } from 'lucide-react';
 import { BaseButton, BaseModal, BaseInput, BaseAlert } from '../common';
 import {
   createCorrectionProfile,
@@ -154,6 +154,8 @@ export default function PromptBasedProfileEditor({ profile, userId, onClose }) {
   const [name, setName] = useState(profile?.name || '');
   const [description, setDescription] = useState(profile?.description || '');
   const [prompt, setPrompt] = useState(profile?.settings?.customPrompt || DEFAULT_PROMPT_TEMPLATE);
+  const [temperature, setTemperature] = useState(profile?.settings?.aiConfig?.temperature ?? 0.5);
+  const [maxTokens, setMaxTokens] = useState(profile?.settings?.aiConfig?.maxTokens ?? 2000);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -261,8 +263,8 @@ export default function PromptBasedProfileEditor({ profile, userId, onClose }) {
             strokeOpacity: 0.8
           },
           aiConfig: {
-            temperature: 0.5,
-            maxTokens: 2000,
+            temperature: temperature,
+            maxTokens: maxTokens,
             feedbackStyle: 'encouraging',
             responseLanguage: 'es'
           },
@@ -320,6 +322,41 @@ export default function PromptBasedProfileEditor({ profile, userId, onClose }) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Ej: Para estudiantes nuevos"
           />
+        </div>
+
+        {/* AI Parameters */}
+        <div className="flex items-center gap-6 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Settings2 className="w-4 h-4 text-zinc-500" />
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Parámetros IA:</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-zinc-600 dark:text-zinc-400">Temperatura:</label>
+            <select
+              value={temperature}
+              onChange={(e) => setTemperature(parseFloat(e.target.value))}
+              className="px-2 py-1 text-sm border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+            >
+              <option value={0.1}>0.1 (Muy preciso)</option>
+              <option value={0.3}>0.3 (Preciso)</option>
+              <option value={0.5}>0.5 (Equilibrado)</option>
+              <option value={0.7}>0.7 (Creativo)</option>
+              <option value={0.9}>0.9 (Muy creativo)</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-zinc-600 dark:text-zinc-400">Max Tokens:</label>
+            <select
+              value={maxTokens}
+              onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+              className="px-2 py-1 text-sm border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+            >
+              <option value={1000}>1000 (Corto)</option>
+              <option value={2000}>2000 (Normal)</option>
+              <option value={3000}>3000 (Largo)</option>
+              <option value={4000}>4000 (Muy largo)</option>
+            </select>
+          </div>
         </div>
 
         {/* Quick presets (only for new profiles) */}
