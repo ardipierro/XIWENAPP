@@ -131,8 +131,8 @@ export function UniversalCard({
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef(null);
 
-  // Get global saved config (si existe)
-  const { config: globalConfig } = useCardConfig();
+  // Get global saved config (si existe) + estado global de botones de eliminar
+  const { config: globalConfig, showDeleteButtons } = useCardConfig();
 
   // Get configurations con merge correcto (memoizado para evitar loops)
   const variantConfig = useMemo(() => {
@@ -677,8 +677,8 @@ export function UniversalCard({
             <div className="flex-shrink-0 flex items-center gap-2 pr-4" onClick={(e) => e.stopPropagation()}>
               {actions && renderActions()}
 
-              {/* Delete Button */}
-              {onDelete && variantConfig.deleteButton?.enabled && (
+              {/* Delete Button - Respeta toggle global */}
+              {onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons && (
                 <CardDeleteButton
                   onDelete={onDelete}
                   variant={variantConfig.deleteButton.variant || 'solid'}
@@ -842,7 +842,7 @@ export function UniversalCard({
             </div>
 
             {/* Footer sticky - FUERA del área scrolleable */}
-            {(badges?.length > 0 || stats?.length > 0 || actions || (onDelete && variantConfig.deleteButton?.enabled)) && variantConfig.footerSticky && (
+            {(badges?.length > 0 || stats?.length > 0 || actions || (onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons)) && variantConfig.footerSticky && (
               <div className={`flex-shrink-0 pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                 {/* Badges */}
                 {renderBadges()}
@@ -851,10 +851,10 @@ export function UniversalCard({
                 {renderStats()}
 
                 {/* Actions Row: DeleteButton (left) + Regular Actions (right) */}
-                {(actions || (onDelete && variantConfig.deleteButton?.enabled)) && (
+                {(actions || (onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons)) && (
                   <div className="flex items-center justify-between gap-2">
-                    {/* Delete Button - Esquina inferior IZQUIERDA */}
-                    {onDelete && variantConfig.deleteButton?.enabled && (
+                    {/* Delete Button - Esquina inferior IZQUIERDA - Respeta toggle global */}
+                    {onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons && (
                       <CardDeleteButton
                         onDelete={onDelete}
                         variant={variantConfig.deleteButton.variant || 'solid'}
@@ -877,7 +877,7 @@ export function UniversalCard({
             )}
 
             {/* Footer NO sticky (para stats cards y otros que no necesitan) */}
-            {(badges?.length > 0 || stats?.length > 0 || actions || (onDelete && variantConfig.deleteButton?.enabled)) && !variantConfig.footerSticky && (
+            {(badges?.length > 0 || stats?.length > 0 || actions || (onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons)) && !variantConfig.footerSticky && (
               <div className={`flex-shrink-0 pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                 {/* Badges */}
                 {renderBadges()}
@@ -886,10 +886,10 @@ export function UniversalCard({
                 {renderStats()}
 
                 {/* Actions Row: DeleteButton (left) + Regular Actions (right) */}
-                {(actions || (onDelete && variantConfig.deleteButton?.enabled)) && (
+                {(actions || (onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons)) && (
                   <div className="flex items-center justify-between gap-2">
-                    {/* Delete Button - Esquina inferior IZQUIERDA */}
-                    {onDelete && variantConfig.deleteButton?.enabled && (
+                    {/* Delete Button - Esquina inferior IZQUIERDA - Respeta toggle global */}
+                    {onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons && (
                       <CardDeleteButton
                         onDelete={onDelete}
                         variant={variantConfig.deleteButton.variant || 'solid'}

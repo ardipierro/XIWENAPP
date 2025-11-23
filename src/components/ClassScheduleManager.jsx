@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import BaseButton from './common/BaseButton';
 import { CardDeleteButton, UniversalCard } from './cards';
+import { useCardConfig } from '../contexts/CardConfigContext';
 import SearchBar from './common/SearchBar';
 import {
   createScheduledClass,
@@ -33,6 +34,9 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Estado global de visibilidad de botones de eliminar
+  const { showDeleteButtons } = useCardConfig();
 
   const [formData, setFormData] = useState({
     daysOfWeek: [1], // Array de días seleccionados (Lunes por defecto)
@@ -413,12 +417,14 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
                         <RefreshCw size={16} strokeWidth={2} />
                       </button>
                     )}
-                    <CardDeleteButton
-                      onDelete={() => handleDelete(schedule.id)}
-                      variant="solid"
-                      size="sm"
-                      confirmMessage={`¿Eliminar horario de ${getDayName(schedule.dayOfWeek)}?`}
-                    />
+                    {showDeleteButtons && (
+                      <CardDeleteButton
+                        onDelete={() => handleDelete(schedule.id)}
+                        variant="solid"
+                        size="sm"
+                        confirmMessage={`¿Eliminar horario de ${getDayName(schedule.dayOfWeek)}?`}
+                      />
+                    )}
                   </div>
                 </div>
 

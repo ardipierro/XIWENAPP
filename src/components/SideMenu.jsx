@@ -4,6 +4,7 @@
  */
 
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useCardConfig } from '../contexts/CardConfigContext';
 import {
   BarChart3,
   Users,
@@ -32,7 +33,10 @@ import {
   UsersRound,
   Layers,
   Sparkles,
-  BookMarked
+  BookMarked,
+  Trash2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 /**
@@ -49,6 +53,9 @@ import {
 function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, hasBanner = false }) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Estado global de visibilidad de botones de eliminar
+  const { showDeleteButtons, toggleDeleteButtons } = useCardConfig();
 
   const handleNavigation = (path, action) => {
     if (action && onMenuAction) {
@@ -195,6 +202,34 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
         <div className="sidemenu-content custom-scrollbar">
           {/* Items del menú */}
           {menuData.sections ? renderSectionedMenu() : renderFlatMenu()}
+
+          {/* Separador */}
+          <div className="sidemenu-divider" />
+
+          {/* Toggle de botones de eliminar - Solo para admin y teachers */}
+          {['admin', 'teacher', 'trial_teacher'].includes(userRole) && (
+            <div className="sidemenu-toggle-section">
+              <button
+                className={`sidemenu-toggle-btn ${!showDeleteButtons ? 'active' : ''}`}
+                onClick={toggleDeleteButtons}
+                title={showDeleteButtons ? 'Ocultar botones de eliminar' : 'Mostrar botones de eliminar'}
+              >
+                <span className="sidemenu-toggle-icon">
+                  {showDeleteButtons ? (
+                    <Eye size={18} strokeWidth={2} />
+                  ) : (
+                    <EyeOff size={18} strokeWidth={2} />
+                  )}
+                </span>
+                <span className="sidemenu-toggle-label">
+                  {showDeleteButtons ? 'Ocultar eliminar' : 'Mostrar eliminar'}
+                </span>
+                <span className={`sidemenu-toggle-indicator ${showDeleteButtons ? 'on' : 'off'}`}>
+                  <Trash2 size={14} strokeWidth={2} />
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       </aside>
     </>

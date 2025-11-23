@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import { useUserManagement } from '../hooks/useUserManagement';
+import { useCardConfig } from '../contexts/CardConfigContext';
 import { createUser, deleteUser } from '../firebase/users';
 import SearchBar from './common/SearchBar';
 import { BaseButton, BaseLoading, BaseEmptyState, BaseBadge, CategoryBadge, BaseModal } from './common';
@@ -96,6 +97,7 @@ const getAvatarColor = (role) => {
  */
 export default function UniversalUserManager({ user, userRole }) {
   const { can, isAdmin, initialized: permissionsReady } = usePermissions();
+  const { showDeleteButtons } = useCardConfig();
 
   // Hook de gestión de usuarios con permisos
   const userManagement = useUserManagement(user, {
@@ -460,8 +462,8 @@ export default function UniversalUserManager({ user, userRole }) {
                     <span className="text-zinc-500">créditos</span>
                   </div>
 
-                  {/* Delete Button - UNIFICADO (esquina inferior izquierda) */}
-                  {can('delete-users') && (
+                  {/* Delete Button - UNIFICADO (esquina inferior izquierda) - Respeta toggle global */}
+                  {can('delete-users') && showDeleteButtons && (
                     <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 flex justify-start">
                       <CardDeleteButton
                         onDelete={async () => {
