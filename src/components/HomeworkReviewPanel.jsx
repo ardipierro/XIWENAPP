@@ -56,6 +56,7 @@ import ImageOverlayControls from './homework/ImageOverlayControls';
 import StudentAssigner from './homework/StudentAssigner';
 import QuickCorrectionView from './homework/QuickCorrectionView';
 import StudentCameraUpload from './homework/StudentCameraUpload';
+import SimpleHomeworkModal from './homework/SimpleHomeworkModal';
 import UserAvatar from './UserAvatar';
 import {
   getPendingReviews,
@@ -440,16 +441,15 @@ export default function HomeworkReviewPanel({ teacherId }) {
         </div>
       )}
 
-      {/* Detail Modal */}
+      {/* Detail Modal - Now using SimpleHomeworkModal */}
       {showDetailModal && selectedReview && (
-        <ReviewDetailModal
+        <SimpleHomeworkModal
           review={selectedReview}
           onClose={() => {
             setShowDetailModal(false);
             setSelectedReview(null);
           }}
           onApproveSuccess={handleApproveSuccess}
-          onReanalysisSuccess={handleReanalysisSuccess}
           teacherId={teacherId}
           currentUser={user}
         />

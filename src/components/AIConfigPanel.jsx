@@ -22,7 +22,7 @@ import AIFunctionCard from './AIFunctionCard';
 import AIFunctionConfigModal from './AIFunctionConfigModal';
 import VoiceLabModal from './VoiceLabModal';
 import SelectionSpeakerConfig from './SelectionSpeakerConfig';
-import ProfileEditor from './homework/ProfileEditor';
+import PromptBasedProfileEditor from './homework/PromptBasedProfileEditor';
 import ImageTaskModal from './ImageTaskModal';
 import TranslatorConfigCard from './settings/TranslatorConfigCard';
 import { ExerciseBuilderModal } from './exercisebuilder/ExerciseBuilderModal';
@@ -793,9 +793,9 @@ function AIConfigPanel() {
         </BaseModal>
       )}
 
-      {/* Profile Editor Modal */}
+      {/* Profile Editor Modal - Now using PromptBasedProfileEditor */}
       {showProfileEditor && user && (
-        <ProfileEditor
+        <PromptBasedProfileEditor
           profile={selectedProfile}
           onClose={handleCloseProfileEditor}
           userId={user.uid}
