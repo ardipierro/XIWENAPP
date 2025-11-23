@@ -33,7 +33,7 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
   const [tema, setTema] = useState('');
   const [formato, setFormato] = useState('');
   const [resultado, setResultado] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [showTitlePrompt, setShowTitlePrompt] = useState(false);
   const [titulo, setTitulo] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -174,7 +174,7 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
    */
   const buildContentData = () => ({
     title: titulo.trim(),
-    description: `Ejercicio generado con ${AI_PROVIDERS.find(p => p.value === provider)?.label || provider}`,
+    description: '',
     type: CONTENT_TYPES.EXERCISE,
     content: resultado,
     status: 'published',
@@ -459,7 +459,7 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
               <BaseTextarea
                 value={resultado}
                 onChange={(e) => setResultado(e.target.value)}
-                placeholder="Edita el resultado aquí..."
+                placeholder="Escribe o pega el contenido del ejercicio aquí, o usa 'Generar ejercicio' para crearlo con IA..."
                 rows={10}
               />
             ) : (
