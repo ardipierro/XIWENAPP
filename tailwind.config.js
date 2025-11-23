@@ -93,6 +93,11 @@ export default {
         'tap-sm': '44px',  // Minimum recommended tap target
         'tap-md': '48px',  // Standard tap target
         'tap-lg': '56px',  // Comfortable tap target
+        // Safe area insets for notched devices (iOS/Android PWA)
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
       },
       
       // Radios de borde

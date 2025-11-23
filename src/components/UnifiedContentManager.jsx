@@ -51,7 +51,8 @@ import {
   BaseAlert,
   BaseEmptyState,
   BaseModal,
-  ExpandableModal
+  ExpandableModal,
+  VideoPlayer
 } from './common';
 import { UniversalCard } from './cards';
 import CreateContentModal from './CreateContentModal';
@@ -537,18 +538,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
             {/* Video */}
             {viewingContent.type === CONTENT_TYPES.VIDEO && viewingContent.url && (
               <div className="space-y-4">
-                <div className="aspect-video w-full rounded-lg overflow-hidden bg-zinc-900">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={viewingContent.url}
-                    title={viewingContent.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full"
-                  />
-                </div>
+                <VideoPlayer
+                  src={viewingContent.url}
+                  title={viewingContent.title}
+                  controls={true}
+                  className="w-full"
+                />
                 {viewingContent.videoData && (
                   <div className="text-sm space-y-2 text-gray-600 dark:text-gray-400">
                     {viewingContent.videoData.duration && (
@@ -793,115 +788,72 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
   };
 
   if (viewMode === 'list') {
+    // Construir badges para UniversalCard
+    const listBadges = [];
+    if (variantConfig.showBadges) {
+      listBadges.push(
+        <CategoryBadge key="type" type="content" value={content.type} size="sm" />
+      );
+      if (content.status) {
+        listBadges.push(
+          <CategoryBadge key="status" type="status" value={content.status} size="sm" />
+        );
+      }
+      if (content.metadata?.difficulty) {
+        listBadges.push(
+          <span key="difficulty" className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
+            {content.metadata.difficulty}
+          </span>
+        );
+      }
+      content.metadata?.tags?.slice(0, 2).forEach((tag, idx) => {
+        listBadges.push(
+          <span key={`tag-${idx}`} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+            {tag}
+          </span>
+        );
+      });
+    }
+
     return (
-      <div
+      <UniversalCard
         id={`content-${content.id}`}
-        className={`group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 cursor-pointer hover:shadow-lg ${isNew ? 'border border-green-500 shadow-lg shadow-green-500/20' : 'border border-gray-200 dark:border-gray-700'}`}
+        layout="row"
+        variant="content"
+        image={hasImage ? content.videoData.thumbnailUrl : undefined}
+        icon={!hasImage ? IconComponent : undefined}
+        title={content.title}
+        description={content.description || config.description}
+        badges={listBadges}
         onClick={() => onView(content)}
+        className={isNew ? 'border-green-500 shadow-lg shadow-green-500/20' : ''}
+        actions={[
+          <BaseButton key="edit" variant="ghost" icon={Edit} size="lg" onClick={() => onEdit(content)} />,
+          <BaseButton key="delete" variant="ghost" icon={Trash2} size="lg" onClick={() => onDelete(content.id)} />
+        ]}
       >
-        <div className="flex items-stretch min-h-[140px]">
-          {/* Imagen o Icono - Cuadrado que ocupa toda la altura */}
-          <div className="w-[140px] flex-shrink-0 overflow-hidden">
-            {hasImage ? (
-              <img
-                src={content.videoData.thumbnailUrl}
-                alt={content.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  // Mostrar ícono de fallback
-                  const iconClasses = getIconColorClasses(content.type);
-                  const fallback = document.createElement('div');
-                  fallback.className = `w-full h-full flex items-center justify-center ${iconClasses}`;
-                  e.target.parentElement.appendChild(fallback);
-                }}
-              />
-            ) : (
-              (() => {
-                const iconClasses = getIconColorClasses(content.type);
-                return (
-                  <div className={`w-full h-full flex items-center justify-center ${iconClasses}`}>
-                    <IconComponent className="w-10 h-10" strokeWidth={2} />
-                  </div>
-                );
-              })()
-            )}
-          </div>
-
-          {/* Badges, Título, Descripción */}
-          <div className="flex-1 min-w-0 py-4 px-4">
-            {/* Badges - Solo mostrar si variantConfig.showBadges es true */}
-            {variantConfig.showBadges && (
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <CategoryBadge
-                  type="content"
-                  value={content.type}
-                  size="sm"
-                />
-                {/* Status badge */}
-                {content.status && (
-                  <CategoryBadge
-                    type="status"
-                    value={content.status}
-                    size="sm"
-                  />
-                )}
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${getStatusClasses(content.status || CONTENT_STATUS.DRAFT)}`} style={{ display: 'none' }}>
-                  {getStatusLabel(content.status || CONTENT_STATUS.DRAFT)}
-                </span>
-                {content.metadata?.difficulty && (
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
-                    {content.metadata.difficulty}
-                  </span>
-                )}
-                {content.metadata?.tags?.slice(0, 2).map((tag, idx) => (
-                  <span key={idx} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Título */}
-            <h3 className="text-base font-semibold truncate mb-1 text-gray-900 dark:text-white">
-              {content.title}
-            </h3>
-
-            {/* Descripción */}
-            <p className="text-sm line-clamp-1 mb-2 text-gray-600 dark:text-gray-400">
-              {content.description || config.description}
-            </p>
-
-            {/* Metadata (fecha, duración, puntos) */}
-            <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-              {content.createdAt && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
-                  {new Date(content.createdAt.toDate()).toLocaleDateString()}
-                </div>
-              )}
-              {content.metadata?.duration && (
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" strokeWidth={2} />
-                  {content.metadata.duration} min
-                </div>
-              )}
-              {content.metadata?.points && (
-                <div className="flex items-center gap-1">
-                  <Target className="w-3.5 h-3.5" strokeWidth={2} />
-                  {content.metadata.points} pts
-                </div>
-              )}
+        {/* Metadata personalizada */}
+        <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mt-1">
+          {content.createdAt && (
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
+              {new Date(content.createdAt.toDate()).toLocaleDateString()}
             </div>
-          </div>
-
-          {/* Footer - Action Buttons */}
-          <div className="flex items-center gap-2 flex-shrink-0 pr-4" onClick={(e) => e.stopPropagation()}>
-            <BaseButton variant="ghost" icon={Edit} size="lg" onClick={() => onEdit(content)} />
-            <BaseButton variant="ghost" icon={Trash2} size="lg" onClick={() => onDelete(content.id)} />
-          </div>
+          )}
+          {content.metadata?.duration && (
+            <div className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" strokeWidth={2} />
+              {content.metadata.duration} min
+            </div>
+          )}
+          {content.metadata?.points && (
+            <div className="flex items-center gap-1">
+              <Target className="w-3.5 h-3.5" strokeWidth={2} />
+              {content.metadata.points} pts
+            </div>
+          )}
         </div>
-      </div>
+      </UniversalCard>
     );
   }
 

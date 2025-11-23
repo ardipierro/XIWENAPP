@@ -22,6 +22,9 @@ export { default as ExpandableModal } from './ExpandableModal';
 export { default as ImageLightbox } from './ImageLightbox';
 export { default as ResponsiveGrid } from './ResponsiveGrid';
 
+// Media
+export { default as VideoPlayer } from './VideoPlayer';
+
 // Feedback & Status
 export { default as BaseBadge } from './BaseBadge';
 export { default as CategoryBadge } from './CategoryBadge';

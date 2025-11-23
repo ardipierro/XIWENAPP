@@ -351,89 +351,56 @@ export default function UniversalUserManager({ user, userRole }) {
             }
           />
         ) : viewMode === 'list' ? (
-          /* Vista List - Estilo filas como Contenidos */
+          /* Vista List - Usando UniversalCard layout="row" */
           <div className="flex flex-col gap-3">
             {userManagement.filteredUsers.map((userItem) => {
-              return (
-                <div
-                  key={userItem.id}
-                  className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-400 cursor-pointer"
-                  onClick={() => handleViewUserProfile(userItem)}
+              // Construir badge de rol
+              const badgeConfig = getBadgeByKey(`ROLE_${userItem.role.toUpperCase()}`);
+              const bgColor = badgeConfig?.color || '#6b7280';
+              const badgeStyles = getBadgeStyles(bgColor);
+              const roleBadge = (
+                <span
+                  key={`badge-${userItem.uid}-${badgeConfigVersion}`}
+                  className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
+                  style={badgeStyles}
                 >
-                  <div className="flex items-stretch min-h-[96px]">
-                    {/* Avatar - Componente Universal */}
-                    <div className="w-[96px] flex-shrink-0 bg-[var(--color-bg-secondary)] flex items-center justify-center">
-                      <UserAvatar
-                        userId={userItem.id}
-                        name={userItem.name}
-                        email={userItem.email}
-                        size="lg"
-                      />
-                    </div>
+                  {renderBadgeIcon(`ROLE_${userItem.role.toUpperCase()}`, '👤', badgeStyles.color)}
+                  {badgeConfig?.label || userItem.role}
+                </span>
+              );
 
-                    {/* Contenido */}
-                    <div className="flex-1 flex items-center gap-4 px-5 py-4 min-w-0">
-                      {/* Nombre y Email */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                          {userItem.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                          <Mail size={14} className="inline mr-1" />
-                          {userItem.email}
-                        </p>
-                      </div>
+              // Construir actions
+              const userActions = can('delete-users') ? [
+                <BaseButton
+                  key="delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setUserToDelete(userItem);
+                    setShowDeleteConfirm(true);
+                  }}
+                  variant="danger"
+                  size="sm"
+                  icon={Trash2}
+                />
+              ] : [];
 
-                      {/* Badge Rol */}
-                      <div className="flex-shrink-0">
-                        {(() => {
-                          const badgeConfig = getBadgeByKey(`ROLE_${userItem.role.toUpperCase()}`);
-                          const bgColor = badgeConfig?.color || '#6b7280';
-                          const badgeStyles = getBadgeStyles(bgColor);
-                          return (
-                            <span
-                              key={`badge-${userItem.uid}-${badgeConfigVersion}`}
-                              className={`inline-flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold shadow-lg backdrop-blur-sm`}
-                              style={badgeStyles}
-                            >
-                              {renderBadgeIcon(`ROLE_${userItem.role.toUpperCase()}`, '👤', badgeStyles.color)}
-                              {badgeConfig?.label || userItem.role}
-                            </span>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Stats */}
-                      <div className="flex gap-6 flex-shrink-0">
-                        <div className="flex items-center gap-2">
-                          <DollarSign size={16} className="text-gray-500" />
-                          <div className="flex flex-col">
-                            <span className="text-lg font-extrabold text-gray-900 dark:text-white">
-                              {userItem.credits || 0}
-                            </span>
-                            <span className="text-xs text-gray-500">Créditos</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      {can('delete-users') && (
-                        <div className="flex gap-2 flex-shrink-0">
-                          <BaseButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setUserToDelete(userItem);
-                              setShowDeleteConfirm(true);
-                            }}
-                            variant="danger"
-                            size="sm"
-                            icon={Trash2}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+              return (
+                <UniversalCard
+                  key={userItem.id}
+                  layout="row"
+                  variant="user"
+                  userId={userItem.id}
+                  userName={userItem.name}
+                  userEmail={userItem.email}
+                  title={userItem.name}
+                  subtitle={userItem.email}
+                  badges={[roleBadge]}
+                  stats={[
+                    { label: 'Créditos', value: userItem.credits || 0, icon: DollarSign }
+                  ]}
+                  actions={userActions}
+                  onClick={() => handleViewUserProfile(userItem)}
+                />
               );
             })}
           </div>

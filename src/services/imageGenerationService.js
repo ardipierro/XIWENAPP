@@ -3,10 +3,12 @@
  * @module services/imageGenerationService
  *
  * Refactored to use centralized CredentialsService
+ * Also supports sync loading via credentialsHelper for immediate access
  */
 
 import logger from '../utils/logger';
 import credentialsService, { CREDENTIALS_CHANGED_EVENT } from './CredentialsService';
+import { getAICredentialSync, getLocalStorageKey } from '../utils/credentialsHelper';
 
 class ImageGenerationService {
   constructor() {
@@ -16,8 +18,32 @@ class ImageGenerationService {
     this.hasStability = false;
     this._initialized = false;
 
+    // Load sync first for immediate availability
+    this._loadSync();
+
     // Listen for credential changes
     this._setupCredentialListener();
+  }
+
+  /**
+   * Load credentials synchronously from localStorage
+   */
+  _loadSync() {
+    try {
+      const openaiKey = getAICredentialSync('openai');
+      if (openaiKey) {
+        this.openaiApiKey = openaiKey;
+        this.hasOpenAI = true;
+      }
+
+      const stabilityKey = getAICredentialSync('stability');
+      if (stabilityKey) {
+        this.stabilityApiKey = stabilityKey;
+        this.hasStability = true;
+      }
+    } catch (err) {
+      logger.warn('Could not load credentials sync', 'ImageGenerationService');
+    }
   }
 
   /**
@@ -85,6 +111,9 @@ class ImageGenerationService {
       await credentialsService.set('openai', key.trim());
       this.openaiApiKey = key.trim();
       this.hasOpenAI = true;
+      // Also save to localStorage for sync access
+      const storageKey = getLocalStorageKey('openai');
+      if (storageKey) localStorage.setItem(storageKey, key.trim());
       logger.info('OpenAI API configured for image generation', 'ImageGenerationService');
     }
   }
@@ -97,6 +126,9 @@ class ImageGenerationService {
       await credentialsService.set('stability', key.trim());
       this.stabilityApiKey = key.trim();
       this.hasStability = true;
+      // Also save to localStorage for sync access
+      const storageKey = getLocalStorageKey('stability');
+      if (storageKey) localStorage.setItem(storageKey, key.trim());
       logger.info('Stability AI API configured', 'ImageGenerationService');
     }
   }
@@ -106,6 +138,8 @@ class ImageGenerationService {
    */
   async removeOpenAIKey() {
     await credentialsService.delete('openai');
+    const storageKey = getLocalStorageKey('openai');
+    if (storageKey) localStorage.removeItem(storageKey);
     this.openaiApiKey = null;
     this.hasOpenAI = false;
   }
@@ -115,6 +149,8 @@ class ImageGenerationService {
    */
   async removeStabilityKey() {
     await credentialsService.delete('stability');
+    const storageKey = getLocalStorageKey('stability');
+    if (storageKey) localStorage.removeItem(storageKey);
     this.stabilityApiKey = null;
     this.hasStability = false;
   }

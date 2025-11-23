@@ -576,15 +576,14 @@ export function UniversalCard({
           <>
             {/* ROW Layout - Vista de Lista Estirada */}
 
-            {/* Sección 1: Imagen/Avatar/Ícono cuadrado (ancho fijo) */}
+            {/* Sección 1: Imagen/Avatar/Ícono cuadrado (ancho = alto de la fila) */}
             <div
               className={`flex-shrink-0 overflow-hidden flex items-center justify-center ${
                 isRowLayout && !image ? layoutConfig.iconBgClass : ''
               }`}
               style={{
-                width: variant === 'user' ? layoutConfig.avatarWidth :
-                       variant === 'content' && image ? layoutConfig.imageWidth :
-                       layoutConfig.iconWidth,
+                height: '100%',
+                aspectRatio: '1 / 1',
                 ...(!isRowLayout && (variant === 'user' || !image) ? { backgroundColor: 'var(--color-bg-tertiary)' } : {}),
               }}
             >

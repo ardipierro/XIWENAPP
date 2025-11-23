@@ -4,11 +4,13 @@
  */
 
 import { useState } from 'react';
-import { Box, CheckSquare, Move, Edit3, HelpCircle } from 'lucide-react';
+import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2 } from 'lucide-react';
 import { BaseBadge } from './common';
 import WordHighlightConfig from './container/WordHighlightConfig';
 import DragDropConfig from './container/DragDropConfig';
 import FillBlanksConfig from './container/FillBlanksConfig';
+import OpenQuestionsConfig from './container/OpenQuestionsConfig';
+import InfoTableConfig from './container/InfoTableConfig';
 import logger from '../utils/logger';
 
 /**
@@ -37,6 +39,22 @@ const CONTAINER_TABS = [
     icon: Edit3,
     description: 'Ejercicios de completar espacios. Las palabras entre *asteriscos* se convierten en campos de texto.',
     component: FillBlanksConfig,
+    available: true
+  },
+  {
+    id: 'open-questions',
+    label: 'Respuesta Libre',
+    icon: MessageSquare,
+    description: 'Preguntas abiertas con textarea para respuestas completas. Ideal para contrarios, transformaciones, traducciones. Detecta #RESPUESTA_LIBRE o líneas numeradas.',
+    component: OpenQuestionsConfig,
+    available: true
+  },
+  {
+    id: 'info-table',
+    label: 'Cuadro Informativo',
+    icon: Table2,
+    description: 'Tablas explicativas interactivas para gramática, conjugaciones, vocabulario. Usa #TABLA_INFO con columnas separadas por |',
+    component: InfoTableConfig,
     available: true
   },
   {

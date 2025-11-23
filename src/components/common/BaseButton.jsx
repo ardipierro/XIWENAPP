@@ -46,6 +46,7 @@ function BaseButton({
       primary: {
         backgroundColor: 'var(--color-accent)', // Fix: usar accent en vez de primary
         color: 'white',
+        border: '1px solid transparent', // Match secondary border width for consistent sizing
         hover: { backgroundColor: 'var(--color-accent-dark)' }
       },
       secondary: {
@@ -60,16 +61,19 @@ function BaseButton({
       success: {
         backgroundColor: 'var(--color-success)',
         color: 'white',
+        border: '1px solid transparent',
         hover: { backgroundColor: 'var(--color-success-dark)' }
       },
       danger: {
         backgroundColor: 'var(--color-error)', // Fix: usar error en vez de danger
         color: 'white',
+        border: '1px solid transparent',
         hover: { backgroundColor: 'var(--color-error-dark)' }
       },
       warning: {
         backgroundColor: 'var(--color-warning)', // Usar variable
         color: 'white',
+        border: '1px solid transparent',
         hover: { backgroundColor: 'var(--color-warning-dark)' }
       },
       ghost: {

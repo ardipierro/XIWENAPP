@@ -57,16 +57,28 @@ export const AI_PROVIDERS = [
   {
     id: 'google',
     name: 'Google Cloud',
-    description: 'Gemini Pro, Cloud TTS, Translation',
-    services: ['Gemini Pro', 'Cloud TTS', 'Translation'],
+    description: 'Gemini Pro, Cloud TTS',
+    services: ['Gemini Pro', 'Cloud TTS'],
     icon: Search,
     emoji: '🔍',
     color: 'red',
     docsUrl: 'https://console.cloud.google.com/apis/credentials',
-    capabilities: ['text', 'translation', 'tts'],
+    capabilities: ['text', 'tts'],
     backendSupported: true,
     // Alias for backend compatibility (backend uses 'gemini')
     backendAlias: 'gemini'
+  },
+  {
+    id: 'google_translate',
+    name: 'Google Cloud Translate API',
+    description: 'Traducción español-chino para diccionario',
+    services: ['Cloud Translation API', 'Traducción en tiempo real'],
+    icon: Search,
+    emoji: '🌐',
+    color: 'blue',
+    docsUrl: 'https://console.cloud.google.com/apis/credentials',
+    capabilities: ['translation'],
+    backendSupported: false
   },
   {
     id: 'grok',

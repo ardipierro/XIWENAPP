@@ -30,6 +30,7 @@ import {
   PageHeader,
   SearchBar
 } from '../common';
+import { UniversalCard } from '../cards';
 import ImageLightbox from '../common/ImageLightbox';
 import ImageOverlay from '../homework/ImageOverlay';
 import StudentFeedbackView from '../StudentFeedbackView';
@@ -322,75 +323,61 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
   const isPendingReview = review.status === REVIEW_STATUS.PENDING_REVIEW || review.status === 'pending_review';
   const isApproved = review.status === REVIEW_STATUS.APPROVED || review.status === 'approved';
 
-  // List view
+  // List view - Usando UniversalCard layout="row"
   if (viewMode === 'list') {
+    // Construir badges
+    const statusBadges = [];
+    if (isProcessing || isPendingReview) {
+      statusBadges.push(
+        <BaseBadge key="status" variant="primary" icon={Clock} size="sm">
+          EN REVISIÓN
+        </BaseBadge>
+      );
+    } else if (isFailed) {
+      statusBadges.push(
+        <BaseBadge key="status" variant="danger" icon={AlertCircle} size="sm">
+          ERROR
+        </BaseBadge>
+      );
+    } else if (isApproved) {
+      statusBadges.push(
+        <BaseBadge key="status" variant="success" icon={CheckCircle} size="sm">
+          ✓ CORREGIDA
+        </BaseBadge>
+      );
+      statusBadges.push(
+        <BaseBadge key="grade" variant={gradeColor} size="sm">
+          {grade}/100
+        </BaseBadge>
+      );
+    }
+
+    const dateTitle = `Tarea del ${review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })}`;
+
     return (
-      <BaseCard
-        hover
+      <UniversalCard
+        layout="row"
+        variant="content"
+        image={review.imageUrl}
+        title={dateTitle}
+        badges={statusBadges}
         onClick={onSelect}
-        className={`cursor-pointer relative ${
-          isProcessing ? 'border-2 border-orange-400 dark:border-orange-500' :
-          isFailed ? 'border-2 border-red-400 dark:border-red-500' :
-          isApproved ? 'border-2 border-green-400 dark:border-green-500' :
-          isPendingReview ? 'border-2 border-yellow-400 dark:border-yellow-500' :
-          ''
-        }`}
       >
-        <div className="flex items-center gap-4">
-          {/* Status Badge */}
-          <div className="flex-shrink-0">
-            {(isProcessing || isPendingReview) ? (
-              <BaseBadge variant="primary" icon={Clock} size="sm">
-                EN REVISIÓN
-              </BaseBadge>
-            ) : isFailed ? (
-              <BaseBadge variant="danger" icon={AlertCircle} size="sm">
-                ERROR
-              </BaseBadge>
-            ) : isApproved ? (
-              <BaseBadge variant="success" icon={CheckCircle} size="sm">
-                ✓ CORREGIDA
-              </BaseBadge>
-            ) : null}
-          </div>
-
-          {/* Image Thumbnail */}
-          <div className="flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-            <img
-              src={review.imageUrl}
-              alt="Tarea"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 dark:text-white mb-1">
-              Tarea del {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </p>
-            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-              <span className="flex items-center gap-1">
-                <Calendar size={12} />
-                {review.createdAt?.toDate?.().toLocaleTimeString('es-ES', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
-              {isApproved && (
-                <span className="flex items-center gap-1">
-                  <BaseBadge variant={gradeColor} size="sm">
-                    {grade}/100
-                  </BaseBadge>
-                </span>
-              )}
-            </div>
-          </div>
+        {/* Metadata - Hora */}
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <span className="flex items-center gap-1">
+            <Calendar size={12} />
+            {review.createdAt?.toDate?.().toLocaleTimeString('es-ES', {
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
         </div>
-      </BaseCard>
+      </UniversalCard>
     );
   }
 

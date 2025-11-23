@@ -21,7 +21,9 @@ export const EXERCISE_TYPES = {
   ORDER: 'order',
   HIGHLIGHT: 'highlight',
   DRAG_DROP: 'drag_drop',
-  TABLE: 'table'
+  TABLE: 'table',
+  OPEN_QUESTIONS: 'open_questions',
+  INFO_TABLE: 'info_table'
 };
 
 /**
@@ -62,6 +64,25 @@ export function parseExerciseFile(text, category) {
     } else if (trimmedSection.startsWith('[TABLE]')) {
       currentType = EXERCISE_TYPES.TABLE;
       continue;
+    } else if (trimmedSection.startsWith('#RESPUESTA_LIBRE') ||
+               trimmedSection.startsWith('#OPEN_QUESTIONS') ||
+               trimmedSection.startsWith('[OPEN_QUESTIONS]')) {
+      currentType = EXERCISE_TYPES.OPEN_QUESTIONS;
+      continue;
+    } else if (trimmedSection.startsWith('#TABLA_INFO') ||
+               trimmedSection.startsWith('#INFO_TABLE') ||
+               trimmedSection.startsWith('[INFO_TABLE]')) {
+      currentType = EXERCISE_TYPES.INFO_TABLE;
+      continue;
+    }
+
+    // Auto-detect numbered questions format (1. 2. 3. etc.)
+    if (currentType === EXERCISE_TYPES.MULTIPLE_CHOICE) {
+      const numberedPattern = /^\d+\.\s+.+/;
+      const lines = trimmedSection.split('\n').filter(l => l.trim());
+      if (lines.length >= 1 && lines.every(l => numberedPattern.test(l.trim()))) {
+        currentType = EXERCISE_TYPES.OPEN_QUESTIONS;
+      }
     }
 
     // Parse based on current type
@@ -95,6 +116,10 @@ function parseByType(text, type, category) {
       return parseDragDrop(text, category);
     case EXERCISE_TYPES.TABLE:
       return parseTable(text, category);
+    case EXERCISE_TYPES.OPEN_QUESTIONS:
+      return parseOpenQuestions(text, category);
+    case EXERCISE_TYPES.INFO_TABLE:
+      return parseInfoTable(text, category);
     default:
       return null;
   }
@@ -380,6 +405,150 @@ function parseTable(text, category) {
     headers,
     rows,
     answers
+  };
+}
+
+/**
+ * Parse Open Questions / Respuesta Libre
+ * Formats supported:
+ * 1. Explicit format with P: and R:
+ *    #RESPUESTA_LIBRE
+ *    P: Acá llueve mucho.
+ *    R: Acá llueve poco.
+ *
+ * 2. Numbered format (auto-detected)
+ *    1. Acá llueve mucho.
+ *    2. El tiempo es muy agradable.
+ */
+function parseOpenQuestions(text, category) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const questions = [];
+
+  // Try P:/R: format first
+  let currentQuestion = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Skip header markers
+    if (line.startsWith('#RESPUESTA_LIBRE') ||
+        line.startsWith('#OPEN_QUESTIONS') ||
+        line.startsWith('---')) {
+      continue;
+    }
+
+    // P: format
+    if (line.startsWith('P:') || line.startsWith('PREGUNTA:')) {
+      if (currentQuestion) {
+        questions.push(currentQuestion);
+      }
+      currentQuestion = {
+        question: line.replace(/^(P:|PREGUNTA:)\s*/, '').trim(),
+        answer: null
+      };
+    }
+    // R: format
+    else if (line.startsWith('R:') || line.startsWith('RESPUESTA:')) {
+      if (currentQuestion) {
+        currentQuestion.answer = line.replace(/^(R:|RESPUESTA:)\s*/, '').trim();
+      }
+    }
+    // Numbered format: 1. Question text
+    else if (/^\d+[\.\)]\s+/.test(line)) {
+      if (currentQuestion) {
+        questions.push(currentQuestion);
+      }
+      currentQuestion = {
+        question: line.replace(/^\d+[\.\)]\s+/, '').trim(),
+        answer: null
+      };
+    }
+    // Line starting with - could be expected answer for numbered format
+    else if (line.startsWith('-') && currentQuestion && !currentQuestion.answer) {
+      currentQuestion.answer = line.replace(/^-\s*/, '').trim();
+    }
+  }
+
+  // Don't forget last question
+  if (currentQuestion) {
+    questions.push(currentQuestion);
+  }
+
+  if (questions.length === 0) return null;
+
+  return {
+    type: EXERCISE_TYPES.OPEN_QUESTIONS,
+    category,
+    questions,
+    title: 'Ejercicio de Respuesta Libre'
+  };
+}
+
+/**
+ * Parse Info Table / Cuadro Informativo
+ * Format:
+ * #TABLA_INFO
+ * TITULO: mucho vs muy
+ * COLUMNAS: mucho|muy
+ * ---
+ * Hace mucho calor|El tiempo está muy bueno
+ * Hace mucho frío|El tiempo está muy malo
+ * ---
+ * NOTA: muy (副词) + 形容词
+ */
+function parseInfoTable(text, category) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+  let title = '';
+  let columns = [];
+  let rows = [];
+  let notes = [];
+  let inDataSection = false;
+
+  for (const line of lines) {
+    // Skip header markers
+    if (line.startsWith('#TABLA_INFO') ||
+        line.startsWith('#INFO_TABLE')) {
+      continue;
+    }
+
+    // Title
+    if (line.startsWith('TITULO:') || line.startsWith('TITLE:')) {
+      title = line.replace(/^(TITULO:|TITLE:)\s*/, '').trim();
+    }
+    // Column headers
+    else if (line.startsWith('COLUMNAS:') || line.startsWith('COLUMNS:')) {
+      columns = line.replace(/^(COLUMNAS:|COLUMNS:)\s*/, '').split('|').map(c => c.trim());
+    }
+    // Notes
+    else if (line.startsWith('NOTA:') || line.startsWith('NOTE:')) {
+      notes.push(line.replace(/^(NOTA:|NOTE:)\s*/, '').trim());
+    }
+    // Section separator
+    else if (line === '---') {
+      inDataSection = true;
+    }
+    // Data rows (contain |)
+    else if (line.includes('|')) {
+      const cells = line.split('|').map(c => c.trim());
+      // If no columns defined yet, first row with | becomes columns
+      if (columns.length === 0) {
+        columns = cells;
+      } else {
+        rows.push(cells);
+      }
+    }
+  }
+
+  if (columns.length === 0 && rows.length === 0) return null;
+
+  return {
+    type: EXERCISE_TYPES.INFO_TABLE,
+    category,
+    title: title || 'Cuadro Informativo',
+    columns,
+    rows,
+    notes
   };
 }
 

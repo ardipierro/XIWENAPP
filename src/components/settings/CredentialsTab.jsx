@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Key, CheckCircle, XCircle, Plus, Trash2, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, Plus, Trash2, RefreshCw } from 'lucide-react';
 import { useCredentials } from '../../contexts/CredentialsContext';
 import { AI_PROVIDERS, PROVIDER_COLORS } from '../../constants/providers';
 import { migrateCredentials } from '../../firebase/credentials';
@@ -62,6 +62,11 @@ function CredentialsTab() {
   const runMigration = async () => {
     try {
       setMigrating(true);
+
+      // Run old localStorage migration first
+      migrateOldLocalStorageKeys();
+
+      // Then run Firestore migration
       const result = await migrateCredentials();
 
       if (result.migrated.length > 0) {
@@ -76,6 +81,54 @@ function CredentialsTab() {
       logger.error('Migration failed', err, 'CredentialsTab');
     } finally {
       setMigrating(false);
+    }
+  };
+
+  // Migrate old localStorage keys to new format
+  const migrateOldLocalStorageKeys = () => {
+    const migrations = {
+      // ElevenLabs variants
+      'ai_credentials_ElevenLabs': 'ai_credentials_elevenlabs',
+      'ai_credentials_Elevenlabs': 'ai_credentials_elevenlabs',
+      'ai_credentials_eleven_labs': 'ai_credentials_elevenlabs',
+      'ai_credentials_Eleven Labs': 'ai_credentials_elevenlabs',
+      'elevenlabs_api_key': 'ai_credentials_elevenlabs',
+
+      // Google variants
+      'ai_credentials_google': 'ai_credentials_Google',
+
+      // Google Translate variants
+      'ai_credentials_Google Translate': 'ai_credentials_Google Cloud Translate API',
+      'ai_credentials_google_translate': 'ai_credentials_Google Cloud Translate API',
+      'ai_credentials_GoogleTranslate': 'ai_credentials_Google Cloud Translate API',
+
+      // Grok/xAI variants
+      'ai_credentials_xAI': 'ai_credentials_Grok',
+      'ai_credentials_xai': 'ai_credentials_Grok',
+      'ai_credentials_grok': 'ai_credentials_Grok',
+
+      // OpenAI variants
+      'ai_credentials_openai': 'ai_credentials_OpenAI',
+      'openai_api_key': 'ai_credentials_OpenAI',
+
+      // Claude/Anthropic variants
+      'ai_credentials_claude': 'ai_credentials_Claude',
+      'ai_credentials_anthropic': 'ai_credentials_Claude',
+    };
+
+    let migrated = false;
+    for (const [oldKey, newKey] of Object.entries(migrations)) {
+      const oldValue = localStorage.getItem(oldKey);
+      const newValue = localStorage.getItem(newKey);
+
+      if (oldValue && oldValue.trim() && (!newValue || !newValue.trim())) {
+        localStorage.setItem(newKey, oldValue.trim());
+        migrated = true;
+      }
+    }
+
+    if (migrated) {
+      logger.info('Old localStorage keys migrated', 'CredentialsTab');
     }
   };
 
@@ -155,12 +208,6 @@ function CredentialsTab() {
       setError(`Error al eliminar: ${err.message}`);
       setTimeout(() => setError(null), 3000);
     }
-  };
-
-  // Check if provider is configured
-  const isProviderConfigured = (provider) => {
-    const cred = credentials[provider.id];
-    return !!(cred?.apiKey?.trim());
   };
 
   // Get credential value for a provider

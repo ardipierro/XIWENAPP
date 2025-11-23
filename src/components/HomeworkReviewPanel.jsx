@@ -46,10 +46,11 @@ import {
 } from './common';
 import CategoryBadge from './common/CategoryBadge';
 import { getBadgeByKey, getContrastText } from '../config/badgeSystem';
-import { CardDeleteButton } from './cards';
+import { CardDeleteButton, UniversalCard } from './cards';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
+import ProfileEditor from './homework/ProfileEditor';
 import ManualHomeworkUpload from './homework/ManualHomeworkUpload';
 import ImageOverlay from './homework/ImageOverlay';
 import ImageOverlayControls from './homework/ImageOverlayControls';
@@ -316,17 +317,21 @@ export default function HomeworkReviewPanel({ teacherId }) {
         <div className="flex items-center gap-2">
           <BaseButton
             variant="secondary"
+            size="md"
             onClick={() => setShowCameraModal(true)}
             icon={Camera}
+            className="sm:min-w-[145px]"
           >
-            Tomar Foto
+            <span className="hidden sm:inline">Tomar Foto</span>
           </BaseButton>
           <BaseButton
             variant="primary"
+            size="md"
             onClick={() => setShowUploadModal(true)}
             icon={Upload}
+            className="sm:min-w-[145px]"
           >
-            Subir Tarea
+            <span className="hidden sm:inline">Subir Tarea</span>
           </BaseButton>
         </div>
       </div>
@@ -345,14 +350,14 @@ export default function HomeworkReviewPanel({ teacherId }) {
           variant={statusFilter === 'pending' ? 'primary' : 'ghost'}
           size="sm"
         >
-          🟡 Pendientes ({pendingCount})
+          Pendientes ({pendingCount})
         </BaseButton>
         <BaseButton
           onClick={() => setStatusFilter('approved')}
           variant={statusFilter === 'approved' ? 'primary' : 'ghost'}
           size="sm"
         >
-          🟢 Aprobadas ({approvedCount})
+          Aprobadas ({approvedCount})
         </BaseButton>
       </div>
 
@@ -525,98 +530,82 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
     }
   };
 
-  // List view (horizontal layout) - Consistente con UnifiedContentManager y UniversalUserManager
+  // List view (horizontal layout) - Usando UniversalCard layout="row"
   if (viewMode === 'list') {
+    // Construir actions
+    const actionButtons = [];
+    if (isStuck) {
+      actionButtons.push(
+        <BaseButton
+          key="cancel"
+          variant="danger"
+          size="sm"
+          onClick={handleCancelClick}
+        >
+          <XCircle size={16} strokeWidth={2.5} />
+          Cancelar
+        </BaseButton>
+      );
+    }
+
+    // Icono de estado
+    const StatusIcon = () => {
+      if (isProcessing) {
+        return (
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30" title="Procesando">
+            <Clock size={14} className="text-orange-500 animate-pulse" />
+          </span>
+        );
+      } else if (isFailed) {
+        return (
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 dark:bg-red-900/30" title="Error">
+            <AlertCircle size={14} className="text-red-500" />
+          </span>
+        );
+      } else if (isTeacherApproved) {
+        return (
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30" title="Aprobado">
+            <CheckCircle size={14} className="text-green-500" />
+          </span>
+        );
+      } else if (isAIReady) {
+        return (
+          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30" title="Pendiente revisión">
+            <Clock size={14} className="text-yellow-500" />
+          </span>
+        );
+      }
+      return null;
+    };
+
     return (
-      <div
-        className="group rounded-lg transition-all overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
+      <UniversalCard
+        layout="row"
+        variant="content"
+        image={review.imageUrl}
+        title={review.studentName || 'Sin asignar'}
         onClick={onSelect}
+        actions={actionButtons}
+        onDelete={handleDeleteClick}
+        deleteConfirmMessage="¿Eliminar esta tarea?"
       >
-        <div className="flex items-stretch min-h-[96px]">
-          {/* Imagen de la tarea - Cuadrado que ocupa toda la altura */}
-          <div className="w-[96px] flex-shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-900">
-            <img
-              src={review.imageUrl}
-              alt="Vista previa"
-              className="w-full h-full object-cover"
-            />
+        {/* Indicador de estado + Nota + Metadata - Colapsa en móvil */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 text-xs text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-2">
+            <StatusIcon />
+            <BaseBadge variant={gradeColor} size="sm">
+              {grade}/100
+            </BaseBadge>
           </div>
-
-          {/* Contenido principal */}
-          <div className="flex-1 min-w-0 py-3 px-4">
-            {/* Badges - Status + Grade */}
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              {isProcessing ? (
-                <BaseBadge variant="warning" icon={RefreshCw} size="sm" className="animate-pulse">
-                  PROCESANDO
-                </BaseBadge>
-              ) : isFailed ? (
-                <BaseBadge variant="danger" icon={AlertCircle} size="sm">
-                  ERROR
-                </BaseBadge>
-              ) : isTeacherApproved ? (
-                <BaseBadge variant="success" icon={CheckCircle} size="sm">
-                  APROBADO
-                </BaseBadge>
-              ) : isAIReady ? (
-                <BaseBadge variant="warning" icon={Clock} size="sm">
-                  PENDIENTE
-                </BaseBadge>
-              ) : null}
-              <BaseBadge variant={gradeColor} size="sm">
-                {grade}/100
-              </BaseBadge>
-            </div>
-
-            {/* Nombre del estudiante */}
-            <h3 className="text-base font-semibold truncate mb-1 text-gray-900 dark:text-white flex items-center gap-2">
-              <UserAvatar
-                userId={review.studentId}
-                name={review.studentName}
-                size="sm"
-              />
-              {review.studentName || 'Sin asignar'}
-            </h3>
-
-            {/* Metadata */}
-            <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-              <span className="flex items-center gap-1">
-                <Calendar size={12} />
-                {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric'
-                })}
-              </span>
-              <span className="flex items-center gap-1">
-                <AlertCircle size={12} />
-                {review.errorSummary?.total || 0} errores
-              </span>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0 pr-4" onClick={(e) => e.stopPropagation()}>
-            {isStuck && (
-              <BaseButton
-                variant="danger"
-                size="sm"
-                onClick={handleCancelClick}
-              >
-                <XCircle size={16} strokeWidth={2.5} />
-                Cancelar
-              </BaseButton>
-            )}
-            <CardDeleteButton
-              onDelete={handleDeleteClick}
-              variant="solid"
-              size="sm"
-              confirmMessage="¿Eliminar esta tarea?"
-              requireConfirm={false}
-            />
-          </div>
+          <span className="flex items-center gap-1">
+            <Calendar size={12} />
+            {review.createdAt?.toDate?.().toLocaleDateString('es-ES', {
+              day: 'numeric',
+              month: 'short'
+            })}
+          </span>
         </div>
-      </div>
+      </UniversalCard>
     );
   }
 
@@ -688,68 +677,11 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
           />
         </div>
 
-        {/* Stats or Processing Message */}
-        {isStuck ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
-              <AlertCircle size={18} className="flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">⚠️ Procesamiento atascado</span>
-            </div>
-            <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
-              Lleva más de 2 minutos procesando. Puede estar rota la conexión con el proveedor de IA. Cancela y reintenta.
-            </p>
-          </div>
-        ) : isProcessing ? (
-          <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-orange-800 dark:text-orange-200">
-              <RefreshCw size={18} className="animate-spin flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">IA analizando la tarea...</span>
-            </div>
-            <p className="text-xs text-orange-700 dark:text-orange-300 mt-2 ml-6 font-medium">
-              ⏱️ Esto puede tardar 10-30 segundos
-            </p>
-          </div>
-        ) : isFailed ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
-              <AlertCircle size={18} strokeWidth={2.5} className="flex-shrink-0" />
-              <span className="font-bold">Error al procesar</span>
-            </div>
-            {review.errorMessage && (
-              <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
-                {review.errorMessage}
-              </p>
-            )}
-          </div>
-        ) : isAIReady ? (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-yellow-800 dark:text-yellow-200">
-              <Clock size={18} className="flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">Pendiente revisión</span>
-            </div>
-            <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 ml-6 font-medium">
-              ✨ IA terminó. Revisa y aprueba
-            </p>
-          </div>
-        ) : isTeacherApproved ? (
-          <div className="bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-2">
-                <BaseBadge variant={gradeColor} className="text-sm">
-                  {grade}/100
-                </BaseBadge>
-                <PerformanceIcon size={14} strokeWidth={2} style={{ color: 'inherit' }} />
-              </div>
-              <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
-                {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
-              </div>
-            </div>
-          </div>
-        ) : (
+        {/* Stats - Mostrar nota y errores cuando hay datos */}
+        {(isTeacherApproved || isAIReady || (!isProcessing && !isFailed && !isStuck)) && (
           <div className="grid grid-cols-2 gap-2">
             <div className="flex items-center gap-2">
-              <BaseBadge variant={gradeColor}>
+              <BaseBadge variant={gradeColor} className="text-sm">
                 {grade}/100
               </BaseBadge>
               <PerformanceIcon size={14} strokeWidth={2} style={{ color: 'inherit' }} />
@@ -758,6 +690,17 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
               <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
               {review.errorSummary?.total || 0} error{(review.errorSummary?.total || 0) !== 1 ? 'es' : ''}
             </div>
+          </div>
+        )}
+
+        {/* Mensaje temporal solo durante procesamiento activo */}
+        {(isProcessing || isStuck) && (
+          <div className={`text-xs text-center py-2 px-3 rounded-lg ${
+            isStuck
+              ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+              : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
+          }`}>
+            {isStuck ? '⚠️ Procesamiento lento - considera cancelar' : '⏳ Analizando...'}
           </div>
         )}
 
@@ -796,7 +739,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
                 style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
               >
                 <CheckCircle size={14} style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">✓ APROBADO</span>
+                <span className="text-xs font-semibold">APROBADO</span>
               </span>
             );
           })() : isAIReady ? (() => {
@@ -855,6 +798,11 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
 
   // Selected correction profile (received from ProfileSelector)
   const [selectedProfile, setSelectedProfile] = useState(null);
+
+  // Profile editor modal state
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(null);
+  const [profileRefreshCallback, setProfileRefreshCallback] = useState(null);
 
   // View mode: 'overlay' (image with marks) or 'quick' (text list)
   const [correctionViewMode, setCorrectionViewMode] = useState('overlay');
@@ -1369,6 +1317,16 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
               setError('Error al solicitar re-análisis: ' + result.error);
             }
           }}
+          onEditProfile={(profile, refreshCallback) => {
+            setEditingProfile(profile);
+            setProfileRefreshCallback(() => refreshCallback);
+            setShowProfileEditor(true);
+          }}
+          onCreateProfile={(refreshCallback) => {
+            setEditingProfile(null); // null = create new
+            setProfileRefreshCallback(() => refreshCallback);
+            setShowProfileEditor(true);
+          }}
         />
 
         {/* Transcription with highlighted errors */}
@@ -1545,6 +1503,23 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         strokeWidth={visualization.strokeWidth}
         strokeOpacity={visualization.strokeOpacity}
       />
+
+      {/* Profile Editor Modal - Direct access from review panel */}
+      {showProfileEditor && (
+        <ProfileEditor
+          profile={editingProfile}
+          userId={currentUser?.uid}
+          onClose={() => {
+            setShowProfileEditor(false);
+            setEditingProfile(null);
+            // Refresh profiles list if callback provided
+            if (profileRefreshCallback) {
+              profileRefreshCallback();
+              setProfileRefreshCallback(null);
+            }
+          }}
+        />
+      )}
     </BaseModal>
   );
 }
