@@ -344,10 +344,16 @@ export async function migrateCredentials() {
 
           // Save to new structure
           await saveCredential(newId, value.trim());
-          results.migrated.push({ source: 'localStorage', key: oldKey, newId });
 
-          // Remove old key
-          localStorage.removeItem(oldKey);
+          // Verify it was saved correctly before removing from localStorage
+          const verification = await getCredential(newId);
+          if (verification?.apiKey?.trim()) {
+            results.migrated.push({ source: 'localStorage', key: oldKey, newId });
+            // DON'T remove from localStorage - keep as backup
+            // localStorage.removeItem(oldKey);
+          } else {
+            results.errors.push({ source: 'localStorage', key: oldKey, error: 'Save verification failed' });
+          }
         }
       } catch (err) {
         results.errors.push({ source: 'localStorage', key: oldKey, error: err.message });
@@ -380,12 +386,12 @@ export async function migrateCredentials() {
             });
             results.migrated.push({ source: 'localStorage', key, newId: customId, isCustom: true });
 
-            // Remove old key
-            localStorage.removeItem(key);
+            // DON'T remove from localStorage - keep as backup
+            // localStorage.removeItem(key);
           }
         }
-        // Remove custom list
-        localStorage.removeItem(customListKey);
+        // DON'T remove custom list - keep as backup
+        // localStorage.removeItem(customListKey);
       }
     } catch (err) {
       results.errors.push({ source: 'localStorage', key: 'custom_credentials', error: err.message });
