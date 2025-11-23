@@ -397,6 +397,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // AI credentials - only admins can read/write
+    match /ai_credentials/{credentialId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
     // ============================================
     // CONTENT READER ANNOTATIONS
     // ============================================
