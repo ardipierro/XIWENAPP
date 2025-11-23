@@ -210,10 +210,42 @@ function CredentialsTab() {
     }
   };
 
-  // Get credential value for a provider
+  // Get credential value for a provider (checks Firestore first, then localStorage)
   const getCredentialValue = (provider) => {
+    // First check Firestore credentials
     const cred = credentials[provider.id];
-    return cred?.apiKey || '';
+    if (cred?.apiKey?.trim()) {
+      return cred.apiKey;
+    }
+
+    // Fallback: check localStorage
+    const localStorageKeyMappings = {
+      'openai': ['ai_credentials_OpenAI', 'ai_credentials_openai'],
+      'anthropic': ['ai_credentials_Claude', 'ai_credentials_claude', 'ai_credentials_Anthropic'],
+      'google': ['ai_credentials_Google', 'ai_credentials_google'],
+      'google_translate': ['ai_credentials_Google Cloud Translate API', 'ai_credentials_google_translate'],
+      'grok': ['ai_credentials_Grok', 'ai_credentials_grok', 'ai_credentials_xAI'],
+      'elevenlabs': ['ai_credentials_elevenlabs', 'ai_credentials_ElevenLabs'],
+      'stability': ['ai_credentials_Stability', 'ai_credentials_stability'],
+      'replicate': ['ai_credentials_Replicate', 'ai_credentials_replicate'],
+      'leonardo': ['ai_credentials_Leonardo', 'ai_credentials_leonardo'],
+      'huggingface': ['ai_credentials_HuggingFace', 'ai_credentials_huggingface']
+    };
+
+    const possibleKeys = localStorageKeyMappings[provider.id] || [`ai_credentials_${provider.id}`];
+
+    try {
+      for (const key of possibleKeys) {
+        const value = localStorage.getItem(key);
+        if (value?.trim()) {
+          return value;
+        }
+      }
+    } catch (e) {
+      // localStorage not available
+    }
+
+    return '';
   };
 
   // Filter providers

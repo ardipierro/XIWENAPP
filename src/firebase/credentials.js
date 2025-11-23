@@ -265,17 +265,66 @@ export async function migrateCredentials() {
     errors: []
   };
 
-  // Old localStorage keys mapping
+  // Comprehensive localStorage keys mapping - covers ALL possible variants
+  // Format: [array of possible old keys] -> new provider ID
   const localStorageMappings = {
+    // OpenAI variants
     'ai_credentials_OpenAI': 'openai',
+    'ai_credentials_openai': 'openai',
+    'ai_credentials_Openai': 'openai',
+    'openai_api_key': 'openai',
+
+    // Claude/Anthropic variants
     'ai_credentials_Claude': 'anthropic',
+    'ai_credentials_claude': 'anthropic',
+    'ai_credentials_Anthropic': 'anthropic',
+    'ai_credentials_anthropic': 'anthropic',
+
+    // Google variants
     'ai_credentials_Google': 'google',
+    'ai_credentials_google': 'google',
+    'ai_credentials_Gemini': 'google',
+    'ai_credentials_gemini': 'google',
+
+    // Google Translate variants
+    'ai_credentials_Google Cloud Translate API': 'google_translate',
+    'ai_credentials_google_translate': 'google_translate',
+    'ai_credentials_GoogleTranslate': 'google_translate',
+    'ai_credentials_Google Translate': 'google_translate',
+
+    // Grok/xAI variants
     'ai_credentials_Grok': 'grok',
+    'ai_credentials_grok': 'grok',
+    'ai_credentials_xAI': 'grok',
+    'ai_credentials_xai': 'grok',
+
+    // ElevenLabs variants
     'ai_credentials_elevenlabs': 'elevenlabs',
+    'ai_credentials_ElevenLabs': 'elevenlabs',
+    'ai_credentials_Elevenlabs': 'elevenlabs',
+    'ai_credentials_eleven_labs': 'elevenlabs',
+    'ai_credentials_Eleven Labs': 'elevenlabs',
+    'elevenlabs_api_key': 'elevenlabs',
+
+    // Stability variants
     'ai_credentials_Stability': 'stability',
+    'ai_credentials_stability': 'stability',
+    'ai_credentials_Stability AI': 'stability',
+
+    // Replicate variants
     'ai_credentials_Replicate': 'replicate',
+    'ai_credentials_replicate': 'replicate',
+
+    // Leonardo variants
     'ai_credentials_Leonardo': 'leonardo',
-    'ai_credentials_HuggingFace': 'huggingface'
+    'ai_credentials_leonardo': 'leonardo',
+    'ai_credentials_Leonardo.ai': 'leonardo',
+
+    // HuggingFace variants
+    'ai_credentials_HuggingFace': 'huggingface',
+    'ai_credentials_huggingface': 'huggingface',
+    'ai_credentials_Hugging Face': 'huggingface',
+    'ai_credentials_hugging_face': 'huggingface'
   };
 
   try {
@@ -351,8 +400,12 @@ export async function migrateCredentials() {
         const firebaseMappings = {
           'openai_api_key': 'openai',
           'anthropic_api_key': 'anthropic',
+          'claude_api_key': 'anthropic',
           'google_api_key': 'google',
+          'gemini_api_key': 'google',
+          'google_translate_api_key': 'google_translate',
           'grok_api_key': 'grok',
+          'xai_api_key': 'grok',
           'elevenlabs_api_key': 'elevenlabs',
           'stability_api_key': 'stability',
           'replicate_api_key': 'replicate',
