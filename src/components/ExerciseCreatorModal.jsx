@@ -315,7 +315,7 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
     setTema('');
     setFormato('');
     setResultado('');
-    setIsEditing(false);
+    setIsEditing(true); // Keep editing mode enabled by default
     setShowTitlePrompt(false);
     setTitulo('');
     setGenerating(false);
