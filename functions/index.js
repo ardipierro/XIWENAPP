@@ -145,9 +145,10 @@ exports.checkAICredentials = checkAICredentials;
 // HOMEWORK ANALYZER
 // ============================================================================
 
-// Export homework analyzer function
-const { analyzeHomeworkImage } = require('./homeworkAnalyzer');
+// Export homework analyzer functions
+const { analyzeHomeworkImage, reanalyzeHomework } = require('./homeworkAnalyzer');
 exports.analyzeHomeworkImage = analyzeHomeworkImage;
+exports.reanalyzeHomework = reanalyzeHomework;
 
 // ============================================================================
 // DASHBOARD ASSISTANT

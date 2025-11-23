@@ -103,10 +103,20 @@ const AI_PROVIDERS = [
     id: 'google',
     name: 'Google Cloud',
     description: 'Gemini Pro, Cloud TTS',
-    services: ['Gemini Pro (Multimodal)', 'Cloud Text-to-Speech', 'Cloud Translation'],
+    services: ['Gemini Pro (Multimodal)', 'Cloud Text-to-Speech'],
     apiKeyField: 'google_api_key',
     icon: '🔍',
     color: 'red',
+    docsUrl: 'https://console.cloud.google.com/apis/credentials'
+  },
+  {
+    id: 'google_translate',
+    name: 'Google Cloud Translate API',
+    description: 'Traducción español-chino para diccionario',
+    services: ['Cloud Translation API', 'Traducción en tiempo real'],
+    apiKeyField: 'google_translate_api_key',
+    icon: '🌐',
+    color: 'blue',
     docsUrl: 'https://console.cloud.google.com/apis/credentials'
   },
   {
@@ -182,6 +192,11 @@ const PROVIDER_MAPPINGS = {
     firebaseName: 'google',
     backendName: 'gemini'  // ⚠️ Backend usa 'gemini', no 'google'
   },
+  google_translate: {
+    localStorageName: 'Google Cloud Translate API',
+    firebaseName: 'google_translate',
+    backendName: null
+  },
   xai: {
     localStorageName: 'Grok',
     firebaseName: 'grok',
@@ -209,12 +224,105 @@ function CredentialsTab() {
   const hasLoadedRef = useRef(false);
 
   // ============================================================================
+  // MIGRATION: Migrar credenciales de claves viejas a las nuevas
+  // ============================================================================
+  const migrateOldCredentials = () => {
+    // Mapeo de claves viejas a claves nuevas (TODAS las variantes posibles)
+    const migrations = {
+      // ElevenLabs - TODAS las variantes con diferentes capitalizaciones
+      'ai_credentials_ElevenLabs': 'ai_credentials_elevenlabs',
+      'ai_credentials_Elevenlabs': 'ai_credentials_elevenlabs',
+      'ai_credentials_eleven_labs': 'ai_credentials_elevenlabs',
+      'ai_credentials_Eleven Labs': 'ai_credentials_elevenlabs',
+      'ai_credentials_eleven labs': 'ai_credentials_elevenlabs',
+      'elevenlabs_api_key': 'ai_credentials_elevenlabs',
+      'elevenlabs': 'ai_credentials_elevenlabs',
+
+      // Google - variantes
+      'ai_credentials_google': 'ai_credentials_Google',
+
+      // Google Translate - la credencial personalizada que existía antes
+      'ai_credentials_Google Translate': 'ai_credentials_Google Cloud Translate API',
+      'ai_credentials_google_translate': 'ai_credentials_Google Cloud Translate API',
+      'ai_credentials_GoogleTranslate': 'ai_credentials_Google Cloud Translate API',
+      'ai_credentials_Google Cloud Translate': 'ai_credentials_Google Cloud Translate API',
+
+      // Grok/xAI - variantes
+      'ai_credentials_xAI': 'ai_credentials_Grok',
+      'ai_credentials_xai': 'ai_credentials_Grok',
+      'ai_credentials_grok': 'ai_credentials_Grok',
+      'ai_credentials_XAI': 'ai_credentials_Grok',
+
+      // OpenAI - variantes
+      'ai_credentials_openai': 'ai_credentials_OpenAI',
+      'ai_credentials_Openai': 'ai_credentials_OpenAI',
+      'openai_api_key': 'ai_credentials_OpenAI',
+
+      // Claude/Anthropic - variantes
+      'ai_credentials_claude': 'ai_credentials_Claude',
+      'ai_credentials_anthropic': 'ai_credentials_Claude',
+      'ai_credentials_Anthropic': 'ai_credentials_Claude',
+    };
+
+    let migrated = false;
+    const migratedKeys = [];
+
+    for (const [oldKey, newKey] of Object.entries(migrations)) {
+      const oldValue = localStorage.getItem(oldKey);
+      const newValue = localStorage.getItem(newKey);
+
+      // Solo migrar si la clave vieja existe Y la nueva NO existe (o está vacía)
+      if (oldValue && oldValue.trim() && (!newValue || !newValue.trim())) {
+        localStorage.setItem(newKey, oldValue.trim());
+        migratedKeys.push(`${oldKey} -> ${newKey}`);
+        migrated = true;
+      }
+    }
+
+    // También buscar en el viejo formato aiProviders
+    try {
+      const oldProviders = localStorage.getItem('aiProviders');
+      if (oldProviders) {
+        const parsed = JSON.parse(oldProviders);
+
+        // ElevenLabs
+        if (parsed.elevenlabs && !localStorage.getItem('ai_credentials_elevenlabs')) {
+          localStorage.setItem('ai_credentials_elevenlabs', parsed.elevenlabs);
+          migratedKeys.push('aiProviders.elevenlabs -> ai_credentials_elevenlabs');
+          migrated = true;
+        }
+
+        // Otras claves del viejo formato
+        if (parsed.openai && !localStorage.getItem('ai_credentials_OpenAI')) {
+          localStorage.setItem('ai_credentials_OpenAI', parsed.openai);
+          migratedKeys.push('aiProviders.openai -> ai_credentials_OpenAI');
+          migrated = true;
+        }
+
+        if (parsed.google && !localStorage.getItem('ai_credentials_Google')) {
+          localStorage.setItem('ai_credentials_Google', parsed.google);
+          migratedKeys.push('aiProviders.google -> ai_credentials_Google');
+          migrated = true;
+        }
+      }
+    } catch (e) {
+      // Ignorar errores de parsing
+    }
+
+    if (migrated) {
+      logger.info(`Credentials migration completed: ${migratedKeys.join(', ')}`, 'CredentialsTab');
+      console.log('🔑 Credenciales migradas:', migratedKeys);
+    }
+  };
+
+  // ============================================================================
   // INITIALIZATION - LAZY LOADING
   // ============================================================================
   // Solo cargar cuando el componente se monta por primera vez
   useEffect(() => {
     if (!hasLoadedRef.current) {
       hasLoadedRef.current = true;
+      migrateOldCredentials(); // Migrar primero
       loadAllCredentials();
     }
   }, []);
@@ -326,41 +434,55 @@ function CredentialsTab() {
       let credentialValue = '';
       let source = 'none';
 
-      // Prioridad 1: Backend Secret Manager (READ-ONLY)
-      if (mapping.backendName && backendCreds[mapping.backendName]) {
+      // ========================================================================
+      // PRIORIDAD 1: localStorage (SIEMPRE tiene prioridad - el usuario acaba de configurar)
+      // ========================================================================
+      const localStorageKey = `ai_credentials_${mapping.localStorageName}`;
+      const localValue = localStorage.getItem(localStorageKey);
+      if (localValue && localValue.trim()) {
+        credentialValue = localValue.trim();
+        source = 'localStorage';
+      }
+      // ========================================================================
+      // PRIORIDAD 2: Backend Secret Manager (solo si localStorage está vacío)
+      // ========================================================================
+      else if (mapping.backendName && backendCreds[mapping.backendName]) {
         credentialValue = '***BACKEND***';
         source = 'backend';
       }
-      // Prioridad 2: localStorage (usuario configuró manualmente)
-      else {
-        const localStorageKey = `ai_credentials_${mapping.localStorageName}`;
-        const localValue = localStorage.getItem(localStorageKey);
-        if (localValue) {
-          credentialValue = localValue;
-          source = 'localStorage';
-        }
-        // Prioridad 3: Firestore functions[].apiKey
-        else if (aiConfig?.functions) {
-          for (const [funcId, funcConfig] of Object.entries(aiConfig.functions)) {
-            if (funcConfig.provider === mapping.firebaseName && funcConfig.apiKey?.trim()) {
-              credentialValue = funcConfig.apiKey;
-              source = 'firebase_functions';
-              break;
-            }
+      // ========================================================================
+      // PRIORIDAD 3: Firestore functions[].apiKey
+      // ========================================================================
+      else if (aiConfig?.functions) {
+        for (const [funcId, funcConfig] of Object.entries(aiConfig.functions)) {
+          if (funcConfig.provider === mapping.firebaseName && funcConfig.apiKey?.trim()) {
+            credentialValue = funcConfig.apiKey;
+            source = 'firebase_functions';
+            // IMPORTANTE: También guardar en localStorage para próxima vez
+            localStorage.setItem(localStorageKey, funcConfig.apiKey.trim());
+            break;
           }
         }
-        // Prioridad 4: Firestore credentials{} (legacy)
-        if (!credentialValue && aiConfig?.credentials?.[provider.apiKeyField]) {
-          credentialValue = aiConfig.credentials[provider.apiKeyField];
-          source = 'firebase_credentials';
+      }
+      // ========================================================================
+      // PRIORIDAD 4: Firestore credentials{} (legacy)
+      // ========================================================================
+      if (!credentialValue && aiConfig?.credentials?.[provider.apiKeyField]) {
+        credentialValue = aiConfig.credentials[provider.apiKeyField];
+        source = 'firebase_credentials';
+        // IMPORTANTE: También guardar en localStorage para próxima vez
+        if (credentialValue && credentialValue.trim()) {
+          localStorage.setItem(localStorageKey, credentialValue.trim());
         }
       }
 
       loadedCredentials[provider.apiKeyField] = credentialValue;
 
-      // Log solo para debugging
+      // Log detallado para debugging de credenciales problemáticas
       if (provider.id === 'elevenlabs' || provider.id === 'google' || provider.id === 'xai') {
-        logger.info(`${provider.name}: ${source} - ${credentialValue ? '✓' : '✗'}`, 'CredentialsTab');
+        const lsKey = `ai_credentials_${mapping.localStorageName}`;
+        const lsValue = localStorage.getItem(lsKey);
+        logger.info(`[${provider.name}] Source: ${source} | Key: ${lsKey} | Found: ${lsValue ? 'YES (' + lsValue.substring(0, 8) + '...)' : 'NO'} | Result: ${credentialValue ? '✓' : '✗'}`, 'CredentialsTab');
       }
     });
 

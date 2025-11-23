@@ -9,7 +9,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Check, X, RotateCcw, ChevronRight, Award, Eye, EyeOff } from 'lucide-react';
 import { BaseButton } from '../common';
-import { gameSounds } from '../../utils/gameSounds';
+import gameSounds from '../../utils/gameSounds';
 import logger from '../../utils/logger';
 
 /**
@@ -128,17 +128,17 @@ function OpenQuestionsExercise({ questions = [], config = {}, onComplete }) {
 
     if (normalizedUser === normalizedCorrect) {
       status = 'correct';
-      if (mergedConfig.soundEnabled) gameSounds.playCorrect();
+      if (mergedConfig.soundEnabled) gameSounds.playCorrectSound();
     } else if (mergedConfig.acceptPartialMatch) {
       const similarity = calculateSimilarity(normalizedUser, normalizedCorrect);
       if (similarity >= mergedConfig.partialMatchThreshold) {
         status = 'partial';
-        if (mergedConfig.soundEnabled) gameSounds.playClick();
+        if (mergedConfig.soundEnabled) gameSounds.playClickSound();
       } else {
-        if (mergedConfig.soundEnabled) gameSounds.playIncorrect();
+        if (mergedConfig.soundEnabled) gameSounds.playIncorrectSound();
       }
     } else {
-      if (mergedConfig.soundEnabled) gameSounds.playIncorrect();
+      if (mergedConfig.soundEnabled) gameSounds.playIncorrectSound();
     }
 
     setAnswers(prev => {
@@ -203,7 +203,7 @@ function OpenQuestionsExercise({ questions = [], config = {}, onComplete }) {
     results.maxScore = questions.length * mergedConfig.correctPoints;
 
     setIsCompleted(true);
-    if (mergedConfig.soundEnabled) gameSounds.playComplete();
+    if (mergedConfig.soundEnabled) gameSounds.playCompletionSound();
 
     if (onComplete) {
       onComplete(results);

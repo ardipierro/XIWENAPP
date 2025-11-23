@@ -147,7 +147,6 @@ function BaseModal({
         {(title || showCloseButton) && (
           <div
             className="flex items-center justify-between px-6 py-5 shrink-0"
-            style={{ borderBottom: '1px solid var(--color-border)' }}
           >
             <div className="flex items-center gap-3 flex-1">
               {/* Icon */}
@@ -209,7 +208,6 @@ function BaseModal({
         {footer && (
           <div
             className="flex items-center justify-end gap-3 px-6 py-5 shrink-0"
-            style={{ borderTop: '1px solid var(--color-border)' }}
           >
             {footer}
           </div>

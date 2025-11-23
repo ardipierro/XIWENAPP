@@ -1,9 +1,12 @@
 /**
  * @fileoverview Servicio de generación de imágenes con IA
  * @module services/imageGenerationService
+ *
+ * ⚠️ Usa credentialsHelper para leer API keys - NO modificar
  */
 
 import logger from '../utils/logger';
+import { getAICredentialSync, getLocalStorageKey } from '../utils/credentialsHelper';
 
 class ImageGenerationService {
   constructor() {
@@ -12,27 +15,27 @@ class ImageGenerationService {
     this.hasOpenAI = false;
     this.hasStability = false;
 
-    // Cargar API keys desde localStorage
+    // Cargar API keys usando el helper centralizado
     this.loadApiKeys();
   }
 
   /**
-   * Cargar API keys desde localStorage
+   * Cargar API keys usando credentialsHelper (NO localStorage directo)
    */
   loadApiKeys() {
     try {
-      // OpenAI para DALL-E
-      const openaiKey = localStorage.getItem('ai_credentials_openai');
-      if (openaiKey && openaiKey.trim()) {
-        this.openaiApiKey = openaiKey.trim();
+      // OpenAI para DALL-E - usando helper centralizado
+      const openaiKey = getAICredentialSync('openai');
+      if (openaiKey) {
+        this.openaiApiKey = openaiKey;
         this.hasOpenAI = true;
         logger.info('OpenAI API key cargada para generación de imágenes');
       }
 
-      // Stability AI para Stable Diffusion
-      const stabilityKey = localStorage.getItem('ai_credentials_stability');
-      if (stabilityKey && stabilityKey.trim()) {
-        this.stabilityApiKey = stabilityKey.trim();
+      // Stability AI para Stable Diffusion - usando helper centralizado
+      const stabilityKey = getAICredentialSync('stability');
+      if (stabilityKey) {
+        this.stabilityApiKey = stabilityKey;
         this.hasStability = true;
         logger.info('Stability AI API key cargada');
       }
@@ -48,7 +51,9 @@ class ImageGenerationService {
     if (key && key.trim()) {
       this.openaiApiKey = key.trim();
       this.hasOpenAI = true;
-      localStorage.setItem('ai_credentials_openai', key.trim());
+      // Usar helper para obtener la clave correcta de localStorage
+      const storageKey = getLocalStorageKey('openai');
+      if (storageKey) localStorage.setItem(storageKey, key.trim());
       logger.info('🔑 OpenAI API configurada para generación de imágenes');
     }
   }
@@ -60,7 +65,9 @@ class ImageGenerationService {
     if (key && key.trim()) {
       this.stabilityApiKey = key.trim();
       this.hasStability = true;
-      localStorage.setItem('ai_credentials_stability', key.trim());
+      // Usar helper para obtener la clave correcta de localStorage
+      const storageKey = getLocalStorageKey('stability');
+      if (storageKey) localStorage.setItem(storageKey, key.trim());
       logger.info('🔑 Stability AI API configurada');
     }
   }
@@ -69,7 +76,8 @@ class ImageGenerationService {
    * Eliminar API key de OpenAI
    */
   removeOpenAIKey() {
-    localStorage.removeItem('ai_credentials_openai');
+    const storageKey = getLocalStorageKey('openai');
+    if (storageKey) localStorage.removeItem(storageKey);
     this.openaiApiKey = null;
     this.hasOpenAI = false;
   }
@@ -78,7 +86,8 @@ class ImageGenerationService {
    * Eliminar API key de Stability AI
    */
   removeStabilityKey() {
-    localStorage.removeItem('ai_credentials_stability');
+    const storageKey = getLocalStorageKey('stability');
+    if (storageKey) localStorage.removeItem(storageKey);
     this.stabilityApiKey = null;
     this.hasStability = false;
   }

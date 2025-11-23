@@ -1,10 +1,13 @@
 /**
  * @fileoverview ElevenLabs TTS Service - Premium text-to-speech for FlashCards
  * @module services/elevenLabsService
+ *
+ * ⚠️ Usa credentialsHelper para leer la API key - NO modificar
  */
 
 import { storage } from '../firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getAICredentialSync } from '../utils/credentialsHelper';
 import logger from '../utils/logger';
 
 // Configuración de voces en español
@@ -205,20 +208,12 @@ export function getAvailableVoices() {
 }
 
 /**
- * Obtener API key de ElevenLabs desde localStorage
+ * Obtener API key de ElevenLabs usando el helper centralizado
+ * ⚠️ Usa getAICredentialSync de credentialsHelper - NO modificar
  * @returns {string|null}
  */
 function getElevenLabsApiKey() {
-  try {
-    const aiConfig = localStorage.getItem('aiProviders');
-    if (!aiConfig) return null;
-
-    const config = JSON.parse(aiConfig);
-    return config.elevenlabs?.apiKey || null;
-  } catch (error) {
-    logger.error('Error reading ElevenLabs API key:', error);
-    return null;
-  }
+  return getAICredentialSync('elevenlabs');
 }
 
 /**
