@@ -50,6 +50,7 @@ import { CardDeleteButton, UniversalCard } from './cards';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
+import ProfileEditor from './homework/ProfileEditor';
 import ManualHomeworkUpload from './homework/ManualHomeworkUpload';
 import ImageOverlay from './homework/ImageOverlay';
 import ImageOverlayControls from './homework/ImageOverlayControls';
@@ -798,6 +799,11 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
   // Selected correction profile (received from ProfileSelector)
   const [selectedProfile, setSelectedProfile] = useState(null);
 
+  // Profile editor modal state
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(null);
+  const [profileRefreshCallback, setProfileRefreshCallback] = useState(null);
+
   // View mode: 'overlay' (image with marks) or 'quick' (text list)
   const [correctionViewMode, setCorrectionViewMode] = useState('overlay');
 
@@ -1311,6 +1317,16 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
               setError('Error al solicitar re-análisis: ' + result.error);
             }
           }}
+          onEditProfile={(profile, refreshCallback) => {
+            setEditingProfile(profile);
+            setProfileRefreshCallback(() => refreshCallback);
+            setShowProfileEditor(true);
+          }}
+          onCreateProfile={(refreshCallback) => {
+            setEditingProfile(null); // null = create new
+            setProfileRefreshCallback(() => refreshCallback);
+            setShowProfileEditor(true);
+          }}
         />
 
         {/* Transcription with highlighted errors */}
@@ -1487,6 +1503,23 @@ function ReviewDetailModal({ review, onClose, onApproveSuccess, onReanalysisSucc
         strokeWidth={visualization.strokeWidth}
         strokeOpacity={visualization.strokeOpacity}
       />
+
+      {/* Profile Editor Modal - Direct access from review panel */}
+      {showProfileEditor && (
+        <ProfileEditor
+          profile={editingProfile}
+          userId={currentUser?.uid}
+          onClose={() => {
+            setShowProfileEditor(false);
+            setEditingProfile(null);
+            // Refresh profiles list if callback provided
+            if (profileRefreshCallback) {
+              profileRefreshCallback();
+              setProfileRefreshCallback(null);
+            }
+          }}
+        />
+      )}
     </BaseModal>
   );
 }

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, User } from 'lucide-react';
+import { RefreshCw, User, Settings, Plus } from 'lucide-react';
 import { BaseButton } from '../common';
 import { UniversalCard } from '../cards';
 import {
@@ -24,6 +24,8 @@ export default function ProfileSelector({
   teacherId, // Kept for backwards compatibility but not used for profile loading
   onProfileSelect, // Callback with full profile object (not just ID)
   onReanalyze,
+  onEditProfile, // Callback to open profile editor (receives profile object)
+  onCreateProfile, // Callback to create new profile
   currentReviewId
 }) {
   const [profiles, setProfiles] = useState([]);
@@ -96,6 +98,25 @@ export default function ProfileSelector({
     }
   };
 
+  // Refresh profiles (called after editing)
+  const refreshProfiles = () => {
+    loadProfilesAndCurrent();
+  };
+
+  // Handle edit button click
+  const handleEditClick = () => {
+    if (onEditProfile && selectedProfile) {
+      onEditProfile(selectedProfile, refreshProfiles);
+    }
+  };
+
+  // Handle create button click
+  const handleCreateClick = () => {
+    if (onCreateProfile) {
+      onCreateProfile(refreshProfiles);
+    }
+  };
+
   if (loading) {
     return (
       <UniversalCard variant="default" size="md" className="mb-4">
@@ -140,7 +161,7 @@ export default function ProfileSelector({
         </div>
 
         {/* Profile Selector - Inline */}
-        <div className="flex-1">
+        <div className="flex-1 flex items-center gap-2">
           <select
             value={selectedProfileId || ''}
             onChange={(e) => {
@@ -156,7 +177,7 @@ export default function ProfileSelector({
                 onProfileSelect(fullProfile);
               }
             }}
-            className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             <option value="">Selecciona un perfil...</option>
             {profiles.map(profile => (
@@ -166,6 +187,28 @@ export default function ProfileSelector({
               </option>
             ))}
           </select>
+
+          {/* Edit Profile Button */}
+          {onEditProfile && selectedProfile && (
+            <button
+              onClick={handleEditClick}
+              className="p-1.5 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+              title="Editar configuración del perfil"
+            >
+              <Settings size={16} />
+            </button>
+          )}
+
+          {/* Create Profile Button */}
+          {onCreateProfile && (
+            <button
+              onClick={handleCreateClick}
+              className="p-1.5 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-colors"
+              title="Crear nuevo perfil"
+            >
+              <Plus size={16} />
+            </button>
+          )}
         </div>
 
         {/* Reanalyze Button - Always visible */}
