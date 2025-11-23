@@ -363,23 +363,31 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
 
   return (
     <div className="w-full">
-      {/* Header */}
+      {/* Header - Simplificado */}
       <div className="mb-6">
-        <div className="flex items-center justify-end gap-3 mb-4">
-          <BaseButton
-            variant="secondary"
-            icon={Plus}
-            onClick={() => setShowExerciseModal(true)}
-          >
-            Nuevo Modal
-          </BaseButton>
-          <BaseButton
-            variant="primary"
-            icon={Plus}
-            onClick={handleCreate}
-          >
-            Crear Contenido
-          </BaseButton>
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <BookOpen size={24} className="text-zinc-700 dark:text-zinc-300" />
+            <h1 className="text-xl font-bold text-zinc-900 dark:text-white">
+              Contenidos
+            </h1>
+          </div>
+          <div className="flex gap-2">
+            <BaseButton
+              variant="secondary"
+              icon={PenTool}
+              onClick={() => setShowExerciseModal(true)}
+              title="Crear ejercicio interactivo"
+              size="md"
+            />
+            <BaseButton
+              variant="primary"
+              icon={Plus}
+              onClick={handleCreate}
+              title="Crear contenido"
+              size="md"
+            />
+          </div>
         </div>
 
         {/* Filters */}

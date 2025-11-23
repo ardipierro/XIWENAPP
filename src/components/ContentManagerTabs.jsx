@@ -111,8 +111,7 @@ export function ContentManagerTabs({ user, userRole }) {
       {/* Page Header */}
       <PageHeader
         icon={Layers}
-        title="Gestión de Contenidos"
-        description="Administra contenidos, ejercicios y material educativo"
+        title="Contenidos"
       />
 
       {/* Tabs - Solo si hay múltiples tabs visibles */}

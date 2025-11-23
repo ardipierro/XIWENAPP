@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import {
   Calendar, CalendarDays, CheckCircle, AlertTriangle, RefreshCw,
   Repeat, Trash2, Clock, Video, CreditCard, BarChart3, AlarmClock,
-  MapPin, Loader, X, Info
+  MapPin, Loader, X, Info, Plus
 } from 'lucide-react';
 import BaseButton from './common/BaseButton';
 import { CardDeleteButton, UniversalCard } from './cards';
@@ -256,20 +256,22 @@ function ClassScheduleManager({ group, groupCourses = [], onUpdate }) {
     <div className="schedule-manager">
       {/* Header */}
       <div className="schedule-header">
-        <div>
-          <h3 className="schedule-title flex items-center gap-2">
-            <Calendar size={24} strokeWidth={2} /> Horarios de Clases
+        <div className="flex items-center gap-3">
+          <Calendar size={24} strokeWidth={2} />
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
+            Horarios
           </h3>
-          <p className="schedule-subtitle">
-            Grupo: {group.name}
-          </p>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+            {group.name}
+          </span>
         </div>
         <BaseButton
           onClick={() => setShowModal(true)}
           variant="primary"
-        >
-          + Agregar Horario
-        </BaseButton>
+          icon={Plus}
+          title="Agregar horario"
+          size="md"
+        />
       </div>
 
       {/* Message */}

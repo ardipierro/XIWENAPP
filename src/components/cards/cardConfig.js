@@ -8,6 +8,54 @@
  */
 
 /**
+ * ⭐ CONFIGURACIÓN GLOBAL DE INTERFAZ DE PANELES
+ * Controla el comportamiento de todos los paneles y tarjetas de la aplicación
+ */
+export const panelConfig = {
+  /**
+   * Modo de acciones en tarjetas
+   * - 'full': Muestra todos los botones de acción en el footer
+   * - 'minimal': Solo muestra el botón de eliminar (si existe)
+   * - 'none': Sin botones, toda la tarjeta es clickeable para abrir modal
+   */
+  cardActionsMode: 'none',
+
+  /**
+   * Si las tarjetas deben ser clickeables para abrir modales
+   * Cuando es true, el click en la tarjeta abre el modal de detalles/edición
+   */
+  cardClickOpensModal: true,
+
+  /**
+   * Si mostrar el botón de eliminar incluso en modo 'none'
+   * Útil para permitir eliminación rápida sin abrir modal
+   */
+  showDeleteInMinimalMode: false,
+};
+
+/**
+ * Helper: Obtener configuración de panel
+ */
+export function getPanelConfig() {
+  return panelConfig;
+}
+
+/**
+ * Helper: Verificar si se deben mostrar acciones en tarjetas
+ */
+export function shouldShowCardActions() {
+  return panelConfig.cardActionsMode === 'full';
+}
+
+/**
+ * Helper: Verificar si se debe mostrar solo el botón de eliminar
+ */
+export function shouldShowMinimalActions() {
+  return panelConfig.cardActionsMode === 'minimal' ||
+    (panelConfig.cardActionsMode === 'none' && panelConfig.showDeleteInMinimalMode);
+}
+
+/**
  * Variantes de cards con sus configuraciones
  * Cada variante define el comportamiento visual completo de la card
  */

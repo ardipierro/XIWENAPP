@@ -142,7 +142,7 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
         <PageHeader
           icon={Presentation}
           title="Pizarras"
-          actionLabel="+ Nueva Pizarra"
+          actionLabel="Nueva pizarra"
           onAction={onOpenWhiteboard}
         />
         <div className="loading-state">
@@ -169,7 +169,7 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
       <PageHeader
         icon={Presentation}
         title="Pizarras"
-        actionLabel="+ Nueva Pizarra"
+        actionLabel="Nueva pizarra"
         onAction={onOpenWhiteboard}
       />
 

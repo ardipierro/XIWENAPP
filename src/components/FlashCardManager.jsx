@@ -193,34 +193,29 @@ export function FlashCardManager({ user }) {
 
   return (
     <div className="w-full">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <CreditCard size={28} className="text-zinc-700 dark:text-zinc-300" />
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-              Colecciones de FlashCards
-            </h1>
-          </div>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Crea y gestiona tarjetas de vocabulario y expresiones
-          </p>
+      {/* Header - Simplificado */}
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <CreditCard size={24} className="text-zinc-700 dark:text-zinc-300" />
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-white">
+            FlashCards
+          </h1>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <BaseButton
             variant="secondary"
             icon={Plus}
             onClick={handleCreateManual}
-          >
-            Crear Colección
-          </BaseButton>
+            title="Crear colección manual"
+            size="md"
+          />
           <BaseButton
             variant="primary"
             icon={Sparkles}
             onClick={handleGenerateAI}
-          >
-            Generar con IA
-          </BaseButton>
+            title="Generar con IA"
+            size="md"
+          />
         </div>
       </div>
 

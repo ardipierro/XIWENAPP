@@ -110,12 +110,15 @@ function BaseButton({
   const variantStyles = getVariantStyles();
   const [isHovered, setIsHovered] = useState(false);
 
-  // Size styles
+  // Detectar si es botón solo-icono (sin texto)
+  const isIconOnly = (Icon || IconRight) && !children;
+
+  // Size styles - con variante cuadrada para botones solo-icono
   const sizes = {
-    sm: { padding: '0.375rem 0.75rem', fontSize: '0.875rem' },
-    md: { padding: '0.5rem 1rem', fontSize: '1rem' },
-    lg: { padding: '0.75rem 1.5rem', fontSize: '1.125rem' },
-    xl: { padding: '1rem 2rem', fontSize: '1.25rem' },
+    sm: { padding: isIconOnly ? '0.375rem' : '0.375rem 0.75rem', fontSize: '0.875rem' },
+    md: { padding: isIconOnly ? '0.5rem' : '0.5rem 1rem', fontSize: '1rem' },
+    lg: { padding: isIconOnly ? '0.75rem' : '0.75rem 1.5rem', fontSize: '1.125rem' },
+    xl: { padding: isIconOnly ? '1rem' : '1rem 2rem', fontSize: '1.25rem' },
   };
 
   // Icon sizes

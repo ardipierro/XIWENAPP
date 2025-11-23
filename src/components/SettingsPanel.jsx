@@ -27,7 +27,6 @@ function SettingsPanel() {
       <PageHeader
         icon={Settings}
         title="Configuración"
-        description="Administra la configuración de tu cuenta y de la aplicación"
       />
 
       {/* Tabs - Migrado a BaseTabs para consistencia */}
