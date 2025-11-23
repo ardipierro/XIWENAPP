@@ -85,11 +85,12 @@ function DashboardLayoutInner({ user, userRole, children, onMenuAction, currentS
       />
 
       {/* Contenido Principal - Scrollbar definido en globals.css */}
+      {/* Safe area: mt-safe-top adds margin for notched devices (iOS/Android PWA) */}
       <main
         className={`
           ${isViewingAs
             ? 'mt-[86px] md:mt-[100px] lg:mt-[108px] h-[calc(100vh-86px)] md:h-[calc(100vh-100px)] lg:h-[calc(100vh-108px)]'
-            : 'mt-12 md:mt-14 lg:mt-16 h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] lg:h-[calc(100vh-64px)]'}
+            : 'mt-[calc(48px+env(safe-area-inset-top))] md:mt-[calc(56px+env(safe-area-inset-top))] lg:mt-[calc(64px+env(safe-area-inset-top))] h-[calc(100vh-48px-env(safe-area-inset-top))] md:h-[calc(100vh-56px-env(safe-area-inset-top))] lg:h-[calc(100vh-64px-env(safe-area-inset-top))]'}
           ${sidebarOpen ? 'ml-0 lg:ml-[260px]' : 'ml-0'}
           transition-[margin-left] duration-200 ease-in-out
         `}
