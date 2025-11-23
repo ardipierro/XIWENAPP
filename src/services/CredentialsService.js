@@ -125,7 +125,7 @@ class CredentialsService {
 
   /**
    * Get API key for a provider
-   * Priority: User credential > Backend credential
+   * Priority: User credential > localStorage fallback > Backend credential
    *
    * @param {string} providerId - Provider ID (e.g., 'openai', 'anthropic')
    * @returns {Promise<string|null>} API key or null
@@ -137,13 +137,29 @@ class CredentialsService {
 
     const normalizedId = providerId.toLowerCase().trim();
 
-    // 1. Check user credential in cache
+    // 1. Check user credential in cache (Firestore)
     const userCred = this._cache[normalizedId];
     if (userCred?.apiKey?.trim()) {
       return userCred.apiKey.trim();
     }
 
-    // 2. Check backend credential
+    // 2. FALLBACK: Check localStorage directly (for pre-migration data)
+    const localStorageKey = this._getLocalStorageKeyForProvider(normalizedId);
+    if (localStorageKey) {
+      try {
+        const localValue = localStorage.getItem(localStorageKey);
+        if (localValue?.trim()) {
+          logger.info(`Found credential in localStorage fallback: ${normalizedId}`, 'CredentialsService');
+          // Auto-migrate to Firestore for future use
+          this._autoMigrateFromLocalStorage(normalizedId, localValue.trim());
+          return localValue.trim();
+        }
+      } catch (e) {
+        // localStorage might not be available
+      }
+    }
+
+    // 3. Check backend credential
     const provider = getProviderById(normalizedId) || getProviderByBackendAlias(normalizedId);
     if (provider) {
       const backendKey = provider.backendAlias || provider.id;
@@ -154,7 +170,7 @@ class CredentialsService {
       }
     }
 
-    // 3. Check if this is a custom credential
+    // 4. Check if this is a custom credential
     const customId = `custom_${normalizedId.replace(/\s+/g, '_')}`;
     const customCred = this._cache[customId];
     if (customCred?.apiKey?.trim()) {
@@ -162,6 +178,65 @@ class CredentialsService {
     }
 
     return null;
+  }
+
+  /**
+   * Get the localStorage key for a provider ID
+   * Tries multiple common key formats
+   * @private
+   */
+  _getLocalStorageKeyForProvider(providerId) {
+    // Mapping of provider ID to possible localStorage keys (most common first)
+    const keyMappings = {
+      'openai': ['ai_credentials_OpenAI', 'ai_credentials_openai', 'openai_api_key'],
+      'anthropic': ['ai_credentials_Claude', 'ai_credentials_claude', 'ai_credentials_Anthropic', 'ai_credentials_anthropic'],
+      'google': ['ai_credentials_Google', 'ai_credentials_google', 'ai_credentials_Gemini'],
+      'google_translate': ['ai_credentials_Google Cloud Translate API', 'ai_credentials_google_translate', 'ai_credentials_GoogleTranslate'],
+      'grok': ['ai_credentials_Grok', 'ai_credentials_grok', 'ai_credentials_xAI'],
+      'elevenlabs': ['ai_credentials_elevenlabs', 'ai_credentials_ElevenLabs', 'elevenlabs_api_key'],
+      'stability': ['ai_credentials_Stability', 'ai_credentials_stability'],
+      'replicate': ['ai_credentials_Replicate', 'ai_credentials_replicate'],
+      'leonardo': ['ai_credentials_Leonardo', 'ai_credentials_leonardo'],
+      'huggingface': ['ai_credentials_HuggingFace', 'ai_credentials_huggingface', 'ai_credentials_Hugging Face']
+    };
+
+    const possibleKeys = keyMappings[providerId] || [`ai_credentials_${providerId}`];
+
+    // Return the first key that has a value
+    for (const key of possibleKeys) {
+      try {
+        const value = localStorage.getItem(key);
+        if (value?.trim()) {
+          return key;
+        }
+      } catch (e) {
+        // localStorage might not be available
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Auto-migrate a credential from localStorage to Firestore
+   * @private
+   */
+  async _autoMigrateFromLocalStorage(providerId, apiKey) {
+    try {
+      // Save to Firestore silently
+      await saveCredential(providerId, apiKey);
+
+      // Update local cache
+      this._cache[providerId] = {
+        id: providerId,
+        apiKey: apiKey,
+        source: 'user'
+      };
+
+      logger.info(`Auto-migrated credential from localStorage: ${providerId}`, 'CredentialsService');
+    } catch (error) {
+      logger.warn(`Failed to auto-migrate credential: ${providerId}`, 'CredentialsService');
+    }
   }
 
   /**
