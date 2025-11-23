@@ -341,6 +341,7 @@ function ExerciseCreatorModal({ isOpen, onClose, initialData = null, onSave, use
         onClose={handleClose}
         title={initialData ? 'Editar Ejercicio con IA' : 'Crear Ejercicio con IA'}
         size="xl"
+        closeOnOverlayClick={false}
       >
         <div className="space-y-6">
           {/* Error Alert */}
