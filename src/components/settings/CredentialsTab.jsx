@@ -48,25 +48,26 @@ function CredentialsTab() {
   const [migrating, setMigrating] = useState(false);
   const [hasMigrated, setHasMigrated] = useState(false);
 
-  // Run migration on first load (once per session)
+  // Run migration on first load
+  // Always run if Firestore credentials are empty (regardless of sessionStorage)
   useEffect(() => {
-    const migrationKey = 'credentials_migrated_v2';
-    const alreadyMigrated = sessionStorage.getItem(migrationKey);
+    const firestoreHasCredentials = Object.keys(credentials).some(
+      key => credentials[key]?.apiKey?.trim()
+    );
 
-    if (!alreadyMigrated && !loading && !hasMigrated) {
+    // Run migration if Firestore is empty and we're not already migrating
+    if (!loading && !hasMigrated && !migrating && !firestoreHasCredentials) {
       runMigration();
     }
-  }, [loading, hasMigrated]);
+  }, [loading, hasMigrated, migrating, credentials]);
 
   // Run migration
   const runMigration = async () => {
     try {
       setMigrating(true);
+      logger.info('Starting credential migration...', 'CredentialsTab');
 
-      // Run old localStorage migration first
-      migrateOldLocalStorageKeys();
-
-      // Then run Firestore migration
+      // Run Firestore migration (includes localStorage migration)
       const result = await migrateCredentials();
 
       if (result.migrated.length > 0) {
@@ -75,60 +76,16 @@ function CredentialsTab() {
         setTimeout(() => setSuccess(null), 5000);
       }
 
-      sessionStorage.setItem('credentials_migrated_v2', 'true');
+      if (result.errors.length > 0) {
+        logger.warn(`Migration had ${result.errors.length} errors:`, 'CredentialsTab');
+        result.errors.forEach(e => logger.warn(`  - ${e.source}/${e.key}: ${e.error}`, 'CredentialsTab'));
+      }
+
       setHasMigrated(true);
     } catch (err) {
       logger.error('Migration failed', err, 'CredentialsTab');
     } finally {
       setMigrating(false);
-    }
-  };
-
-  // Migrate old localStorage keys to new format
-  const migrateOldLocalStorageKeys = () => {
-    const migrations = {
-      // ElevenLabs variants
-      'ai_credentials_ElevenLabs': 'ai_credentials_elevenlabs',
-      'ai_credentials_Elevenlabs': 'ai_credentials_elevenlabs',
-      'ai_credentials_eleven_labs': 'ai_credentials_elevenlabs',
-      'ai_credentials_Eleven Labs': 'ai_credentials_elevenlabs',
-      'elevenlabs_api_key': 'ai_credentials_elevenlabs',
-
-      // Google variants
-      'ai_credentials_google': 'ai_credentials_Google',
-
-      // Google Translate variants
-      'ai_credentials_Google Translate': 'ai_credentials_Google Cloud Translate API',
-      'ai_credentials_google_translate': 'ai_credentials_Google Cloud Translate API',
-      'ai_credentials_GoogleTranslate': 'ai_credentials_Google Cloud Translate API',
-
-      // Grok/xAI variants
-      'ai_credentials_xAI': 'ai_credentials_Grok',
-      'ai_credentials_xai': 'ai_credentials_Grok',
-      'ai_credentials_grok': 'ai_credentials_Grok',
-
-      // OpenAI variants
-      'ai_credentials_openai': 'ai_credentials_OpenAI',
-      'openai_api_key': 'ai_credentials_OpenAI',
-
-      // Claude/Anthropic variants
-      'ai_credentials_claude': 'ai_credentials_Claude',
-      'ai_credentials_anthropic': 'ai_credentials_Claude',
-    };
-
-    let migrated = false;
-    for (const [oldKey, newKey] of Object.entries(migrations)) {
-      const oldValue = localStorage.getItem(oldKey);
-      const newValue = localStorage.getItem(newKey);
-
-      if (oldValue && oldValue.trim() && (!newValue || !newValue.trim())) {
-        localStorage.setItem(newKey, oldValue.trim());
-        migrated = true;
-      }
-    }
-
-    if (migrated) {
-      logger.info('Old localStorage keys migrated', 'CredentialsTab');
     }
   };
 
