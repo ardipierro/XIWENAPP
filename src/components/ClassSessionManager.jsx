@@ -410,9 +410,9 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
       {/* Page Header */}
       <PageHeader
         icon={Calendar}
-        title="Sesiones de Clase"
-        description={`${sessions.length} sesiones totales`}
-        actionLabel="Nueva Sesión"
+        title="Sesiones"
+        description={`${sessions.length} sesiones`}
+        actionLabel="Nueva sesión"
         onAction={() => setShowModal(true)}
       />
 

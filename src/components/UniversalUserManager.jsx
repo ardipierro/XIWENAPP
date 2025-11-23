@@ -257,7 +257,7 @@ export default function UniversalUserManager({ user, userRole }) {
   // Determinar título e icono según rol
   const title = isAdmin() ? 'Usuarios' : 'Estudiantes';
   const TitleIcon = isAdmin() ? Crown : GraduationCap;
-  const createButtonLabel = isAdmin() ? 'Nuevo Usuario' : 'Agregar Alumno';
+  const createButtonTooltip = isAdmin() ? 'Crear usuario' : 'Agregar alumno';
 
   // Loading state
   if (userManagement.loading && userManagement.users.length === 0) {
@@ -266,37 +266,33 @@ export default function UniversalUserManager({ user, userRole }) {
 
   return (
     <div className="universal-user-manager p-0">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+      {/* Header - Simplificado */}
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <TitleIcon size={32} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          <TitleIcon size={24} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
+          <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {title}
           </h1>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        {/* Actions - Solo iconos */}
+        <div className="flex gap-2">
           {can('create-users') && (
             <BaseButton
               onClick={() => setShowAddUserModal(true)}
               variant="primary"
               icon={Plus}
-              className="w-full sm:w-auto"
-            >
-              {createButtonLabel}
-            </BaseButton>
+              title={createButtonTooltip}
+              size="md"
+            />
           )}
-
           <BaseButton
             onClick={userManagement.loadUsers}
-            variant="success"
+            variant="secondary"
             icon={RefreshCw}
-            className="w-full sm:w-auto"
             title="Actualizar lista"
-          >
-            Actualizar
-          </BaseButton>
+            size="md"
+          />
         </div>
       </div>
 

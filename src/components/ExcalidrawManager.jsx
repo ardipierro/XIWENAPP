@@ -164,8 +164,8 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
 
         <PageHeader
           icon={PenTool}
-          title="Pizarras Excalidraw"
-          actionLabel="+ Nueva Pizarra"
+          title="Excalidraw"
+          actionLabel="Nueva pizarra"
           onAction={onCreateNew}
         />
         <div className="loading-state">
@@ -186,8 +186,8 @@ function ExcalidrawManager({ onBack, onOpenSession, onCreateNew }) {
       {/* Header */}
       <PageHeader
         icon={PenTool}
-        title="Pizarras Excalidraw"
-        actionLabel="+ Nueva Pizarra"
+        title="Excalidraw"
+        actionLabel="Nueva pizarra"
         onAction={onCreateNew}
       />
 

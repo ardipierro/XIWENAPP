@@ -273,7 +273,7 @@ export default function SimpleHomeworkModal({
   const gradeColor = grade >= 80 ? 'text-green-600' : grade >= 60 ? 'text-amber-600' : 'text-red-600';
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
 
         {/* Header - Student name/selector */}

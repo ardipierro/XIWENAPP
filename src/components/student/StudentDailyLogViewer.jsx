@@ -88,9 +88,8 @@ function StudentDailyLogViewer({ user }) {
     <div className="space-y-6">
       {/* Header */}
       <PageHeader
-        title="Diario de Clases"
-        description="Diarios compartidos por tus profesores"
         icon={BookOpen}
+        title="Diarios"
       />
 
       {/* Search Bar */}

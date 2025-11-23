@@ -172,8 +172,8 @@ function ClassDailyLogManager({ user }) {
       {/* Page Header */}
       <PageHeader
         icon={BookOpen}
-        title="Diarios de Clase"
-        actionLabel="Nuevo Diario"
+        title="Diarios"
+        actionLabel="Nuevo diario"
         onAction={createModal.open}
       />
 

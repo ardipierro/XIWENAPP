@@ -21,6 +21,9 @@ import {
   generateCardStyles,
   getHoverStyles,
   getNormalStyles,
+  shouldShowCardActions,
+  shouldShowMinimalActions,
+  getPanelConfig,
 } from './cardConfig';
 
 /**
@@ -511,9 +514,11 @@ export function UniversalCard({
 
   /**
    * Render Actions
+   * Respeta la configuración global de panelConfig.cardActionsMode
    */
   const renderActions = () => {
-    if (!actions) return null;
+    // Si no hay acciones o el modo es 'none', no mostrar
+    if (!actions || !shouldShowCardActions()) return null;
 
     return (
       <div className="flex gap-2">
@@ -528,6 +533,23 @@ export function UniversalCard({
         )}
       </div>
     );
+  };
+
+  /**
+   * Determinar si mostrar el botón de eliminar según configuración global
+   * Respeta tanto panelConfig como el toggle global de showDeleteButtons
+   */
+  const shouldShowDelete = () => {
+    // Primero verificar el toggle global
+    if (!showDeleteButtons) return false;
+
+    if (!onDelete || !variantConfig.deleteButton?.enabled) return false;
+
+    const panelCfg = getPanelConfig();
+    // Mostrar en modo 'full', 'minimal', o si está habilitado en modo 'none'
+    return panelCfg.cardActionsMode === 'full' ||
+           panelCfg.cardActionsMode === 'minimal' ||
+           panelCfg.showDeleteInMinimalMode;
   };
 
   // ⭐ Para layout="row", usar clases Tailwind directamente para consistencia
@@ -678,7 +700,7 @@ export function UniversalCard({
               {actions && renderActions()}
 
               {/* Delete Button - Respeta toggle global */}
-              {onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons && (
+              {shouldShowDelete() && (
                 <CardDeleteButton
                   onDelete={onDelete}
                   variant={variantConfig.deleteButton.variant || 'solid'}
@@ -774,20 +796,8 @@ export function UniversalCard({
               </div>
             )}
 
-            {/* Sección 4: Actions (al final) */}
-            {actions && (
-              <div className={`flex-shrink-0 flex ${layout === 'horizontal' ? 'gap-1.5' : 'gap-2'}`}>
-                {Array.isArray(actions) ? (
-                  actions.map((action, index) => (
-                    <div key={index} onClick={(e) => e.stopPropagation()}>
-                      {action}
-                    </div>
-                  ))
-                ) : (
-                  <div onClick={(e) => e.stopPropagation()}>{actions}</div>
-                )}
-              </div>
-            )}
+            {/* Sección 4: Actions (al final) - Respeta configuración global */}
+            {renderActions()}
           </>
         ) : (
           <>
@@ -842,7 +852,7 @@ export function UniversalCard({
             </div>
 
             {/* Footer sticky - FUERA del área scrolleable */}
-            {(badges?.length > 0 || stats?.length > 0 || actions || (onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons)) && variantConfig.footerSticky && (
+            {(badges?.length > 0 || stats?.length > 0 || (actions && shouldShowCardActions()) || shouldShowDelete()) && variantConfig.footerSticky && (
               <div className={`flex-shrink-0 pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                 {/* Badges */}
                 {renderBadges()}
@@ -851,10 +861,10 @@ export function UniversalCard({
                 {renderStats()}
 
                 {/* Actions Row: DeleteButton (left) + Regular Actions (right) */}
-                {(actions || (onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons)) && (
+                {((actions && shouldShowCardActions()) || shouldShowDelete()) && (
                   <div className="flex items-center justify-between gap-2">
                     {/* Delete Button - Esquina inferior IZQUIERDA - Respeta toggle global */}
-                    {onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons && (
+                    {shouldShowDelete() && (
                       <CardDeleteButton
                         onDelete={onDelete}
                         variant={variantConfig.deleteButton.variant || 'solid'}
@@ -866,18 +876,14 @@ export function UniversalCard({
                     )}
 
                     {/* Regular Actions - Lado derecho */}
-                    {actions && (
-                      <div className="flex gap-2 ml-auto">
-                        {renderActions()}
-                      </div>
-                    )}
+                    {renderActions()}
                   </div>
                 )}
               </div>
             )}
 
             {/* Footer NO sticky (para stats cards y otros que no necesitan) */}
-            {(badges?.length > 0 || stats?.length > 0 || actions || (onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons)) && !variantConfig.footerSticky && (
+            {(badges?.length > 0 || stats?.length > 0 || (actions && shouldShowCardActions()) || shouldShowDelete()) && !variantConfig.footerSticky && (
               <div className={`flex-shrink-0 pt-4 flex flex-col ${variantConfig.footerSpacing}`}>
                 {/* Badges */}
                 {renderBadges()}
@@ -886,10 +892,10 @@ export function UniversalCard({
                 {renderStats()}
 
                 {/* Actions Row: DeleteButton (left) + Regular Actions (right) */}
-                {(actions || (onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons)) && (
+                {((actions && shouldShowCardActions()) || shouldShowDelete()) && (
                   <div className="flex items-center justify-between gap-2">
                     {/* Delete Button - Esquina inferior IZQUIERDA - Respeta toggle global */}
-                    {onDelete && variantConfig.deleteButton?.enabled && showDeleteButtons && (
+                    {shouldShowDelete() && (
                       <CardDeleteButton
                         onDelete={onDelete}
                         variant={variantConfig.deleteButton.variant || 'solid'}
@@ -901,11 +907,7 @@ export function UniversalCard({
                     )}
 
                     {/* Regular Actions - Lado derecho */}
-                    {actions && (
-                      <div className="flex gap-2 ml-auto">
-                        {renderActions()}
-                      </div>
-                    )}
+                    {renderActions()}
                   </div>
                 )}
               </div>

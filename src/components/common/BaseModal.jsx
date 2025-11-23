@@ -101,6 +101,7 @@ function BaseModal({
 
   const modalContent = (
     // Overlay con backdrop blur
+    // IMPORTANTE: Usar z-index muy alto para estar por encima de TopBar (z-50) y ViewAsBanner (z-[1000])
     <div
       className={`
         fixed inset-0
@@ -110,7 +111,7 @@ function BaseModal({
         animate-in fade-in duration-200
         ${isDanger ? 'bg-red-500/10' : ''}
       `}
-      style={{ zIndex: 'var(--z-modal-backdrop)' }}
+      style={{ zIndex: 10000 }}
       onClick={handleOverlayClick}
     >
       {/* Modal box */}
@@ -124,7 +125,7 @@ function BaseModal({
           ${className}
         `}
         style={{
-          zIndex: 'var(--z-modal)',
+          zIndex: 10001,
           background: 'var(--color-bg-secondary)',
           border: '1px solid var(--color-border)'
         }}
