@@ -2,152 +2,68 @@
  * @fileoverview Helper CENTRALIZADO para leer credenciales de IA
  * @module utils/credentialsHelper
  *
- * ⚠️ IMPORTANTE: TODOS los servicios deben usar este helper.
- * NO leer localStorage directamente para credenciales de IA.
+ * BACKWARD COMPATIBILITY LAYER
+ * This file now wraps the centralized CredentialsService
+ * for components that haven't been refactored yet.
  *
- * Prioridad de lectura:
- * 1. localStorage (ai_credentials_XXX)
- * 2. Firebase functions[].apiKey
- * 3. Firebase credentials{} (legacy)
+ * For new code, prefer importing CredentialsService directly:
+ * import credentialsService from '../services/CredentialsService';
  */
 
-import { getAIConfig } from '../firebase/aiConfig';
+import credentialsService from '../services/CredentialsService';
 import logger from './logger';
 
 // ============================================================================
-// MAPPINGS CENTRALIZADOS - ÚNICA FUENTE DE VERDAD
+// LEGACY SUPPORT - For sync operations that can't use async/await
 // ============================================================================
-// Estos mappings DEBEN coincidir con CredentialsTab.jsx
 
+// Mappings for sync operations (localStorage only)
 const PROVIDER_MAPPINGS = {
-  // === TEXTO / CHAT ===
-  openai: {
-    localStorageName: 'OpenAI',
-    firebaseName: 'openai',
-    backendName: 'openai',
-    apiKeyField: 'openai_api_key'
-  },
-  anthropic: {
-    localStorageName: 'Claude',
-    firebaseName: 'claude',
-    backendName: 'claude',
-    apiKeyField: 'anthropic_api_key'
-  },
-  google: {
-    localStorageName: 'Google',
-    firebaseName: 'google',
-    backendName: 'gemini',
-    apiKeyField: 'google_api_key'
-  },
-  xai: {
-    localStorageName: 'Grok',  // Coincide con CredentialsTab
-    firebaseName: 'grok',
-    backendName: 'grok',
-    apiKeyField: 'grok_api_key'
-  },
-
-  // === IMÁGENES ===
-  stability: {
-    localStorageName: 'Stability',
-    firebaseName: 'stability',
-    backendName: null,
-    apiKeyField: 'stability_api_key'
-  },
-  replicate: {
-    localStorageName: 'Replicate',
-    firebaseName: 'replicate',
-    backendName: null,
-    apiKeyField: 'replicate_api_key'
-  },
-  leonardo: {
-    localStorageName: 'Leonardo',
-    firebaseName: 'leonardo',
-    backendName: null,
-    apiKeyField: 'leonardo_api_key'
-  },
-  huggingface: {
-    localStorageName: 'HuggingFace',
-    firebaseName: 'huggingface',
-    backendName: null,
-    apiKeyField: 'huggingface_api_key'
-  },
-
-  // === AUDIO / TTS ===
-  elevenlabs: {
-    localStorageName: 'elevenlabs',  // lowercase para compatibilidad
-    firebaseName: 'elevenlabs',
-    backendName: 'elevenlabs',
-    apiKeyField: 'elevenlabs_api_key'
-  }
+  openai: { localStorageName: 'OpenAI' },
+  anthropic: { localStorageName: 'Claude' },
+  google: { localStorageName: 'Google' },
+  google_translate: { localStorageName: 'Google Cloud Translate API' },
+  xai: { localStorageName: 'Grok' },
+  grok: { localStorageName: 'Grok' },
+  stability: { localStorageName: 'Stability' },
+  replicate: { localStorageName: 'Replicate' },
+  leonardo: { localStorageName: 'Leonardo' },
+  huggingface: { localStorageName: 'HuggingFace' },
+  elevenlabs: { localStorageName: 'elevenlabs' }
 };
 
-// Aliases para nombres comunes (case-insensitive)
+// Aliases for common names
 const PROVIDER_ALIASES = {
   'eleven labs': 'elevenlabs',
   'eleven_labs': 'elevenlabs',
-  'elevenlabs': 'elevenlabs',
-  'openai': 'openai',
-  'open ai': 'openai',
   'claude': 'anthropic',
-  'anthropic': 'anthropic',
-  'stability': 'stability',
-  'stability ai': 'stability',
-  'stabilityai': 'stability',
-  'replicate': 'replicate',
-  'leonardo': 'leonardo',
-  'leonardo.ai': 'leonardo',
-  'leonardoai': 'leonardo',
-  'huggingface': 'huggingface',
-  'hugging face': 'huggingface',
-  'hf': 'huggingface',
-  'google': 'google',
   'gemini': 'google',
-  'xai': 'xai',
-  'grok': 'xai',
   'x.ai': 'xai'
 };
 
 /**
- * Normaliza el ID del proveedor a su forma canónica
- * @param {string} providerId - ID o nombre del proveedor
- * @returns {string|null} - ID normalizado o null si no se reconoce
+ * Normaliza el ID del proveedor
  */
 function normalizeProviderId(providerId) {
   if (!providerId) return null;
-
   const normalized = providerId.toLowerCase().trim();
-
-  // Primero verificar si es un ID directo
-  if (PROVIDER_MAPPINGS[normalized]) {
-    return normalized;
-  }
-
-  // Luego verificar aliases
-  if (PROVIDER_ALIASES[normalized]) {
-    return PROVIDER_ALIASES[normalized];
-  }
-
-  return null;
+  if (PROVIDER_MAPPINGS[normalized]) return normalized;
+  if (PROVIDER_ALIASES[normalized]) return PROVIDER_ALIASES[normalized];
+  return normalized;
 }
 
 /**
  * Lee una credencial de forma SINCRÓNICA (solo localStorage)
  * Usar cuando no se puede usar async/await
- *
- * @param {string} providerId - ID del proveedor ('elevenlabs', 'openai', etc.)
- * @returns {string|null} - La credencial o null si no existe
  */
 export function getAICredentialSync(providerId) {
   try {
     const normalizedId = normalizeProviderId(providerId);
-    if (!normalizedId) {
-      logger.warn(`[credentialsHelper] Provider no reconocido: ${providerId}`);
-      return null;
-    }
+    if (!normalizedId) return null;
 
     const mapping = PROVIDER_MAPPINGS[normalizedId];
+    if (!mapping) return null;
 
-    // Solo buscar en localStorage (sincrónico)
     const localStorageKey = `ai_credentials_${mapping.localStorageName}`;
     const localValue = localStorage.getItem(localStorageKey);
 
@@ -156,77 +72,34 @@ export function getAICredentialSync(providerId) {
     }
 
     return null;
-
   } catch (err) {
-    logger.error(`[credentialsHelper] Error sync loading ${providerId}`, err);
+    logger.error(`Error sync loading ${providerId}`, err, 'credentialsHelper');
     return null;
   }
 }
 
 /**
- * Lee una credencial de forma ASINCRÓNICA (localStorage + Firebase)
- *
- * @param {string} providerId - ID del proveedor ('elevenlabs', 'openai', etc.)
- * @returns {Promise<string|null>} - La credencial o null si no existe
+ * Lee una credencial de forma ASINCRÓNICA usando CredentialsService
  */
 export async function getAICredential(providerId) {
   try {
-    const normalizedId = normalizeProviderId(providerId);
-    if (!normalizedId) {
-      logger.warn(`[credentialsHelper] Provider no reconocido: ${providerId}`);
+    const credential = await credentialsService.get(providerId);
+
+    // Don't return backend marker as a real credential
+    if (credential === '***BACKEND***') {
+      logger.info(`Provider ${providerId} uses backend credential (Secret Manager)`, 'credentialsHelper');
       return null;
     }
 
-    const mapping = PROVIDER_MAPPINGS[normalizedId];
-
-    // 1. Intentar cargar desde localStorage primero (más rápido)
-    const localStorageKey = `ai_credentials_${mapping.localStorageName}`;
-    const localValue = localStorage.getItem(localStorageKey);
-    if (localValue && localValue.trim()) {
-      return localValue.trim();
-    }
-
-    // 2. Si no está en localStorage, cargar desde Firebase
-    const aiConfig = await getAIConfig();
-    if (!aiConfig) {
-      return null;
-    }
-
-    // 3. Buscar en functions[] primero
-    if (aiConfig.functions) {
-      for (const funcConfig of Object.values(aiConfig.functions)) {
-        if (funcConfig.provider === mapping.firebaseName && funcConfig.apiKey?.trim()) {
-          // Guardar en localStorage para próxima vez
-          localStorage.setItem(localStorageKey, funcConfig.apiKey.trim());
-          logger.info(`[credentialsHelper] Cached ${normalizedId} from Firebase functions`);
-          return funcConfig.apiKey.trim();
-        }
-      }
-    }
-
-    // 4. Buscar en credentials{} (legacy)
-    if (aiConfig.credentials?.[mapping.apiKeyField]) {
-      const credential = aiConfig.credentials[mapping.apiKeyField];
-      if (credential && credential.trim()) {
-        // Guardar en localStorage para próxima vez
-        localStorage.setItem(localStorageKey, credential.trim());
-        logger.info(`[credentialsHelper] Cached ${normalizedId} from Firebase credentials`);
-        return credential.trim();
-      }
-    }
-
-    return null;
-
+    return credential;
   } catch (err) {
-    logger.error(`[credentialsHelper] Error loading ${providerId}`, err);
+    logger.error(`Error loading ${providerId}`, err, 'credentialsHelper');
     return null;
   }
 }
 
 /**
  * Verifica si un proveedor tiene credenciales configuradas (async)
- * @param {string} providerId - ID del proveedor
- * @returns {Promise<boolean>}
  */
 export async function hasAICredential(providerId) {
   const credential = await getAICredential(providerId);
@@ -234,9 +107,7 @@ export async function hasAICredential(providerId) {
 }
 
 /**
- * Verifica si un proveedor tiene credenciales configuradas (sync, solo localStorage)
- * @param {string} providerId - ID del proveedor
- * @returns {boolean}
+ * Verifica si un proveedor tiene credenciales configuradas (sync)
  */
 export function hasAICredentialSync(providerId) {
   const credential = getAICredentialSync(providerId);
@@ -244,33 +115,55 @@ export function hasAICredentialSync(providerId) {
 }
 
 /**
- * Obtiene la clave de localStorage correcta para un proveedor
- * Útil para debugging o cuando se necesita guardar manualmente
- * @param {string} providerId - ID del proveedor
- * @returns {string|null} - La clave de localStorage o null
+ * Guarda una credencial
+ */
+export async function setAICredential(providerId, apiKey) {
+  await credentialsService.set(providerId, apiKey);
+}
+
+/**
+ * Elimina una credencial
+ */
+export async function deleteAICredential(providerId) {
+  await credentialsService.delete(providerId);
+}
+
+/**
+ * Obtiene todas las credenciales
+ */
+export async function getAllAICredentials() {
+  return credentialsService.getAll();
+}
+
+/**
+ * Obtiene la clave de localStorage para un proveedor
  */
 export function getLocalStorageKey(providerId) {
   const normalizedId = normalizeProviderId(providerId);
   if (!normalizedId) return null;
-
   const mapping = PROVIDER_MAPPINGS[normalizedId];
+  if (!mapping) return null;
   return `ai_credentials_${mapping.localStorageName}`;
 }
 
 /**
  * Lista todos los providers disponibles
- * @returns {string[]} - Array de IDs de providers
  */
 export function getAvailableProviders() {
   return Object.keys(PROVIDER_MAPPINGS);
 }
 
-// Export por defecto para conveniencia
+// Export credentialsService for direct access
+export { credentialsService, normalizeProviderId };
+
 export default {
   getAICredential,
   getAICredentialSync,
   hasAICredential,
   hasAICredentialSync,
+  setAICredential,
+  deleteAICredential,
+  getAllAICredentials,
   getLocalStorageKey,
   getAvailableProviders,
   normalizeProviderId

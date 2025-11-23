@@ -2,10 +2,12 @@
  * @fileoverview Servicio de generación de imágenes con IA
  * @module services/imageGenerationService
  *
- * ⚠️ Usa credentialsHelper para leer API keys - NO modificar
+ * Refactored to use centralized CredentialsService
+ * Also supports sync loading via credentialsHelper for immediate access
  */
 
 import logger from '../utils/logger';
+import credentialsService, { CREDENTIALS_CHANGED_EVENT } from './CredentialsService';
 import { getAICredentialSync, getLocalStorageKey } from '../utils/credentialsHelper';
 
 class ImageGenerationService {
@@ -14,68 +16,128 @@ class ImageGenerationService {
     this.stabilityApiKey = null;
     this.hasOpenAI = false;
     this.hasStability = false;
+    this._initialized = false;
 
-    // Cargar API keys usando el helper centralizado
-    this.loadApiKeys();
+    // Load sync first for immediate availability
+    this._loadSync();
+
+    // Listen for credential changes
+    this._setupCredentialListener();
   }
 
   /**
-   * Cargar API keys usando credentialsHelper (NO localStorage directo)
+   * Load credentials synchronously from localStorage
    */
-  loadApiKeys() {
+  _loadSync() {
     try {
-      // OpenAI para DALL-E - usando helper centralizado
       const openaiKey = getAICredentialSync('openai');
       if (openaiKey) {
         this.openaiApiKey = openaiKey;
         this.hasOpenAI = true;
-        logger.info('OpenAI API key cargada para generación de imágenes');
       }
 
-      // Stability AI para Stable Diffusion - usando helper centralizado
       const stabilityKey = getAICredentialSync('stability');
       if (stabilityKey) {
         this.stabilityApiKey = stabilityKey;
         this.hasStability = true;
-        logger.info('Stability AI API key cargada');
       }
     } catch (err) {
-      logger.warn('⚠️ No se pudieron cargar las API keys de generación de imágenes:', err);
+      logger.warn('Could not load credentials sync', 'ImageGenerationService');
+    }
+  }
+
+  /**
+   * Setup listener for credential changes
+   */
+  _setupCredentialListener() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener(CREDENTIALS_CHANGED_EVENT, () => {
+        logger.info('Credentials changed, reloading API keys', 'ImageGenerationService');
+        this.loadApiKeys();
+      });
+    }
+  }
+
+  /**
+   * Ensure API keys are loaded
+   */
+  async ensureInitialized() {
+    if (!this._initialized) {
+      await this.loadApiKeys();
+      this._initialized = true;
+    }
+  }
+
+  /**
+   * Cargar API keys desde el sistema centralizado de credenciales
+   */
+  async loadApiKeys() {
+    try {
+      // Initialize credentials service
+      await credentialsService.initialize();
+
+      // Get OpenAI key for DALL-E
+      const openaiKey = await credentialsService.get('openai');
+      if (openaiKey && openaiKey.trim() && openaiKey !== '***BACKEND***') {
+        this.openaiApiKey = openaiKey.trim();
+        this.hasOpenAI = true;
+        logger.info('OpenAI API key loaded for image generation', 'ImageGenerationService');
+      } else {
+        this.openaiApiKey = null;
+        this.hasOpenAI = false;
+      }
+
+      // Get Stability AI key
+      const stabilityKey = await credentialsService.get('stability');
+      if (stabilityKey && stabilityKey.trim() && stabilityKey !== '***BACKEND***') {
+        this.stabilityApiKey = stabilityKey.trim();
+        this.hasStability = true;
+        logger.info('Stability AI API key loaded', 'ImageGenerationService');
+      } else {
+        this.stabilityApiKey = null;
+        this.hasStability = false;
+      }
+
+    } catch (err) {
+      logger.warn('Could not load image generation API keys', 'ImageGenerationService', err);
     }
   }
 
   /**
    * Configurar API key de OpenAI
    */
-  setOpenAIKey(key) {
+  async setOpenAIKey(key) {
     if (key && key.trim()) {
+      await credentialsService.set('openai', key.trim());
       this.openaiApiKey = key.trim();
       this.hasOpenAI = true;
-      // Usar helper para obtener la clave correcta de localStorage
+      // Also save to localStorage for sync access
       const storageKey = getLocalStorageKey('openai');
       if (storageKey) localStorage.setItem(storageKey, key.trim());
-      logger.info('🔑 OpenAI API configurada para generación de imágenes');
+      logger.info('OpenAI API configured for image generation', 'ImageGenerationService');
     }
   }
 
   /**
    * Configurar API key de Stability AI
    */
-  setStabilityKey(key) {
+  async setStabilityKey(key) {
     if (key && key.trim()) {
+      await credentialsService.set('stability', key.trim());
       this.stabilityApiKey = key.trim();
       this.hasStability = true;
-      // Usar helper para obtener la clave correcta de localStorage
+      // Also save to localStorage for sync access
       const storageKey = getLocalStorageKey('stability');
       if (storageKey) localStorage.setItem(storageKey, key.trim());
-      logger.info('🔑 Stability AI API configurada');
+      logger.info('Stability AI API configured', 'ImageGenerationService');
     }
   }
 
   /**
    * Eliminar API key de OpenAI
    */
-  removeOpenAIKey() {
+  async removeOpenAIKey() {
+    await credentialsService.delete('openai');
     const storageKey = getLocalStorageKey('openai');
     if (storageKey) localStorage.removeItem(storageKey);
     this.openaiApiKey = null;
@@ -85,7 +147,8 @@ class ImageGenerationService {
   /**
    * Eliminar API key de Stability AI
    */
-  removeStabilityKey() {
+  async removeStabilityKey() {
+    await credentialsService.delete('stability');
     const storageKey = getLocalStorageKey('stability');
     if (storageKey) localStorage.removeItem(storageKey);
     this.stabilityApiKey = null;
@@ -96,19 +159,21 @@ class ImageGenerationService {
    * Generar imagen usando DALL-E de OpenAI
    */
   async generateWithDALLE(prompt, options = {}) {
+    await this.ensureInitialized();
+
     if (!this.hasOpenAI) {
       throw new Error('OpenAI API key no configurada');
     }
 
     const {
-      size = '1024x1024', // 256x256, 512x512, 1024x1024, 1024x1792, 1792x1024
-      quality = 'standard', // standard, hd
-      style = 'natural', // natural, vivid
-      n = 1 // Número de imágenes a generar (1-10)
+      size = '1024x1024',
+      quality = 'standard',
+      style = 'natural',
+      n = 1
     } = options;
 
     try {
-      logger.info(`🎨 Generando imagen con DALL-E: "${prompt.substring(0, 50)}..."`);
+      logger.info(`Generating image with DALL-E: "${prompt.substring(0, 50)}..."`, 'ImageGenerationService');
 
       const response = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
@@ -134,7 +199,7 @@ class ImageGenerationService {
 
       const data = await response.json();
 
-      logger.info('✅ Imagen generada con DALL-E exitosamente');
+      logger.info('Image generated with DALL-E successfully', 'ImageGenerationService');
 
       return {
         type: 'dall-e',
@@ -142,12 +207,12 @@ class ImageGenerationService {
         quality: quality,
         images: data.data.map(img => ({
           url: img.url,
-          revisedPrompt: img.revised_prompt // DALL-E 3 revisa el prompt
+          revisedPrompt: img.revised_prompt
         })),
         created: data.created
       };
     } catch (err) {
-      logger.error('❌ Error generando imagen con DALL-E:', err);
+      logger.error('Error generating image with DALL-E', err, 'ImageGenerationService');
       throw err;
     }
   }
@@ -156,6 +221,8 @@ class ImageGenerationService {
    * Generar imagen usando Stability AI (Stable Diffusion)
    */
   async generateWithStability(prompt, options = {}) {
+    await this.ensureInitialized();
+
     if (!this.hasStability) {
       throw new Error('Stability AI API key no configurada');
     }
@@ -165,11 +232,11 @@ class ImageGenerationService {
       height = 1024,
       samples = 1,
       steps = 30,
-      style = 'enhance' // enhance, anime, photographic, digital-art, comic-book, fantasy-art
+      style = 'enhance'
     } = options;
 
     try {
-      logger.info(`🎨 Generando imagen con Stability AI: "${prompt.substring(0, 50)}..."`);
+      logger.info(`Generating image with Stability AI: "${prompt.substring(0, 50)}..."`, 'ImageGenerationService');
 
       const response = await fetch(
         'https://api.stability.ai/v2beta/stable-image/generate/core',
@@ -198,7 +265,7 @@ class ImageGenerationService {
 
       const data = await response.json();
 
-      logger.info('✅ Imagen generada con Stability AI exitosamente');
+      logger.info('Image generated with Stability AI successfully', 'ImageGenerationService');
 
       return {
         type: 'stable-diffusion',
@@ -210,7 +277,7 @@ class ImageGenerationService {
         }))
       };
     } catch (err) {
-      logger.error('❌ Error generando imagen con Stability AI:', err);
+      logger.error('Error generating image with Stability AI', err, 'ImageGenerationService');
       throw err;
     }
   }
@@ -219,9 +286,10 @@ class ImageGenerationService {
    * Generar imagen con el mejor proveedor disponible
    */
   async generateImage(prompt, options = {}) {
+    await this.ensureInitialized();
+
     const { provider = 'auto', ...restOptions } = options;
 
-    // Si se especifica proveedor, usarlo
     if (provider === 'openai' || provider === 'dall-e') {
       return await this.generateWithDALLE(prompt, restOptions);
     }
@@ -230,12 +298,12 @@ class ImageGenerationService {
       return await this.generateWithStability(prompt, restOptions);
     }
 
-    // Auto: intentar con el primer proveedor disponible
+    // Auto: use first available provider
     if (this.hasOpenAI) {
       try {
         return await this.generateWithDALLE(prompt, restOptions);
       } catch (err) {
-        logger.warn('⚠️ DALL-E falló, probando Stability AI...');
+        logger.warn('DALL-E failed, trying Stability AI...', 'ImageGenerationService');
         if (this.hasStability) {
           return await this.generateWithStability(prompt, restOptions);
         }
@@ -281,14 +349,16 @@ class ImageGenerationService {
   /**
    * Verificar si hay proveedores configurados
    */
-  hasProviders() {
+  async hasProviders() {
+    await this.ensureInitialized();
     return this.hasOpenAI || this.hasStability;
   }
 
   /**
    * Obtener lista de proveedores disponibles
    */
-  getAvailableProviders() {
+  async getAvailableProviders() {
+    await this.ensureInitialized();
     return [
       {
         id: 'openai',
