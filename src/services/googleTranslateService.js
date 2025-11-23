@@ -2,39 +2,59 @@
  * @fileoverview Google Translate API Service
  * Servicio para traducción español ↔ chino simplificado usando Google Cloud Translation API
  * @module services/googleTranslateService
+ *
+ * Refactored to use centralized CredentialsService
  */
 
 import logger from '../utils/logger';
+import credentialsService from './CredentialsService';
 
 // Configuración de la API
 const GOOGLE_TRANSLATE_API = 'https://translation.googleapis.com/language/translate/v2';
 
-// Clave para localStorage
-const GOOGLE_API_KEY_STORAGE = 'ai_credentials_google_translate';
+// Cache for API key
+let _apiKeyCache = null;
+let _apiKeyCacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Obtiene la API key de Google Translate
- * Prioridad: localStorage (varias keys) > null
- * @returns {string|null}
+ * Uses centralized CredentialsService
+ * @returns {Promise<string|null>}
  */
-export function getGoogleTranslateApiKey() {
+export async function getGoogleTranslateApiKey() {
   try {
-    // Lista de keys a buscar en orden de prioridad
-    const keysToCheck = [
-      GOOGLE_API_KEY_STORAGE,                       // ai_credentials_google_translate
-      'ai_credentials_Google',                      // CredentialsTab usa mayúscula
-      'ai_credentials_google',                      // Versión lowercase
-      'ai_credentials_GoogleTranslate',             // Custom credential
-      'ai_credentials_Google Cloud Translate API', // Custom con nombre largo
-      'ai_credentials_Google Translate',            // Variante común
-    ];
+    // Check cache first
+    if (_apiKeyCache && _apiKeyCacheTimestamp && (Date.now() - _apiKeyCacheTimestamp < CACHE_DURATION)) {
+      return _apiKeyCache;
+    }
 
-    for (const key of keysToCheck) {
-      const stored = localStorage.getItem(key);
-      if (stored && stored.trim()) {
-        logger.info(`Found Google API key in: ${key}`, 'googleTranslateService');
-        return stored.trim();
+    // Initialize service
+    await credentialsService.initialize();
+
+    // Try 'google' provider first (main Google Cloud credential)
+    let key = await credentialsService.get('google');
+
+    // If not found or is backend marker, try custom credentials
+    if (!key || key === '***BACKEND***') {
+      // Check for custom Google Translate credentials
+      const customCredentials = await credentialsService.getCustomCredentials();
+      const googleTranslateCustom = customCredentials.find(c =>
+        c.displayName?.toLowerCase().includes('google') &&
+        c.displayName?.toLowerCase().includes('translate')
+      );
+
+      if (googleTranslateCustom?.apiKey?.trim()) {
+        key = googleTranslateCustom.apiKey.trim();
       }
+    }
+
+    // Update cache
+    if (key && key !== '***BACKEND***') {
+      _apiKeyCache = key;
+      _apiKeyCacheTimestamp = Date.now();
+      logger.info('Google API key loaded from centralized service', 'googleTranslateService');
+      return key;
     }
 
     return null;
@@ -48,10 +68,12 @@ export function getGoogleTranslateApiKey() {
  * Guarda la API key de Google Translate
  * @param {string} apiKey - La API key a guardar
  */
-export function setGoogleTranslateApiKey(apiKey) {
+export async function setGoogleTranslateApiKey(apiKey) {
   try {
     if (apiKey && apiKey.trim()) {
-      localStorage.setItem(GOOGLE_API_KEY_STORAGE, apiKey.trim());
+      await credentialsService.set('google', apiKey.trim());
+      _apiKeyCache = apiKey.trim();
+      _apiKeyCacheTimestamp = Date.now();
       logger.info('Google Translate API key saved', 'googleTranslateService');
     }
   } catch (error) {
@@ -65,7 +87,7 @@ export function setGoogleTranslateApiKey(apiKey) {
  * @param {Object} options - Opciones de traducción
  * @param {string} options.source - Idioma origen (default: 'es')
  * @param {string} options.target - Idioma destino (default: 'zh-CN')
- * @param {string} options.apiKey - API key (opcional, usa localStorage si no se provee)
+ * @param {string} options.apiKey - API key (opcional, usa CredentialsService si no se provee)
  * @returns {Promise<Object>} Resultado de traducción
  */
 export async function translateWithGoogle(text, options = {}) {
@@ -76,7 +98,7 @@ export async function translateWithGoogle(text, options = {}) {
   } = options;
 
   // Obtener API key
-  const key = apiKey || getGoogleTranslateApiKey();
+  const key = apiKey || await getGoogleTranslateApiKey();
 
   if (!key) {
     throw new Error('Google Translate API key no configurada. Configúrala en Ajustes > Credenciales.');
@@ -181,10 +203,10 @@ export async function autoTranslate(text) {
 
 /**
  * Verifica si Google Translate está configurado
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-export function isGoogleTranslateConfigured() {
-  const key = getGoogleTranslateApiKey();
+export async function isGoogleTranslateConfigured() {
+  const key = await getGoogleTranslateApiKey();
   return key !== null && key.length > 10;
 }
 

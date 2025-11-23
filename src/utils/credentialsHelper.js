@@ -2,84 +2,33 @@
  * @fileoverview Helper centralizado para leer credenciales de IA
  * @module utils/credentialsHelper
  *
- * Usa la misma lógica que CredentialsTab para evitar inconsistencias.
- * Prioridad: Backend Secret Manager > localStorage > Firebase functions > Firebase credentials
+ * BACKWARD COMPATIBILITY LAYER
+ * This file now wraps the centralized CredentialsService
+ * for components that haven't been refactored yet.
+ *
+ * For new code, prefer importing CredentialsService directly:
+ * import credentialsService from '@/services/CredentialsService';
  */
 
-import { getAIConfig } from '../firebase/aiConfig';
+import credentialsService from '../services/CredentialsService';
 import logger from './logger';
 
-// Mapeos de nombres entre sistemas (idéntico a CredentialsTab)
-const PROVIDER_MAPPINGS = {
-  elevenlabs: {
-    localStorageName: 'elevenlabs',
-    firebaseName: 'elevenlabs',
-    backendName: 'elevenlabs',
-    apiKeyField: 'elevenlabs_api_key'
-  },
-  openai: {
-    localStorageName: 'OpenAI',
-    firebaseName: 'openai',
-    backendName: 'openai',
-    apiKeyField: 'openai_api_key'
-  },
-  stability: {
-    localStorageName: 'Stability',
-    firebaseName: 'stability',
-    backendName: null,
-    apiKeyField: 'stability_api_key'
-  }
-};
-
 /**
- * Lee una credencial usando la misma lógica que CredentialsTab
- * @param {string} providerId - ID del proveedor ('elevenlabs', 'openai', 'stability')
+ * Lee una credencial usando el sistema centralizado
+ * @param {string} providerId - ID del proveedor ('elevenlabs', 'openai', 'stability', etc.)
  * @returns {Promise<string|null>} - La credencial o null si no existe
  */
 export async function getAICredential(providerId) {
   try {
-    const mapping = PROVIDER_MAPPINGS[providerId];
-    if (!mapping) {
-      logger.warn(`No mapping found for provider: ${providerId}`, 'credentialsHelper');
-      return null;
+    const credential = await credentialsService.get(providerId);
+
+    // Don't return backend marker as a real credential
+    if (credential === '***BACKEND***') {
+      logger.info(`Provider ${providerId} uses backend credential (Secret Manager)`, 'credentialsHelper');
+      return null; // Client-side code can't use backend credentials directly
     }
 
-    // 1. Intentar cargar desde localStorage primero (más rápido)
-    const localStorageKey = `ai_credentials_${mapping.localStorageName}`;
-    const localValue = localStorage.getItem(localStorageKey);
-    if (localValue && localValue.trim()) {
-      return localValue.trim();
-    }
-
-    // 2. Si no está en localStorage, cargar desde Firebase
-    const aiConfig = await getAIConfig();
-    if (!aiConfig) {
-      return null;
-    }
-
-    // 3. Buscar en functions[] primero
-    if (aiConfig.functions) {
-      for (const funcConfig of Object.values(aiConfig.functions)) {
-        if (funcConfig.provider === mapping.firebaseName && funcConfig.apiKey?.trim()) {
-          // Guardar en localStorage para próxima vez
-          localStorage.setItem(localStorageKey, funcConfig.apiKey.trim());
-          return funcConfig.apiKey.trim();
-        }
-      }
-    }
-
-    // 4. Buscar en credentials{} (legacy)
-    if (aiConfig.credentials?.[mapping.apiKeyField]) {
-      const credential = aiConfig.credentials[mapping.apiKeyField];
-      if (credential && credential.trim()) {
-        // Guardar en localStorage para próxima vez
-        localStorage.setItem(localStorageKey, credential.trim());
-        return credential.trim();
-      }
-    }
-
-    return null;
-
+    return credential;
   } catch (err) {
     logger.error(`Error loading credential for ${providerId}`, err, 'credentialsHelper');
     return null;
@@ -95,3 +44,41 @@ export async function hasAICredential(providerId) {
   const credential = await getAICredential(providerId);
   return !!credential;
 }
+
+/**
+ * Guarda una credencial
+ * @param {string} providerId - ID del proveedor
+ * @param {string} apiKey - API key
+ * @returns {Promise<void>}
+ */
+export async function setAICredential(providerId, apiKey) {
+  await credentialsService.set(providerId, apiKey);
+}
+
+/**
+ * Elimina una credencial
+ * @param {string} providerId - ID del proveedor
+ * @returns {Promise<void>}
+ */
+export async function deleteAICredential(providerId) {
+  await credentialsService.delete(providerId);
+}
+
+/**
+ * Obtiene todas las credenciales
+ * @returns {Promise<Object>} Mapa de providerId -> credential
+ */
+export async function getAllAICredentials() {
+  return credentialsService.getAll();
+}
+
+// Export credentialsService for direct access
+export { credentialsService };
+
+export default {
+  getAICredential,
+  hasAICredential,
+  setAICredential,
+  deleteAICredential,
+  getAllAICredentials
+};
