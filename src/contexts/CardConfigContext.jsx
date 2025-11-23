@@ -4,11 +4,20 @@
  * Este contexto carga configuración guardada de localStorage y la hace disponible
  * para todas las instancias de UniversalCard en la aplicación.
  *
+ * Incluye control global de visibilidad de botones de eliminar.
+ *
  * @module contexts/CardConfigContext
  */
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { cardVariants } from '../components/cards/cardConfig';
+
+// Keys para localStorage
+const STORAGE_KEYS = {
+  CARD_CONFIG: 'xiwen_card_config',
+  COMPONENT_MAPPING: 'xiwen_card_component_mapping',
+  SHOW_DELETE_BUTTONS: 'xiwen_show_delete_buttons',
+};
 
 const CardConfigContext = createContext();
 
@@ -40,7 +49,11 @@ export function useCardConfig() {
       reloadConfig: () => {},
       componentMapping: DEFAULT_COMPONENT_MAPPING,
       updateComponentMapping: () => {},
-      getComponentVariant: (name) => DEFAULT_COMPONENT_MAPPING[name] || 'default'
+      getComponentVariant: (name) => DEFAULT_COMPONENT_MAPPING[name] || 'default',
+      // Estado global de botones de eliminar
+      showDeleteButtons: true,
+      toggleDeleteButtons: () => {},
+      setShowDeleteButtons: () => {},
     };
   }
   return context;
@@ -54,7 +67,7 @@ export function useCardConfig() {
 export function CardConfigProvider({ children }) {
   const [config, setConfig] = useState(() => {
     // Cargar configuración guardada de localStorage
-    const savedConfig = localStorage.getItem('xiwen_card_config');
+    const savedConfig = localStorage.getItem(STORAGE_KEYS.CARD_CONFIG);
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
@@ -78,7 +91,7 @@ export function CardConfigProvider({ children }) {
 
   // Mapeo de componentes a variants
   const [componentMapping, setComponentMapping] = useState(() => {
-    const savedMapping = localStorage.getItem('xiwen_card_component_mapping');
+    const savedMapping = localStorage.getItem(STORAGE_KEYS.COMPONENT_MAPPING);
     if (savedMapping) {
       try {
         const parsed = JSON.parse(savedMapping);
@@ -91,12 +104,43 @@ export function CardConfigProvider({ children }) {
     return DEFAULT_COMPONENT_MAPPING;
   });
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Estado global de visibilidad de botones de eliminar
+  // ═══════════════════════════════════════════════════════════════════════════
+  const [showDeleteButtons, setShowDeleteButtonsState] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS);
+    // Por defecto TRUE (mostrar botones)
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  /**
+   * Toggle para mostrar/ocultar botones de eliminar globalmente
+   */
+  const toggleDeleteButtons = useCallback(() => {
+    setShowDeleteButtonsState(prev => {
+      const newValue = !prev;
+      localStorage.setItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS, JSON.stringify(newValue));
+      console.log(`🗑️ Botones de eliminar: ${newValue ? 'VISIBLE' : 'OCULTO'}`);
+      return newValue;
+    });
+  }, []);
+
+  /**
+   * Setter directo para el estado de botones de eliminar
+   */
+  const setShowDeleteButtons = useCallback((value) => {
+    const newValue = Boolean(value);
+    setShowDeleteButtonsState(newValue);
+    localStorage.setItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS, JSON.stringify(newValue));
+    console.log(`🗑️ Botones de eliminar: ${newValue ? 'VISIBLE' : 'OCULTO'}`);
+  }, []);
+
   /**
    * Función para recargar la configuración desde localStorage
    * (útil después de guardar cambios en el configurator)
    */
-  const reloadConfig = () => {
-    const savedConfig = localStorage.getItem('xiwen_card_config');
+  const reloadConfig = useCallback(() => {
+    const savedConfig = localStorage.getItem(STORAGE_KEYS.CARD_CONFIG);
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
@@ -116,36 +160,49 @@ export function CardConfigProvider({ children }) {
       // Si no hay config guardado, volver a defaults
       setConfig({...cardVariants});
     }
-  };
+
+    // También recargar estado de botones de eliminar
+    const savedDeleteButtons = localStorage.getItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS);
+    if (savedDeleteButtons !== null) {
+      setShowDeleteButtonsState(JSON.parse(savedDeleteButtons));
+    }
+  }, []);
 
   /**
    * Función para actualizar el mapeo de un componente
    */
-  const updateComponentMapping = (componentName, variant) => {
-    const newMapping = { ...componentMapping, [componentName]: variant };
-    setComponentMapping(newMapping);
-    localStorage.setItem('xiwen_card_component_mapping', JSON.stringify(newMapping));
-    console.log(`🔄 Mapeo actualizado: ${componentName} → ${variant}`);
-  };
+  const updateComponentMapping = useCallback((componentName, variant) => {
+    setComponentMapping(prev => {
+      const newMapping = { ...prev, [componentName]: variant };
+      localStorage.setItem(STORAGE_KEYS.COMPONENT_MAPPING, JSON.stringify(newMapping));
+      console.log(`🔄 Mapeo actualizado: ${componentName} → ${variant}`);
+      return newMapping;
+    });
+  }, []);
 
   /**
    * Función para obtener el variant de un componente
    */
-  const getComponentVariant = (componentName) => {
+  const getComponentVariant = useCallback((componentName) => {
     return componentMapping[componentName] || 'default';
-  };
+  }, [componentMapping]);
 
   // Escuchar cambios en localStorage (para sincronizar entre tabs)
   useEffect(() => {
     const handleStorageChange = (e) => {
-      if (e.key === 'xiwen_card_config') {
+      if (e.key === STORAGE_KEYS.CARD_CONFIG) {
         reloadConfig();
+      }
+      // Sincronizar estado de botones de eliminar entre tabs
+      if (e.key === STORAGE_KEYS.SHOW_DELETE_BUTTONS) {
+        const newValue = e.newValue !== null ? JSON.parse(e.newValue) : true;
+        setShowDeleteButtonsState(newValue);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [reloadConfig]);
 
   return (
     <CardConfigContext.Provider value={{
@@ -153,7 +210,11 @@ export function CardConfigProvider({ children }) {
       reloadConfig,
       componentMapping,
       updateComponentMapping,
-      getComponentVariant
+      getComponentVariant,
+      // Estado global de botones de eliminar
+      showDeleteButtons,
+      toggleDeleteButtons,
+      setShowDeleteButtons,
     }}>
       {children}
     </CardConfigContext.Provider>

@@ -47,6 +47,7 @@ import {
 import CategoryBadge from './common/CategoryBadge';
 import { getBadgeByKey, getContrastText } from '../config/badgeSystem';
 import { CardDeleteButton, UniversalCard } from './cards';
+import { useCardConfig } from '../contexts/CardConfigContext';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
 import ProfileSelector from './homework/ProfileSelector';
@@ -168,6 +169,9 @@ export default function HomeworkReviewPanel({ teacherId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved'
+
+  // Estado global de visibilidad de botones de eliminar
+  const { showDeleteButtons } = useCardConfig();
 
   useEffect(() => {
     loadAllReviews();
@@ -623,16 +627,18 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete })
         ''
       }`}
     >
-      {/* Delete button - Bottom left corner (UNIFICADO) */}
-      <div className="absolute bottom-2 left-2 z-10">
-        <CardDeleteButton
-          onDelete={handleDeleteClick}
-          variant="solid"
-          size="sm"
-          confirmMessage="¿Eliminar esta tarea?"
-          requireConfirm={false}  // Ya tiene confirmación en handleDeleteClick
-        />
-      </div>
+      {/* Delete button - Bottom left corner (UNIFICADO) - Respeta toggle global */}
+      {showDeleteButtons && (
+        <div className="absolute bottom-2 left-2 z-10">
+          <CardDeleteButton
+            onDelete={handleDeleteClick}
+            variant="solid"
+            size="sm"
+            confirmMessage="¿Eliminar esta tarea?"
+            requireConfirm={false}  // Ya tiene confirmación en handleDeleteClick
+          />
+        </div>
+      )}
 
       <div className="space-y-3">
         {/* Student Info */}

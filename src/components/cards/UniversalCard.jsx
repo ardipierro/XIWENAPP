@@ -134,8 +134,8 @@ export function UniversalCard({
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef(null);
 
-  // Get global saved config (si existe)
-  const { config: globalConfig } = useCardConfig();
+  // Get global saved config (si existe) + estado global de botones de eliminar
+  const { config: globalConfig, showDeleteButtons } = useCardConfig();
 
   // Get configurations con merge correcto (memoizado para evitar loops)
   const variantConfig = useMemo(() => {
@@ -537,8 +537,12 @@ export function UniversalCard({
 
   /**
    * Determinar si mostrar el botón de eliminar según configuración global
+   * Respeta tanto panelConfig como el toggle global de showDeleteButtons
    */
   const shouldShowDelete = () => {
+    // Primero verificar el toggle global
+    if (!showDeleteButtons) return false;
+
     if (!onDelete || !variantConfig.deleteButton?.enabled) return false;
 
     const panelCfg = getPanelConfig();
@@ -695,7 +699,7 @@ export function UniversalCard({
             <div className="flex-shrink-0 flex items-center gap-2 pr-4" onClick={(e) => e.stopPropagation()}>
               {actions && renderActions()}
 
-              {/* Delete Button */}
+              {/* Delete Button - Respeta toggle global */}
               {shouldShowDelete() && (
                 <CardDeleteButton
                   onDelete={onDelete}
@@ -859,7 +863,7 @@ export function UniversalCard({
                 {/* Actions Row: DeleteButton (left) + Regular Actions (right) */}
                 {((actions && shouldShowCardActions()) || shouldShowDelete()) && (
                   <div className="flex items-center justify-between gap-2">
-                    {/* Delete Button - Esquina inferior IZQUIERDA */}
+                    {/* Delete Button - Esquina inferior IZQUIERDA - Respeta toggle global */}
                     {shouldShowDelete() && (
                       <CardDeleteButton
                         onDelete={onDelete}
@@ -890,7 +894,7 @@ export function UniversalCard({
                 {/* Actions Row: DeleteButton (left) + Regular Actions (right) */}
                 {((actions && shouldShowCardActions()) || shouldShowDelete()) && (
                   <div className="flex items-center justify-between gap-2">
-                    {/* Delete Button - Esquina inferior IZQUIERDA */}
+                    {/* Delete Button - Esquina inferior IZQUIERDA - Respeta toggle global */}
                     {shouldShowDelete() && (
                       <CardDeleteButton
                         onDelete={onDelete}
