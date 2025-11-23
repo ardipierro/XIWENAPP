@@ -29,6 +29,7 @@ import {
   subscribeToLog,
   addEntry,
   removeEntry,
+  reorderEntry,
   updateScrollPosition,
   updateLog,
   endLog
@@ -49,7 +50,8 @@ import ContentSelectorModal from './ContentSelectorModal';
 import {
   UnifiedExerciseRenderer,
   EnhancedTextEditor,
-  InSituContentEditor
+  InSituContentEditor,
+  EntryOptionsMenu
 } from './diary';
 import WordHighlightExercise from './container/WordHighlightExercise';
 import SelectionDetector from './translation/SelectionDetector';
@@ -348,6 +350,34 @@ function ClassDailyLog({ logId, user, onBack }) {
     }
   };
 
+  // Mover entrada hacia arriba
+  const handleMoveUp = async (entryId) => {
+    try {
+      const result = await reorderEntry(logId, entryId, 'up');
+      if (result.success) {
+        logger.info('⬆️ Contenido movido arriba');
+        setHasUnsavedChanges(true);
+      }
+    } catch (err) {
+      logger.error('Error moviendo entrada:', err);
+      setError('Error al mover');
+    }
+  };
+
+  // Mover entrada hacia abajo
+  const handleMoveDown = async (entryId) => {
+    try {
+      const result = await reorderEntry(logId, entryId, 'down');
+      if (result.success) {
+        logger.info('⬇️ Contenido movido abajo');
+        setHasUnsavedChanges(true);
+      }
+    } catch (err) {
+      logger.error('Error moviendo entrada:', err);
+      setError('Error al mover');
+    }
+  };
+
   const handleScrollToEntry = (index) => {
     const entryElement = document.getElementById(`entry-${index}`);
     if (entryElement) {
@@ -453,6 +483,8 @@ function ClassDailyLog({ logId, user, onBack }) {
 
   const renderContentEntry = (entry, index) => {
     const content = entry.contentData;
+    const totalEntries = log?.entries?.length || 0;
+
     if (!content) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-800">
@@ -463,48 +495,62 @@ function ClassDailyLog({ logId, user, onBack }) {
 
     const Icon = CONTENT_ICONS[content.type] || FileText;
 
+    // Formatear fecha de agregado
+    const addedDate = entry.addedAt
+      ? (typeof entry.addedAt === 'number'
+          ? new Date(entry.addedAt)
+          : entry.addedAt?.toDate?.())
+      : null;
+    const formattedDate = addedDate
+      ? addedDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+      : '';
+
     return (
       <div
         id={`entry-${index}`}
         key={entry.id}
-        className="min-h-screen p-8 bg-white dark:bg-gray-900 border-b-4 border-gray-200 dark:border-gray-700"
+        className="min-h-screen p-8 bg-white dark:bg-gray-900 mb-2"
       >
-        {/* Header del contenido */}
-        <div className="max-w-5xl mx-auto mb-8">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Icon size={32} className="text-gray-600 dark:text-gray-400" />
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {content.title}
-                </h2>
-                <div className="flex items-center gap-2 mt-2">
-                  <CategoryBadge
-                    type="content"
-                    value={content.type}
-                    size="sm"
-                  />
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Agregado: {entry.addedAt?.toDate?.().toLocaleTimeString() || 'Ahora'}
-                  </span>
-                </div>
-              </div>
+        {/* Header minimalista - todo en una línea */}
+        <div className="max-w-5xl mx-auto mb-6">
+          <div className="flex items-center justify-between gap-3">
+            {/* Lado izquierdo: Icono + Título + Subtítulo + Fecha + Badge */}
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Icon size={18} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white truncate">
+                {content.title}
+              </h2>
+              {content.subtitle && (
+                <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                  {content.subtitle}
+                </span>
+              )}
+              {formattedDate && (
+                <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">
+                  {formattedDate}
+                </span>
+              )}
+              <CategoryBadge
+                type="content"
+                value={content.type}
+                size="xs"
+              />
             </div>
 
+            {/* Lado derecho: Menú de opciones (solo profesores) */}
             {isTeacher && (
-              <BaseButton
-                variant="ghost"
-                icon={X}
-                onClick={() => handleRemoveEntry(entry.id)}
-                size="sm"
-              >
-                Quitar
-              </BaseButton>
+              <EntryOptionsMenu
+                onMoveUp={() => handleMoveUp(entry.id)}
+                onMoveDown={() => handleMoveDown(entry.id)}
+                onDelete={() => handleRemoveEntry(entry.id)}
+                isFirst={index === 0}
+                isLast={index === totalEntries - 1}
+              />
             )}
           </div>
 
           {content.description && (
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 ml-7">
               {content.description}
             </p>
           )}
@@ -657,12 +703,12 @@ function ClassDailyLog({ logId, user, onBack }) {
     <div className={`class-daily-log fixed inset-0 flex bg-gray-100 dark:bg-gray-900 ${isViewingAs ? 'mt-[86px] md:mt-[100px] lg:mt-[108px]' : 'mt-12 md:mt-14 lg:mt-16'}`}>
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar (Índice) */}
+        {/* Sidebar (Índice) - mismo ancho que menú lateral de la APP (260px) */}
         <div
           className={`
             bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
             transition-all duration-300 overflow-y-auto flex-shrink-0
-            ${sidebarOpen ? 'w-80' : 'w-0'}
+            ${sidebarOpen ? 'w-[260px]' : 'w-0'}
           `}
         >
           {sidebarOpen && (

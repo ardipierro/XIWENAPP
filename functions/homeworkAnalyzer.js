@@ -168,6 +168,12 @@ function mapProfileToParams(profile) {
   console.log(`[mapProfileToParams] Profile: ${profile.name}, Strictness: ${strictness}`);
   console.log(`[mapProfileToParams] AI Config: temp=${aiConfig.temperature}, style=${aiConfig.feedbackStyle}, tokens=${aiConfig.maxTokens}`);
 
+  // ✨ Check for custom prompt (from PromptBasedProfileEditor)
+  const customPrompt = settings.customPrompt || null;
+  if (customPrompt) {
+    console.log(`[mapProfileToParams] Using custom prompt (${customPrompt.length} chars)`);
+  }
+
   return {
     strictnessLevel: strictnessMap[strictness] || 'intermediate',
     correctionTypes,
@@ -176,7 +182,9 @@ function mapProfileToParams(profile) {
     feedbackStyle: aiConfig.feedbackStyle,
     detailedExplanations: display.showDetailedErrors !== false,
     includeSynonyms: aiConfig.includeSynonyms,
-    includeExamples: aiConfig.includeExamples
+    includeExamples: aiConfig.includeExamples,
+    // ✨ Custom prompt from PromptBasedProfileEditor
+    customPrompt
   };
 }
 
@@ -573,8 +581,22 @@ exports.analyzeHomeworkImage = onDocumentCreated({
     // Build final system prompt with dynamic configuration
     const hasPreExtractedText = ocrResult && ocrResult.transcription;
 
-    const systemPrompt = hasPreExtractedText
-      ? `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar el texto escrito por un estudiante (ya extraído de la imagen) y proporcionar una corrección detallada y constructiva.
+    // ✨ Use custom prompt if available from PromptBasedProfileEditor
+    let systemPrompt;
+
+    if (profileParams.customPrompt) {
+      // User provided custom prompt - use it directly
+      console.log('[homeworkAnalyzer] Using CUSTOM PROMPT from profile');
+      systemPrompt = profileParams.customPrompt;
+
+      // If OCR extracted text, prepend it to the prompt
+      if (hasPreExtractedText) {
+        systemPrompt = `TEXTO EXTRAÍDO DE LA IMAGEN:\n"""\n${ocrResult.transcription}\n"""\n\n${systemPrompt}`;
+      }
+    } else {
+      // Build prompt dynamically (legacy behavior)
+      systemPrompt = hasPreExtractedText
+        ? `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar el texto escrito por un estudiante (ya extraído de la imagen) y proporcionar una corrección detallada y constructiva.
 
 TEXTO EXTRAÍDO:
 """
@@ -699,18 +721,19 @@ FORMATO DE RESPUESTA (JSON):
 }
 
 Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
+    } // End of else block for dynamic prompt building
 
     // ✨ STEP 2: Analyze with selected provider for error correction
     // Pass aiConfig from profile for temperature, maxTokens control
-    const aiConfig = profileParams.aiConfig || {};
-    console.log(`[analyzeHomeworkImage] Using AI config from profile: temp=${aiConfig.temperature}, tokens=${aiConfig.maxTokens}, style=${aiConfig.feedbackStyle}`);
+    const analysisAiConfig = profileParams.aiConfig || {};
+    console.log(`[homeworkAnalyzer] Using AI config: temp=${analysisAiConfig.temperature}, tokens=${analysisAiConfig.maxTokens}, style=${analysisAiConfig.feedbackStyle}`);
 
     let aiResponse;
     if (functionConfig.analysis_provider === 'openai') {
-      aiResponse = await analyzeWithOpenAI(reviewData.imageUrl, imageBase64, systemPrompt, aiConfig);
+      aiResponse = await analyzeWithOpenAI(reviewData.imageUrl, imageBase64, systemPrompt, analysisAiConfig);
     } else {
       // Default to Claude
-      aiResponse = await analyzeWithClaude(reviewData.imageUrl, imageBase64, systemPrompt, aiConfig);
+      aiResponse = await analyzeWithClaude(reviewData.imageUrl, imageBase64, systemPrompt, analysisAiConfig);
     }
 
     // Parse JSON response
@@ -957,8 +980,22 @@ exports.reanalyzeHomework = onDocumentUpdated({
     // Build final system prompt with dynamic configuration
     const hasPreExtractedText = ocrResult && ocrResult.transcription;
 
-    const systemPrompt = hasPreExtractedText
-      ? `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar el texto escrito por un estudiante (ya extraído de la imagen) y proporcionar una corrección detallada y constructiva.
+    // ✨ Use custom prompt if available from PromptBasedProfileEditor
+    let systemPrompt;
+
+    if (profileParams.customPrompt) {
+      // User provided custom prompt - use it directly
+      console.log('[homeworkAnalyzer] Using CUSTOM PROMPT from profile');
+      systemPrompt = profileParams.customPrompt;
+
+      // If OCR extracted text, prepend it to the prompt
+      if (hasPreExtractedText) {
+        systemPrompt = `TEXTO EXTRAÍDO DE LA IMAGEN:\n"""\n${ocrResult.transcription}\n"""\n\n${systemPrompt}`;
+      }
+    } else {
+      // Build prompt dynamically (legacy behavior)
+      systemPrompt = hasPreExtractedText
+        ? `Eres un profesor experto en español como lengua extranjera. Tu tarea es analizar el texto escrito por un estudiante (ya extraído de la imagen) y proporcionar una corrección detallada y constructiva.
 
 TEXTO EXTRAÍDO:
 """
@@ -1083,18 +1120,19 @@ FORMATO DE RESPUESTA (JSON):
 }
 
 Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mejorar.`;
+    } // End of else block for dynamic prompt building
 
     // ✨ STEP 2: Analyze with selected provider for error correction
     // Pass aiConfig from profile for temperature, maxTokens control
-    const aiConfig = profileParams.aiConfig || {};
-    console.log(`[reanalyzeHomework] Using AI config from profile: temp=${aiConfig.temperature}, tokens=${aiConfig.maxTokens}, style=${aiConfig.feedbackStyle}`);
+    const reanalysisAiConfig = profileParams.aiConfig || {};
+    console.log(`[reanalyzeHomework] Using AI config: temp=${reanalysisAiConfig.temperature}, tokens=${reanalysisAiConfig.maxTokens}, style=${reanalysisAiConfig.feedbackStyle}`);
 
     let aiResponse;
     if (functionConfig.analysis_provider === 'openai') {
-      aiResponse = await analyzeWithOpenAI(afterData.imageUrl, imageBase64, systemPrompt, aiConfig);
+      aiResponse = await analyzeWithOpenAI(afterData.imageUrl, imageBase64, systemPrompt, reanalysisAiConfig);
     } else {
       // Default to Claude
-      aiResponse = await analyzeWithClaude(afterData.imageUrl, imageBase64, systemPrompt, aiConfig);
+      aiResponse = await analyzeWithClaude(afterData.imageUrl, imageBase64, systemPrompt, reanalysisAiConfig);
     }
 
     // Parse JSON response
