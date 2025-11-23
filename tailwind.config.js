@@ -94,7 +94,9 @@ export default {
         'tap-md': '48px',  // Standard tap target
         'tap-lg': '56px',  // Comfortable tap target
         // Safe area insets for notched devices (iOS/Android PWA)
+        // Con fallback mínimo de 20px para dispositivos móviles que no reportan safe-area
         'safe-top': 'env(safe-area-inset-top)',
+        'safe-top-mobile': 'max(env(safe-area-inset-top), 20px)', // Fallback 20px para barra de estado móvil
         'safe-bottom': 'env(safe-area-inset-bottom)',
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',

@@ -191,7 +191,9 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
       )}
 
       {/* Menú lateral */}
-      <aside className={`sidemenu ${isOpen ? 'open' : ''} ${hasBanner ? 'top-[86px] md:top-[100px] lg:top-[108px]' : ''}`}>
+      {/* Con banner: top = banner + topbar + safe-area (en móvil) */}
+      {/* En desktop (lg:) no hay barra de estado, usamos valores fijos */}
+      <aside className={`sidemenu ${isOpen ? 'open' : ''} ${hasBanner ? 'top-[calc(86px+max(env(safe-area-inset-top),20px))] md:top-[calc(100px+max(env(safe-area-inset-top),20px))] lg:top-[108px]' : ''}`}>
         <div className="sidemenu-content custom-scrollbar">
           {/* Items del menú */}
           {menuData.sections ? renderSectionedMenu() : renderFlatMenu()}
