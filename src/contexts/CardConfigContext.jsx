@@ -12,13 +12,14 @@
  * @module contexts/CardConfigContext
  */
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { cardVariants } from '../components/cards/cardConfig';
 
 // Keys para localStorage (editMode NO usa localStorage - no persiste)
 const STORAGE_KEYS = {
   CARD_CONFIG: 'xiwen_card_config',
   COMPONENT_MAPPING: 'xiwen_card_component_mapping',
+  CONTENT_DISPLAY_CONFIG: 'xiwen_content_display_config',
 };
 
 const CardConfigContext = createContext();
@@ -37,6 +38,19 @@ const DEFAULT_COMPONENT_MAPPING = {
   'LiveClassRoom': 'class',
   'ClassScheduleManager': 'class',
   'UnifiedCalendar': 'class',
+};
+
+/**
+ * Configuración por defecto para visualización de contenido
+ * Controla cómo se muestran ejercicios, lecciones y otros contenidos en modales
+ */
+const DEFAULT_CONTENT_DISPLAY_CONFIG = {
+  mode: 'compact', // 'compact' | 'detailed'
+  showInternalHeader: false, // Si false, elimina el header redundante dentro del modal
+  showMetadataBadges: true, // Mostrar badges de tipo/dificultad/puntos
+  compactQuestions: true, // Preguntas sin header "Preguntas (N)"
+  showInfoNote: false, // Nota informativa al final
+  showInstructions: true, // Mostrar instrucciones/descripción del ejercicio
 };
 
 /**
@@ -60,6 +74,9 @@ export function useCardConfig() {
       showDeleteButtons: false,
       toggleDeleteButtons: () => {},
       setShowDeleteButtons: () => {},
+      // Configuración de visualización de contenido
+      contentDisplayConfig: DEFAULT_CONTENT_DISPLAY_CONFIG,
+      updateContentDisplayConfig: () => {},
     };
   }
   return context;
@@ -116,6 +133,23 @@ export function CardConfigProvider({ children }) {
   // ═══════════════════════════════════════════════════════════════════════════
   const [editMode, setEditModeState] = useState(false);
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Configuración de visualización de contenido
+  // ═══════════════════════════════════════════════════════════════════════════
+  const [contentDisplayConfig, setContentDisplayConfigState] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.CONTENT_DISPLAY_CONFIG);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_CONTENT_DISPLAY_CONFIG, ...parsed };
+      } catch (e) {
+        console.error('❌ Error loading content display config:', e);
+        return DEFAULT_CONTENT_DISPLAY_CONFIG;
+      }
+    }
+    return DEFAULT_CONTENT_DISPLAY_CONFIG;
+  });
+
   /**
    * Toggle para activar/desactivar modo edición
    */
@@ -134,6 +168,19 @@ export function CardConfigProvider({ children }) {
     const newValue = Boolean(value);
     setEditModeState(newValue);
     console.log(`✏️ Modo Edición: ${newValue ? 'ACTIVADO' : 'DESACTIVADO'}`);
+  }, []);
+
+  /**
+   * Actualizar configuración de visualización de contenido
+   * @param {Object} updates - Objeto con las propiedades a actualizar
+   */
+  const updateContentDisplayConfig = useCallback((updates) => {
+    setContentDisplayConfigState(prev => {
+      const newConfig = { ...prev, ...updates };
+      localStorage.setItem(STORAGE_KEYS.CONTENT_DISPLAY_CONFIG, JSON.stringify(newConfig));
+      console.log('📄 Configuración de visualización actualizada:', newConfig);
+      return newConfig;
+    });
   }, []);
 
   /**
@@ -161,7 +208,19 @@ export function CardConfigProvider({ children }) {
       // Si no hay config guardado, volver a defaults
       setConfig({...cardVariants});
     }
+
     // Nota: editMode NO se recarga - siempre arranca en false
+
+    // Recargar configuración de visualización de contenido
+    const savedContentDisplay = localStorage.getItem(STORAGE_KEYS.CONTENT_DISPLAY_CONFIG);
+    if (savedContentDisplay) {
+      try {
+        const parsed = JSON.parse(savedContentDisplay);
+        setContentDisplayConfigState({ ...DEFAULT_CONTENT_DISPLAY_CONFIG, ...parsed });
+      } catch (e) {
+        console.error('❌ Error reloading content display config:', e);
+      }
+    }
   }, []);
 
   /**
@@ -183,6 +242,27 @@ export function CardConfigProvider({ children }) {
     return componentMapping[componentName] || 'default';
   }, [componentMapping]);
 
+  // Escuchar cambios en localStorage (para sincronizar entre tabs)
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === STORAGE_KEYS.CARD_CONFIG) {
+        reloadConfig();
+      }
+      // Sincronizar configuración de visualización de contenido entre tabs
+      if (e.key === STORAGE_KEYS.CONTENT_DISPLAY_CONFIG) {
+        try {
+          const newValue = e.newValue ? JSON.parse(e.newValue) : DEFAULT_CONTENT_DISPLAY_CONFIG;
+          setContentDisplayConfigState({ ...DEFAULT_CONTENT_DISPLAY_CONFIG, ...newValue });
+        } catch (err) {
+          console.error('❌ Error syncing content display config:', err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [reloadConfig]);
+
   return (
     <CardConfigContext.Provider value={{
       config,
@@ -198,8 +278,13 @@ export function CardConfigProvider({ children }) {
       showDeleteButtons: editMode,
       toggleDeleteButtons: toggleEditMode,
       setShowDeleteButtons: setEditMode,
+      // Configuración de visualización de contenido
+      contentDisplayConfig,
+      updateContentDisplayConfig,
     }}>
       {children}
     </CardConfigContext.Provider>
   );
 }
+
+export { DEFAULT_CONTENT_DISPLAY_CONFIG };
