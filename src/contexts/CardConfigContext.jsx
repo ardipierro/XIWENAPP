@@ -17,6 +17,7 @@ const STORAGE_KEYS = {
   CARD_CONFIG: 'xiwen_card_config',
   COMPONENT_MAPPING: 'xiwen_card_component_mapping',
   SHOW_DELETE_BUTTONS: 'xiwen_show_delete_buttons',
+  CONTENT_DISPLAY_CONFIG: 'xiwen_content_display_config',
 };
 
 const CardConfigContext = createContext();
@@ -38,6 +39,19 @@ const DEFAULT_COMPONENT_MAPPING = {
 };
 
 /**
+ * Configuración por defecto para visualización de contenido
+ * Controla cómo se muestran ejercicios, lecciones y otros contenidos en modales
+ */
+const DEFAULT_CONTENT_DISPLAY_CONFIG = {
+  mode: 'compact', // 'compact' | 'detailed'
+  showInternalHeader: false, // Si false, elimina el header redundante dentro del modal
+  showMetadataBadges: true, // Mostrar badges de tipo/dificultad/puntos
+  compactQuestions: true, // Preguntas sin header "Preguntas (N)"
+  showInfoNote: false, // Nota informativa al final
+  showInstructions: true, // Mostrar instrucciones/descripción del ejercicio
+};
+
+/**
  * Hook para acceder a la configuración de cards
  */
 export function useCardConfig() {
@@ -54,6 +68,9 @@ export function useCardConfig() {
       showDeleteButtons: true,
       toggleDeleteButtons: () => {},
       setShowDeleteButtons: () => {},
+      // Configuración de visualización de contenido
+      contentDisplayConfig: DEFAULT_CONTENT_DISPLAY_CONFIG,
+      updateContentDisplayConfig: () => {},
     };
   }
   return context;
@@ -113,6 +130,23 @@ export function CardConfigProvider({ children }) {
     return saved !== null ? JSON.parse(saved) : true;
   });
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Configuración de visualización de contenido
+  // ═══════════════════════════════════════════════════════════════════════════
+  const [contentDisplayConfig, setContentDisplayConfigState] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.CONTENT_DISPLAY_CONFIG);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_CONTENT_DISPLAY_CONFIG, ...parsed };
+      } catch (e) {
+        console.error('❌ Error loading content display config:', e);
+        return DEFAULT_CONTENT_DISPLAY_CONFIG;
+      }
+    }
+    return DEFAULT_CONTENT_DISPLAY_CONFIG;
+  });
+
   /**
    * Toggle para mostrar/ocultar botones de eliminar globalmente
    */
@@ -133,6 +167,19 @@ export function CardConfigProvider({ children }) {
     setShowDeleteButtonsState(newValue);
     localStorage.setItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS, JSON.stringify(newValue));
     console.log(`🗑️ Botones de eliminar: ${newValue ? 'VISIBLE' : 'OCULTO'}`);
+  }, []);
+
+  /**
+   * Actualizar configuración de visualización de contenido
+   * @param {Object} updates - Objeto con las propiedades a actualizar
+   */
+  const updateContentDisplayConfig = useCallback((updates) => {
+    setContentDisplayConfigState(prev => {
+      const newConfig = { ...prev, ...updates };
+      localStorage.setItem(STORAGE_KEYS.CONTENT_DISPLAY_CONFIG, JSON.stringify(newConfig));
+      console.log('📄 Configuración de visualización actualizada:', newConfig);
+      return newConfig;
+    });
   }, []);
 
   /**
@@ -166,6 +213,17 @@ export function CardConfigProvider({ children }) {
     if (savedDeleteButtons !== null) {
       setShowDeleteButtonsState(JSON.parse(savedDeleteButtons));
     }
+
+    // Recargar configuración de visualización de contenido
+    const savedContentDisplay = localStorage.getItem(STORAGE_KEYS.CONTENT_DISPLAY_CONFIG);
+    if (savedContentDisplay) {
+      try {
+        const parsed = JSON.parse(savedContentDisplay);
+        setContentDisplayConfigState({ ...DEFAULT_CONTENT_DISPLAY_CONFIG, ...parsed });
+      } catch (e) {
+        console.error('❌ Error reloading content display config:', e);
+      }
+    }
   }, []);
 
   /**
@@ -198,6 +256,15 @@ export function CardConfigProvider({ children }) {
         const newValue = e.newValue !== null ? JSON.parse(e.newValue) : true;
         setShowDeleteButtonsState(newValue);
       }
+      // Sincronizar configuración de visualización de contenido entre tabs
+      if (e.key === STORAGE_KEYS.CONTENT_DISPLAY_CONFIG) {
+        try {
+          const newValue = e.newValue ? JSON.parse(e.newValue) : DEFAULT_CONTENT_DISPLAY_CONFIG;
+          setContentDisplayConfigState({ ...DEFAULT_CONTENT_DISPLAY_CONFIG, ...newValue });
+        } catch (err) {
+          console.error('❌ Error syncing content display config:', err);
+        }
+      }
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -215,6 +282,9 @@ export function CardConfigProvider({ children }) {
       showDeleteButtons,
       toggleDeleteButtons,
       setShowDeleteButtons,
+      // Configuración de visualización de contenido
+      contentDisplayConfig,
+      updateContentDisplayConfig,
     }}>
       {children}
     </CardConfigContext.Provider>
