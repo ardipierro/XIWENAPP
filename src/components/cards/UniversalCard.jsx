@@ -134,8 +134,8 @@ export function UniversalCard({
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef(null);
 
-  // Get global saved config (si existe) + estado global de botones de eliminar
-  const { config: globalConfig, showDeleteButtons } = useCardConfig();
+  // Get global saved config (si existe) + estado global de modo edición
+  const { config: globalConfig, editMode } = useCardConfig();
 
   // Get configurations con merge correcto (memoizado para evitar loops)
   const variantConfig = useMemo(() => {
@@ -537,19 +537,16 @@ export function UniversalCard({
 
   /**
    * Determinar si mostrar el botón de eliminar según configuración global
-   * Respeta tanto panelConfig como el toggle global de showDeleteButtons
+   * Solo muestra el botón si el Modo Edición está activo
    */
   const shouldShowDelete = () => {
-    // Primero verificar el toggle global
-    if (!showDeleteButtons) return false;
+    // Solo mostrar si el Modo Edición está activo
+    if (!editMode) return false;
 
+    // Verificar que existe callback y está habilitado en la variante
     if (!onDelete || !variantConfig.deleteButton?.enabled) return false;
 
-    const panelCfg = getPanelConfig();
-    // Mostrar en modo 'full', 'minimal', o si está habilitado en modo 'none'
-    return panelCfg.cardActionsMode === 'full' ||
-           panelCfg.cardActionsMode === 'minimal' ||
-           panelCfg.showDeleteInMinimalMode;
+    return true;
   };
 
   // ⭐ Para layout="row", usar clases Tailwind directamente para consistencia
